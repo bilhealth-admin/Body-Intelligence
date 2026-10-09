@@ -267,27 +267,27 @@ class DashboardPage extends ConsumerWidget {
 
     return Theme(
       data: dashboardTheme,
-      child: DashboardFirstUseExperience(
-        ownerScope: guideOwner ?? 'local',
-        ownerReady: guideOwnerReady,
-        child: DashboardShell(
-          leading: const CloudSyncConsentNotice(),
-          edgeHeader: DashboardTopBar(
-            profilePhoto: profilePhoto,
-            profilePhotoUrl: profilePhotoUrl,
-            onProfile: () => manageProfilePhoto(
-              context,
-              ref,
-              profilePhoto,
-              profilePhotoUrl,
-              locale,
-            ),
+      child: DashboardShell(
+        leading: const CloudSyncConsentNotice(),
+        edgeHeader: DashboardTopBar(
+          profilePhoto: profilePhoto,
+          profilePhotoUrl: profilePhotoUrl,
+          onProfile: () => manageProfilePhoto(
+            context,
+            ref,
+            profilePhoto,
+            profilePhotoUrl,
+            locale,
           ),
-          child: DashboardHealthActivityRefresh(
-            child: DashboardComposition(
-              hero: hero,
-              content: const DashboardGrid(hero: DashboardHeader()),
+        ),
+        child: DashboardHealthActivityRefresh(
+          child: DashboardComposition(
+            hero: DashboardFirstUseExperience(
+              ownerScope: guideOwner ?? 'local',
+              ownerReady: guideOwnerReady,
+              child: hero,
             ),
+            content: const DashboardGrid(hero: DashboardHeader()),
           ),
         ),
       ),

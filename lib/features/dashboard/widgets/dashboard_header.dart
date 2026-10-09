@@ -81,9 +81,30 @@ class _CoachConversationEntry extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
+          // The approved portrait must never make title or subtitle unreadable.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: AlignmentDirectional.centerStart,
+                    end: AlignmentDirectional.centerEnd,
+                    colors: [
+                      Color(0xF20B2332),
+                      Color(0xD80B2332),
+                      Color(0x000B2332),
+                    ],
+                    stops: [0, .53, 1],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
           // Keep navigation copy readable above the right-hand portrait.
           Padding(
             padding: EdgeInsetsDirectional.only(end: compact ? 76 : 132),
@@ -185,6 +206,8 @@ class _CoachConversationEntry extends StatelessWidget {
                 borderSide: BorderSide.none,
               ),
             ),
+          ),
+            ],
           ),
         ],
       ),

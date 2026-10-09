@@ -60,6 +60,17 @@ void main() {
         find.byKey(const Key('dashboard-food-guide-step-0')),
         findsOneWidget,
       );
+      final guideBounds = tester.getRect(
+        find.byKey(const Key('dashboard-food-guide-step-0')),
+      );
+      final underlyingBounds = tester.getRect(
+        find.text('Underlying action'),
+      );
+      expect(
+        guideBounds.bottom,
+        lessThanOrEqualTo(underlyingBounds.top),
+        reason: 'Tutorial must not float over regular Home controls.',
+      );
       await tester.tap(find.text('Underlying action'));
       expect(underlayTapped, isTrue);
       await tester.tap(find.byKey(const Key('dashboard-guide-next')));

@@ -116,36 +116,36 @@ class _DashboardFirstUseExperienceState
         firstFoodStatus.hasValue &&
         firstFoodStatus.value == null &&
         !hasLoggedFood;
-    return Stack(
-      fit: StackFit.expand,
+    // Put the optional walkthrough in the normal Home scroll flow.
+    // A fixed bottom overlay covered calories/weight and could intercept
+    // underlying controls, especially with large text or narrow viewports.
+    return Column(
+      key: const Key('dashboard-first-use-inline-region'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        widget.child,
-        if (needsGuide)
-          Positioned(
-            left: 12,
-            right: 12,
-            bottom: 16,
-            child: SafeArea(
-              top: false,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 440),
-                  child: _FoodGuideStep(
-                    step: _step,
-                    saving: _saving,
-                    onSkip: () => _finish(openFood: false),
-                    onNext: () {
-                      if (_step == 0) {
-                        setState(() => _step = 1);
-                      } else {
-                        _finish(openFood: true);
-                      }
-                    },
-                  ),
-                ),
+        if (needsGuide) ...[
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: _FoodGuideStep(
+                step: _step,
+                saving: _saving,
+                onSkip: () => _finish(openFood: false),
+                onNext: () {
+                  if (_step == 0) {
+                    setState(() => _step = 1);
+                  } else {
+                    _finish(openFood: true);
+                  }
+                },
               ),
             ),
           ),
+          const SizedBox(height: 12),
+        ],
+        widget.child,
       ],
     );
   }
@@ -264,7 +264,10 @@ class _FoodGuideStep extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
+              OverflowBar(
+                alignment: MainAxisAlignment.spaceBetween,
+                overflowAlignment: OverflowBarAlignment.end,
+                overflowSpacing: 8,
                 children: [
                   TextButton.icon(
                     key: const Key('dashboard-guide-skip'),
@@ -286,7 +289,6 @@ class _FoodGuideStep extends StatelessWidget {
                       style: TextStyle(color: foreground),
                     ),
                   ),
-                  const Spacer(),
                   FilledButton(
                     key: const Key('dashboard-guide-next'),
                     onPressed: saving ? null : onNext,
