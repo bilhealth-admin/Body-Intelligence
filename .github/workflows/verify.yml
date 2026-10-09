@@ -137,6 +137,40 @@ jobs:
             flutter test --no-pub "${{ matrix.path }}"
           }
 
+      # Explicit five-file review manifest. Export only images independently
+      # inspected against their existing master and isolated diff. No image
+      # comparison is relaxed and this job never alters a Golden.
+      - name: Export five visually reviewed candidates (hash guarded)
+        if: failure() && matrix.suite == 'production-goldens'
+        shell: pwsh
+        run: |
+          $approved = @{
+            'visual_closure_recipe_detail_phone' = '13ebd33c906eca6a671180e5b1482b76fd34134aed5b63e1ee1bb48a5cd43a70'
+            'visual_closure_recipe_detail_shakshuka_phone' = 'a680bf3cce0cbf4a934c66d4244a8a03cbae437e4bb20f1c6d9f582d6bc33be0'
+            'visual_closure_workout_routine_builder_phone' = '2aa3d60dd365547d01b6f225302c9538dd3674ff1edcb61df9347b2de18df94b'
+            'visual_closure_recipe_detail_chickpea_phone' = '7de322a1b3a0531e192759dd3aeba2ff940d6fd6bf29af9f7cb5f8b85800b14d'
+            'visual_closure_recipe_detail_yogurt_phone' = '4dc73c404d683e1827413864f62cfb7bcdf4d7578cd0532b101f3eb15a0f05dc'
+          }
+          foreach ($item in $approved.GetEnumerator()) {
+            $name = $item.Key
+            $file = "test/visual_closure/failures/${name}_testImage.png"
+            if (-not (Test-Path -LiteralPath $file)) {
+              throw "Reviewed image is missing: $name"
+            }
+            $digest = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($digest -ne $item.Value) {
+              throw "Visual image changed since manual review: $name $digest"
+            }
+            Write-Host "BIL_REVIEW_IMAGE_BEGIN:$name:$digest"
+            $bytes = [System.IO.File]::ReadAllBytes($file)
+            $encoded = [Convert]::ToBase64String($bytes)
+            for ($offset = 0; $offset -lt $encoded.Length; $offset += 4096) {
+              $part = [Math]::Min(4096, $encoded.Length - $offset)
+              Write-Host $encoded.Substring($offset, $part)
+            }
+            Write-Host "BIL_REVIEW_IMAGE_END:$name"
+          }
+
       - name: Preserve failed Golden screenshots from focused suite
         if: failure()
         uses: actions/upload-artifact@v4

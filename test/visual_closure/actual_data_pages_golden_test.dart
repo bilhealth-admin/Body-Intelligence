@@ -58,6 +58,7 @@ import 'package:body_intelligence_log/features/settings/account_connection_setti
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -132,7 +133,23 @@ final class _VisualRouteStack extends StatelessWidget {
 }
 
 void main() {
-  setUpAll(loadVisualEvidenceFont);
+  const ttsChannel = MethodChannel('bil/tts');
+  setUpAll(() async {
+    await loadVisualEvidenceFont();
+    // The Coach can dispose after the following capture starts; support
+    // only stop() in this visual harness, never synthesize speech results.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(ttsChannel, (call) async {
+          if (call.method == 'stop') return null;
+          throw MissingPluginException(
+            'Unexpected TTS action in visual evidence: ${call.method}',
+          );
+        });
+  });
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(ttsChannel, null);
+  });
 
   void setExplicitLightSettings() {
     SharedPreferences.setMockInitialValues({
