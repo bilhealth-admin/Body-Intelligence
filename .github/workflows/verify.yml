@@ -75,6 +75,9 @@ jobs:
           git diff -- test/visual_closure/actual_data_pages_golden_test.dart test/epic15_store_screenshot_golden_test.dart test/premium_splash_experience_test.dart
 
       - name: Analyze complete source
+        # Report analyzer failures in the *same* run if formatting is red.
+        # The source job still fails; this never bypasses any required gate.
+        if: ${{ always() && !cancelled() }}
         run: flutter analyze --no-pub
 
   focused:
@@ -129,6 +132,44 @@ jobs:
             flutter test --no-pub --timeout=2m "${{ matrix.path }}"
           } else {
             flutter test --no-pub "${{ matrix.path }}"
+          }
+
+      # Temporary, read-only evidence export for the eight reviewed icon-only
+      # Goldens. Exact PNG hashes prevent accepting unreviewed visual changes.
+      # No files are overwritten, no checks are skipped, and protected
+      # Home/Log Food screens are absent from this fixed whitelist.
+      - name: Export reviewed flat-icon PNG candidates with SHA guards
+        if: ${{ failure() && (matrix.suite == 'data-goldens' || matrix.suite == 'production-goldens') }}
+        shell: pwsh
+        run: |
+          $approved = @{
+            'visual_closure_more_phone' = '121e02c2f58ff4be2c130293ea5fd08b73529105c78cece9c929edcb82404716'
+            'visual_closure_more_lower_phone' = '6638633ee207054ce6a50adda4f92868b5f46b24a2237a28a01976bf5d7e171c'
+            'visual_closure_settings_phone' = '0e72b314d3a62a59e6edaea992217975e4064e1f269fdcabc79a9ec4638cbd0d'
+            'visual_closure_settings_phone_2' = 'fcc7e6265ccbf07b2acfc5be3a33e76ad02980f67d5b45ac9a95f643c195aafd'
+            'visual_closure_settings_phone_3' = '02bab03c9e648309f6b1e22c8988f7219c5d1e38974d774b6d06f6526826ed61'
+            'visual_closure_settings_phone_4' = '4cd79085013d883b7cc3feb75edb581689f9201f8e994bdef14eb53d69cbd910'
+            'visual_closure_notification_settings_phone' = '580aaf65d46eb0afa2d22fdec5d8d081a89c4bd9c734e41d23f2d9dbaa1011bf'
+            'visual_closure_wellness_library_phone' = 'fe31b02a66a7f0e92e998dee28723932692af7a68b42d2862db98bc72c415421'
+          }
+          foreach ($item in $approved.GetEnumerator()) {
+            $file = "test/visual_closure/failures/$($item.Key)_testImage.png"
+            if (-not (Test-Path $file)) { continue }
+            $digest = (Get-FileHash -Algorithm SHA256 $file).Hash.ToLowerInvariant()
+            if ($digest -ne $item.Value) {
+              throw "Unreviewed Golden candidate $($item.Key): $digest"
+            }
+            # Git blobs accept base64. Emit bounded lines for later independent
+            # review and SHA verification; never push from this test runner.
+            $encoded = [Convert]::ToBase64String(
+              [System.IO.File]::ReadAllBytes($file)
+            )
+            Write-Host "BIL_REVIEWED_IMAGE_BEGIN:$($item.Key):$digest"
+            for ($offset = 0; $offset -lt $encoded.Length; $offset += 4096) {
+              $size = [Math]::Min(4096, $encoded.Length - $offset)
+              Write-Host $encoded.Substring($offset, $size)
+            }
+            Write-Host "BIL_REVIEWED_IMAGE_END:$($item.Key)"
           }
 
       - name: Preserve failed Golden screenshots from focused suite

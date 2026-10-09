@@ -9,7 +9,6 @@ import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_engine.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
-import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';

@@ -77,6 +77,7 @@ Finder _coachWelcomeMessage() {
     return widget.text.contains('I’m ready for your next useful decision.');
   });
 }
+
 Finder _coachOpeningSurface() {
   // The evidence-based daily brief replaces the synthetic session welcome.
   final dailyBrief = find.text('FOR TODAY');
