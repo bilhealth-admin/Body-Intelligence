@@ -197,14 +197,13 @@ class _CommunityNavigationGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final child = Container(
-      width: 42,
-      height: 42,
-      decoration: BoxDecoration(
-        color: scheme.primaryContainer,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Icon(icon, size: 22, color: scheme.onPrimaryContainer),
+    final child = BilFlatIcon(
+      kind: BilSemanticIcons.kindForRoute(value) ??
+          BilSemanticIconKind.community,
+      size: 42,
+      iconSize: 22,
+      materialIcon: icon,
+      color: scheme.primary,
     );
     final kind = switch (value) {
       '/community/messages' => CommunityAttentionKind.messages,

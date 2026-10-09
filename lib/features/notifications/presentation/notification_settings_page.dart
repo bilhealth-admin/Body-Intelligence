@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../app/theme/bil_flat_icon.dart';
 import '../domain/community_push_preferences.dart';
 import '../domain/daily_reminder.dart';
 import '../domain/notification_delivery_preferences.dart';
@@ -267,18 +268,17 @@ class _NotificationSettingsPageState
                         children: [
                           Row(
                             children: [
-                              Container(
+                              SizedBox(
                                 width: 48,
                                 height: 48,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  _phoneNotificationsEnabled == true
-                                      ? Icons.notifications_active_rounded
-                                      : Icons.notifications_none_rounded,
-                                  color: Theme.of(context).colorScheme.primary,
+                                child: Center(
+                                  child: Icon(
+                                    _phoneNotificationsEnabled == true
+                                        ? Icons.notifications_active_outlined
+                                        : Icons.notifications_none_outlined,
+                                    size: 28,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -366,7 +366,7 @@ class _NotificationSettingsPageState
                                     enabled: enabled,
                                   ),
                                 ),
-                          secondary: BilSemanticIconBadge(
+                          secondary: BilFlatIcon(
                             kind: _semanticKind(reminder.kind),
                           ),
                           title: Text(_copy.label(reminder.kind)),

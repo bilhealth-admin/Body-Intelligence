@@ -21,7 +21,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
         key: const Key('all-daily-reminders'),
         value: _allDailyEnabled,
         onChanged: _saving ? null : _setAllDaily,
-        secondary: const BilSemanticIconBadge(
+        secondary: const BilFlatIcon(
           kind: BilSemanticIconKind.notifications,
         ),
         title: Text(
@@ -109,7 +109,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
                     (_pushPreferences?.providerReady ?? false)
                 ? _setPushEnabled
                 : null,
-            secondary: const BilSemanticIconBadge(
+            secondary: const BilFlatIcon(
               kind: BilSemanticIconKind.community,
             ),
             title: Text(
@@ -226,7 +226,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
               key: const Key('sensitive-lock-screen-preview'),
               value: _pushPreferences?.sensitivePreviewAllowed ?? false,
               onChanged: _pushSaving ? null : _setSensitivePreview,
-              secondary: const BilSemanticIconBadge(
+              secondary: const BilFlatIcon(
                 kind: BilSemanticIconKind.privacy,
               ),
               title: Text(
@@ -250,7 +250,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
             ),
           if (_pushPreferences != null)
             ListTile(
-              leading: const BilSemanticIconBadge(
+              leading: const BilFlatIcon(
                 kind: BilSemanticIconKind.time,
               ),
               title: Text(_pushPreferences!.timeZone),

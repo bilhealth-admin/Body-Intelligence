@@ -302,7 +302,7 @@ class _SettingsRow extends StatelessWidget {
               size: 19,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             )
-          : BilNativeSettingsIcon(kind: kind),
+          : BilNativeSettingsIcon(kind: kind, flat: true),
       title: Tooltip(
         message: label,
         child: Text(

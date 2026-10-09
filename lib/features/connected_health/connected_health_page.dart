@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/premium_design_tokens.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../../app/theme/bil_flat_icon.dart';
 import '../../app/localization/runtime_copy_connected_health.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../commerce/domain/commerce_plan.dart';
@@ -395,7 +396,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                   for (final signal in snapshot.signals)
                                     ListTile(
                                       contentPadding: EdgeInsets.zero,
-                                      leading: BilSemanticIconBadge(
+                                      leading: BilFlatIcon(
                                         kind:
                                             BilSemanticIcons.kindForHealthSignal(
                                               signal.key,

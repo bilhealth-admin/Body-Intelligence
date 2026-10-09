@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../../app/theme/bil_flat_icon.dart';
 import '../../core/units/measurement_units.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../admin/services/ai_coach_admin_service.dart';

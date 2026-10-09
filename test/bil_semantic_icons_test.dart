@@ -316,6 +316,7 @@ void main() {
         source,
         anyOf(
           contains('BilSemanticIconBadge'),
+          contains('BilFlatIcon'),
           contains('BilNativeSettingsIcon'),
           contains('BilSemanticIcons.spec'),
         ),

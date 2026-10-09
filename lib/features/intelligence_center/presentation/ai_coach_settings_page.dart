@@ -9,6 +9,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../app/theme/bil_flat_icon.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../../shared/widgets/bil_clinical_note.dart';
 import '../../../shared/widgets/bil_premium_trust_surface.dart';
@@ -481,7 +482,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
             ),
           ),
           child: ListTile(
-            leading: const BilSemanticIconBadge(
+            leading: const BilFlatIcon(
               kind: BilSemanticIconKind.privacy,
               iconOverride: Icons.phonelink_lock_rounded,
               appleIconOverride: Icons.phonelink_lock_rounded,

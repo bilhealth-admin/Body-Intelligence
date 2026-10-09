@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../app/theme/bil_flat_icon.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
 import '../../../app/router/bil_quick_add_presenter.dart';
@@ -627,7 +628,7 @@ PopupMenuItem<String> _communityAction(
   value: route,
   child: Row(
     children: [
-      BilSemanticIconBadge(
+      BilFlatIcon(
         kind: BilSemanticIcons.kindForRoute(route)!,
         size: 34,
         iconSize: 19,
