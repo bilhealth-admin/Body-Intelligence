@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../data/repositories/first_meal_milestone.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'first_meal_celebration.dart';
+
+final _firstFoodMilestoneStatusProvider = StreamProvider<String?>((ref) =>
+    ref.watch(preferencesRepositoryProvider).watch(firstMealCelebrationPreferenceKey));
 
 /// Non-modal food walkthrough. Skip is always available and never changes data.
 class DashboardFirstUseExperience extends ConsumerStatefulWidget {
@@ -95,11 +99,19 @@ class _DashboardFirstUseExperienceState
   @override
   Widget build(BuildContext context) {
     final meals = ref.watch(allMealsProvider);
-    // Empty meal buckets are not evidence of a recorded food item.
+    final firstFoodStatus = ref.watch(_firstFoodMilestoneStatusProvider);
+    // Empty meal buckets are not evidence of a recorded food item, and a
+    // previously celebrated/deleted first food must not reopen onboarding.
     final hasLoggedFood =
         meals.value?.any((meal) => meal.items.isNotEmpty) ?? false;
     final needsGuide =
-        widget.ownerReady && _ready && _canGuide && meals.hasValue && !hasLoggedFood;
+        widget.ownerReady &&
+        _ready &&
+        _canGuide &&
+        meals.hasValue &&
+        firstFoodStatus.hasValue &&
+        firstFoodStatus.value == null &&
+        !hasLoggedFood;
     return Stack(
       fit: StackFit.expand,
       children: [
