@@ -135,6 +135,9 @@ void main() {
         tester.widget<SelectableText>(find.byType(SelectableText)).data,
         reply,
       );
+      // There is only one message in the widget tree. A second invisible
+      // RichText/EditableText caused ambiguous reactions and transcript tests.
+      expect(find.text(reply), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

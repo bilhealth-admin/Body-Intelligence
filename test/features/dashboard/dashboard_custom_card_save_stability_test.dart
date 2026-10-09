@@ -103,10 +103,10 @@ void main() {
           ]) {
             await tester.pump(elapsed);
             expect(find.byType(LinearProgressIndicator), findsNothing);
-            expect(find.byType(CircularProgressIndicator), findsOneWidget);
+            expect(find.byType(CircularProgressIndicator), findsNothing);
             expect(
               find.byKey(Key('dashboard-section-$section-saving')),
-              findsOneWidget,
+              findsNothing,
             );
             expect(tester.element(card), same(savedElement));
             expect(tester.getRect(card), savedRect);
@@ -122,8 +122,8 @@ void main() {
               );
               expect(
                 tile.value,
-                before[id],
-                reason: 'Only committed preferences change',
+                id == section ? !before[id]! : before[id],
+                reason: 'Only the edited card changes optimistically',
               );
             }
             final done = tester.widget<FilledButton>(

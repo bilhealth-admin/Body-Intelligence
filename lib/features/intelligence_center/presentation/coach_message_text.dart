@@ -129,15 +129,29 @@ class _CoachMessageTextState extends State<CoachMessageText>
           Stack(
             fit: StackFit.passthrough,
             children: [
-              ExcludeSemantics(
-                child: Opacity(
-                  opacity: 0,
-                  child: Text(
-                    widget.text,
+              // Size with TextPainter, not a hidden Text/RichText widget.
+              // An invisible duplicate was being matched as a second reply
+              // by find.text and by some accessibility traversal paths.
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final painter = TextPainter(
+                    text: TextSpan(
+                      text: widget.text,
+                      style: _messageStyle(context),
+                    ),
                     textDirection: widget.textDirection,
-                    style: _messageStyle(context),
-                  ),
-                ),
+                    textScaler: MediaQuery.textScalerOf(context),
+                    textHeightBehavior:
+                        DefaultTextStyle.of(context).textHeightBehavior,
+                    locale: Localizations.maybeLocaleOf(context),
+                  )..layout(maxWidth: constraints.maxWidth);
+                  final height = painter.height;
+                  final width = constraints.hasBoundedWidth
+                      ? constraints.maxWidth
+                      : painter.width;
+                  painter.dispose();
+                  return SizedBox(width: width, height: height);
+                },
               ),
               Positioned.fill(
                 child: Align(

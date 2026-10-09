@@ -105,14 +105,15 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                 ),
               ),
             if (_selectedImages.isNotEmpty) ...[
-              Visibility(
-                visible: _publishing,
-                maintainState: true,
-                maintainAnimation: true,
-                maintainSize: true,
-                child: const LinearProgressIndicator(
-                  key: Key('community-post-upload-progress'),
-                ),
+              // Reserve progress height without leaving an indeterminate
+              // animation ticking invisibly after photos are selected.
+              SizedBox(
+                height: 4,
+                child: _publishing
+                    ? const LinearProgressIndicator(
+                        key: Key('community-post-upload-progress'),
+                      )
+                    : const SizedBox.shrink(),
               ),
               const SizedBox(height: 8),
             ],
