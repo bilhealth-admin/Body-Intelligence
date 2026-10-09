@@ -57,8 +57,17 @@ class _CoachConversationEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(compact ? 14 : 26),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(compact ? 18 : 26),
+        // The same approved BIL coach as the small portrait, never stock art.
+        image: const DecorationImage(
+          image: AssetImage(bilApprovedAiCoachAsset),
+          fit: BoxFit.contain,
+          alignment: AlignmentDirectional.centerEnd,
+          opacity: .66,
+        ),
+        border: Border.all(color: const Color(0x5487DBEF), width: .8),
         gradient: const LinearGradient(
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
@@ -75,7 +84,10 @@ class _CoachConversationEntry extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          // Keep navigation copy readable above the right-hand portrait.
+          Padding(
+            padding: EdgeInsetsDirectional.only(end: compact ? 76 : 132),
+            child: Row(
             children: [
               Container(
                 width: 36,
@@ -132,6 +144,7 @@ class _CoachConversationEntry extends StatelessWidget {
                 ),
               ),
             ],
+            ),
           ),
           const SizedBox(height: 10),
           TextField(
@@ -165,7 +178,7 @@ class _CoachConversationEntry extends StatelessWidget {
                 icon: const Icon(Icons.arrow_forward_rounded, size: 20),
               ),
               filled: true,
-              fillColor: const Color(0xFFF7F9FA),
+              fillColor: const Color(0xEDF7F9FA),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,

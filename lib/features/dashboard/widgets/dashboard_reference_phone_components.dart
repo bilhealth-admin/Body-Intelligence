@@ -135,7 +135,7 @@ class _ReferenceTrendRailState extends State<_ReferenceTrendRail> {
     return SizedBox(
       key: const Key('dashboard-reference-trend-rail'),
       height:
-          130 +
+          152 +
           (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0.0, 2.0) * 90,
       child: PageView(
         // Refreshing the data must not reset the selected trend page.
@@ -148,7 +148,7 @@ class _ReferenceTrendRailState extends State<_ReferenceTrendRail> {
             period: tr('Last 90 days', 'آخر 90 يومًا'),
             values: widget.weightValues,
             unit: widget.weightUnit,
-            colors: const [AppColors.protein, AppColors.carbs, AppColors.fats],
+            colors: const [Color(0xFF12AB63), AppColors.carbs, AppColors.fats],
             emptyLabel: tr(
               'Add weight to see your trend',
               'أضف وزنك لعرض الاتجاه',
@@ -206,6 +206,19 @@ class _ReferenceTrendCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final validWeightSamples = useExplicitValue
+        ? const <double>[]
+        : values.where((value) => value.isFinite && value > 0).toList();
+    final double? weightDelta = validWeightSamples.length >= 2
+        ? validWeightSamples.last - validWeightSamples.first
+        : null;
+    final weightWentDown = weightDelta != null && weightDelta < -.05;
+    final weightWentUp = weightDelta != null && weightDelta > .05;
+    final deltaColor = weightWentDown
+        ? const Color(0xFF0CA865)
+        : weightWentUp
+        ? const Color(0xFFBF5353)
+        : theme.colorScheme.onSurfaceVariant;
     return Padding(
       padding: EdgeInsets.zero,
       child: Material(
@@ -266,14 +279,51 @@ class _ReferenceTrendCard extends StatelessWidget {
                               flex: 4,
                               child: Align(
                                 alignment: AlignmentDirectional.centerStart,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    '${(useExplicitValue ? explicitValue : values.last)?.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0) ?? '—'} $unit',
-                                    textDirection: TextDirection.ltr,
-                                    style: theme.textTheme.headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.w800),
-                                  ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        '${(useExplicitValue ? explicitValue : values.last)?.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0) ?? '—'} $unit',
+                                        textDirection: TextDirection.ltr,
+                                        style: theme.textTheme.headlineSmall
+                                            ?.copyWith(fontWeight: FontWeight.w800),
+                                      ),
+                                    ),
+                                    if (weightDelta != null) ...[
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            weightWentDown
+                                                ? Icons.south_rounded
+                                                : weightWentUp
+                                                ? Icons.north_rounded
+                                                : Icons.remove_rounded,
+                                            size: 16,
+                                            color: deltaColor,
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Flexible(
+                                            child: Text(
+                                              '${weightDelta > 0 ? '+' : ''}${weightDelta.toStringAsFixed(1)} $unit',
+                                              key: const Key('dashboard-weight-period-change'),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textDirection: TextDirection.ltr,
+                                              style: theme.textTheme.labelSmall?.copyWith(
+                                                color: deltaColor,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             ),
@@ -349,35 +399,76 @@ class _ReferenceTrendPainter extends CustomPainter {
     final maxValue = populatedValues.reduce((a, b) => a > b ? a : b);
     final spread = (maxValue - minValue).abs();
     if (!zeroBased) {
-      // A single measurement is one point, never an invented trend. Draw a
-      // line only between actual recorded weights; leave missing data gaps.
-      final line = Paint()
-        ..color = colors.first
-        ..strokeWidth = 2
-        ..style = PaintingStyle.stroke;
-      Offset? previous;
-      for (var i = 0; i < values.length; i++) {
-        final value = values[i];
+      // Draw only observed in-period weights; never connect missing samples.
+      final color = colors.first;
+      final segment = <Offset>[];
+      void drawSegment() {
+        if (segment.isEmpty) return;
+        final stroke = Path()..moveTo(segment.first.dx, segment.first.dy);
+        for (final point in segment.skip(1)) {
+          stroke.lineTo(point.dx, point.dy);
+        }
+        if (segment.length > 1) {
+          final area = Path.from(stroke)
+            ..lineTo(segment.last.dx, chartBottom)
+            ..lineTo(segment.first.dx, chartBottom)
+            ..close();
+          canvas.drawPath(
+            area,
+            Paint()
+              ..shader = LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [color.withValues(alpha: .28), color.withValues(alpha: .02)],
+              ).createShader(Offset.zero & size),
+          );
+          canvas.drawPath(
+            stroke,
+            Paint()
+              ..color = color.withValues(alpha: .18)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 7
+              ..strokeCap = StrokeCap.round
+              ..strokeJoin = StrokeJoin.round,
+          );
+          canvas.drawPath(
+            stroke,
+            Paint()
+              ..color = color
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2.6
+              ..strokeCap = StrokeCap.round
+              ..strokeJoin = StrokeJoin.round,
+          );
+        }
+        for (final point in segment) {
+          canvas.drawCircle(
+            point,
+            segment.length == 1 ? 4 : 1.8,
+            Paint()..color = color,
+          );
+        }
+        segment.clear();
+      }
+
+      for (var index = 0; index < values.length; index++) {
+        final value = values[index];
         if (!value.isFinite || value <= 0) {
-          previous = null;
+          drawSegment();
           continue;
         }
-        final point = Offset(
-          values.length == 1
-              ? size.width / 2
-              : 6 + (size.width - 12) * i / (values.length - 1),
-          spread == 0
-              ? size.height / 2
-              : 6 + (size.height - 12) * (1 - (value - minValue) / spread),
+        segment.add(
+          Offset(
+            values.length == 1
+                ? size.width / 2
+                : 6 + (size.width - 12) * index / (values.length - 1),
+            spread == 0
+                ? size.height / 2
+                : 6 + (size.height - 12) * (1 - (value - minValue) / spread),
+          ),
         );
-        if (previous != null) canvas.drawLine(previous, point, line);
-        canvas.drawCircle(
-          point,
-          values.length == 1 ? 4 : 2.5,
-          Paint()..color = colors.first,
-        );
-        previous = point;
       }
+      drawSegment();
       return;
     }
     final slotWidth = size.width / values.length;
@@ -470,7 +561,12 @@ class _BodyTwinImageCard extends StatelessWidget {
             child: DecoratedBox(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xE8031026), Color(0x52031026)],
+                  colors: [
+                    Color(0xF407192A),
+                    Color(0xB807192A),
+                    Color(0x0007192A),
+                  ],
+                  stops: [0, .48, 1],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -478,7 +574,7 @@ class _BodyTwinImageCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Align(
-                  alignment: AlignmentDirectional.centerStart,
+                  alignment: Alignment.centerLeft,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 210),
                     child: Column(
@@ -495,6 +591,7 @@ class _BodyTwinImageCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 title,
+                                textAlign: TextAlign.left,
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       color: Colors.white,
@@ -507,6 +604,7 @@ class _BodyTwinImageCard extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text(
                           summary,
+                          textAlign: TextAlign.left,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
