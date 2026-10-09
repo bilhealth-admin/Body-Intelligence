@@ -1,9 +1,7 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
-import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
 import 'package:body_intelligence_log/features/settings/help_center_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,73 +75,10 @@ void main() {
     }
   });
 
-  testWidgets('help rows render functional semantic mappings per platform', (
-    tester,
-  ) async {
+  testWidgets('help rows stay text-first and actionable', (tester) async {
     tester.view.physicalSize = const Size(430, 932);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-
-    final expected =
-        <
-          ({
-            String id,
-            String title,
-            BilSemanticIconKind kind,
-            IconData? androidOverride,
-            IconData? appleOverride,
-          })
-        >[
-          (
-            id: 'about',
-            title: 'About BIL',
-            kind: BilSemanticIconKind.support,
-            androidOverride: Icons.info_outline_rounded,
-            appleOverride: CupertinoIcons.info_circle,
-          ),
-          (
-            id: 'faq',
-            title: 'Frequently Asked Questions',
-            kind: BilSemanticIconKind.support,
-            androidOverride: Icons.quiz_outlined,
-            appleOverride: CupertinoIcons.question_circle,
-          ),
-          (
-            id: 'contact-support',
-            title: 'Contact Support',
-            kind: BilSemanticIconKind.support,
-            androidOverride: null,
-            appleOverride: null,
-          ),
-          (
-            id: 'terms',
-            title: 'Terms of Service',
-            kind: BilSemanticIconKind.legal,
-            androidOverride: null,
-            appleOverride: null,
-          ),
-          (
-            id: 'troubleshooting',
-            title: 'Troubleshooting',
-            kind: BilSemanticIconKind.preferences,
-            androidOverride: Icons.build_outlined,
-            appleOverride: CupertinoIcons.wrench,
-          ),
-          (
-            id: 'delete-account',
-            title: 'Delete Account',
-            kind: BilSemanticIconKind.accountDeletion,
-            androidOverride: null,
-            appleOverride: null,
-          ),
-          (
-            id: 'service-status',
-            title: 'Service Status',
-            kind: BilSemanticIconKind.health,
-            androidOverride: Icons.monitor_heart_outlined,
-            appleOverride: CupertinoIcons.waveform_path_ecg,
-          ),
-        ];
 
     for (final platform in const [TargetPlatform.android, TargetPlatform.iOS]) {
       await tester.pumpWidget(
@@ -154,41 +89,36 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      for (final item in expected) {
-        expect(find.text(item.title), findsOneWidget);
-        final badgeFinder = find.byKey(Key('help-center-icon-${item.id}'));
-        expect(badgeFinder, findsOneWidget);
-
-        final badge = tester.widget<BilSemanticIconBadge>(badgeFinder);
-        expect(badge.kind, item.kind);
-        final spec = BilSemanticIcons.spec(item.kind);
-        final expectedIcon = switch (platform) {
-          TargetPlatform.iOS => item.appleOverride ?? spec.appleIcon,
-          _ => item.androidOverride ?? spec.icon,
-        };
-        final icon = tester.widget<Icon>(
-          find.descendant(of: badgeFinder, matching: find.byType(Icon)),
+      for (final item in const [
+        (id: 'about', title: 'About BIL'),
+        (id: 'faq', title: 'Frequently Asked Questions'),
+        (id: 'contact-support', title: 'Contact Support'),
+        (id: 'terms', title: 'Terms of Service'),
+        (id: 'troubleshooting', title: 'Troubleshooting'),
+        (id: 'delete-account', title: 'Delete Account'),
+        (id: 'service-status', title: 'Service Status'),
+      ]) {
+        final label = find.text(item.title);
+        expect(label, findsOneWidget, reason: '${platform.name}:${item.id}');
+        final tileFinder = find.ancestor(
+          of: label,
+          matching: find.byType(ListTile),
         );
-        expect(icon.icon, expectedIcon, reason: '${platform.name}:${item.id}');
-        expect(
-          icon.color,
-          spec.onAccent(Brightness.light),
-          reason: '${platform.name}:${item.id}:accent',
-        );
-
-        final container = tester.widget<Container>(
-          find.descendant(of: badgeFinder, matching: find.byType(Container)),
-        );
-        final decoration = container.decoration! as BoxDecoration;
-        expect(
-          (decoration.gradient! as LinearGradient).colors,
-          [
-            Color.lerp(spec.accent(Brightness.light), Colors.white, .18)!,
-            spec.accent(Brightness.light),
-          ],
-          reason: '${platform.name}:${item.id}:container',
-        );
+        expect(tileFinder, findsOneWidget);
+        final tile = tester.widget<ListTile>(tileFinder);
+        expect(tile.onTap, isNotNull, reason: item.id);
+        expect(tile.leading, isNull, reason: 'No decorative leading icon');
+        expect(tile.minTileHeight, greaterThanOrEqualTo(48));
+        expect(tile.trailing, isA<Icon>());
+        expect((tile.trailing! as Icon).size, 16);
+        expect(find.byKey(Key('help-center-icon-${item.id}')), findsNothing);
       }
+
+      await tester.tap(find.text('About BIL'));
+      await tester.pumpAndSettle();
+      expect(find.text('Body Intelligence Log™'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: platform.name);
     }
   });

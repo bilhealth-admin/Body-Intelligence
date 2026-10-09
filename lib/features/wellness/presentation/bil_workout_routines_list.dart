@@ -143,7 +143,7 @@ class _WorkoutCategorySection extends StatelessWidget {
           title,
           style: Theme.of(
             context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         if (subtitle?.isNotEmpty == true) ...[
           const SizedBox(height: 3),
@@ -520,7 +520,7 @@ class _WorkoutRoutineCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

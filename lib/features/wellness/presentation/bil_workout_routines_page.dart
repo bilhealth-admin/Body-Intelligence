@@ -31,6 +31,7 @@ import '../services/wellness_video_resume.dart';
 import 'workout_access_policy.dart';
 import 'wellness_copy.dart';
 import 'workout_video_group_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'bil_workout_routines_list.dart';
 part 'bil_workout_routine_details.dart';
@@ -367,92 +368,99 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     ref.watch(verifiedSubscriptionAccessProvider);
     final future = _items;
     final compactHeader = MediaQuery.sizeOf(context).width < 520;
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: compactHeader ? 72 : null,
-        titleSpacing: compactHeader ? 0 : null,
-        leading: IconButton(
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go('/wellness-library'),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        title: Text(
-          wellnessWorkoutVideosAndRoutinesTitle(context),
-          key: const ValueKey('workout-videos-routines-title'),
-          maxLines: compactHeader ? 2 : 1,
-          overflow: compactHeader
-              ? TextOverflow.visible
-              : TextOverflow.ellipsis,
-          style: compactHeader
-              ? Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  height: 1.08,
-                )
-              : null,
-        ),
-        actions: [
-          IconButton(
-            key: const ValueKey('workout-programs-action'),
-            tooltip: _copy(context, '10 training categories', '10 فئات تدريب'),
-            onPressed: () => context.push('/wellness/workouts/log'),
-            icon: const Icon(Icons.playlist_add_check_circle_outlined),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          toolbarHeight: compactHeader ? 72 : null,
+          titleSpacing: compactHeader ? 0 : null,
+          leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go('/wellness-library'),
+            icon: const Icon(Icons.arrow_back_rounded),
           ),
-          IconButton(
-            key: const ValueKey('workout-packs-action'),
-            tooltip: _copy(
-              context,
-              'Manage verified packs',
-              'إدارة الحزم الموثقة',
+          title: Text(
+            wellnessWorkoutVideosAndRoutinesTitle(context),
+            key: const ValueKey('workout-videos-routines-title'),
+            maxLines: compactHeader ? 2 : 1,
+            overflow: compactHeader
+                ? TextOverflow.visible
+                : TextOverflow.ellipsis,
+            style: compactHeader
+                ? Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    height: 1.08,
+                  )
+                : null,
+          ),
+          actions: [
+            IconButton(
+              key: const ValueKey('workout-programs-action'),
+              tooltip: _copy(
+                context,
+                '10 training categories',
+                '10 فئات تدريب',
+              ),
+              onPressed: () => context.push('/wellness/workouts/log'),
+              icon: const Icon(Icons.playlist_add_check_circle_outlined),
             ),
-            onPressed: () => context.push('/wellness/content-packs'),
-            icon: const Icon(Icons.download_for_offline_outlined),
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabs,
-          tabs: [
-            Tab(text: _workoutHubCopy(context, 'Videos')),
-            Tab(text: _workoutHubCopy(context, 'Gym')),
-            Tab(text: _workoutHubCopy(context, 'Home')),
-            Tab(text: _workoutHubCopy(context, 'My plans')),
+            IconButton(
+              key: const ValueKey('workout-packs-action'),
+              tooltip: _copy(
+                context,
+                'Manage verified packs',
+                'إدارة الحزم الموثقة',
+              ),
+              onPressed: () => context.push('/wellness/content-packs'),
+              icon: const Icon(Icons.download_for_offline_outlined),
+            ),
           ],
+          bottom: TabBar(
+            controller: _tabs,
+            tabs: [
+              Tab(text: _workoutHubCopy(context, 'Videos')),
+              Tab(text: _workoutHubCopy(context, 'Gym')),
+              Tab(text: _workoutHubCopy(context, 'Home')),
+              Tab(text: _workoutHubCopy(context, 'My plans')),
+            ],
+          ),
         ),
-      ),
-      body: future == null
-          ? const Center(child: CircularProgressIndicator())
-          : FutureBuilder<List<WellnessContentItem>>(
-              future: future,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const _WorkoutLibraryLoading();
-                }
-                if (snapshot.hasError) {
-                  return _WorkoutLibraryError(
-                    offline: widget.offline,
-                    onRetry: _reload,
+        body: future == null
+            ? const Center(child: CircularProgressIndicator())
+            : FutureBuilder<List<WellnessContentItem>>(
+                future: future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const _WorkoutLibraryLoading();
+                  }
+                  if (snapshot.hasError) {
+                    return _WorkoutLibraryError(
+                      offline: widget.offline,
+                      onRetry: _reload,
+                    );
+                  }
+                  final items = snapshot.data ?? const <WellnessContentItem>[];
+                  _scheduleInitialItem(items);
+                  return FutureBuilder<GymSixMonthPlan>(
+                    future: _gymPlan,
+                    builder: (context, planSnapshot) {
+                      if (planSnapshot.connectionState !=
+                          ConnectionState.done) {
+                        return const _WorkoutLibraryLoading();
+                      }
+                      if (planSnapshot.hasError || planSnapshot.data == null) {
+                        return _WorkoutLibraryError(
+                          offline: widget.offline,
+                          onRetry: _reload,
+                        );
+                      }
+                      return _buildLibrary(items, planSnapshot.data!);
+                    },
                   );
-                }
-                final items = snapshot.data ?? const <WellnessContentItem>[];
-                _scheduleInitialItem(items);
-                return FutureBuilder<GymSixMonthPlan>(
-                  future: _gymPlan,
-                  builder: (context, planSnapshot) {
-                    if (planSnapshot.connectionState != ConnectionState.done) {
-                      return const _WorkoutLibraryLoading();
-                    }
-                    if (planSnapshot.hasError || planSnapshot.data == null) {
-                      return _WorkoutLibraryError(
-                        offline: widget.offline,
-                        onRetry: _reload,
-                      );
-                    }
-                    return _buildLibrary(items, planSnapshot.data!);
-                  },
-                );
-              },
-            ),
+                },
+              ),
+      ),
     );
   }
 

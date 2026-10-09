@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 const _aiCoachPrivacyDisclosure =
     'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.';
@@ -37,41 +38,46 @@ class LegalDocumentPage extends StatelessWidget {
     // The legal entity is rendered from the immutable metadata line below.
     // Translation services must never localize or rename it.
     final effectiveStatus = copy.effective.split(' • ').take(2).join(' • ');
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: SelectionArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 18, 24, 48),
-          children: [
-            Text(
-              heading,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            Text(effectiveStatus, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 4),
-            Text(
-              '$bilLegalPolicyId • $bilLegalPolicyRevision • $bilLegalEntity',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 22),
-            for (final section in sections) ...[
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: SelectionArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, 18, 24, 48),
+            children: [
               Text(
-                section.$1,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                heading,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              const SizedBox(height: 6),
-              Text(section.$2, style: const TextStyle(height: 1.45)),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8),
+              Text(
+                effectiveStatus,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '$bilLegalPolicyId • $bilLegalPolicyRevision • $bilLegalEntity',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 22),
+              for (final section in sections) ...[
+                Text(
+                  section.$1,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(section.$2, style: const TextStyle(height: 1.45)),
+                const SizedBox(height: 20),
+              ],
+              const Divider(),
+              const SizedBox(height: 12),
+              Text(copy.contact),
             ],
-            const Divider(),
-            const SizedBox(height: 12),
-            Text(copy.contact),
-          ],
+          ),
         ),
       ),
     );

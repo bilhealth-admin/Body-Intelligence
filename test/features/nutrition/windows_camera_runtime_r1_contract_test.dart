@@ -25,7 +25,15 @@ void main() {
 
     expect(scanner, contains('_scanBeamController.repeat(reverse: true)'));
     expect(scanner, contains("Key('barcode-animated-scan-beam')"));
-    expect(scanner, contains('final beamY ='));
-    expect(scanner, contains('MaskFilter.blur'));
+    // The painter is a Dart part of the same scanner library, so verify the
+    // animation and the actual beam painting across both source files.
+    final painter = File(
+      'lib/features/nutrition/presentation/'
+      'food_barcode_scanner_painter.dart',
+    ).readAsStringSync();
+    expect(scanner, contains("part 'food_barcode_scanner_painter.dart'"));
+    expect(painter, contains("part of 'food_barcode_scanner_page.dart'"));
+    expect(painter, contains('final beamY ='));
+    expect(painter, contains('MaskFilter.blur'));
   });
 }

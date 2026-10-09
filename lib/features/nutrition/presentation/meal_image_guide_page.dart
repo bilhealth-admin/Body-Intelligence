@@ -5,6 +5,7 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../providers/meal_vision_usage_provider.dart';
 import '../services/meal_vision_usage_contract.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'meal_image_guide_widgets.dart';
 

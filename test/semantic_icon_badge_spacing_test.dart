@@ -100,7 +100,7 @@ void main() {
     );
 
     testWidgets(
-      'More semantic rows keep a 12 px title gap in ${direction.name}',
+      'More secondary navigation rows stay icon-free in ${direction.name}',
       (tester) async {
         _setPhoneSurface(tester);
         final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -139,20 +139,12 @@ void main() {
         );
 
         expect(tile, findsOneWidget);
-        expect(badge, findsOneWidget);
-        expect(tester.widget<ListTile>(tile).horizontalTitleGap, 12);
-        expect(tester.getSize(badge), const Size(44, 44));
-        expect(tester.widget<Text>(title).style?.fontSize, 16);
-        expect(tester.widget<Text>(title).style?.fontWeight, FontWeight.w700);
+        expect(badge, findsNothing);
+        expect(tester.widget<ListTile>(tile).leading, isNull);
+        expect(tester.getSize(tile).height, greaterThanOrEqualTo(48));
+        expect(tester.widget<Text>(title).style?.fontSize, 15);
+        expect(tester.widget<Text>(title).style?.fontWeight, FontWeight.w500);
         expect(Directionality.of(tester.element(tile)), direction);
-        expect(
-          _directionalGap(
-            direction: direction,
-            leading: tester.getRect(badge),
-            title: tester.getRect(title),
-          ),
-          greaterThanOrEqualTo(12),
-        );
 
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump(const Duration(milliseconds: 1));

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../core/health_evidence/health_evidence_catalog.dart';
 import '../../shared/widgets/bil_clinical_note.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 class HealthInformationSourcesPage extends StatelessWidget {
   const HealthInformationSourcesPage({
@@ -32,48 +33,50 @@ class HealthInformationSourcesPage extends StatelessWidget {
         (source) => !featuredIds.contains(source.id),
       ),
     ];
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          copy('Health sources & methodology', 'مصادر ومنهجية الصحة'),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: Text(
+            copy('Health sources & methodology', 'مصادر ومنهجية الصحة'),
+          ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-        children: [
-          Text(
-            copy('Sources & methodology', 'المصادر والمنهجية'),
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 10),
-          BilClinicalNote(
-            title: copy('Your data, clearly separated', 'بياناتك، بوضوح'),
-            text: copy(
-              'BIL distinguishes your recorded or measured data from calculated estimates and general population references. BIL does not diagnose medical conditions, and estimates are not a treatment prescription. Check with a doctor or qualified health professional before decisions involving pregnancy, supplements, medicines, or medical conditions.',
-              'يميز BIL بين بياناتك المسجلة أو المقاسة، والتقديرات المحسوبة، والمراجع السكانية العامة. لا يشخّص BIL الحالات الطبية، وليست التقديرات وصفة علاجية. استشر طبيبًا أو مختصًا صحيًا مؤهلًا قبل قرارات الحمل أو المكملات أو الأدوية أو الحالات الطبية.',
-            ),
-          ),
-          const SizedBox(height: 18),
-          if (featured.isNotEmpty) ...[
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+          children: [
             Text(
-              copy(
-                'References for this information',
-                'المراجع المرتبطة بهذه المعلومة',
-              ),
-              key: const Key('health-sources-featured-heading'),
+              copy('Sources & methodology', 'المصادر والمنهجية'),
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+            BilClinicalNote(
+              title: copy('Your data, clearly separated', 'بياناتك، بوضوح'),
+              text: copy(
+                'BIL distinguishes your recorded or measured data from calculated estimates and general population references. BIL does not diagnose medical conditions, and estimates are not a treatment prescription. Check with a doctor or qualified health professional before decisions involving pregnancy, supplements, medicines, or medical conditions.',
+                'يميز BIL بين بياناتك المسجلة أو المقاسة، والتقديرات المحسوبة، والمراجع السكانية العامة. لا يشخّص BIL الحالات الطبية، وليست التقديرات وصفة علاجية. استشر طبيبًا أو مختصًا صحيًا مؤهلًا قبل قرارات الحمل أو المكملات أو الأدوية أو الحالات الطبية.',
+              ),
+            ),
+            const SizedBox(height: 18),
+            if (featured.isNotEmpty) ...[
+              Text(
+                copy(
+                  'References for this information',
+                  'المراجع المرتبطة بهذه المعلومة',
+                ),
+                key: const Key('health-sources-featured-heading'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+            ],
+            for (final source in visibleSources) ...[
+              _SourceCard(source: source, arabic: arabic),
+              const SizedBox(height: 8),
+            ],
           ],
-          for (final source in visibleSources) ...[
-            _SourceCard(source: source, arabic: arabic),
-            const SizedBox(height: 8),
-          ],
-        ],
+        ),
       ),
     );
   }
