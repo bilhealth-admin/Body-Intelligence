@@ -63,9 +63,7 @@ void main() {
       final guideBounds = tester.getRect(
         find.byKey(const Key('dashboard-food-guide-step-0')),
       );
-      final underlyingBounds = tester.getRect(
-        find.text('Underlying action'),
-      );
+      final underlyingBounds = tester.getRect(find.text('Underlying action'));
       expect(
         guideBounds.bottom,
         lessThanOrEqualTo(underlyingBounds.top),
