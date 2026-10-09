@@ -125,7 +125,13 @@ void main() {
     await tester.pumpWidget(
       const _SplashHarness(reducedMotion: true, showSpinner: false),
     );
-    await tester.pump();
+    // The shipped launch path predecodes the identity before runApp. Wait
+    // for the same asset to finish decoding in the screenshot-only harness.
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('premium-splash-wordmark')),
+      findsOneWidget,
+    );
 
     await expectLater(
       find.byType(Scaffold),

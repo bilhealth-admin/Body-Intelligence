@@ -33,6 +33,7 @@ import 'package:body_intelligence_log/features/nutrition/presentation/food_barco
 import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_guide_page.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/history/progress_page.dart';
@@ -57,6 +58,7 @@ import 'package:body_intelligence_log/features/settings/account_connection_setti
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,6 +70,12 @@ const _skipVisualPixelComparison = bool.fromEnvironment(
   'BIL_SKIP_VISUAL_PIXELS',
 );
 const _captureIpad = bool.fromEnvironment('BIL_CAPTURE_IPAD');
+
+Finder _coachWelcomeMessage() => find.byWidgetPredicate(
+  (widget) =>
+      widget is CoachMessageText &&
+      widget.text.contains('I’m ready for your next useful decision.'),
+);
 
 final _visualVerifiedFreeSubscription = SubscriptionState(
   plan: CommercePlan.free,
@@ -381,7 +389,7 @@ void main() {
     }
     if (name == 'ai_coach_conversation_phone') {
       expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
-      expect(find.text('Let’s make the first decision'), findsOneWidget);
+      expect(_coachWelcomeMessage(), findsOneWidget);
     }
     expect(tester.takeException(), isNull);
     final captureTarget = captureOverlay
@@ -629,7 +637,7 @@ void main() {
       prepare: (tester) async {
         expect(find.byType(Scaffold), findsOneWidget);
         final field = find.byKey(const Key('ai-coach-question-field'));
-        final decision = find.text('Let’s make the first decision');
+        final decision = _coachWelcomeMessage();
         expect(field, findsOneWidget);
         expect(decision, findsOneWidget);
         expect(tester.getRect(field).top, lessThan(844));
@@ -643,6 +651,22 @@ void main() {
       tester,
     ) async {
       final db = await database(tester, profile: true);
+      // Desktop host tests have no native TTS implementation. Respond only
+      // to harmless stop; all unexpected voice actions still fail the test.
+      const ttsChannel = MethodChannel('bil/tts');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        ttsChannel,
+        (call) async {
+          if (call.method == 'stop') return null;
+          throw MissingPluginException(
+            'Unexpected TTS action in static capture: ${call.method}',
+          );
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(ttsChannel, null),
+      );
       await capture(
         tester,
         page: const DashboardPage(),
