@@ -12,6 +12,7 @@ import 'package:body_intelligence_log/features/analytics/weekly_report_provider.
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
@@ -253,7 +254,10 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
-          if (page is DailyLogPage || page is FoodPage) ...[
+          if (page is DailyLogPage ||
+              page is FoodPage ||
+              page is SettingsPage ||
+              page is AnalyticsPage) ...[
             verifiedEntitlementClockProvider.overrideWithValue(
               () => DateTime.utc(2026, 8, 30, 9, 41, 12),
             ),
