@@ -243,6 +243,13 @@ void main() {
   }) async {
     SharedPreferences.setMockInitialValues({});
     final db = await seededDatabase(trends: trends);
+    // Store screenshots show a returning user. First-use onboarding has its
+    // own explicit widget tests, so it must not obscure Home references.
+    if (page is DashboardPage) {
+      await PreferencesRepository(
+        db,
+      ).set('experience.dashboard_food_guide.v1.local', 'dismissed');
+    }
     tester.view.physicalSize = physicalSize;
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
@@ -321,6 +328,13 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(tester.takeException(), isNull);
+    if (page is DashboardPage) {
+      expect(
+        find.byKey(const Key('dashboard-guide-skip')),
+        findsNothing,
+        reason: 'Returning member cannot be captured with first-use help.',
+      );
+    }
     try {
       await expectLater(
         find.byType(Scaffold).first,

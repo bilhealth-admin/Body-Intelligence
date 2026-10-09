@@ -261,6 +261,14 @@ void main() {
     NutritionGoalTarget? dailyGoalOverride,
     List<MealWithItems>? dailyMealsOverride,
   }) async {
+    // These Home Goldens capture a RETURNING member's settled dashboard.
+    // Keep the optional first-use tour tested in its dedicated widget suite,
+    // rather than injecting a first-install card into established screenshots.
+    if (page is DashboardPage) {
+      await PreferencesRepository(
+        db,
+      ).set('experience.dashboard_food_guide.v1.local', 'dismissed');
+    }
     tester.view.physicalSize = _captureIpad
         ? const Size(1032, 1376)
         : const Size(390, 844);
@@ -416,6 +424,13 @@ void main() {
       expect(_coachOpeningSurface(), findsOneWidget);
     }
     expect(tester.takeException(), isNull);
+    if (page is DashboardPage) {
+      expect(
+        find.byKey(const Key('dashboard-guide-skip')),
+        findsNothing,
+        reason: 'Returning Home screenshot must not include onboarding.',
+      );
+    }
     final captureTarget = captureOverlay
         ? find.byType(Overlay).first
         : captureTopmostScaffold
