@@ -124,25 +124,35 @@ void main() {
     tester.view.devicePixelRatio = 2.5;
     addTearDown(tester.view.reset);
 
-    // Mirror the production bootstrap: decode the exact bundled identity
-    // before runApp, so the first screenshot never races AssetImage decoding.
-    final data = await rootBundle.load(
-      'assets/branding/bil_splash_identity.png',
+    // Mirror the production bootstrap with the shipped bitmap and exact
+    // decode size. The engine codec completes in real async time, whereas
+    // testWidgets uses FakeAsync: awaiting it outside runAsync can deadlock
+    // until the ten-minute test timeout on Windows.
+    final decodedWordmark = await tester.runAsync(() async {
+      final data = await rootBundle.load(
+        'assets/branding/bil_splash_identity.png',
+      );
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      final codec = await ui.instantiateImageCodec(
+        bytes,
+        targetWidth: 864,
+        targetHeight: 864,
+      );
+      try {
+        return (await codec.getNextFrame()).image;
+      } finally {
+        codec.dispose();
+      }
+    });
+    expect(
+      decodedWordmark,
+      isNotNull,
+      reason: 'The shipped launch wordmark must decode before capture.',
     );
-    final bytes = data.buffer.asUint8List(
-      data.offsetInBytes,
-      data.lengthInBytes,
-    );
-    final codec = await ui.instantiateImageCodec(
-      bytes,
-      targetWidth: 864,
-      targetHeight: 864,
-    );
-    try {
-      bilPredecodedLaunchWordmark = (await codec.getNextFrame()).image;
-    } finally {
-      codec.dispose();
-    }
+    bilPredecodedLaunchWordmark = decodedWordmark;
     addTearDown(() {
       final image = bilPredecodedLaunchWordmark;
       bilPredecodedLaunchWordmark = null;
