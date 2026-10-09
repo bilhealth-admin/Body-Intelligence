@@ -10,11 +10,11 @@ void main() {
     for (final tag in BilLocalePolicy.productionTags) {
       for (final source in QualityFeedbackRuntimeCopy.sources) {
         final expected = QualityFeedbackRuntimeCopy.resolve(source, tag);
-        expect(expected, isNotNull, reason: '$'+'tag: '+'$'+'source');
+        expect(expected, isNotNull, reason: '$tag: $source');
         expect(expected!.trim(), isNotEmpty);
         expect(RuntimeCopy.resolve(source, tag), expected);
         if (tag != 'en') {
-          expect(expected, isNot(source), reason: '$'+'tag: '+'$'+'source');
+          expect(expected, isNot(source), reason: '$tag: $source');
         }
       }
     }
