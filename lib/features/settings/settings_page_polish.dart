@@ -52,7 +52,7 @@ class _CloudSyncRow extends ConsumerWidget {
             : const _MorePremiumIcon(kind: BilSemanticIconKind.cloudSync),
         title: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w400),
         ),
         subtitle: CloudSyncStatusLine(status: status),
         onTap: status.isSyncing ? null : () => _runSync(context, ref),
@@ -115,7 +115,7 @@ class _MoreActionRow extends StatelessWidget {
         leading: _MorePremiumIcon(kind: kind),
         title: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w400),
         ),
         trailing: Icon(
           Directionality.of(context) == TextDirection.rtl

@@ -71,9 +71,10 @@ class SettingsPage extends ConsumerWidget {
         centerTitle: true,
         title: Text(
           copy('More'),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -.35,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontSize: 19,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0,
           ),
         ),
       ),
@@ -313,7 +314,9 @@ class _PremiumMembershipLink extends StatelessWidget {
                         ReferenceSettingsCopy.of(context)('BIL Premium'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: gold,
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -321,7 +324,9 @@ class _PremiumMembershipLink extends StatelessWidget {
                         label,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 12,
                           fontWeight: FontWeight.w400,
+                          letterSpacing: 0,
                         ),
                       ),
                     ],
@@ -370,12 +375,11 @@ class _MoreSection extends StatelessWidget {
             padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 9),
             child: Text(
               title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: -.25,
-                color: dark
-                    ? theme.colorScheme.onSurface
-                    : const Color(0xFF101C33),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -486,7 +490,8 @@ class _ProfileSummary extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         semanticsLabel: name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -537,7 +542,7 @@ class _Metric extends StatelessWidget {
             '$value $unit',
             style: Theme.of(
               context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(height: 3),
@@ -572,11 +577,11 @@ class _MoreRow extends StatelessWidget {
           leading: _MorePremiumIcon(kind: semanticKind, danger: _isDanger),
           title: Text(
             label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: _isDanger ? Theme.of(context).colorScheme.error : null,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -.12,
+              fontSize: 15.5,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0,
             ),
           ),
           trailing: Row(

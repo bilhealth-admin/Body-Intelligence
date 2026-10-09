@@ -60,8 +60,36 @@ void main() {
       expect(flatIcon, isNot(contains(forbidden)), reason: forbidden);
     }
     expect(source, contains('BorderRadius.circular(24)'));
-    expect(source, contains('fontWeight: FontWeight.w900'));
+    expect(source, isNot(contains('fontWeight: FontWeight.w900')));
+    // The native font family is already supplied by the platform theme:
+    // only More's weights and sizes should be locally refined.
+    expect(source, contains('fontSize: 19,'));
+    expect(source, contains('fontSize: 14,'));
+    expect(source, contains('fontSize: 15.5,'));
+    expect(source, contains('fontWeight: FontWeight.w400'));
+    expect(source, contains('fontWeight: FontWeight.w600'));
     expect(source, contains('CommunityUnreadBadge'));
+  });
+
+  test('More typography follows the restrained system hierarchy', () {
+    final page = File(
+      'lib/features/settings/settings_page.dart',
+    ).readAsStringSync();
+    final helpers = File(
+      'lib/features/settings/settings_page_polish.dart',
+    ).readAsStringSync();
+    final start = page.indexOf('class _MoreRow extends StatelessWidget');
+    expect(start, greaterThanOrEqualTo(0));
+    final rows = page.substring(start);
+    expect(rows, contains('textTheme.bodyLarge?.copyWith('));
+    expect(rows, contains('fontSize: 15.5'));
+    expect(rows, contains('fontWeight: FontWeight.w400'));
+    expect(rows, isNot(contains('FontWeight.w700')));
+    expect(helpers, contains('fontSize: 15.5'));
+    expect(helpers, contains('fontWeight: FontWeight.w400'));
+    // Navigation, membership authority, and global themes are unchanged.
+    expect(page, contains("onTap: () => context.push(route)"));
+    expect(page, contains("onTap: () => context.push('/plans')"));
   });
 
   test('More Premium entry is subtle and preserves verified-state routing', () {
