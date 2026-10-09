@@ -23,6 +23,12 @@ extension CoachMealCommands on MealRepository {
         // silently apply the original command a second time.
         return true;
       }
+      final isNewFoodCommit =
+          command.kind == CoachMealCommandKind.quickMacros ||
+          command.kind == CoachMealCommandKind.foods;
+      final firstFoodMilestone = isNewFoodCommit
+          ? await _firstFoodMilestoneBeforeInsert()
+          : null;
       final before = <CoachMealSnapshot>[];
       final createdMeals = <Meal>[];
       final itemIds = <int>[];
@@ -63,6 +69,9 @@ extension CoachMealCommands on MealRepository {
         createdMeals: createdMeals,
       );
       await _writeCoachJournal(journal, scope);
+      if (isNewFoodCommit && itemIds.isNotEmpty) {
+        await _firstFoodMilestoneAfterInsert(firstFoodMilestone);
+      }
       scope.check(_database.localOwnerId);
       return false;
     });

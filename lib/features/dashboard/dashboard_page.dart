@@ -204,16 +204,24 @@ class DashboardPage extends ConsumerWidget {
     // process-wide fallback may still be English during the first frame.
     AppLocalizations.activate(resolvedLocale);
     final locale = resolvedLocale.languageCode.toLowerCase();
-    final showFirstValue = ref.watch(firstValueHandoffProvider).value ?? false;
     final profilePhoto = ref.watch(profilePhotoProvider).value;
     final profilePhotoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
     final identity = ref.watch(profileAuthIdentityProvider);
+    final guidePreferences = ref.watch(preferencesRepositoryProvider);
+    final guideOwner = identity.asData?.value.ownerId;
+    // Authentication can update one frame before its SQLite owner namespace.
+    // Never show either first-use prompt using the previous account's data.
+    final guideOwnerReady =
+        identity.hasValue && guidePreferences.localOwnerId == guideOwner;
+    final showFirstValue =
+        guideOwnerReady && (ref.watch(firstValueHandoffProvider).value ?? false);
 
     final hero = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (showFirstValue) ...[
           FirstValueHandoffCard(
+            key: ValueKey('first-value-${guideOwner ?? 'local'}'),
             onSkip: () async {
               try {
                 await ref
@@ -259,8 +267,8 @@ class DashboardPage extends ConsumerWidget {
     return Theme(
       data: dashboardTheme,
       child: DashboardFirstUseExperience(
-        ownerScope: identity.asData?.value.ownerId ?? 'local',
-        ownerReady: identity.hasValue,
+        ownerScope: guideOwner ?? 'local',
+        ownerReady: guideOwnerReady,
         child: DashboardShell(
         leading: const CloudSyncConsentNotice(),
         edgeHeader: DashboardTopBar(

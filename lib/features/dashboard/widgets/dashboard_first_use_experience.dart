@@ -95,9 +95,11 @@ class _DashboardFirstUseExperienceState
   @override
   Widget build(BuildContext context) {
     final meals = ref.watch(allMealsProvider);
-    final needsGuide = widget.ownerReady &&
-        _ready && _canGuide && meals.hasValue &&
-        (meals.value?.isEmpty ?? false);
+    // Empty meal buckets are not evidence of a recorded food item.
+    final hasLoggedFood =
+        meals.value?.any((meal) => meal.items.isNotEmpty) ?? false;
+    final needsGuide =
+        widget.ownerReady && _ready && _canGuide && meals.hasValue && !hasLoggedFood;
     return Stack(
       fit: StackFit.expand,
       children: [

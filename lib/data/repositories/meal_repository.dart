@@ -48,6 +48,30 @@ class MealRepository {
     this._dailyNutritionEngine = const DailyNutritionIntelligenceEngine(),
   });
 
+  /// Snapshot the first-food milestone before inserting an item.
+  /// A historical (even soft-deleted) item is not a new user's first meal.
+  /// Must be called within the transaction that will persist that item.
+  Future<bool?> _firstFoodMilestoneBeforeInsert() async {
+    final preferences = PreferencesRepository(_database);
+    if (await preferences.get(firstMealCelebrationPreferenceKey) != null) {
+      return null;
+    }
+    final historicalItem = await (_database.select(_database.mealItems)
+          ..limit(1))
+        .getSingleOrNull();
+    return historicalItem == null;
+  }
+
+  /// Mark only after a real item is persisted; the outer transaction makes
+  /// item + milestone atomic across manual, recipe, and AI Coach writes.
+  Future<void> _firstFoodMilestoneAfterInsert(bool? isFirstFood) async {
+    if (isFirstFood == null) return;
+    await PreferencesRepository(_database).set(
+      firstMealCelebrationPreferenceKey,
+      isFirstFood ? 'ready' : 'done',
+    );
+  }
+
   Future<int> createMeal({
     required DateTime date,
     required String name,
@@ -94,16 +118,7 @@ class MealRepository {
       await _requireOpenMealDay(mealId);
       // The milestone flag is committed in the SAME transaction as the
       // first real food item. A failed write or draft cannot celebrate.
-      final milestonePrefs = PreferencesRepository(_database);
-      final priorMilestone = await milestonePrefs.get(
-        firstMealCelebrationPreferenceKey,
-      );
-      final existingFoodItem = priorMilestone == null
-          ? await (_database.select(_database.mealItems)
-                ..where((row) => row.deletedAt.isNull())
-                ..limit(1))
-              .getSingleOrNull()
-          : null;
+      final firstFoodMilestone = await _firstFoodMilestoneBeforeInsert();
       final food = await _activeFood(foodId);
       final values = _mealFoodPortionValues(
         food,
@@ -132,12 +147,7 @@ class MealRepository {
             ),
           );
       await _verifyAddedFoodEvidence(itemId);
-      if (priorMilestone == null) {
-        await milestonePrefs.set(
-          firstMealCelebrationPreferenceKey,
-          existingFoodItem == null ? 'ready' : 'done',
-        );
-      }
+      await _firstFoodMilestoneAfterInsert(firstFoodMilestone);
     });
   }
 
@@ -210,6 +220,7 @@ class MealRepository {
     );
     return _database.transaction(() async {
       await _requireOpenDayForMeals(dayKeyFor(date));
+      final firstFoodMilestone = await _firstFoodMilestoneBeforeInsert();
       var food =
           await (_database.select(_database.foods)
                 ..where((row) => row.uuid.equals(foodUuid))
@@ -294,6 +305,7 @@ class MealRepository {
               servingUnitSnapshot: const Value('serving'),
             ),
           );
+      await _firstFoodMilestoneAfterInsert(firstFoodMilestone);
       return mealId;
     });
   }
