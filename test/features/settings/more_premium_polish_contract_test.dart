@@ -64,6 +64,38 @@ void main() {
     expect(source, contains('CommunityUnreadBadge'));
   });
 
+  test('More Premium entry is subtle and preserves verified-state routing', () {
+    final source = File(
+      'lib/features/settings/settings_page.dart',
+    ).readAsStringSync();
+    final start = source.indexOf('class _PremiumMembershipLink');
+    final end = source.indexOf('class _MoreSection');
+    expect(start, greaterThanOrEqualTo(0));
+    expect(end, greaterThan(start));
+    final entry = source.substring(start, end);
+    expect(source, contains("Key('more-premium-entry')"));
+    expect(source, contains("copy('Explore Premium')"));
+    expect(source, contains("onTap: () => context.push('/plans')"));
+    expect(source, contains('EntitlementAuthority.verifiedServer'));
+    expect(source, contains("copy('Retry subscription check')"));
+    expect(entry, contains('BoxConstraints(minHeight: 52)'));
+    expect(entry, contains('fontWeight: FontWeight.w600'));
+    expect(entry, contains('Color(0xFF8B6429)'));
+    expect(entry, contains('Color(0xFFE2C78E)'));
+    expect(entry, contains('isChecking'));
+    expect(entry, contains('isRetry'));
+    for (final forbidden in const [
+      'PremiumCrownEmblem(',
+      'LinearGradient(',
+      'BoxDecoration(',
+      'BoxShadow(',
+      'ShaderMask(',
+      'BackdropFilter(',
+    ]) {
+      expect(entry, isNot(contains(forbidden)), reason: forbidden);
+    }
+  });
+
   test('bottom dock is compact and Quick Add owns the premium gradient', () {
     final source = File(
       'lib/app/router/responsive_app_shell.dart',

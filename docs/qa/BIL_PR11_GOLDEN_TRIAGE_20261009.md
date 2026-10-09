@@ -10,7 +10,7 @@ Strict focused failures: Store **18**, Data **19**, Production **88**. Splash an
 
 ## First manual visual triage
 
-- `visual_closure_help_center_phone`: actual UX version dropped all eight row leading glyphs while retaining semantic icon fields. This violates the product direction (flat native platform glyphs, no icon backdrop). Reinstated scoped `BilFlatIcon` for the 8 Help rows, neutral color, no global theme changes or protected-route impact. Added a focused runtime widget assertion in its existing screenshot case. **Golden comparison is expected to remain red until its refreshed actual pixels are reviewed individually**.
+- `visual_closure_help_center_phone`: **Owner correction supersedes the previous triage.** An icon isn't required just because a row can have one; the eight Help items are clear as text-and-chevron. Remove unnecessary leading glyphs entirely, and retain a strict widget assertion that all eight have null leading. No Golden was altered.
 - `visual_closure_sharing_privacy_phone`: the updated view has additional rows, new line breaks and rearranged content, not only icon changes. Needs behavior/content audit before accepting a baseline.
 - `visual_closure_progress_steps_month_phone`: selector surfaces have different glyph treatment, chart/card sizing and spacing. Requires design/accessibility review.
 - `epic15_iphone_69_en_00_onboarding`: priority rows and top imagery positioning changed. Review UX behavior before accepting.

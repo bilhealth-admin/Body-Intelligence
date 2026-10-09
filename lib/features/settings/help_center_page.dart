@@ -1,11 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
-import '../../app/theme/bil_flat_icon.dart';
-import '../../app/theme/bil_semantic_icons.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
 String _localized(BuildContext context, Map<String, String> values) {
@@ -80,19 +77,8 @@ class HelpCenterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     String t(String en, String ar, String fr, String es, String tr) =>
         _localized(context, {'en': en, 'ar': ar, 'fr': fr, 'es': es, 'tr': tr});
-    final rows =
-        <
-          ({
-            String id,
-            String title,
-            BilSemanticIconKind kind,
-            IconData? iconOverride,
-            IconData? appleIconOverride,
-            VoidCallback action,
-          })
-        >[
+    final rows = <({String title, VoidCallback action})>[
           (
-            id: 'about',
             title: t(
               'About BIL',
               'حول BIL',
@@ -100,9 +86,6 @@ class HelpCenterPage extends StatelessWidget {
               'Acerca de BIL',
               'BIL Hakkında',
             ),
-            kind: BilSemanticIconKind.support,
-            iconOverride: Icons.info_outline_rounded,
-            appleIconOverride: CupertinoIcons.info_circle,
             action: () => _show(
               context,
               'Body Intelligence Log™',
@@ -116,7 +99,6 @@ class HelpCenterPage extends StatelessWidget {
             ),
           ),
           (
-            id: 'faq',
             title: t(
               'Frequently Asked Questions',
               'الأسئلة الشائعة',
@@ -124,13 +106,9 @@ class HelpCenterPage extends StatelessWidget {
               'Preguntas frecuentes',
               'Sık Sorulan Sorular',
             ),
-            kind: BilSemanticIconKind.support,
-            iconOverride: Icons.quiz_outlined,
-            appleIconOverride: CupertinoIcons.question_circle,
             action: () => context.push('/help/faq'),
           ),
           (
-            id: 'health-sources',
             title: t(
               'Health sources & methodology',
               'مصادر الصحة والمنهجية',
@@ -138,13 +116,9 @@ class HelpCenterPage extends StatelessWidget {
               'Fuentes de salud y metodología',
               'Sağlık kaynakları ve yöntem',
             ),
-            kind: BilSemanticIconKind.health,
-            iconOverride: Icons.menu_book_outlined,
-            appleIconOverride: CupertinoIcons.book,
             action: () => context.push('/health-information-sources'),
           ),
           (
-            id: 'contact-support',
             title: t(
               'Contact Support',
               'تواصل مع الدعم',
@@ -152,13 +126,9 @@ class HelpCenterPage extends StatelessWidget {
               'Contactar con soporte',
               'Destekle İletişim',
             ),
-            kind: BilSemanticIconKind.support,
-            iconOverride: null,
-            appleIconOverride: null,
             action: () => _email(context, 'BIL support request'),
           ),
           (
-            id: 'terms',
             title: t(
               'Terms of Service',
               'شروط الاستخدام',
@@ -166,13 +136,9 @@ class HelpCenterPage extends StatelessWidget {
               'Términos del servicio',
               'Hizmet Koşulları',
             ),
-            kind: BilSemanticIconKind.legal,
-            iconOverride: null,
-            appleIconOverride: null,
             action: () => context.push('/legal/terms'),
           ),
           (
-            id: 'troubleshooting',
             title: t(
               'Troubleshooting',
               'حل المشكلات',
@@ -180,9 +146,6 @@ class HelpCenterPage extends StatelessWidget {
               'Solución de problemas',
               'Sorun Giderme',
             ),
-            kind: BilSemanticIconKind.preferences,
-            iconOverride: Icons.build_outlined,
-            appleIconOverride: CupertinoIcons.wrench,
             action: () => _show(
               context,
               t(
@@ -202,7 +165,6 @@ class HelpCenterPage extends StatelessWidget {
             ),
           ),
           (
-            id: 'delete-account',
             title: t(
               'Delete Account',
               'حذف الحساب',
@@ -210,13 +172,9 @@ class HelpCenterPage extends StatelessWidget {
               'Eliminar cuenta',
               'Hesabı Sil',
             ),
-            kind: BilSemanticIconKind.accountDeletion,
-            iconOverride: null,
-            appleIconOverride: null,
             action: () => context.push('/help/delete-account'),
           ),
           (
-            id: 'service-status',
             title: t(
               'Service Status',
               'حالة الخدمة',
@@ -224,9 +182,6 @@ class HelpCenterPage extends StatelessWidget {
               'Estado del servicio',
               'Hizmet Durumu',
             ),
-            kind: BilSemanticIconKind.health,
-            iconOverride: Icons.monitor_heart_outlined,
-            appleIconOverride: CupertinoIcons.waveform_path_ecg,
             action: () => _show(
               context,
               t(
@@ -267,15 +222,6 @@ class HelpCenterPage extends StatelessWidget {
             final row = rows[index];
             return ListTile(
               minTileHeight: 54,
-              leading: BilFlatIcon(
-                key: Key('help-flat-icon-${row.id}'),
-                kind: row.kind,
-                size: 32,
-                iconSize: 20,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                materialIcon: row.iconOverride,
-                appleIcon: row.appleIconOverride,
-              ),
               title: Text(row.title),
               trailing: Icon(
                 Directionality.of(context) == TextDirection.rtl

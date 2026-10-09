@@ -1824,8 +1824,9 @@ void main() {
       page: const HelpCenterPage(),
       name: 'help_center_phone',
       interact: (tester) async {
-        expect(find.byKey(const Key('help-flat-icon-about')), findsOneWidget);
-        expect(find.byKey(const Key('help-flat-icon-faq')), findsOneWidget);
+        final rows = tester.widgetList<ListTile>(find.byType(ListTile));
+        expect(rows.length, 8);
+        expect(rows.every((row) => row.leading == null), isTrue);
       },
     );
   });

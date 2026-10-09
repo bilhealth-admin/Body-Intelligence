@@ -1294,7 +1294,8 @@ void main() {
       name: 'more_phone',
       prepare: (tester) async {
         expect(find.text('BIL member'), findsOneWidget);
-        expect(find.text('Start 7-day free trial'), findsOneWidget);
+        expect(find.text('Explore Premium'), findsOneWidget);
+        expect(find.byKey(const Key('more-premium-entry')), findsOneWidget);
       },
     );
   });
