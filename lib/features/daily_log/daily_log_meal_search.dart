@@ -170,20 +170,19 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
                 maxLines: largeText ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
             if (food.verified) ...[
               const SizedBox(width: 7),
-              KeyedSubtree(
-                key: const Key('daily-search-verified-food-badge'),
+              const KeyedSubtree(
+                key: Key('daily-search-verified-food-badge'),
                 child: Icon(
                   Icons.verified_rounded,
-                  size: 16,
-                  // Verified source status is semantic, not decorative.
-                  color: const Color(0xFF56C878),
+                  size: 19,
+                  color: Color(0xFF56C878),
                 ),
               ),
             ],
@@ -223,8 +222,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             dimension: largeText ? 58 : 54,
             child: Icon(
               Icons.add_rounded,
-              size: 20,
-              color: scheme.onSurfaceVariant,
+              size: largeText ? 32 : 30,
+              color: scheme.primary,
             ),
           ),
         ),
@@ -232,22 +231,22 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     );
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       elevation: 0,
       color: scheme.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .55)),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _selectFood(food, controller, displayName),
         child: Padding(
           padding: EdgeInsetsDirectional.fromSTEB(
-            16,
-            largeText ? 14 : 10,
-            10,
-            largeText ? 14 : 10,
+            18,
+            largeText ? 14 : 11,
+            12,
+            largeText ? 14 : 11,
           ),
           child: largeText
               ? Column(

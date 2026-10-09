@@ -29,7 +29,6 @@ import '../../shared/widgets/bil_camera_capture_page.dart';
 import 'domain/food_log_meal_selector.dart';
 import 'presentation/quick_macro_entry_dialog.dart';
 import 'providers/daily_log_provider.dart';
-import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'food_log_actions.dart';
 
@@ -190,81 +189,79 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     final popularFoods = ref.watch(foodLogPopularFoodsProvider);
     final date = ref.watch(selectedLogDateProvider);
     final scheme = Theme.of(context).colorScheme;
-    return BilCalmVisualScope(
-      builder: (context) => Scaffold(
-        backgroundColor: scheme.surfaceContainerLowest,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          titleSpacing: 16,
-          title: Row(
-            children: [
-              IconButton(
-                key: const Key('food-log-close'),
-                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                onPressed: () => _close(context),
-                icon: const Icon(Icons.close_rounded),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    key: const Key('food-log-select-meal'),
-                    value: mealType,
-                    isExpanded: true,
-                    icon: const Icon(Icons.arrow_drop_down_rounded),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: scheme.primary,
-                      fontWeight: FontWeight.w900,
-                    ),
-                    onChanged: (value) {
-                      if (value == null || value == mealType) return;
-                      setState(() => mealType = value);
-                    },
-                    items: [
-                      for (final type in foodLogMealTypes)
-                        DropdownMenuItem(
-                          value: type,
-                          child: Text(_mealTitle(context, type)),
-                        ),
-                    ],
+    return Scaffold(
+      backgroundColor: scheme.surfaceContainerLowest,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            IconButton(
+              key: const Key('food-log-close'),
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+              onPressed: () => _close(context),
+              icon: const Icon(Icons.close_rounded),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  key: const Key('food-log-select-meal'),
+                  value: mealType,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down_rounded),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w900,
                   ),
+                  onChanged: (value) {
+                    if (value == null || value == mealType) return;
+                    setState(() => mealType = value);
+                  },
+                  items: [
+                    for (final type in foodLogMealTypes)
+                      DropdownMenuItem(
+                        value: type,
+                        child: Text(_mealTitle(context, type)),
+                      ),
+                  ],
                 ),
               ),
-              Text(
-                '${date.day}/${date.month}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-        body: foods.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(
-            child: FilledButton.icon(
-              onPressed: () => ref.invalidate(foodsProvider),
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(_t(context, 'Retry')),
             ),
-          ),
-          data: (items) => mealImageBusy
-              ? Center(
-                  key: const Key('food-log-meal-analysis-progress'),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      Text(
-                        '${_t(context, 'Analyze a meal photo')}…',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                )
-              : _buildBody(context, items, rankedFoods: popularFoods.value),
+            Text(
+              '${date.day}/${date.month}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
         ),
+      ),
+      body: foods.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => Center(
+          child: FilledButton.icon(
+            onPressed: () => ref.invalidate(foodsProvider),
+            icon: const Icon(Icons.refresh_rounded),
+            label: Text(_t(context, 'Retry')),
+          ),
+        ),
+        data: (items) => mealImageBusy
+            ? Center(
+                key: const Key('food-log-meal-analysis-progress'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      '${_t(context, 'Analyze a meal photo')}…',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              )
+            : _buildBody(context, items, rankedFoods: popularFoods.value),
       ),
     );
   }
