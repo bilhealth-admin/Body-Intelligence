@@ -41,7 +41,24 @@ void main() {
     }
     expect(source, contains('class _MorePremiumIcon'));
     expect(source, contains('const Color(0xFF0869E8)'));
-    expect(source, contains('const Color(0xFFEAF3FF)'));
+    // Verify the approved flat treatment rather than the retired filled badge.
+    final flatIcon = File(
+      'lib/features/settings/settings_page_polish.dart',
+    ).readAsStringSync().split('class _CloudSyncRow').first;
+    expect(flatIcon, contains('return BilFlatIcon('));
+    expect(flatIcon, contains('kind: kind,'));
+    expect(flatIcon, contains('size: 44,'));
+    expect(flatIcon, contains('iconSize: 24,'));
+    expect(flatIcon, contains('color: foreground,'));
+    for (final forbidden in const [
+      'BoxDecoration(',
+      'LinearGradient(',
+      'ShaderMask(',
+      'BoxShadow(',
+      'AnimatedContainer(',
+    ]) {
+      expect(flatIcon, isNot(contains(forbidden)), reason: forbidden);
+    }
     expect(source, contains('BorderRadius.circular(24)'));
     expect(source, contains('fontWeight: FontWeight.w900'));
     expect(source, contains('CommunityUnreadBadge'));
