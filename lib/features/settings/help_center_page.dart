@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/theme/bil_flat_icon.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
@@ -266,6 +267,15 @@ class HelpCenterPage extends StatelessWidget {
             final row = rows[index];
             return ListTile(
               minTileHeight: 54,
+              leading: BilFlatIcon(
+                key: Key('help-flat-icon-${row.id}'),
+                kind: row.kind,
+                size: 32,
+                iconSize: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                materialIcon: row.iconOverride,
+                appleIcon: row.appleIconOverride,
+              ),
               title: Text(row.title),
               trailing: Icon(
                 Directionality.of(context) == TextDirection.rtl

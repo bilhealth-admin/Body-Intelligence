@@ -1823,6 +1823,10 @@ void main() {
       tester,
       page: const HelpCenterPage(),
       name: 'help_center_phone',
+      interact: (tester) async {
+        expect(find.byKey(const Key('help-flat-icon-about')), findsOneWidget);
+        expect(find.byKey(const Key('help-flat-icon-faq')), findsOneWidget);
+      },
     );
   });
 

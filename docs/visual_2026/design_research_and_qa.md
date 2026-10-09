@@ -58,7 +58,7 @@ The applied \`BilCalmVisualScope\` is expressly **route-local**: none of the thr
 
 ### Completed source-level work (not screenshots/tests)
 
-- Food Diary, focused Food Search and Add Food context: route typography; selected food saving and food evidence untouched; small neutral search add glyph inside unchanged 54/58px tapping surface.
+- Food Diary, focused Food Search, and Add Food context: **earlier UX proposals were reverted**. Their accepted production widgets and food logging flows are protected and byte-identical to the QA base on PR11; the screenshots remain reference-only and no native comparison is certified.
 - Food Catalog, Meals/Recipes/Foods, barcode search, Meal Scan guide: standalone route themes, embedded Food Catalog opts out.
 - Progress/Measurement charts, Weight History, Nutrition Analytics/Reports, Weekly Digest: local text/card treatment; progress metric selection now text-first, chart gradient removed.
 - Settings and More: text-only eligible destinations instead of colorful badges; existing Community and AI Coach destination rows retain their original appearance and notification count; Grouped Settings/Help/FAQ made lighter; preferences, privacy, legal, email-related parent pages, support, account removal and location scoped.
