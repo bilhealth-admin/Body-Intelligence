@@ -124,24 +124,35 @@ void main() {
     tester.view.devicePixelRatio = 2.5;
     addTearDown(tester.view.reset);
 
-    // Use the same predecoded identity that production has before runApp.
-    final data = await rootBundle.load(
-      'assets/branding/bil_splash_identity.png',
-    );
-    final bytes = data.buffer.asUint8List(
-      data.offsetInBytes,
-      data.lengthInBytes,
-    );
-    final codec = await ui.instantiateImageCodec(
-      bytes,
-      targetWidth: 864,
-      targetHeight: 864,
-    );
-    try {
-      bilPredecodedLaunchWordmark = (await codec.getNextFrame()).image;
-    } finally {
-      codec.dispose();
+    // Flutter widget tests run in fake async. Asset decoding needs a real
+    // asynchronous zone or a stalled codec can hold this Golden indefinitely.
+    Future<ui.Image> decodeIdentity() async {
+      final data = await rootBundle.load(
+        'assets/branding/bil_splash_identity.png',
+      );
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      final codec = await ui.instantiateImageCodec(
+        bytes,
+        targetWidth: 864,
+        targetHeight: 864,
+      );
+      try {
+        return (await codec.getNextFrame()).image;
+      } finally {
+        codec.dispose();
+      }
     }
+
+    // Both the image decoder and its timeout run in real async. A hanging
+    // decode cannot occupy Flutter's default ten-minute test timeout.
+    final decodedIdentity = await tester.runAsync<ui.Image>(
+      () => decodeIdentity().timeout(const Duration(seconds: 25)),
+    );
+    expect(decodedIdentity, isNotNull);
+    bilPredecodedLaunchWordmark = decodedIdentity;
     addTearDown(() {
       final image = bilPredecodedLaunchWordmark;
       bilPredecodedLaunchWordmark = null;

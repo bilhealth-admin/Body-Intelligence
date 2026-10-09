@@ -9,6 +9,12 @@ import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_engine.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
@@ -34,6 +40,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
+
+// Only protected Log Food screenshot fixtures are given a deterministic,
+// server-verified Free member. This prevents an unrelated missing-verifier
+// Retry control from replacing the reviewed Premium preview in the capture.
+final _visualVerifiedFree = SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  lifecycle: SubscriptionLifecycle.inactive,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
 
 final class _StoreHealthGateway implements ConnectedHealthGateway {
   const _StoreHealthGateway();
@@ -260,6 +278,14 @@ void main() {
           connectedHealthGatewayProvider.overrideWithValue(
             const _StoreHealthGateway(),
           ),
+          if (page is DailyLogPage) ...[
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => DateTime.utc(2026, 8, 30, 9, 41, 12),
+            ),
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(_visualVerifiedFree),
+            ),
+          ],
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

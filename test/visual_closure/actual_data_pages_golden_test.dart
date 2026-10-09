@@ -77,6 +77,12 @@ Finder _coachWelcomeMessage() {
     return widget.text.contains('I’m ready for your next useful decision.');
   });
 }
+Finder _coachOpeningSurface() {
+  // The evidence-based daily brief replaces the synthetic session welcome.
+  final dailyBrief = find.text('FOR TODAY');
+  if (dailyBrief.evaluate().isNotEmpty) return dailyBrief;
+  return _coachWelcomeMessage();
+}
 
 final _visualVerifiedFreeSubscription = SubscriptionState(
   plan: CommercePlan.free,
@@ -406,7 +412,7 @@ void main() {
     }
     if (name == 'ai_coach_conversation_phone') {
       expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
-      expect(_coachWelcomeMessage(), findsOneWidget);
+      expect(_coachOpeningSurface(), findsOneWidget);
     }
     expect(tester.takeException(), isNull);
     final captureTarget = captureOverlay
@@ -654,12 +660,11 @@ void main() {
       prepare: (tester) async {
         expect(find.byType(Scaffold), findsOneWidget);
         final field = find.byKey(const Key('ai-coach-question-field'));
-        final decision = _coachWelcomeMessage();
-        // The actual transcript is loaded from the local database after
-        // navigation. Wait for that read instead of capturing an empty shell.
+        // Wait for either permitted opening instead of requiring a synthetic
+        // welcome when the Coach renders an evidence-backed daily brief.
         for (
           var attempt = 0;
-          attempt < 60 && decision.evaluate().isEmpty;
+          attempt < 60 && _coachOpeningSurface().evaluate().isEmpty;
           attempt++
         ) {
           await tester.runAsync(
@@ -667,6 +672,7 @@ void main() {
           );
           await tester.pump(const Duration(milliseconds: 30));
         }
+        final decision = _coachOpeningSurface();
         expect(field, findsOneWidget);
         expect(decision, findsOneWidget);
         expect(tester.getRect(field).top, lessThan(844));

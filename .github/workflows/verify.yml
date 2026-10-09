@@ -71,8 +71,8 @@ jobs:
         run: |
           # Format only the file reported by the preceding strict gate.
           # Preserve its original failure, then display the exact SDK patch.
-          dart format test/visual_closure/actual_data_pages_golden_test.dart
-          git diff -- test/visual_closure/actual_data_pages_golden_test.dart
+          dart format test/visual_closure/actual_data_pages_golden_test.dart test/epic15_store_screenshot_golden_test.dart test/premium_splash_experience_test.dart
+          git diff -- test/visual_closure/actual_data_pages_golden_test.dart test/epic15_store_screenshot_golden_test.dart test/premium_splash_experience_test.dart
 
       - name: Analyze complete source
         run: flutter analyze --no-pub
@@ -122,7 +122,14 @@ jobs:
 
       - name: Run focused Golden or transaction regression suite
         shell: pwsh
-        run: flutter test --no-pub "${{ matrix.path }}"
+        run: |
+          if ("${{ matrix.suite }}" -eq "splash-golden") {
+            # A hanging image codec must fail promptly, never occupy the runner
+            # for the default ten-minute per-test timeout.
+            flutter test --no-pub --timeout=2m "${{ matrix.path }}"
+          } else {
+            flutter test --no-pub "${{ matrix.path }}"
+          }
 
       - name: Preserve failed Golden screenshots from focused suite
         if: failure()
