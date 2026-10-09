@@ -16,8 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  source-checks:
-    name: format-and-analyze
+  source:
+    name: source-checks
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -68,10 +68,9 @@ jobs:
       - name: Analyze complete source
         run: flutter analyze --no-pub
 
-
-  test-shards:
-    name: flutter tests (shard ${{ matrix.shard }} of 8)
-    needs: source-checks
+  shards:
+    name: flutter-tests (shard ${{ matrix.shard }} of 8)
+    needs: source
     runs-on: windows-latest
     timeout-minutes: 60
     strategy:
@@ -98,27 +97,38 @@ jobs:
       - name: Resolve packages
         run: flutter pub get
 
-
-      - name: Run all tests and goldens — shard ${{ matrix.shard }} of 8
+      - name: Run complete Flutter test suite shard ${{ matrix.shard }} of 8
         shell: pwsh
-        run: flutter test --no-pub --total-shards=8 --shard-index=${{ matrix.shard }}
+        run: |
+          flutter test --no-pub --total-shards=8 --shard-index=${{ matrix.shard }}
+
+      - name: Preserve failed golden screenshots from this shard
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures-shard-${{ matrix.shard }}
+          path: test/**/failures/**
+          if-no-files-found: ignore
+          retention-days: 7
+          compression-level: 0
 
   flutter:
-    # Preserve the existing check name for PR rules while showing 8 individual
-    # shard results. A failure in any shard makes this aggregate fail.
     name: flutter
     if: ${{ always() }}
-    needs: [source-checks, test-shards]
+    needs: [source, shards]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Require clean analysis and all eight passing shards
+      - name: Require analysis, formatting and all eight shards to pass
         shell: bash
         env:
-          SOURCE_RESULT: ${{ needs.source-checks.result }}
-          TEST_RESULT: ${{ needs.test-shards.result }}
+          SOURCE_RESULT: ${{ needs.source.result }}
+          SHARDS_RESULT: ${{ needs.shards.result }}
         run: |
-          echo "Source checks: $SOURCE_RESULT"
-          echo "Eight test shards: $TEST_RESULT"
-          test "$SOURCE_RESULT" = success
-          test "$TEST_RESULT" = success
+          echo "Formatting and analysis: $SOURCE_RESULT"
+          echo "All eight Flutter test shards: $SHARDS_RESULT"
+          if [[ "$SOURCE_RESULT" != "success" || "$SHARDS_RESULT" != "success" ]]; then
+            echo "::error::Source checks or one or more Flutter test shards failed."
+            exit 1
+          fi
+          echo "All quality gates passed."
