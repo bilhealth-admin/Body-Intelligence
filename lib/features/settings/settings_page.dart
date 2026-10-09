@@ -559,12 +559,12 @@ class _MoreRow extends StatelessWidget {
       '/community/connections',
       '/community/messages',
     }.contains(path);
-    final showIcon = protectedEntry ||
+    final showIcon =
+        protectedEntry ||
         const <String>{
           '/goals',
           '/history',
           '/weekly-report',
-          '/challenges',
           '/analytics/nutrition',
           '/nutrition',
           '/wellness/fasting',

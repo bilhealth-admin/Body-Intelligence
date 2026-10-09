@@ -14,3 +14,8 @@
 - `more_premium_polish_contract_test.dart` updated to **enforce** smaller flat glyphs, no shadow/elevation, scoped radius and verified route/status preserved. No screenshot baseline updates, assertions weakened or Golden tolerances changed.
 - No edits to Home/Dashboard, Log Food, app theme, routes, billing/prices/Trial or production; PR11 Draft only. Strict five focused tests must pass before original eight full Flutter shards and final aggregate; Android Debug independently required.
 - Actual matched iOS/Android photos and all 146 source-reference parity still pending. CI image mismatches need individual assessment and owner visual signoff before changes to Golden PNGs.
+
+## CI evidence from first compact commit
+- Initial `023fb907`: complete Flutter Analyze **PASS**; strict Dart Format **FAIL** on only one whitespace layout at `final showIcon`; Android Debug [run #37966571242](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/37966571242) **PASS**. Focused Goldens and 8 shards were correctly not executed because source-checks were red.
+- Follow-up: apply precisely the Dart SDK formatter diff and make the `Challenges` Diary destination text-first, as required by existing real widget contract. Add four **strict** targeted More widget/source tests to `source-checks` *after* Format+Analyze, while preserving the five existing focused groups, eight full shards and aggregate, without new test skip rules or Golden updates.
+- All results on the follow-up commit require new exact-SHA CI evidence; no native-device certification is implied.

@@ -87,6 +87,16 @@ jobs:
         if: ${{ always() && !cancelled() }}
         run: flutter analyze --no-pub
 
+      - name: Verify More UI behavior before Golden captures
+        if: ${{ success() }}
+        shell: pwsh
+        run: >
+          flutter test --no-pub
+          test/features/settings/more_section_headings_test.dart
+          test/features/settings/more_language_entry_test.dart
+          test/features/settings/more_latest_weight_test.dart
+          test/features/settings/more_premium_polish_contract_test.dart
+
   focused:
     # Fast, mandatory failure gate. All current Golden suites and the
     # transaction queue are exercised before the expensive complete suite.
