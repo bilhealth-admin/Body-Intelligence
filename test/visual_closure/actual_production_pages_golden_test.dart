@@ -739,9 +739,20 @@ void main() {
       page: CommunityHubPage(repository: _VisualCommunityRepository()),
       name: 'community_hub_authenticated_phone',
       interact: (tester) async {
-        expect(find.text('BIL QA Partner'), findsOneWidget);
+        // The author also appears in the profile header; scope to the post.
+        final post = find.byKey(
+          const ValueKey('66666666-6666-4666-8666-666666666666'),
+        );
+        expect(post, findsOneWidget);
         expect(
-          find.textContaining('consistent movement habit'),
+          find.descendant(of: post, matching: find.text('BIL QA Partner')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: post,
+            matching: find.textContaining('consistent movement habit'),
+          ),
           findsOneWidget,
         );
       },
@@ -889,8 +900,11 @@ void main() {
       name: 'community_notifications_empty_authenticated_phone',
       captureOverlay: true,
       interact: (tester) async {
-        expect(find.text('No community updates'), findsOneWidget);
-        expect(find.text('Find people'), findsOneWidget);
+        expect(find.text('You are all caught up'), findsOneWidget);
+        expect(
+          find.text('New approvals, mentions and comments will appear here.'),
+          findsOneWidget,
+        );
       },
     );
   });

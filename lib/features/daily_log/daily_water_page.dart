@@ -8,7 +8,6 @@ import 'presentation/daily_log_input_sections.dart';
 import 'presentation/daily_log_summary_widgets.dart';
 import 'providers/daily_log_provider.dart';
 import 'water_mutation_coordinator.dart';
-import '../visual_2026/bil_calm_visual_scope.dart';
 
 class DailyWaterPage extends ConsumerStatefulWidget {
   const DailyWaterPage({super.key, this.returnPath});
@@ -108,65 +107,63 @@ class _DailyWaterPageState extends ConsumerState<DailyWaterPage> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    return BilCalmVisualScope(
-      builder: (context) => PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop && !saving) leave();
-        },
-        child: Scaffold(
-          key: const Key('daily-water-page'),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            surfaceTintColor: Colors.transparent,
-            leading: BackButton(onPressed: saving ? null : leave),
-            title: Text(
-              context.strings.text('Water'),
-              style: const TextStyle(fontWeight: FontWeight.w600),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && !saving) leave();
+      },
+      child: Scaffold(
+        key: const Key('daily-water-page'),
+        backgroundColor: const Color(0xFFF5F5F8),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFF5F5F8),
+          surfaceTintColor: Colors.transparent,
+          leading: BackButton(onPressed: saving ? null : leave),
+          title: Text(
+            context.strings.text('Water'),
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 148),
+          children: [
+            DiaryDateNavigator(
+              date: date,
+              arabic: arabic,
+              onPrevious: saving
+                  ? null
+                  : () => ref.read(selectedLogDateProvider.notifier).state =
+                        date.subtract(const Duration(days: 1)),
+              onNext: date.isBefore(today) && !saving
+                  ? () => ref.read(selectedLogDateProvider.notifier).state =
+                        date.add(const Duration(days: 1))
+                  : null,
+              onPick: saving
+                  ? null
+                  : () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: date,
+                        firstDate: DateTime(2000),
+                        lastDate: today,
+                      );
+                      if (picked != null) {
+                        ref.read(selectedLogDateProvider.notifier).state =
+                            picked;
+                      }
+                    },
             ),
-          ),
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 148),
-            children: [
-              DiaryDateNavigator(
-                date: date,
-                arabic: arabic,
-                onPrevious: saving
-                    ? null
-                    : () => ref.read(selectedLogDateProvider.notifier).state =
-                          date.subtract(const Duration(days: 1)),
-                onNext: date.isBefore(today) && !saving
-                    ? () => ref.read(selectedLogDateProvider.notifier).state =
-                          date.add(const Duration(days: 1))
-                    : null,
-                onPick: saving
-                    ? null
-                    : () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: date,
-                          firstDate: DateTime(2000),
-                          lastDate: today,
-                        );
-                        if (picked != null) {
-                          ref.read(selectedLogDateProvider.notifier).state =
-                              picked;
-                        }
-                      },
-              ),
-              const SizedBox(height: 8),
-              DailyWaterSection(
-                arabic: arabic,
-                controller: amountController,
-                entries: entries,
-                saving: saving,
-                onAdd: addWater,
-                onDelete: deleteWater,
-                onRetry: () => ref.invalidate(dailyWaterProvider),
-              ),
-            ],
-          ),
+            const SizedBox(height: 8),
+            DailyWaterSection(
+              arabic: arabic,
+              controller: amountController,
+              entries: entries,
+              saving: saving,
+              onAdd: addWater,
+              onDelete: deleteWater,
+              onRetry: () => ref.invalidate(dailyWaterProvider),
+            ),
+          ],
         ),
       ),
     );
