@@ -6,6 +6,7 @@ import 'package:body_intelligence_log/data/repositories/preferences_repository.d
 import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_first_use_experience.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,6 +33,11 @@ void main() {
           child: MaterialApp(
             locale: const Locale('ar'),
             supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             home: Scaffold(
               body: DashboardFirstUseExperience(
                 ownerScope: 'owner-a',
@@ -71,6 +77,9 @@ void main() {
         'dismissed',
       );
       expect(tester.takeException(), isNull);
+      // Unmount Riverpod streams before Drift's zero-delay close timer.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 10));
     },
   );
 
@@ -100,10 +109,15 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // Bounded frames avoid treating asynchronous SQLite stream disposal as
+    // an endless pumpAndSettle animation during a widget test.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.byKey(const Key('dashboard-guide-skip')), findsNothing);
     expect(find.text('Home remains available'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 10));
   });
 }
