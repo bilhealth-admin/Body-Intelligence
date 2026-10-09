@@ -22,3 +22,23 @@ These candidates are nonprotected and scoped to the user's approved icon-only ch
 - Splash and recipe library Golden differences until deterministic setup and current source/asset fidelity pass
 
 Follow-up must preserve the actual current design, owner-specific permissions and data, RTL/large text contrast, and all required CI checks. A passing screenshot without source inspection does not establish a device-level iOS acceptance.
+
+## Scoped visual-review acceptance on QUALITY branch
+
+The eight PNG snapshots above were cross-checked against original
+expected/actual/isolated-diff artifacts and their SHA-256 digests in
+[focused run 37914774060](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/37914774060).
+All eight differences are confined to the approved 44dp leading-icon
+treatment in More/Settings, notification settings and the Wellness icon.
+They are legitimate accepted SF-style flat-icon changes, not runtime errors.
+
+Only the eight allowlisted Golden PNG paths from the table above may be
+updated; they remain byte-for-byte identical to their reviewed candidate
+testImage PNGs. Native iOS/Android device confirmation is still outstanding.
+Do **not** update Home, Dashboard, Log Food, their Golden files, or any
+other screenshot without separate review.
+
+Subsequent **read-only** evidence collection has an explicit SHA-256 allowlist
+for additional changed Community, AI Coach, local export, and recipe imagery.
+These are **not yet approved baselines** merely because their bytes have been
+exported. The complete visual and behavioral contract remains mandatory.

@@ -139,7 +139,7 @@ jobs:
       # No files are overwritten, no checks are skipped, and protected
       # Home/Log Food screens are absent from this fixed whitelist.
       - name: Export reviewed flat-icon PNG candidates with SHA guards
-        if: ${{ failure() && (matrix.suite == 'data-goldens' || matrix.suite == 'production-goldens') }}
+        if: ${{ failure() && (matrix.suite == 'data-goldens' || matrix.suite == 'production-goldens' || matrix.suite == 'store-captures') }}
         shell: pwsh
         run: |
           $approved = @{
@@ -151,9 +151,22 @@ jobs:
             'visual_closure_settings_phone_4' = '4cd79085013d883b7cc3feb75edb581689f9201f8e994bdef14eb53d69cbd910'
             'visual_closure_notification_settings_phone' = '580aaf65d46eb0afa2d22fdec5d8d081a89c4bd9c734e41d23f2d9dbaa1011bf'
             'visual_closure_wellness_library_phone' = 'fe31b02a66a7f0e92e998dee28723932692af7a68b42d2862db98bc72c415421'
+            'visual_closure_community_signed_out_phone' = '02fcc2ee35a1747b1f3e36d6269355b788f39ad70e536662a857efe3f0e053c2'
+            'visual_closure_community_messages_phone' = 'c40af20baca72398c8be1d11cb8738d17e3b6b350d058098fe57102ea381f726'
+            'visual_closure_community_hub_authenticated_phone' = '72145d6a99c9c913bf7e93ed3570ae3ebe7fda5b6ed2b0cd1f4f2447a0b25e87'
+            'visual_closure_community_navigation_menu_authenticated_phone' = '0d30d714162cc65cf52ba037e7e878e7b2aab819437fcc440369a788f1b8bc55'
+            'visual_closure_community_inbox_authenticated_phone' = 'c61126c2e404b13f2b3fa7a62c105862a5816c6d679bb4200ee352151ae90b9b'
+            'visual_closure_community_sent_authenticated_phone' = '3b45ccee35a5053b99da3e7f7b835582ed89b6d43351529bb31a35ad25ca5e98'
+            'visual_closure_community_notifications_empty_authenticated_phone' = '8ed868db9e463f023e59e41bd8786628bb119dbd9a18f59f505501445da51fe7'
+            'visual_closure_ai_coach_conversation_phone' = '18836860b5710a099853379b514e796633bdbc5dc37a082e798896f98e2778f6'
+            'visual_closure_local_export_selected_day_phone' = '6587d9261ad294fa49df5f4726b27c6f5934d82c3558ec005c0cf9aaa50ae16d'
+            'epic15_evidence_en_recipe_library' = '3e32a8cb6f02af47c9c2324c35446a06357df7feffc063dabe46f69dc6f77a51'
           }
           foreach ($item in $approved.GetEnumerator()) {
             $file = "test/visual_closure/failures/$($item.Key)_testImage.png"
+            if ($item.Key.StartsWith('epic15_')) {
+              $file = "test/failures/$($item.Key)_testImage.png"
+            }
             if (-not (Test-Path $file)) { continue }
             $digest = (Get-FileHash -Algorithm SHA256 $file).Hash.ToLowerInvariant()
             if ($digest -ne $item.Value) {

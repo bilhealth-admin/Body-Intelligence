@@ -134,11 +134,9 @@ void main() {
         data.offsetInBytes,
         data.lengthInBytes,
       );
-      final codec = await ui.instantiateImageCodec(
-        bytes,
-        targetWidth: 864,
-        targetHeight: 864,
-      );
+      // Keep the original 1080px identity bitmap. Downscaling to 864px
+      // and upscaling it again creates a real 0.41% wordmark pixel drift.
+      final codec = await ui.instantiateImageCodec(bytes);
       try {
         return (await codec.getNextFrame()).image;
       } finally {

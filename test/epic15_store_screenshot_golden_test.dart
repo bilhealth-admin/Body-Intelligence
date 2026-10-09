@@ -40,9 +40,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
 
-// Only protected Log Food screenshot fixtures are given a deterministic,
-// server-verified Free member. This prevents an unrelated missing-verifier
-// Retry control from replacing the reviewed Premium preview in the capture.
+// Food-entry and catalog screenshot fixtures use a server-verified Free
+// member. This prevents a missing-verifier Retry overlay from replacing the
+// intended Premium preview, without changing the product access policy.
 final _visualVerifiedFree = SubscriptionState(
   plan: CommercePlan.free,
   entitlements: FreePlan.entitlements,
@@ -277,7 +277,7 @@ void main() {
           connectedHealthGatewayProvider.overrideWithValue(
             const _StoreHealthGateway(),
           ),
-          if (page is DailyLogPage) ...[
+          if (page is DailyLogPage || page is FoodPage) ...[
             verifiedEntitlementClockProvider.overrideWithValue(
               () => DateTime.utc(2026, 8, 30, 9, 41, 12),
             ),
