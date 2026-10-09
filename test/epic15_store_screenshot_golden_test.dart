@@ -40,9 +40,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
 
-// Food-entry and catalog screenshot fixtures use a server-verified Free
-// member. This prevents a missing-verifier Retry overlay from replacing the
-// intended Premium preview, without changing the product access policy.
+// Protected Food, More, and Progress store captures share a single
+// server-verified Free member. Without that evidence, the UI correctly
+// fails closed to Retry rather than showing the reviewed Premium preview.
+// This affects only the screenshot fixture, never production entitlements.
 final _visualVerifiedFree = SubscriptionState(
   plan: CommercePlan.free,
   entitlements: FreePlan.entitlements,
@@ -277,7 +278,10 @@ void main() {
           connectedHealthGatewayProvider.overrideWithValue(
             const _StoreHealthGateway(),
           ),
-          if (page is DailyLogPage || page is FoodPage) ...[
+          if (page is DailyLogPage ||
+              page is FoodPage ||
+              page is SettingsPage ||
+              page is AnalyticsPage) ...[
             verifiedEntitlementClockProvider.overrideWithValue(
               () => DateTime.utc(2026, 8, 30, 9, 41, 12),
             ),
