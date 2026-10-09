@@ -74,10 +74,7 @@ abstract final class RuntimeCopy {
   static String? resolve(String english, String localeTag) {
     final invalidRoute = InvalidRouteRuntimeCopy.resolve(english, localeTag);
     if (invalidRoute != null) return invalidRoute;
-    final statusCopy = QualityFeedbackRuntimeCopy.resolve(
-      english,
-      localeTag,
-    );
+    final statusCopy = QualityFeedbackRuntimeCopy.resolve(english, localeTag);
     if (statusCopy != null) return statusCopy;
     final integrated = IntegrationRuntimeCopy.resolve(english, localeTag);
     if (integrated != null) return integrated;

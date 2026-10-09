@@ -11,14 +11,8 @@ abstract final class QualityFeedbackRuntimeCopy {
   static const sources = <String>[publishing, refreshFailure];
 
   static const translations = <String, (String, String)>{
-    'en': (
-      'Publishing…',
-      'Refresh failed. Showing last verified settings.',
-    ),
-    'ar': (
-      'جارٍ النشر…',
-      'فشل التحديث. تُعرض آخر إعدادات تم التحقق منها.',
-    ),
+    'en': ('Publishing…', 'Refresh failed. Showing last verified settings.'),
+    'ar': ('جارٍ النشر…', 'فشل التحديث. تُعرض آخر إعدادات تم التحقق منها.'),
     'fr': (
       'Publication en cours…',
       'Échec de l’actualisation. Derniers réglages vérifiés affichés.',
@@ -67,22 +61,10 @@ abstract final class QualityFeedbackRuntimeCopy {
       'Sedang menerbitkan…',
       'Muat semula gagal. Tetapan terakhir yang disahkan dipaparkan.',
     ),
-    'ja': (
-      '投稿しています…',
-      '更新できませんでした。最後に確認された設定を表示しています。',
-    ),
-    'ko': (
-      '게시 중…',
-      '새로 고침에 실패했습니다. 마지막으로 확인된 설정을 표시합니다.',
-    ),
-    'zh-Hans': (
-      '正在发布…',
-      '刷新失败。正在显示最近一次验证的设置。',
-    ),
-    'zh-Hant': (
-      '正在發布…',
-      '重新整理失敗。顯示上次驗證的設定。',
-    ),
+    'ja': ('投稿しています…', '更新できませんでした。最後に確認された設定を表示しています。'),
+    'ko': ('게시 중…', '새로 고침에 실패했습니다. 마지막으로 확인된 설정을 표시합니다.'),
+    'zh-Hans': ('正在发布…', '刷新失败。正在显示最近一次验证的设置。'),
+    'zh-Hant': ('正在發布…', '重新整理失敗。顯示上次驗證的設定。'),
     'ru': (
       'Публикация…',
       'Не удалось обновить. Показаны последние проверенные настройки.',
@@ -126,9 +108,7 @@ abstract final class QualityFeedbackRuntimeCopy {
     return translations.keys.toSet().containsAll(required) &&
         required.containsAll(translations.keys) &&
         translations.values.every(
-          (pair) =>
-              pair.$1.trim().isNotEmpty &&
-              pair.$2.trim().isNotEmpty,
+          (pair) => pair.$1.trim().isNotEmpty && pair.$2.trim().isNotEmpty,
         );
   }
 }

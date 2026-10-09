@@ -141,8 +141,9 @@ class _CoachMessageTextState extends State<CoachMessageText>
                     ),
                     textDirection: widget.textDirection,
                     textScaler: MediaQuery.textScalerOf(context),
-                    textHeightBehavior:
-                        DefaultTextStyle.of(context).textHeightBehavior,
+                    textHeightBehavior: DefaultTextStyle.of(
+                      context,
+                    ).textHeightBehavior,
                     locale: Localizations.maybeLocaleOf(context),
                   )..layout(maxWidth: constraints.maxWidth);
                   final height = painter.height;
