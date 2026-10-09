@@ -169,6 +169,10 @@ jobs:
             'visual_closure_ai_coach_conversation_phone' = '18836860b5710a099853379b514e796633bdbc5dc37a082e798896f98e2778f6'
             'visual_closure_local_export_selected_day_phone' = '6587d9261ad294fa49df5f4726b27c6f5934d82c3558ec005c0cf9aaa50ae16d'
             'epic15_evidence_en_recipe_library' = '3e32a8cb6f02af47c9c2324c35446a06357df7feffc063dabe46f69dc6f77a51'
+            'epic15_iphone_69_en_06_privacy_settings' = '17f858bd97fe37f3c3e9836826d61ece6bc2bfb493272ab53970b85ba5a25e68'
+            'epic15_iphone_69_ar_08_privacy_settings_dark' = '01f5026f767e40676e5af4e3572bd303ac71dfcead2f1c3daad3826dacf82499'
+            'epic15_android_phone_en_06_privacy_settings' = 'ae963daf74bed9f540732a0c9a3d27c7efcc89b85064531e0b477f4b24b19612'
+            'epic15_evidence_en_workout_library' = 'a35a14eac5008ab1bbaf3cdb1c846ebecf99a9d144321cef67300eb10ab5b928'
           }
           foreach ($item in $approved.GetEnumerator()) {
             $file = "test/visual_closure/failures/$($item.Key)_testImage.png"
