@@ -246,7 +246,7 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       valueKey: const Key(
                         'dashboard-reference-calorie-consumed-value',
                       ),
-                      value: consumed != null ? _formatBilCalories(consumed) : '—',
+                      value: consumedValue != null ? _formatBilCalories(consumedValue) : '—',
                       trailing: hasGoal
                           ? ' cal / ${_formatBilCalories(goal)}'
                           : ' cal / —',

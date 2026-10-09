@@ -76,7 +76,16 @@ jobs:
             'lib/features/settings/help_center_page.dart',
             'test/visual_closure/actual_data_pages_golden_test.dart',
             'test/epic15_store_screenshot_golden_test.dart',
-            'test/premium_splash_experience_test.dart'
+            'test/premium_splash_experience_test.dart',
+            'lib/data/repositories/meal_repository.dart',
+            'lib/features/connected_health/widgets/live_health_watch.dart',
+            'lib/features/dashboard/dashboard_page.dart',
+            'lib/features/dashboard/widgets/dashboard_first_use_experience.dart',
+            'lib/features/dashboard/widgets/dashboard_grid.dart',
+            'lib/features/dashboard/widgets/dashboard_header.dart',
+            'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
+            'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
+            'lib/features/dashboard/widgets/first_meal_celebration.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets
