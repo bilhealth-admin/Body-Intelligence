@@ -126,7 +126,23 @@ final class _VisualRouteStack extends StatelessWidget {
 }
 
 void main() {
-  setUpAll(loadVisualEvidenceFont);
+  const ttsChannel = MethodChannel('bil/tts');
+  setUpAll(() async {
+    await loadVisualEvidenceFont();
+    // Every screenshot shares the same engine. A Coach disposal may send
+    // stop() after the next capture starts, so mock for the full fixture suite.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(ttsChannel, (call) async {
+          if (call.method == 'stop') return null;
+          throw MissingPluginException(
+            'Unexpected TTS action in visual evidence: ${call.method}',
+          );
+        });
+  });
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(ttsChannel, null);
+  });
 
   void setExplicitLightSettings() {
     SharedPreferences.setMockInitialValues({
@@ -639,6 +655,18 @@ void main() {
         expect(find.byType(Scaffold), findsOneWidget);
         final field = find.byKey(const Key('ai-coach-question-field'));
         final decision = _coachWelcomeMessage();
+        // The actual transcript is loaded from the local database after
+        // navigation. Wait for that read instead of capturing an empty shell.
+        for (
+          var attempt = 0;
+          attempt < 60 && decision.evaluate().isEmpty;
+          attempt++
+        ) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 30)),
+          );
+          await tester.pump(const Duration(milliseconds: 30));
+        }
         expect(field, findsOneWidget);
         expect(decision, findsOneWidget);
         expect(tester.getRect(field).top, lessThan(844));
@@ -652,24 +680,6 @@ void main() {
       tester,
     ) async {
       final db = await database(tester, profile: true);
-      // Desktop host tests have no native TTS implementation. Respond only
-      // to harmless stop; all unexpected voice actions still fail the test.
-      const ttsChannel = MethodChannel('bil/tts');
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        ttsChannel,
-        (call) async {
-          if (call.method == 'stop') return null;
-          throw MissingPluginException(
-            'Unexpected TTS action in static capture: ${call.method}',
-          );
-        },
-      );
-      addTearDown(() {
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          ttsChannel,
-          null,
-        );
-      });
       await capture(
         tester,
         page: const DashboardPage(),

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:body_intelligence_log/features/startup/premium_splash_experience.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,17 +124,41 @@ void main() {
     tester.view.devicePixelRatio = 2.5;
     addTearDown(tester.view.reset);
 
+    // Use the same predecoded identity that production has before runApp.
+    final data = await rootBundle.load(
+      'assets/branding/bil_splash_identity.png',
+    );
+    final bytes = data.buffer.asUint8List(
+      data.offsetInBytes,
+      data.lengthInBytes,
+    );
+    final codec = await ui.instantiateImageCodec(
+      bytes,
+      targetWidth: 864,
+      targetHeight: 864,
+    );
+    try {
+      bilPredecodedLaunchWordmark = (await codec.getNextFrame()).image;
+    } finally {
+      codec.dispose();
+    }
+    addTearDown(() {
+      final image = bilPredecodedLaunchWordmark;
+      bilPredecodedLaunchWordmark = null;
+      image?.dispose();
+    });
+
     await tester.pumpWidget(
       const _SplashHarness(reducedMotion: true, showSpinner: false),
     );
-    // The shipped launch path predecodes the identity before runApp. Wait
-    // for the same asset to finish decoding in the screenshot-only harness.
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const ValueKey('premium-splash-wordmark')),
-      findsOneWidget,
-    );
+    await tester.pump();
 
+    final rawWordmark = find.descendant(
+      of: find.byKey(const ValueKey('premium-splash-wordmark')),
+      matching: find.byType(RawImage),
+    );
+    expect(rawWordmark, findsOneWidget);
+    expect(tester.widget<RawImage>(rawWordmark).image, isNotNull);
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('goldens/premium_splash_native.png'),
