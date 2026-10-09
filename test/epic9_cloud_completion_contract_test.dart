@@ -235,7 +235,7 @@ void main() {
       );
       final resume = service.substring(
         service.indexOf('Future<void> refreshRegistrationIfEnabled('),
-        service.indexOf('Future<void> syncDeliveryPreferences('),
+        service.indexOf('Future<CommunityPushDeliveryCategories> syncDeliveryPreferences('),
       );
       final resumeSteps = <String>[
         'if (!isAvailable) return;',
