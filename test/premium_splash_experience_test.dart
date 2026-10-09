@@ -136,11 +136,9 @@ void main() {
         data.offsetInBytes,
         data.lengthInBytes,
       );
-      final codec = await ui.instantiateImageCodec(
-        bytes,
-        targetWidth: 864,
-        targetHeight: 864,
-      );
+      // Golden fidelity: decode the original identity bitmap. Downscaling
+      // and re-upscaling subtly changes the wordmark's pixel edges.
+      final codec = await ui.instantiateImageCodec(bytes);
       try {
         return (await codec.getNextFrame()).image;
       } finally {

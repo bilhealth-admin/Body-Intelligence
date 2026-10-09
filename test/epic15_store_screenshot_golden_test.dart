@@ -45,6 +45,7 @@ final _storeGoldenVerifiedFree = SubscriptionState(
   plan: CommercePlan.free,
   entitlements: FreePlan.entitlements,
   authority: EntitlementAuthority.verifiedServer,
+  lifecycle: SubscriptionLifecycle.inactive,
   isPurchasable: true,
   canRestorePurchases: true,
 );
@@ -252,10 +253,14 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
-          if (page is DailyLogPage)
+          if (page is DailyLogPage || page is FoodPage) ...[
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => DateTime.utc(2026, 8, 30, 9, 41, 12),
+            ),
             verifiedSubscriptionStateProvider.overrideWithValue(
               AsyncData(_storeGoldenVerifiedFree),
             ),
+          ],
           dashboardClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),
