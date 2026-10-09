@@ -123,6 +123,14 @@ jobs:
       - name: Resolve packages
         run: flutter pub get
 
+      - name: Clean stale checked-in Golden failure images
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path test -Directory -Recurse -Filter failures |
+            ForEach-Object {
+              Remove-Item -LiteralPath $_.FullName -Recurse -Force
+            }
+
       - name: Run focused Golden or transaction regression suite
         shell: pwsh
         run: |
@@ -223,6 +231,14 @@ jobs:
 
       - name: Resolve packages
         run: flutter pub get
+
+      - name: Clean stale checked-in Golden failure images
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path test -Directory -Recurse -Filter failures |
+            ForEach-Object {
+              Remove-Item -LiteralPath $_.FullName -Recurse -Force
+            }
 
       - name: Run complete Flutter test suite shard ${{ matrix.shard }} of 8
         shell: pwsh
