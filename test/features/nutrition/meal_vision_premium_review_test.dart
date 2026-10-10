@@ -121,6 +121,7 @@ void main() {
       find.byKey(const Key('premium-vision-select-0')),
     );
     await tester.tap(find.byKey(const Key('premium-vision-select-0')));
+    await tester.pump();
     await tester.ensureVisible(
       find.byKey(const Key('premium-vision-remaining-0')),
     );
@@ -141,6 +142,7 @@ void main() {
           .onPressed,
       isNull,
     );
+    await tester.ensureVisible(find.byKey(const Key('premium-vision-eaten-0')));
     await tester.tap(find.byKey(const Key('premium-vision-eaten-0')));
     await tester.enterText(
       find.byKey(const Key('premium-vision-amount-0')),
@@ -173,6 +175,7 @@ void main() {
       find.byKey(const Key('premium-vision-select-0')),
     );
     await tester.tap(find.byKey(const Key('premium-vision-select-0')));
+    await tester.pump();
     await tester.ensureVisible(find.byKey(const Key('premium-vision-eaten-0')));
     await tester.tap(find.byKey(const Key('premium-vision-eaten-0')));
     await tester.enterText(
@@ -206,6 +209,7 @@ void main() {
         find.byKey(const Key('premium-vision-select-0')),
       );
       await tester.tap(find.byKey(const Key('premium-vision-select-0')));
+      await tester.pump();
       await tester.ensureVisible(find.text('فول سادة'));
       await tester.tap(find.text('فول سادة'));
       await tester.ensureVisible(

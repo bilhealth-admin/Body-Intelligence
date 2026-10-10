@@ -10,6 +10,15 @@ import bil_codex_test_ladder as ladder
 
 
 class LadderGateTests(unittest.TestCase):
+    def test_arabic_gate_requires_v2_matrix_and_interactions(self):
+        with patch.object(ladder, "run_suites", return_value={"passed": False}) as suites:
+            self.assertFalse(ladder.run_stage("arabic", 8)["passed"])
+        stage, jobs, parallel, _ = suites.call_args.args
+        self.assertEqual(stage, "arabic")
+        self.assertEqual(parallel, 1)
+        self.assertIn("test/features/nutrition/meal_vision_v2_matrix_test.dart", jobs[1][1])
+        self.assertIn("test/features/nutrition/meal_vision_v2_interaction_test.dart", jobs[1][1])
+
     def test_fingerprint_excludes_diagnostics_but_tracks_real_baselines(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

@@ -328,10 +328,7 @@ void main() {
       );
       expect(find.text('tomato'), findsNothing);
       expect(find.text(payload('ar')['notice']! as String), findsNothing);
-      final unit = tester.widget<TextField>(
-        find.byKey(const Key('premium-vision-unit-0')),
-      );
-      expect(unit.controller!.text, 'piece');
+      expect(find.byKey(const Key('premium-vision-unit-0')), findsNothing);
       final stage = find.byKey(const Key('premium-vision-stage-before'));
       await tester.ensureVisible(stage);
       await tester.tap(stage);
@@ -340,6 +337,10 @@ void main() {
       await tester.ensureVisible(selectedFood);
       await tester.tap(selectedFood);
       await tester.pump();
+      final unit = tester.widget<TextField>(
+        find.byKey(const Key('premium-vision-unit-0')),
+      );
+      expect(unit.controller!.text, 'piece');
       final eatenAmount = find.byKey(const Key('premium-vision-eaten-0'));
       await tester.ensureVisible(eatenAmount);
       await tester.tap(eatenAmount);

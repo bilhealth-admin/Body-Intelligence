@@ -164,8 +164,14 @@ def run_stage(stage, parallel, previous=None):
     if stage == "source":
         return run_source()
     if stage == "arabic":
-        return run_suites(stage, [("noto-capture",
-            "test/features/nutrition/meal_vision_flutter_capture_test.dart")], 1, previous)
+        return run_suites(stage, [
+            ("noto-capture", "test/features/nutrition/meal_vision_flutter_capture_test.dart"),
+            ("vision-v2", [
+                "test/features/nutrition/meal_vision_premium_visual_contract_test.dart",
+                "test/features/nutrition/meal_vision_v2_matrix_test.dart",
+                "test/features/nutrition/meal_vision_v2_interaction_test.dart",
+            ]),
+        ], 1, previous)
     if stage == "p0":
         return run_suites(stage, P0, parallel, previous)
     if stage == "focused":

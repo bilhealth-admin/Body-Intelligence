@@ -26,7 +26,7 @@ Future<void> _capture(WidgetTester tester, String name) async {
     try {
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       expect(data, isNotNull);
-      final path = File('build/vision-captures/$name.png');
+      final path = File('build/vision-v2-legacy-captures/$name.png');
       await path.parent.create(recursive: true);
       await path.writeAsBytes(data!.buffer.asUint8List());
       expect(await path.length(), greaterThan(2500));
@@ -162,6 +162,7 @@ void main() {
       find.byKey(const Key('premium-vision-select-0')),
     );
     await tester.tap(find.byKey(const Key('premium-vision-select-0')));
+    await tester.pump();
     await tester.ensureVisible(find.byKey(const Key('premium-vision-eaten-0')));
     await tester.tap(find.byKey(const Key('premium-vision-eaten-0')));
     await _capture(tester, '02_review_eaten_confirmation_ar_dark');
