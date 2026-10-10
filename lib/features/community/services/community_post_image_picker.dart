@@ -50,7 +50,14 @@ abstract interface class CommunityPostImagePickerContract {
   Future<CommunityPostImageDraft?> pick();
 }
 
-class CommunityPostImagePicker implements CommunityPostImagePickerContract {
+/// Separate capability keeps existing injected single-pick tests compatible.
+abstract interface class CommunityPostMultiImagePickerContract {
+  Future<List<CommunityPostImageDraft>> pickMany({required int maxImages});
+}
+
+class CommunityPostImagePicker
+    implements CommunityPostImagePickerContract,
+        CommunityPostMultiImagePickerContract {
   CommunityPostImagePicker({
     ImagePicker? picker,
     BilRecoverableImagePicker? recoverablePicker,
@@ -82,6 +89,30 @@ class CommunityPostImagePicker implements CommunityPostImagePickerContract {
       );
     }
     return prepareCommunityPostImageAsync(bytes);
+  }
+
+  @override
+  Future<List<CommunityPostImageDraft>> pickMany({
+    required int maxImages,
+  }) async {
+    if (maxImages < 1 || maxImages > 4) {
+      throw ArgumentError.value(maxImages, 'maxImages');
+    }
+    final files = await _picker.pickMultiImages(
+      purpose: BilImagePickerPurpose.communityPost,
+      maxItems: maxImages,
+      maxWidth: communityPostImageProcessingMaxDimension.toDouble(),
+      maxHeight: communityPostImageProcessingMaxDimension.toDouble(),
+      imageQuality: 85,
+      requestFullMetadata: false,
+    );
+    final prepared = <CommunityPostImageDraft>[];
+    // Avoid decoding multiple full camera originals in memory at once.
+    for (final file in files) {
+      final bytes = await file.readAsBytes();
+      prepared.add(await prepareCommunityPostImageAsync(bytes));
+    }
+    return List<CommunityPostImageDraft>.unmodifiable(prepared);
   }
 }
 
