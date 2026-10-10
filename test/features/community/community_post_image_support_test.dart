@@ -35,6 +35,23 @@ final class _FakePostImagePicker implements CommunityPostImagePickerContract {
   Future<CommunityPostImageDraft?> pick() async => image;
 }
 
+final class _FakeMultiPhotoPicker
+    implements
+        CommunityPostImagePickerContract,
+        CommunityPostMultiImagePickerContract {
+  const _FakeMultiPhotoPicker(this.images);
+
+  final List<CommunityPostImageDraft> images;
+
+  @override
+  Future<CommunityPostImageDraft?> pick() async => images.firstOrNull;
+
+  @override
+  Future<List<CommunityPostImageDraft>> pickMany({
+    required int maxImages,
+  }) async => images.take(maxImages).toList(growable: false);
+}
+
 final class _PostImageRepository extends CommunityRepository {
   _PostImageRepository() : super(_testClient);
 
@@ -341,6 +358,13 @@ void main() {
       await tester.tap(find.byKey(const Key('community-post-add-photo')));
       await tester.pumpAndSettle();
       expect(
+        find.byKey(const Key('bil-media-review-confirm')),
+        findsOneWidget,
+      );
+      expect(repository.imagePublishCalls, 0);
+      await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
+      await tester.pumpAndSettle();
+      expect(
         find.byKey(const Key('community-post-remove-photo')),
         findsOneWidget,
       );
@@ -388,6 +412,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-post-add-photo')));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('community-post-composer')),
       'Keep this complete draft',
@@ -406,6 +432,66 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('one native selection stages several photos only after review', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final repository = _PostImageRepository();
+    await tester.pumpWidget(
+      _app(
+        locale: const Locale('en'),
+        repository: repository,
+        picker: _FakeMultiPhotoPicker([
+          _testImage(),
+          _testImage(),
+          _testImage(),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-create-post')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-post-add-photo')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('bil-media-review-confirm')), findsOneWidget);
+    expect(find.byKey(const Key('community-selected-photo-0')), findsNothing);
+    await tester.tap(find.byKey(const Key('bil-media-review-remove-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('community-selected-photo-0')), findsOneWidget);
+    expect(find.byKey(const Key('community-selected-photo-1')), findsOneWidget);
+    expect(find.byKey(const Key('community-selected-photo-2')), findsNothing);
+    expect(repository.imagePublishCalls, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('cancelled photo review leaves the draft without a new image', (
+    tester,
+  ) async {
+    final repository = _PostImageRepository();
+    await tester.pumpWidget(
+      _app(
+        locale: const Locale('en'),
+        repository: repository,
+        picker: _FakePostImagePicker(_testImage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-create-post')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-post-add-photo')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('bil-media-review-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('community-selected-photo-0')), findsNothing);
+    expect(repository.imagePublishCalls, 0);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('private image signing failure renders a bounded safe fallback', (
