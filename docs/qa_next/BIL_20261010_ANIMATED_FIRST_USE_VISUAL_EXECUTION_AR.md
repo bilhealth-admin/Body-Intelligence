@@ -70,3 +70,10 @@ The first-use source gate for SHA `108cc7a4` passed Dart Format and Flutter Anal
 
 ## Source gate on 2b9a8435
 The strict CI format gate identified one final Dart formatter change in the Food Log scroll finder. Flutter Analyze passed with zero issues. The exact SDK formatting patch was applied. The source now also triggers the milestone after successfully committed photo and quick-macro entries, without changing transactional writes. This branch still requires a fresh green source gate, all five focused suites, eight full shards, and native visual inspection before release readiness.
+
+## Scoped Back-arrow Golden review and post-promotion validation
+- [verify #38038239172](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38038239172): source-checks PASS; four focused suites PASS; production-goldens 116 PASS / 10 FAIL due solely to newly approved Back arrows.
+- All ten compared 390×844 screenshots differed only in navigation arrow pixels: four community screenshots each 93 pixels at (20,20)-(37,36); five LTR support/legal screenshots each 64 pixels at (22,22)-(35,34); one RTL dark screenshot 64 pixels at (356,22)-(369,34). No other pixels changed.
+- [review promotion #38039067305](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38039067305) SUCCESS: exactly ten previously reviewed source PNGs promoted to QA baselines with exact old/new SHA-256, no source, tolerance or unrelated Golden changes.
+- Promotion commit `9746a0a196405569dd47678d529a4741222d4953`; proof at `docs/qa_next/BIL_20261010_REVIEWED_NAV_BACK_GOLDEN_MANIFEST.json`.
+- This documentation commit requests a new strict CI run. Do not infer test results from the binary promotion itself. QA remains Draft / unmerged / not published.
