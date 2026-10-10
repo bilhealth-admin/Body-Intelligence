@@ -81,6 +81,14 @@ jobs:
             'lib/features/connected_health/widgets/live_health_watch.dart',
             'lib/features/dashboard/dashboard_page.dart',
             'lib/features/dashboard/widgets/dashboard_first_use_experience.dart',
+            'lib/features/dashboard/widgets/first_use_context_coachmark.dart',
+            'lib/features/dashboard/widgets/first_use_glass_surface.dart',
+            'lib/features/dashboard/widgets/first_value_handoff_card.dart',
+            'lib/features/daily_log/food_log_page.dart',
+            'lib/features/daily_log/food_log_actions.dart',
+            'test/features/dashboard/first_meal_celebration_visual_test.dart',
+            'test/features/dashboard/first_use_context_coachmark_test.dart',
+            'test/features/daily_log/food_log_first_use_coachmark_test.dart',
             'lib/features/dashboard/widgets/dashboard_grid.dart',
             'lib/features/dashboard/widgets/dashboard_header.dart',
             'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
@@ -112,6 +120,7 @@ jobs:
           test/data/repositories/first_food_milestone_commit_test.dart
           test/features/dashboard/dashboard_first_use_guidance_test.dart
           test/features/dashboard/first_use_context_coachmark_test.dart
+          test/features/dashboard/first_meal_celebration_visual_test.dart
           test/features/daily_log/food_log_first_use_coachmark_test.dart
           test/features/commerce/reviewer_subscription_mirror_fallback_test.dart
 
