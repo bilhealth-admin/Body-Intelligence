@@ -5,27 +5,30 @@ import 'package:flutter/material.dart';
 
 import '../../../data/repositories/first_meal_milestone.dart';
 import '../../../data/repositories/preferences_repository.dart';
+import 'first_use_glass_surface.dart';
 
-/// Show a single celebratory burst after the database has actually saved
-/// the owner's first food item. The atomic marker claim prevents duplicates
-/// on rebuilds, route returns, edits, retries and repeated save callbacks.
+/// Only a real, committed first food item may trigger the one-time effect.
+/// The local database owns the decision; this UI never writes nutrition data.
 abstract final class FirstMealCelebration {
   static Future<bool> showIfPending(
     BuildContext context,
     PreferencesRepository preferences,
   ) async {
-    // Never consume a once-only celebration when its view cannot be painted.
     if (!context.mounted) return false;
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return false;
+
     bool claimed;
     try {
       claimed = await preferences.mutateIfUnchanged(
         expected: const {firstMealCelebrationPreferenceKey: 'ready'},
-        set: const {firstMealCelebrationPreferenceKey: 'done'},
+        set: const {
+          firstMealCelebrationPreferenceKey: 'done',
+          firstMealStreakGuidePreferenceKey: 'ready',
+        },
       );
-    } catch (_) {
-      // The meal remains saved; a display effect is never a write prerequisite.
+    } on Object {
+      // A decoration must not interfere with an already committed meal.
       return false;
     }
     if (!claimed || !context.mounted) return false;
@@ -39,7 +42,9 @@ abstract final class FirstMealCelebration {
       entry.dispose();
     }
 
-    entry = OverlayEntry(builder: (_) => _FirstFoodBurst(onFinished: finish));
+    entry = OverlayEntry(
+      builder: (_) => _FirstFoodBurst(onFinished: finish),
+    );
     overlay.insert(entry);
     return true;
   }
@@ -58,7 +63,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2300),
+    duration: const Duration(milliseconds: 2450),
   );
   Timer? _reducedMotionTimer;
   bool _started = false;
@@ -77,10 +82,10 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    _reducedMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    _reducedMotion = MediaQuery.disableAnimationsOf(context);
     if (_reducedMotion) {
       _reducedMotionTimer = Timer(
-        const Duration(milliseconds: 1250),
+        const Duration(milliseconds: 1350),
         widget.onFinished,
       );
     } else {
@@ -95,135 +100,150 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
     super.dispose();
   }
 
+  String _copy(
+    String en,
+    String ar,
+    String fr,
+    String es,
+    String tr,
+  ) => switch (Localizations.localeOf(context).languageCode) {
+    'ar' => ar,
+    'fr' => fr,
+    'es' => es,
+    'tr' => tr,
+    _ => en,
+  };
+
   @override
   Widget build(BuildContext context) {
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    final message = arabic
-        ? 'أحسنت! تم تسجيل أول وجبة'
-        : 'Your first meal is logged!';
+    final title = _copy(
+      'What a start!',
+      'بداية رائعة!',
+      'Quel beau début !',
+      '¡Un gran comienzo!',
+      'Harika başlangıç!',
+    );
+    final subtitle = _copy(
+      'Your first meal is saved.',
+      'تم حفظ أول وجبة بنجاح.',
+      'Votre premier repas est enregistré.',
+      'Tu primera comida está guardada.',
+      'İlk öğünün kaydedildi.',
+    );
     return Positioned.fill(
       child: IgnorePointer(
+        ignoring: true,
         child: Semantics(
           key: const Key('dashboard-first-food-celebration'),
           liveRegion: true,
-          label: message,
+          label: '$title $subtitle',
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, _) {
-              final progress = _reducedMotion
-                  ? 0.45
-                  : Curves.easeOutCubic.transform(_controller.value);
+              final value = _reducedMotion ? .40 : _controller.value;
+              final burst = Curves.easeOutCubic.transform(
+                (value / .76).clamp(0.0, 1.0),
+              );
               final fade = _reducedMotion
                   ? 1.0
-                  : (1 - _controller.value).clamp(0.0, 1.0);
+                  : (1 - ((value - .80) / .20).clamp(0.0, 1.0));
               final particleFade = _reducedMotion
                   ? 0.0
-                  : (1 - ((_controller.value - .38) / .62).clamp(0.0, 1.0));
+                  : (1 - ((value - .52) / .48).clamp(0.0, 1.0));
+              final cardScale = _reducedMotion
+                  ? 1.0
+                  : .78 +
+                        .22 *
+                            Curves.easeOutBack.transform(
+                              (value / .32).clamp(0.0, 1.0),
+                            );
               return Center(
                 child: SizedBox(
-                  width: 300,
-                  height: 300,
+                  width: 340,
+                  height: 380,
                   child: Stack(
                     clipBehavior: Clip.none,
+                    alignment: Alignment.center,
                     children: [
                       if (!_reducedMotion)
-                        for (var index = 0; index < 48; index++)
+                        Positioned.fill(
+                          child: CustomPaint(
+                            painter: _ConfettiBurstPainter(
+                              progress: burst,
+                              opacity: particleFade,
+                            ),
+                          ),
+                        ),
+                      if (!_reducedMotion)
+                        for (var i = 0; i < 10; i++)
                           Positioned(
-                            left:
-                                150 +
-                                math.cos(index * math.pi * 2 / 48 + index * .31) *
-                                    (18 + progress * (92 + index % 5 * 22)) -
-                                15,
-                            top:
-                                150 +
-                                math.sin(index * math.pi * 2 / 48 + index * .31) *
-                                    (18 + progress * (92 + index % 5 * 22)) +
-                                progress * progress * (index % 3) * 17 -
-                                15,
+                            left: 155 +
+                                math.cos(i * math.pi * 2 / 10) *
+                                    (35 + burst * (116 + i % 3 * 14)),
+                            top: 165 +
+                                math.sin(i * math.pi * 2 / 10) *
+                                    (30 + burst * (108 + i % 4 * 12)),
                             child: Opacity(
-                              opacity: (
-                                particleFade * (index % 3 == 0 ? .85 : 1.0)
-                              ).clamp(0.0, 1.0),
+                              opacity: particleFade,
                               child: Transform.rotate(
-                                angle: progress * (index.isEven ? 2.4 : -2.1),
-                                child: Icon(
-                                  const [
-                                    Icons.celebration_rounded,
-                                    Icons.auto_awesome_rounded,
-                                    Icons.star_rounded,
-                                    Icons.check_circle_rounded,
-                                  ][index % 4],
-                                  size: 12.0 + (index % 4) * 5,
-                                  color: const [
-                                    Color(0xFFFFD36B),
-                                    Color(0xFFACDAFF),
-                                    Color(0xFFE8BCFF),
-                                    Color(0xFF7CE8B0),
-                                  ][index % 4],
+                                angle: burst * (i.isEven ? 1.4 : -1.6),
+                                child: Text(
+                                  const ['🎉', '✨', '🎊', '🥳', '💚'][i % 5],
+                                  style: TextStyle(
+                                    fontSize: 19.0 + (i % 3) * 6,
+                                    fontFamilyFallback: const [
+                                      'Apple Color Emoji',
+                                      'Noto Color Emoji',
+                                      'Segoe UI Emoji',
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                       Center(
                         child: Opacity(
-                          opacity: _reducedMotion
-                              ? 1
-                              : (1 -
-                                  ((_controller.value - .72) / .28).clamp(
-                                    0.0,
-                                    1.0,
-                                  )),
+                          opacity: fade,
                           child: Transform.scale(
-                            scale: _reducedMotion
-                                ? 1
-                                : .88 +
-                                    .12 *
-                                        Curves.easeOutBack.transform(
-                                          (_controller.value * 3).clamp(0.0, 1.0),
-                                        ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: const Color(0xF1092753),
-                              borderRadius: BorderRadius.circular(26),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF76EEDB).withValues(
-                                    alpha: .28 * fade,
-                                  ),
-                                  blurRadius: 38,
-                                  spreadRadius: 3,
+                            scale: cardScale,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 298),
+                              child: FirstUseGlassSurface(
+                                accent: const Color(0xFFB8FFE6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 25,
+                                  vertical: 23,
                                 ),
-                              ],
-                              border: Border.all(
-                                color: const Color(0xFFACDAFF),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 22,
-                                vertical: 14,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.celebration_rounded,
-                                    color: Color(0xFFFFD36B),
-                                    size: 22,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Flexible(
-                                    child: Text(
-                                      message,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.celebration_rounded,
+                                      size: 40,
+                                      color: Color(0xFFFFD76A),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      title,
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 17,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      subtitle,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Color(0xFFDCEFEF),
+                                        fontSize: 15,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -239,4 +259,71 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
       ),
     );
   }
+}
+
+/// Deterministic vector pieces remain crisp when emoji fonts differ across
+/// devices. The larger emoji layer above adds joyful native OS glyphs.
+class _ConfettiBurstPainter extends CustomPainter {
+  const _ConfettiBurstPainter({
+    required this.progress,
+    required this.opacity,
+  });
+
+  final double progress;
+  final double opacity;
+
+  static const _palette = [
+    Color(0xFFFDD879),
+    Color(0xFF8BEAD5),
+    Color(0xFFB3D7FF),
+    Color(0xFFE5B6FF),
+    Color(0xFFFFACCA),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (opacity <= 0) return;
+    final origin = Offset(size.width / 2, size.height / 2 - 8);
+    for (var i = 0; i < 72; i++) {
+      final delay = (i % 7) * .037;
+      final local = ((progress - delay) / (1 - delay)).clamp(0.0, 1.0);
+      if (local <= 0) continue;
+      final eased = Curves.easeOutCubic.transform(local);
+      final angle = i * 2.39996;
+      final distance = (62 + (i % 6) * 27) * eased;
+      final dx = math.cos(angle) * distance;
+      final dy = math.sin(angle) * distance + local * local * (i % 4) * 11;
+      final paint = Paint()
+        ..color = _palette[i % _palette.length].withValues(
+          alpha: opacity * (1 - local * .23),
+        );
+      canvas.save();
+      canvas.translate(origin.dx + dx, origin.dy + dy);
+      canvas.rotate(angle + local * (i.isEven ? 3 : -3));
+      if (i % 3 == 0) {
+        canvas.drawCircle(
+          Offset.zero,
+          2.3 + (i % 3),
+          paint,
+        );
+      } else {
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(
+              center: Offset.zero,
+              width: 3.4 + (i % 4),
+              height: 9.0 + (i % 3) * 3,
+            ),
+            const Radius.circular(1.5),
+          ),
+          paint,
+        );
+      }
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ConfettiBurstPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.opacity != opacity;
 }
