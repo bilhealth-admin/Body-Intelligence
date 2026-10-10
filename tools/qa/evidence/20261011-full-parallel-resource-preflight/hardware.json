@@ -1,0 +1,27 @@
+{
+  "utc": "2026-10-10T21:23:50.4048886Z",
+  "ram": [
+    {
+      "totalGiB": 15.73,
+      "freeGiB": 7.63
+    }
+  ],
+  "cpu": [
+    {
+      "Name": "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
+      "NumberOfCores": 4,
+      "NumberOfLogicalProcessors": 8,
+      "LoadPercentage": 43
+    }
+  ],
+  "disk": [
+    {
+      "DriveLetter": "G",
+      "freeGiB": 334.71
+    },
+    {
+      "DriveLetter": "C",
+      "freeGiB": 70.11
+    }
+  ]
+}

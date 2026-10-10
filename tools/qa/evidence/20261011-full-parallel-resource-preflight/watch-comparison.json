@@ -1,0 +1,26 @@
+[
+  {
+    "name": "live_health_watch_compact_all_metrics_isolatedDiff.png",
+    "current_sha256": "a9b59311dc82202b4832c9b9dd16106d16b15d7dda0b4c2ddc8b9da2c0ddbf46",
+    "previous_sha256": "a9b59311dc82202b4832c9b9dd16106d16b15d7dda0b4c2ddc8b9da2c0ddbf46",
+    "identical": true
+  },
+  {
+    "name": "live_health_watch_compact_all_metrics_maskedDiff.png",
+    "current_sha256": "c3ebf97306a7ebd7457cdb955531c029a56931f365ab5d2b499daadc787de0c5",
+    "previous_sha256": "c3ebf97306a7ebd7457cdb955531c029a56931f365ab5d2b499daadc787de0c5",
+    "identical": true
+  },
+  {
+    "name": "live_health_watch_compact_all_metrics_masterImage.png",
+    "current_sha256": "32611211076a677cfe1027c561a6641f4bf58765c2f4b533070d7fdf2502a826",
+    "previous_sha256": "32611211076a677cfe1027c561a6641f4bf58765c2f4b533070d7fdf2502a826",
+    "identical": true
+  },
+  {
+    "name": "live_health_watch_compact_all_metrics_testImage.png",
+    "current_sha256": "0ab4091f33df9b445a57a369531b23de44cf589aea6dfd5f91177cdc3df54744",
+    "previous_sha256": "0ab4091f33df9b445a57a369531b23de44cf589aea6dfd5f91177cdc3df54744",
+    "identical": true
+  }
+]
