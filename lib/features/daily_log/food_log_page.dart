@@ -15,6 +15,9 @@ import '../../app/services/runtime_permission_policy.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/food_repository.dart';
 import '../commerce/presentation/premium_barcode_access.dart';
+import '../dashboard/widgets/first_use_context_coachmark.dart';
+import '../dashboard/widgets/first_meal_celebration.dart';
+import '../profile/providers/user_profile_provider.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../foods/providers/food_provider.dart';
 import '../nutrition/presentation/food_barcode_scanner_page.dart';
@@ -88,12 +91,15 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   bool initialCaptureActionApplied = false;
   String? initialCaptureActionInFlight;
   int _searchGeneration = 0;
+  bool _firstFoodTour = false;
+  String? _tourOwner;
 
   @override
   void initState() {
     super.initState();
     mealType = normalizeFoodLogMealType(widget.initialMealType);
     _scheduleInitialCaptureAction();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restoreFoodTour());
   }
 
   @override
@@ -105,6 +111,48 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       if (initialCaptureActionInFlight == null) {
         _scheduleInitialCaptureAction();
       }
+    }
+  }
+
+  String _tourKey(String? owner) =>
+      'experience.dashboard_food_guide.v1.${owner ?? 'local'}';
+
+  bool get _tourVisible =>
+      _firstFoodTour &&
+      _tourOwner == ref.read(preferencesRepositoryProvider).localOwnerId;
+
+  Future<void> _restoreFoodTour() async {
+    if (!mounted) return;
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final owner = preferences.localOwnerId;
+    String? state;
+    try {
+      state = await preferences.get(_tourKey(owner));
+    } on Object {
+      return;
+    }
+    if (!mounted ||
+        ref.read(preferencesRepositoryProvider).localOwnerId != owner) {
+      return;
+    }
+    setState(() {
+      _tourOwner = owner;
+      _firstFoodTour = state == 'started';
+    });
+  }
+
+  Future<void> _dismissFoodTour({bool completed = false}) async {
+    if (!_tourVisible) return;
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final owner = preferences.localOwnerId;
+    setState(() => _firstFoodTour = false);
+    try {
+      await preferences.set(
+        _tourKey(owner),
+        completed ? 'completed' : 'dismissed',
+      );
+    } on Object {
+      // Skip works immediately, even when local preferences are unavailable.
     }
   }
 
@@ -309,6 +357,26 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       key: const Key('food-log-reference-page'),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
       children: [
+        if (_tourVisible && query.isEmpty) ...[
+          FirstUseContextCoachmark(
+            key: const Key('food-log-search-guide'),
+            compact: true,
+            title: _foodTourText(
+              context,
+              en: 'Find something delicious',
+              ar: 'ابحث عن طعامك',
+            ),
+            message: _foodTourText(
+              context,
+              en: 'Type a food name here. You can always skip this tour.',
+              ar: 'اكتب اسم الطعام في البحث. يمكنك تخطي الإرشادات في أي وقت.',
+            ),
+            icon: Icons.search_rounded,
+            onSkip: _dismissFoodTour,
+            skipKey: const Key('food-log-search-guide-skip'),
+          ),
+          const SizedBox(height: 8),
+        ],
         SearchBar(
           key: const Key('food-log-search'),
           controller: search,
@@ -349,6 +417,27 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
           const LinearProgressIndicator(minHeight: 2),
         ],
         const SizedBox(height: 14),
+        if (_tourVisible && query.isNotEmpty && filtered.isNotEmpty) ...[
+          FirstUseContextCoachmark(
+            key: const Key('food-log-choose-guide'),
+            compact: true,
+            title: _foodTourText(
+              context,
+              en: 'Choose the right food',
+              ar: 'اختر الطعام الصحيح',
+            ),
+            message: _foodTourText(
+              context,
+              en: 'Tap + next to a matching food. Review the serving before saving.',
+              ar: 'اضغط + بجانب الطعام المناسب، ثم راجع الكمية قبل الحفظ.',
+            ),
+            icon: Icons.touch_app_rounded,
+            accent: const Color(0xFF9BCBFF),
+            onSkip: _dismissFoodTour,
+            skipKey: const Key('food-log-choose-guide-skip'),
+          ),
+          const SizedBox(height: 8),
+        ],
         Text(
           _t(context, 'Most popular'),
           style: Theme.of(
@@ -374,6 +463,12 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       ],
     );
   }
+
+  String _foodTourText(
+    BuildContext context, {
+    required String en,
+    required String ar,
+  }) => Localizations.localeOf(context).languageCode == 'ar' ? ar : en;
 
   String _searchHintKey() => FoodLogRuntimeCopy.searchHint;
 
