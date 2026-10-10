@@ -18,7 +18,8 @@ class FirstUseGlassSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(27);
-    final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -81,10 +82,7 @@ class FirstUseGlassSurface extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
-                      colors: [
-                        Color(0x60246CCA),
-                        Color(0x00246CCA),
-                      ],
+                      colors: [Color(0x60246CCA), Color(0x00246CCA)],
                     ),
                   ),
                 ),
