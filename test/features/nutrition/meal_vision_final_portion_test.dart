@@ -99,6 +99,9 @@ void main() {
     expect((zoom.image as FileImage).file.path, visionV2PhotoPath);
     await tester.tap(find.byTooltip('إغلاق الصورة'));
     await tester.pumpAndSettle();
+    // A tap warning is not a successful dismissal: require the zoom route
+    // to be gone before touching the underlying trusted-food selection.
+    expect(find.byType(InteractiveViewer), findsNothing);
     await tester.ensureVisible(find.text(food.arabicName!));
     await tester.tap(find.text(food.arabicName!));
     await tester.pumpAndSettle();
@@ -134,6 +137,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('76.0 kcal'), findsOneWidget);
     await captureVisionV2(tester, 'functional_final_80g_nutrition');
+    // The screenshot must be taken after the edited amount is rendered.
+    // UI assertions alone do not guarantee Flutter raster evidence is fresh.
+    final recorded = File(
+      'build/vision-v2-captures/functional_final_80g_nutrition.png',
+    );
+    expect(await recorded.exists(), isTrue);
+    expect(await recorded.length(), greaterThan(2500));
     await tester.tap(find.byKey(const Key('premium-vision-use-food')));
     await tester.pumpAndSettle();
     expect(result!.food, same(food));

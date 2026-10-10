@@ -197,6 +197,16 @@ Future<void> captureVisionV2(
       Key(wholeScreen ? 'v2-test-screen' : 'premium-vision-render-surface'),
     ),
   );
+  // An engine snapshot may preserve retained compositing layers even after
+  // the widget text is updated. Mark the complete test surface for painting
+  // before capturing evidence so the PNG reflects the latest portion value.
+  void repaint(RenderObject object) {
+    object.markNeedsPaint();
+    object.visitChildren(repaint);
+  }
+
+  repaint(boundary);
+  await tester.pump();
   await tester.runAsync(() async {
     final image = await boundary.toImage(pixelRatio: 2);
     try {
