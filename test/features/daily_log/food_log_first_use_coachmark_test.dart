@@ -114,10 +114,12 @@ void main() {
 
     // The first-use glass tip makes the food row legitimately lazy. Find
     // the Food Log list's own Scrollable (not nested EditableText scrollables).
-    final listScrollable = find.descendant(
-      of: find.byKey(const Key('food-log-reference-page')),
-      matching: find.byType(Scrollable),
-    ).first;
+    final listScrollable = find
+        .descendant(
+          of: find.byKey(const Key('food-log-reference-page')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
     await tester.scrollUntilVisible(
       find.byKey(Key('food-log-add-$foodId')),
       150,
