@@ -78,6 +78,39 @@ void main() {
     expect(find.text('Skip'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('narrow Arabic layout with large text keeps Skip available', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('ar'),
+        home: Scaffold(
+          body: MediaQuery(
+            data: MediaQueryData(textScaler: TextScaler.linear(1.8)),
+            child: SingleChildScrollView(
+              child: FirstUseContextCoachmark(
+                title: 'ابدأ بتسجيل الوجبة الصحيحة بالتفصيل',
+                message:
+                    'هذا دليل تفاعلي اختياري ويمكنك استخدام باقي التطبيق أو تخطيه في أي وقت.',
+                onSkip: _noop,
+                actionLabel: 'استمرار',
+                onAction: _noop,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('تخطي'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
 }
 
 void _noop() {}
