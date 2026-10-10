@@ -1,6 +1,7 @@
 name: BIL QA fast P0 regression gate
 
 # Narrow regression only. No eight-shard full-suite run here.
+# Re-check exact formatter output at 914f2ff9; full shards stay blocked.
 on:
   push:
     branches:
