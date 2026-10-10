@@ -1,0 +1,51 @@
+name: BIL QA targeted community return
+
+on:
+  push:
+    branches:
+      - qa/bil-quality-ux-integration-20261009
+    paths:
+      - test/features/community/community_message_retry_cases.dart
+      - test/features/community/community_chat_auth_session_test.dart
+      - lib/features/community/presentation/community_return_button.dart
+      - lib/features/community/presentation/community_chat_rendering.dart
+      - .github/workflows/bil_qa_targeted_community_return.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-qa-community-return-targeted
+  cancel-in-progress: true
+
+jobs:
+  community-return-only:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/bil-quality-ux-integration-20261009'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Configure Git LF checkout
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out exact QA source
+        uses: actions/checkout@v4
+
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Verify exact Dart formatting
+        shell: pwsh
+        run: |
+          dart format --output=none --set-exit-if-changed test/features/community/community_message_retry_cases.dart test/features/community/community_chat_auth_session_test.dart lib/features/community/presentation/community_return_button.dart lib/features/community/presentation/community_chat_rendering.dart
+
+      - name: Test community chat, inbox and new-message return paths
+        run: flutter test --no-pub --timeout=2m test/features/community/community_chat_auth_session_test.dart
