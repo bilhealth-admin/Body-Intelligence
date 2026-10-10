@@ -12,34 +12,69 @@ extension _FoodLogActions on _FoodLogPageState {
       );
       final quantity = await (() async {
         try {
+          var showQuantityGuide = _tourVisible;
           return await showDialog<double>(
             context: context,
-            builder: (dialogContext) => AlertDialog(
-              title: Text(_t(dialogContext, 'Choose a serving')),
-              content: TextField(
-                controller: controller,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  labelText:
-                      '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(_t(dialogContext, 'Cancel')),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(
-                    dialogContext,
-                    double.tryParse(controller.text.replaceAll(',', '.')),
+            builder: (dialogContext) => StatefulBuilder(
+              builder: (dialogContext, refreshDialog) => AlertDialog(
+                title: Text(_t(dialogContext, 'Choose a serving')),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showQuantityGuide) ...[
+                        FirstUseContextCoachmark(
+                          key: const Key('food-log-quantity-guide'),
+                          compact: true,
+                          title: _foodTourText(
+                            dialogContext,
+                            en: 'Make it accurate',
+                            ar: 'خلّي الكمية دقيقة',
+                          ),
+                          message: _foodTourText(
+                            dialogContext,
+                            en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
+                            ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
+                          ),
+                          icon: Icons.scale_rounded,
+                          accent: const Color(0xFFFFDB95),
+                          onSkip: () {
+                            refreshDialog(() => showQuantityGuide = false);
+                            _dismissFoodTour();
+                          },
+                          skipKey: const Key('food-log-quantity-guide-skip'),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      TextField(
+                        key: const Key('food-log-serving-quantity-field'),
+                        controller: controller,
+                        autofocus: !showQuantityGuide,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText:
+                              '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Text(_t(dialogContext, 'Add')),
                 ),
-              ],
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: Text(_t(dialogContext, 'Cancel')),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(
+                      dialogContext,
+                      double.tryParse(controller.text.replaceAll(',', '.')),
+                    ),
+                    child: Text(_t(dialogContext, 'Add')),
+                  ),
+                ],
+              ),
             ),
           );
         } finally {
@@ -68,6 +103,16 @@ extension _FoodLogActions on _FoodLogPageState {
         ref.invalidate(dailyMealsProvider);
         if (!mounted) return;
         messenger.showSnackBar(SnackBar(content: Text(addedCopy)));
+        // Food Log is the first-use route opened from Home. A successful
+        // atomic repository commit is the only point allowed to celebrate.
+        if (_tourVisible) {
+          await _dismissFoodTour(completed: true);
+        }
+        if (!mounted) return;
+        await FirstMealCelebration.showIfPending(
+          context,
+          ref.read(preferencesRepositoryProvider),
+        );
       } on Object {
         if (!mounted) return;
         messenger.showSnackBar(SnackBar(content: Text(errorCopy)));
