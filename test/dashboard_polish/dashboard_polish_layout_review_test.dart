@@ -198,7 +198,7 @@ void main() {
   );
   for (final locale in const [Locale('en'), Locale('ar')]) {
     for (final width in const [320.0, 390.0, 430.0]) {
-      for (final scale in const [1.0, 1.6]) {
+      for (final scale in const [1.0, 1.6, 2.0]) {
         testWidgets(
           '${locale.languageCode} ${width.toInt()} at ${scale}x retains all content and burned calories',
           (tester) async {
@@ -242,6 +242,15 @@ void main() {
             expect(
               find.byKey(const Key('dashboard-burn-policy-note')),
               findsOneWidget,
+            );
+            // Keep the entire verified burned-calorie explanation inside
+            // its card; swallowing Flutter exceptions cannot pass this check.
+            expect(
+              tester.getBottomLeft(
+                find.byKey(const Key('dashboard-burn-policy-note')),
+              ).dy,
+              lessThanOrEqualTo(tester.getBottomLeft(calories).dy),
+              reason: 'The full burn-policy note must fit inside the card.',
             );
             final remaining = tester.widget<Text>(
               find.byKey(

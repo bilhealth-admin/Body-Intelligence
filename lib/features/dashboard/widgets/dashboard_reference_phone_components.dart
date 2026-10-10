@@ -65,7 +65,11 @@ class _OverviewCardsCarouselState extends State<_OverviewCardsCarousel> {
                       .toDouble() +
                   // Keep the existing burned-calorie explanation readable;
                   // its presence must not squeeze the values or progress bar.
-                  (widget.hasBurnPolicyNote ? 24 : 0),
+                  // The burned-policy explanation uses about 217px inside a card
+                  // with 32px vertical padding at 1x English. A 2px reserve
+                  // accounts for fractional font metrics without clipping
+                  // the note or changing any card typography or content.
+                  (widget.hasBurnPolicyNote ? 26 : 0),
               child: PageView.builder(
                 key: const Key('dashboard-calories-macros-horizontal'),
                 physics: const PageScrollPhysics(),
