@@ -65,9 +65,12 @@ def executable_args(args):
 def fingerprint(head):
     h = hashlib.sha256(head.encode())
     h.update(git("rev-parse", BASE).stdout)
-    h.update(git("diff", "HEAD", "--binary", "--").stdout)
+    # Flutter writes diagnostic PNGs into some historically tracked failures
+    # folders. Those are outputs; real golden baselines remain fingerprinted.
+    scope = (".", ":(glob,exclude)test/**/failures/*.png")
+    h.update(git("diff", "HEAD", "--binary", "--", *scope).stdout)
     untracked = git("ls-files", "--others", "--exclude-standard", "--",
-                    "lib", "test", "tools", "scripts").stdout.decode(
+                    *scope).stdout.decode(
                         "utf-8", errors="replace").splitlines()
     for name in sorted(untracked):
         file = ROOT / name

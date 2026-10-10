@@ -10,6 +10,29 @@ import bil_codex_test_ladder as ladder
 
 
 class LadderGateTests(unittest.TestCase):
+    def test_fingerprint_excludes_diagnostics_but_tracks_real_baselines(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            def git(*args):
+                return subprocess.run(["git", *args], cwd=root, check=True,
+                                      capture_output=True).stdout.decode().strip()
+            git("init")
+            diagnostic = root / "test/screen/failures/example_testImage.png"
+            golden = root / "test/screen/goldens/example.png"
+            for file in (diagnostic, golden):
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_bytes(b"initial")
+            git("add", ".")
+            git("-c", "core.hooksPath=NUL", "-c", "user.name=QA",
+                "-c", "user.email=qa@example.invalid", "commit", "-m", "fixture")
+            head = git("rev-parse", "HEAD")
+            with patch.object(ladder, "ROOT", root), patch.object(ladder, "BASE", "HEAD"):
+                stamp = ladder.fingerprint(head)
+                diagnostic.write_bytes(b"generated diff")
+                self.assertEqual(ladder.fingerprint(head), stamp)
+                golden.write_bytes(b"changed baseline")
+                self.assertNotEqual(ladder.fingerprint(head), stamp)
+
     def test_format_batches_cover_complete_scope_before_analysis(self):
         targets = [f"test/file_{i}.dart" for i in range(182)]
         with patch.object(ladder, "changed_dart_targets", return_value=targets), \
