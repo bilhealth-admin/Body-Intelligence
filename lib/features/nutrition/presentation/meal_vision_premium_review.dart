@@ -485,9 +485,11 @@ class _PremiumVisionReviewDialogState
             ),
           ),
           Expanded(
-            child: ListView(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              children: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 this._photo(context),
                 const SizedBox(height: 12),
                 Container(
@@ -549,7 +551,8 @@ class _PremiumVisionReviewDialogState
                     _word(context, 'Add missing food', 'إضافة عنصر مفقود'),
                   ),
                 ),
-              ],
+                ],
+              ),
             ),
           ),
           Container(
