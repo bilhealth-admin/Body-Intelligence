@@ -51,10 +51,8 @@ MaterialApp _app(Widget child) => MaterialApp(
     ThemeData(useMaterial3: true, brightness: Brightness.dark),
     fontFamily: 'NotoArabicEvidence',
   ),
-  builder: (context, child) => visualEvidenceTextSurface(
-    child,
-    fontFamily: 'NotoArabicEvidence',
-  ),
+  builder: (context, child) =>
+      visualEvidenceTextSurface(child, fontFamily: 'NotoArabicEvidence'),
   home: Scaffold(body: child),
 );
 

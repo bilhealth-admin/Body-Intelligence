@@ -113,7 +113,10 @@ void main() {
     // a decorative crown/paywall. It must stay keyboard/gesture actionable.
     expect(source, contains("Key('more-premium-entry')"));
     expect(source, contains('ReferenceSettingsCopy.of(context)'));
-    expect(source, contains('isRetry ? Icons.refresh_rounded : directionalIcon'));
+    expect(
+      source,
+      contains('isRetry ? Icons.refresh_rounded : directionalIcon'),
+    );
     expect(source, contains("onTap: () => context.push('/plans')"));
     expect(source, isNot(contains('PremiumCrownEmblem')));
   });
