@@ -264,49 +264,11 @@ class AppLocalizations {
       return 'نحتاج ${moreMeals.group(1)} أيام وجبات مكتملة إضافية';
     }
 
-    // A single trusted Body Twin baseline embeds a user-specific weight in
-    // otherwise fixed runtime copy. Translate the reviewed template rather
-    // than looking up the entire interpolated English sentence as a key.
+    // Translate dynamic evidence via a reviewed template; the weight is not
+    // part of a static localization key and must remain its actual value.
     if (locale.languageCode == 'ar') {
       final firstBodyTwinBaseline = RegExp(
-        r'^Body Twin accepted your first trusted baseline at ([+-]?\d+(?:\.\d+)?) kg\. This describes your current recorded state; it does not claim a trend yet\.
-    // never show an internal localization failure to the user.
-    assert(() {
-      debugPrint(
-        'Missing reviewed runtime translation: '
-        '${locale.languageCode}: $english',
-      );
-      return true;
-    }());
-    return english;
-  }
-}
-
-extension AppLocalizationContext on BuildContext {
-  AppLocalizations get strings => AppLocalizations.of(this);
-}
-
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
-  const _AppLocalizationsDelegate();
-
-  @override
-  bool isSupported(Locale locale) => AppLocalizations.supportedLocales.any(
-    (candidate) =>
-        BilLocalePolicy.canonicalTag(candidate) ==
-        BilLocalePolicy.canonicalTag(locale),
-  );
-
-  @override
-  Future<AppLocalizations> load(Locale locale) async {
-    return AppLocalizations(locale);
-  }
-
-  @override
-  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) =>
-      false;
-}
-,
+        r'^Body Twin accepted your first trusted baseline at ([+-]?\d+(?:\.\d+)?) kg\. This describes your current recorded state; it does not claim a trend yet\.$',
       ).firstMatch(english);
       if (firstBodyTwinBaseline != null) {
         final weight = isolate('${firstBodyTwinBaseline.group(1)} كجم');
