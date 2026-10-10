@@ -17,14 +17,15 @@ final class _VisionCommitIntent {
   final String payloadDigest;
 }
 
-extension _MealVisionCommitJournal on MealRepository {
+extension MealRepositoryVisionCommits on MealRepository {
   _VisionCommitIntent? _visionCommitIntent(
     String? requestId,
     DateTime date,
     String mealType,
     List<({int foodId, double quantity})> items,
-    bool quantitiesInGrams,
-  ) {
+    bool quantitiesInGrams, {
+    List<bool>? itemGramModes,
+  }) {
     if (requestId == null) return null;
     final request = requestId.trim();
     if (request.isEmpty || request.length > 128) {
@@ -36,6 +37,7 @@ extension _MealVisionCommitJournal on MealRepository {
       'dayKey': dayKeyFor(date),
       'mealType': mealType,
       'grams': quantitiesInGrams,
+      if (itemGramModes != null) 'itemGramModes': itemGramModes,
       'items': [
         for (final item in items)
           {'foodId': item.foodId, 'quantity': item.quantity},
@@ -48,6 +50,55 @@ extension _MealVisionCommitJournal on MealRepository {
       requestDigest: requestDigest,
       payloadDigest: payloadDigest,
     );
+  }
+
+  /// Writes a mixed-unit reviewed Vision batch using each label's *actual*
+  /// measurement basis. No portion is silently converted from pieces/mL to
+  /// grams; every row and the owner-scoped replay receipt share one transaction.
+  Future<int> addReviewedVisionItemsAtomically({
+    required DateTime date,
+    required String mealType,
+    required String visionRequestId,
+    required List<({int foodId, double quantity, bool quantityInGrams})> items,
+  }) async {
+    if (items.isEmpty) {
+      throw ArgumentError.value(items, 'items', 'Must not be empty');
+    }
+    for (final item in items) {
+      _validateQuantity(item.quantity);
+    }
+    final intent = _visionCommitIntent(
+      visionRequestId,
+      date,
+      mealType,
+      [
+        for (final item in items)
+          (foodId: item.foodId, quantity: item.quantity),
+      ],
+      false,
+      itemGramModes: [
+        for (final item in items) item.quantityInGrams,
+      ],
+    )!;
+    return _database.transaction(() async {
+      final prior = await _visionCommittedMealId(intent);
+      if (prior != null) return prior;
+      final mealId = await createMeal(
+        date: date,
+        name: mealType,
+        type: mealType,
+      );
+      for (final item in items) {
+        await addMealItem(
+          mealId: mealId,
+          foodId: item.foodId,
+          quantity: item.quantity,
+          quantityInGrams: item.quantityInGrams,
+        );
+      }
+      await _saveVisionCommitReceipt(intent, mealId);
+      return mealId;
+    });
   }
 
   /// Only call from the parent atomic diary transaction. A reused request ID

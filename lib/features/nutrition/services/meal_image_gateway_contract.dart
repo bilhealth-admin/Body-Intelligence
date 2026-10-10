@@ -43,6 +43,81 @@ double? mealImageAmountInGrams({
   return null;
 }
 
+
+/// A reviewed portion in the *catalog record's real measurement basis*.
+///
+/// Mass is accepted only for an explicit mass-based label. Count/volume labels
+/// keep their own unit; neither a photograph nor a number of pieces supplies
+/// a fictitious gram conversion. [servingFactor] is used for the nutrient
+/// preview and is always tied to the same basis that the diary will save.
+typedef MealImageReviewedQuantity = ({
+  double quantity,
+  bool quantityInGrams,
+  double servingFactor,
+});
+
+double? _visionMassGramsPerUnit(String rawUnit) {
+  return switch (rawUnit.trim().toLowerCase()) {
+    'g' || 'gram' || 'grams' || 'gm' || 'جم' => 1,
+    'kg' || 'kilogram' || 'kilograms' || 'كجم' => 1000,
+    'mg' || 'milligram' || 'milligrams' => .001,
+    'oz' || 'ounce' || 'ounces' => 28.349523125,
+    'lb' || 'lbs' || 'pound' || 'pounds' => 453.59237,
+    _ => null,
+  };
+}
+
+MealImageReviewedQuantity? mealImageReviewedQuantity({
+  required double amount,
+  required String unit,
+  required double servingSize,
+  required String servingUnit,
+}) {
+  if (!amount.isFinite ||
+      amount <= 0 ||
+      !servingSize.isFinite ||
+      servingSize <= 0) {
+    return null;
+  }
+  final selected = unit.trim().toLowerCase();
+  final catalog = servingUnit.trim().toLowerCase();
+  if (selected.isEmpty || catalog.isEmpty) return null;
+  final catalogGrams = _visionMassGramsPerUnit(catalog);
+  final selectedGrams = _visionMassGramsPerUnit(selected);
+  if (catalogGrams != null) {
+    // The actual label basis supplies a known mass. Counted servings may
+    // use that mass only because this is an explicit catalog serving basis.
+    final grams = selected == 'serving'
+        ? amount * servingSize * catalogGrams
+        : selectedGrams == null
+        ? null
+        : amount * selectedGrams;
+    final divisor = servingSize * catalogGrams;
+    if (grams == null || !grams.isFinite || divisor <= 0) return null;
+    final factor = grams / divisor;
+    if (grams <= 0 ||
+        grams > 100000 ||
+        !factor.isFinite ||
+        factor <= 0) {
+      return null;
+    }
+    return (
+      quantity: grams,
+      quantityInGrams: true,
+      servingFactor: factor,
+    );
+  }
+  // Pieces, mL, and other nonmass label units cannot silently become grams.
+  if (selected != catalog || amount > 100000) return null;
+  final factor = amount / servingSize;
+  if (!factor.isFinite || factor <= 0) return null;
+  return (
+    quantity: amount,
+    quantityInGrams: false,
+    servingFactor: factor,
+  );
+}
+
 enum MealImageAnalysisFailure {
   notConfigured,
   authenticationRequired,

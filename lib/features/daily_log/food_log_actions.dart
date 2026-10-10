@@ -383,7 +383,7 @@ extension _FoodLogActions on _FoodLogPageState {
         photographedAt: DateTime.now(),
       );
       if (selections == null || selections.isEmpty || !mounted) return;
-      final confirmed = <(Food, double)>[];
+      final confirmed = <({Food food, double quantity, bool quantityInGrams})>[];
       for (final selection in selections) {
         final authority = ref.read(foodRuntimeSearchAuthorityProvider);
         final exactId = selection.candidate.verifiedFoodRecordId;
@@ -420,29 +420,48 @@ extension _FoodLogActions on _FoodLogPageState {
           reviewedUnit: selection.unit,
         );
         if (!mounted || reviewed == null) continue;
-        final quantity = mealImageAmountInGrams(
+        final portion = mealImageReviewedQuantity(
           amount: selection.amount,
           unit: selection.unit,
           servingSize: reviewed.servingSize,
           servingUnit: reviewed.servingUnit,
         );
-        if (quantity != null) confirmed.add((reviewed, quantity));
+        if (portion == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${selection.candidate.name}: ${visionCopy.text('unit_mismatch')} '
+                '(${reviewed.servingUnit})',
+              ),
+            ),
+          );
+          continue;
+        }
+        confirmed.add((
+          food: reviewed,
+          quantity: portion.quantity,
+          quantityInGrams: portion.quantityInGrams,
+        ));
       }
       if (confirmed.isEmpty || !mounted) return;
       await ref
           .read(mealRepositoryProvider)
-          .addReviewedMealItemsAtomically(
+          .addReviewedVisionItemsAtomically(
             date: ref.read(selectedLogDateProvider),
             mealType: mealType,
-            items: [
-              for (final (food, quantity) in confirmed)
-                (foodId: food.id, quantity: quantity),
-            ],
             visionRequestId: analysis.requestId,
+            items: [
+              for (final item in confirmed)
+                (
+                  foodId: item.food.id,
+                  quantity: item.quantity,
+                  quantityInGrams: item.quantityInGrams,
+                ),
+            ],
           );
-      for (final (food, _) in confirmed) {
+      for (final item in confirmed) {
         try {
-          await ref.read(foodRepositoryProvider).recordRecent(food.id);
+          await ref.read(foodRepositoryProvider).recordRecent(item.food.id);
         } on Object {
           // The diary write is authoritative; recency is best effort.
         }

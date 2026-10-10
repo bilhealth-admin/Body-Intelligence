@@ -38,8 +38,10 @@ jobs:
             lib/features/daily_log/daily_log_capture_actions.dart \
             lib/features/intelligence_center/presentation/intelligence_vision_flow.dart \
             lib/features/nutrition/presentation/meal_image_review_dialog.dart \
+            lib/features/nutrition/services/meal_image_gateway_contract.dart \
             lib/features/nutrition/presentation/meal_vision_premium_review.dart \
             lib/features/nutrition/presentation/meal_vision_premium_match.dart \
+            test/features/nutrition/meal_image_unified_review_contract_test.dart \
             test/features/nutrition/meal_vision_verified_commit_test.dart \
             test/features/nutrition/meal_vision_premium_review_test.dart \
             test/features/nutrition/coach_food_commit_test.dart \
@@ -59,8 +61,10 @@ jobs:
             lib/features/daily_log/daily_log_capture_actions.dart \
             lib/features/intelligence_center/presentation/intelligence_vision_flow.dart \
             lib/features/nutrition/presentation/meal_image_review_dialog.dart \
+            lib/features/nutrition/services/meal_image_gateway_contract.dart \
             lib/features/nutrition/presentation/meal_vision_premium_review.dart \
             lib/features/nutrition/presentation/meal_vision_premium_match.dart \
+            test/features/nutrition/meal_image_unified_review_contract_test.dart \
             test/features/nutrition/meal_vision_verified_commit_test.dart \
             test/features/nutrition/meal_vision_premium_review_test.dart \
             test/features/nutrition/coach_food_commit_test.dart \

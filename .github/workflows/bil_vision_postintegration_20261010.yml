@@ -3,6 +3,11 @@ on:
   push:
     branches: [qa/bil-quality-ux-integration-20261009]
     paths:
+      - lib/features/nutrition/services/meal_image_gateway_contract.dart
+      - lib/data/repositories/meal_repository_vision_journal.dart
+      - lib/features/daily_log/food_log_actions.dart
+      - lib/features/daily_log/daily_log_capture_actions.dart
+      - test/features/nutrition/meal_image_unified_review_contract_test.dart
       - lib/features/nutrition/presentation/meal_vision_premium_review.dart
       - lib/features/nutrition/presentation/meal_vision_premium_visuals.dart
       - lib/features/nutrition/presentation/meal_vision_premium_match.dart
@@ -28,7 +33,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - name: Enforce Dart formatting for scoped Vision files
-        run: dart format --output=none --set-exit-if-changed lib/features/nutrition/presentation/meal_vision_premium_review.dart lib/features/nutrition/presentation/meal_vision_premium_visuals.dart lib/features/nutrition/presentation/meal_vision_premium_match.dart test/features/nutrition/meal_vision_premium_review_test.dart test/features/nutrition/meal_vision_flutter_capture_test.dart test/features/nutrition/meal_vision_verified_commit_test.dart
+        run: dart format --output=none --set-exit-if-changed lib/features/nutrition/services/meal_image_gateway_contract.dart test/features/nutrition/meal_image_unified_review_contract_test.dart lib/features/nutrition/presentation/meal_vision_premium_review.dart lib/features/nutrition/presentation/meal_vision_premium_visuals.dart lib/features/nutrition/presentation/meal_vision_premium_match.dart test/features/nutrition/meal_vision_premium_review_test.dart test/features/nutrition/meal_vision_flutter_capture_test.dart test/features/nutrition/meal_vision_verified_commit_test.dart
       - run: flutter analyze --no-pub
   focused:
     runs-on: ubuntu-24.04
@@ -78,8 +83,8 @@ jobs:
   baseline-architecture:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    # Audit only. The existing 716/726-line Food Log and meal repository
-    # exceed the historic ceiling; this is reported separately, never skipped.
+    # Enforced source architecture ceiling: any file exceeding the 700-line
+    # guard must fail until it is split by responsibility.
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2

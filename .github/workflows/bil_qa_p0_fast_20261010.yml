@@ -18,6 +18,8 @@ on:
       - test/features/nutrition/meal_vision_verified_commit_test.dart
       - lib/features/daily_log/food_log_page.dart
       - lib/features/daily_log/food_log_tile_widgets.dart
+      - lib/features/nutrition/services/meal_image_gateway_contract.dart
+      - test/features/nutrition/meal_image_unified_review_contract_test.dart
       - lib/features/nutrition/presentation/meal_vision_premium_review.dart
       - lib/features/nutrition/presentation/meal_vision_premium_match.dart
       - lib/features/nutrition/presentation/meal_vision_premium_visuals.dart
@@ -61,12 +63,14 @@ jobs:
             lib/features/nutrition/presentation/meal_image_review_dialog.dart \
             lib/features/daily_log/food_log_page.dart \
             lib/features/daily_log/food_log_tile_widgets.dart \
+            lib/features/nutrition/services/meal_image_gateway_contract.dart \
             lib/features/nutrition/presentation/meal_vision_premium_review.dart \
             lib/features/nutrition/presentation/meal_vision_premium_match.dart \
             test/features/nutrition/coach_food_commit_test.dart \
             test/features/nutrition/coach_food_journal_cases.dart \
             test/features/nutrition/coach_meal_commit_boundary_test.dart \
             test/features/nutrition/coach_meal_journal_cases.dart \
+            test/features/nutrition/meal_image_unified_review_contract_test.dart \
             test/features/nutrition/meal_vision_premium_review_test.dart \
             test/features/nutrition/meal_vision_flutter_capture_test.dart \
             test/parallel/bil02/coach_media_page_overlay_test.dart \
@@ -95,6 +99,8 @@ jobs:
             path: test/features/nutrition/meal_vision_premium_review_test.dart
           - suite: vision-durable-idempotency
             path: test/features/nutrition/meal_vision_verified_commit_test.dart
+          - suite: vision-quantity-basis
+            path: test/features/nutrition/meal_image_unified_review_contract_test.dart
           - suite: vision-capture
             path: test/features/nutrition/meal_vision_flutter_capture_test.dart
           - suite: architecture

@@ -208,7 +208,7 @@ class _PremiumTrustedMatchDialogState
                       ) ||
                       (widget.reviewedAmount != null &&
                           widget.reviewedUnit != null &&
-                          mealImageAmountInGrams(
+                          mealImageReviewedQuantity(
                                 amount: widget.reviewedAmount!,
                                 unit: widget.reviewedUnit!,
                                 servingSize: _selected!.servingSize,
@@ -238,19 +238,17 @@ class _PremiumTrustedMatchDialogState
   Widget _nutritionFacts(BuildContext context, Food food) {
     // This does not infer nutrients from image pixels. It reads only the
     // explicitly selected, verified catalog record and its evidence mask.
-    final grams = widget.reviewedAmount == null || widget.reviewedUnit == null
+    final portion = widget.reviewedAmount == null || widget.reviewedUnit == null
         ? null
-        : mealImageAmountInGrams(
+        : mealImageReviewedQuantity(
             amount: widget.reviewedAmount!,
             unit: widget.reviewedUnit!,
             servingSize: food.servingSize,
             servingUnit: food.servingUnit,
           );
-    // Existing diary contract stores catalog nutrients per servingSize grams.
-    // Do not scale unless the unit conversion is guaranteed by that contract.
-    final factor = grams == null || food.servingSize <= 0
-        ? null
-        : grams / food.servingSize;
+    // Factor is tied to the catalog's actual mass, count or volume basis.
+    // Neither the picture nor a piece count supplies an invented gram amount.
+    final factor = portion?.servingFactor;
     final facts = <(FoodNutrient, String, double, String)>[
       (
         FoodNutrient.calories,
