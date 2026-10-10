@@ -18,6 +18,7 @@ class FirstUseGlassSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(27);
+    final reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -33,7 +34,10 @@ class FirstUseGlassSurface extends StatelessWidget {
       child: ClipRRect(
         borderRadius: radius,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 11, sigmaY: 11),
+          filter: ImageFilter.blur(
+            sigmaX: reduceMotion ? 0 : 11,
+            sigmaY: reduceMotion ? 0 : 11,
+          ),
           child: Stack(
             children: [
               const Positioned.fill(
