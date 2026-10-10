@@ -61,3 +61,6 @@
 ### إصلاح التنسيق النهائي
 - [Verify #38034812740](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38034812740): Dart Format أحمر في **مسافة بادئة واحدة** ضمن Fixture اللغة العربية، Flutter Analyze أخضر دون مشكلات. لم تُشغّل اختبارات المصدر بسبب الحاجز.
 - طُبّق الآن فرق التنسيق كما أخرجه Flutter 3.44.6 حرفيًا. يعاد التحقق دون تخفيف أي شرط.
+
+## Fifth CI pass
+Verify run 38035105337: format and analyzer passed; 14 functional tests passed and 2 failed because the test finder chose multiple nested scrollables. The test now uses ensureVisible on the exact food action key. Android debug run 38035105330 passed for its older commit; it does not certify the latest HEAD.
