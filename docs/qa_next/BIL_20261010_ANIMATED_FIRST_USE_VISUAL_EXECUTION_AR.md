@@ -37,3 +37,8 @@
 - بريق اتصال صغير على إطار الساعة عندما تكون البيانات الصحية متصلة ومؤكدة.
 - انتقالات Body Twin ببيانات صور فعلية متاحة، وليس صورًا مجهولة المصدر.
 - حركة نجاح قصيرة عند إنجاز هدف حقيقي، مع احترام وضع تقليل الحركة.
+
+## CI triage — first pass
+- [Verify #38033226049](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38033226049): اكتشف ثمانية ملفات تحتاج Dart Format وتحذير analyzer واحد على BuildContext في `food_log_actions.dart`. تم تطبيق patch التنسيق الأصلي للمصدر والاحتفال واختبار Home وتصحيح حارس BuildContext. ما زالت بقية ملفات التنسيق بحاجة إلى إعادة تشغيل وتقرير patch الكامل.
+- [Android debug #38033226046](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38033226046) كان قيد التنفيذ عند إضافة هذا التحديث؛ لا يُنقل نجاحه لآخر SHA.
+- يرفض هذا التقرير اعتبار المصدر جاهزًا قبل وصول check أخضر **على SHA واحد**.
