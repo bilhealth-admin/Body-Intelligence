@@ -59,6 +59,7 @@ class FoodLogPage extends ConsumerStatefulWidget {
   const FoodLogPage({
     super.key,
     this.initialMealType,
+    this.startGuide = false,
     this.initialAction,
     this.directPhotoCapture = false,
     this.initialImage,
@@ -67,6 +68,7 @@ class FoodLogPage extends ConsumerStatefulWidget {
   });
 
   final String? initialMealType;
+  final bool startGuide;
   final String? initialAction;
   final bool directPhotoCapture;
   final XFile? initialImage;
@@ -137,7 +139,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     }
     setState(() {
       _tourOwner = owner;
-      _firstFoodTour = state == 'started';
+      _firstFoodTour =
+          state == 'started' || (widget.startGuide && state == null);
     });
   }
 
