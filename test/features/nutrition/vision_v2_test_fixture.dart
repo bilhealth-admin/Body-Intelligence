@@ -172,8 +172,12 @@ Future<void> openVisionV2Review(
     // photo widget. A cold first case selected by sharding must not depend on
     // a previous case warming the image cache, or a one-second polling budget.
     await tester.runAsync(() async {
+      final originalPhoto = FileImage(File(visionV2PhotoPath));
+      // An earlier nutrient-only case can leave this key pending in FakeAsync.
+      // Evict that entry so the actual file starts decoding in the real zone.
+      await originalPhoto.evict();
       await precacheImage(
-        FileImage(File(visionV2PhotoPath)),
+        originalPhoto,
         tester.element(find.text('OPEN TEST REVIEW')),
         onError: (error, stack) => decodeError = error,
       ).timeout(const Duration(seconds: 30));
