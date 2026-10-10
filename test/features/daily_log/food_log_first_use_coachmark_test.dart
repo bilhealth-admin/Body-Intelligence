@@ -63,10 +63,7 @@ void main() {
       'dismissed',
     );
     expect(find.byKey(const Key('food-log-search')), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.byKey(Key('food-log-add-$foodId')),
-      160,
-    );
+    await tester.ensureVisible(find.byKey(Key('food-log-add-$foodId')));
     expect(find.byKey(Key('food-log-add-$foodId')), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
@@ -115,10 +112,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.byKey(Key('food-log-add-$foodId')),
-      160,
-    );
+    await tester.ensureVisible(find.byKey(Key('food-log-add-$foodId')));
     await tester.tap(find.byKey(Key('food-log-add-$foodId')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('food-log-quantity-guide')), findsOneWidget);
