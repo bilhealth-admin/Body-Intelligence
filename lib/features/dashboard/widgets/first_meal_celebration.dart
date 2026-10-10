@@ -116,6 +116,9 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
               final fade = _reducedMotion
                   ? 1.0
                   : (1 - _controller.value).clamp(0.0, 1.0);
+              final particleFade = _reducedMotion
+                  ? 0.0
+                  : (1 - ((_controller.value - .38) / .62).clamp(0.0, 1.0));
               return Center(
                 child: SizedBox(
                   width: 300,
@@ -138,7 +141,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                                 progress * progress * (index % 3) * 17 -
                                 15,
                             child: Opacity(
-                              opacity: (fade * (index % 3 == 0 ? .85 : 1.0)).clamp(0.0, 1.0),
+                              opacity: (particleFade * (index % 3 == 0 ? .85 : 1.0)).clamp(0.0, 1.0),
                               child: Transform.rotate(
                                 angle: progress * (index.isEven ? 2.4 : -2.1),
                                 child: Icon(
@@ -161,7 +164,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                           ),
                       Center(
                         child: Opacity(
-                          opacity: _reducedMotion ? 1 : fade,
+                          opacity: _reducedMotion ? 1 : (1 - ((_controller.value - .72) / .28).clamp(0.0, 1.0)),
                           child: Transform.scale(
                           scale: _reducedMotion ? 1 : .88 + .12 * Curves.easeOutBack.transform((_controller.value * 3).clamp(0.0, 1.0)),
                           child: DecoratedBox(
