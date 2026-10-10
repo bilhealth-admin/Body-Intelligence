@@ -107,6 +107,9 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   @override
   void didUpdateWidget(covariant FoodLogPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.startGuide != widget.startGuide) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _restoreFoodTour());
+    }
     if (oldWidget.initialAction != widget.initialAction ||
         oldWidget.directPhotoCapture != widget.directPhotoCapture) {
       initialCaptureActionApplied = false;
@@ -131,6 +134,16 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     try {
       state = await preferences.get(_tourKey(owner));
     } on Object {
+      // Keep the explicitly requested tutorial usable this visit even if
+      // local preference reads are temporarily unavailable.
+      if (!mounted ||
+          ref.read(preferencesRepositoryProvider).localOwnerId != owner) {
+        return;
+      }
+      setState(() {
+        _tourOwner = owner;
+        _firstFoodTour = widget.startGuide;
+      });
       return;
     }
     if (!mounted ||
