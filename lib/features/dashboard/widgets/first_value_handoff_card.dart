@@ -49,10 +49,7 @@ class _FirstValueHandoffCardState extends State<FirstValueHandoffCard> {
                 context.strings.text(
                   'BIL saved your profile and starting targets on this device.',
                 ),
-                style: const TextStyle(
-                  color: Color(0xFFD5E4ED),
-                  height: 1.45,
-                ),
+                style: const TextStyle(color: Color(0xFFD5E4ED), height: 1.45),
               ),
               const SizedBox(height: PremiumDesignTokens.spaceSm),
               Row(
