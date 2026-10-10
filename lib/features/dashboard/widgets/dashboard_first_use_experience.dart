@@ -106,7 +106,7 @@ class _DashboardFirstUseExperienceState
     // A stale callback must never navigate a different signed-in owner.
     if (!mounted || !widget.ownerReady || widget.ownerScope != scope) return;
     setState(() => _saving = false);
-    if (openFood) context.go('/daily-log?foodLog=1&from=%2Fdashboard');
+    if (openFood) context.go('/daily-log?foodLog=1&guide=1&from=%2Fdashboard');
   }
 
   Future<void> _dismissStreak() async {
