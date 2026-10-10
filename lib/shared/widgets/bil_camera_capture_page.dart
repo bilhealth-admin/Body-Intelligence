@@ -28,6 +28,8 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
   CameraController? _controller;
   bool _capturing = false;
   XFile? _capturedForReview;
+  bool _reviewReady = false;
+  bool _reviewFailed = false;
   bool _cameraShouldRun = true;
   bool _disposed = false;
   Future<void>? _cameraOperation;
@@ -143,6 +145,8 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
         setState(() {
           _capturedForReview = image;
           _capturing = false;
+          _reviewReady = false;
+          _reviewFailed = false;
         });
       }
     } on CameraException catch (error) {
@@ -164,13 +168,17 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
 
   void _retake() {
     if (_capturedForReview == null || _capturing) return;
-    setState(() => _capturedForReview = null);
+    setState(() {
+      _capturedForReview = null;
+      _reviewReady = false;
+      _reviewFailed = false;
+    });
     if (_cameraShouldRun) unawaited(_initialize());
   }
 
   void _useCapturedPhoto() {
     final photo = _capturedForReview;
-    if (photo == null || !mounted) return;
+    if (photo == null || !mounted || !_reviewReady || _reviewFailed) return;
     Navigator.of(context).pop(photo);
   }
 
@@ -232,11 +240,38 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                 File(_capturedForReview!.path),
                 key: const Key('bil-camera-review-photo'),
                 fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.white,
-                  size: 48,
-                ),
+                frameBuilder: (context, child, frame, synchronous) {
+                  final pathAtFrame = _capturedForReview?.path;
+                  if ((synchronous || frame != null) && !_reviewReady) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted &&
+                          pathAtFrame != null &&
+                          _capturedForReview?.path == pathAtFrame &&
+                          !_reviewReady) {
+                        setState(() => _reviewReady = true);
+                      }
+                    });
+                  }
+                  if (!synchronous && frame == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    );
+                  }
+                  return child;
+                },
+                errorBuilder: (_, _, _) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && _capturedForReview != null &&
+                        !_reviewFailed) {
+                      setState(() => _reviewFailed = true);
+                    }
+                  });
+                  return const Icon(
+                    Icons.broken_image_outlined,
+                    color: Colors.white,
+                    size: 48,
+                  );
+                },
               ),
             )
           else if (ready)
@@ -307,7 +342,9 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                                 backgroundColor: const Color(0xFF45E7A3),
                                 foregroundColor: const Color(0xFF06261E),
                               ),
-                              onPressed: _useCapturedPhoto,
+                              onPressed: _reviewReady && !_reviewFailed
+                                  ? _useCapturedPhoto
+                                  : null,
                               icon: const Icon(Icons.check_rounded),
                               label: Text(
                                 Localizations.localeOf(context).languageCode ==
