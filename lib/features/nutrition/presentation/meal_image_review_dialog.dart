@@ -5,6 +5,7 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../data/database/app_database.dart';
 import '../services/meal_image_gateway_contract.dart';
+import 'meal_vision_premium_review.dart';
 
 class MealImageReviewSelection {
   const MealImageReviewSelection({
@@ -21,8 +22,19 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
   BuildContext context, {
   required String recognizedName,
   required List<Food> foods,
+  double? reviewedAmount,
+  String? reviewedUnit,
 }) {
   if (foods.isEmpty) return Future<Food?>.value(null);
+  if (MediaQuery.sizeOf(context).width >= 320) {
+    return showPremiumTrustedVisionFoodMatchDialog(
+      context,
+      recognizedName: recognizedName,
+      foods: foods,
+      reviewedAmount: reviewedAmount,
+      reviewedUnit: reviewedUnit,
+    );
+  }
   Food? selected;
   final copy = _VisionReviewCopy.ofLocale(Localizations.localeOf(context));
   return showDialog<Food>(
@@ -74,7 +86,30 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
 Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   BuildContext context, {
   required MealImageAnalysis analysis,
+  String? imagePath,
+  String? mealType,
+  DateTime? photographedAt,
 }) {
+  if (MediaQuery.sizeOf(context).width >= 320) {
+    return showPremiumVisionReviewDialog(
+      context,
+      analysis: analysis,
+      imagePath: imagePath,
+      mealType: mealType,
+      photographedAt: photographedAt,
+    ).then(
+      (drafts) => drafts == null
+          ? null
+          : [
+              for (final draft in drafts)
+                MealImageReviewSelection(
+                  candidate: draft.candidate,
+                  amount: draft.amount,
+                  unit: draft.unit,
+                ),
+            ],
+    );
+  }
   final locale = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
   final copy = _VisionReviewCopy.ofLocale(Localizations.localeOf(context));
   final selected = <int>{};

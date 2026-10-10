@@ -334,6 +334,9 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         final selections = await showMealImageReviewDialog(
           context,
           analysis: analysis,
+          imagePath: image.path,
+          mealType: mealType,
+          photographedAt: DateTime.now(),
         );
         if (selections == null || selections.isEmpty || !mounted) return;
         final confirmed = <(Food, double)>[];
@@ -370,6 +373,8 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
             context,
             recognizedName: selection.candidate.name,
             foods: foods,
+            reviewedAmount: selection.amount,
+            reviewedUnit: selection.unit,
           );
           if (!mounted) return;
           if (reviewed != null) {
