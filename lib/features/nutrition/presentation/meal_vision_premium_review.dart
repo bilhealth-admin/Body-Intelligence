@@ -10,6 +10,7 @@ import '../services/meal_image_gateway_contract.dart';
 import '../domain/unified_food.dart';
 
 part 'meal_vision_premium_match.dart';
+part 'meal_vision_premium_portion.dart';
 part 'meal_vision_premium_visuals.dart';
 part 'meal_vision_premium_glass.dart';
 part 'meal_vision_premium_reference.dart';
@@ -25,6 +26,43 @@ class PremiumVisionSelection {
   final MealImageCandidate candidate;
   final double amount;
   final String unit;
+}
+
+/// The exact food and portion confirmed on the final review screen.
+class TrustedVisionFoodSelection {
+  const TrustedVisionFoodSelection({
+    required this.food,
+    required this.amount,
+    required this.unit,
+  });
+  final Food food;
+  final double amount;
+  final String unit;
+}
+
+Future<TrustedVisionFoodSelection?> showEditableTrustedVisionFoodMatchDialog(
+  BuildContext context, {
+  required String recognizedName,
+  required List<Food> foods,
+  required double reviewedAmount,
+  required String reviewedUnit,
+  String? imagePath,
+  String? evidenceOwnerKey,
+}) {
+  if (foods.isEmpty) return Future.value(null);
+  return showDialog<TrustedVisionFoodSelection>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => _PremiumTrustedMatchDialog(
+      recognizedName: recognizedName,
+      foods: foods,
+      reviewedAmount: reviewedAmount,
+      reviewedUnit: reviewedUnit,
+      imagePath: imagePath,
+      editable: true,
+      evidenceOwnerKey: evidenceOwnerKey,
+    ),
+  );
 }
 
 /// Opt-in replacement for the first review stage. Does not write to the diary.

@@ -67,12 +67,13 @@ void main() {
         visionV2App(
           Builder(
             builder: (context) => TextButton(
-              onPressed: () => showPremiumTrustedVisionFoodMatchDialog(
+              onPressed: () => showEditableTrustedVisionFoodMatchDialog(
                 context,
                 recognizedName: 'فول مدمس مع طحينة — عينة اختبار',
                 foods: [food],
                 reviewedAmount: 60,
                 reviewedUnit: 'g',
+                imagePath: visionV2PhotoPath,
               ),
               child: const Text('OPEN VERIFIED TEST'),
             ),

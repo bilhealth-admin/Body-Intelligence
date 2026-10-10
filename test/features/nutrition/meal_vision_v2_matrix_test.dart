@@ -120,12 +120,13 @@ void main() {
                 visionV2App(
                   Builder(
                     builder: (context) => TextButton(
-                      onPressed: () => showPremiumTrustedVisionFoodMatchDialog(
+                      onPressed: () => showEditableTrustedVisionFoodMatchDialog(
                         context,
                         recognizedName: 'TEST FIXTURE — فول',
                         foods: [food],
                         reviewedAmount: 80,
                         reviewedUnit: 'g',
+                        imagePath: visionV2PhotoPath,
                       ),
                       child: const Text('OPEN NUTRIENTS'),
                     ),
@@ -144,6 +145,12 @@ void main() {
                 isNull,
               );
               final foodTitle = language == 'ar' ? food.arabicName! : food.name;
+              await tester.scrollUntilVisible(
+                find.text(foodTitle),
+                100,
+                scrollable: find.byType(Scrollable).first,
+              );
+              await tester.pumpAndSettle();
               expect(find.text(foodTitle), findsOneWidget);
               if (language == 'ar') expect(find.text(food.name), findsNothing);
               await tapVisible(tester, find.text(foodTitle));

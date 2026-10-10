@@ -27,7 +27,7 @@ P0 = [
     ("first-food-commit", "test/data/repositories/first_food_milestone_commit_test.dart"),
     ("vision-review", "test/features/nutrition/meal_vision_premium_review_test.dart"),
     ("vision-durable-replay", "test/features/nutrition/meal_vision_verified_commit_test.dart"),
-    ("vision-quantity-basis", "test/features/nutrition/meal_image_unified_review_contract_test.dart"),
+    ("vision-quantity-basis", "test/features/nutrition/meal_image_unified_review_contract_test.dart test/features/nutrition/meal_vision_final_portion_test.dart"),
     ("vision-capture", "test/features/nutrition/meal_vision_flutter_capture_test.dart"),
     ("architecture", "test/architecture_source_file_size_guard_test.dart"),
     ("coach-photo-bridge", "test/parallel/bil02/coach_media_page_overlay_test.dart"),

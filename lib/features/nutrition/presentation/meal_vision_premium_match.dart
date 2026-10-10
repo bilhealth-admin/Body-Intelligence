@@ -15,12 +15,16 @@ class _PremiumTrustedMatchDialog extends StatefulWidget {
     this.reviewedAmount,
     this.reviewedUnit,
     this.evidenceOwnerKey,
+    this.imagePath,
+    this.editable = false,
   });
   final String recognizedName;
   final List<Food> foods;
   final double? reviewedAmount;
   final String? reviewedUnit;
   final String? evidenceOwnerKey;
+  final String? imagePath;
+  final bool editable;
 
   @override
   State<_PremiumTrustedMatchDialog> createState() =>
@@ -31,6 +35,50 @@ class _PremiumTrustedMatchDialogState
     extends State<_PremiumTrustedMatchDialog> {
   Food? _selected;
   bool _full = false;
+  late final TextEditingController _amount;
+  late final TextEditingController _unit;
+
+  @override
+  void initState() {
+    super.initState();
+    _amount = TextEditingController(text: '${widget.reviewedAmount ?? ''}');
+    _unit = TextEditingController(text: widget.reviewedUnit ?? '');
+  }
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    _unit.dispose();
+    super.dispose();
+  }
+
+  double? get _currentAmount =>
+      double.tryParse(_PremiumVisionReviewDialogState._digits(_amount.text));
+  String get _currentUnit => _unit.text.trim();
+
+  bool get _validPortion {
+    if (!widget.editable && widget.reviewedAmount == null) return true;
+    final amount = _currentAmount;
+    return _selected != null &&
+        amount != null &&
+        amount.isFinite &&
+        amount > 0 &&
+        mealImageReviewedQuantity(
+              amount: amount,
+              unit: _currentUnit,
+              servingSize: _selected!.servingSize,
+              servingUnit: _selected!.servingUnit,
+            ) !=
+            null;
+  }
+
+  void _stepAmount(double delta) {
+    final amount = _currentAmount;
+    if (amount == null || !amount.isFinite || amount + delta <= 0) return;
+    setState(() => _amount.text = '${amount + delta}');
+  }
+
+  void _portionUpdate(VoidCallback change) => setState(change);
 
   @override
   Widget build(BuildContext context) => _glassShell(
@@ -88,6 +136,7 @@ class _PremiumTrustedMatchDialogState
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
             children: [
+              if (widget.editable) _portionEditor(context),
               for (final food in widget.foods)
                 Builder(
                   builder: (context) {
@@ -258,17 +307,22 @@ class _PremiumTrustedMatchDialogState
                           _selected!,
                           evidenceOwnerKey: widget.evidenceOwnerKey,
                         ) ||
-                        (widget.reviewedAmount != null &&
-                            widget.reviewedUnit != null &&
-                            mealImageReviewedQuantity(
-                                  amount: widget.reviewedAmount!,
-                                  unit: widget.reviewedUnit!,
-                                  servingSize: _selected!.servingSize,
-                                  servingUnit: _selected!.servingUnit,
-                                ) ==
-                                null)
+                        !_validPortion
                     ? null
-                    : () => Navigator.pop(context, _selected),
+                    : () {
+                        if (widget.editable) {
+                          Navigator.pop(
+                            context,
+                            TrustedVisionFoodSelection(
+                              food: _selected!,
+                              amount: _currentAmount!,
+                              unit: _currentUnit,
+                            ),
+                          );
+                        } else {
+                          Navigator.pop(context, _selected);
+                        }
+                      },
                 style: _visionActionStyle(context),
                 child: Text(
                   _word(
@@ -292,11 +346,11 @@ class _PremiumTrustedMatchDialogState
   Widget _nutritionFacts(BuildContext context, Food food) {
     // This does not infer nutrients from image pixels. It reads only the
     // explicitly selected, verified catalog record and its evidence mask.
-    final portion = widget.reviewedAmount == null || widget.reviewedUnit == null
+    final portion = _currentAmount == null || _currentUnit.isEmpty
         ? null
         : mealImageReviewedQuantity(
-            amount: widget.reviewedAmount!,
-            unit: widget.reviewedUnit!,
+            amount: _currentAmount!,
+            unit: _currentUnit,
             servingSize: food.servingSize,
             servingUnit: food.servingUnit,
           );

@@ -7,6 +7,26 @@ import '../../../data/database/app_database.dart';
 import '../services/meal_image_gateway_contract.dart';
 import 'meal_vision_premium_review.dart';
 
+export 'meal_vision_premium_review.dart' show TrustedVisionFoodSelection;
+
+Future<TrustedVisionFoodSelection?> showReviewedVisionFoodMatchDialog(
+  BuildContext context, {
+  required String recognizedName,
+  required List<Food> foods,
+  required double reviewedAmount,
+  required String reviewedUnit,
+  String? imagePath,
+  String? evidenceOwnerKey,
+}) => showEditableTrustedVisionFoodMatchDialog(
+  context,
+  recognizedName: recognizedName,
+  foods: foods,
+  reviewedAmount: reviewedAmount,
+  reviewedUnit: reviewedUnit,
+  imagePath: imagePath,
+  evidenceOwnerKey: evidenceOwnerKey,
+);
+
 class MealImageReviewSelection {
   const MealImageReviewSelection({
     required this.candidate,

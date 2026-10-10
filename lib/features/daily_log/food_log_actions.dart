@@ -413,33 +413,34 @@ extension _FoodLogActions on _FoodLogPageState {
           );
           continue;
         }
-        final reviewed = await showTrustedVisionFoodMatchDialog(
+        final reviewed = await showReviewedVisionFoodMatchDialog(
           context,
           recognizedName: selection.candidate.name,
           foods: foods,
           reviewedAmount: selection.amount,
           reviewedUnit: selection.unit,
+          imagePath: image.path,
         );
         if (!mounted || reviewed == null) continue;
         final portion = mealImageReviewedQuantity(
-          amount: selection.amount,
-          unit: selection.unit,
-          servingSize: reviewed.servingSize,
-          servingUnit: reviewed.servingUnit,
+          amount: reviewed.amount,
+          unit: reviewed.unit,
+          servingSize: reviewed.food.servingSize,
+          servingUnit: reviewed.food.servingUnit,
         );
         if (portion == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 '${selection.candidate.name}: ${visionCopy.text('unit_mismatch')} '
-                '(${reviewed.servingUnit})',
+                '(${reviewed.food.servingUnit})',
               ),
             ),
           );
           continue;
         }
         confirmed.add((
-          food: reviewed,
+          food: reviewed.food,
           quantity: portion.quantity,
           quantityInGrams: portion.quantityInGrams,
         ));
