@@ -1,0 +1,62 @@
+{
+  "head": "bd4a95b12bef111ecfef8c0f279f9a29e8b2e83f",
+  "fingerprint": "cecd8d525137ee56e4c613ba236d64d23bd75f7c3c7973198e0ffe3a10a297f8",
+  "jobs": {
+    "arabic-noto-capture": {
+      "stage": "arabic",
+      "passed": 2,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/arabic-noto-capture-1791661446790764000.log"
+    },
+    "arabic-vision-v2": {
+      "stage": "arabic",
+      "passed": 82,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/arabic-vision-v2-1791661470435159400.log"
+    },
+    "affected-contracts-home-card-all": {
+      "stage": "affected-contracts",
+      "passed": 18,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/affected-contracts-home-card-all-1791661503998836700.log"
+    },
+    "affected-contracts-vision-final-portion": {
+      "stage": "affected-contracts",
+      "passed": 3,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/affected-contracts-vision-final-portion-1791661515320398700.log"
+    },
+    "broad-dashboard-nutrition": {
+      "stage": "broad",
+      "passed": 85,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/broad-dashboard-nutrition-1791661524765816800.log"
+    },
+    "broad-dashboard-contract-health": {
+      "stage": "broad",
+      "passed": 28,
+      "failed": 1,
+      "exit_code": 1,
+      "log": "logs/broad-dashboard-contract-health-1791661540791804700.log"
+    },
+    "broad-weekly-onboarding-goldens": {
+      "stage": "broad",
+      "passed": 19,
+      "failed": 26,
+      "exit_code": 1,
+      "log": "logs/broad-weekly-onboarding-goldens-1791661551401918800.log"
+    },
+    "broad-wellness-commerce": {
+      "stage": "broad",
+      "passed": 9,
+      "failed": 2,
+      "exit_code": 1,
+      "log": "logs/broad-wellness-commerce-1791661569379131000.log"
+    }
+  }
+}

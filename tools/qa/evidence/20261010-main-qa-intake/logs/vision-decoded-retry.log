@@ -1,0 +1,15 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart
+00:00 +0: (setUpAll)
+00:00 +0 -1: (setUpAll) [E]
+  PathExistsException: Cannot copy file to 'build/vision-v2-captures/TEST_FIXTURE_MEAL_ful.png', path = 'assets/images/professional/recipes/ful-medames-tahini.png' (OS Error: Cannot create a file when that file already exists, errno = 183)
+  dart:io                                                    _File.copy
+  test\features\nutrition\vision_v2_test_fixture.dart 24:33  prepareVisionV2Fixture
+  ===== asynchronous gap ===========================
+  dart:async                                                 _CustomZone.registerUnaryCallback
+  test\features\nutrition\vision_v2_test_fixture.dart 20:3   prepareVisionV2Fixture
+  
+00:00 +0 -1: (tearDownAll)
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: (setUpAll)

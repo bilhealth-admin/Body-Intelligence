@@ -1,0 +1,95 @@
+Command: flutter test --no-pub --timeout=3m test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart test/dashboard_polish/dashboard_polish_layout_review_test.dart test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart test/dashboard_polish/dashboard_current_preview_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: ar workout tile opens videos and routines at 1.6x
+00:01 +1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories
+00:02 +2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories
+00:02 +3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories
+00:03 +4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories
+00:03 +5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories
+00:03 +6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories
+00:03 +7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories
+00:03 +8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:03 +9: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:03 +10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +11: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +12: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +13: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +14: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +15: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +16: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +17: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +18: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +19: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +20: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: en real Dashboard shows unknown macros after1905 commit
+00:04 +21: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +22: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +23: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +24: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +25: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +26: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +27: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +28: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +29: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +30: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +31: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +32: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +32: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: ar real Dashboard shows unknown macros after1905 commit
+Missing reviewed runtime translation: ar: Body Twin accepted your first trusted baseline at 87.0 kg. This describes your current recorded state; it does not claim a trend yet.
+00:05 +33: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +34: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:05 +35: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +36: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +37: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +38: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +38: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: ar actual calorie net and remaining stay unknown
+Missing reviewed runtime translation: ar: Body Twin accepted your first trusted baseline at 87.0 kg. This describes your current recorded state; it does not claim a trend yet.
+00:06 +39: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +40: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +41: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +42: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +43: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +44: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +45: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +46: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +47: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +48: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +49: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +50: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:06 +51: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:07 +52: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:07 +53: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:07 +54: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:07 +55: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:07 +56: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:07 +57: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview
+00:07 +58: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart: modern explicitly known zero remains distinct from an omitted value
+00:07 +59: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: zh-Hant workout tile opens videos and routines at 1.6x
+00:07 +60: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: zh-Hant workout tile opens videos and routines at 1.6x
+00:07 +61: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: zh-Hant workout tile opens videos and routines at 1.6x
+00:07 +62: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: ar 390 at 1.6x retains all content and burned calories
+00:07 +63: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: ar 390 at 1.6x retains all content and burned calories
+00:07 +64: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: ar 390 at 1.6x retains all content and burned calories
+00:07 +65: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +66: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +67: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +68: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +69: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +70: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +71: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +72: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:07 +73: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:08 +74: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+00:08 +75: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: ar current production dashboard and dock preview
+Missing reviewed runtime translation: ar: Body Twin accepted your first trusted baseline at 87.0 kg. This describes your current recorded state; it does not claim a trend yet.
+Missing reviewed runtime translation: ar: Body Twin accepted your first trusted baseline at 87.0 kg. This describes your current recorded state; it does not claim a trend yet.
+00:08 +76: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: ar 430 at 2.0x retains all content and burned calories
+00:08 +77: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: ar 430 at 2.0x retains all content and burned calories
+00:08 +78: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: th uses reference calorie and macro rows at 1.6x
+00:08 +79: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: pl workout tile opens videos and routines at 1.6x
+00:08 +80: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: pl uses reference calorie and macro rows at 1.6x
+00:08 +81: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: nl workout tile opens videos and routines at 1.6x
+00:08 +82: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: nl uses reference calorie and macro rows at 1.6x
+00:08 +83: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: uk workout tile opens videos and routines at 1.6x
+00:08 +84: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart: uk uses reference calorie and macro rows at 1.6x
+00:08 +85: All tests passed!

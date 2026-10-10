@@ -1,0 +1,104 @@
+{
+  "head": "bd4a95b12bef111ecfef8c0f279f9a29e8b2e83f",
+  "worktree_sha256": "cecd8d525137ee56e4c613ba236d64d23bd75f7c3c7973198e0ffe3a10a297f8",
+  "flutter": "3.44.6",
+  "stages": {
+    "source": {
+      "format": [
+        {
+          "exit_code": 0,
+          "seconds": 2.8,
+          "log": "build\\bil-main-qa-intake\\final\\source-format-1-1791660922340556800.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 2.9,
+          "log": "build\\bil-main-qa-intake\\final\\source-format-2-1791660925139244100.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 2.7,
+          "log": "build\\bil-main-qa-intake\\final\\source-format-3-1791660928014599800.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 2.1,
+          "log": "build\\bil-main-qa-intake\\final\\source-format-4-1791660930759072900.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 2.5,
+          "log": "build\\bil-main-qa-intake\\final\\source-format-5-1791660932816548100.log"
+        }
+      ],
+      "analyze": {
+        "exit_code": 0,
+        "seconds": 511.3,
+        "log": "build\\bil-main-qa-intake\\final\\source-analyze-1791660935322441400.log"
+      },
+      "passed": true
+    },
+    "arabic": {
+      "passed": true,
+      "jobs": {
+        "arabic-noto-capture": {
+          "exit_code": 0,
+          "seconds": 23.6,
+          "log": "build\\bil-main-qa-intake\\final\\arabic-noto-capture-1791661446790764000.log"
+        },
+        "arabic-vision-v2": {
+          "exit_code": 0,
+          "seconds": 33.4,
+          "log": "build\\bil-main-qa-intake\\final\\arabic-vision-v2-1791661470435159400.log"
+        }
+      }
+    },
+    "affected-contracts": {
+      "passed": true,
+      "jobs": {
+        "affected-contracts-home-card-all": {
+          "exit_code": 0,
+          "seconds": 11.3,
+          "log": "build\\bil-main-qa-intake\\final\\affected-contracts-home-card-all-1791661503998836700.log"
+        },
+        "affected-contracts-vision-final-portion": {
+          "exit_code": 0,
+          "seconds": 9.3,
+          "log": "build\\bil-main-qa-intake\\final\\affected-contracts-vision-final-portion-1791661515320398700.log"
+        }
+      }
+    },
+    "broad": {
+      "passed": false,
+      "jobs": {
+        "broad-dashboard-nutrition": {
+          "exit_code": 0,
+          "seconds": 16.0,
+          "log": "build\\bil-main-qa-intake\\final\\broad-dashboard-nutrition-1791661524765816800.log"
+        },
+        "broad-dashboard-contract-health": {
+          "exit_code": 1,
+          "seconds": 10.6,
+          "log": "build\\bil-main-qa-intake\\final\\broad-dashboard-contract-health-1791661540791804700.log"
+        },
+        "broad-weekly-onboarding-goldens": {
+          "exit_code": 1,
+          "seconds": 18.0,
+          "log": "build\\bil-main-qa-intake\\final\\broad-weekly-onboarding-goldens-1791661551401918800.log"
+        },
+        "broad-wellness-commerce": {
+          "exit_code": 1,
+          "seconds": 11.2,
+          "log": "build\\bil-main-qa-intake\\final\\broad-wellness-commerce-1791661569379131000.log"
+        }
+      }
+    }
+  },
+  "skipped": {
+    "p0": "No full 11-group rerun requested: unchanged unrelated contracts; affected Vision contract rerun separately.",
+    "focused": "No full 5-group rerun requested: no change to those sources.",
+    "broad-settings-language-icons": "Unchanged, prior green only; not certified on this SHA.",
+    "broad-community-cold-back": "Unchanged, prior green only; not certified on this SHA.",
+    "full": "All 8 skipped: Broad still RED and full prerequisite set not green on final SHA."
+  }
+}
