@@ -8,13 +8,13 @@ import 'package:go_router/go_router.dart';
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../../app/theme/bil_flat_icon.dart';
 import '../../core/units/measurement_units.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../admin/services/ai_coach_admin_service.dart';
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/domain/subscription_state.dart';
-import '../commerce/presentation/premium_crown_emblem.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -65,28 +65,20 @@ class SettingsPage extends ConsumerWidget {
     );
     final unit = copy(UnitConverter.weightUnit(system));
 
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           copy('More'),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -.35,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontSize: 19,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0,
           ),
         ),
       ),
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: dark
-              ? null
-              : const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFF9FBFF), Color(0xFFF3F7FC)],
-                ),
-        ),
+      body: ColoredBox(
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 96),
           children: [
@@ -107,29 +99,33 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => context.push('/profile-summary'),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             subscription.when(
-              loading: () =>
-                  _PremiumMembershipCard(label: copy('Checking subscription')),
-              error: (_, _) => _PremiumMembershipCard(
+              loading: () => _PremiumMembershipLink(
+                label: copy('Checking subscription'),
+                isChecking: true,
+              ),
+              error: (_, _) => _PremiumMembershipLink(
                 label: copy('Retry subscription check'),
+                isRetry: true,
                 onTap: () => ref.invalidate(verifiedSubscriptionStateProvider),
               ),
               data: (value) =>
                   value.authority != EntitlementAuthority.verifiedServer
-                  ? _PremiumMembershipCard(
+                  ? _PremiumMembershipLink(
                       label: copy('Retry subscription check'),
+                      isRetry: true,
                       onTap: () =>
                           ref.invalidate(verifiedSubscriptionStateProvider),
                     )
-                  : _PremiumMembershipCard(
+                  : _PremiumMembershipLink(
                       label: value.plan == CommercePlan.free
-                          ? copy('Start 7-day free trial')
+                          ? copy('Explore Premium')
                           : copy('Active'),
                       onTap: () => context.push('/plans'),
                     ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 4),
             _MoreSection(
               title: copy('Account & profile'),
               children: [
@@ -266,78 +262,89 @@ class SettingsPage extends ConsumerWidget {
   }
 }
 
-class _PremiumMembershipCard extends StatelessWidget {
-  const _PremiumMembershipCard({required this.label, this.onTap});
+class _PremiumMembershipLink extends StatelessWidget {
+  const _PremiumMembershipLink({
+    required this.label,
+    this.onTap,
+    this.isChecking = false,
+    this.isRetry = false,
+  });
 
   final String label;
   final VoidCallback? onTap;
+  final bool isChecking;
+  final bool isRetry;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.transparent,
-    borderRadius: BorderRadius.circular(16),
-    clipBehavior: Clip.antiAlias,
-    child: Ink(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [Color(0xFF13243A), Color(0xFF07111D)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0x99F6D477)),
-      ),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gold = theme.brightness == Brightness.dark
+        ? const Color(0xFFE2C78E)
+        : const Color(0xFF8B6429);
+    final directionalIcon = Directionality.of(context) == TextDirection.rtl
+        ? Icons.chevron_left_rounded
+        : Icons.chevron_right_rounded;
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
+        key: const Key('more-premium-entry'),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              const PremiumCrownEmblem(size: 52),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ReferenceSettingsCopy.of(context)('BIL Premium'),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFFFFE59A),
-                        fontWeight: FontWeight.w900,
+        borderRadius: BorderRadius.circular(12),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 12, 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ReferenceSettingsCopy.of(context)('BIL Premium'),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: gold,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFFD8E1EA),
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 2),
+                      Text(
+                        label,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              if (onTap == null)
-                const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFFFFD469),
+                    ],
                   ),
-                )
-              else
-                Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.arrow_back_rounded
-                      : Icons.arrow_forward_rounded,
-                  color: Color(0xFFFFE59A),
                 ),
-            ],
+                const SizedBox(width: 12),
+                if (isChecking)
+                  SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: gold,
+                    ),
+                  )
+                else
+                  Icon(
+                    isRetry ? Icons.refresh_rounded : directionalIcon,
+                    size: 18,
+                    color: gold,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _MoreSection extends StatelessWidget {
@@ -349,39 +356,30 @@ class _MoreSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.only(top: 18),
+      padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 9),
+            padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 6),
             child: Text(
               title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: -.25,
-                color: dark
-                    ? theme.colorScheme.onSurface
-                    : const Color(0xFF101C33),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           Material(
-            color: dark
-                ? theme.colorScheme.surfaceContainer
-                : const Color(0xFFFEFFFF),
-            elevation: dark ? 0 : 1.5,
-            shadowColor: dark
-                ? Colors.black.withValues(alpha: .18)
-                : const Color(0xFF315E9B).withValues(alpha: .10),
+            color: theme.colorScheme.surface,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(14),
               side: BorderSide(
-                color: dark
-                    ? Colors.white.withValues(alpha: .09)
-                    : const Color(0xFFDDE7F3),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: .55),
               ),
             ),
             clipBehavior: Clip.antiAlias,
@@ -453,17 +451,17 @@ class _ProfileSummary extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
         child: Column(
           children: [
             Row(
               children: [
                 BilAccountAvatar(
-                  radius: 34,
+                  radius: 28,
                   photoBytes: photo,
                   networkUrl: photoUrl,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,7 +473,8 @@ class _ProfileSummary extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         semanticsLabel: name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -495,7 +494,7 @@ class _ProfileSummary extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             Row(
               children: [
                 _Metric(currentWeight, copy('Current'), unit),
@@ -526,7 +525,7 @@ class _Metric extends StatelessWidget {
             '$value $unit',
             style: Theme.of(
               context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(height: 3),
@@ -551,21 +550,48 @@ class _MoreRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final path = Uri.parse(route).path;
+    // Community and Coach entrances keep their established semantic icons.
+    // Other destinations show a flat glyph only when it adds wayfinding value.
+    final protectedEntry = const <String>{
+      '/intelligence-center',
+      '/community',
+      '/community/connections',
+      '/community/messages',
+    }.contains(path);
+    final showIcon =
+        protectedEntry ||
+        const <String>{
+          '/goals',
+          '/history',
+          '/weekly-report',
+          '/analytics/nutrition',
+          '/nutrition',
+          '/wellness/fasting',
+          '/wellness/sleep',
+          '/wellness/recipes',
+          '/wellness/workouts/routines',
+          '/connected-health',
+          '/connected-health/steps',
+          '/notification-settings',
+        }.contains(path);
     final semanticKind = BilSemanticIcons.kindForRoute(route) ?? _fallbackKind;
     return Column(
       children: [
         ListTile(
-          minTileHeight: 60,
+          minTileHeight: protectedEntry ? 60 : 54,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          horizontalTitleGap: 12,
-          leading: _MorePremiumIcon(kind: semanticKind, danger: _isDanger),
+          horizontalTitleGap: 8,
+          leading: showIcon
+              ? _MorePremiumIcon(kind: semanticKind, danger: _isDanger)
+              : null,
           title: Text(
             label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: _isDanger ? Theme.of(context).colorScheme.error : null,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -.12,
+              fontSize: 15.5,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0,
             ),
           ),
           trailing: Row(
@@ -598,7 +624,7 @@ class _MoreRow extends StatelessWidget {
           Divider(
             height: 1,
             thickness: .7,
-            indent: 72,
+            indent: showIcon ? 58 : 16,
             endIndent: 16,
             color: Theme.of(context).dividerColor.withValues(alpha: .42),
           ),

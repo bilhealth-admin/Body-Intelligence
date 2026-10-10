@@ -20,6 +20,7 @@ import '../weight/providers/weight_provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'profile_summary_locale_copy.dart';
 import '../../shared/widgets/bil_account_avatar.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 final profileFriendsCountProvider = FutureProvider<int?>((ref) async {
   if (!AppEnvironment.cloudConfigured) return null;
@@ -153,34 +154,36 @@ class ProfileSummaryPage extends ConsumerWidget {
         friendsState.hasError ||
         nameState.hasError ||
         photoState.hasError) {
-      return Scaffold(
-        appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline_rounded, size: 42),
-                const SizedBox(height: 12),
-                Text(
-                  _copy(context, 'Profile data could not be loaded.'),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () {
-                    ref.invalidate(userProfileProvider);
-                    ref.invalidate(weightHistoryProvider);
-                    ref.invalidate(measurementSystemProvider);
-                    ref.invalidate(profileFriendsCountProvider);
-                    ref.invalidate(displayNameProvider);
-                    ref.invalidate(profilePhotoProvider);
-                  },
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(_copy(context, 'Retry')),
-                ),
-              ],
+      return BilCalmVisualScope(
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline_rounded, size: 42),
+                  const SizedBox(height: 12),
+                  Text(
+                    _copy(context, 'Profile data could not be loaded.'),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: () {
+                      ref.invalidate(userProfileProvider);
+                      ref.invalidate(weightHistoryProvider);
+                      ref.invalidate(measurementSystemProvider);
+                      ref.invalidate(profileFriendsCountProvider);
+                      ref.invalidate(displayNameProvider);
+                      ref.invalidate(profilePhotoProvider);
+                    },
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(_copy(context, 'Retry')),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -192,160 +195,167 @@ class ProfileSummaryPage extends ConsumerWidget {
         friendsState.isLoading ||
         nameState.isLoading ||
         photoState.isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
-        body: const Center(child: CircularProgressIndicator()),
+      return BilCalmVisualScope(
+        builder: (context) => Scaffold(
+          appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
+          body: const Center(child: CircularProgressIndicator()),
+        ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: colors.surfaceContainerLowest,
-      appBar: AppBar(centerTitle: true, title: Text(name)),
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          Container(
-            color: colors.surface,
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                _Avatar(photo: photo, networkUrl: photoUrl),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(name, style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 3),
-                      if (memberSince != null || profile != null)
-                        Text.rich(
-                          TextSpan(
-                            text: '${_copy(context, 'Member since')}: ',
-                            children: [
-                              TextSpan(
-                                text: MaterialLocalizations.of(context)
-                                    .formatMediumDate(
-                                      (memberSince ?? profile!.createdAt)
-                                          .toLocal(),
-                                    ),
-                                style: TextStyle(color: colors.onSurface),
-                              ),
-                            ],
-                          ),
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: colors.onSurfaceVariant),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        backgroundColor: colors.surfaceContainerLowest,
+        appBar: AppBar(centerTitle: true, title: Text(name)),
+        body: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Container(
+              color: colors.surface,
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  _Avatar(photo: photo, networkUrl: photoUrl),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                    ],
+                        const SizedBox(height: 3),
+                        if (memberSince != null || profile != null)
+                          Text.rich(
+                            TextSpan(
+                              text: '${_copy(context, 'Member since')}: ',
+                              children: [
+                                TextSpan(
+                                  text: MaterialLocalizations.of(context)
+                                      .formatMediumDate(
+                                        (memberSince ?? profile!.createdAt)
+                                            .toLocal(),
+                                      ),
+                                  style: TextStyle(color: colors.onSurface),
+                                ),
+                              ],
+                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: colors.onSurfaceVariant),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Container(
+              color: colors.surface,
+              height: 88,
+              child: Row(
+                children: [
+                  _Metric(
+                    value: weightChangeValue ?? '\u2014',
+                    unit: weightUnit,
+                    label: _copy(context, 'Weight change'),
+                    semanticValue: weightChangeValue == null
+                        ? _copy(context, 'Insufficient data')
+                        : '$weightChangeValue $weightUnit',
+                    accent: true,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 88,
+                    color: Theme.of(context).dividerColor,
+                  ),
+                  _Metric(
+                    value: friendsState.isLoading
+                        ? '…'
+                        : friends?.toString() ?? '\u2014',
+                    label: _copy(context, 'Friends'),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            subscription.when(
+              loading: () => Container(
+                color: colors.surface,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                alignment: Alignment.center,
+                child: const SizedBox.square(
+                  dimension: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              error: (_, _) => Container(
+                color: colors.surface,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                alignment: Alignment.center,
+                child: TextButton.icon(
+                  onPressed: () =>
+                      ref.invalidate(verifiedSubscriptionStateProvider),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(context.strings.text('Retry subscription check')),
+                ),
+              ),
+              data: (value) =>
+                  value.authority != EntitlementAuthority.verifiedServer
+                  ? Container(
+                      color: colors.surface,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      alignment: Alignment.center,
+                      child: TextButton.icon(
+                        onPressed: () =>
+                            ref.invalidate(verifiedSubscriptionStateProvider),
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: Text(
+                          context.strings.text('Retry subscription check'),
+                        ),
+                      ),
+                    )
+                  : value.plan == CommercePlan.free
+                  ? Container(
+                      color: colors.surface,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      alignment: Alignment.center,
+                      child: FilledButton(
+                        onPressed: () => context.push('/plans'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFCB55),
+                          foregroundColor: Colors.black,
+                          minimumSize: const Size(0, 46),
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                        ),
+                        child: Text(_copy(context, 'Go Premium')),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            const Divider(height: 1),
+            Material(
+              color: colors.surface,
+              child: InkWell(
+                onTap: () => context.push('/profile-settings'),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 18,
+                  ),
+                  child: Text(
+                    _copy(context, 'Edit Profile'),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: colors.primary),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Container(
-            color: colors.surface,
-            height: 88,
-            child: Row(
-              children: [
-                _Metric(
-                  value: weightChangeValue ?? '\u2014',
-                  unit: weightUnit,
-                  label: _copy(context, 'Weight change'),
-                  semanticValue: weightChangeValue == null
-                      ? _copy(context, 'Insufficient data')
-                      : '$weightChangeValue $weightUnit',
-                  accent: true,
-                ),
-                Container(
-                  width: 1,
-                  height: 88,
-                  color: Theme.of(context).dividerColor,
-                ),
-                _Metric(
-                  value: friendsState.isLoading
-                      ? '…'
-                      : friends?.toString() ?? '\u2014',
-                  label: _copy(context, 'Friends'),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          subscription.when(
-            loading: () => Container(
-              color: colors.surface,
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              alignment: Alignment.center,
-              child: const SizedBox.square(
-                dimension: 22,
-                child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
-            error: (_, _) => Container(
-              color: colors.surface,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              alignment: Alignment.center,
-              child: TextButton.icon(
-                onPressed: () =>
-                    ref.invalidate(verifiedSubscriptionStateProvider),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(context.strings.text('Retry subscription check')),
-              ),
-            ),
-            data: (value) =>
-                value.authority != EntitlementAuthority.verifiedServer
-                ? Container(
-                    color: colors.surface,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    alignment: Alignment.center,
-                    child: TextButton.icon(
-                      onPressed: () =>
-                          ref.invalidate(verifiedSubscriptionStateProvider),
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: Text(
-                        context.strings.text('Retry subscription check'),
-                      ),
-                    ),
-                  )
-                : value.plan == CommercePlan.free
-                ? Container(
-                    color: colors.surface,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    alignment: Alignment.center,
-                    child: FilledButton(
-                      onPressed: () => context.push('/plans'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCB55),
-                        foregroundColor: Colors.black,
-                        minimumSize: const Size(0, 46),
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                      ),
-                      child: Text(_copy(context, 'Go Premium')),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-          const Divider(height: 1),
-          Material(
-            color: colors.surface,
-            child: InkWell(
-              onTap: () => context.push('/profile-settings'),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 18,
-                ),
-                child: Text(
-                  _copy(context, 'Edit Profile'),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleMedium?.copyWith(color: colors.primary),
-                ),
-              ),
-            ),
-          ),
-          const Divider(height: 1),
-        ],
+            const Divider(height: 1),
+          ],
+        ),
       ),
     );
   }

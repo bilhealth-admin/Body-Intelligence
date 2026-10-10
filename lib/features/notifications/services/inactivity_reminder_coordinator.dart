@@ -40,7 +40,9 @@ class _InactivityReminderCoordinatorState
     WidgetsBinding.instance.addObserver(this);
     if (!kIsWeb &&
         BilNotificationNavigation.supportsPlatform(defaultTargetPlatform)) {
-      BilNotificationNavigation.configure(navigate: AppRouter.router.go);
+      BilNotificationNavigation.configure(
+        navigate: AppRouter.openExternalRoute,
+      );
       unawaited(BilNotificationNavigation.initializeNativeRemoteTapBridge());
     }
     unawaited(_cancelSafely());

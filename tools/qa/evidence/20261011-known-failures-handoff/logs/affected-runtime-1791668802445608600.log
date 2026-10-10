@@ -1,0 +1,15 @@
+Command: flutter test --no-pub --timeout=3m test/features/ai_platform/local_intelligence_reality_runtime_test.dart --reporter=json --concurrency=1
+
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":17144,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"count":1,"time":9,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":4558}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":4561}
+{"test":{"id":3,"name":"first trusted baseline message is localized for an Arabic user","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":12,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart"},"type":"testStart","time":4561}
+{"testID":3,"messageType":"print","message":"Missing reviewed runtime translation: ar: Body Twin accepted your first trusted baseline at 87.0 kg. This describes your current recorded state; it does not claim a trend yet.","type":"print","time":5203}
+{"testID":3,"error":"Expected: match '[؀-ۿ]'\n  Actual: 'Body Twin accepted your first trusted baseline at 87.0 kg. This describes your current recorded state; it does not claim a trend yet.'\n","stackTrace":"package:matcher                                                              expect\npackage:flutter_test/src/widget_tester.dart 473:18                           expect\ntest\\features\\ai_platform\\local_intelligence_reality_runtime_test.dart 41:7  main.<fn>\n","isFailure":true,"type":"error","time":5211}
+{"testID":3,"result":"failure","skipped":false,"hidden":false,"type":"testDone","time":5212}
+{"test":{"id":4,"name":"composition root exposes the canonical Reality Runtime only","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":49,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart"},"type":"testStart","time":5212}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5219}
+{"success":false,"type":"done","time":5285}

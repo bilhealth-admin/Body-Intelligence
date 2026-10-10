@@ -1,0 +1,9 @@
+Command: flutter test --no-pub --timeout=3m test/data/repositories/first_food_milestone_commit_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/data/repositories/first_food_milestone_commit_test.dart
+00:00 +0: a meal bucket alone is not a first committed food
+00:00 +1: manual food marks ready and edits or later foods cannot rearm
+00:00 +2: a failed atomic first food cannot create a celebration
+00:00 +3: calculated recipe first serving creates milestone atomically
+00:00 +4: legacy deleted food is not classified as a new first food
+00:00 +5: All tests passed!

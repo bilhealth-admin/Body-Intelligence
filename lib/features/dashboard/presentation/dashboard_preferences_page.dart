@@ -41,6 +41,12 @@ class _DashboardPreferencesPageState
   bool get _savingLayout => _saving && _savingSection == null;
   final _presetScrollController = ScrollController();
   final _stableSectionValues = <String, bool>{};
+  // A stream can still contain the previously committed value while the
+  // database transaction is running. Render the requested choice until its
+  // authoritative stream echoes it (or roll back after a failed write).
+  final _pendingSectionValues = <String, bool>{};
+  String? _pendingPresetId;
+  bool _finishAfterSave = false;
 
   @override
   void dispose() {
@@ -51,7 +57,12 @@ class _DashboardPreferencesPageState
   void _updateState(VoidCallback update) => setState(update);
 
   void _finishEditing() {
-    if (_saving) return;
+    // The Done control stays visually unchanged. A tap made during a save
+    // finishes only after the database confirms success.
+    if (_saving) {
+      _finishAfterSave = true;
+      return;
+    }
     context.canPop() ? context.pop() : context.go('/dashboard');
   }
 

@@ -21,7 +21,7 @@ void main() {
     expect(source, contains("'/settings/language'"));
     expect(source, isNot(contains('toLanguageTag()')));
     // Keep More rows comfortably above the 48dp accessibility minimum.
-    expect(source, contains('minTileHeight: 60'));
+    expect(source, contains('minTileHeight: protectedEntry ? 60 : 54'));
   });
 
   test('language selector exposes exactly 25 canonical tags', () {

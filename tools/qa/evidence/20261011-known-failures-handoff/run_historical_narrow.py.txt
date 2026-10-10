@@ -1,0 +1,11 @@
+import runpy,json
+from pathlib import Path
+ns=runpy.run_path('tools/qa/bil_codex_test_ladder.py',run_name='historic_failures_narrow_only')
+p=Path('build/qa-priority-review/results.json')
+s=json.loads(p.read_text(encoding='utf-8'))
+for label in ['food-owner-atomic','meal-owner-atomic','architecture']:
+    source=dict(ns['P0'])[label]
+    s['stages']['affected-p0-'+label]=ns['run_suites']('affected-p0',[(label,source.split()+['--reporter=json','--concurrency=1'])],1)
+    p.write_text(json.dumps(s,indent=2),encoding='utf-8')
+s['fingerprint_after']=ns['fingerprint'](s['tested_head'])
+p.write_text(json.dumps(s,indent=2),encoding='utf-8')

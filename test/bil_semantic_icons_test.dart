@@ -288,7 +288,6 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_reference_progress_components.dart',
       'lib/features/dashboard/widgets/dashboard_water_card.dart',
       'lib/features/settings/settings_page.dart',
-      'lib/features/settings/reference_settings_home_page.dart',
       'lib/features/daily_log/presentation/daily_log_meals_list.dart',
       'lib/features/daily_log/presentation/quick_macro_entry_dialog.dart',
       'lib/features/wellness/presentation/wellness_library_page.dart',
@@ -316,6 +315,7 @@ void main() {
         source,
         anyOf(
           contains('BilSemanticIconBadge'),
+          contains('BilFlatIcon'),
           contains('BilNativeSettingsIcon'),
           contains('BilSemanticIcons.spec'),
         ),
@@ -332,6 +332,15 @@ void main() {
       'lib/features/settings/reference_settings_home_page.dart',
     ).readAsStringSync();
     expect(iosSettings, isNot(contains('Color(0xFF007AFF)')));
+    // Flat SF/native icons (without decorative badges) are the intended
+    // settings treatment. Direct route navigation must still work.
+    expect(iosSettings, contains('return CupertinoListTile('));
+    expect(iosSettings, contains('onTap: () => context.push(route)'));
+    expect(
+      iosSettings,
+      contains('BilNativeSettingsIcon(kind: kind, flat: true)'),
+    );
+    expect(iosSettings, isNot(contains('BilNativeSettingsIcon(kind: kind)')));
 
     final quickAdd = File(
       'lib/app/router/bil_quick_add_sheet.dart',

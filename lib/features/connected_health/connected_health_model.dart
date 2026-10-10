@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../global_platform/core/global_platform_core.dart';
 
 enum ConnectedHealthStatus {
@@ -158,37 +160,91 @@ final class ConnectedHealthSnapshot {
   );
 }
 
+String? _readableHealthSourceName(Object? candidate) {
+  Object? value = candidate;
+  for (var depth = 0; depth < 5; depth++) {
+    if (value is Map) {
+      Object? named;
+      for (final key in const [
+        'deviceName',
+        'sourceName',
+        'displayName',
+        'productName',
+        'name',
+      ]) {
+        if (value[key] is String) {
+          named = value[key];
+          break;
+        }
+      }
+      if (named == null) return null;
+      value = named;
+      continue;
+    }
+    if (value is! String) return null;
+    final text = value.trim();
+    if (text.isEmpty ||
+        text == 'null' ||
+        text == '{}' ||
+        text.startsWith('Instance of ') ||
+        text.startsWith('[object ')) {
+      return null;
+    }
+    if (text.startsWith('{') ||
+        text.startsWith('[') ||
+        (text.startsWith('"') && text.endsWith('"'))) {
+      try {
+        value = jsonDecode(text);
+        continue;
+      } on FormatException {
+        return null;
+      }
+    }
+    if (text.length == 36 && RegExp(r'^[0-9a-fA-F-]{36}').hasMatch(text)) {
+      return null;
+    }
+    return text;
+  }
+  return null;
+}
+
+/// Human-readable, evidence-based source. Do not mutate canonical provenance.
 String connectedHealthDisplaySource(ConnectedHealthSignalView signal) {
-  // A wearable is not necessarily an Apple Watch. Use the Apple-specific
-  // evidence carried by HealthKit, including revisions without an HKDevice.
-  final attributes = signal.attributes;
-  final kind = attributes['wearableKind']?.toString().trim().toLowerCase();
-  final product = attributes['sourceProductType']
-      ?.toString()
-      .trim()
-      .toLowerCase();
-  final device = [
-    signal.source,
-    attributes['deviceName'],
-    attributes['deviceModel'],
-    attributes['sourceName'],
-  ].whereType<Object>().join(' ').toLowerCase();
-  final manufacturer = attributes['deviceManufacturer']
-      ?.toString()
-      .trim()
-      .toLowerCase();
+  final attrs = signal.attributes;
+  final source = _readableHealthSourceName(signal.source);
+  final deviceName = _readableHealthSourceName(attrs['deviceName']);
+  final deviceModel = _readableHealthSourceName(attrs['deviceModel']);
+  final sourceName = _readableHealthSourceName(attrs['sourceName']);
+  final productName = _readableHealthSourceName(attrs['sourceProductType']);
+  final kind = _readableHealthSourceName(attrs['wearableKind'])?.toLowerCase();
+  final manufacturer = _readableHealthSourceName(
+    attrs['deviceManufacturer'],
+  )?.toLowerCase();
+  final product = productName?.toLowerCase();
+  final deviceText = [
+    source,
+    deviceName,
+    deviceModel,
+    sourceName,
+  ].whereType<String>().join(' ').toLowerCase();
   if (kind == 'apple_watch' ||
       product?.startsWith('watch') == true ||
-      device.contains('apple watch') ||
-      (manufacturer == 'apple inc.' && device.contains('watch'))) {
+      deviceText.contains('apple watch') ||
+      (manufacturer == 'apple inc.' && deviceText.contains('watch'))) {
     return 'Apple Watch';
   }
-  final normalized = signal.source.trim().toLowerCase();
-  if (normalized.contains('health connect')) return 'Health Connect';
-  if (normalized.contains('apple') || normalized.contains('healthkit')) {
+  if (deviceText.contains('health connect')) return 'Health Connect';
+  if (deviceText.contains('apple') || deviceText.contains('healthkit')) {
     return 'Apple Health';
   }
-  return signal.source.trim();
+  final preferred = sourceName ?? deviceName ?? source;
+  if (preferred == null ||
+      preferred.toLowerCase().startsWith('com.') ||
+      preferred.toLowerCase().startsWith('org.') ||
+      preferred.toLowerCase().startsWith('android.')) {
+    return 'Health source';
+  }
+  return preferred;
 }
 
 /// Returns one value for each of the last 30 local calendar days.

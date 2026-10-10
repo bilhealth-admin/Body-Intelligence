@@ -187,7 +187,7 @@ class _MeasuredSignalCard extends StatelessWidget {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(context.strings.text('Source')),
-              subtitle: Text(connectedHealthDisplaySource(signal)),
+              subtitle: Text(connectedHealthDisplayName(context, signal)),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,

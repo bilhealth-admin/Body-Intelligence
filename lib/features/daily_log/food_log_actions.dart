@@ -12,34 +12,75 @@ extension _FoodLogActions on _FoodLogPageState {
       );
       final quantity = await (() async {
         try {
+          var showQuantityGuide = _tourVisible;
           return await showDialog<double>(
             context: context,
-            builder: (dialogContext) => AlertDialog(
-              title: Text(_t(dialogContext, 'Choose a serving')),
-              content: TextField(
-                controller: controller,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  labelText:
-                      '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(_t(dialogContext, 'Cancel')),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(
-                    dialogContext,
-                    double.tryParse(controller.text.replaceAll(',', '.')),
+            builder: (dialogContext) => StatefulBuilder(
+              builder: (dialogContext, refreshDialog) => AlertDialog(
+                title: Text(_t(dialogContext, 'Choose a serving')),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showQuantityGuide) ...[
+                        FirstUseContextCoachmark(
+                          key: const Key('food-log-quantity-guide'),
+                          compact: true,
+                          title: _foodTourText(
+                            dialogContext,
+                            en: 'Make it accurate',
+                            ar: 'خلّي الكمية دقيقة',
+                            fr: 'Soyez précis',
+                            es: 'Ajusta la cantidad',
+                            tr: 'Miktarı doğru gir',
+                          ),
+                          message: _foodTourText(
+                            dialogContext,
+                            en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
+                            ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
+                            fr: 'Ajustez la portion et confirmez avec Ajouter.',
+                            es: 'Ajusta la porción y confirma con Añadir.',
+                            tr: 'Porsiyonu ayarla ve Ekle ile onayla.',
+                          ),
+                          icon: Icons.scale_rounded,
+                          accent: const Color(0xFFFFDB95),
+                          onSkip: () {
+                            refreshDialog(() => showQuantityGuide = false);
+                            _dismissFoodTour();
+                          },
+                          skipKey: const Key('food-log-quantity-guide-skip'),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      TextField(
+                        key: const Key('food-log-serving-quantity-field'),
+                        controller: controller,
+                        autofocus: !showQuantityGuide,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText:
+                              '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Text(_t(dialogContext, 'Add')),
                 ),
-              ],
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: Text(_t(dialogContext, 'Cancel')),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(
+                      dialogContext,
+                      double.tryParse(controller.text.replaceAll(',', '.')),
+                    ),
+                    child: Text(_t(dialogContext, 'Add')),
+                  ),
+                ],
+              ),
             ),
           );
         } finally {
@@ -68,6 +109,16 @@ extension _FoodLogActions on _FoodLogPageState {
         ref.invalidate(dailyMealsProvider);
         if (!mounted) return;
         messenger.showSnackBar(SnackBar(content: Text(addedCopy)));
+        // Food Log is the first-use route opened from Home. A successful
+        // atomic repository commit is the only point allowed to celebrate.
+        if (_tourVisible) {
+          await _dismissFoodTour(completed: true);
+        }
+        if (!context.mounted) return;
+        await FirstMealCelebration.showIfPending(
+          context,
+          ref.read(preferencesRepositoryProvider),
+        );
       } on Object {
         if (!mounted) return;
         messenger.showSnackBar(SnackBar(content: Text(errorCopy)));
@@ -327,9 +378,13 @@ extension _FoodLogActions on _FoodLogPageState {
       final selections = await showMealImageReviewDialog(
         context,
         analysis: analysis,
+        imagePath: image.path,
+        mealType: mealType,
+        photographedAt: DateTime.now(),
       );
       if (selections == null || selections.isEmpty || !mounted) return;
-      final confirmed = <(Food, double)>[];
+      final confirmed =
+          <({Food food, double quantity, bool quantityInGrams})>[];
       for (final selection in selections) {
         final authority = ref.read(foodRuntimeSearchAuthorityProvider);
         final exactId = selection.candidate.verifiedFoodRecordId;
@@ -347,35 +402,68 @@ extension _FoodLogActions on _FoodLogPageState {
                 selection.candidate.name,
                 limit: 10,
               )).where((food) => food.verified).toList(growable: false);
-        if (!mounted || foods.isEmpty) continue;
-        final reviewed = await showTrustedVisionFoodMatchDialog(
+        if (!mounted) return;
+        if (foods.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${selection.candidate.name}: ${visionCopy.text('no_match')}',
+              ),
+            ),
+          );
+          continue;
+        }
+        final reviewed = await showReviewedVisionFoodMatchDialog(
           context,
           recognizedName: selection.candidate.name,
           foods: foods,
+          reviewedAmount: selection.amount,
+          reviewedUnit: selection.unit,
+          imagePath: image.path,
         );
         if (!mounted || reviewed == null) continue;
-        final quantity = mealImageAmountInGrams(
-          amount: selection.amount,
-          unit: selection.unit,
-          servingSize: reviewed.servingSize,
-          servingUnit: reviewed.servingUnit,
+        final portion = mealImageReviewedQuantity(
+          amount: reviewed.amount,
+          unit: reviewed.unit,
+          servingSize: reviewed.food.servingSize,
+          servingUnit: reviewed.food.servingUnit,
         );
-        if (quantity != null) confirmed.add((reviewed, quantity));
+        if (portion == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${selection.candidate.name}: ${visionCopy.text('unit_mismatch')} '
+                '(${reviewed.food.servingUnit})',
+              ),
+            ),
+          );
+          continue;
+        }
+        confirmed.add((
+          food: reviewed.food,
+          quantity: portion.quantity,
+          quantityInGrams: portion.quantityInGrams,
+        ));
       }
       if (confirmed.isEmpty || !mounted) return;
       await ref
           .read(mealRepositoryProvider)
-          .addReviewedMealItemsAtomically(
+          .addReviewedVisionItemsAtomically(
             date: ref.read(selectedLogDateProvider),
             mealType: mealType,
+            visionRequestId: analysis.requestId,
             items: [
-              for (final (food, quantity) in confirmed)
-                (foodId: food.id, quantity: quantity),
+              for (final item in confirmed)
+                (
+                  foodId: item.food.id,
+                  quantity: item.quantity,
+                  quantityInGrams: item.quantityInGrams,
+                ),
             ],
           );
-      for (final (food, _) in confirmed) {
+      for (final item in confirmed) {
         try {
-          await ref.read(foodRepositoryProvider).recordRecent(food.id);
+          await ref.read(foodRepositoryProvider).recordRecent(item.food.id);
         } on Object {
           // The diary write is authoritative; recency is best effort.
         }
@@ -387,6 +475,15 @@ extension _FoodLogActions on _FoodLogPageState {
           SnackBar(content: Text(visionCopy.text('confirmed_added'))),
         );
       }
+      // Show the same one-time first-food celebration after a fully reviewed,
+      // atomic photo log. A cancelled or rejected image never reaches here.
+      if (!mounted) return;
+      if (_tourVisible) await _dismissFoodTour(completed: true);
+      if (!mounted) return;
+      await FirstMealCelebration.showIfPending(
+        context,
+        ref.read(preferencesRepositoryProvider),
+      );
     } on MealImageAnalysisException catch (error) {
       if (!mounted) return;
       if (error.failure == MealImageAnalysisFailure.boostRequired) {
@@ -461,6 +558,14 @@ extension _FoodLogActions on _FoodLogPageState {
       ref.invalidate(dailyMealsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_t(context, 'Quick Add saved locally.'))),
+      );
+      // Quick Add writes a real diary snapshot. Only the repository milestone
+      // may arm the effect, and cancellation never claims it.
+      if (_tourVisible) await _dismissFoodTour(completed: true);
+      if (!mounted) return;
+      await FirstMealCelebration.showIfPending(
+        context,
+        ref.read(preferencesRepositoryProvider),
       );
     } finally {
       quickAddBusy = false;

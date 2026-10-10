@@ -1,0 +1,934 @@
+Command: flutter test --no-pub --timeout=3m test/epic8_weekly_report_golden_test.dart test/features/onboarding/onboarding_visual_golden_test.dart test/premium_dashboard_benchmark_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: (setUpAll)
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report phone LTR light golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_phone_ltr_light.png": Pixel test failed, 79.96%, 263202px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:199:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:02 +0 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: English LTR small phone light visual
+00:02 +0 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report phone LTR light golden [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report phone LTR light golden
+  
+00:03 +0 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: English LTR small phone light visual
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/en_ltr_small_light.png": Pixel test failed, 86.71%, 285430px diff
+detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:154:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +0 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: legacy insight deck is removed from the unified dashboard
+00:03 +0 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: English LTR small phone light visual [E]
+  Test failed. See exception logs above.
+  The test description was: English LTR small phone light visual
+  
+00:03 +1 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: member since prefers account creation and zero streak stays zero
+00:03 +2 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: member since prefers account creation and zero streak stays zero
+00:03 +3 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic RTL small phone dark visual at 160 percent
+00:03 +4 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic RTL small phone dark visual at 160 percent
+00:03 +5 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic RTL small phone dark visual at 160 percent
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/ar_rtl_small_dark_160.png": Pixel test failed, 87.56%, 288210px diff
+detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:170:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +5 -3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: member since null uses localized Arabic unavailable
+00:03 +5 -3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic RTL small phone dark visual at 160 percent [E]
+  Test failed. See exception logs above.
+  The test description was: Arabic RTL small phone dark visual at 160 percent
+  
+00:03 +6 -3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: member since null uses localized Arabic unavailable
+00:03 +7 -3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: female hip optional page visual
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/female_hip_light_160.png": Pixel test failed, 87.71%, 288715px diff
+detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:184:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:04 +7 -4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: phone premium dashboard golden
+00:04 +7 -4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: female hip optional page visual [E]
+  Test failed. See exception logs above.
+  The test description was: female hip optional page visual
+  
+00:04 +7 -4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: phone premium dashboard golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/premium_dashboard_phone_after.png": Pixel test failed, 13.13%, 43204px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart:136:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:04 +7 -5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report controls expose actions and feedback persists
+00:04 +7 -5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: phone premium dashboard golden [E]
+  Test failed. See exception logs above.
+  The test description was: phone premium dashboard golden
+  
+00:04 +8 -5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: calculated plan visual in dark mode
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/plan_dark_160.png": Pixel test failed, 75.42%, 248251px diff
+detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:198:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:04 +8 -6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:04 +8 -6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: calculated plan visual in dark mode [E]
+  Test failed. See exception logs above.
+  The test description was: calculated plan visual in dark mode
+  
+00:05 +8 -6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly feedback read and write failures stay recoverable
+WARNING (drift): It looks like you've created the database class AppDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _$AppDatabase (package:body_intelligence_log/data/database/app_database.g.dart:14689:36)
+#4      new AppDatabase.forTesting (package:body_intelligence_log/data/database/app_database.dart)
+#5      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:325:33)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#8      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:05 +9 -6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:05 +9 -6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Android final permission choices visual
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/permissions_light_160.png": Pixel test failed, 85.61%, 281792px diff
+detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:213:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:05 +9 -7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:05 +9 -7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Android final permission choices visual [E]
+  Test failed. See exception logs above.
+  The test description was: Android final permission choices visual
+  
+00:05 +10 -7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:05 +10 -7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: English facts on 320 wide phone at 200 percent
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/facts_320x568_en_light_200.png": Pixel test failed, 85.27%, 154987px
+diff detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:229:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:05 +10 -8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:05 +10 -8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: English facts on 320 wide phone at 200 percent [E]
+  Test failed. See exception logs above.
+  The test description was: English facts on 320 wide phone at 200 percent
+  
+00:05 +11 -8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:06 +12 -8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:06 +13 -8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+00:06 +14 -8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/premium_dashboard_tablet_after.png": Pixel test failed, 33.44%, 467724px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart:136:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +14 -9: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: height and units photo keeps its focal measurement crop
+00:06 +14 -9: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden [E]
+  Test failed. See exception logs above.
+  The test description was: tablet premium dashboard golden
+  
+00:06 +14 -9: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: height and units photo keeps its focal measurement crop
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/height_units_en_light_100.png": Pixel test failed, 94.30%, 310384px
+diff detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:248:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +14 -10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly copy is Unicode-safe for tr
+00:06 +14 -10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: height and units photo keeps its focal measurement crop [E]
+  Test failed. See exception logs above.
+  The test description was: height and units photo keeps its focal measurement crop
+  
+00:06 +15 -10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:06 +16 -10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:06 +17 -10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:06 +18 -10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:06 +18 -10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic plan on 320 wide phone at 200 percent
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/plan_320x568_ar_dark_200.png": Pixel test failed, 85.59%, 155567px
+diff detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:266:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +18 -11: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:06 +18 -11: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic plan on 320 wide phone at 200 percent [E]
+  Test failed. See exception logs above.
+  The test description was: Arabic plan on 320 wide phone at 200 percent
+  
+00:07 +18 -11: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report calories_anchor evidence
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_calories_anchor.png": Pixel test failed, 90.59%, 298189px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:511:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +18 -12: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:07 +18 -12: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report calories_anchor evidence [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report calories_anchor evidence
+  
+00:07 +18 -12: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic AI choices on 430 wide phone
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/onboarding_2026/ai_430x932_ar_light_100.png": Pixel test failed, 78.38%, 314121px
+diff detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart:282:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +18 -13: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:07 +18 -13: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic AI choices on 430 wide phone [E]
+  Test failed. See exception logs above.
+  The test description was: Arabic AI choices on 430 wide phone
+  
+00:07 +18 -13: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:07 +18 -13: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report frequent_anchor evidence
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_frequent_anchor.png": Pixel test failed, 84.73%, 278889px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:511:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +18 -14: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:07 +18 -14: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report frequent_anchor evidence [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report frequent_anchor evidence
+  
+00:07 +18 -14: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report macros_anchor evidence
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_macros_anchor.png": Pixel test failed, 89.17%, 293519px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:511:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +18 -15: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+00:07 +18 -15: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report macros_anchor evidence [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report macros_anchor evidence
+  
+00:08 +18 -15: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/premium_dashboard_desktop_after.png": Pixel test failed, 13.63%, 196259px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart:136:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +18 -16: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report exercise_anchor evidence
+00:08 +18 -16: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden [E]
+  Test failed. See exception logs above.
+  The test description was: desktop premium dashboard golden
+  
+00:08 +18 -16: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report exercise_anchor evidence
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_exercise_anchor.png": Pixel test failed, 89.14%, 293422px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:511:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +18 -17: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: corrected light morning premium dashboard golden
+00:08 +18 -17: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report exercise_anchor evidence [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report exercise_anchor evidence
+  
+00:08 +18 -17: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report alltime_anchor evidence
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_alltime_anchor.png": Pixel test failed, 88.58%, 291582px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:511:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +18 -18: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: corrected light morning premium dashboard golden
+00:08 +18 -18: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report alltime_anchor evidence [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report alltime_anchor evidence
+  
+00:09 +18 -18: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report macro tooltip evidence
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_macro_tooltip.png": Pixel test failed, 91.24%, 300324px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:541:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:09 +18 -19: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: corrected light morning premium dashboard golden
+00:09 +18 -19: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report macro tooltip evidence [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report macro tooltip evidence
+  
+00:09 +18 -19: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report phone RTL dark golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_phone_rtl_dark.png": Pixel test failed, 79.44%, 261500px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:553:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:09 +18 -20: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: corrected light morning premium dashboard golden
+00:09 +18 -20: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report phone RTL dark golden [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report phone RTL dark golden
+  
+00:09 +18 -20: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: corrected light morning premium dashboard golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/premium_dashboard_light_corrected.png": Pixel test failed, 33.45%, 467906px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart:155:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:09 +18 -21: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report evidence and limits golden
+00:09 +18 -21: G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: corrected light morning premium dashboard golden [E]
+  Test failed. See exception logs above.
+  The test description was: corrected light morning premium dashboard golden
+  
+00:09 +19 -21: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report evidence and limits golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_evidence_phone.png": Pixel test failed, 93.58%, 308022px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:567:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:09 +19 -22: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report evidence and limits golden [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report evidence and limits golden
+  
+00:09 +19 -22: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report honest empty state golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_empty_phone.png": Pixel test failed, 96.86%, 318836px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:582:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +19 -23: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report honest empty state golden [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report honest empty state golden
+  
+00:10 +19 -23: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report nutrition production section golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_nutrition_phone.png": Pixel test failed, 99.85%, 328667px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:604:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +19 -24: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report nutrition production section golden [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report nutrition production section golden
+  
+00:10 +19 -24: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report coverage production section golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_coverage_phone.png": Pixel test failed, 93.55%, 307944px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:604:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:11 +19 -25: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report coverage production section golden [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report coverage production section golden
+  
+00:11 +19 -25: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report sources production section golden
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/epic8_weekly_report_sources_phone.png": Pixel test failed, 93.58%, 308022px diff
+detected.
+Failure feedback can be found at /G:/BIL_Project/worktrees/bil-test-only-20261010/test/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart:604:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:11 +19 -26: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report sources production section golden [E]
+  Test failed. See exception logs above.
+  The test description was: weekly report sources production section golden
+  
+00:11 +19 -26: G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: (tearDownAll)
+00:11 +19 -26: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report alltime_anchor evidence
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report calories_anchor evidence
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report coverage production section golden
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report evidence and limits golden
+  ... and 22 more

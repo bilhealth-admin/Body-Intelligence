@@ -1,0 +1,41 @@
+{
+  "head": "944973ed3556ccb9b8cd8a09b451562aea3cf652",
+  "fingerprint": "038dd19f7cf0fe6e1870453ea9a33a82d49b40a675b815f499bfeed8e8f02c5e",
+  "result": {
+    "format": [
+      {
+        "exit_code": 0,
+        "seconds": 1.8,
+        "log": "build\\bil-codex-qa\\source-format-1-1791667403968330600.log"
+      },
+      {
+        "exit_code": 0,
+        "seconds": 1.7,
+        "log": "build\\bil-codex-qa\\source-format-2-1791667405788450000.log"
+      },
+      {
+        "exit_code": 0,
+        "seconds": 1.7,
+        "log": "build\\bil-codex-qa\\source-format-3-1791667407531660500.log"
+      },
+      {
+        "exit_code": 0,
+        "seconds": 1.7,
+        "log": "build\\bil-codex-qa\\source-format-4-1791667409279610500.log"
+      },
+      {
+        "exit_code": 0,
+        "seconds": 1.4,
+        "log": "build\\bil-codex-qa\\source-format-5-1791667411006811300.log"
+      }
+    ],
+    "analyze": {
+      "exit_code": 0,
+      "seconds": 247.6,
+      "log": "build\\bil-codex-qa\\source-analyze-1791667412444988900.log"
+    },
+    "passed": true
+  },
+  "input_fingerprint_before_generated_evidence": "f9436b7b15c48721e290e5db3f5a2dd116166e5ebcceafb37ce79452cf0b2eca",
+  "fingerprint_context": "Original fingerprint field was sampled after generating report files; code and tracked inputs remained unchanged. See head tree, code-input hashes and git-diff verification."
+}

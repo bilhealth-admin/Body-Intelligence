@@ -1,0 +1,50 @@
+Command: flutter test --no-pub --timeout=3m test/features/community/community_chat_auth_session_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/community/community_chat_auth_session_test.dart
+00:00 +0: repository policy await cannot insert after A-B
+00:00 +1: repository policy await cannot insert after queued A-B-A
+00:00 +2: repository Unicode limit matches actual PostgreSQL 2000 code points
+00:00 +3: message latest query is bounded and tie ordered, while returned transcript is chronological
+00:00 +4: older page carries time and UUID cursor in each conversation direction
+00:00 +5: readback returns exact incoming server-read IDs without promoting null rows
+00:00 +6: readback rejects another owner or conversation even if ID matches
+00:00 +7: transcript rejects an unrelated peer row rather than mixing private data
+00:00 +8: inbox entry retires private content on real A-B
+00:01 +9: inbox entry retires private content on real A-B-A
+00:01 +10: new entry retires private content on real A-B
+00:01 +11: new entry retires private content on real A-B-A
+00:01 +12: pending inbox cannot paint after queued owner replacement
+00:02 +13: new message keeps subject and body when total envelope exceeds server limit
+00:02 +14: new message never clips a long subject or body
+00:02 +15: chat cold root has a safe dashboard return
+00:02 +16: inbox cold root has a safe dashboard return
+00:02 +17: new cold root has a safe dashboard return
+00:03 +18: both inbox errors are observed and each tab can explicitly retry
+00:03 +19: failed new message keeps original subject body and recipient for one explicit retry
+00:03 +20: inbox repository replacement rejects old private cached state
+00:03 +21: new repository replacement rejects old private cached state
+00:03 +22: an open policy sheet cannot accept for a retired message owner
+00:04 +23: inbox owner switch after message read prevents the follow-up public-profile query
+00:04 +24: covering a chat discards dwell and restarts it after uncovering
+00:04 +25: partial readback does not acknowledge the missing message
+00:04 +26: owner changes during write stop readback and later acknowledgement
+00:04 +27: a new visible row entering during a read write is not lost
+00:04 +28: failed older page keeps transcript and retries the identical cursor
+00:04 +29: a pending send cannot clear or reload a replacement peer draft
+00:05 +30: an emoji menu from a retired peer cannot insert into the new draft
+00:05 +31: realtime failure retains transcript input and older-reading position through retry
+00:05 +32: new realtime row still needs its own complete dwell after an earlier write finishes
+00:05 +33: 2000 astral codepoints send intact with the codepoint counter
+00:05 +34: private transcript and draft retire on real A-B
+00:05 +35: pending transcript cannot paint after real A-B
+00:05 +36: private transcript and draft retire on real queued A-B-A
+00:06 +37: pending transcript cannot paint after real queued A-B-A
+00:06 +38: peer replacement clears private draft and rejects late load
+00:06 +39: repository replacement clears private draft and rejects late load
+00:06 +40: same-owner refresh retains input and visible private transcript
+00:06 +41: same-text edit during send is a new draft revision
+00:06 +42: fetch and first 599ms are not read receipts
+00:06 +43: background dwell is discarded until resumed
+00:06 +44: failed read does not retry on rebuild or realtime
+00:06 +45: overflow remains intact and cannot be sent
+00:06 +46: All tests passed!

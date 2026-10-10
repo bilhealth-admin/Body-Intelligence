@@ -10,6 +10,7 @@ import '../../app/theme/bil_semantic_icons.dart';
 import '../cloud_platform/presentation/cloud_sync_consent_notice.dart';
 import '../connected_health/widgets/dashboard_health_activity_refresh.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../profile/providers/profile_auth_identity_provider.dart';
 import '../profile/services/profile_photo_service.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
 import 'widgets/dashboard_composition.dart';
@@ -18,6 +19,7 @@ import 'widgets/dashboard_header.dart';
 import 'widgets/dashboard_shell.dart';
 import 'widgets/dashboard_top_bar.dart';
 import 'widgets/first_value_handoff_card.dart';
+import 'widgets/dashboard_first_use_experience.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -202,15 +204,34 @@ class DashboardPage extends ConsumerWidget {
     // process-wide fallback may still be English during the first frame.
     AppLocalizations.activate(resolvedLocale);
     final locale = resolvedLocale.languageCode.toLowerCase();
-    final showFirstValue = ref.watch(firstValueHandoffProvider).value ?? false;
     final profilePhoto = ref.watch(profilePhotoProvider).value;
     final profilePhotoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+    final identity = ref.watch(profileAuthIdentityProvider);
+    final guidePreferences = ref.watch(preferencesRepositoryProvider);
+    final guideOwner = identity.asData?.value.ownerId;
+    // Authentication can update one frame before its SQLite owner namespace.
+    // Never show either first-use prompt using the previous account's data.
+    final guideOwnerReady =
+        identity.hasValue && guidePreferences.localOwnerId == guideOwner;
+    final showFirstValue =
+        guideOwnerReady &&
+        (ref.watch(firstValueHandoffProvider).value ?? false);
 
     final hero = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (showFirstValue) ...[
           FirstValueHandoffCard(
+            key: ValueKey('first-value-${guideOwner ?? 'local'}'),
+            onSkip: () async {
+              try {
+                await ref
+                    .read(preferencesRepositoryProvider)
+                    .remove('firstValueHandoffPending');
+              } on Object {
+                // A declined optional check-in must never force navigation.
+              }
+            },
             onContinue: () async {
               try {
                 await ref
@@ -261,7 +282,11 @@ class DashboardPage extends ConsumerWidget {
         ),
         child: DashboardHealthActivityRefresh(
           child: DashboardComposition(
-            hero: hero,
+            hero: DashboardFirstUseExperience(
+              ownerScope: guideOwner ?? 'local',
+              ownerReady: guideOwnerReady,
+              child: hero,
+            ),
             content: const DashboardGrid(hero: DashboardHeader()),
           ),
         ),

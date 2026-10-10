@@ -127,6 +127,7 @@ class _CommunitySavedPostsPageState extends State<CommunitySavedPostsPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(communityText(context, 'Saved posts', 'المحفوظات')),
     ),
     body: FutureBuilder<void>(

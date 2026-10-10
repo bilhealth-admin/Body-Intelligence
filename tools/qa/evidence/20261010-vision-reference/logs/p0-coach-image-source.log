@@ -1,0 +1,35 @@
+Command: flutter test --no-pub --timeout=3m test/features/intelligence_center/coach_image_source_regression_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/intelligence_center/coach_image_source_regression_test.dart
+00:00 +0: source picker and deletion selection stay in app locale ar
+00:00 +1: source picker and deletion selection stay in app locale en
+00:00 +2: source picker and deletion selection stay in app locale fr
+00:00 +3: source picker and deletion selection stay in app locale es
+00:00 +4: source picker and deletion selection stay in app locale tr
+00:00 +5: source picker and deletion selection stay in app locale de
+00:00 +6: source picker and deletion selection stay in app locale it
+00:00 +7: source picker and deletion selection stay in app locale pt-BR
+00:00 +8: source picker and deletion selection stay in app locale pt-PT
+00:00 +9: source picker and deletion selection stay in app locale ur
+00:00 +10: source picker and deletion selection stay in app locale fa
+00:00 +11: source picker and deletion selection stay in app locale hi
+00:00 +12: source picker and deletion selection stay in app locale id
+00:00 +13: source picker and deletion selection stay in app locale ms
+00:00 +14: source picker and deletion selection stay in app locale ja
+00:00 +15: source picker and deletion selection stay in app locale ko
+00:00 +16: source picker and deletion selection stay in app locale zh-Hans
+00:00 +17: source picker and deletion selection stay in app locale zh-Hant
+00:00 +18: source picker and deletion selection stay in app locale ru
+00:00 +19: source picker and deletion selection stay in app locale bn
+00:00 +20: source picker and deletion selection stay in app locale vi
+00:00 +21: source picker and deletion selection stay in app locale th
+00:00 +22: source picker and deletion selection stay in app locale pl
+00:00 +23: source picker and deletion selection stay in app locale nl
+00:00 +24: source picker and deletion selection stay in app locale uk
+00:00 +25: source cancellation opens no picker and preserves draft and chat
+00:02 +26: gallery is single-flight; cancellation/late result is safe, leave=false
+00:02 +27: gallery is single-flight; cancellation/late result is safe, leave=true
+00:03 +28: selected photo reaches the same localized review, arabic=false
+00:03 +29: selected photo reaches the same localized review, arabic=true
+00:03 +30: gallery error is localized, does not leak platform error, and permits retry
+00:04 +31: All tests passed!

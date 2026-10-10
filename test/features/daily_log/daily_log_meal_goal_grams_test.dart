@@ -15,11 +15,13 @@ void main() {
       'lib/features/daily_log/daily_log_page.dart',
     ).readAsStringSync();
     expect(
-      source.replaceAll(RegExp(r'\s+'), ' '),
-      contains(
-        'goalSchedule.mealTargets[mealType]?.calories ?? '
-        'mealCalorieGoals[mealType]',
-      ),
+      RegExp(
+        r'goalSchedule\s*\.mealTargets\[mealType\]\s*\?\.calories'
+        r'\s*\?\?\s*mealCalorieGoals\[mealType\]'
+        r'\s*\?\?\s*dailyGoal\?\.calories',
+      ).hasMatch(source),
+      isTrue,
+      reason: 'Scheduled meal goal must precede override and default fallback',
     );
   });
 

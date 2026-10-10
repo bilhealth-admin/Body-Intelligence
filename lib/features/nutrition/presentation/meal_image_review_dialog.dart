@@ -5,6 +5,27 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../data/database/app_database.dart';
 import '../services/meal_image_gateway_contract.dart';
+import 'meal_vision_premium_review.dart';
+
+export 'meal_vision_premium_review.dart' show TrustedVisionFoodSelection;
+
+Future<TrustedVisionFoodSelection?> showReviewedVisionFoodMatchDialog(
+  BuildContext context, {
+  required String recognizedName,
+  required List<Food> foods,
+  required double reviewedAmount,
+  required String reviewedUnit,
+  String? imagePath,
+  String? evidenceOwnerKey,
+}) => showEditableTrustedVisionFoodMatchDialog(
+  context,
+  recognizedName: recognizedName,
+  foods: foods,
+  reviewedAmount: reviewedAmount,
+  reviewedUnit: reviewedUnit,
+  imagePath: imagePath,
+  evidenceOwnerKey: evidenceOwnerKey,
+);
 
 class MealImageReviewSelection {
   const MealImageReviewSelection({
@@ -21,8 +42,21 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
   BuildContext context, {
   required String recognizedName,
   required List<Food> foods,
+  double? reviewedAmount,
+  String? reviewedUnit,
+  String? evidenceOwnerKey,
 }) {
   if (foods.isEmpty) return Future<Food?>.value(null);
+  if (MediaQuery.sizeOf(context).width >= 320) {
+    return showPremiumTrustedVisionFoodMatchDialog(
+      context,
+      recognizedName: recognizedName,
+      foods: foods,
+      reviewedAmount: reviewedAmount,
+      reviewedUnit: reviewedUnit,
+      evidenceOwnerKey: evidenceOwnerKey,
+    );
+  }
   Food? selected;
   final copy = _VisionReviewCopy.ofLocale(Localizations.localeOf(context));
   return showDialog<Food>(
@@ -40,7 +74,13 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
               const SizedBox(height: 10),
               for (final food in foods)
                 ListTile(
-                  onTap: () => setState(() => selected = food),
+                  onTap:
+                      mealVisionFoodCanBeUsed(
+                        food,
+                        evidenceOwnerKey: evidenceOwnerKey,
+                      )
+                      ? () => setState(() => selected = food)
+                      : null,
                   leading: Icon(
                     identical(selected, food)
                         ? Icons.radio_button_checked
@@ -60,7 +100,12 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
             child: Text(copy.cancel),
           ),
           FilledButton(
-            onPressed: selected == null
+            onPressed:
+                selected == null ||
+                    !mealVisionFoodCanBeUsed(
+                      selected!,
+                      evidenceOwnerKey: evidenceOwnerKey,
+                    )
                 ? null
                 : () => Navigator.pop(dialogContext, selected),
             child: Text(copy.useFood),
@@ -74,7 +119,30 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
 Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   BuildContext context, {
   required MealImageAnalysis analysis,
+  String? imagePath,
+  String? mealType,
+  DateTime? photographedAt,
 }) {
+  if (MediaQuery.sizeOf(context).width >= 320) {
+    return showPremiumVisionReviewDialog(
+      context,
+      analysis: analysis,
+      imagePath: imagePath,
+      mealType: mealType,
+      photographedAt: photographedAt,
+    ).then(
+      (drafts) => drafts == null
+          ? null
+          : [
+              for (final draft in drafts)
+                MealImageReviewSelection(
+                  candidate: draft.candidate,
+                  amount: draft.amount,
+                  unit: draft.unit,
+                ),
+            ],
+    );
+  }
   final locale = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
   final copy = _VisionReviewCopy.ofLocale(Localizations.localeOf(context));
   final selected = <int>{};

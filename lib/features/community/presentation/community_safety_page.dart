@@ -9,6 +9,7 @@ import '../../../app/theme/bil_semantic_icons.dart';
 import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import 'community_copy.dart';
+import 'community_return_button.dart';
 
 typedef CommunityPolicyUrlLauncher = Future<bool> Function(Uri uri);
 
@@ -207,6 +208,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(_t('Safety & community policy', 'الأمان وسياسة المجتمع')),
     ),
     body: _policyState == null

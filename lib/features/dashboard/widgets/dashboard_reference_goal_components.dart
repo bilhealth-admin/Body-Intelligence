@@ -174,9 +174,11 @@ class _ReferenceCaloriesCard extends StatelessWidget {
     final consumedLabel = Localizations.localeOf(context).languageCode == 'en'
         ? 'Consumed'
         : localizedConsumed;
-    final remainingLabel = hasGoal
-        ? _referenceText(context, 'left', 'متبقي')
-        : _referenceText(context, 'Edit goal', 'تعديل الهدف');
+    final remainingLabel = !hasGoal
+        ? _referenceText(context, 'Edit goal', 'تعديل الهدف')
+        : remaining != null && remaining < 0
+        ? _referenceText(context, 'over', 'زيادة')
+        : _referenceText(context, 'left', 'متبقي');
 
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.25,
@@ -200,9 +202,9 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -.25,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -.12,
                       ),
                     ),
                   ),
@@ -244,8 +246,12 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       valueKey: const Key(
                         'dashboard-reference-calorie-consumed-value',
                       ),
-                      value: consumed?.toString() ?? '—',
-                      trailing: hasGoal ? '/ $goal' : '/ —',
+                      value: consumedValue != null
+                          ? _formatBilCalories(consumedValue)
+                          : '—',
+                      trailing: hasGoal
+                          ? ' cal / ${_formatBilCalories(goal)}'
+                          : ' cal / —',
                       label: consumedLabel,
                       alignment: CrossAxisAlignment.start,
                     ),
@@ -256,13 +262,47 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       valueKey: const Key(
                         'dashboard-reference-calorie-remaining-value',
                       ),
-                      value: remaining?.toString() ?? '—',
+                      value: remaining != null
+                          ? _formatBilCalories(remaining.abs())
+                          : '—',
                       trailing: '',
                       label: remainingLabel,
                       alignment: CrossAxisAlignment.end,
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 13),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: SizedBox(
+                  height: 9,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ExcludeSemantics(
+                        excluding: consumed == null,
+                        child: LinearProgressIndicator(
+                          key: const Key(
+                            'dashboard-reference-calories-progress',
+                          ),
+                          minHeight: 9,
+                          value: progress,
+                          color: remaining != null && remaining < 0
+                              ? const Color(0xFF1D448B)
+                              : const Color(0xFF2768DA),
+                          backgroundColor: scheme.surfaceContainerHighest,
+                        ),
+                      ),
+                      if (remaining != null && remaining < 0)
+                        const IgnorePointer(
+                          child: CustomPaint(
+                            painter: _BilCalorieOverTargetStripes(),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
               Container(
@@ -311,26 +351,48 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(99),
-                child: ExcludeSemantics(
-                  excluding: consumed == null,
-                  child: LinearProgressIndicator(
-                    key: const Key('dashboard-reference-calories-progress'),
-                    minHeight: 8,
-                    value: progress,
-                    color: const Color(0xFF1475E8),
-                    backgroundColor: scheme.surfaceContainerHighest,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/// Fixed, non-animated reference stripes: shown only for a real over-goal
+/// state. A zero goal or unavailable intake never displays fake progress.
+class _BilCalorieOverTargetStripes extends CustomPainter {
+  const _BilCalorieOverTargetStripes();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stripe = Paint()
+      ..color = Colors.white.withValues(alpha: .92)
+      ..strokeWidth = 2;
+    for (var x = -size.height; x < size.width + size.height; x += 8) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        stripe,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BilCalorieOverTargetStripes oldDelegate) =>
+      false;
+}
+
+String _formatBilCalories(int amount) {
+  final digits = amount.abs().toString();
+  final chunks = <String>[];
+  var remaining = digits;
+  while (remaining.length > 3) {
+    chunks.insert(0, remaining.substring(remaining.length - 3));
+    remaining = remaining.substring(0, remaining.length - 3);
+  }
+  chunks.insert(0, remaining);
+  return '${amount < 0 ? '-' : ''}${chunks.join(',')}';
 }
 
 class _CalorieEquationValue extends StatelessWidget {

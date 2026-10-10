@@ -1,0 +1,50 @@
+Command: flutter test --no-pub --timeout=3m test/epic15_store_screenshot_golden_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic15_store_screenshot_golden_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: store snapshot iphone_69_en_00_onboarding
+00:01 +1: store snapshot iphone_69_en_01_dashboard
+00:02 +2: store snapshot iphone_69_en_02_daily_log
+00:02 +3: store snapshot iphone_69_en_025_food_search
+00:02 +4: store snapshot iphone_69_en_03_progress
+00:03 +5: store snapshot iphone_69_en_04_plans
+00:03 +6: store snapshot iphone_69_en_05_connected_health
+00:03 +7: store snapshot iphone_69_en_06_privacy_settings
+00:03 +8: store snapshot iphone_69_en_07_weekly_report
+00:04 +9: store snapshot iphone_69_en_08_nutrition_pathways
+00:04 +10: store snapshot iphone_69_ar_00_onboarding
+00:04 +11: store snapshot iphone_69_ar_01_dashboard
+00:04 +12: store snapshot iphone_69_ar_02_daily_log
+00:04 +13: store snapshot iphone_69_ar_025_food_search
+00:05 +14: store snapshot iphone_69_ar_03_progress_dark
+00:05 +15: store snapshot iphone_69_ar_04_plans
+00:05 +16: store snapshot iphone_69_ar_05_weekly_report
+00:05 +17: store snapshot iphone_69_ar_06_connected_health
+00:05 +18: store snapshot iphone_69_ar_07_profile
+00:05 +19: store snapshot iphone_69_ar_08_privacy_settings_dark
+00:06 +20: store snapshot android_phone_en_00_onboarding
+00:06 +21: store snapshot android_phone_en_01_dashboard
+00:06 +22: store snapshot android_phone_en_02_daily_log
+00:06 +23: store snapshot android_phone_en_025_food_search
+00:06 +24: store snapshot android_phone_en_03_progress
+00:06 +25: store snapshot android_phone_en_04_plans
+00:06 +26: store snapshot android_phone_en_05_connected_health
+00:07 +27: store snapshot android_phone_en_06_privacy_settings
+00:07 +28: store snapshot android_phone_ar_00_onboarding
+00:07 +29: store snapshot android_phone_ar_01_dashboard
+00:07 +30: store snapshot android_phone_ar_02_daily_log
+00:07 +31: store snapshot android_phone_ar_025_food_search
+00:07 +32: store snapshot android_phone_ar_03_progress_dark
+00:07 +33: store snapshot android_phone_ar_04_plans
+00:08 +34: store snapshot android_phone_ar_05_weekly_report
+00:08 +35: store snapshot android_phone_ar_06_connected_health
+00:08 +36: store snapshot iphone_69_fr_plans
+00:08 +37: store snapshot android_phone_fr_plans
+00:08 +38: store snapshot iphone_69_es_plans
+00:08 +39: store snapshot android_phone_es_plans
+00:08 +40: store snapshot iphone_69_tr_plans
+00:08 +41: store snapshot android_phone_tr_plans
+00:08 +42: store snapshot evidence_en_recipe_library
+00:09 +43: store snapshot evidence_en_workout_library
+00:09 +44: (tearDownAll)
+00:09 +44: All tests passed!

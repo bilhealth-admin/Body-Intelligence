@@ -204,7 +204,7 @@ void _foodEvidenceCases() {
         _conflict(CoachMealConflictReason.closedDay),
       );
       expect(await f.active(), [first.after.single.item]);
-      expect(await f.db.select(f.db.preferences).get(), hasLength(1));
+      await _expectSavedFoodJournalAndMilestone(f, 'before-close');
     },
   );
 }

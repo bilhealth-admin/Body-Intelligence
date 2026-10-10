@@ -142,12 +142,9 @@ Future<void> _mount(
       channel,
       (_) async => null,
     );
-    addTearDown(
-      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        channel,
-        null,
-      ),
-    );
+    // Asynchronous native speech stop can complete after the current page
+    // unmounts. Keep the isolated mock for the entire test file, clearing it
+    // in tearDownAll rather than racing a late platform cleanup.
   }
   final router = GoRouter(
     initialLocation: '/intelligence-center',
@@ -266,15 +263,24 @@ Future<void> _unmount(WidgetTester tester) async {
   await _drain(tester);
 }
 
-Finder get _matchUse => find.descendant(
-  of: find.byType(AlertDialog),
-  matching: find.byType(FilledButton),
-);
+// Premium Vision uses a Dialog rather than the legacy AlertDialog. Both
+// flows must retain an initially disabled action and a verified-food check.
+Finder get _matchUse {
+  final premium = find.byKey(const Key('premium-vision-use-food'));
+  if (premium.evaluate().isNotEmpty) return premium;
+  return find.descendant(
+    of: find.byType(AlertDialog),
+    matching: find.byType(FilledButton),
+  );
+}
 
 Future<void> _chooseMatch(WidgetTester tester, String name) async {
-  await _until(tester, find.text(name));
+  // Premium repeats the recognized name in its heading. Select the actual
+  // catalog row, not a text matcher that also sees the recognition heading.
+  final row = find.widgetWithText(ListTile, name);
+  await _until(tester, row);
   expect(tester.widget<FilledButton>(_matchUse).onPressed, isNull);
-  await tester.tap(find.text(name));
+  await tester.tap(row);
   await tester.pump();
   expect(tester.widget<FilledButton>(_matchUse).onPressed, isNotNull);
   await tester.tap(_matchUse);
@@ -399,6 +405,14 @@ Map<String, int> _mockCameraPermission(
 }
 
 void main() {
+  tearDownAll(() {
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    for (final name in ['bil/tts', 'bil/speech', 'bil/mic_sound']) {
+      messenger.setMockMethodCallHandler(MethodChannel(name), null);
+    }
+  });
+
   for (final arabic in [false, true]) {
     testWidgets(
       'barcode review commits one bound readback with unknowns, arabic=$arabic',
@@ -705,22 +719,31 @@ void main() {
       await tester.tap(find.byKey(const Key('ai-coach-food-image-button')));
       await _drain(tester);
       await tester.tap(find.byKey(const Key('ai-coach-image-source-gallery')));
-      await _until(tester, find.byType(CheckboxListTile));
+      // Premium photo review now requires the user's photo-stage and
+      // actually-eaten confirmation before matching a trusted catalog row.
+      final photoStage = find.byKey(const Key('premium-vision-stage-before'));
+      await _until(tester, photoStage);
       await _expectNoMeal(tester, fixture);
-      await tester.tap(find.byType(CheckboxListTile));
+      await tester.ensureVisible(photoStage);
+      await tester.tap(photoStage);
       await tester.pump();
-      // Reviewing the suggested amount must be safe while its field is still
-      // focused when Continue dismisses the candidate dialog.
+      final selection = find.byKey(const Key('premium-vision-select-0'));
+      await tester.ensureVisible(selection);
+      await tester.tap(selection);
+      await tester.pump();
+      final eaten = find.byKey(const Key('premium-vision-eaten-0'));
+      await tester.ensureVisible(eaten);
+      await tester.tap(eaten);
+      await tester.pump();
       await tester.enterText(
-        find
-            .descendant(
-              of: find.byType(AlertDialog),
-              matching: find.byType(TextField),
-            )
-            .first,
+        find.byKey(const Key('premium-vision-amount-0')),
         '100',
       );
-      await tester.tap(_matchUse);
+      final next = find.byKey(const Key('premium-vision-continue'));
+      await tester.ensureVisible(next);
+      await tester.pump();
+      expect(tester.widget<FilledButton>(next).onPressed, isNotNull);
+      await tester.tap(next);
       await _drain(tester);
       await _chooseMatch(tester, fixture.rows.single.name);
       await _until(tester, find.byType(CoachFoodReviewCard));

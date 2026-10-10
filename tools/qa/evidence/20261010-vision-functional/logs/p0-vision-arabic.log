@@ -1,0 +1,83 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/meal_image_language_regression_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_language_regression_test.dart
+00:00 +0: Coach review copy has exactly the 25 shipped locale columns
+00:00 +1: static review, permission, error copy and units use ar
+00:00 +2: localized dynamic fields survive intact in ar
+00:00 +3: rejects legacy or wrong-language result for ar
+00:00 +4: static review, permission, error copy and units use en
+00:00 +5: localized dynamic fields survive intact in en
+00:00 +6: static review, permission, error copy and units use fr
+00:00 +7: localized dynamic fields survive intact in fr
+00:00 +8: rejects legacy or wrong-language result for fr
+00:00 +9: static review, permission, error copy and units use es
+00:00 +10: localized dynamic fields survive intact in es
+00:00 +11: rejects legacy or wrong-language result for es
+00:00 +12: static review, permission, error copy and units use tr
+00:00 +13: localized dynamic fields survive intact in tr
+00:00 +14: rejects legacy or wrong-language result for tr
+00:00 +15: static review, permission, error copy and units use de
+00:00 +16: localized dynamic fields survive intact in de
+00:00 +17: rejects legacy or wrong-language result for de
+00:00 +18: static review, permission, error copy and units use it
+00:00 +19: localized dynamic fields survive intact in it
+00:00 +20: rejects legacy or wrong-language result for it
+00:00 +21: static review, permission, error copy and units use pt-BR
+00:00 +22: localized dynamic fields survive intact in pt-BR
+00:00 +23: rejects legacy or wrong-language result for pt-BR
+00:00 +24: static review, permission, error copy and units use pt-PT
+00:00 +25: localized dynamic fields survive intact in pt-PT
+00:00 +26: rejects legacy or wrong-language result for pt-PT
+00:00 +27: static review, permission, error copy and units use ur
+00:00 +28: localized dynamic fields survive intact in ur
+00:00 +29: rejects legacy or wrong-language result for ur
+00:00 +30: static review, permission, error copy and units use fa
+00:00 +31: localized dynamic fields survive intact in fa
+00:00 +32: rejects legacy or wrong-language result for fa
+00:00 +33: static review, permission, error copy and units use hi
+00:00 +34: localized dynamic fields survive intact in hi
+00:00 +35: rejects legacy or wrong-language result for hi
+00:00 +36: static review, permission, error copy and units use id
+00:00 +37: localized dynamic fields survive intact in id
+00:00 +38: rejects legacy or wrong-language result for id
+00:00 +39: static review, permission, error copy and units use ms
+00:00 +40: localized dynamic fields survive intact in ms
+00:00 +41: rejects legacy or wrong-language result for ms
+00:00 +42: static review, permission, error copy and units use ja
+00:00 +43: localized dynamic fields survive intact in ja
+00:00 +44: rejects legacy or wrong-language result for ja
+00:00 +45: static review, permission, error copy and units use ko
+00:00 +46: localized dynamic fields survive intact in ko
+00:00 +47: rejects legacy or wrong-language result for ko
+00:00 +48: static review, permission, error copy and units use zh-Hans
+00:00 +49: localized dynamic fields survive intact in zh-Hans
+00:00 +50: rejects legacy or wrong-language result for zh-Hans
+00:00 +51: static review, permission, error copy and units use zh-Hant
+00:00 +52: localized dynamic fields survive intact in zh-Hant
+00:00 +53: rejects legacy or wrong-language result for zh-Hant
+00:00 +54: static review, permission, error copy and units use ru
+00:00 +55: localized dynamic fields survive intact in ru
+00:00 +56: rejects legacy or wrong-language result for ru
+00:00 +57: static review, permission, error copy and units use bn
+00:00 +58: localized dynamic fields survive intact in bn
+00:00 +59: rejects legacy or wrong-language result for bn
+00:00 +60: static review, permission, error copy and units use vi
+00:00 +61: localized dynamic fields survive intact in vi
+00:00 +62: rejects legacy or wrong-language result for vi
+00:00 +63: static review, permission, error copy and units use th
+00:00 +64: localized dynamic fields survive intact in th
+00:00 +65: rejects legacy or wrong-language result for th
+00:00 +66: static review, permission, error copy and units use pl
+00:00 +67: localized dynamic fields survive intact in pl
+00:00 +68: rejects legacy or wrong-language result for pl
+00:00 +69: static review, permission, error copy and units use nl
+00:00 +70: localized dynamic fields survive intact in nl
+00:00 +71: rejects legacy or wrong-language result for nl
+00:00 +72: static review, permission, error copy and units use uk
+00:00 +73: localized dynamic fields survive intact in uk
+00:00 +74: rejects legacy or wrong-language result for uk
+00:00 +75: Arabic receipt cannot hide English evidence, alternatives or warnings
+00:00 +76: regional and script variants select their own column
+00:00 +77: semantic language failure is localized without a paid retry
+00:00 +78: Arabic photo review displays Arabic and returns a canonical unit
+00:01 +79: All tests passed!

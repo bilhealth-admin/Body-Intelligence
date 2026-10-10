@@ -1,0 +1,11 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/meal_vision_premium_review_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_premium_review_test.dart
+00:00 +0: No selected food or inferred portion is auto-logged
+00:01 +1: Leftovers are never mistaken for amount consumed
+00:01 +2: Rejects zero portion with visible validation
+00:01 +3: Alternative changes identity without retaining verified record
+00:02 +4: Only image from user may appear; no substitute meal photo
+00:02 +5: modern label source needs matching owner proof, not just a food name
+00:02 +6: owner-bound label may be selected without claiming verification
+00:02 +7: All tests passed!

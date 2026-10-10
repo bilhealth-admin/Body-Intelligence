@@ -1,0 +1,70 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/coach_food_commit_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/coach_food_commit_test.dart
+00:00 +0: Food committed storage modern all-unknown mask0 stays unknown through real ledger and Dashboard
+00:00 +1: Food committed storage known zero remains different from unknown in full readback and daily totals
+00:00 +2: Food committed storage lost modern envelope cannot fall back to legacy zero or become a receipt
+00:00 +3: Food committed storage invalid JSON cannot fall back to legacy zero or become a receipt
+00:00 +4: Food committed storage unknown schema cannot fall back to legacy zero or become a receipt
+00:00 +5: Food committed storage changed numeric projection cannot fall back to legacy zero or become a receipt
+00:00 +6: Food committed storage changed quantity projection cannot fall back to legacy zero or become a receipt
+00:00 +7: Food committed storage changed evidence mask cannot fall back to legacy zero or become a receipt
+00:00 +8: Food committed storage unearned verification cannot fall back to legacy zero or become a receipt
+00:00 +9: Food committed storage lost modern mask0 envelope stays invalid and never becomes known zero
+00:00 +10: Food committed storage copy day, historical repeat and duplication preserve the full saved snapshot
+00:00 +11: Food committed storage closed day blocks a new batch without changing existing snapshots
+00:00 +12: Food operation journal second-food database failure rolls back foods, items, bucket and journal together
+00:00 +13: Food operation journal unexpected committed nutrient readback rolls back before journal success
+00:00 +14: Food operation journal concurrent same-operation calls create one batch and reject changed arguments
+00:00 +15: Food operation journal batch Undo preserves older meal items and replay never resurrects its foods
+00:01 +16: Food operation journal later quantity edit blocks stale replacement and stale batch Undo
+00:01 +17: Food operation journal fixed per-user source accepts its opaque owner and rejects another user before writes
+00:01 +18: Food operation journal every batch async owner boundary is atomic or reports an already durable commit
+00:02 +19: Food templates template preserves all 13 nutrients and provenance after catalog edits
+00:02 +20: Food templates template keeps modern all-unknown mask0 unavailable in daily readback
+00:02 +21: Food templates corrupted historical evidence cannot become a reusable template
+00:02 +22: Food templates another owner cannot instantiate fixed values and leaves no partial meal
+WARNING (drift): It looks like you've created the database class AppDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _$AppDatabase (package:body_intelligence_log/data/database/app_database.g.dart:14689:36)
+#4      new AppDatabase.forTesting (package:body_intelligence_log/data/database/app_database.dart)
+#5      _foodTemplateCases.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/coach_food_template_cases.dart:101:33)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +23: Food templates template detects a corrupted inserted projection and rolls back the batch
+00:02 +24: Food reselection ordinary diary selection keeps thirteen nutrients and source evidence
+00:02 +25: Food reselection meal builder keeps an unknown food alongside a known zero food
+00:02 +26: Food reselection invalid catalog basis cannot be reselected as legacy numeric nutrition
+00:02 +27: Food reselection readback corruption rolls back ordinary Food V2 reselection
+00:02 +28: Food reselection foreign fixed-owner basis cannot be reselected or counted by the ledger
+WARNING (drift): It looks like you've created the database class AppDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _$AppDatabase (package:body_intelligence_log/data/database/app_database.g.dart:14689:36)
+#4      new AppDatabase.forTesting (package:body_intelligence_log/data/database/app_database.dart)
+#5      _foodReselectionCases.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/coach_food_reselection_cases.dart:133:33)
+<asynchronous suspension>
+#6      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#7      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:02 +29: four foods commit complete immutable evidence and replay after repository recreation
+00:02 +30: quantity uses original thirteen-nutrient basis after catalog changes
+00:02 +31: replacement changes the existing entry and Undo restores full prior evidence
+00:02 +32: All tests passed!

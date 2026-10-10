@@ -1,0 +1,2534 @@
+[
+  {
+    "utc": "2026-10-10T21:21:57.1993152Z",
+    "seconds": 0.38,
+    "freeGiB": 7.269,
+    "workingSetMiB": 19.38,
+    "privateMiB": 10.26,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 9.55
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.83
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:21:58.0206519Z",
+    "seconds": 1.19,
+    "freeGiB": 7.187,
+    "workingSetMiB": 118.99,
+    "privateMiB": 99.24,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 91.3
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:21:58.8362552Z",
+    "seconds": 2.01,
+    "freeGiB": 7.11,
+    "workingSetMiB": 211.11,
+    "privateMiB": 180.18,
+    "processes": [
+      {
+        "Id": 1868,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.91
+      },
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 23248,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 7240,
+        "ProcessName": "dart",
+        "workingSetMiB": 46.62
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 121.68
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:21:59.6489390Z",
+    "seconds": 2.82,
+    "freeGiB": 6.996,
+    "workingSetMiB": 346.4,
+    "privateMiB": 307.61,
+    "processes": [
+      {
+        "Id": 1868,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.91
+      },
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 2432,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 23248,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 7240,
+        "ProcessName": "dart",
+        "workingSetMiB": 46.62
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 5564,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 128.22
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 121.68
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:00.4443319Z",
+    "seconds": 3.62,
+    "freeGiB": 7.063,
+    "workingSetMiB": 152.2,
+    "privateMiB": 135.69,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 124.52
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:01.2818821Z",
+    "seconds": 4.46,
+    "freeGiB": 7.025,
+    "workingSetMiB": 284.0,
+    "privateMiB": 243.8,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 20316,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.9
+      },
+      {
+        "Id": 11808,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 17552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.09
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 9212,
+        "ProcessName": "dart",
+        "workingSetMiB": 46.66
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 18328,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 62.64
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 124.83
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:02.1463712Z",
+    "seconds": 5.32,
+    "freeGiB": 7.003,
+    "workingSetMiB": 299.62,
+    "privateMiB": 259.33,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 20316,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.9
+      },
+      {
+        "Id": 11808,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 17552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.09
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 9212,
+        "ProcessName": "dart",
+        "workingSetMiB": 46.66
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 18328,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 78.26
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 124.83
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:03.1104472Z",
+    "seconds": 6.28,
+    "freeGiB": 6.958,
+    "workingSetMiB": 359.54,
+    "privateMiB": 320.02,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 20316,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.9
+      },
+      {
+        "Id": 11808,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 17552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.09
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 9212,
+        "ProcessName": "dart",
+        "workingSetMiB": 46.66
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 18328,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 138.16
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 124.84
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:04.0416570Z",
+    "seconds": 7.22,
+    "freeGiB": 6.929,
+    "workingSetMiB": 389.35,
+    "privateMiB": 348.21,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 20316,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.9
+      },
+      {
+        "Id": 11808,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 17552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.09
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 9212,
+        "ProcessName": "dart",
+        "workingSetMiB": 46.66
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 18328,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 168.0
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 124.82
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:04.9919748Z",
+    "seconds": 8.17,
+    "freeGiB": 7.104,
+    "workingSetMiB": 167.71,
+    "privateMiB": 143.48,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 21760,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.68
+      },
+      {
+        "Id": 16232,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 125.12
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:05.8870480Z",
+    "seconds": 9.06,
+    "freeGiB": 7.063,
+    "workingSetMiB": 248.39,
+    "privateMiB": 211.5,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 21760,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.68
+      },
+      {
+        "Id": 16232,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 25532,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 125.11
+      },
+      {
+        "Id": 24196,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 71.88
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:06.8270041Z",
+    "seconds": 10.0,
+    "freeGiB": 7.054,
+    "workingSetMiB": 253.66,
+    "privateMiB": 218.29,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 21760,
+        "ProcessName": "cmd",
+        "workingSetMiB": 7.68
+      },
+      {
+        "Id": 16232,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.21
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 25532,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 125.11
+      },
+      {
+        "Id": 24196,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 77.15
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:07.7707919Z",
+    "seconds": 10.94,
+    "freeGiB": 7.111,
+    "workingSetMiB": 157.52,
+    "privateMiB": 138.95,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 129.84
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:08.6567996Z",
+    "seconds": 11.83,
+    "freeGiB": 7.112,
+    "workingSetMiB": 158.6,
+    "privateMiB": 139.54,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 130.92
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:09.6261733Z",
+    "seconds": 12.8,
+    "freeGiB": 7.122,
+    "workingSetMiB": 158.41,
+    "privateMiB": 139.64,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 130.73
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:10.5183553Z",
+    "seconds": 13.69,
+    "freeGiB": 7.112,
+    "workingSetMiB": 154.07,
+    "privateMiB": 133.83,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 126.38
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:11.3289494Z",
+    "seconds": 14.5,
+    "freeGiB": 7.045,
+    "workingSetMiB": 154.07,
+    "privateMiB": 133.83,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 126.38
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:12.1757659Z",
+    "seconds": 15.35,
+    "freeGiB": 6.931,
+    "workingSetMiB": 154.07,
+    "privateMiB": 133.83,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 126.38
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:13.0229202Z",
+    "seconds": 16.2,
+    "freeGiB": 7.646,
+    "workingSetMiB": 156.43,
+    "privateMiB": 141.03,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 128.75
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:13.8991827Z",
+    "seconds": 17.07,
+    "freeGiB": 7.679,
+    "workingSetMiB": 156.82,
+    "privateMiB": 141.51,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 129.14
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:14.7389268Z",
+    "seconds": 17.91,
+    "freeGiB": 7.554,
+    "workingSetMiB": 181.54,
+    "privateMiB": 163.54,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.86
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:15.6214584Z",
+    "seconds": 18.8,
+    "freeGiB": 7.473,
+    "workingSetMiB": 397.13,
+    "privateMiB": 370.19,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 208.54
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.84
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:16.4417969Z",
+    "seconds": 19.62,
+    "freeGiB": 7.447,
+    "workingSetMiB": 449.86,
+    "privateMiB": 423.44,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 261.26
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.84
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:17.2732114Z",
+    "seconds": 20.45,
+    "freeGiB": 7.437,
+    "workingSetMiB": 475.08,
+    "privateMiB": 449.32,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 286.49
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.84
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:18.1391404Z",
+    "seconds": 21.31,
+    "freeGiB": 7.439,
+    "workingSetMiB": 489.11,
+    "privateMiB": 461.52,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 300.54
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.81
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:19.0036104Z",
+    "seconds": 22.18,
+    "freeGiB": 7.391,
+    "workingSetMiB": 528.65,
+    "privateMiB": 500.96,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 340.09
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.81
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:19.9085390Z",
+    "seconds": 23.08,
+    "freeGiB": 7.271,
+    "workingSetMiB": 669.67,
+    "privateMiB": 638.82,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 481.22
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:20.7932582Z",
+    "seconds": 23.97,
+    "freeGiB": 7.132,
+    "workingSetMiB": 824.66,
+    "privateMiB": 794.64,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 636.21
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:21.6449053Z",
+    "seconds": 24.82,
+    "freeGiB": 7.061,
+    "workingSetMiB": 889.51,
+    "privateMiB": 859.61,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 701.06
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:22.4786275Z",
+    "seconds": 25.65,
+    "freeGiB": 7.092,
+    "workingSetMiB": 856.51,
+    "privateMiB": 826.35,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 668.06
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:23.3102075Z",
+    "seconds": 26.48,
+    "freeGiB": 7.095,
+    "workingSetMiB": 852.59,
+    "privateMiB": 822.41,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 664.14
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:24.2284705Z",
+    "seconds": 27.4,
+    "freeGiB": 7.077,
+    "workingSetMiB": 863.61,
+    "privateMiB": 833.81,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 675.16
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:25.0878413Z",
+    "seconds": 28.26,
+    "freeGiB": 7.09,
+    "workingSetMiB": 857.47,
+    "privateMiB": 827.8,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 669.02
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:25.9120387Z",
+    "seconds": 29.09,
+    "freeGiB": 7.065,
+    "workingSetMiB": 888.88,
+    "privateMiB": 859.38,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 700.43
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:26.7463163Z",
+    "seconds": 29.92,
+    "freeGiB": 7.081,
+    "workingSetMiB": 878.96,
+    "privateMiB": 854.59,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.9
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 690.52
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.7
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:27.5806090Z",
+    "seconds": 30.75,
+    "freeGiB": 6.808,
+    "workingSetMiB": 988.95,
+    "privateMiB": 1010.38,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.87
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 800.39
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 153.85
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:28.3992460Z",
+    "seconds": 31.57,
+    "freeGiB": 6.706,
+    "workingSetMiB": 1169.29,
+    "privateMiB": 1150.36,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 24488,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.08
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 800.39
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 154.59
+      },
+      {
+        "Id": 888,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 172.55
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:29.2358448Z",
+    "seconds": 32.41,
+    "freeGiB": 6.658,
+    "workingSetMiB": 1226.52,
+    "privateMiB": 1199.53,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 24488,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.08
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 800.39
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 154.59
+      },
+      {
+        "Id": 888,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 229.79
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:30.0832869Z",
+    "seconds": 33.26,
+    "freeGiB": 6.573,
+    "workingSetMiB": 1284.0,
+    "privateMiB": 1256.11,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 24488,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.08
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 800.39
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 154.59
+      },
+      {
+        "Id": 888,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 287.27
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:30.9191988Z",
+    "seconds": 34.09,
+    "freeGiB": 6.618,
+    "workingSetMiB": 989.69,
+    "privateMiB": 1012.15,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 24488,
+        "ProcessName": "conhost",
+        "workingSetMiB": 0.0
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 800.39
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 154.64
+      },
+      {
+        "Id": 888,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 0.0
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:31.7616846Z",
+    "seconds": 34.94,
+    "freeGiB": 6.891,
+    "workingSetMiB": 991.92,
+    "privateMiB": 1015.62,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 800.39
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.86
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:32.6120420Z",
+    "seconds": 35.79,
+    "freeGiB": 6.907,
+    "workingSetMiB": 988.23,
+    "privateMiB": 1013.79,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 796.7
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.86
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:33.4665095Z",
+    "seconds": 36.64,
+    "freeGiB": 6.732,
+    "workingSetMiB": 1175.49,
+    "privateMiB": 1154.3,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 7796,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 796.7
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 157.58
+      },
+      {
+        "Id": 9536,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 179.46
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:34.2789186Z",
+    "seconds": 37.45,
+    "freeGiB": 6.911,
+    "workingSetMiB": 989.05,
+    "privateMiB": 1014.41,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 7796,
+        "ProcessName": "conhost",
+        "workingSetMiB": 0.0
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 796.7
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 157.68
+      },
+      {
+        "Id": 9536,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 0.0
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:35.1582814Z",
+    "seconds": 38.33,
+    "freeGiB": 6.815,
+    "workingSetMiB": 988.15,
+    "privateMiB": 1013.55,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 796.7
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.78
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:35.9902659Z",
+    "seconds": 39.16,
+    "freeGiB": 6.928,
+    "workingSetMiB": 988.15,
+    "privateMiB": 1013.55,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 796.7
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.78
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:36.7791030Z",
+    "seconds": 39.95,
+    "freeGiB": 6.911,
+    "workingSetMiB": 988.15,
+    "privateMiB": 1013.55,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 796.7
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.78
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:37.5801438Z",
+    "seconds": 40.75,
+    "freeGiB": 6.923,
+    "workingSetMiB": 996.24,
+    "privateMiB": 1018.59,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 804.79
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.78
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:38.3721611Z",
+    "seconds": 41.55,
+    "freeGiB": 6.936,
+    "workingSetMiB": 991.23,
+    "privateMiB": 1012.58,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 799.78
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.78
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:39.1873075Z",
+    "seconds": 42.36,
+    "freeGiB": 7.019,
+    "workingSetMiB": 912.14,
+    "privateMiB": 934.43,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 720.7
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.78
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:40.0209643Z",
+    "seconds": 43.19,
+    "freeGiB": 7.037,
+    "workingSetMiB": 912.97,
+    "privateMiB": 932.31,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 721.59
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:40.8358912Z",
+    "seconds": 44.01,
+    "freeGiB": 7.035,
+    "workingSetMiB": 912.97,
+    "privateMiB": 932.31,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 721.59
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:41.6804235Z",
+    "seconds": 44.85,
+    "freeGiB": 7.012,
+    "workingSetMiB": 912.97,
+    "privateMiB": 932.31,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 721.59
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:42.4860495Z",
+    "seconds": 45.66,
+    "freeGiB": 7.004,
+    "workingSetMiB": 913.64,
+    "privateMiB": 932.98,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 722.26
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:43.2809096Z",
+    "seconds": 46.45,
+    "freeGiB": 7.009,
+    "workingSetMiB": 921.17,
+    "privateMiB": 942.16,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 729.79
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:44.0811689Z",
+    "seconds": 47.25,
+    "freeGiB": 7.001,
+    "workingSetMiB": 957.71,
+    "privateMiB": 978.7,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 766.32
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:44.8938819Z",
+    "seconds": 48.07,
+    "freeGiB": 6.934,
+    "workingSetMiB": 1018.41,
+    "privateMiB": 1039.23,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 827.02
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:45.7541152Z",
+    "seconds": 48.93,
+    "freeGiB": 6.89,
+    "workingSetMiB": 1090.57,
+    "privateMiB": 1126.11,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 899.18
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.71
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:46.6206590Z",
+    "seconds": 49.79,
+    "freeGiB": 6.548,
+    "workingSetMiB": 1314.05,
+    "privateMiB": 1325.27,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 987.17
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 156.84
+      },
+      {
+        "Id": 11880,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 135.36
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:47.4636796Z",
+    "seconds": 50.64,
+    "freeGiB": 6.464,
+    "workingSetMiB": 1425.32,
+    "privateMiB": 1404.43,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 19552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.08
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 987.17
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 157.15
+      },
+      {
+        "Id": 11880,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 239.25
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:48.3437661Z",
+    "seconds": 51.52,
+    "freeGiB": 6.408,
+    "workingSetMiB": 1479.33,
+    "privateMiB": 1451.0,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 19552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.08
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 987.17
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 157.15
+      },
+      {
+        "Id": 11880,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 293.26
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:49.1682591Z",
+    "seconds": 52.34,
+    "freeGiB": 6.334,
+    "workingSetMiB": 1570.79,
+    "privateMiB": 1541.24,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 19552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.08
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 987.17
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 157.15
+      },
+      {
+        "Id": 11880,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 384.72
+      }
+    ]
+  },
+  {
+    "utc": "2026-10-10T21:22:50.0299923Z",
+    "seconds": 53.2,
+    "freeGiB": 6.477,
+    "workingSetMiB": 1179.62,
+    "privateMiB": 1227.56,
+    "processes": [
+      {
+        "Id": 19580,
+        "ProcessName": "cmd",
+        "workingSetMiB": 8.86
+      },
+      {
+        "Id": 9596,
+        "ProcessName": "conhost",
+        "workingSetMiB": 7.07
+      },
+      {
+        "Id": 19552,
+        "ProcessName": "conhost",
+        "workingSetMiB": 0.0
+      },
+      {
+        "Id": 22316,
+        "ProcessName": "conhost",
+        "workingSetMiB": 9.92
+      },
+      {
+        "Id": 20596,
+        "ProcessName": "dart",
+        "workingSetMiB": 8.82
+      },
+      {
+        "Id": 8,
+        "ProcessName": "dartaotruntime",
+        "workingSetMiB": 987.17
+      },
+      {
+        "Id": 22072,
+        "ProcessName": "dartvm",
+        "workingSetMiB": 157.78
+      },
+      {
+        "Id": 11880,
+        "ProcessName": "flutter_tester",
+        "workingSetMiB": 0.0
+      }
+    ]
+  }
+]

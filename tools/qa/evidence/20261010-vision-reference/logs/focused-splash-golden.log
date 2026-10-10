@@ -1,0 +1,11 @@
+Command: flutter test --no-pub --timeout=3m test/premium_splash_experience_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_splash_experience_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: 2026 splash exposes the full identity without loading chrome
+00:00 +1: premium splash stays stable with RTL and large text
+00:00 +2: reduced motion presents stable identity immediately
+00:00 +3: premium splash scales safely on tablet
+00:00 +4: native launch continuity matches the single Flutter splash
+00:00 +5: (tearDownAll)
+00:00 +5: All tests passed!

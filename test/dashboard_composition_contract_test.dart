@@ -36,7 +36,14 @@ void main() {
     expect(source, contains('AppColors.carbs'));
     expect(source, contains('AppColors.fats'));
     expect(source, contains('((index * 3) ~/ values.length).clamp(0, 2)'));
-    expect(source, isNot(contains('canvas.drawPath(')));
+    // Real observed weight trends use drawPath; the three-zone step bars
+    // still must use distinct rounded rectangles and never bridge gaps.
+    final barPainter = source.substring(
+      source.indexOf('final slotWidth = size.width / values.length'),
+      source.indexOf('bool shouldRepaint(covariant _ReferenceTrendPainter'),
+    );
+    expect(barPainter, contains('canvas.drawRRect('));
+    expect(barPainter, isNot(contains('canvas.drawPath(')));
     expect(grid, contains('weightTrendValues: weights'));
     expect(grid, contains('DashboardStepTrend.fromEvidence('));
     expect(grid, contains('connected: connectedHealthSnapshot'));

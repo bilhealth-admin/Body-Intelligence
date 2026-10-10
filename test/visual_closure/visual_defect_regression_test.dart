@@ -752,9 +752,12 @@ void main() {
     );
     expect(nutritionPathways, isNot(contains("premium ? 'Premium'")));
     expect(nutritionPathways, isNot(contains('Icons.lock_rounded')));
-    expect(settings, contains("copy('Start 7-day free trial')"));
+    // The current More design offers optional plan discovery but reports
+    // Active only from verified server status. Do not force trial enrollment.
+    expect(settings, contains('EntitlementAuthority.verifiedServer'));
+    expect(settings, contains("copy('Explore Premium')"));
     expect(settings, contains("copy('Active')"));
-    expect(settings, isNot(contains("copy('Explore Premium')")));
+    expect(settings, isNot(contains("copy('Start 7-day free trial')")));
     expect(referenceSettings, contains("copy('BIL Premium')"));
     expect(referenceSettings, contains("copy('Start 7-day free trial')"));
     expect(referenceSettings, isNot(contains("copy('Explore Premium')")));

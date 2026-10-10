@@ -1,0 +1,17 @@
+{
+  "first_use_head": "944973ed3556ccb9b8cd8a09b451562aea3cf652",
+  "files_preserved": {
+    "lib/app/router/responsive_app_shell.dart": true,
+    "lib/features/daily_log/food_log_actions.dart": true,
+    "lib/features/daily_log/food_log_page.dart": true,
+    "lib/features/dashboard/widgets/dashboard_first_use_experience.dart": true,
+    "lib/features/dashboard/widgets/first_meal_celebration.dart": true,
+    "lib/features/dashboard/widgets/first_use_context_coachmark.dart": true,
+    "lib/features/dashboard/widgets/first_use_glass_surface.dart": true,
+    "lib/shared/widgets/bil_reference_bottom_bar.dart": true,
+    "lib/shared/widgets/first_use_guide_anchor.dart": true,
+    "test/features/dashboard/first_use_reference_journey_test.dart": true
+  },
+  "all_match_previous_handoff": true,
+  "tested_in_capacity_probe": false
+}

@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_circles.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
+import 'package:body_intelligence_log/app/theme/bil_flat_icon.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_circles.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
@@ -99,6 +100,12 @@ void main() {
               lessThan(tester.getRect(cover).top),
             );
             expect(tester.getSize(cover), const Size(56, 56));
+            expect(tester.widget<BilFlatIcon>(cover).iconSize, 28);
+            expect(
+              find.descendant(of: cover, matching: find.byType(DecoratedBox)),
+              findsNothing,
+              reason: 'A Circle glyph has no gradient, glow or shadow',
+            );
             expect(repository.lists, 1);
             expect(repository.joins, 0);
             expect(repository.leaves, 0);

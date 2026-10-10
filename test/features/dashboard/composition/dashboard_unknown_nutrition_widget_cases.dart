@@ -109,7 +109,7 @@ void _dashboardUnknownNutritionWidgetCases(
           expect(rendered.fatConsumed, isNull);
           expect(
             _cardValue(tester, 'dashboard-reference-calorie-consumed-value'),
-            startsWith('1905 / '),
+            startsWith('1,905  cal / '),
           );
           await _showEvidenceMacros(tester);
           final card = find.byKey(const Key('dashboard-reference-macros-card'));
@@ -164,7 +164,7 @@ void _dashboardUnknownNutritionWidgetCases(
         expect(rendered.caloriesGoal, greaterThan(0));
         expect(
           _cardValue(tester, 'dashboard-reference-calorie-consumed-value'),
-          startsWith('— / '),
+          startsWith('—  cal / '),
         );
         expect(
           _cardValue(tester, 'dashboard-reference-calorie-remaining-value'),

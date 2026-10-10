@@ -1,0 +1,5 @@
+Command: flutter test --no-pub --timeout=3m test/architecture_source_file_size_guard_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/architecture_source_file_size_guard_test.dart
+00:00 +0: hand-maintained Dart sources stay below the architecture ceiling
+00:00 +1: All tests passed!

@@ -23,6 +23,12 @@ void _messageRetryCases(
               _ => NewCommunityMessagePage(repository: repo),
             },
           ),
+          // Chat's real cold-start fallback is the message inbox. The
+          // inbox/new-message roots themselves return to the safe dashboard.
+          GoRoute(
+            path: '/community/messages',
+            builder: (_, _) => const Scaffold(body: Text('Safe inbox')),
+          ),
           GoRoute(
             path: '/dashboard',
             builder: (_, _) => const Scaffold(body: Text('Safe dashboard')),
@@ -34,7 +40,10 @@ void _messageRetryCases(
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('community-safe-return')));
       await tester.pumpAndSettle();
-      expect(find.text('Safe dashboard'), findsOneWidget);
+      expect(
+        find.text(page == 'chat' ? 'Safe inbox' : 'Safe dashboard'),
+        findsOneWidget,
+      );
     });
   }
   _case('both inbox errors are observed and each tab can explicitly retry', (

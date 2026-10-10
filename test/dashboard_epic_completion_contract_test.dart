@@ -16,7 +16,8 @@ void main() {
 
     expect(page, contains('DashboardShell('));
     expect(page, contains('DashboardComposition('));
-    expect(page, contains('hero: hero'));
+    expect(page, contains('hero: DashboardFirstUseExperience('));
+    expect(page, contains('child: hero,'));
     expect(page, contains('content: const DashboardGrid('));
     expect(composition, contains("Key('dashboard-composition-wide')"));
     expect(composition, contains("Key('dashboard-composition-stacked')"));

@@ -6,6 +6,7 @@ import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
 import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/first_meal_milestone.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/features/dashboard/composition/dashboard_intelligence_input_adapter.dart';
 import 'package:body_intelligence_log/features/dashboard/domain/dashboard_intelligence_composer.dart';
@@ -153,6 +154,22 @@ Matcher _conflict(CoachMealConflictReason reason) => throwsA(
   isA<CoachMealConflict>().having((error) => error.reason, 'reason', reason),
 );
 
+Future<void> _expectSavedFoodJournalAndMilestone(
+  _FoodFixture fixture,
+  String operationId,
+) async {
+  final entries = await fixture.db.select(fixture.db.preferences).get();
+  final owner = LocalDatabaseScope.keyForOwner(fixture.db.localOwnerId);
+  expect(entries.map((entry) => entry.key).toSet(), {
+    'coachMealOperationV1.$owner.$operationId',
+    firstMealCelebrationPreferenceKey,
+  });
+  final milestone = entries.singleWhere(
+    (entry) => entry.key == firstMealCelebrationPreferenceKey,
+  );
+  expect(milestone.value, 'ready');
+}
+
 void main() {
   group('Food committed storage', _foodEvidenceCases);
   group('Food operation journal', _foodJournalCases);
@@ -197,7 +214,7 @@ void main() {
       );
       expect(await f.active(), hasLength(4));
       expect(await f.db.select(f.db.foods).get(), hasLength(4));
-      expect(await f.db.select(f.db.preferences).get(), hasLength(1));
+      await _expectSavedFoodJournalAndMilestone(f, 'four-foods');
     },
   );
 

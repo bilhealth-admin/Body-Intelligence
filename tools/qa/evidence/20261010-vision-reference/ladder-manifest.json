@@ -1,0 +1,183 @@
+{
+  "head": "b60f4c1710243202187763b30ce444065573bdc6",
+  "branch": "qa/bil-quality-ux-integration-20261009",
+  "worktree_sha256": "cafa4f4cad9bc63fff0b5c3bf862686d02ff24fef4de44085366706c80378a80",
+  "flutter": "3.44.6",
+  "stages": {
+    "source": {
+      "format": [
+        {
+          "exit_code": 0,
+          "seconds": 2.2,
+          "log": "build\\bil-vision-reference\\source-format-1-1791655409948878400.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 2.3,
+          "log": "build\\bil-vision-reference\\source-format-2-1791655412159200300.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.8,
+          "log": "build\\bil-vision-reference\\source-format-3-1791655414443547800.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.4,
+          "log": "build\\bil-vision-reference\\source-format-4-1791655416274283100.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.3,
+          "log": "build\\bil-vision-reference\\source-format-5-1791655417710067300.log"
+        }
+      ],
+      "analyze": {
+        "exit_code": 0,
+        "seconds": 452.9,
+        "log": "build\\bil-vision-reference\\source-analyze-1791655419016277300.log"
+      },
+      "passed": true
+    },
+    "arabic": {
+      "passed": true,
+      "jobs": {
+        "arabic-noto-capture": {
+          "exit_code": 0,
+          "seconds": 17.4,
+          "log": "build\\bil-vision-reference\\arabic-noto-capture-1791655872133668200.log"
+        },
+        "arabic-vision-v2": {
+          "exit_code": 0,
+          "seconds": 62.1,
+          "log": "build\\bil-vision-reference\\arabic-vision-v2-1791655889565786800.log"
+        }
+      }
+    },
+    "p0": {
+      "passed": true,
+      "jobs": {
+        "p0-food-owner-atomic": {
+          "exit_code": 0,
+          "seconds": 13.4,
+          "log": "build\\bil-vision-reference\\p0-food-owner-atomic-1791655951968340500.log"
+        },
+        "p0-meal-owner-atomic": {
+          "exit_code": 0,
+          "seconds": 7.6,
+          "log": "build\\bil-vision-reference\\p0-meal-owner-atomic-1791655965354939000.log"
+        },
+        "p0-first-food-commit": {
+          "exit_code": 0,
+          "seconds": 6.8,
+          "log": "build\\bil-vision-reference\\p0-first-food-commit-1791655972956572000.log"
+        },
+        "p0-vision-review": {
+          "exit_code": 0,
+          "seconds": 9.7,
+          "log": "build\\bil-vision-reference\\p0-vision-review-1791655979721116900.log"
+        },
+        "p0-vision-durable-replay": {
+          "exit_code": 0,
+          "seconds": 6.9,
+          "log": "build\\bil-vision-reference\\p0-vision-durable-replay-1791655989460338600.log"
+        },
+        "p0-vision-quantity-basis": {
+          "exit_code": 0,
+          "seconds": 6.5,
+          "log": "build\\bil-vision-reference\\p0-vision-quantity-basis-1791655996403579600.log"
+        },
+        "p0-vision-capture": {
+          "exit_code": 0,
+          "seconds": 10.3,
+          "log": "build\\bil-vision-reference\\p0-vision-capture-1791656002949719600.log"
+        },
+        "p0-architecture": {
+          "exit_code": 0,
+          "seconds": 7.3,
+          "log": "build\\bil-vision-reference\\p0-architecture-1791656013227837100.log"
+        },
+        "p0-coach-photo-bridge": {
+          "exit_code": 0,
+          "seconds": 19.6,
+          "log": "build\\bil-vision-reference\\p0-coach-photo-bridge-1791656020499533700.log"
+        },
+        "p0-coach-image-source": {
+          "exit_code": 0,
+          "seconds": 11.2,
+          "log": "build\\bil-vision-reference\\p0-coach-image-source-1791656040084504100.log"
+        },
+        "p0-vision-arabic": {
+          "exit_code": 0,
+          "seconds": 8.5,
+          "log": "build\\bil-vision-reference\\p0-vision-arabic-1791656051298723700.log"
+        }
+      }
+    },
+    "focused": {
+      "passed": true,
+      "jobs": {
+        "focused-store-captures": {
+          "exit_code": 0,
+          "seconds": 17.6,
+          "log": "build\\bil-vision-reference\\focused-store-captures-1791656059933130700.log"
+        },
+        "focused-production-goldens": {
+          "exit_code": 0,
+          "seconds": 67.1,
+          "log": "build\\bil-vision-reference\\focused-production-goldens-1791656077564462000.log"
+        },
+        "focused-data-goldens": {
+          "exit_code": 0,
+          "seconds": 22.4,
+          "log": "build\\bil-vision-reference\\focused-data-goldens-1791656144632081500.log"
+        },
+        "focused-splash-golden": {
+          "exit_code": 0,
+          "seconds": 8.3,
+          "log": "build\\bil-vision-reference\\focused-splash-golden-1791656167068111100.log"
+        },
+        "focused-transaction-queue": {
+          "exit_code": 0,
+          "seconds": 8.0,
+          "log": "build\\bil-vision-reference\\focused-transaction-queue-1791656175362459200.log"
+        }
+      }
+    },
+    "broad": {
+      "passed": false,
+      "jobs": {
+        "broad-dashboard-nutrition": {
+          "exit_code": 1,
+          "seconds": 17.5,
+          "log": "build\\bil-vision-reference\\broad-dashboard-nutrition-1791656183559830500.log"
+        },
+        "broad-dashboard-contract-health": {
+          "exit_code": 1,
+          "seconds": 10.8,
+          "log": "build\\bil-vision-reference\\broad-dashboard-contract-health-1791656201088468900.log"
+        },
+        "broad-weekly-onboarding-goldens": {
+          "exit_code": 1,
+          "seconds": 18.8,
+          "log": "build\\bil-vision-reference\\broad-weekly-onboarding-goldens-1791656211928461700.log"
+        },
+        "broad-settings-language-icons": {
+          "exit_code": 0,
+          "seconds": 15.4,
+          "log": "build\\bil-vision-reference\\broad-settings-language-icons-1791656230721340200.log"
+        },
+        "broad-wellness-commerce": {
+          "exit_code": 1,
+          "seconds": 11.4,
+          "log": "build\\bil-vision-reference\\broad-wellness-commerce-1791656246077568800.log"
+        },
+        "broad-community-cold-back": {
+          "exit_code": 0,
+          "seconds": 13.7,
+          "log": "build\\bil-vision-reference\\broad-community-cold-back-1791656257452593400.log"
+        }
+      }
+    }
+  }
+}

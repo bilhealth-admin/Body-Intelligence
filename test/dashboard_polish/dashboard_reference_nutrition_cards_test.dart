@@ -192,12 +192,12 @@ void main() {
         final consumedValue = tester.widget<Text>(
           find.byKey(const Key('dashboard-reference-calorie-consumed-value')),
         );
-        expect(consumedValue.textSpan?.toPlainText(), '640 / 2100');
+        expect(consumedValue.textSpan?.toPlainText(), '640  cal / 2,100');
         expect(consumedValue.textDirection, TextDirection.ltr);
         final remainingValue = tester.widget<Text>(
           find.byKey(const Key('dashboard-reference-calorie-remaining-value')),
         );
-        expect(remainingValue.textSpan?.toPlainText(), '1460');
+        expect(remainingValue.textSpan?.toPlainText(), '1,460');
         expect(remainingValue.textDirection, TextDirection.ltr);
 
         final todayAction = find.byKey(
@@ -221,12 +221,12 @@ void main() {
           final todayLabel = tester.widget<Text>(
             find.descendant(of: calories, matching: find.text('Today')),
           );
-          expect(todayLabel.style?.fontSize, caloriesTitle.style?.fontSize);
-          expect(todayLabel.style?.fontWeight, caloriesTitle.style?.fontWeight);
-          expect(
-            todayLabel.style?.letterSpacing,
-            caloriesTitle.style?.letterSpacing,
-          );
+          // Title and Today action have intentionally different hierarchy.
+          expect(caloriesTitle.style?.fontSize, 15);
+          expect(caloriesTitle.style?.fontWeight, FontWeight.w700);
+          expect(todayLabel.style?.fontSize, 18);
+          expect(todayLabel.style?.fontWeight, FontWeight.w800);
+          expect(todayLabel.style?.letterSpacing, -.25);
           await tester.tap(todayAction);
           await tester.pumpAndSettle();
           expect(router.routeInformationProvider.value.uri.path, '/daily-log');

@@ -78,7 +78,10 @@ void _coachMealOwnerAtomicityCases() {
             if (error.committed) {
               committed++;
               expect(items, hasLength(1), reason: 'check $stop');
-              expect(journals, hasLength(1));
+              await _expectDurableMealJournalAndMilestone(
+                fixture,
+                'cancel-at-$stop',
+              );
             } else {
               rolledBack++;
               expect(items, isEmpty, reason: 'check $stop');
