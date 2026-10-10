@@ -44,8 +44,16 @@ MaterialApp _app(Widget child) => MaterialApp(
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
   ],
+  // Headless Flutter falls back to Ahem squares unless Arabic is selected
+  // explicitly: adding Arabic fonts to a Roboto family does not provide a
+  // reliable glyph fallback. This is test-only; production typefaces stay as-is.
   theme: visualEvidenceTheme(
     ThemeData(useMaterial3: true, brightness: Brightness.dark),
+    fontFamily: 'NotoArabicEvidence',
+  ),
+  builder: (context, child) => visualEvidenceTextSurface(
+    child,
+    fontFamily: 'NotoArabicEvidence',
   ),
   home: Scaffold(body: child),
 );
@@ -140,6 +148,13 @@ void main() {
       ),
     );
     await tester.tap(find.text('فتح'));
+    await tester.pumpAndSettle();
+    final themedApp = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(
+      themedApp.theme!.textTheme.bodyMedium?.fontFamily,
+      'NotoArabicEvidence',
+      reason: 'Ahem squares are not acceptable Arabic visual evidence.',
+    );
     await _capture(tester, '01_review_ar_dark');
     await tester.ensureVisible(
       find.byKey(const Key('premium-vision-stage-during')),

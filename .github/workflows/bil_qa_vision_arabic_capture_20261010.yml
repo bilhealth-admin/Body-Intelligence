@@ -1,0 +1,38 @@
+name: BIL QA Arabic Vision actual Flutter capture
+
+# Render-only proof: no expensive full shards or mobile builds in this job.
+on:
+  push:
+    branches:
+      - qa/bil-quality-ux-integration-20261009
+    paths:
+      - .github/workflows/bil_qa_vision_arabic_capture_20261010.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  arabic:
+    name: Arabic Noto glyphs and four real Flutter-rendered PNGs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Strict capture test formatting
+        run: dart format --output=none --set-exit-if-changed test/features/nutrition/meal_vision_flutter_capture_test.dart
+      - name: Render actual Arabic Vision review and full nutrient evidence
+        run: flutter test --no-pub --timeout=3m test/features/nutrition/meal_vision_flutter_capture_test.dart
+      - name: Save every original PNG, not an Ahem placeholder or mock frame
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-vision-noto-arabic-renderings-${{ github.sha }}
+          path: build/vision-captures/*.png
+          if-no-files-found: warn
+          retention-days: 7
