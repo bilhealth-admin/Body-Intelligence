@@ -10,6 +10,16 @@ import bil_codex_test_ladder as ladder
 
 
 class LadderGateTests(unittest.TestCase):
+    def test_format_batches_cover_complete_scope_before_analysis(self):
+        targets = [f"test/file_{i}.dart" for i in range(182)]
+        with patch.object(ladder, "changed_dart_targets", return_value=targets), \
+                patch.object(ladder, "run_command", return_value={"exit_code": 0}) as command:
+            self.assertTrue(ladder.run_source()["passed"])
+        commands = [call.args[1] for call in command.call_args_list]
+        self.assertEqual([file for args in commands[:-1] for file in args[4:]], targets)
+        self.assertTrue(all(len(args[4:]) <= 40 for args in commands[:-1]))
+        self.assertEqual(commands[-1], ["flutter", "analyze", "--no-pub"])
+
     def test_windows_launcher_is_resolved_without_shell(self):
         with patch.object(ladder.shutil, "which", return_value=r"G:\SDK\flutter.bat"):
             self.assertEqual(ladder.executable_args(["flutter", "test"]),

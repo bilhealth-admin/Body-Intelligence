@@ -116,12 +116,18 @@ def changed_dart_targets():
 def run_source():
     targets = changed_dart_targets()
     print("Strict dart format targets:", len(targets), flush=True)
-    fmt = run_command("source-format", ["dart", "format", "--output=none",
-                                       "--set-exit-if-changed", *targets])
-    if fmt["exit_code"] != 0:
-        return {"format": fmt, "passed": False}
+    # The complete PR scope exceeds cmd.exe's 8191-character limit for the
+    # Windows dart.bat launcher. Check every target in bounded batches.
+    formats = []
+    for start in range(0, len(targets), 40):
+        fmt = run_command("source-format-" + str(start // 40 + 1),
+                          ["dart", "format", "--output=none",
+                           "--set-exit-if-changed", *targets[start:start + 40]])
+        formats.append(fmt)
+        if fmt["exit_code"] != 0:
+            return {"format": formats, "passed": False}
     analysis = run_command("source-analyze", ["flutter", "analyze", "--no-pub"])
-    return {"format": fmt, "analyze": analysis,
+    return {"format": formats, "analyze": analysis,
             "passed": analysis["exit_code"] == 0}
 
 
