@@ -43,7 +43,6 @@ double? mealImageAmountInGrams({
   return null;
 }
 
-
 /// A reviewed portion in the *catalog record's real measurement basis*.
 ///
 /// Mass is accepted only for an explicit mass-based label. Count/volume labels
@@ -95,27 +94,16 @@ MealImageReviewedQuantity? mealImageReviewedQuantity({
     final divisor = servingSize * catalogGrams;
     if (grams == null || !grams.isFinite || divisor <= 0) return null;
     final factor = grams / divisor;
-    if (grams <= 0 ||
-        grams > 100000 ||
-        !factor.isFinite ||
-        factor <= 0) {
+    if (grams <= 0 || grams > 100000 || !factor.isFinite || factor <= 0) {
       return null;
     }
-    return (
-      quantity: grams,
-      quantityInGrams: true,
-      servingFactor: factor,
-    );
+    return (quantity: grams, quantityInGrams: true, servingFactor: factor);
   }
   // Pieces, mL, and other nonmass label units cannot silently become grams.
   if (selected != catalog || amount > 100000) return null;
   final factor = amount / servingSize;
   if (!factor.isFinite || factor <= 0) return null;
-  return (
-    quantity: amount,
-    quantityInGrams: false,
-    servingFactor: factor,
-  );
+  return (quantity: amount, quantityInGrams: false, servingFactor: factor);
 }
 
 enum MealImageAnalysisFailure {

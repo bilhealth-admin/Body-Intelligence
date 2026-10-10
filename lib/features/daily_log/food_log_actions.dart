@@ -383,7 +383,8 @@ extension _FoodLogActions on _FoodLogPageState {
         photographedAt: DateTime.now(),
       );
       if (selections == null || selections.isEmpty || !mounted) return;
-      final confirmed = <({Food food, double quantity, bool quantityInGrams})>[];
+      final confirmed =
+          <({Food food, double quantity, bool quantityInGrams})>[];
       for (final selection in selections) {
         final authority = ref.read(foodRuntimeSearchAuthorityProvider);
         final exactId = selection.candidate.verifiedFoodRecordId;

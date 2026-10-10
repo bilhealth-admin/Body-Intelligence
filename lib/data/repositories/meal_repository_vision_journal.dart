@@ -76,9 +76,7 @@ extension MealRepositoryVisionCommits on MealRepository {
           (foodId: item.foodId, quantity: item.quantity),
       ],
       false,
-      itemGramModes: [
-        for (final item in items) item.quantityInGrams,
-      ],
+      itemGramModes: [for (final item in items) item.quantityInGrams],
     )!;
     return _database.transaction(() async {
       final prior = await _visionCommittedMealId(intent);

@@ -177,106 +177,113 @@ void main() {
     );
   });
 
-  test('Vision mixed grams, pieces and milliliters commit actual quantities', () async {
-    final grams = await verifiedFood();
-    final piece = await foods.addFood(
-      name: 'Verified eggs per 2 pieces',
-      category: 'test',
-      servingSize: 2,
-      servingUnit: 'piece',
-      calories: 200,
-      protein: 14,
-      carbs: 2,
-      fats: 12,
-      source: 'label',
-      verified: true,
-    );
-    final liquid = await foods.addFood(
-      name: 'Verified milk per 100 ml',
-      category: 'test',
-      servingSize: 100,
-      servingUnit: 'ml',
-      calories: 60,
-      protein: 3.4,
-      carbs: 5,
-      fats: 1,
-      source: 'label',
-      verified: true,
-    );
+  test(
+    'Vision mixed grams, pieces and milliliters commit actual quantities',
+    () async {
+      final grams = await verifiedFood();
+      final piece = await foods.addFood(
+        name: 'Verified eggs per 2 pieces',
+        category: 'test',
+        servingSize: 2,
+        servingUnit: 'piece',
+        calories: 200,
+        protein: 14,
+        carbs: 2,
+        fats: 12,
+        source: 'label',
+        verified: true,
+      );
+      final liquid = await foods.addFood(
+        name: 'Verified milk per 100 ml',
+        category: 'test',
+        servingSize: 100,
+        servingUnit: 'ml',
+        calories: 60,
+        protein: 3.4,
+        carbs: 5,
+        fats: 1,
+        source: 'label',
+        verified: true,
+      );
 
-    const request = 'vision-mixed-units';
-    const dayType = 'lunch';
-    final day = DateTime(2026, 10, 10);
-    final items = [
-      (foodId: grams, quantity: 80.0, quantityInGrams: true),
-      (foodId: piece, quantity: 1.0, quantityInGrams: false),
-      (foodId: liquid, quantity: 250.0, quantityInGrams: false),
-    ];
-    final mealId = await meals.addReviewedVisionItemsAtomically(
-      date: day,
-      mealType: dayType,
-      visionRequestId: request,
-      items: items,
-    );
-    final saved = await db.select(db.mealItems).get();
-    expect(saved, hasLength(3));
-    final byFood = {for (final row in saved) row.foodId: row};
-    expect(byFood[grams]!.quantity, 80);
-    expect(byFood[grams]!.servingUnitSnapshot, 'g');
-    expect(byFood[grams]!.calories, closeTo(76, .001));
-    expect(byFood[piece]!.quantity, 1);
-    expect(byFood[piece]!.servingUnitSnapshot, 'piece');
-    expect(byFood[piece]!.calories, closeTo(100, .001));
-    expect(byFood[liquid]!.quantity, 250);
-    expect(byFood[liquid]!.servingUnitSnapshot, 'ml');
-    expect(byFood[liquid]!.calories, closeTo(150, .001));
-    expect(byFood[grams]!.nutrientEvidenceMask, isNot(0));
-    final replay = await MealRepository(db).addReviewedVisionItemsAtomically(
-      date: day,
-      mealType: dayType,
-      visionRequestId: request,
-      items: items,
-    );
-    expect(replay, mealId);
-    expect(await db.select(db.mealItems).get(), hasLength(3));
-    await expectLater(
-      meals.addReviewedVisionItemsAtomically(
+      const request = 'vision-mixed-units';
+      const dayType = 'lunch';
+      final day = DateTime(2026, 10, 10);
+      final items = [
+        (foodId: grams, quantity: 80.0, quantityInGrams: true),
+        (foodId: piece, quantity: 1.0, quantityInGrams: false),
+        (foodId: liquid, quantity: 250.0, quantityInGrams: false),
+      ];
+      final mealId = await meals.addReviewedVisionItemsAtomically(
         date: day,
         mealType: dayType,
         visionRequestId: request,
-        items: [
-          (foodId: grams, quantity: 80, quantityInGrams: true),
-          (foodId: piece, quantity: 1, quantityInGrams: true),
-          (foodId: liquid, quantity: 250, quantityInGrams: false),
-        ],
-      ),
-      throwsStateError,
-    );
-    expect(await db.select(db.mealItems).get(), hasLength(3));
-  });
+        items: items,
+      );
+      final saved = await db.select(db.mealItems).get();
+      expect(saved, hasLength(3));
+      final byFood = {for (final row in saved) row.foodId: row};
+      expect(byFood[grams]!.quantity, 80);
+      expect(byFood[grams]!.servingUnitSnapshot, 'g');
+      expect(byFood[grams]!.calories, closeTo(76, .001));
+      expect(byFood[piece]!.quantity, 1);
+      expect(byFood[piece]!.servingUnitSnapshot, 'piece');
+      expect(byFood[piece]!.calories, closeTo(100, .001));
+      expect(byFood[liquid]!.quantity, 250);
+      expect(byFood[liquid]!.servingUnitSnapshot, 'ml');
+      expect(byFood[liquid]!.calories, closeTo(150, .001));
+      expect(byFood[grams]!.nutrientEvidenceMask, isNot(0));
+      final replay = await MealRepository(db).addReviewedVisionItemsAtomically(
+        date: day,
+        mealType: dayType,
+        visionRequestId: request,
+        items: items,
+      );
+      expect(replay, mealId);
+      expect(await db.select(db.mealItems).get(), hasLength(3));
+      await expectLater(
+        meals.addReviewedVisionItemsAtomically(
+          date: day,
+          mealType: dayType,
+          visionRequestId: request,
+          items: [
+            (foodId: grams, quantity: 80, quantityInGrams: true),
+            (foodId: piece, quantity: 1, quantityInGrams: true),
+            (foodId: liquid, quantity: 250, quantityInGrams: false),
+          ],
+        ),
+        throwsStateError,
+      );
+      expect(await db.select(db.mealItems).get(), hasLength(3));
+    },
+  );
 
-  test('mixed-unit Vision partial failure leaves neither rows nor receipt', () async {
-    final grams = await verifiedFood();
-    await expectLater(
-      meals.addReviewedVisionItemsAtomically(
-        date: DateTime(2026, 10, 10),
-        mealType: 'snack',
-        visionRequestId: 'vision-mixed-rollback',
-        items: [
-          (foodId: grams, quantity: 40, quantityInGrams: true),
-          (foodId: 99999999, quantity: 1, quantityInGrams: false),
-        ],
-      ),
-      throwsStateError,
-    );
-    expect(await db.select(db.mealItems).get(), isEmpty);
-    expect(await db.select(db.meals).get(), isEmpty);
-    expect(
-      (await db.select(db.preferences).get())
-          .where((row) => row.key.startsWith('visionMealCommitV1.')),
-      isEmpty,
-    );
-  });
+  test(
+    'mixed-unit Vision partial failure leaves neither rows nor receipt',
+    () async {
+      final grams = await verifiedFood();
+      await expectLater(
+        meals.addReviewedVisionItemsAtomically(
+          date: DateTime(2026, 10, 10),
+          mealType: 'snack',
+          visionRequestId: 'vision-mixed-rollback',
+          items: [
+            (foodId: grams, quantity: 40, quantityInGrams: true),
+            (foodId: 99999999, quantity: 1, quantityInGrams: false),
+          ],
+        ),
+        throwsStateError,
+      );
+      expect(await db.select(db.mealItems).get(), isEmpty);
+      expect(await db.select(db.meals).get(), isEmpty);
+      expect(
+        (await db.select(db.preferences).get()).where(
+          (row) => row.key.startsWith('visionMealCommitV1.'),
+        ),
+        isEmpty,
+      );
+    },
+  );
 
   test('zero reviewed amount cannot write a partial meal', () async {
     final foodId = await verifiedFood();
