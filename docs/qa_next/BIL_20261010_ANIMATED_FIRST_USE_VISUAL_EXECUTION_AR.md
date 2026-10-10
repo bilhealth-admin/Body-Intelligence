@@ -51,3 +51,9 @@
 ### الجولة الثالثة من التحقق
 - [Verify #38034112091](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38034112091): **Flutter Analyze PASS (No issues found)**؛ تنسيق ملف اختبار 320px/RTL وحده كان متبقيًا وصُحح بالـpatch الحقيقي من Dart Format.
 - طلبنا تحققًا جديدًا على نفس المصادر المعدّلة؛ نجاح Flutter Analyze على SHA سابق لا يساوي نجاح التحقق الجديد.
+
+### الجولة الرابعة: نتائج فحوص المصدر واختبارات UI
+- [Verify #38034374568](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38034374568): **Dart Format PASS / Flutter Analyze PASS** على SHA `e3b88875`، لكن **12 اختبار PASS / 4 FAIL** في الفحص المركّز الأول؛ الخمس focused والثماني الشاملة غير معتمدة.
+- فشل اختبارين للنص العربي «تخطي»: `MaterialApp` في Fixture لم يعلن `supportedLocales` ولا delegates للعربية، لذلك أعاد Flutter لغة واجهة افتراضية مختلفة. أُصلحت بيئة اختبار العربية الحقيقية، دون تغيير النَص المنتج أو تخفيف توقع «تخطي».
+- فشل اختبارا Food Log بسبب `AppLocalizations.of(context)!` حين أغفل اختبار الشاشة نفسها `AppLocalizations.delegate`، فانهار العرض قبل ظهور البطاقة؛ تمت إضافة delegate الحقيقي لنسختي الاختبار.
+- تُعاد اختبارات المصدر أولاً ثم المجموعات المركزة، دون القول إن هذه الإصلاحات ناجحة حتى يثبت CI على HEAD الجديد.
