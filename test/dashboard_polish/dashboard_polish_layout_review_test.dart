@@ -246,9 +246,11 @@ void main() {
             // Keep the entire verified burned-calorie explanation inside
             // its card; swallowing Flutter exceptions cannot pass this check.
             expect(
-              tester.getBottomLeft(
-                find.byKey(const Key('dashboard-burn-policy-note')),
-              ).dy,
+              tester
+                  .getBottomLeft(
+                    find.byKey(const Key('dashboard-burn-policy-note')),
+                  )
+                  .dy,
               lessThanOrEqualTo(tester.getBottomLeft(calories).dy),
               reason: 'The full burn-policy note must fit inside the card.',
             );

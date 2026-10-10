@@ -9,6 +9,29 @@ import 'vision_v2_test_fixture.dart';
 
 void main() {
   setUpAll(prepareVisionV2Fixture);
+  setUpAll(() => WidgetController.hitTestWarningShouldBeFatal = true);
+  tearDownAll(() => WidgetController.hitTestWarningShouldBeFatal = false);
+
+  Future<void> waitForDecodedPhoto(WidgetTester tester, Finder surface) async {
+    final images = find.descendant(
+      of: surface,
+      matching: find.byType(RawImage),
+    );
+    for (var attempt = 0; attempt < 100; attempt++) {
+      if (tester
+          .widgetList<RawImage>(images)
+          .any((image) => image.image != null)) {
+        await tester.pumpAndSettle();
+        return;
+      }
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    fail('The original TEST file did not decode on the visible photo surface.');
+  }
+
   testWidgets(
     'cancel final review returns no selection and no substitute photo',
     (tester) async {
@@ -87,6 +110,10 @@ void main() {
       ),
     );
     expect((photo.image as FileImage).file.path, visionV2PhotoPath);
+    await waitForDecodedPhoto(
+      tester,
+      find.byKey(const Key('premium-vision-final-photo')),
+    );
     await tester.tap(find.byKey(const Key('premium-vision-final-photo')));
     await tester.pumpAndSettle();
     expect(find.byType(InteractiveViewer), findsOneWidget);
@@ -97,6 +124,7 @@ void main() {
       ),
     );
     expect((zoom.image as FileImage).file.path, visionV2PhotoPath);
+    await waitForDecodedPhoto(tester, find.byType(InteractiveViewer));
     await tester.tap(find.byTooltip('إغلاق الصورة'));
     await tester.pumpAndSettle();
     // A tap warning is not a successful dismissal: require the zoom route
@@ -142,8 +170,8 @@ void main() {
     final recorded = File(
       'build/vision-v2-captures/functional_final_80g_nutrition.png',
     );
-    expect(await recorded.exists(), isTrue);
-    expect(await recorded.length(), greaterThan(2500));
+    expect(recorded.existsSync(), isTrue);
+    expect(recorded.lengthSync(), greaterThan(2500));
     await tester.tap(find.byKey(const Key('premium-vision-use-food')));
     await tester.pumpAndSettle();
     expect(result!.food, same(food));

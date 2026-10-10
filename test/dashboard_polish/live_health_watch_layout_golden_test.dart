@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../visual_closure/visual_evidence_font.dart';
+
 ConnectedHealthSignalView _signal(String key, double value, String unit) =>
     ConnectedHealthSignalView(
       key: key,
@@ -17,6 +19,7 @@ ConnectedHealthSignalView _signal(String key, double value, String unit) =>
     );
 
 void main() {
+  setUpAll(loadVisualEvidenceFont);
   testWidgets('compact watch keeps all four readings below the clock', (
     tester,
   ) async {
