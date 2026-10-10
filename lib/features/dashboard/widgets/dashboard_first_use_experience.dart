@@ -273,9 +273,7 @@ class _FoodGuideStep extends StatelessWidget {
           step: step + 1,
           stepCount: 2,
           icon: second ? Icons.search_rounded : Icons.celebration_rounded,
-          accent: second
-              ? const Color(0xFF9ACBFF)
-              : const Color(0xFF95F5E1),
+          accent: second ? const Color(0xFF9ACBFF) : const Color(0xFF95F5E1),
           onAction: saving ? null : onNext,
           actionLabel: second
               ? _copy(
