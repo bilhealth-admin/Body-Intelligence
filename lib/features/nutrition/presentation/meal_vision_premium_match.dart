@@ -31,7 +31,7 @@ class _PremiumTrustedMatchDialogState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 16, 14),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -43,13 +43,13 @@ class _PremiumTrustedMatchDialogState
                     child: Text(
                       _word(
                         context,
-                        'Choose a trusted food record',
-                        'اختر سجل الطعام الموثوق',
+                        'Review nutrition source',
+                        'مراجعة الطعام ومصدر التغذية',
                       ),
                       style: TextStyle(
                         color: _foreground(context),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -78,7 +78,7 @@ class _PremiumTrustedMatchDialogState
         ),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
             children: [
               for (final food in widget.foods)
                 Builder(
@@ -167,25 +167,69 @@ class _PremiumTrustedMatchDialogState
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              _word(context, 'Quick summary', 'الملخص السريع'),
-                              style: TextStyle(color: _foreground(context)),
+                            child: Semantics(
+                              selected: !_full,
+                              child: FilledButton(
+                                key: const Key('premium-vision-quick-toggle'),
+                                onPressed: () => setState(() => _full = false),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: !_full
+                                      ? _accent(context)
+                                      : Colors.transparent,
+                                  foregroundColor: !_full
+                                      ? const Color(0xFF063029)
+                                      : _foreground(context),
+                                  side: BorderSide(color: _accent(context)),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                child: Text(
+                                  _word(
+                                    context,
+                                    'Quick summary',
+                                    'الملخص السريع',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
                           ),
-                          Switch(
-                            key: const Key('premium-vision-full-toggle'),
-                            value: _full,
-                            onChanged: (v) => setState(() => _full = v),
-                          ),
-                          Text(
-                            _word(context, 'Full analysis', 'التحليل الكامل'),
-                            style: TextStyle(
-                              color: _secondary(context),
-                              fontSize: 12,
+                          const SizedBox(width: 7),
+                          Expanded(
+                            child: Semantics(
+                              selected: _full,
+                              child: FilledButton(
+                                key: const Key('premium-vision-full-toggle'),
+                                onPressed: () => setState(() => _full = true),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: _full
+                                      ? _accent(context)
+                                      : Colors.transparent,
+                                  foregroundColor: _full
+                                      ? const Color(0xFF063029)
+                                      : _foreground(context),
+                                  side: BorderSide(color: _accent(context)),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                child: Text(
+                                  _word(
+                                    context,
+                                    'Full analysis',
+                                    'التحليل الكامل',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
                       _nutritionFacts(context, _selected!),
                     ],
                   ),
@@ -319,7 +363,53 @@ class _PremiumTrustedMatchDialogState
         value != 0;
     final carbsKnown = known(FoodNutrient.carbohydrates, food.carbs);
     final fiberKnown = known(FoodNutrient.fiber, food.fiber);
-    final visible = _full ? facts : facts.take(6).toList();
+    final primary = facts.take(6).toList();
+    final extra = facts.skip(6).toList();
+
+    Widget tiles(
+      List<(FoodNutrient, String, double, String)> entries, {
+      bool showNetCarbs = false,
+    }) {
+      return LayoutBuilder(
+        builder: (context, dimensions) {
+          final cellWidth = (dimensions.maxWidth - 16) / 3;
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final entry in entries)
+                SizedBox(
+                  width: cellWidth,
+                  child: _nutrientTile(
+                    entry.$1.name,
+                    entry.$2,
+                    factor == null || !known(entry.$1, entry.$3)
+                        ? null
+                        : entry.$3 * factor,
+                    entry.$4,
+                  ),
+                ),
+              if (showNetCarbs)
+                SizedBox(
+                  width: cellWidth,
+                  child: _nutrientTile(
+                    'netCarbs',
+                    _word(context, 'Net carbs', 'صافي الكربوهيدرات'),
+                    !carbsKnown || !fiberKnown || factor == null
+                        ? null
+                        : (food.carbs - food.fiber)
+                                  .clamp(0.0, double.infinity)
+                                  .toDouble() *
+                              factor,
+                    'g',
+                  ),
+                ),
+            ],
+          );
+        },
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -327,57 +417,51 @@ class _PremiumTrustedMatchDialogState
           factor == null
               ? _word(
                   context,
-                  'Per catalog serving (not adjusted)',
-                  'القيم لكل حصة في السجل (لم تحوّل الكمية)',
+                  'Catalog serving only — reviewed amount not convertible',
+                  'لكل حصة في المصدر فقط — لا يمكن تحويل الكمية المراجعة',
                 )
               : _word(
                   context,
-                  'For your reviewed eaten amount',
-                  'للكمية المأكولة التي راجعتها',
+                  'For the amount you confirmed eating',
+                  'للكمية التي أكدت تناولها',
                 ),
           style: TextStyle(color: _secondary(context), fontSize: 11),
         ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 7,
-          runSpacing: 7,
-          children: [
-            for (final entry in visible)
-              _nutrientTile(
-                entry.$1.name,
-                entry.$2,
-                factor == null || !known(entry.$1, entry.$3)
-                    ? null
-                    : entry.$3 * factor,
-                entry.$4,
-              ),
-            if (carbsKnown && fiberKnown && factor != null)
-              _nutrientTile(
-                'netCarbs',
-                _word(context, 'Net carbs', 'صافي الكربوهيدرات'),
-                (food.carbs - food.fiber).clamp(0, double.infinity).toDouble() *
-                    factor,
-                'g',
-              ),
-            if (_full && (!carbsKnown || !fiberKnown))
-              _nutrientTile(
-                'netCarbs',
-                _word(context, 'Net carbs', 'صافي الكربوهيدرات'),
-                null,
-                'g',
-              ),
-          ],
+        const SizedBox(height: 10),
+        Text(
+          _word(context, 'Calories and macros', 'السعرات والمغذيات الكبرى'),
+          style: TextStyle(
+            color: _foreground(context),
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
+        tiles(primary, showNetCarbs: true),
+        if (_full) ...[
+          const SizedBox(height: 14),
+          Text(
+            _word(context, 'Minerals and vitamins', 'المعادن والفيتامينات'),
+            style: TextStyle(
+              color: _foreground(context),
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 8),
+          tiles(extra),
+        ],
+        const SizedBox(height: 12),
         Text(
           _word(context, 'Nutrition source: ', 'مصدر التغذية: ') + food.source,
-          style: TextStyle(color: _accent(context), fontSize: 12),
+          style: TextStyle(color: _accent(context), fontSize: 11),
         ),
+        const SizedBox(height: 4),
         Text(
           _word(
             context,
-            'Image recognition is a separate source and does not verify calories.',
-            'التعرّف بالصورة مصدر منفصل ولا يثبت السعرات.',
+            'Recognition confidence is separate; the photo never verifies nutrient values.',
+            'ثقة التعرّف مستقلة؛ الصورة لا تثبت القيم الغذائية.',
           ),
           style: TextStyle(color: _secondary(context), fontSize: 11),
         ),
@@ -385,30 +469,60 @@ class _PremiumTrustedMatchDialogState
     );
   }
 
-  Widget _nutrientTile(String id, String label, double? value, String unit) =>
-      Container(
-        key: Key('premium-vision-nutrient-$id'),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: _glassDecoration(context),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(color: _secondary(context), fontSize: 11),
+  Widget _nutrientTile(String id, String label, double? value, String unit) {
+    final (symbol, tint) = switch (id) {
+      'calories' => (
+        Icons.local_fire_department_rounded,
+        const Color(0xFFFFA66B),
+      ),
+      'protein' => (Icons.egg_alt_rounded, const Color(0xFF75F2AD)),
+      'fat' => (Icons.opacity_rounded, const Color(0xFFFFCC78)),
+      'carbohydrates' => (Icons.bubble_chart_rounded, const Color(0xFF92C8FF)),
+      'fiber' => (Icons.spa_rounded, const Color(0xFF73D999)),
+      'netCarbs' => (Icons.water_drop_outlined, const Color(0xFF8AD8EA)),
+      'sodium' => (Icons.science_outlined, const Color(0xFFBCD2E2)),
+      'potassium' => (Icons.eco_outlined, const Color(0xFF86EB94)),
+      'magnesium' => (Icons.grain_rounded, const Color(0xFFC1B1FF)),
+      'calcium' => (Icons.bubble_chart_outlined, const Color(0xFFCDE9FF)),
+      'phosphorus' => (Icons.hub_outlined, const Color(0xFFE7BBF8)),
+      _ => (Icons.circle_outlined, _accent(context)),
+    };
+    return Container(
+      key: Key('premium-vision-nutrient-$id'),
+      constraints: const BoxConstraints(minHeight: 86),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: _glassDecoration(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(symbol, color: tint, size: 19),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: _secondary(context),
+              fontSize: 10,
+              height: 1.12,
             ),
-            Text(
-              value == null
-                  ? _word(context, 'Not available', 'غير متوفر')
-                  : '${value.toStringAsFixed(1)} $unit',
-              style: TextStyle(
-                color: _foreground(context),
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value == null
+                ? _word(context, 'Not available', 'غير متوفر')
+                : value.toStringAsFixed(1) + ' ' + unit,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: _foreground(context),
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
+
 }
