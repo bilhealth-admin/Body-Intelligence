@@ -190,8 +190,13 @@ Future<void> captureVisionV2(
   WidgetTester tester,
   String name, {
   bool wholeScreen = false,
+  bool settle = true,
 }) async {
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump();
+  }
   final boundary = tester.renderObject<RenderRepaintBoundary>(
     find.byKey(
       Key(wholeScreen ? 'v2-test-screen' : 'premium-vision-render-surface'),

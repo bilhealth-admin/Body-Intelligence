@@ -28,21 +28,25 @@ void main() {
         neck: 40,
       );
       final day = DateTime.utc(2026, 7, 20);
-      await WeightRepository(database).addWeight(87, date: day);
-      final output = await const BilLocalIntelligenceCompositionRoot()
-          .create(database: database)
-          .run(asOf: day);
-      expect(output.primaryMessage, contains('87.0'));
-      final localized = AppLocalizations(
-        const Locale('ar'),
-      ).text(output.primaryMessage);
-      // Exercise the real runtime-produced message and production localizer,
-      // rather than a hardcoded fixture or a source-only translation check.
-      expect(localized, matches(RegExp(r'[؀-ۿ]')));
-      expect(
-        localized,
-        isNot(contains('accepted your first trusted baseline')),
-      );
+      for (final weight in [87.0, 92.8, 104.5]) {
+        await WeightRepository(database).addWeight(weight, date: day);
+        final output = await const BilLocalIntelligenceCompositionRoot()
+            .create(database: database)
+            .run(asOf: day);
+        final measured = weight.toStringAsFixed(1);
+        expect(output.primaryMessage, contains(measured));
+        final localized = AppLocalizations(
+          const Locale('ar'),
+        ).text(output.primaryMessage);
+        // Production runtime + localizer, including multiple measured weights
+        // to prevent a hardcoded translation for the original 87 kg fixture.
+        expect(localized, matches(RegExp(r'[؀-ۿ]')));
+        expect(localized, contains(measured));
+        expect(
+          localized,
+          isNot(contains('accepted your first trusted baseline')),
+        );
+      }
     },
   );
 

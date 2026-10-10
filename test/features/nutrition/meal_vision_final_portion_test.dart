@@ -116,7 +116,10 @@ void main() {
     await tester.tap(find.text('OPEN'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('premium-vision-final-photo')));
-    await tester.pumpAndSettle();
+    // The pending image intentionally animates a loading indicator. Complete
+    // the route entrance without waiting for that indicator to stop.
+    await tester.pump(); // Start the route transition on its first frame.
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.byType(InteractiveViewer), findsOneWidget);
     final images = find.descendant(
       of: find.byType(InteractiveViewer),
@@ -126,7 +129,20 @@ void main() {
       tester.widgetList<RawImage>(images).every((image) => image.image == null),
       isTrue,
     );
-    await captureVisionV2(tester, 'zoom_pending_original_decode');
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    final original = tester.widget<Image>(
+      find.descendant(
+        of: find.byType(InteractiveViewer),
+        matching: find.byType(Image),
+      ),
+    );
+    expect((original.image as FileImage).file.path, visionV2PhotoPath);
+    await captureVisionV2(
+      tester,
+      'zoom_pending_original_decode',
+      wholeScreen: true,
+      settle: false,
+    );
     // Fatal hit-test warnings prevent a barrier tap from masquerading as a
     // successful press of the close button.
     await tester.tap(find.byTooltip('إغلاق الصورة'));
