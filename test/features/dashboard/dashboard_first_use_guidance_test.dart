@@ -158,9 +158,8 @@ void main() {
         ),
         GoRoute(
           path: '/daily-log',
-          builder: (context, state) => const Scaffold(
-            body: Text('Real Food Log destination'),
-          ),
+          builder: (context, state) =>
+              const Scaffold(body: Text('Real Food Log destination')),
         ),
       ],
     );
@@ -191,5 +190,4 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 10));
   });
-
 }
