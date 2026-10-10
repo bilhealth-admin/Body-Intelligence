@@ -14,23 +14,67 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
             key: const Key('premium-vision-final-photo'),
             onTap: () => showDialog<void>(
               context: context,
-              builder: (context) => Dialog(
-                child: Stack(
-                  children: [
-                    InteractiveViewer(
-                      maxScale: 5,
-                      child: Image.file(File(widget.imagePath!)),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: IconButton(
-                        tooltip: _word(context, 'Close photo', 'إغلاق الصورة'),
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
+              builder: (zoomContext) => Dialog(
+                // A real FileImage has no dimensions until its first frame
+                // decodes. Keep the modal and close button hittable even while
+                // the original photo is pending or fails to load.
+                insetPadding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.sizeOf(zoomContext).height * .65,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ColoredBox(
+                        color: const Color(0xFF061A22),
+                        child: InteractiveViewer(
+                          maxScale: 5,
+                          child: Image.file(
+                            File(widget.imagePath!),
+                            fit: BoxFit.contain,
+                            frameBuilder: (context, child, frame, synchronous) {
+                              if (synchronous || frame != null) return child;
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                Center(
+                                  child: Text(
+                                    _word(
+                                      context,
+                                      'Photo unavailable',
+                                      'الصورة غير متوفرة',
+                                    ),
+                                  ),
+                                ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                      PositionedDirectional(
+                        top: 8,
+                        end: 8,
+                        child: Material(
+                          color: const Color(0xCC061A22),
+                          shape: const CircleBorder(),
+                          child: IconButton(
+                            tooltip: _word(
+                              zoomContext,
+                              'Close photo',
+                              'إغلاق الصورة',
+                            ),
+                            onPressed: () => Navigator.of(zoomContext).pop(),
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
