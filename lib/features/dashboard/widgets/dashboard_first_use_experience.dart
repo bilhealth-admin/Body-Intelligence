@@ -6,6 +6,7 @@ import '../../../data/repositories/first_meal_milestone.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'first_meal_celebration.dart';
+import 'first_use_glass_surface.dart';
 
 final _firstFoodMilestoneStatusProvider = StreamProvider<String?>(
   (ref) => ref
@@ -182,13 +183,7 @@ class _FoodGuideStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final second = step == 1;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final background = second
-        ? const Color(0xFF193E83)
-        : dark
-        ? const Color(0xFF172B40)
-        : Colors.white;
-    final foreground = second || dark ? Colors.white : const Color(0xFF16233A);
+    const foreground = Colors.white;
     final title = second
         ? _copy(
             context,
@@ -227,13 +222,14 @@ class _FoodGuideStep extends StatelessWidget {
       key: Key('dashboard-food-guide-step-$step'),
       container: true,
       label: '$title. $message',
-      child: Material(
-        color: background,
-        elevation: 7,
-        shadowColor: Colors.black.withValues(alpha: .20),
-        borderRadius: BorderRadius.circular(20),
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: MediaQuery.maybeOf(context)?.disableAnimations == true ? 1 : 420),
+        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, .08), end: Offset.zero).animate(animation), child: child)),
+        child: FirstUseGlassSurface(
+        key: ValueKey(step),
+        accent: second ? const Color(0xFF8CC7FF) : const Color(0xFF70F1D4),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          padding: EdgeInsets.zero,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -246,7 +242,7 @@ class _FoodGuideStep extends StatelessWidget {
                       style: TextStyle(
                         color: foreground,
                         fontWeight: FontWeight.w800,
-                        fontSize: 17,
+                        fontSize: 23,
                       ),
                     ),
                   ),
@@ -259,71 +255,38 @@ class _FoodGuideStep extends StatelessWidget {
                 message,
                 style: TextStyle(
                   color: foreground.withValues(alpha: .88),
-                  fontSize: 13,
+                  fontSize: 14,
                   height: 1.38,
                 ),
               ),
               const SizedBox(height: 12),
-              OverflowBar(
-                alignment: MainAxisAlignment.spaceBetween,
-                overflowAlignment: OverflowBarAlignment.end,
-                overflowSpacing: 8,
-                children: [
-                  TextButton.icon(
-                    key: const Key('dashboard-guide-skip'),
-                    onPressed: saving ? null : onSkip,
-                    icon: Icon(
-                      Icons.close_rounded,
-                      size: 17,
-                      color: foreground,
-                    ),
-                    label: Text(
-                      _copy(
-                        context,
-                        en: 'Skip',
-                        ar: 'تخطي',
-                        fr: 'Ignorer',
-                        es: 'Omitir',
-                        tr: 'Atla',
-                      ),
-                      style: TextStyle(color: foreground),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: FilledButton(
+                  key: const Key('dashboard-guide-next'),
+                  onPressed: saving ? null : onNext,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFAEF9E8),
+                    foregroundColor: const Color(0xFF0D2B40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  FilledButton(
-                    key: const Key('dashboard-guide-next'),
-                    onPressed: saving ? null : onNext,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: second
-                          ? Colors.white
-                          : const Color(0xFF235DDC),
-                      foregroundColor: second
-                          ? const Color(0xFF193E83)
-                          : Colors.white,
-                    ),
-                    child: Text(
-                      second
-                          ? _copy(
-                              context,
-                              en: 'Open Food Log',
-                              ar: 'فتح تسجيل الطعام',
-                              fr: 'Ouvrir le journal',
-                              es: 'Abrir el diario',
-                              tr: 'Yemek kaydını aç',
-                            )
-                          : _copy(
-                              context,
-                              en: 'Next',
-                              ar: 'التالي',
-                              fr: 'Suivant',
-                              es: 'Siguiente',
-                              tr: 'İleri',
-                            ),
-                    ),
-                  ),
-                ],
+                  child: Text(second ? _copy(context, en: 'Open Food Log', ar: 'فتح تسجيل الطعام', fr: 'Ouvrir le journal', es: 'Abrir el diario', tr: 'Yemek kaydını aç') : _copy(context, en: 'Next', ar: 'التالي', fr: 'Suivant', es: 'Siguiente', tr: 'İleri')),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Center(
+                child: TextButton(
+                  key: const Key('dashboard-guide-skip'),
+                  onPressed: saving ? null : onSkip,
+                  child: Text(_copy(context, en: 'Skip', ar: 'تخطي', fr: 'Ignorer', es: 'Omitir', tr: 'Atla'), style: const TextStyle(color: Colors.white70)),
+                ),
               ),
             ],
           ),
+        ),
         ),
       ),
     );
