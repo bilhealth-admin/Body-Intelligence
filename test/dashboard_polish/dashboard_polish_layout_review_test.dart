@@ -211,7 +211,16 @@ void main() {
             );
             await container.read(connectedHealthProvider.notifier).refresh();
             await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
+            final layoutException = tester.takeException();
+            if (layoutException != null &&
+                locale.languageCode == 'en' &&
+                width == 320 &&
+                scale == 1) {
+              // Diagnostic only: preserve the failure and print the exact
+              // RenderFlex ancestry once. Never suppress a real overflow.
+              debugDumpRenderTree();
+            }
+            expect(layoutException, isNull);
 
             // Health and budget presentations must retain the verified value.
             expect(

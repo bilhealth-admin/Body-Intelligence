@@ -109,6 +109,12 @@ void main() {
     expect(flatIcon, contains('iconSize: 20,'));
     expect(flatIcon, isNot(contains('boxShadow:')));
     expect(source, contains(r"Key('more-premium-icon-${kind.name}')"));
-    expect(source, contains('PremiumCrownEmblem'));
+    // The current optional Premium row is a flat, direction-aware link, not
+    // a decorative crown/paywall. It must stay keyboard/gesture actionable.
+    expect(source, contains("Key('more-premium-entry')"));
+    expect(source, contains('ReferenceSettingsCopy.of(context)'));
+    expect(source, contains('isRetry ? Icons.refresh_rounded : directionalIcon'));
+    expect(source, contains("onTap: () => context.push('/plans')"));
+    expect(source, isNot(contains('PremiumCrownEmblem')));
   });
 }
