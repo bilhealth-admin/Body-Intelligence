@@ -258,7 +258,11 @@ class _FoodGuideStep extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Icon(Icons.celebration_rounded, size: 24, color: foreground),
+                  Icon(
+                    second ? Icons.search_rounded : Icons.celebration_rounded,
+                    size: 26,
+                    color: const Color(0xFFAEF9E8),
+                  ),
                 ],
               ),
               const SizedBox(height: 5),
