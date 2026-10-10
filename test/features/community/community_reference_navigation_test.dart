@@ -271,10 +271,7 @@ void main() {
     await _mount(tester, repository);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('community-safe-return')), findsNothing);
-    expect(
-      find.byKey(const Key('bil-reference-navigation')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('bil-reference-navigation')), findsOneWidget);
   });
 
   testWidgets('Community opened over another page provides real Back', (

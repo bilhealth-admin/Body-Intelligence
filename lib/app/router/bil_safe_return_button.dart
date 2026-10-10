@@ -4,10 +4,7 @@ import 'package:go_router/go_router.dart';
 /// A visible, always-working Back action for routes opened without history.
 /// Never derive a destination from an external URL or notification payload.
 class BilSafeReturnButton extends StatelessWidget {
-  const BilSafeReturnButton({
-    super.key,
-    required this.fallbackLocation,
-  });
+  const BilSafeReturnButton({super.key, required this.fallbackLocation});
 
   final String fallbackLocation;
 

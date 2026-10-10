@@ -43,8 +43,7 @@ final class BilExternalRouteNavigator {
         String path when path.startsWith('/community/chat/') =>
           '/community/messages',
         '/community/invite' => '/dashboard',
-        String path when path.startsWith('/community/invite/') =>
-          '/dashboard',
+        String path when path.startsWith('/community/invite/') => '/dashboard',
         String path when path.startsWith('/community/') => '/community',
         '/community' => '/community',
         _ => '/dashboard',

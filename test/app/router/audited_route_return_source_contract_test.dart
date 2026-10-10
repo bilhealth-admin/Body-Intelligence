@@ -11,34 +11,47 @@ void main() {
       'lib/features/community/presentation/community_connections_page.dart': 1,
       'lib/features/community/presentation/community_people_page.dart': 1,
       'lib/features/community/presentation/community_profile_page.dart': 1,
-      'lib/features/community/presentation/community_post_moderation_page.dart': 1,
-      'lib/features/community/presentation/community_notifications_rendering.dart': 1,
+      'lib/features/community/presentation/community_post_moderation_page.dart':
+          1,
+      'lib/features/community/presentation/community_notifications_rendering.dart':
+          1,
       'lib/features/community/presentation/community_messages_page.dart': 1,
-      'lib/features/community/presentation/community_message_owner_scope.dart': 1,
+      'lib/features/community/presentation/community_message_owner_scope.dart':
+          1,
       'lib/features/community/presentation/community_entry_gate.dart': 1,
-      'lib/features/community/presentation/community_member_profile_drafts.dart': 1,
+      'lib/features/community/presentation/community_member_profile_drafts.dart':
+          1,
       'lib/features/community/presentation/community_post_owner_scope.dart': 1,
-      'lib/features/community/presentation/community_post_composer_owner_scope.dart': 1,
+      'lib/features/community/presentation/community_post_composer_owner_scope.dart':
+          1,
       'lib/features/community/presentation/community_chat_rendering.dart': 1,
       'lib/features/community/presentation/new_community_message_page.dart': 3,
       'lib/features/community/presentation/community_safety_page.dart': 1,
-      'lib/features/community/presentation/community_invite_landing_page.dart': 1,
+      'lib/features/community/presentation/community_invite_landing_page.dart':
+          1,
       'lib/features/community/presentation/community_bil_code_page.dart': 3,
       'lib/features/community/presentation/community_food_review_page.dart': 1,
       'lib/features/community/presentation/community_post_gallery_page.dart': 1,
       'lib/features/community/presentation/community_saved_posts_page.dart': 1,
       'lib/features/community/presentation/community_my_posts_page.dart': 1,
-      'lib/features/community/presentation/community_circle_detail_page.dart': 2,
-      'lib/features/community/presentation/community_member_profile_page.dart': 1,
+      'lib/features/community/presentation/community_circle_detail_page.dart':
+          2,
+      'lib/features/community/presentation/community_member_profile_page.dart':
+          1,
       'lib/features/community/presentation/community_circles_page.dart': 1,
-      'lib/features/community/presentation/community_post_detail_rendering.dart': 1,
+      'lib/features/community/presentation/community_post_detail_rendering.dart':
+          1,
       'lib/features/community/presentation/community_post_widgets.dart': 1,
       'lib/features/community/presentation/community_topics_page.dart': 2,
       'lib/features/community/presentation/community_rewards_page.dart': 1,
-      'lib/features/community/presentation/community_compose_entry_page.dart': 1,
-      'lib/features/community/channels/presentation/community_channels_page.dart': 1,
-      'lib/features/community/channels/presentation/community_channels_route.dart': 1,
-      'lib/features/community/activity_rewards/community_post_receipt_page.dart': 1,
+      'lib/features/community/presentation/community_compose_entry_page.dart':
+          1,
+      'lib/features/community/channels/presentation/community_channels_page.dart':
+          1,
+      'lib/features/community/channels/presentation/community_channels_route.dart':
+          1,
+      'lib/features/community/activity_rewards/community_post_receipt_page.dart':
+          1,
     };
     final appBars = RegExp(r'AppBar\(');
     final explicitReturn = RegExp(
@@ -49,7 +62,11 @@ void main() {
       final source = File(entry.key).readAsStringSync();
       final count = appBars.allMatches(source).length;
       final backed = explicitReturn.allMatches(source).length;
-      expect(count, entry.value, reason: 'Review changed page count: ${entry.key}');
+      expect(
+        count,
+        entry.value,
+        reason: 'Review changed page count: ${entry.key}',
+      );
       expect(backed, count, reason: 'Missing Back on ${entry.key}');
     }
   });
@@ -82,10 +99,7 @@ void main() {
     ).readAsStringSync();
     expect(router, contains('BilExternalRouteNavigator(router).open(route)'));
     expect(main, contains('navigate: AppRouter.openExternalRoute'));
-    expect(
-      notifications,
-      contains('navigate: AppRouter.openExternalRoute'),
-    );
+    expect(notifications, contains('navigate: AppRouter.openExternalRoute'));
     expect(navigation, contains('router.push(location)'));
     expect(navigation, contains("'/community/messages'"));
   });

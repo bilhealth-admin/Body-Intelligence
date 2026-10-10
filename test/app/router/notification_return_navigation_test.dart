@@ -22,8 +22,7 @@ Future<GoRouter> _mount(WidgetTester tester, String initial) async {
       ),
       GoRoute(
         path: '/dashboard',
-        builder: (_, _) =>
-            const Scaffold(body: Text('Home', key: Key('home'))),
+        builder: (_, _) => const Scaffold(body: Text('Home', key: Key('home'))),
       ),
       GoRoute(
         path: '/settings',
@@ -62,9 +61,7 @@ Future<GoRouter> _mount(WidgetTester tester, String initial) async {
         path: '/legal/privacy',
         builder: (_, _) => Scaffold(
           appBar: AppBar(
-            leading: const BilSafeReturnButton(
-              fallbackLocation: '/settings',
-            ),
+            leading: const BilSafeReturnButton(fallbackLocation: '/settings'),
           ),
           body: const Text('Privacy'),
         ),
@@ -103,9 +100,7 @@ void main() {
     expect(router.routeInformationProvider.value.uri.path, '/dashboard');
   });
 
-  testWidgets('cold friend acceptance goes Back to Community', (
-    tester,
-  ) async {
+  testWidgets('cold friend acceptance goes Back to Community', (tester) async {
     final router = await _mount(tester, '/startup');
     final route = CommunityDeepLink.routeFor(
       Uri.parse('bil://community/connections'),
@@ -209,72 +204,71 @@ void main() {
     expect(router.canPop(), isFalse);
   });
 
-  testWidgets('all declared external screen aliases have a cold-launch return path', (
-    tester,
-  ) async {
-    final links = File(
-      'lib/features/notifications/domain/community_deep_link.dart',
-    ).readAsStringSync();
-    final start = links.indexOf('static const _appAliases');
-    final end = links.indexOf('  };', start);
-    expect(start, greaterThanOrEqualTo(0));
-    expect(end, greaterThan(start));
-    final aliases = <String>{
-      for (final match in RegExp(
-        r"'[^']+':\s*'([^']+)'",
-      ).allMatches(links.substring(start, end)))
-        match.group(1)!,
-    };
-    expect(aliases.length, greaterThanOrEqualTo(45));
+  testWidgets(
+    'all declared external screen aliases have a cold-launch return path',
+    (tester) async {
+      final links = File(
+        'lib/features/notifications/domain/community_deep_link.dart',
+      ).readAsStringSync();
+      final start = links.indexOf('static const _appAliases');
+      final end = links.indexOf('  };', start);
+      expect(start, greaterThanOrEqualTo(0));
+      expect(end, greaterThan(start));
+      final aliases = <String>{
+        for (final match in RegExp(
+          r"'[^']+':\s*'([^']+)'",
+        ).allMatches(links.substring(start, end)))
+          match.group(1)!,
+      };
+      expect(aliases.length, greaterThanOrEqualTo(45));
 
-    final destinations = <String>{
-      '/startup',
-      '/dashboard',
-      '/community',
-      '/community/messages',
-      ...aliases,
-    };
-    final router = GoRouter(
-      initialLocation: '/startup',
-      routes: [
-        for (final route in destinations)
-          GoRoute(
-            path: route,
-            builder: (_, state) => Scaffold(
-              appBar: AppBar(),
-              body: Text(state.uri.path),
+      final destinations = <String>{
+        '/startup',
+        '/dashboard',
+        '/community',
+        '/community/messages',
+        ...aliases,
+      };
+      final router = GoRouter(
+        initialLocation: '/startup',
+        routes: [
+          for (final route in destinations)
+            GoRoute(
+              path: route,
+              builder: (_, state) =>
+                  Scaffold(appBar: AppBar(), body: Text(state.uri.path)),
             ),
-          ),
-      ],
-    );
-    addTearDown(router.dispose);
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-    await tester.pumpAndSettle();
-
-    for (final route in aliases) {
-      router.go('/startup');
-      await tester.pumpAndSettle();
-      BilExternalRouteNavigator(router).open(route);
-      await tester.pumpAndSettle();
-      expect(
-        router.routeInformationProvider.value.uri.path,
-        route,
-        reason: 'External destination failed: $route',
+        ],
       );
-      if (route != '/dashboard' && route != '/community') {
-        expect(
-          router.canPop(),
-          isTrue,
-          reason: 'No previous screen after cold external link: $route',
-        );
-        router.pop();
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      for (final route in aliases) {
+        router.go('/startup');
+        await tester.pumpAndSettle();
+        BilExternalRouteNavigator(router).open(route);
         await tester.pumpAndSettle();
         expect(
           router.routeInformationProvider.value.uri.path,
-          route.startsWith('/community/') ? '/community' : '/dashboard',
-          reason: 'Wrong return destination for external link: $route',
+          route,
+          reason: 'External destination failed: $route',
         );
+        if (route != '/dashboard' && route != '/community') {
+          expect(
+            router.canPop(),
+            isTrue,
+            reason: 'No previous screen after cold external link: $route',
+          );
+          router.pop();
+          await tester.pumpAndSettle();
+          expect(
+            router.routeInformationProvider.value.uri.path,
+            route.startsWith('/community/') ? '/community' : '/dashboard',
+            reason: 'Wrong return destination for external link: $route',
+          );
+        }
       }
-    }
-  });
+    },
+  );
 }
