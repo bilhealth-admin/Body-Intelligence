@@ -168,6 +168,10 @@ jobs:
             path: test/architecture_source_file_size_guard_test.dart
           - suite: coach-vision-page-bridge
             path: test/parallel/bil02/coach_media_page_overlay_test.dart
+          - suite: coach-image-source-bridge
+            path: test/features/intelligence_center/coach_image_source_regression_test.dart
+          - suite: arabic-meal-image-review
+            path: test/features/nutrition/meal_image_language_regression_test.dart
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2

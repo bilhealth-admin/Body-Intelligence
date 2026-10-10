@@ -318,16 +318,35 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      expect(find.text('طماطم'), findsOneWidget);
+      // The new review contains a recognized title and an alternative chip:
+      // duplicated visible names are valid, but the selected card is unique.
+      final card = find.byKey(const Key('premium-vision-food-0'));
+      expect(card, findsOneWidget);
+      expect(
+        find.descendant(of: card, matching: find.text('طماطم')).first,
+        findsOneWidget,
+      );
       expect(find.text('tomato'), findsNothing);
       expect(find.text(payload('ar')['notice']! as String), findsNothing);
-      expect(find.text('قطعة'), findsOneWidget);
-      expect(find.text('piece'), findsNothing);
-      await tester.tap(find.byType(CheckboxListTile));
-      await tester.pump();
-      await tester.tap(
-        find.widgetWithText(FilledButton, 'مطابقة الأطعمة المحددة'),
+      final unit = tester.widget<TextField>(
+        find.byKey(const Key('premium-vision-unit-0')),
       );
+      expect(unit.controller!.text, 'piece');
+      final stage = find.byKey(const Key('premium-vision-stage-before'));
+      await tester.ensureVisible(stage);
+      await tester.tap(stage);
+      await tester.pump();
+      final selectedFood = find.byKey(const Key('premium-vision-select-0'));
+      await tester.ensureVisible(selectedFood);
+      await tester.tap(selectedFood);
+      await tester.pump();
+      final eatenAmount = find.byKey(const Key('premium-vision-eaten-0'));
+      await tester.ensureVisible(eatenAmount);
+      await tester.tap(eatenAmount);
+      await tester.pump();
+      final confirmation = find.byKey(const Key('premium-vision-continue'));
+      expect(tester.widget<FilledButton>(confirmation).onPressed, isNotNull);
+      await tester.tap(confirmation);
       await tester.pumpAndSettle();
       expect(selected!.single.unit, 'piece');
       expect(selected!.single.amount, 1);

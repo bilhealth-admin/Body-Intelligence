@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../visual_closure/visual_evidence_font.dart';
+
 /// Pixel evidence from Flutter's widget renderer on a test surface.
 /// This does NOT claim to be a physical iPhone or Android screenshot.
 /// No photo is substituted for a user's real image.
@@ -42,7 +44,9 @@ MaterialApp _app(Widget child) => MaterialApp(
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
   ],
-  theme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
+  theme: visualEvidenceTheme(
+    ThemeData(useMaterial3: true, brightness: Brightness.dark),
+  ),
   home: Scaffold(body: child),
 );
 
@@ -111,6 +115,8 @@ Food _verifiedFixture() {
 }
 
 void main() {
+  setUpAll(loadVisualEvidenceFont);
+
   testWidgets('capture actual Flutter-rendered BIL Vision review panels', (
     tester,
   ) async {

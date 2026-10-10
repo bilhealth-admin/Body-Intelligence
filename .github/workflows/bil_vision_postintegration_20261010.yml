@@ -102,7 +102,9 @@ jobs:
       - run: flutter build apk --debug --no-pub
   ios:
     needs: [analyze, focused, flutter-captures, baseline-architecture]
-    runs-on: macos-15
+    # connectivity_plus 7.1.0 requires iOS 26 SDK for NWPath.isUltraConstrained.
+    # Use the Xcode 26 macOS runner; no production dependency is changed.
+    runs-on: macos-26
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
