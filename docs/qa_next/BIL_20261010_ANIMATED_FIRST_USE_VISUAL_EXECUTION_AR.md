@@ -64,3 +64,6 @@
 
 ## Fifth CI pass
 Verify run 38035105337: format and analyzer passed; 14 functional tests passed and 2 failed because the test finder chose multiple nested scrollables. The test now uses ensureVisible on the exact food action key. Android debug run 38035105330 passed for its older commit; it does not certify the latest HEAD.
+
+## Latest source-gate correction
+The first-use source gate for SHA `108cc7a4` passed Dart Format and Flutter Analyze. It passed 15 targeted tests but failed the lazy Food Log serving-guide test because `ensureVisible` could not locate an unmounted off-screen row. The test now drives the Food Log ListView's exact Scrollable using `scrollUntilVisible` rather than touching application code or weakening assertions. The new commit must still pass the strict source gate and all downstream checks.
