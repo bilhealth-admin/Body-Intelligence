@@ -1,6 +1,8 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/first_meal_milestone.dart';
+import 'package:body_intelligence_log/data/database/database_scope.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
@@ -9,6 +11,27 @@ import 'package:flutter_test/flutter_test.dart';
 
 part 'coach_meal_journal_cases.dart';
 part 'coach_meal_owner_atomicity_cases.dart';
+
+Future<void> _expectDurableMealJournalAndMilestone(
+  _MealFixture fixture,
+  String operationId,
+) async {
+  final entries = await fixture.database.select(
+    fixture.database.preferences,
+  ).get();
+  final owner = LocalDatabaseScope.keyForOwner(fixture.database.localOwnerId);
+  expect(
+    entries.map((entry) => entry.key).toSet(),
+    {
+      'coachMealOperationV1.$owner.$operationId',
+      firstMealCelebrationPreferenceKey,
+    },
+  );
+  final milestone = entries.singleWhere(
+    (entry) => entry.key == firstMealCelebrationPreferenceKey,
+  );
+  expect(milestone.value, 'ready');
+}
 
 void main() {
   group('Coach meal journal', _coachMealJournalCases);

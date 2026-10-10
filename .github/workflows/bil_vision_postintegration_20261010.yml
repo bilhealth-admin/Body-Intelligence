@@ -46,6 +46,10 @@ jobs:
           - test/features/nutrition/meal_item_evidence_snapshot_test.dart
           - test/features/daily_log/meal_photo_initial_action_test.dart
           - test/features/daily_log/daily_log_nutrition_evidence_test.dart
+          - test/features/nutrition/meal_vision_quota_contract_test.dart
+          - test/features/nutrition/meal_vision_image_preprocessor_test.dart
+          - test/features/nutrition/epic6_voice_vision_gateway_test.dart
+          - test/features/global_platform/vision_recovery_system_test.dart
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -85,7 +89,7 @@ jobs:
       - run: flutter pub get
       - run: flutter test --no-pub --timeout=2m test/architecture_source_file_size_guard_test.dart
   android:
-    needs: [analyze, focused]
+    needs: [analyze, focused, flutter-captures, baseline-architecture]
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
@@ -97,7 +101,7 @@ jobs:
       - run: flutter pub get
       - run: flutter build apk --debug --no-pub
   ios:
-    needs: [analyze, focused]
+    needs: [analyze, focused, flutter-captures, baseline-architecture]
     runs-on: macos-15
     timeout-minutes: 50
     steps:

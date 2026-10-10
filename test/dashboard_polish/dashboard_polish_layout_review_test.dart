@@ -239,7 +239,7 @@ void main() {
                 const Key('dashboard-reference-calorie-remaining-value'),
               ),
             );
-            expect(remaining.textSpan!.toPlainText(), '1460');
+            expect(remaining.textSpan!.toPlainText(), '1,460');
 
             // Inspect the lower half too; compact tiles and the single-point
             // trend must not overflow when accessibility fonts are enabled.

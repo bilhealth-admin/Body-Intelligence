@@ -18,14 +18,20 @@ Future<void> _capture(WidgetTester tester, String name) async {
   final boundary = tester.renderObject<RenderRepaintBoundary>(
     find.byKey(const Key('premium-vision-render-surface')),
   );
-  final image = await boundary.toImage(pixelRatio: 2);
-  final data = await image.toByteData(format: ui.ImageByteFormat.png);
-  expect(data, isNotNull);
-  final path = File('build/vision-captures/$name.png');
-  await path.parent.create(recursive: true);
-  await path.writeAsBytes(data!.buffer.asUint8List());
-  expect(await path.length(), greaterThan(2500));
-  image.dispose();
+  // Raster readback and file I/O require real engine events, not FakeAsync.
+  await tester.runAsync(() async {
+    final image = await boundary.toImage(pixelRatio: 2);
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      expect(data, isNotNull);
+      final path = File('build/vision-captures/$name.png');
+      await path.parent.create(recursive: true);
+      await path.writeAsBytes(data!.buffer.asUint8List());
+      expect(await path.length(), greaterThan(2500));
+    } finally {
+      image.dispose();
+    }
+  });
 }
 
 MaterialApp _app(Widget child) => MaterialApp(

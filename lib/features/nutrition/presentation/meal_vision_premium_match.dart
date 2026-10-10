@@ -85,30 +85,33 @@ class _PremiumTrustedMatchDialogState
                     return Container(
                       margin: const EdgeInsets.only(bottom: 9),
                       decoration: _glassDecoration(context, active: active),
-                      child: ListTile(
-                        onTap: food.verified
-                            ? () => setState(() => _selected = food)
-                            : null,
-                        leading: Icon(
-                          active
-                              ? Icons.radio_button_checked
-                              : Icons.radio_button_unchecked,
-                          color: active
-                              ? _accent(context)
-                              : _secondary(context),
-                        ),
-                        title: Text(
-                          food.name,
-                          style: TextStyle(
-                            color: _foreground(context),
-                            fontWeight: FontWeight.w600,
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: ListTile(
+                          onTap: food.verified
+                              ? () => setState(() => _selected = food)
+                              : null,
+                          leading: Icon(
+                            active
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color: active
+                                ? _accent(context)
+                                : _secondary(context),
                           ),
-                        ),
-                        subtitle: Text(
-                          '${food.servingSize} ${food.servingUnit} · ${food.source}',
-                          style: TextStyle(
-                            color: _secondary(context),
-                            fontSize: 12,
+                          title: Text(
+                            food.name,
+                            style: TextStyle(
+                              color: _foreground(context),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${food.servingSize} ${food.servingUnit} · ${food.source}',
+                            style: TextStyle(
+                              color: _secondary(context),
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),

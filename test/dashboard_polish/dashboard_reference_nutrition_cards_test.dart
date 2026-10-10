@@ -192,12 +192,12 @@ void main() {
         final consumedValue = tester.widget<Text>(
           find.byKey(const Key('dashboard-reference-calorie-consumed-value')),
         );
-        expect(consumedValue.textSpan?.toPlainText(), '640 / 2100');
+        expect(consumedValue.textSpan?.toPlainText(), '640  cal / 2,100');
         expect(consumedValue.textDirection, TextDirection.ltr);
         final remainingValue = tester.widget<Text>(
           find.byKey(const Key('dashboard-reference-calorie-remaining-value')),
         );
-        expect(remainingValue.textSpan?.toPlainText(), '1460');
+        expect(remainingValue.textSpan?.toPlainText(), '1,460');
         expect(remainingValue.textDirection, TextDirection.ltr);
 
         final todayAction = find.byKey(

@@ -142,12 +142,9 @@ Future<void> _mount(
       channel,
       (_) async => null,
     );
-    addTearDown(
-      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        channel,
-        null,
-      ),
-    );
+    // Asynchronous native speech stop can complete after the current page
+    // unmounts. Keep the isolated mock for the entire test file, clearing it
+    // in tearDownAll rather than racing a late platform cleanup.
   }
   final router = GoRouter(
     initialLocation: '/intelligence-center',
@@ -266,10 +263,16 @@ Future<void> _unmount(WidgetTester tester) async {
   await _drain(tester);
 }
 
-Finder get _matchUse => find.descendant(
-  of: find.byType(AlertDialog),
-  matching: find.byType(FilledButton),
-);
+// Premium Vision uses a Dialog rather than the legacy AlertDialog. Both
+// flows must retain an initially disabled action and a verified-food check.
+Finder get _matchUse {
+  final premium = find.byKey(const Key('premium-vision-use-food'));
+  if (premium.evaluate().isNotEmpty) return premium;
+  return find.descendant(
+    of: find.byType(AlertDialog),
+    matching: find.byType(FilledButton),
+  );
+}
 
 Future<void> _chooseMatch(WidgetTester tester, String name) async {
   await _until(tester, find.text(name));
@@ -399,6 +402,14 @@ Map<String, int> _mockCameraPermission(
 }
 
 void main() {
+  tearDownAll(() {
+    final messenger = TestDefaultBinaryMessengerBinding.instance
+        .defaultBinaryMessenger;
+    for (final name in ['bil/tts', 'bil/speech', 'bil/mic_sound']) {
+      messenger.setMockMethodCallHandler(MethodChannel(name), null);
+    }
+  });
+
   for (final arabic in [false, true]) {
     testWidgets(
       'barcode review commits one bound readback with unknowns, arabic=$arabic',

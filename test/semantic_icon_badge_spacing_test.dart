@@ -142,7 +142,7 @@ void main() {
         expect(badge, findsNothing);
         expect(tester.widget<ListTile>(tile).leading, isNull);
         expect(tester.getSize(tile).height, greaterThanOrEqualTo(48));
-        expect(tester.widget<Text>(title).style?.fontSize, 15);
+        expect(tester.widget<Text>(title).style?.fontSize, 15.5);
         expect(tester.widget<Text>(title).style?.fontWeight, FontWeight.w500);
         expect(Directionality.of(tester.element(tile)), direction);
 

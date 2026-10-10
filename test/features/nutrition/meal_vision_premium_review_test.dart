@@ -147,6 +147,15 @@ void main() {
     await tester.ensureVisible(
       find.byKey(const Key('premium-vision-continue')),
     );
+    await tester.pump();
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const Key('premium-vision-continue')),
+          )
+          .onPressed,
+      isNotNull,
+    );
     await tester.tap(find.byKey(const Key('premium-vision-continue')));
     await tester.pumpAndSettle();
     expect(result!.single.amount, 80);
@@ -196,7 +205,6 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('premium-vision-select-0')));
       await tester.ensureVisible(find.text('فول سادة'));
-      await tester.ensureVisible(find.text('فول سادة'));
       await tester.tap(find.text('فول سادة'));
       await tester.ensureVisible(
         find.byKey(const Key('premium-vision-eaten-0')),
@@ -204,6 +212,15 @@ void main() {
       await tester.tap(find.byKey(const Key('premium-vision-eaten-0')));
       await tester.ensureVisible(
         find.byKey(const Key('premium-vision-continue')),
+      );
+      await tester.pump();
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.byKey(const Key('premium-vision-continue')),
+            )
+            .onPressed,
+        isNotNull,
       );
       await tester.tap(find.byKey(const Key('premium-vision-continue')));
       await tester.pumpAndSettle();

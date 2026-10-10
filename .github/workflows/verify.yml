@@ -144,13 +144,55 @@ jobs:
           test/features/settings/more_latest_weight_test.dart
           test/features/settings/more_premium_polish_contract_test.dart
 
+  p0:
+    # The critical data/journal and Vision/architecture suites must pass
+    # before running expensive visual suites or the eight complete shards.
+    name: p0-regressions (${{ matrix.suite }})
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - suite: food-atomic-commits
+            path: test/features/nutrition/coach_food_commit_test.dart
+          - suite: coach-meal-journal
+            path: test/features/nutrition/coach_meal_commit_boundary_test.dart
+          - suite: vision-review
+            path: test/features/nutrition/meal_vision_premium_review_test.dart
+          - suite: vision-capture
+            path: test/features/nutrition/meal_vision_flutter_capture_test.dart
+          - suite: architecture
+            path: test/architecture_source_file_size_guard_test.dart
+          - suite: coach-vision-page-bridge
+            path: test/parallel/bil02/coach_media_page_overlay_test.dart
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Run critical regression test without weakening assertions
+        run: flutter test --no-pub --timeout=3m "${{ matrix.path }}"
+      - name: Preserve real Flutter Vision renderings
+        if: ${{ always() && matrix.suite == 'vision-capture' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-vision-renderings-${{ github.sha }}
+          path: build/vision-captures/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+
   focused:
     # Fast, mandatory failure gate. All current Golden suites and the
     # transaction queue are exercised before the expensive complete suite.
     # Nothing is skipped or accepted here: a red focused check keeps the
     # aggregate required check red, while the full eight shards wait for green.
     name: focused-regressions (${{ matrix.suite }})
-    needs: source
+    needs: [source, p0]
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -274,9 +316,66 @@ jobs:
           retention-days: 7
           compression-level: 0
 
+  broad:
+    # Run every historically failing full-suite file in smaller domain groups.
+    # Full 8-shard execution stays blocked until all known failure clusters pass.
+    name: broad-regressions (${{ matrix.suite }})
+    needs: [source, p0, focused]
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - suite: dashboard-nutrition
+            files: >-
+              test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart test/dashboard_polish/dashboard_polish_layout_review_test.dart test/features/dashboard/composition/dashboard_unknown_nutrition_flow_test.dart test/dashboard_polish/dashboard_current_preview_test.dart
+          - suite: dashboard-contract-health
+            files: >-
+              test/dashboard_composition_contract_test.dart test/dashboard_epic_completion_contract_test.dart test/dashboard_polish/dashboard_live_health_hub_contract_test.dart test/dashboard_polish/dashboard_p9_r15_final_visual_contract_test.dart test/dashboard_polish/live_health_watch_layout_golden_test.dart test/dashboard_polish/live_health_watch_visibility_test.dart
+          - suite: weekly-onboarding-goldens
+            files: >-
+              test/epic8_weekly_report_golden_test.dart test/features/onboarding/onboarding_visual_golden_test.dart test/premium_dashboard_benchmark_test.dart
+          - suite: settings-language-icons
+            files: >-
+              test/semantic_icon_badge_spacing_test.dart test/bil_semantic_icons_test.dart test/launch_readiness/navigation_and_more_master_closure_test.dart test/localization/bil_25_locale_fallback_closure_test.dart test/visual_closure/visual_defect_regression_test.dart
+          - suite: wellness-commerce
+            files: >-
+              test/features/commerce/verified_entitlement_surface_contract_test.dart test/features/wellness/recipe_library_polish_test.dart test/features/wellness/workout_reference_golden_test.dart
+          - suite: community-cold-back
+            files: >-
+              test/features/community/community_chat_auth_session_test.dart
+    steps:
+      - name: Configure Git LF checkout
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Reproduce all historically failing domains before full shards
+        shell: pwsh
+        run: |
+          $targets = @("${{ matrix.files }}".Split(' ', [StringSplitOptions]::RemoveEmptyEntries))
+          Write-Host "Testing $($targets.Count) known failure files in ${{ matrix.suite }}"
+          flutter test --no-pub --timeout=3m @targets
+      - name: Preserve reviewed-only Golden failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: broad-regression-failures-${{ matrix.suite }}
+          path: test/**/failures/**
+          if-no-files-found: ignore
+          retention-days: 7
+
   shards:
     name: flutter-tests (shard ${{ matrix.shard }} of 8)
-    needs: [source, focused]
+    needs: [source, p0, focused, broad]
     runs-on: windows-latest
     timeout-minutes: 60
     strategy:
@@ -329,7 +428,7 @@ jobs:
   flutter:
     name: flutter
     if: ${{ always() }}
-    needs: [source, focused, shards]
+    needs: [source, p0, focused, broad, shards]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -337,14 +436,18 @@ jobs:
         shell: bash
         env:
           SOURCE_RESULT: ${{ needs.source.result }}
+          P0_RESULT: ${{ needs.p0.result }}
+          BROAD_RESULT: ${{ needs.broad.result }}
           FOCUSED_RESULT: ${{ needs.focused.result }}
           SHARDS_RESULT: ${{ needs.shards.result }}
         run: |
           echo "Formatting and analysis: $SOURCE_RESULT"
+          echo "P0 critical data, Vision, architecture: $P0_RESULT"
+          echo "Broader targeted regressions: $BROAD_RESULT"
           echo "Focused Goldens and commerce: $FOCUSED_RESULT"
           echo "All eight Flutter test shards: $SHARDS_RESULT"
-          if [[ "$SOURCE_RESULT" != "success" || "$FOCUSED_RESULT" != "success" || "$SHARDS_RESULT" != "success" ]]; then
-            echo "::error::All three quality phases must pass: source, focused, and the complete eight-shard suite."
+          if [[ "$SOURCE_RESULT" != "success" || "$P0_RESULT" != "success" || "$FOCUSED_RESULT" != "success" || "$BROAD_RESULT" != "success" || "$SHARDS_RESULT" != "success" ]]; then
+            echo "::error::All five quality phases must pass: source, P0, focused, broad, and the complete eight-shard suite."
             exit 1
           fi
           echo "All quality gates passed."
