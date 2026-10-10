@@ -283,7 +283,9 @@ class _FoodGuideStep extends StatelessWidget {
                         duration: const Duration(milliseconds: 300),
                         height: 3,
                         decoration: BoxDecoration(
-                          color: i <= step ? const Color(0xFF9DF6E5) : Colors.white24,
+                          color: i <= step
+                              ? const Color(0xFF9DF6E5)
+                              : Colors.white24,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -308,8 +310,22 @@ class _FoodGuideStep extends StatelessWidget {
                   ),
                   child: Text(
                     second
-                        ? _copy(context, en: 'Open Food Log', ar: 'فتح تسجيل الطعام', fr: 'Ouvrir le journal', es: 'Abrir el diario', tr: 'Yemek kaydını aç')
-                        : _copy(context, en: 'Next', ar: 'التالي', fr: 'Suivant', es: 'Siguiente', tr: 'İleri'),
+                        ? _copy(
+                            context,
+                            en: 'Open Food Log',
+                            ar: 'فتح تسجيل الطعام',
+                            fr: 'Ouvrir le journal',
+                            es: 'Abrir el diario',
+                            tr: 'Yemek kaydını aç',
+                          )
+                        : _copy(
+                            context,
+                            en: 'Next',
+                            ar: 'التالي',
+                            fr: 'Suivant',
+                            es: 'Siguiente',
+                            tr: 'İleri',
+                          ),
                   ),
                 ),
               ),
@@ -319,7 +335,14 @@ class _FoodGuideStep extends StatelessWidget {
                   key: const Key('dashboard-guide-skip'),
                   onPressed: saving ? null : onSkip,
                   child: Text(
-                    _copy(context, en: 'Skip', ar: 'تخطي', fr: 'Ignorer', es: 'Omitir', tr: 'Atla'),
+                    _copy(
+                      context,
+                      en: 'Skip',
+                      ar: 'تخطي',
+                      fr: 'Ignorer',
+                      es: 'Omitir',
+                      tr: 'Atla',
+                    ),
                     style: const TextStyle(color: Colors.white70),
                   ),
                 ),
