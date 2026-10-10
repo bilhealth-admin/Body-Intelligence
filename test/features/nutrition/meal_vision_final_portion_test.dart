@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_review_dialog.dart';
@@ -76,6 +77,64 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('zoom close remains tappable before original photo decodes', (
+    tester,
+  ) async {
+    await setVisionV2Viewport(tester, const Size(390, 844));
+    final provider = FileImage(File(visionV2PhotoPath));
+    final cache = PaintingBinding.instance.imageCache;
+    cache.clear();
+    cache.clearLiveImages();
+    // Hold the real FileImage stream pending; no placeholder or replacement
+    // widget. This reproduces slow decoding deterministically on local Flutter.
+    final pending = Completer<ImageInfo>();
+    cache.putIfAbsent(
+      provider,
+      () => OneFrameImageStreamCompleter(pending.future),
+    );
+    addTearDown(() {
+      cache.clear();
+      cache.clearLiveImages();
+    });
+    await tester.pumpWidget(
+      visionV2App(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showReviewedVisionFoodMatchDialog(
+              context,
+              recognizedName: 'TEST',
+              foods: [visionV2Food()],
+              reviewedAmount: 60,
+              reviewedUnit: 'g',
+              imagePath: visionV2PhotoPath,
+            ),
+            child: const Text('OPEN'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('OPEN'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('premium-vision-final-photo')));
+    await tester.pumpAndSettle();
+    expect(find.byType(InteractiveViewer), findsOneWidget);
+    final images = find.descendant(
+      of: find.byType(InteractiveViewer),
+      matching: find.byType(RawImage),
+    );
+    expect(
+      tester.widgetList<RawImage>(images).every((image) => image.image == null),
+      isTrue,
+    );
+    await captureVisionV2(tester, 'zoom_pending_original_decode');
+    // Fatal hit-test warnings prevent a barrier tap from masquerading as a
+    // successful press of the close button.
+    await tester.tap(find.byTooltip('إغلاق الصورة'));
+    await tester.pumpAndSettle();
+    expect(find.byType(InteractiveViewer), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('final edited portion returns the food and exact commit basis', (
     tester,
   ) async {

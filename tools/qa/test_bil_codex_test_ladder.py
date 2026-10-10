@@ -10,6 +10,23 @@ import bil_codex_test_ladder as ladder
 
 
 class LadderGateTests(unittest.TestCase):
+    def test_full_queues_eight_shards_with_single_test_worker(self):
+        with patch.object(ladder, "run_command", return_value={"exit_code": 0}) as command:
+            result = ladder.run_stage("full", 2)
+        self.assertTrue(result["passed"])
+        self.assertEqual(len(result["jobs"]), 8)
+        commands = [call.args[1] for call in command.call_args_list]
+        self.assertTrue(all("--concurrency=1" in args for args in commands))
+        self.assertEqual({args[-1] for args in commands},
+                         {"--shard-index=" + str(i) for i in range(8)})
+        self.assertTrue(all("--total-shards=8" in args for args in commands))
+
+    def test_full_rejects_more_than_two_shards_before_launch(self):
+        with patch.object(ladder, "run_command") as command:
+            with self.assertRaises(ValueError):
+                ladder.run_stage("full", 3)
+        command.assert_not_called()
+
     def test_arabic_gate_requires_v2_matrix_and_interactions(self):
         with patch.object(ladder, "run_suites", return_value={"passed": False}) as suites:
             self.assertFalse(ladder.run_stage("arabic", 8)["passed"])

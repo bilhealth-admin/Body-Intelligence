@@ -135,6 +135,8 @@ def run_source():
 
 
 def run_suites(stage, suites, parallel, previous=None):
+    if stage == "full" and parallel > 2:
+        raise ValueError("Full permits at most two simultaneous shards")
     work = []
     outcomes = {}
     for label, source in suites:
@@ -145,6 +147,8 @@ def run_suites(stage, suites, parallel, previous=None):
             print("[REUSED GREEN SUITE] " + name, flush=True)
             continue
         args = ["flutter", "test", "--no-pub", "--timeout=3m"]
+        if stage == "full":
+            args.append("--concurrency=1")
         args += (source.split() if isinstance(source, str) else source)
         work.append((name, args))
     with ThreadPoolExecutor(max_workers=max(1, min(parallel, len(work)))) as pool:
@@ -195,6 +199,8 @@ def main():
     if args.parallel < 1 or args.parallel > 8:
         parser.error("--parallel must be 1 through 8")
     first, last = STAGES.index(args.from_stage), STAGES.index(args.through_stage)
+    if last == STAGES.index("full") and args.parallel > 2:
+        parser.error("Full permits --parallel 1 or 2; each shard uses --concurrency=1")
     if first > last:
         parser.error("--from-stage cannot follow --through-stage")
     if not shutil.which("flutter") or not shutil.which("dart"):
