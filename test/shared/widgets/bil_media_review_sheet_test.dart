@@ -125,6 +125,37 @@ void main() {
     expect(chosen, [1]);
   });
 
+  testWidgets('profile review has explicit update action and can be cancelled', (
+    tester,
+  ) async {
+    bool? approved;
+    final bytes = _photoBytes();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async => approved =
+                  await showBilSingleImageBytesReview(
+                    context,
+                    bytes: bytes,
+                  ),
+              child: const Text('Profile gallery'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Profile gallery'));
+    await tester.pumpAndSettle();
+    expect(find.text('Review your profile photo'), findsOneWidget);
+    expect(find.text('Update photo'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('bil-media-review-cancel')));
+    await tester.pumpAndSettle();
+    expect(approved, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
   test('shared camera does not commit the picture at shutter press', () {
     final code = File(
       'lib/shared/widgets/bil_camera_capture_page.dart',
@@ -132,6 +163,7 @@ void main() {
     expect(code, contains("_capturedForReview = image"));
     expect(code, contains("Key('bil-camera-retake')"));
     expect(code, contains("Key('bil-camera-use-photo')"));
+    expect(code, contains('_reviewReady && !_reviewFailed'));
     expect(code, contains('onPressed: _useCapturedPhoto'));
     expect(code, isNot(contains('Navigator.of(context).pop(image)')));
   });
