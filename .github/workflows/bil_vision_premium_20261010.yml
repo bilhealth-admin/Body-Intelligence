@@ -1,0 +1,13 @@
+name: BIL Vision premium scoped QA
+on:
+  push:
+    branches: [qa/bil-quality-ux-integration-20261009]
+    paths: [.github/bil_vision_payload.base64]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  staged:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo 'CI implementation pending; no source mutation in skeleton'
