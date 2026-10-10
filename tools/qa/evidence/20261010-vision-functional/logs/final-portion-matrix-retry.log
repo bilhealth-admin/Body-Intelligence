@@ -1,0 +1,10 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: V2 nutrients 320_en_dark_1.0x values and unavailable facts stay readable
+00:01 +1: V2 nutrients 320_en_dark_1.8x values and unavailable facts stay readable
+00:01 +2: V2 nutrients 320_en_dark_2.0x values and unavailable facts stay readable
+00:01 +3: V2 nutrients 320_en_light_1.0x values and unavailable facts stay readable
+00:02 +4: V2 nutrients 320_en_light_1.8x values and unavailable facts stay readable
+00:02 +5: V2 nutrients 320_en_light_2.0x values and unavailable facts stay readable
+00:02 +6: (tearDownAll)
+00:02 +6: All tests passed!

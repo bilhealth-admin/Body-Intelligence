@@ -1,0 +1,134 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: (setUpAll)
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_ar_dark_1.0x original photo, clock, controls and overflow
+00:01 +1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_ar_dark_1.0x values and unavailable facts stay readable
+00:02 +2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_ar_dark_1.8x original photo, clock, controls and overflow
+00:03 +3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_ar_dark_1.8x values and unavailable facts stay readable
+00:03 +4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_ar_dark_2.0x original photo, clock, controls and overflow
+00:04 +5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_ar_dark_2.0x values and unavailable facts stay readable
+00:04 +6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_ar_light_1.0x original photo, clock, controls and overflow
+00:05 +7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_ar_light_1.0x values and unavailable facts stay readable
+00:05 +8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_ar_light_1.8x original photo, clock, controls and overflow
+00:05 +9: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_ar_light_1.8x values and unavailable facts stay readable
+00:05 +10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_ar_light_2.0x original photo, clock, controls and overflow
+00:05 +11: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_ar_light_2.0x values and unavailable facts stay readable
+00:05 +12: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_en_dark_1.0x original photo, clock, controls and overflow
+00:06 +13: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_dark_1.0x values and unavailable facts stay readable
+00:06 +14: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_en_dark_1.8x original photo, clock, controls and overflow
+00:06 +15: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_dark_1.8x values and unavailable facts stay readable
+00:06 +16: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_en_dark_2.0x original photo, clock, controls and overflow
+00:06 +17: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_dark_2.0x values and unavailable facts stay readable
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Verified ful — TEST FIXTURE": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart:148:15)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart line 148
+The test description was:
+  V2 nutrients 320_en_dark_2.0x values and unavailable facts stay readable
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +17 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_dark_2.0x values and unavailable facts stay readable [E]
+  Test failed. See exception logs above.
+  The test description was: V2 nutrients 320_en_dark_2.0x values and unavailable facts stay readable
+  
+00:07 +17 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_en_light_1.0x original photo, clock, controls and overflow
+00:07 +18 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_light_1.0x values and unavailable facts stay readable
+00:07 +19 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_en_light_1.8x original photo, clock, controls and overflow
+00:08 +20 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_light_1.8x values and unavailable facts stay readable
+00:08 +21 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 320_en_light_2.0x original photo, clock, controls and overflow
+00:08 +22 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_light_2.0x values and unavailable facts stay readable
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Verified ful — TEST FIXTURE": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart:148:15)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart line 148
+The test description was:
+  V2 nutrients 320_en_light_2.0x values and unavailable facts stay readable
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +22 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_light_2.0x values and unavailable facts stay readable [E]
+  Test failed. See exception logs above.
+  The test description was: V2 nutrients 320_en_light_2.0x values and unavailable facts stay readable
+  
+00:08 +22 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_ar_dark_1.0x original photo, clock, controls and overflow
+00:09 +23 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_ar_dark_1.0x values and unavailable facts stay readable
+00:10 +24 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_ar_dark_1.8x original photo, clock, controls and overflow
+00:10 +25 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_ar_dark_1.8x values and unavailable facts stay readable
+00:11 +26 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_ar_dark_2.0x original photo, clock, controls and overflow
+00:11 +27 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_ar_dark_2.0x values and unavailable facts stay readable
+00:12 +28 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_ar_light_1.0x original photo, clock, controls and overflow
+00:12 +29 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_ar_light_1.0x values and unavailable facts stay readable
+00:12 +30 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_ar_light_1.8x original photo, clock, controls and overflow
+00:13 +31 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_ar_light_1.8x values and unavailable facts stay readable
+00:13 +32 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_ar_light_2.0x original photo, clock, controls and overflow
+00:13 +33 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_ar_light_2.0x values and unavailable facts stay readable
+00:13 +34 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_en_dark_1.0x original photo, clock, controls and overflow
+00:13 +35 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_en_dark_1.0x values and unavailable facts stay readable
+00:13 +36 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_en_dark_1.8x original photo, clock, controls and overflow
+00:13 +37 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_en_dark_1.8x values and unavailable facts stay readable
+00:14 +38 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_en_dark_2.0x original photo, clock, controls and overflow
+00:14 +39 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_en_dark_2.0x values and unavailable facts stay readable
+00:14 +40 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_en_light_1.0x original photo, clock, controls and overflow
+00:14 +41 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_en_light_1.0x values and unavailable facts stay readable
+00:14 +42 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_en_light_1.8x original photo, clock, controls and overflow
+00:15 +43 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_en_light_1.8x values and unavailable facts stay readable
+00:15 +44 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 390_en_light_2.0x original photo, clock, controls and overflow
+00:15 +45 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 390_en_light_2.0x values and unavailable facts stay readable
+00:15 +46 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_ar_dark_1.0x original photo, clock, controls and overflow
+00:17 +47 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_ar_dark_1.0x values and unavailable facts stay readable
+00:18 +48 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_ar_dark_1.8x original photo, clock, controls and overflow
+00:18 +49 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_ar_dark_1.8x values and unavailable facts stay readable
+00:19 +50 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_ar_dark_2.0x original photo, clock, controls and overflow
+00:20 +51 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_ar_dark_2.0x values and unavailable facts stay readable
+00:21 +52 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_ar_light_1.0x original photo, clock, controls and overflow
+00:21 +53 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_ar_light_1.0x values and unavailable facts stay readable
+00:21 +54 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_ar_light_1.8x original photo, clock, controls and overflow
+00:21 +55 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_ar_light_1.8x values and unavailable facts stay readable
+00:21 +56 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_ar_light_2.0x original photo, clock, controls and overflow
+00:21 +57 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_ar_light_2.0x values and unavailable facts stay readable
+00:21 +58 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_en_dark_1.0x original photo, clock, controls and overflow
+00:21 +59 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_en_dark_1.0x values and unavailable facts stay readable
+00:22 +60 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_en_dark_1.8x original photo, clock, controls and overflow
+00:22 +61 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_en_dark_1.8x values and unavailable facts stay readable
+00:22 +62 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_en_dark_2.0x original photo, clock, controls and overflow
+00:22 +63 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_en_dark_2.0x values and unavailable facts stay readable
+00:22 +64 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_en_light_1.0x original photo, clock, controls and overflow
+00:22 +65 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_en_light_1.0x values and unavailable facts stay readable
+00:22 +66 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_en_light_1.8x original photo, clock, controls and overflow
+00:23 +67 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_en_light_1.8x values and unavailable facts stay readable
+00:23 +68 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 review 430_en_light_2.0x original photo, clock, controls and overflow
+00:23 +69 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 430_en_light_2.0x values and unavailable facts stay readable
+00:23 +70 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: (tearDownAll)
+00:23 +70 -2: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_reference_capture_test.dart
+00:24 +70 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_reference_capture_test.dart: (setUpAll)
+00:24 +70 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_reference_capture_test.dart: reference composition: review, edit control and trusted full facts
+00:28 +71 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_reference_capture_test.dart: (tearDownAll)
+00:28 +71 -2: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_dark_2.0x values and unavailable facts stay readable
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_v2_matrix_test.dart: V2 nutrients 320_en_light_2.0x values and unavailable facts stay readable

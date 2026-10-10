@@ -1,0 +1,67 @@
+Command: flutter test --no-pub --timeout=3m test/visual_closure/actual_data_pages_golden_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/actual_data_pages_golden_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: food catalog production empty state capture
+00:01 +1: daily log repository food search production capture
+00:02 +2: food catalog favorites production state capture
+00:02 +3: food catalog recent production state capture
+00:02 +4: food catalog verified_result production capture
+00:03 +5: food catalog favorite_result production capture
+00:03 +6: food catalog recent_result production capture
+00:03 +7: custom food production form capture
+00:03 +8: dashboard production populated phone capture
+00:04 +9: dashboard persisted nutrient goal card capture
+00:04 +10: AI Coach conversation production phone capture
+00:05 +11: dashboard production vertical module page 2 capture
+00:05 +12: dashboard production vertical module page 3 capture
+00:06 +13: dashboard production steps trend capture
+00:06 +14: dashboard production Macros overview capture
+00:06 +15: dashboard production Heart Healthy overview capture
+00:07 +16: daily log production empty day capture
+00:07 +17: daily log reference premium goal capture
+00:07 +18: daily log production middle sections capture
+00:07 +19: daily log production lower sections capture
+00:07 +20: daily log meal-entry production capture
+00:07 +21: daily log water-entry production capture
+00:07 +22: meal-image guide truthful unavailable production capture
+00:07 +23: barcode scanner truthful unavailable production capture
+00:08 +24: analytics production empty state capture
+00:08 +25: progress production steps summary capture
+00:08 +26: progress production range picker capture
+00:08 +27: progress production metric picker capture
+00:08 +28: progress production lower metric picker capture
+00:08 +29: progress production body measurement empty capture
+00:08 +30: analytics production recorded trend capture
+00:08 +31: analytics production seven_days range capture
+00:08 +32: analytics production all_time range capture
+00:09 +33: profile production populated state capture
+00:09 +34: profile summary repository state capture
+00:09 +35: profile goals production lower section capture
+00:09 +36: nutrition goals production capture page 1
+00:09 +37: nutrition goals production capture page 2
+00:09 +38: settings production phone capture
+00:09 +39: appearance_phone production capture
+00:09 +40: diary_settings_phone production capture
+00:10 +41: default_search_tab_phone production capture
+00:10 +42: diary_sharing_phone production capture
+00:10 +43: meal_names_phone production capture
+00:10 +44: sharing_privacy_phone production capture
+00:10 +45: email_settings_phone production capture
+00:10 +46: account_password_phone production capture
+00:10 +47: facebook_settings_phone production capture
+00:10 +48: google_settings_phone production capture
+00:10 +49: email_settings_lower_phone production capture
+00:11 +50: More production top capture
+00:11 +51: More production lower capture
+00:11 +52: settings production phone capture page 2
+00:11 +53: settings production phone capture page 3
+00:11 +54: settings production phone capture page 4
+00:11 +55: settings capture viewports remain byte-distinct
+00:11 +56: nutrition analytics calories capture
+00:11 +57: nutrition analytics nutrients capture
+00:12 +58: nutrition analytics macros capture
+00:12 +59: local export selected-day capture
+00:12 +60: daily check-in production phone capture
+00:12 +61: (tearDownAll)
+00:12 +61: All tests passed!
