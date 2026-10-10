@@ -108,7 +108,7 @@ extension _FoodLogActions on _FoodLogPageState {
         if (_tourVisible) {
           await _dismissFoodTour(completed: true);
         }
-        if (!mounted) return;
+        if (!context.mounted) return;
         await FirstMealCelebration.showIfPending(
           context,
           ref.read(preferencesRepositoryProvider),
