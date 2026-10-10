@@ -16,6 +16,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../visual_closure/visual_evidence_font.dart';
+
 const examples = <String, List<String>>{
   'en': ['tomato', 'A round red fruit is visible'],
   'ar': ['طماطم', 'ثمرة حمراء مستديرة ظاهرة'],
@@ -282,6 +284,7 @@ void main() {
   testWidgets(
     'Arabic photo review displays Arabic and returns a canonical unit',
     (tester) async {
+      await tester.runAsync(loadVisualEvidenceFont);
       tester.view.physicalSize = const Size(600, 1200);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -289,6 +292,14 @@ void main() {
       List<MealImageReviewSelection>? selected;
       await tester.pumpWidget(
         MaterialApp(
+          theme: visualEvidenceTheme(
+            ThemeData(useMaterial3: true),
+            fontFamily: 'NotoArabicEvidence',
+          ),
+          builder: (context, child) => visualEvidenceTextSurface(
+            child,
+            fontFamily: 'NotoArabicEvidence',
+          ),
           locale: const Locale('ar'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
@@ -316,6 +327,15 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<MaterialApp>(find.byType(MaterialApp))
+            .theme!
+            .textTheme
+            .bodyMedium
+            ?.fontFamily,
+        'NotoArabicEvidence',
+      );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
       // The new review contains a recognized title and an alternative chip:
