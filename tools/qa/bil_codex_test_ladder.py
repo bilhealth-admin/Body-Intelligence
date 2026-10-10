@@ -170,6 +170,7 @@ def run_stage(stage, parallel, previous=None):
                 "test/features/nutrition/meal_vision_premium_visual_contract_test.dart",
                 "test/features/nutrition/meal_vision_v2_matrix_test.dart",
                 "test/features/nutrition/meal_vision_v2_interaction_test.dart",
+                "test/features/nutrition/meal_vision_reference_capture_test.dart",
             ]),
         ], 1, previous)
     if stage == "p0":

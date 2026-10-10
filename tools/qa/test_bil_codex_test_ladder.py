@@ -18,6 +18,7 @@ class LadderGateTests(unittest.TestCase):
         self.assertEqual(parallel, 1)
         self.assertIn("test/features/nutrition/meal_vision_v2_matrix_test.dart", jobs[1][1])
         self.assertIn("test/features/nutrition/meal_vision_v2_interaction_test.dart", jobs[1][1])
+        self.assertIn("test/features/nutrition/meal_vision_reference_capture_test.dart", jobs[1][1])
 
     def test_fingerprint_excludes_diagnostics_but_tracks_real_baselines(self):
         with tempfile.TemporaryDirectory() as temp:

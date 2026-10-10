@@ -29,8 +29,9 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
         ),
       );
     }
-    final photoHeight =
-        MediaQuery.sizeOf(context).height >= 760 ? 238.0 : 168.0;
+    final photoHeight = MediaQuery.sizeOf(context).height >= 760
+        ? 238.0
+        : 168.0;
     return Semantics(
       label: _word(
         context,
@@ -78,7 +79,11 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) => Center(
                     child: Text(
-                      _word(context, 'Photo cannot be loaded', 'تعذر عرض الصورة'),
+                      _word(
+                        context,
+                        'Photo cannot be loaded',
+                        'تعذر عرض الصورة',
+                      ),
                     ),
                   ),
                 ),
@@ -177,77 +182,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Checkbox(
-                key: Key('premium-vision-select-$index'),
-                value: selected,
-                onChanged: (v) => _visualUpdate(() {
-                  if (v == true) {
-                    _selected.add(index);
-                  } else {
-                    _selected.remove(index);
-                  }
-                }),
-                activeColor: _mint,
-                checkColor: _bgBottom,
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  item.name,
-                  maxLines: 3,
-                  style: TextStyle(
-                    color: _foreground(context),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Column(
-                children: [
-                  SizedBox(
-                    width: 54,
-                    height: 54,
-                    child: TweenAnimationBuilder<double>(
-                      tween: Tween(
-                        begin: 0,
-                        end: item.confidence.clamp(0, 1).toDouble(),
-                      ),
-                      duration: MediaQuery.disableAnimationsOf(context)
-                          ? Duration.zero
-                          : const Duration(milliseconds: 600),
-                      builder: (_, value, _) => Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          CircularProgressIndicator(
-                            value: value,
-                            strokeWidth: 4,
-                            backgroundColor: const Color(0x337FFFFF),
-                            color: low ? const Color(0xFFFFC66E) : _mint,
-                          ),
-                          Center(
-                            child: Text(
-                              '${(item.confidence * 100).round()}%',
-                              style: TextStyle(
-                                color: low ? const Color(0xFFFFC66E) : _mint,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Text(
-                    _word(context, 'Recognition only', 'ثقة التعرّف فقط'),
-                    style: TextStyle(color: _secondary(context), fontSize: 10),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          _candidateHeading(index),
           if (item.evidence.trim().isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 5, bottom: 6),
@@ -294,165 +229,172 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
               ),
             ),
           if (selected) ...[
-          const SizedBox(height: 7),
-          Text(
-            _word(
-              context,
-              'Does the suggested amount mean eaten or remaining?',
-              'هل الكمية المقترحة هي ما أكلته أم ما تبقّى؟',
+            const SizedBox(height: 7),
+            Text(
+              _word(
+                context,
+                'Does the suggested amount mean eaten or remaining?',
+                'هل الكمية المقترحة هي ما أكلته أم ما تبقّى؟',
+              ),
+              style: const TextStyle(color: Color(0xFFFFD18B), fontSize: 12),
             ),
-            style: const TextStyle(color: Color(0xFFFFD18B), fontSize: 12),
-          ),
-          Wrap(
-            spacing: 6,
-            children: [
-              ChoiceChip(
-                key: Key('premium-vision-eaten-$index'),
-                label: Text(
-                  _word(context, 'I ate this amount', 'أكلت هذه الكمية'),
-                ),
-                selected: _amountMeaning[index] == true,
-                onSelected: (_) =>
-                    _visualUpdate(() => _amountMeaning[index] = true),
-              ),
-              ChoiceChip(
-                key: Key('premium-vision-remaining-$index'),
-                label: Text(
-                  _word(context, 'This amount remains', 'هذه الكمية المتبقية'),
-                ),
-                selected: _amountMeaning[index] == false,
-                onSelected: (_) => _visualUpdate(() {
-                  _amountMeaning[index] = false;
-                  _amounts[index]
-                      .clear(); // Never log visible leftovers as eaten.
-                }),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 38,
-                height: 48,
-                child: IconButton(
-                  key: Key('premium-vision-minus-$index'),
-                  tooltip: _word(context, 'Decrease amount', 'تقليل الكمية'),
-                  padding: EdgeInsets.zero,
-                  onPressed: () => _adjust(index, -5),
-                  icon: Icon(Icons.remove_rounded, color: _accent(context)),
-                ),
-              ),
-              Expanded(
-                child: TextField(
-                  key: Key('premium-vision-amount-$index'),
-                  controller: _amounts[index],
-                  onChanged: (_) => _visualUpdate(() {}),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: _foreground(context),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+            Wrap(
+              spacing: 6,
+              children: [
+                ChoiceChip(
+                  key: Key('premium-vision-eaten-$index'),
+                  label: Text(
+                    _word(context, 'I ate this amount', 'أكلت هذه الكمية'),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    labelText: _word(context, 'Eaten', 'المأكول'),
-                    hintText: _word(context, 'Amount', 'الكمية'),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 11,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  selected: _amountMeaning[index] == true,
+                  onSelected: (_) =>
+                      _visualUpdate(() => _amountMeaning[index] = true),
+                ),
+                ChoiceChip(
+                  key: Key('premium-vision-remaining-$index'),
+                  label: Text(
+                    _word(
+                      context,
+                      'This amount remains',
+                      'هذه الكمية المتبقية',
                     ),
                   ),
+                  selected: _amountMeaning[index] == false,
+                  onSelected: (_) => _visualUpdate(() {
+                    _amountMeaning[index] = false;
+                    _amounts[index]
+                        .clear(); // Never log visible leftovers as eaten.
+                  }),
                 ),
-              ),
-              SizedBox(
-                height: 48,
-                width: 38,
-                child: IconButton(
-                  key: Key('premium-vision-plus-$index'),
-                  tooltip: _word(context, 'Increase amount', 'زيادة الكمية'),
-                  padding: EdgeInsets.zero,
-                  onPressed: () => _adjust(index, 5),
-                  icon: Icon(Icons.add_rounded, color: _accent(context)),
-                ),
-              ),
-              const SizedBox(width: 4),
-              SizedBox(
-                width: 103,
-                child: TextField(
-                  key: Key('premium-vision-unit-$index'),
-                  controller: _units[index],
-                  onChanged: (_) => _visualUpdate(() {}),
-                  style: TextStyle(
-                    color: _foreground(context),
-                    fontSize: 12,
-                  ),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    labelText: _word(context, 'Unit', 'الوحدة'),
-                    hintText: portionUnit.isEmpty ? 'g' : portionUnit,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 10,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    suffixIconConstraints: const BoxConstraints(
-                      minWidth: 28,
-                      minHeight: 32,
-                    ),
-                    suffixIcon: PopupMenuButton<String>(
-                      tooltip: _word(context, 'Choose unit', 'اختيار الوحدة'),
-                      onSelected: (unit) =>
-                          _visualUpdate(() => _units[index].text = unit),
-                      itemBuilder: (_) => [
-                        for (final unit in const [
-                          'g', 'kg', 'oz', 'lb', 'piece', 'ml', 'serving',
-                        ])
-                          PopupMenuItem(value: unit, child: Text(unit)),
-                      ],
-                      icon: const Icon(Icons.arrow_drop_down_rounded),
-                    ),
+              ],
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 38,
+                  height: 48,
+                  child: IconButton(
+                    key: Key('premium-vision-minus-$index'),
+                    tooltip: _word(context, 'Decrease amount', 'تقليل الكمية'),
+                    padding: EdgeInsets.zero,
+                    onPressed: () => _adjust(index, -5),
+                    icon: Icon(Icons.remove_rounded, color: _accent(context)),
                   ),
                 ),
-              ),
-            ],
-          ),
-          if (item.alternatives.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Wrap(
-                spacing: 6,
-                children: [
-                  for (var alt = 0; alt < item.alternatives.length; alt++)
-                    ChoiceChip(
-                      label: Text(item.alternatives[alt].name),
-                      selected: _alternatives[index] == alt,
-                      onSelected: (v) => _visualUpdate(
-                        () => _alternatives[index] = v ? alt : null,
+                Expanded(
+                  child: TextField(
+                    key: Key('premium-vision-amount-$index'),
+                    controller: _amounts[index],
+                    onChanged: (_) => _visualUpdate(() {}),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _foreground(context),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      labelText: _word(context, 'Eaten', 'المأكول'),
+                      hintText: _word(context, 'Amount', 'الكمية'),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 11,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                ],
+                  ),
+                ),
+                SizedBox(
+                  height: 48,
+                  width: 38,
+                  child: IconButton(
+                    key: Key('premium-vision-plus-$index'),
+                    tooltip: _word(context, 'Increase amount', 'زيادة الكمية'),
+                    padding: EdgeInsets.zero,
+                    onPressed: () => _adjust(index, 5),
+                    icon: Icon(Icons.add_rounded, color: _accent(context)),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                SizedBox(
+                  width: 103,
+                  child: TextField(
+                    key: Key('premium-vision-unit-$index'),
+                    controller: _units[index],
+                    onChanged: (_) => _visualUpdate(() {}),
+                    style: TextStyle(color: _foreground(context), fontSize: 12),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      labelText: _word(context, 'Unit', 'الوحدة'),
+                      hintText: portionUnit.isEmpty ? 'g' : portionUnit,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 10,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      suffixIconConstraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 32,
+                      ),
+                      suffixIcon: PopupMenuButton<String>(
+                        tooltip: _word(context, 'Choose unit', 'اختيار الوحدة'),
+                        onSelected: (unit) =>
+                            _visualUpdate(() => _units[index].text = unit),
+                        itemBuilder: (_) => [
+                          for (final unit in const [
+                            'g',
+                            'kg',
+                            'oz',
+                            'lb',
+                            'piece',
+                            'ml',
+                            'serving',
+                          ])
+                            PopupMenuItem(value: unit, child: Text(unit)),
+                        ],
+                        icon: const Icon(Icons.arrow_drop_down_rounded),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (item.alternatives.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Wrap(
+                  spacing: 6,
+                  children: [
+                    for (var alt = 0; alt < item.alternatives.length; alt++)
+                      ChoiceChip(
+                        label: Text(item.alternatives[alt].name),
+                        selected: _alternatives[index] == alt,
+                        onSelected: (v) => _visualUpdate(
+                          () => _alternatives[index] = v ? alt : null,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton.icon(
+                key: Key('premium-vision-exclude-$index'),
+                icon: const Icon(Icons.remove_circle_outline, size: 17),
+                onPressed: () => _visualUpdate(() {
+                  _excluded.add(index);
+                  _selected.remove(index);
+                }),
+                label: Text(_word(context, 'Exclude', 'استبعاد')),
               ),
             ),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: TextButton.icon(
-              key: Key('premium-vision-exclude-$index'),
-              icon: const Icon(Icons.remove_circle_outline, size: 17),
-              onPressed: () => _visualUpdate(() {
-                _excluded.add(index);
-                _selected.remove(index);
-              }),
-              label: Text(_word(context, 'Exclude', 'استبعاد')),
-            ),
-          ),
           ],
         ],
       ),

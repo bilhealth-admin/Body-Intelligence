@@ -1,5 +1,13 @@
 part of 'meal_vision_premium_review.dart';
 
+String _visionFoodTitle(BuildContext context, Food food) {
+  final arabic = food.arabicName?.trim() ?? '';
+  return Localizations.localeOf(context).languageCode == 'ar' &&
+          arabic.isNotEmpty
+      ? arabic
+      : food.name;
+}
+
 class _PremiumTrustedMatchDialog extends StatefulWidget {
   const _PremiumTrustedMatchDialog({
     required this.recognizedName,
@@ -106,7 +114,7 @@ class _PremiumTrustedMatchDialogState
                                 : _secondary(context),
                           ),
                           title: Text(
-                            food.name,
+                            _visionFoodTitle(context, food),
                             style: TextStyle(
                               color: _foreground(context),
                               fontWeight: FontWeight.w600,
@@ -129,9 +137,8 @@ class _PremiumTrustedMatchDialogState
               if (_selected != null)
                 Container(
                   key: const Key('premium-vision-trusted-nutrients'),
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.all(12),
-                  decoration: _glassDecoration(context, active: true),
+                  decoration: _glassDecoration(context),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -241,36 +248,39 @@ class _PremiumTrustedMatchDialogState
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: SizedBox(
-            height: 48,
-            child: FilledButton(
-              key: const Key('premium-vision-use-food'),
-              onPressed:
-                  _selected == null ||
-                      !mealVisionFoodCanBeUsed(
-                        _selected!,
-                        evidenceOwnerKey: widget.evidenceOwnerKey,
-                      ) ||
-                      (widget.reviewedAmount != null &&
-                          widget.reviewedUnit != null &&
-                          mealImageReviewedQuantity(
-                                amount: widget.reviewedAmount!,
-                                unit: widget.reviewedUnit!,
-                                servingSize: _selected!.servingSize,
-                                servingUnit: _selected!.servingUnit,
-                              ) ==
-                              null)
-                  ? null
-                  : () => Navigator.pop(context, _selected),
-              child: Text(
-                _word(
-                  context,
-                  _selected?.verified == true
-                      ? 'Use this verified food'
-                      : 'Use this reviewed food source',
-                  _selected?.verified == true
-                      ? 'استخدام الطعام الموثوق'
-                      : 'استخدام مصدر الطعام الذي راجعته',
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 54),
+              child: FilledButton(
+                key: const Key('premium-vision-use-food'),
+                onPressed:
+                    _selected == null ||
+                        !mealVisionFoodCanBeUsed(
+                          _selected!,
+                          evidenceOwnerKey: widget.evidenceOwnerKey,
+                        ) ||
+                        (widget.reviewedAmount != null &&
+                            widget.reviewedUnit != null &&
+                            mealImageReviewedQuantity(
+                                  amount: widget.reviewedAmount!,
+                                  unit: widget.reviewedUnit!,
+                                  servingSize: _selected!.servingSize,
+                                  servingUnit: _selected!.servingUnit,
+                                ) ==
+                                null)
+                    ? null
+                    : () => Navigator.pop(context, _selected),
+                child: Text(
+                  _word(
+                    context,
+                    _selected?.verified == true
+                        ? 'Use this verified food'
+                        : 'Use this reviewed food source',
+                    _selected?.verified == true
+                        ? 'استخدام الطعام الموثوق'
+                        : 'استخدام مصدر الطعام الذي راجعته',
+                  ),
                 ),
+                style: _visionActionStyle(context),
               ),
             ),
           ),
@@ -306,13 +316,13 @@ class _PremiumTrustedMatchDialogState
         food.protein,
         'g',
       ),
-      (FoodNutrient.fat, _word(context, 'Fat', 'الدهون'), food.fats, 'g'),
       (
         FoodNutrient.carbohydrates,
         _word(context, 'Carbs', 'الكربوهيدرات'),
         food.carbs,
         'g',
       ),
+      (FoodNutrient.fat, _word(context, 'Fat', 'الدهون'), food.fats, 'g'),
       (FoodNutrient.fiber, _word(context, 'Fiber', 'الألياف'), food.fiber, 'g'),
       (FoodNutrient.sugar, _word(context, 'Sugar', 'السكر'), food.sugar, 'g'),
       (
@@ -363,7 +373,7 @@ class _PremiumTrustedMatchDialogState
         value != 0;
     final carbsKnown = known(FoodNutrient.carbohydrates, food.carbs);
     final fiberKnown = known(FoodNutrient.fiber, food.fiber);
-    final primary = facts.take(6).toList();
+    final primary = facts.take(5).toList();
     final extra = facts.skip(6).toList();
 
     Widget tiles(
@@ -372,36 +382,47 @@ class _PremiumTrustedMatchDialogState
     }) {
       return LayoutBuilder(
         builder: (context, dimensions) {
-          final cellWidth = (dimensions.maxWidth - 16) / 3;
+          final scale = MediaQuery.textScalerOf(context).scale(13) / 13;
+          final columns = (dimensions.maxWidth / (90 * scale + 8))
+              .floor()
+              .clamp(1, 3);
+          final cellWidth = (dimensions.maxWidth - 8 * (columns - 1)) / columns;
           return Wrap(
+            textDirection: TextDirection.ltr,
             spacing: 8,
             runSpacing: 8,
             children: [
               for (final entry in entries)
                 SizedBox(
                   width: cellWidth,
-                  child: _nutrientTile(
-                    entry.$1.name,
-                    entry.$2,
-                    factor == null || !known(entry.$1, entry.$3)
-                        ? null
-                        : entry.$3 * factor,
-                    entry.$4,
+                  child: Directionality(
+                    textDirection: Directionality.of(context),
+                    child: _nutrientTile(
+                      entry.$1.name,
+                      entry.$2,
+                      factor == null || !known(entry.$1, entry.$3)
+                          ? null
+                          : entry.$3 * factor,
+                      entry.$4,
+                    ),
                   ),
                 ),
               if (showNetCarbs)
                 SizedBox(
                   width: cellWidth,
-                  child: _nutrientTile(
-                    'netCarbs',
-                    _word(context, 'Net carbs', 'صافي الكربوهيدرات'),
-                    !carbsKnown || !fiberKnown || factor == null
-                        ? null
-                        : (food.carbs - food.fiber)
-                                  .clamp(0.0, double.infinity)
-                                  .toDouble() *
-                              factor,
-                    'g',
+                  child: Directionality(
+                    textDirection: Directionality.of(context),
+                    child: _nutrientTile(
+                      'netCarbs',
+                      _word(context, 'Net carbs', 'صافي الكربوهيدرات'),
+                      !carbsKnown || !fiberKnown || factor == null
+                          ? null
+                          : (food.carbs - food.fiber)
+                                    .clamp(0.0, double.infinity)
+                                    .toDouble() *
+                                factor,
+                      'g',
+                    ),
                   ),
                 ),
             ],
@@ -438,6 +459,39 @@ class _PremiumTrustedMatchDialogState
         ),
         const SizedBox(height: 8),
         tiles(primary, showNetCarbs: true),
+        const SizedBox(height: 8),
+        Container(
+          key: const Key('premium-vision-nutrient-sugar'),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: _glassDecoration(context),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                _word(context, 'Sugar', 'السكر'),
+                style: TextStyle(color: _secondary(context), fontSize: 12),
+              ),
+              Directionality(
+                textDirection:
+                    factor == null || !known(FoodNutrient.sugar, food.sugar)
+                    ? Directionality.of(context)
+                    : TextDirection.ltr,
+                child: Text(
+                  factor == null || !known(FoodNutrient.sugar, food.sugar)
+                      ? _word(context, 'Not available', 'غير متوفر')
+                      : '${(food.sugar * factor).toStringAsFixed(1)} g',
+                  style: TextStyle(
+                    color: _foreground(context),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         if (_full) ...[
           const SizedBox(height: 14),
           Text(
@@ -453,7 +507,7 @@ class _PremiumTrustedMatchDialogState
         ],
         const SizedBox(height: 12),
         Text(
-          _word(context, 'Nutrition source: ', 'مصدر التغذية: ') + food.source,
+          '${_word(context, 'Nutrition source: ', 'مصدر التغذية: ')}${food.source}',
           style: TextStyle(color: _accent(context), fontSize: 11),
         ),
         const SizedBox(height: 4),
@@ -499,8 +553,6 @@ class _PremiumTrustedMatchDialogState
           const SizedBox(height: 3),
           Text(
             label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: _secondary(context),
               fontSize: 10,
@@ -508,21 +560,23 @@ class _PremiumTrustedMatchDialogState
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            value == null
-                ? _word(context, 'Not available', 'غير متوفر')
-                : value.toStringAsFixed(1) + ' ' + unit,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: _foreground(context),
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
+          Directionality(
+            textDirection: value == null
+                ? Directionality.of(context)
+                : TextDirection.ltr,
+            child: Text(
+              value == null
+                  ? _word(context, 'Not available', 'غير متوفر')
+                  : '${value.toStringAsFixed(1)} $unit',
+              style: TextStyle(
+                color: _foreground(context),
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
 }

@@ -53,6 +53,17 @@ void main() {
               );
               originalPhoto(tester, key('premium-vision-photo'));
               expect(find.byType(BackdropFilter), findsWidgets);
+              final actionText = find.descendant(
+                of: key('premium-vision-continue'),
+                matching: find.byType(Text),
+              );
+              final action = tester.renderObject<RenderParagraph>(actionText);
+              expect(
+                action.text.style?.fontFamily,
+                language == 'ar' ? 'NotoArabicEvidence' : 'RobotoEvidence',
+                reason:
+                    'Action text must inherit the real evidence font, not Ahem fallback.',
+              );
               expect(key('premium-vision-amount-0'), findsNothing);
               if (capture) {
                 await captureVisionV2(tester, 'review_initial_$id');
@@ -132,7 +143,10 @@ void main() {
                     .onPressed,
                 isNull,
               );
-              await tapVisible(tester, find.text(food.name));
+              final foodTitle = language == 'ar' ? food.arabicName! : food.name;
+              expect(find.text(foodTitle), findsOneWidget);
+              if (language == 'ar') expect(find.text(food.name), findsNothing);
+              await tapVisible(tester, find.text(foodTitle));
               for (final entry in {
                 'calories': '76.0 kcal',
                 'protein': '4.1 g',

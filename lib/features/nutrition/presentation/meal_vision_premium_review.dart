@@ -12,6 +12,7 @@ import '../domain/unified_food.dart';
 part 'meal_vision_premium_match.dart';
 part 'meal_vision_premium_visuals.dart';
 part 'meal_vision_premium_glass.dart';
+part 'meal_vision_premium_reference.dart';
 
 /// Only identity and serving suggestions are returned from image analysis.
 /// Nutrient values MUST be resolved by the existing trusted-food match flow.
@@ -110,6 +111,7 @@ class _PremiumVisionReviewDialogState
   final List<bool?> _amountMeaning = [];
   final Set<int> _selected = <int>{};
   final Set<int> _excluded = <int>{};
+  final GlobalKey _ingredientsAnchor = GlobalKey();
   String? _photoStage;
   bool _adding = false;
   final _newFood = TextEditingController();
@@ -331,9 +333,7 @@ class _PremiumVisionReviewDialogState
     final photographedAt = widget.photographedAt;
     final clock = photographedAt == null
         ? '—'
-        : photographedAt.hour.toString().padLeft(2, '0') +
-              ':' +
-              photographedAt.minute.toString().padLeft(2, '0');
+        : '${photographedAt.hour.toString().padLeft(2, '0')}:${photographedAt.minute.toString().padLeft(2, '0')}';
     return _glassShell(
       context,
       Column(
@@ -397,8 +397,13 @@ class _PremiumVisionReviewDialogState
                 children: [
                   _photo(context),
                   const SizedBox(height: 12),
-                  for (var index = 0; index < _foods.length; index++)
-                    if (!_excluded.contains(index)) _candidateCard(index),
+                  Column(
+                    key: _ingredientsAnchor,
+                    children: [
+                      for (var index = 0; index < _foods.length; index++)
+                        if (!_excluded.contains(index)) _candidateCard(index),
+                    ],
+                  ),
                   if (_excluded.isNotEmpty)
                     Wrap(
                       spacing: 6,
@@ -406,67 +411,14 @@ class _PremiumVisionReviewDialogState
                         for (final index in _excluded)
                           ActionChip(
                             label: Text(
-                              _word(context, 'Restore ', 'استعادة ') +
-                                  _foods[index].name,
+                              '${_word(context, 'Restore ', 'استعادة ')}${_foods[index].name}',
                             ),
-                            onPressed: () => setState(
-                              () => _excluded.remove(index),
-                            ),
+                            onPressed: () =>
+                                setState(() => _excluded.remove(index)),
                           ),
                       ],
                     ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: _glassDecoration(context),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.wb_sunny_outlined,
-                              size: 20,
-                              color: _accent(context),
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                _word(context, 'Meal', 'الوجبة') +
-                                    ' · ' +
-                                    _mealLabel(context, widget.mealType),
-                                style: TextStyle(
-                                  color: _foreground(context),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            Icon(
-                              Icons.schedule_rounded,
-                              size: 18,
-                              color: _accent(context),
-                            ),
-                            const SizedBox(width: 5),
-                            Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Text(
-                                clock,
-                                key: const Key('premium-vision-clock'),
-                                style: TextStyle(
-                                  color: _foreground(context),
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        _stageChooser(context),
-                      ],
-                    ),
-                  ),
+                  _reviewContext(clock),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -508,145 +460,26 @@ class _PremiumVisionReviewDialogState
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Container(
-                    key: const Key('premium-vision-unverified-nutrition'),
-                    padding: const EdgeInsets.all(13),
-                    decoration: _glassDecoration(context),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.local_fire_department_rounded,
-                          color: _accent(context),
-                          size: 26,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _word(context, 'Nutrition', 'القيمة الغذائية'),
-                                style: TextStyle(
-                                  color: _foreground(context),
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                _word(
-                                  context,
-                                  'Calories and nutrients appear after matching a trusted food record.',
-                                  'تظهر السعرات والمغذيات بعد مطابقة الطعام بمصدر موثوق.',
-                                ),
-                                style: TextStyle(
-                                  color: _secondary(context),
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _unverifiedNutrition(context),
                   TextButton.icon(
                     key: const Key('premium-vision-add-food'),
                     onPressed: _addFood,
                     icon: const Icon(Icons.add_rounded),
                     label: Text(
-                      _word(context, 'Add missing ingredient', 'إضافة مكوّن آخر'),
+                      _word(
+                        context,
+                        'Add missing ingredient',
+                        'إضافة مكوّن آخر',
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          Container(
-            key: const Key('premium-vision-sticky-action'),
-            decoration: BoxDecoration(
-              color: light
-                  ? const Color(0xFFF0FAF6)
-                  : const Color(0xFF061A22),
-              border: const Border(
-                top: BorderSide(color: _outline, width: 0.8),
-              ),
-            ),
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.fact_check_outlined,
-                      size: 17,
-                      color: _accent(context),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        _word(context, 'Selected ingredients: ', 'المكونات المحددة: ') +
-                            count.toString(),
-                        style: TextStyle(
-                          color: _foreground(context),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      _word(context, 'Nothing saved yet', 'لم يُحفظ شيء بعد'),
-                      style: TextStyle(
-                        color: _secondary(context),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-                if (!_canContinue)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: Text(
-                      _word(
-                        context,
-                        'Select a food, stage and amount actually eaten.',
-                        'حدّد الصنف ومرحلة الصورة والكمية المأكولة.',
-                      ),
-                      style: TextStyle(
-                        color: _secondary(context),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 9),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: FilledButton.icon(
-                    key: const Key('premium-vision-continue'),
-                    onPressed: _canContinue ? _confirm : null,
-                    icon: const Icon(Icons.check_circle_rounded),
-                    label: Text(
-                      _word(
-                        context,
-                        'Match selected ingredients',
-                        'مطابقة المكونات المحددة',
-                      ),
-                    ),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF45E7A3),
-                      foregroundColor: const Color(0xFF052C25),
-                      disabledBackgroundColor: const Color(0xFF284249),
-                      disabledForegroundColor: const Color(0xFF9AABAF),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _reviewActionBar(count),
         ],
       ),
     );
   }
-
 }

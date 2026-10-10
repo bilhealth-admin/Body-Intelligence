@@ -193,7 +193,8 @@ void main() {
       );
       await tester.tap(find.text('فتح المطابقة'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Verified ful (fixture)'));
+      expect(find.text('Verified ful (fixture)'), findsNothing);
+      await tester.tap(find.text('فول مدمس — عينة اختبار موثوقة'));
       await tester.pumpAndSettle();
       await tester.ensureVisible(
         find.byKey(const Key('premium-vision-trusted-nutrients')),
