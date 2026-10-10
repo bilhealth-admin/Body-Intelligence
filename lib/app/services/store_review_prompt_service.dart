@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,7 @@ enum StoreReviewOutcome {
   unavailable,
   requested,
   failed,
+  deferred,
 }
 
 abstract interface class StoreReviewGateway {
@@ -47,10 +49,12 @@ final class StoreReviewPromptService {
     DateTime Function()? now,
     Future<SharedPreferences> Function()? preferences,
     bool Function()? isSupportedPlatform,
+    bool Function()? canRequestNow,
     this.presentationDelay = const Duration(seconds: 2),
   }) : _now = now ?? DateTime.now,
        _preferences = preferences ?? SharedPreferences.getInstance,
-       _isSupportedPlatform = isSupportedPlatform ?? _defaultSupportedPlatform;
+       _isSupportedPlatform = isSupportedPlatform ?? _defaultSupportedPlatform,
+       _canRequestNow = canRequestNow ?? _defaultCanRequestNow;
 
   static const minimumExperience = Duration(days: 7);
   static const minimumSuccessfulDays = 5;
@@ -64,6 +68,7 @@ final class StoreReviewPromptService {
   final DateTime Function() _now;
   final Future<SharedPreferences> Function() _preferences;
   final bool Function() _isSupportedPlatform;
+  final bool Function() _canRequestNow;
   final Duration presentationDelay;
   bool _requestInFlight = false;
 
@@ -108,12 +113,18 @@ final class StoreReviewPromptService {
 
     _requestInFlight = true;
     try {
+      // Do not interrupt a user who has already left BIL or placed it in
+      // the background. StoreKit/Play own their native modal lifecycle.
+      if (!_canRequestNow()) return StoreReviewOutcome.deferred;
       if (!await _gateway.isAvailable()) {
         return StoreReviewOutcome.unavailable;
       }
       if (presentationDelay > Duration.zero) {
         await Future<void>.delayed(presentationDelay);
       }
+      // The user may switch apps during the delay. Never burn our local
+      // cooldown or launch a store-owned sheet when BIL is not foreground.
+      if (!_canRequestNow()) return StoreReviewOutcome.deferred;
       // Persist before crossing the platform boundary so a lifecycle change or
       // process death cannot cause a duplicate request on the next success.
       await preferences.setInt(_lastAttemptKey, now.millisecondsSinceEpoch);
@@ -142,6 +153,14 @@ final class StoreReviewPromptService {
       '${value.year.toString().padLeft(4, '0')}-'
       '${value.month.toString().padLeft(2, '0')}-'
       '${value.day.toString().padLeft(2, '0')}';
+
+  static bool _defaultCanRequestNow() {
+    // During headless tests lifecycleState may be null. On a real paused or
+    // inactive device, suppress the request; the next meaningful success
+    // will reconsider it under the existing persisted policy.
+    final state = WidgetsBinding.instance.lifecycleState;
+    return state == null || state == AppLifecycleState.resumed;
+  }
 
   static bool _defaultSupportedPlatform() {
     if (kIsWeb) return false;
