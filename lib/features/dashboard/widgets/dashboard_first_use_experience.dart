@@ -270,7 +270,25 @@ class _FoodGuideStep extends StatelessWidget {
                   height: 1.38,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 15),
+              Row(
+                children: [
+                  for (var i = 0; i < 2; i++) ...[
+                    Expanded(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: i <= step ? const Color(0xFF9DF6E5) : Colors.white24,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                    if (i == 0) const SizedBox(width: 7),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 height: 50,
