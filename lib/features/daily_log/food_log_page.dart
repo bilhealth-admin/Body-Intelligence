@@ -381,11 +381,17 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               context,
               en: 'Find something delicious',
               ar: 'ابحث عن طعامك',
+              fr: 'Trouvez votre aliment',
+              es: 'Encuentra tu alimento',
+              tr: 'Yemeğini bul',
             ),
             message: _foodTourText(
               context,
               en: 'Type a food name here. You can always skip this tour.',
               ar: 'اكتب اسم الطعام في البحث. يمكنك تخطي الإرشادات في أي وقت.',
+              fr: 'Saisissez un aliment ici. Vous pouvez ignorer le guide.',
+              es: 'Escribe un alimento aquí. Puedes omitir esta guía.',
+              tr: 'Yiyecek adını yaz. Rehberi istediğin an atlayabilirsin.',
             ),
             icon: Icons.search_rounded,
             onSkip: _dismissFoodTour,
@@ -441,11 +447,17 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               context,
               en: 'Choose the right food',
               ar: 'اختر الطعام الصحيح',
+              fr: 'Choisissez le bon aliment',
+              es: 'Elige el alimento correcto',
+              tr: 'Doğru yiyeceği seç',
             ),
             message: _foodTourText(
               context,
               en: 'Tap + next to a matching food. Review the serving before saving.',
               ar: 'اضغط + بجانب الطعام المناسب، ثم راجع الكمية قبل الحفظ.',
+              fr: 'Touchez + à côté de l’aliment, puis vérifiez la portion.',
+              es: 'Toca + junto al alimento y revisa la porción.',
+              tr: 'Yiyeceğin yanındaki + simgesine dokun, porsiyonu kontrol et.',
             ),
             icon: Icons.touch_app_rounded,
             accent: const Color(0xFF9BCBFF),
@@ -484,7 +496,16 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     BuildContext context, {
     required String en,
     required String ar,
-  }) => Localizations.localeOf(context).languageCode == 'ar' ? ar : en;
+    String? fr,
+    String? es,
+    String? tr,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'ar' => ar,
+    'fr' => fr ?? en,
+    'es' => es ?? en,
+    'tr' => tr ?? en,
+    _ => en,
+  };
 
   String _searchHintKey() => FoodLogRuntimeCopy.searchHint;
 
