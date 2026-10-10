@@ -554,6 +554,24 @@ class _CommunityPostComposerPageState
         ),
       };
       setState(() => _submitError = communityText(context, english, arabic));
+    } on StateError catch (error) {
+      if (!mounted || !_checkComposerOwner()) return;
+      final limitExceeded =
+          error.message.toString().contains('photo picker exceeded') ||
+          error.message.toString().contains('Too many recovered photos');
+      setState(
+        () => _submitError = limitExceeded
+            ? communityText(
+                context,
+                'Select at most the remaining photo slots, then try again.',
+                'اختر صورًا بعدد الأماكن المتبقية فقط، ثم حاول مجددًا.',
+              )
+            : communityText(
+                context,
+                'Could not prepare the selected photos. Try again.',
+                'تعذر تجهيز الصور المحددة. حاول مجددًا.',
+              ),
+      );
     } on Object {
       if (!mounted || !_checkComposerOwner()) return;
       setState(
