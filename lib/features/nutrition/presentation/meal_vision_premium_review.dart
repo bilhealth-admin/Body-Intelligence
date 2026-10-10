@@ -115,51 +115,42 @@ BoxDecoration _glassDecoration(BuildContext context, {bool active = false}) {
 }
 
 Widget _glassShell(BuildContext context, Widget child) {
-  final size = MediaQuery.sizeOf(context);
   final light = _light(context);
   return RepaintBoundary(
     key: const Key('premium-vision-render-surface'),
-    child: Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      elevation: 0,
+    child: Dialog.fullscreen(
       backgroundColor: Colors.transparent,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 520, maxHeight: size.height - 32),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  colors: light
-                      ? const [
-                          Color(0xF7F4FCF8),
-                          Color(0xF2E1F0EE),
-                          Color(0xFAFFFFFF),
-                        ]
-                      : const [_bgTop, Color(0xFF092D33), _bgBottom],
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: light
+                ? const [
+                    Color(0xFFF3FCF8),
+                    Color(0xFFE7F4F0),
+                    Colors.white,
+                  ]
+                : const [
+                    Color(0xFF071C24),
+                    Color(0xFF082E36),
+                    Color(0xFF04131A),
+                  ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: ClipRRect(
+                borderRadius: BorderRadius.zero,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: child,
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: light ? const Color(0x553F7D72) : _outline,
-                ),
-                boxShadow: const [
-                  BoxShadow(color: Color(0x33000000), blurRadius: 25),
-                ],
-              ),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: light
-                      ? Theme.of(context).colorScheme.copyWith(
-                          primary: const Color(0xFF087A5D),
-                          onPrimary: Colors.white,
-                        )
-                      : Theme.of(context).colorScheme.copyWith(primary: _mint),
-                ),
-                child: child,
               ),
             ),
           ),
@@ -410,26 +401,38 @@ class _PremiumVisionReviewDialogState
 
   @override
   Widget build(BuildContext context) {
+    final light = _light(context);
+    final count = _selected.difference(_excluded).length;
+    final photographedAt = widget.photographedAt;
+    final clock = photographedAt == null
+        ? '—'
+        : photographedAt.hour.toString().padLeft(2, '0') +
+              ':' +
+              photographedAt.minute.toString().padLeft(2, '0');
     return _glassShell(
       context,
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.auto_awesome_rounded,
-                      color: _accent(context),
-                      size: 28,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
+                Container(
+                  height: 43,
+                  width: 43,
+                  decoration: _glassDecoration(context, active: true),
+                  child: Icon(
+                    Icons.center_focus_strong_rounded,
+                    color: _accent(context),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         'BIL Vision',
                         style: TextStyle(
                           color: _foreground(context),
@@ -437,104 +440,100 @@ class _PremiumVisionReviewDialogState
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: _word(context, 'Cancel', 'إلغاء'),
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(
-                        Icons.close_rounded,
-                        color: _foreground(context),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  _word(
-                    context,
-                    'Review your meal analysis',
-                    'تحليل وجبتك — راجع النتائج',
-                  ),
-                  style: TextStyle(color: _secondary(context), fontSize: 14),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  _word(
-                    context,
-                    'If the photo shows leftovers, enter what you actually ate, not what remains.',
-                    'إذا كانت الصورة لبقايا الطعام، أدخل ما أكلته بالفعل وليس الكمية المتبقية.',
-                  ),
-                  style: const TextStyle(
-                    color: Color(0xFFFFDA8B),
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 13),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: _glassDecoration(context),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.verified_user_outlined,
-                        color: _accent(context),
-                        size: 22,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _word(
-                            context,
-                            'AI suggestions are not nutrition facts. Only a trusted food record supplies nutrients after your confirmation.',
-                            'الاقتراحات ليست قيمًا غذائية مؤكدة. تُحسب المغذيات من سجل موثوق بعد مراجعتك ومطابقتك.',
-                          ),
-                          style: TextStyle(
-                            color: _secondary(context),
-                            height: 1.45,
-                            fontSize: 12,
-                          ),
+                      Text(
+                        _word(
+                          context,
+                          'Review the AI meal analysis',
+                          'تحليل الوجبة بالذكاء الاصطناعي',
+                        ),
+                        style: TextStyle(
+                          color: _secondary(context),
+                          fontSize: 11,
                         ),
                       ),
                     ],
                   ),
+                ),
+                IconButton(
+                  key: const Key('premium-vision-close'),
+                  tooltip: _word(context, 'Cancel', 'إلغاء'),
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(Icons.close_rounded, color: _foreground(context)),
                 ),
               ],
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              key: const Key('premium-vision-review-scroll'),
+              padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _photo(context),
                   const SizedBox(height: 12),
+                  for (var index = 0; index < _foods.length; index++)
+                    if (!_excluded.contains(index)) _candidateCard(index),
+                  if (_excluded.isNotEmpty)
+                    Wrap(
+                      spacing: 6,
+                      children: [
+                        for (final index in _excluded)
+                          ActionChip(
+                            label: Text(
+                              _word(context, 'Restore ', 'استعادة ') +
+                                  _foods[index].name,
+                            ),
+                            onPressed: () => setState(
+                              () => _excluded.remove(index),
+                            ),
+                          ),
+                      ],
+                    ),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: _glassDecoration(context),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Row(
                           children: [
                             Icon(
-                              Icons.schedule_outlined,
+                              Icons.wb_sunny_outlined,
+                              size: 20,
                               color: _accent(context),
-                              size: 18,
                             ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                _word(context, 'Meal type: ', 'نوع الوجبة: ') +
+                                _word(context, 'Meal', 'الوجبة') +
+                                    ' · ' +
                                     _mealLabel(context, widget.mealType),
-                                style: TextStyle(color: _foreground(context)),
+                                style: TextStyle(
+                                  color: _foreground(context),
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                            Text(
-                              widget.photographedAt == null
-                                  ? '—'
-                                  : '${widget.photographedAt!.hour.toString().padLeft(2, '0')}: '
-                                        '${widget.photographedAt!.minute.toString().padLeft(2, '0')}',
-                              style: TextStyle(color: _secondary(context)),
+                            Icon(
+                              Icons.schedule_rounded,
+                              size: 18,
+                              color: _accent(context),
+                            ),
+                            const SizedBox(width: 5),
+                            Directionality(
+                              textDirection: TextDirection.ltr,
+                              child: Text(
+                                clock,
+                                key: const Key('premium-vision-clock'),
+                                style: TextStyle(
+                                  color: _foreground(context),
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -543,29 +542,95 @@ class _PremiumVisionReviewDialogState
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  for (var index = 0; index < _foods.length; index++)
-                    if (!_excluded.contains(index)) _candidateCard(index),
-                  if (_excluded.isNotEmpty)
-                    Wrap(
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: light
+                          ? const Color(0xFFFFF4DD)
+                          : const Color(0x503C2E10),
+                      border: Border.all(
+                        color: const Color(0x88EDBD64),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
                       children: [
-                        for (final index in _excluded)
-                          ActionChip(
-                            label: Text(
-                              _word(context, 'Restore ', 'استعادة ') +
-                                  _foods[index].name,
+                        const Icon(
+                          Icons.info_outline_rounded,
+                          color: Color(0xFFF3C56E),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 9),
+                        Expanded(
+                          child: Text(
+                            _word(
+                              context,
+                              'If the photo shows leftovers, enter what you ate, not what remains. Recognition confidence is not calorie accuracy.',
+                              'إذا كانت الصورة لبقايا الطعام، أدخل ما أكلته بالفعل. ثقة التعرّف لا تثبت السعرات.',
                             ),
-                            onPressed: () =>
-                                setState(() => _excluded.remove(index)),
+                            style: TextStyle(
+                              color: light
+                                  ? const Color(0xFF674F26)
+                                  : const Color(0xFFFFDE9A),
+                              fontSize: 12,
+                              height: 1.4,
+                            ),
                           ),
+                        ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    key: const Key('premium-vision-unverified-nutrition'),
+                    padding: const EdgeInsets.all(13),
+                    decoration: _glassDecoration(context),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.local_fire_department_rounded,
+                          color: _accent(context),
+                          size: 26,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _word(context, 'Nutrition', 'القيمة الغذائية'),
+                                style: TextStyle(
+                                  color: _foreground(context),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                _word(
+                                  context,
+                                  'Calories and nutrients appear after matching a trusted food record.',
+                                  'تظهر السعرات والمغذيات بعد مطابقة الطعام بمصدر موثوق.',
+                                ),
+                                style: TextStyle(
+                                  color: _secondary(context),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   TextButton.icon(
                     key: const Key('premium-vision-add-food'),
                     onPressed: _addFood,
                     icon: const Icon(Icons.add_rounded),
                     label: Text(
-                      _word(context, 'Add missing food', 'إضافة عنصر مفقود'),
+                      _word(context, 'Add missing ingredient', 'إضافة مكوّن آخر'),
                     ),
                   ),
                 ],
@@ -573,75 +638,81 @@ class _PremiumVisionReviewDialogState
             ),
           ),
           Container(
+            key: const Key('premium-vision-sticky-action'),
             decoration: BoxDecoration(
-              color: _light(context)
-                  ? const Color(0xFFF1FAF7)
-                  : const Color(0xA3051720),
-              border: const Border(top: BorderSide(color: _outline)),
+              color: light
+                  ? const Color(0xFFF0FAF6)
+                  : const Color(0xFF061A22),
+              border: const Border(
+                top: BorderSide(color: _outline, width: 0.8),
+              ),
             ),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
                     Icon(
                       Icons.fact_check_outlined,
+                      size: 17,
                       color: _accent(context),
-                      size: 18,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        _word(
-                          context,
-                          'Selected foods: ${_selected.difference(_excluded).length}',
-                          'الأطعمة المحددة: ${_selected.difference(_excluded).length}',
-                        ),
+                        _word(context, 'Selected ingredients: ', 'المكونات المحددة: ') +
+                            count.toString(),
                         style: TextStyle(
                           color: _foreground(context),
-                          fontSize: 13,
+                          fontSize: 12,
                         ),
                       ),
                     ),
                     Text(
-                      _word(context, 'Nothing logged yet', 'لم يُسجّل شيء بعد'),
+                      _word(context, 'Nothing saved yet', 'لم يُحفظ شيء بعد'),
                       style: TextStyle(
                         color: _secondary(context),
-                        fontSize: 11,
+                        fontSize: 10,
                       ),
                     ),
                   ],
                 ),
                 if (!_canContinue)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(top: 5),
                     child: Text(
                       _word(
                         context,
-                        'To continue: select an item, confirm the photo stage and amount eaten, and enter a valid positive quantity and unit.',
-                        'للمتابعة: حدّد الطعام ومرحلة الصورة والكمية المأكولة، وأدخل مقدارًا موجبًا ووحدة صحيحة.',
+                        'Select a food, stage and amount actually eaten.',
+                        'حدّد الصنف ومرحلة الصورة والكمية المأكولة.',
                       ),
                       style: TextStyle(
                         color: _secondary(context),
-                        fontSize: 11,
+                        fontSize: 10,
                       ),
                     ),
                   ),
-                const SizedBox(height: 11),
+                const SizedBox(height: 9),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: FilledButton.icon(
                     key: const Key('premium-vision-continue'),
                     onPressed: _canContinue ? _confirm : null,
-                    icon: const Icon(Icons.arrow_forward_rounded),
+                    icon: const Icon(Icons.check_circle_rounded),
                     label: Text(
                       _word(
                         context,
-                        'Match selected foods',
-                        'مطابقة الأطعمة المحددة',
+                        'Match selected ingredients',
+                        'مطابقة المكونات المحددة',
                       ),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF45E7A3),
+                      foregroundColor: const Color(0xFF052C25),
+                      disabledBackgroundColor: const Color(0xFF284249),
+                      disabledForegroundColor: const Color(0xFF9AABAF),
                     ),
                   ),
                 ),
@@ -652,4 +723,5 @@ class _PremiumVisionReviewDialogState
       ),
     );
   }
+
 }
