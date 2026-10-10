@@ -16,17 +16,14 @@ Future<void> _expectDurableMealJournalAndMilestone(
   _MealFixture fixture,
   String operationId,
 ) async {
-  final entries = await fixture.database.select(
-    fixture.database.preferences,
-  ).get();
+  final entries = await fixture.database
+      .select(fixture.database.preferences)
+      .get();
   final owner = LocalDatabaseScope.keyForOwner(fixture.database.localOwnerId);
-  expect(
-    entries.map((entry) => entry.key).toSet(),
-    {
-      'coachMealOperationV1.$owner.$operationId',
-      firstMealCelebrationPreferenceKey,
-    },
-  );
+  expect(entries.map((entry) => entry.key).toSet(), {
+    'coachMealOperationV1.$owner.$operationId',
+    firstMealCelebrationPreferenceKey,
+  });
   final milestone = entries.singleWhere(
     (entry) => entry.key == firstMealCelebrationPreferenceKey,
   );

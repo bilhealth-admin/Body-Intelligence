@@ -403,8 +403,8 @@ Map<String, int> _mockCameraPermission(
 
 void main() {
   tearDownAll(() {
-    final messenger = TestDefaultBinaryMessengerBinding.instance
-        .defaultBinaryMessenger;
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     for (final name in ['bil/tts', 'bil/speech', 'bil/mic_sound']) {
       messenger.setMockMethodCallHandler(MethodChannel(name), null);
     }

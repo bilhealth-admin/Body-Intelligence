@@ -236,10 +236,12 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.descendant(
-            of: find.byKey(const Key('premium-vision-food-0')),
-            matching: find.text(arabic ? 'طماطم' : 'Tomato'),
-          ).first,
+          find
+              .descendant(
+                of: find.byKey(const Key('premium-vision-food-0')),
+                matching: find.text(arabic ? 'طماطم' : 'Tomato'),
+              )
+              .first,
           findsOneWidget,
         );
         await tester.tap(find.byTooltip(arabic ? 'إلغاء' : 'Cancel'));

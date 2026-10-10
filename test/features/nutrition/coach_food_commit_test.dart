@@ -160,13 +160,10 @@ Future<void> _expectSavedFoodJournalAndMilestone(
 ) async {
   final entries = await fixture.db.select(fixture.db.preferences).get();
   final owner = LocalDatabaseScope.keyForOwner(fixture.db.localOwnerId);
-  expect(
-    entries.map((entry) => entry.key).toSet(),
-    {
-      'coachMealOperationV1.$owner.$operationId',
-      firstMealCelebrationPreferenceKey,
-    },
-  );
+  expect(entries.map((entry) => entry.key).toSet(), {
+    'coachMealOperationV1.$owner.$operationId',
+    firstMealCelebrationPreferenceKey,
+  });
   final milestone = entries.singleWhere(
     (entry) => entry.key == firstMealCelebrationPreferenceKey,
   );
