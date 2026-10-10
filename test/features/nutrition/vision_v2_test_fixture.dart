@@ -166,23 +166,44 @@ Future<void> openVisionV2Review(
       scale: scale,
     ),
   );
+  if (photo) {
+    Object? decodeError;
+    // Resolve the genuine FileImage outside FakeAsync before constructing the
+    // photo widget. A cold first case selected by sharding must not depend on
+    // a previous case warming the image cache, or a one-second polling budget.
+    await tester.runAsync(() async {
+      await precacheImage(
+        FileImage(File(visionV2PhotoPath)),
+        tester.element(find.text('OPEN TEST REVIEW')),
+        onError: (error, stack) => decodeError = error,
+      ).timeout(const Duration(seconds: 30));
+    });
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'Original photo decode failed',
+    );
+    expect(
+      decodeError,
+      isNull,
+      reason: 'Original TEST file must really decode',
+    );
+  }
   await tester.tap(find.text('OPEN TEST REVIEW'));
   await tester.pumpAndSettle();
   if (photo) {
-    for (var i = 0; i < 100; i++) {
-      final images = tester.widgetList<RawImage>(
-        find.descendant(
-          of: find.byKey(const Key('premium-vision-photo')),
-          matching: find.byType(RawImage),
-        ),
-      );
-      if (images.any((image) => image.image != null)) return;
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 10)),
-      );
-      await tester.pump(const Duration(milliseconds: 10));
-    }
-    fail('Original TEST input photo did not decode.');
+    final images = tester.widgetList<RawImage>(
+      find.descendant(
+        of: find.byKey(const Key('premium-vision-photo')),
+        matching: find.byType(RawImage),
+      ),
+    );
+    expect(
+      images.any((image) => image.image != null),
+      isTrue,
+      reason:
+          'The actual original photo must be decoded on the visible surface',
+    );
   }
 }
 
