@@ -4,15 +4,33 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
   Widget _photo(BuildContext context) {
     final path = _sourceImagePath;
     if (path == null || path.isEmpty) {
-      return Text(
-        _word(
-          context,
-          'Photo unavailable. No substitute image is shown.',
-          'الصورة غير متاحة، ولن نعرض صورة بديلة على أنها صورتك.',
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: _glassDecoration(context),
+        child: Row(
+          children: [
+            Icon(
+              Icons.no_photography_outlined,
+              color: _secondary(context),
+              size: 23,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _word(
+                  context,
+                  'Photo unavailable. No substitute image is shown.',
+                  'الصورة غير متاحة، ولن نعرض صورة بديلة على أنها صورتك.',
+                ),
+                style: TextStyle(color: _secondary(context), fontSize: 12),
+              ),
+            ),
+          ],
         ),
-        style: TextStyle(color: _secondary(context), fontSize: 12),
       );
     }
+    final photoHeight =
+        MediaQuery.sizeOf(context).height >= 760 ? 238.0 : 168.0;
     return Semantics(
       label: _word(
         context,
@@ -49,19 +67,40 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
           ),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: SizedBox(
-            height: 155,
-            width: double.infinity,
-            child: Image.file(
-              File(path),
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Center(
-                child: Text(
-                  _word(context, 'Photo cannot be loaded', 'تعذر عرض الصورة'),
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              SizedBox(
+                height: photoHeight,
+                width: double.infinity,
+                child: Image.file(
+                  File(path),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Center(
+                    child: Text(
+                      _word(context, 'Photo cannot be loaded', 'تعذر عرض الصورة'),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              PositionedDirectional(
+                end: 10,
+                bottom: 10,
+                child: Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: const Color(0xDE081B22),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _outline),
+                  ),
+                  child: const Icon(
+                    Icons.zoom_in_rounded,
+                    color: Colors.white,
+                    size: 23,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -168,8 +207,8 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
               Column(
                 children: [
                   SizedBox(
-                    width: 47,
-                    height: 47,
+                    width: 54,
+                    height: 54,
                     child: TweenAnimationBuilder<double>(
                       tween: Tween(
                         begin: 0,
@@ -291,13 +330,15 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
           ),
           Row(
             children: [
-              IconButton(
-                key: Key('premium-vision-minus-$index'),
-                tooltip: _word(context, 'Decrease amount', 'تقليل الكمية'),
-                onPressed: () => _adjust(index, -5),
-                icon: Icon(
-                  Icons.remove_circle_outline_rounded,
-                  color: _accent(context),
+              SizedBox(
+                width: 38,
+                height: 48,
+                child: IconButton(
+                  key: Key('premium-vision-minus-$index'),
+                  tooltip: _word(context, 'Decrease amount', 'تقليل الكمية'),
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _adjust(index, -5),
+                  icon: Icon(Icons.remove_rounded, color: _accent(context)),
                 ),
               ),
               Expanded(
@@ -305,59 +346,82 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                   key: Key('premium-vision-amount-$index'),
                   controller: _amounts[index],
                   onChanged: (_) => _visualUpdate(() {}),
-                  style: TextStyle(color: _foreground(context)),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _foreground(context),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                   decoration: InputDecoration(
                     isDense: true,
-                    labelText: _word(
-                      context,
-                      'Amount eaten',
-                      'الكمية المأكولة',
+                    labelText: _word(context, 'Eaten', 'المأكول'),
+                    hintText: _word(context, 'Amount', 'الكمية'),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 11,
                     ),
-                    hintText: _word(context, 'Enter quantity', 'أدخل الكمية'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
               ),
-              IconButton(
-                key: Key('premium-vision-plus-$index'),
-                tooltip: _word(context, 'Increase amount', 'زيادة الكمية'),
-                onPressed: () => _adjust(index, 5),
-                icon: Icon(
-                  Icons.add_circle_outline_rounded,
-                  color: _accent(context),
+              SizedBox(
+                height: 48,
+                width: 38,
+                child: IconButton(
+                  key: Key('premium-vision-plus-$index'),
+                  tooltip: _word(context, 'Increase amount', 'زيادة الكمية'),
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _adjust(index, 5),
+                  icon: Icon(Icons.add_rounded, color: _accent(context)),
+                ),
+              ),
+              const SizedBox(width: 4),
+              SizedBox(
+                width: 103,
+                child: TextField(
+                  key: Key('premium-vision-unit-$index'),
+                  controller: _units[index],
+                  onChanged: (_) => _visualUpdate(() {}),
+                  style: TextStyle(
+                    color: _foreground(context),
+                    fontSize: 12,
+                  ),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: _word(context, 'Unit', 'الوحدة'),
+                    hintText: portionUnit.isEmpty ? 'g' : portionUnit,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 32,
+                    ),
+                    suffixIcon: PopupMenuButton<String>(
+                      tooltip: _word(context, 'Choose unit', 'اختيار الوحدة'),
+                      onSelected: (unit) =>
+                          _visualUpdate(() => _units[index].text = unit),
+                      itemBuilder: (_) => [
+                        for (final unit in const [
+                          'g', 'kg', 'oz', 'lb', 'piece', 'ml', 'serving',
+                        ])
+                          PopupMenuItem(value: unit, child: Text(unit)),
+                      ],
+                      icon: const Icon(Icons.arrow_drop_down_rounded),
+                    ),
+                  ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 6),
-          TextField(
-            key: Key('premium-vision-unit-$index'),
-            controller: _units[index],
-            onChanged: (_) => _visualUpdate(() {}),
-            style: TextStyle(color: _foreground(context)),
-            decoration: InputDecoration(
-              isDense: true,
-              labelText: _word(context, 'Unit', 'الوحدة'),
-              hintText: portionUnit.isEmpty ? 'g' : portionUnit,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              suffixIcon: PopupMenuButton<String>(
-                tooltip: _word(context, 'Choose unit', 'اختيار الوحدة'),
-                onSelected: (unit) =>
-                    _visualUpdate(() => _units[index].text = unit),
-                itemBuilder: (_) => [
-                  for (final unit in const ['g', 'kg', 'oz', 'lb', 'serving'])
-                    PopupMenuItem(value: unit, child: Text(unit)),
-                ],
-                icon: const Icon(Icons.arrow_drop_down_rounded),
-              ),
-            ),
           ),
           if (item.alternatives.isNotEmpty)
             Padding(
