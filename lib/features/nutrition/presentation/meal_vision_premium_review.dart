@@ -494,7 +494,7 @@ class _PremiumVisionReviewDialogState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  this._photo(context),
+                  _photo(context),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -512,7 +512,7 @@ class _PremiumVisionReviewDialogState
                             Expanded(
                               child: Text(
                                 _word(context, 'Meal type: ', 'نوع الوجبة: ') +
-                                    this._mealLabel(context, widget.mealType),
+                                    _mealLabel(context, widget.mealType),
                                 style: TextStyle(color: _foreground(context)),
                               ),
                             ),
@@ -526,13 +526,13 @@ class _PremiumVisionReviewDialogState
                           ],
                         ),
                         const SizedBox(height: 8),
-                        this._stageChooser(context),
+                        _stageChooser(context),
                       ],
                     ),
                   ),
                   const SizedBox(height: 12),
                   for (var index = 0; index < _foods.length; index++)
-                    if (!_excluded.contains(index)) this._candidateCard(index),
+                    if (!_excluded.contains(index)) _candidateCard(index),
                   if (_excluded.isNotEmpty)
                     Wrap(
                       children: [
