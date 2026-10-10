@@ -37,40 +37,47 @@ void main() {
     isCustom: false,
   );
 
-  test('80 g reviewed vision amount is really committed and readable', () async {
-    final foodId = await verifiedFood();
-    final food = await (db.select(db.foods)..limit(1)).getSingle();
-    final grams = mealImageAmountInGrams(
-      amount: 80, unit: 'g',
-      servingSize: food.servingSize, servingUnit: food.servingUnit,
-    );
-    expect(grams, 80);
-    await meals.addReviewedMealItemsAtomically(
-      date: DateTime(2026, 10, 10),
-      mealType: 'breakfast',
-      items: [(foodId: foodId, quantity: grams!)],
-    );
-    final saved = await db.select(db.mealItems).get();
-    expect(saved, hasLength(1));
-    expect(saved.single.foodId, foodId);
-    expect(saved.single.quantity, 80);
-    expect(saved.single.foodSourceSnapshot, 'foundation');
-    expect(saved.single.foodVerifiedSnapshot, isTrue);
-    expect(saved.single.calories, closeTo(76, 0.0001));
-    expect(saved.single.potassium, closeTo(136, 0.0001));
-    expect(
-      NutrientEvidenceMask.contains(
-        saved.single.nutrientEvidenceMask, TrackedNutrient.potassium,
-      ),
-      isTrue,
-    );
-    expect(
-      NutrientEvidenceMask.contains(
-        saved.single.nutrientEvidenceMask, TrackedNutrient.sodium,
-      ),
-      isFalse,
-    );
-  });
+  test(
+    '80 g reviewed vision amount is really committed and readable',
+    () async {
+      final foodId = await verifiedFood();
+      final food = await (db.select(db.foods)..limit(1)).getSingle();
+      final grams = mealImageAmountInGrams(
+        amount: 80,
+        unit: 'g',
+        servingSize: food.servingSize,
+        servingUnit: food.servingUnit,
+      );
+      expect(grams, 80);
+      await meals.addReviewedMealItemsAtomically(
+        date: DateTime(2026, 10, 10),
+        mealType: 'breakfast',
+        items: [(foodId: foodId, quantity: grams!)],
+      );
+      final saved = await db.select(db.mealItems).get();
+      expect(saved, hasLength(1));
+      expect(saved.single.foodId, foodId);
+      expect(saved.single.quantity, 80);
+      expect(saved.single.foodSourceSnapshot, 'foundation');
+      expect(saved.single.foodVerifiedSnapshot, isTrue);
+      expect(saved.single.calories, closeTo(76, 0.0001));
+      expect(saved.single.potassium, closeTo(136, 0.0001));
+      expect(
+        NutrientEvidenceMask.contains(
+          saved.single.nutrientEvidenceMask,
+          TrackedNutrient.potassium,
+        ),
+        isTrue,
+      );
+      expect(
+        NutrientEvidenceMask.contains(
+          saved.single.nutrientEvidenceMask,
+          TrackedNutrient.sodium,
+        ),
+        isFalse,
+      );
+    },
+  );
 
   test('zero reviewed amount cannot write a partial meal', () async {
     final foodId = await verifiedFood();

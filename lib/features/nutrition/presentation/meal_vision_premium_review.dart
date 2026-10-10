@@ -108,50 +108,50 @@ Widget _glassShell(BuildContext context, Widget child) {
     key: const Key('premium-vision-render-surface'),
     child: Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-    elevation: 0,
-    backgroundColor: Colors.transparent,
-    child: ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 520, maxHeight: size.height - 32),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                colors: light
-                    ? const [
-                        Color(0xF7F4FCF8),
-                        Color(0xF2E1F0EE),
-                        Color(0xFAFFFFFF),
-                      ]
-                    : const [_bgTop, Color(0xFF092D33), _bgBottom],
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 520, maxHeight: size.height - 32),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: light
+                      ? const [
+                          Color(0xF7F4FCF8),
+                          Color(0xF2E1F0EE),
+                          Color(0xFAFFFFFF),
+                        ]
+                      : const [_bgTop, Color(0xFF092D33), _bgBottom],
+                ),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: light ? const Color(0x553F7D72) : _outline,
+                ),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x33000000), blurRadius: 25),
+                ],
               ),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: light ? const Color(0x553F7D72) : _outline,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: light
+                      ? Theme.of(context).colorScheme.copyWith(
+                          primary: const Color(0xFF087A5D),
+                          onPrimary: Colors.white,
+                        )
+                      : Theme.of(context).colorScheme.copyWith(primary: _mint),
+                ),
+                child: child,
               ),
-              boxShadow: const [
-                BoxShadow(color: Color(0x33000000), blurRadius: 25),
-              ],
-            ),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: light
-                    ? Theme.of(context).colorScheme.copyWith(
-                        primary: const Color(0xFF087A5D),
-                        onPrimary: Colors.white,
-                      )
-                    : Theme.of(context).colorScheme.copyWith(primary: _mint),
-              ),
-              child: child,
             ),
           ),
         ),
       ),
-    ),
     ),
   );
 }

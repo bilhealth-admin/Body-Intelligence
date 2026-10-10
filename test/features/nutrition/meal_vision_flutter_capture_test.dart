@@ -54,9 +54,7 @@ MealImageAnalysis _analysis() => const MealImageAnalysis(
       amount: 60,
       unit: 'g',
       uncertainty: 'هل الكمية مأكولة أم متبقية؟',
-      alternatives: [
-        MealImageAlternative(name: 'فول سادة', confidence: 0.63),
-      ],
+      alternatives: [MealImageAlternative(name: 'فول سادة', confidence: 0.63)],
     ),
   ],
 );
@@ -86,8 +84,14 @@ Food _verifiedFixture() {
     iron: 0,
     vitaminC: 0,
     nutrientEvidenceMask: NutrientEvidenceMask.fromValues(
-      calories: 95, protein: 5.1, carbohydrates: 11.9, fat: 3.4,
-      fiber: 3.5, potassium: 170, calcium: 45, magnesium: 29,
+      calories: 95,
+      protein: 5.1,
+      carbohydrates: 11.9,
+      fat: 3.4,
+      fiber: 3.5,
+      potassium: 170,
+      calcium: 45,
+      magnesium: 29,
       phosphorus: 111,
     ),
     source: 'foundation-test-fixture',
@@ -101,54 +105,79 @@ Food _verifiedFixture() {
 }
 
 void main() {
-  testWidgets('capture actual Flutter-rendered BIL Vision review panels', (tester) async {
+  testWidgets('capture actual Flutter-rendered BIL Vision review panels', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(430, 932));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(_app(Builder(builder: (context) =>
-      Center(child: FilledButton(
-        onPressed: () => showPremiumVisionReviewDialog(
-          context,
-          analysis: _analysis(),
-          mealType: 'breakfast',
-          photographedAt: DateTime(2026, 10, 10, 11, 30),
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) => Center(
+            child: FilledButton(
+              onPressed: () => showPremiumVisionReviewDialog(
+                context,
+                analysis: _analysis(),
+                mealType: 'breakfast',
+                photographedAt: DateTime(2026, 10, 10, 11, 30),
+              ),
+              child: const Text('فتح'),
+            ),
+          ),
         ),
-        child: const Text('فتح'),
-      )),
-    )));
+      ),
+    );
     await tester.tap(find.text('فتح'));
     await _capture(tester, '01_review_ar_dark');
-    await tester.ensureVisible(find.byKey(const Key('premium-vision-stage-during')));
+    await tester.ensureVisible(
+      find.byKey(const Key('premium-vision-stage-during')),
+    );
     await tester.tap(find.byKey(const Key('premium-vision-stage-during')));
-    await tester.ensureVisible(find.byKey(const Key('premium-vision-select-0')));
+    await tester.ensureVisible(
+      find.byKey(const Key('premium-vision-select-0')),
+    );
     await tester.tap(find.byKey(const Key('premium-vision-select-0')));
     await tester.ensureVisible(find.byKey(const Key('premium-vision-eaten-0')));
     await tester.tap(find.byKey(const Key('premium-vision-eaten-0')));
     await _capture(tester, '02_review_eaten_confirmation_ar_dark');
   });
 
-  testWidgets('capture trusted-source quick and full nutrition Flutter panels', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(430, 932));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(_app(Builder(builder: (context) =>
-      Center(child: FilledButton(
-        onPressed: () => showPremiumTrustedVisionFoodMatchDialog(
-          context,
-          recognizedName: 'فول مدمس — عينة اختبار',
-          foods: [_verifiedFixture()],
-          reviewedAmount: 80,
-          reviewedUnit: 'g',
+  testWidgets(
+    'capture trusted-source quick and full nutrition Flutter panels',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(430, 932));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder: (context) => Center(
+              child: FilledButton(
+                onPressed: () => showPremiumTrustedVisionFoodMatchDialog(
+                  context,
+                  recognizedName: 'فول مدمس — عينة اختبار',
+                  foods: [_verifiedFixture()],
+                  reviewedAmount: 80,
+                  reviewedUnit: 'g',
+                ),
+                child: const Text('فتح المطابقة'),
+              ),
+            ),
+          ),
         ),
-        child: const Text('فتح المطابقة'),
-      )),
-    )));
-    await tester.tap(find.text('فتح المطابقة'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Verified ful (fixture)'));
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const Key('premium-vision-trusted-nutrients')));
-    await _capture(tester, '03_nutrition_quick_ar_dark');
-    await tester.ensureVisible(find.byKey(const Key('premium-vision-full-toggle')));
-    await tester.tap(find.byKey(const Key('premium-vision-full-toggle')));
-    await _capture(tester, '04_nutrition_full_ar_dark');
-  });
+      );
+      await tester.tap(find.text('فتح المطابقة'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Verified ful (fixture)'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const Key('premium-vision-trusted-nutrients')),
+      );
+      await _capture(tester, '03_nutrition_quick_ar_dark');
+      await tester.ensureVisible(
+        find.byKey(const Key('premium-vision-full-toggle')),
+      );
+      await tester.tap(find.byKey(const Key('premium-vision-full-toggle')));
+      await _capture(tester, '04_nutrition_full_ar_dark');
+    },
+  );
 }
