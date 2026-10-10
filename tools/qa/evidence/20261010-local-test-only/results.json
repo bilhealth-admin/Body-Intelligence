@@ -1,0 +1,372 @@
+{
+  "tested_head": "c3acb5c79d80f65488f3f048ab307b61aabb0ca3",
+  "worktree_sha256": "50ae73e4a239a3a79599e6c420d166c0b9073f7e2c687f7be8eef35949283c19",
+  "branch": "qa/bil-quality-ux-integration-20261009",
+  "flutter": "3.44.6",
+  "dart": "3.12.2",
+  "host": "Windows",
+  "runner_tests": {
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0
+  },
+  "stages": {
+    "source": {
+      "passed": true,
+      "jobs": [],
+      "format_targets": 182,
+      "format_batches": 5,
+      "analyze_exit_code": 0,
+      "format": [
+        {
+          "exit_code": 0,
+          "seconds": 4.4,
+          "log": "build\\bil-codex-qa\\source-format-1-1791642182896169000.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 6.6,
+          "log": "build\\bil-codex-qa\\source-format-2-1791642187280118300.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 5.7,
+          "log": "build\\bil-codex-qa\\source-format-3-1791642193887551100.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 4.2,
+          "log": "build\\bil-codex-qa\\source-format-4-1791642199634237100.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 3.1,
+          "log": "build\\bil-codex-qa\\source-format-5-1791642203873667800.log"
+        }
+      ],
+      "analyze": {
+        "exit_code": 0,
+        "seconds": 348.3,
+        "log": "build\\bil-codex-qa\\source-analyze-1791642206964841600.log"
+      }
+    },
+    "arabic": {
+      "passed": true,
+      "jobs": [
+        {
+          "name": "arabic-noto-capture",
+          "exit_code": 0,
+          "seconds": 30.0,
+          "log": "build\\bil-codex-qa\\arabic-noto-capture-1791642555466105300.log",
+          "tests_passed": 2,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        }
+      ],
+      "tests_passed": 2,
+      "tests_failed": 0,
+      "tests_skipped": 0
+    },
+    "p0": {
+      "passed": true,
+      "jobs": [
+        {
+          "name": "p0-food-owner-atomic",
+          "exit_code": 0,
+          "seconds": 6.1,
+          "log": "build\\bil-codex-qa\\p0-food-owner-atomic-1791642605460131700.log",
+          "tests_passed": 32,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-meal-owner-atomic",
+          "exit_code": 0,
+          "seconds": 6.7,
+          "log": "build\\bil-codex-qa\\p0-meal-owner-atomic-1791642611517474500.log",
+          "tests_passed": 16,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-first-food-commit",
+          "exit_code": 0,
+          "seconds": 6.0,
+          "log": "build\\bil-codex-qa\\p0-first-food-commit-1791642618179858800.log",
+          "tests_passed": 5,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-vision-review",
+          "exit_code": 0,
+          "seconds": 9.2,
+          "log": "build\\bil-codex-qa\\p0-vision-review-1791642624182553400.log",
+          "tests_passed": 7,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-vision-durable-replay",
+          "exit_code": 0,
+          "seconds": 6.0,
+          "log": "build\\bil-codex-qa\\p0-vision-durable-replay-1791642633387066900.log",
+          "tests_passed": 8,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-vision-quantity-basis",
+          "exit_code": 0,
+          "seconds": 5.9,
+          "log": "build\\bil-codex-qa\\p0-vision-quantity-basis-1791642639383461800.log",
+          "tests_passed": 6,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-vision-capture",
+          "exit_code": 0,
+          "seconds": 8.5,
+          "log": "build\\bil-codex-qa\\p0-vision-capture-1791642645286600800.log",
+          "tests_passed": 2,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-architecture",
+          "exit_code": 0,
+          "seconds": 6.2,
+          "log": "build\\bil-codex-qa\\p0-architecture-1791642653813654400.log",
+          "tests_passed": 1,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-coach-photo-bridge",
+          "exit_code": 0,
+          "seconds": 20.5,
+          "log": "build\\bil-codex-qa\\p0-coach-photo-bridge-1791642659971270300.log",
+          "tests_passed": 12,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-coach-image-source",
+          "exit_code": 0,
+          "seconds": 11.6,
+          "log": "build\\bil-codex-qa\\p0-coach-image-source-1791642680466841100.log",
+          "tests_passed": 31,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "p0-vision-arabic",
+          "exit_code": 0,
+          "seconds": 8.9,
+          "log": "build\\bil-codex-qa\\p0-vision-arabic-1791642692067386100.log",
+          "tests_passed": 79,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        }
+      ],
+      "tests_passed": 199,
+      "tests_failed": 0,
+      "tests_skipped": 0
+    },
+    "focused": {
+      "passed": true,
+      "jobs": [
+        {
+          "name": "focused-store-captures",
+          "exit_code": 0,
+          "seconds": 17.9,
+          "log": "build\\bil-codex-qa\\focused-store-captures-1791642711827565100.log",
+          "tests_passed": 44,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "focused-production-goldens",
+          "exit_code": 0,
+          "seconds": 52.9,
+          "log": "build\\bil-codex-qa\\focused-production-goldens-1791642729750560300.log",
+          "tests_passed": 126,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "focused-data-goldens",
+          "exit_code": 0,
+          "seconds": 21.2,
+          "log": "build\\bil-codex-qa\\focused-data-goldens-1791642782676906800.log",
+          "tests_passed": 61,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "focused-splash-golden",
+          "exit_code": 0,
+          "seconds": 9.7,
+          "log": "build\\bil-codex-qa\\focused-splash-golden-1791642803892050800.log",
+          "tests_passed": 5,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "focused-transaction-queue",
+          "exit_code": 0,
+          "seconds": 8.4,
+          "log": "build\\bil-codex-qa\\focused-transaction-queue-1791642813572810300.log",
+          "tests_passed": 36,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        }
+      ],
+      "tests_passed": 272,
+      "tests_failed": 0,
+      "tests_skipped": 0
+    },
+    "broad": {
+      "passed": false,
+      "jobs": [
+        {
+          "name": "broad-dashboard-nutrition",
+          "exit_code": 1,
+          "seconds": 18.0,
+          "log": "build\\bil-codex-qa\\broad-dashboard-nutrition-1791642833723072000.log",
+          "tests_passed": 75,
+          "tests_failed": 4,
+          "tests_skipped": 0,
+          "failures": [
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 320 at 1.0x retains all content and burned calories [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 390 at 1.0x retains all content and burned calories [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_polish_layout_review_test.dart: en 430 at 1.0x retains all content and burned calories [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_current_preview_test.dart: en current production dashboard and dock preview [E]"
+          ]
+        },
+        {
+          "name": "broad-dashboard-contract-health",
+          "exit_code": 1,
+          "seconds": 11.4,
+          "log": "build\\bil-codex-qa\\broad-dashboard-contract-health-1791642851678884400.log",
+          "tests_passed": 28,
+          "tests_failed": 1,
+          "tests_skipped": 0,
+          "failures": [
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart: compact watch keeps all four readings below the clock [E]"
+          ]
+        },
+        {
+          "name": "broad-weekly-onboarding-goldens",
+          "exit_code": 1,
+          "seconds": 19.2,
+          "log": "build\\bil-codex-qa\\broad-weekly-onboarding-goldens-1791642863037606700.log",
+          "tests_passed": 19,
+          "tests_failed": 26,
+          "tests_skipped": 0,
+          "failures": [
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report phone LTR light golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: English LTR small phone light visual [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic RTL small phone dark visual at 160 percent [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: female hip optional page visual [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: phone premium dashboard golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: calculated plan visual in dark mode [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Android final permission choices visual [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: English facts on 320 wide phone at 200 percent [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: height and units photo keeps its focal measurement crop [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: tablet premium dashboard golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic plan on 320 wide phone at 200 percent [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report calories_anchor evidence [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/onboarding/onboarding_visual_golden_test.dart: Arabic AI choices on 430 wide phone [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report frequent_anchor evidence [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report macros_anchor evidence [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report exercise_anchor evidence [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: desktop premium dashboard golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report alltime_anchor evidence [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report macro tooltip evidence [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report phone RTL dark golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/premium_dashboard_benchmark_test.dart: corrected light morning premium dashboard golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report evidence and limits golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report honest empty state golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report nutrition production section golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report coverage production section golden [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/epic8_weekly_report_golden_test.dart: weekly report sources production section golden [E]"
+          ]
+        },
+        {
+          "name": "broad-settings-language-icons",
+          "exit_code": 0,
+          "seconds": 15.9,
+          "log": "build\\bil-codex-qa\\broad-settings-language-icons-1791642882223051500.log",
+          "tests_passed": 39,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        },
+        {
+          "name": "broad-wellness-commerce",
+          "exit_code": 1,
+          "seconds": 11.4,
+          "log": "build\\bil-codex-qa\\broad-wellness-commerce-1791642898095671300.log",
+          "tests_passed": 9,
+          "tests_failed": 2,
+          "tests_skipped": 0,
+          "failures": [
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: uses exact local art and verified nutrition on a real card [E]",
+            "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/workout_reference_golden_test.dart: unconfigured routine library is visibly honest and offline [E]"
+          ]
+        },
+        {
+          "name": "broad-community-cold-back",
+          "exit_code": 0,
+          "seconds": 14.4,
+          "log": "build\\bil-codex-qa\\broad-community-cold-back-1791642909541760800.log",
+          "tests_passed": 46,
+          "tests_failed": 0,
+          "tests_skipped": 0,
+          "failures": []
+        }
+      ],
+      "tests_passed": 216,
+      "tests_failed": 33,
+      "tests_skipped": 0
+    }
+  },
+  "full": {
+    "shards_run": 0,
+    "shards_skipped": 8,
+    "reason": "Broad is red"
+  },
+  "physical_devices_tested": false,
+  "isolated_overflow": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "log": "isolated-dashboard-overflow-1791642944893305600.log"
+  },
+  "production_source_diff": "git diff 1e24421b HEAD -- lib pubspec.yaml pubspec.lock android ios supabase: empty",
+  "golden_review": {
+    "pairs": 29,
+    "fresh_local_pairs_pixel_identical_to_reviewed_history": 29,
+    "baseline_updates": 0,
+    "approved": 0
+  }
+}
