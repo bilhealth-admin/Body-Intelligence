@@ -534,6 +534,7 @@ class AppRouter {
               );
               if (foodLogMode) {
                 return FoodLogPage(
+                  startGuide: state.uri.queryParameters['guide'] == '1',
                   initialMealType: state.uri.queryParameters['meal'],
                   initialAction: state.uri.queryParameters['action'],
                   directPhotoCapture:
