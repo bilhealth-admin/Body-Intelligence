@@ -228,7 +228,6 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                             ),
                           ),
                         ),
-                        ),
                       ),
                     ],
                   ),
