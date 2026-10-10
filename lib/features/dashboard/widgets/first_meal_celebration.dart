@@ -58,7 +58,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1450),
+    duration: const Duration(milliseconds: 2300),
   );
   Timer? _reducedMotionTimer;
   bool _started = false;
@@ -124,22 +124,23 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                     clipBehavior: Clip.none,
                     children: [
                       if (!_reducedMotion)
-                        for (var index = 0; index < 16; index++)
+                        for (var index = 0; index < 48; index++)
                           Positioned(
                             left:
                                 150 +
-                                math.cos(index * math.pi / 8) *
-                                    (18 + progress * 127) -
+                                math.cos(index * math.pi * 2 / 48 + index * .31) *
+                                    (18 + progress * (92 + index % 5 * 22)) -
                                 15,
                             top:
                                 150 +
-                                math.sin(index * math.pi / 8) *
-                                    (18 + progress * 127) -
+                                math.sin(index * math.pi * 2 / 48 + index * .31) *
+                                    (18 + progress * (92 + index % 5 * 22)) +
+                                progress * progress * (index % 3) * 17 -
                                 15,
                             child: Opacity(
-                              opacity: fade,
+                              opacity: (fade * (index % 3 == 0 ? .85 : 1.0)).clamp(0.0, 1.0),
                               child: Transform.rotate(
-                                angle: progress * (index.isEven ? .65 : -.65),
+                                angle: progress * (index.isEven ? 2.4 : -2.1),
                                 child: Icon(
                                   const [
                                     Icons.celebration_rounded,
@@ -147,7 +148,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                                     Icons.star_rounded,
                                     Icons.check_circle_rounded,
                                   ][index % 4],
-                                  size: 26,
+                                  size: 12.0 + (index % 4) * 5,
                                   color: const [
                                     Color(0xFFFFD36B),
                                     Color(0xFFACDAFF),
@@ -161,10 +162,13 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                       Center(
                         child: Opacity(
                           opacity: _reducedMotion ? 1 : fade,
+                          child: Transform.scale(
+                          scale: _reducedMotion ? 1 : .88 + .12 * Curves.easeOutBack.transform((_controller.value * 3).clamp(0.0, 1.0)),
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: const Color(0xF1092753),
-                              borderRadius: BorderRadius.circular(22),
+                              borderRadius: BorderRadius.circular(26),
+                              boxShadow: [BoxShadow(color: const Color(0xFF76EEDB).withValues(alpha: .28 * fade), blurRadius: 38, spreadRadius: 3)],
                               border: Border.all(
                                 color: const Color(0xFFACDAFF),
                               ),
@@ -198,6 +202,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                               ),
                             ),
                           ),
+                        ),
                         ),
                       ),
                     ],
