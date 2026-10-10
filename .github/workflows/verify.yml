@@ -87,7 +87,13 @@ jobs:
             'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
             'lib/features/dashboard/widgets/first_meal_celebration.dart',
             'test/data/repositories/first_food_milestone_commit_test.dart',
-            'test/features/dashboard/dashboard_first_use_guidance_test.dart'
+            'test/features/dashboard/dashboard_first_use_guidance_test.dart',
+            'lib/app/router/bil_external_route_navigator.dart',
+            'lib/app/router/bil_safe_return_button.dart',
+            'lib/features/notifications/services/inactivity_reminder_coordinator.dart',
+            'test/app/router/audited_route_return_source_contract_test.dart',
+            'test/app/router/notification_return_navigation_test.dart',
+            'test/features/community/community_reference_navigation_test.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets
