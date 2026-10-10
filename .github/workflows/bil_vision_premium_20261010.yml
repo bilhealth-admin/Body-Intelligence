@@ -2,7 +2,7 @@ name: BIL Vision premium review - scoped apply and QA
 on:
   push:
     branches: [qa/bil-quality-ux-integration-20261009]
-    paths: [.github/bil_vision_payload.base64]
+    paths: [.github/vision_payload.part09.txt]
   workflow_dispatch:
 permissions:
   contents: write
@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base64 -d .github/bil_vision_payload.base64 > /tmp/bil_vision_payload.tar.xz
+          cat .github/vision_payload.part*.txt | base64 -d > /tmp/bil_vision_payload.tar.xz
           echo '2c7eb0221fa1f0df755c5607fa15a137bf4cf50f3f8152eb9af25af78ba72de2  /tmp/bil_vision_payload.tar.xz' | sha256sum -c -
           tar -tJf /tmp/bil_vision_payload.tar.xz
           tar -xJf /tmp/bil_vision_payload.tar.xz -C .
