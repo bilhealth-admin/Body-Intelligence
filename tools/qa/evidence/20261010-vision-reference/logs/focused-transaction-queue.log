@@ -1,0 +1,40 @@
+Command: flutter test --no-pub --timeout=3m test/features/commerce/store_transaction_queue_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/commerce/store_transaction_queue_test.dart
+00:00 +0: restore preserves ownership rejection for bil_premium HTTP 200
+00:00 +1: restore preserves ownership rejection for bil_premium HTTP 400
+00:00 +2: restore preserves ownership rejection for bil_ai_boost HTTP 200
+00:00 +3: restore preserves ownership rejection for bil_ai_boost HTTP 400
+00:00 +4: later inactive receipt cannot hide an earlier restore ownership rejection
+00:00 +5: a callback locks purchase immediately before asynchronous verification
+00:00 +6: slow prices cannot overwrite a pending native transaction
+00:00 +7: failed prices cannot overwrite a transaction that already verified
+00:00 +8: late Boost launch failure (throws=false) cannot replace a verified receipt
+00:00 +9: late plan launch failure (throws=false) cannot unlock a pending native transaction
+00:00 +10: late Boost launch failure (throws=true) cannot replace a verified receipt
+00:00 +11: late plan launch failure (throws=true) cannot unlock a pending native transaction
+00:00 +12: acknowledgement failure after verification cannot enable a second purchase
+00:00 +13: a native stream error leaves pending state without enabling recharge
+00:00 +14: a startup StoreKit stream fault recovers after the catalog loads
+00:00 +15: a startup historical StoreKit error does not lock the loaded catalog
+00:00 +16: a receipt verification failure cannot be overwritten by a startup fault
+00:00 +17: a stream error cannot replace the outcome of an in-flight receipt
+00:00 +18: explicit iOS restore syncs before StoreKit restoration
+00:00 +19: a failed explicit Apple sync never starts native restoration
+00:00 +20: deduplicates a queued failed transaction but permits a new purchase id
+00:00 +21: a cooled-down replay cannot replace a newly pending checkout
+00:00 +22: explicit Restore retries a failed transaction once despite cooldown
+00:00 +23: failed replay cooldown is account scoped across Plans service instances
+00:00 +24: restore waits for receipt verification before publishing its result
+00:00 +25: restore waits for a delayed restored Premium callback
+00:00 +26: a verified inactive subscription completes without restoring stale paid access
+00:00 +27: a verified subscription missing entitlement state stays fail-closed
+00:00 +28: a newer canonical active row wins an inactive receipt response race
+00:00 +29: restore verification failure stays restore-specific and fail-closed
+00:00 +30: verification HTTP 409 stays fail closed and unacknowledged
+00:00 +31: verification HTTP 429 stays fail closed and unacknowledged
+00:00 +32: verification HTTP 500 stays fail closed and unacknowledged
+00:00 +33: verification HTTP 503 stays fail closed and unacknowledged
+00:00 +34: a transient empty entitlement read retains the verified member state
+00:00 +35: a malformed active row does not erase a still-valid entitlement
+00:00 +36: All tests passed!

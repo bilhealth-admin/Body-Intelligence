@@ -1,0 +1,10 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/meal_image_unified_review_contract_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart
+00:00 +0: parses every unified review field without selecting an item
+00:00 +1: reviewed image amounts convert to the diary gram contract
+00:00 +2: Vision preserves catalog count or volume without fake grams
+00:00 +3: Vision mass conversions scale per actual catalog mass basis
+00:00 +4: vision UI copy is clean and complete in five locales
+00:00 +5: vision review copy resolves honestly across all 25 locales
+00:00 +6: All tests passed!

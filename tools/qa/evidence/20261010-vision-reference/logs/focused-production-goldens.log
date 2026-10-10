@@ -1,0 +1,132 @@
+Command: flutter test --no-pub --timeout=3m test/visual_closure/actual_production_pages_golden_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/actual_production_pages_golden_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: store plans production page phone capture
+00:01 +1: store plans production page lower actions capture
+00:01 +2: meal image guide production step 1 capture
+00:01 +3: meal image guide production step 2 capture
+00:01 +4: meal image guide production step 3 capture
+00:02 +5: meal image guide production step 4 capture
+00:02 +6: saved nutrition meals production empty-state capture
+00:02 +7: saved nutrition recipes production empty-state capture
+00:02 +8: saved nutrition my_foods production empty-state capture
+00:02 +9: quick nutrition production dialog capture
+00:02 +10: account gateway production Arabic phone capture
+00:03 +11: community signed-out production state phone capture
+00:03 +12: community profile production unavailable state capture
+00:03 +13: community connections production unavailable state capture
+00:03 +14: community messages production unavailable state capture
+00:03 +15: community authenticated profile production state capture
+00:03 +16: community authenticated hub feed capture
+00:04 +17: community authenticated navigation menu capture
+00:04 +18: community authenticated incoming request state capture
+00:04 +19: community authenticated friend state capture
+00:05 +20: community add friends chooser authenticated capture
+00:05 +21: community people search authenticated capture
+00:05 +22: community authenticated inbox state capture
+00:05 +23: community authenticated sent state capture
+00:05 +24: community notifications empty authenticated capture
+00:05 +25: trust and support production page RTL dark capture
+00:05 +26: privacy policy production capture
+00:05 +27: terms of service production capture
+00:06 +28: advertising consent production capture
+00:06 +29: connected health permission state production capture
+00:06 +30: connected health compatibility production capture
+00:06 +31: connected health unavailable production capture
+00:06 +32: connected health update_required production capture
+00:06 +33: connected health offline production capture
+00:07 +34: verified recipe library production capture
+00:07 +35: local recipe discovery production capture
+00:08 +36: local recipe discovery production capture page 2
+00:09 +37: local recipe discovery production capture page 3
+00:10 +38: local recipe discovery production capture page 4
+00:12 +39: local recipe discovery production capture page 5
+00:13 +40: local recipe discovery production capture page 6
+00:16 +41: local recipe discovery production capture page 7
+00:18 +42: local recipe discovery production capture page 8
+00:20 +43: local recipe discovery production capture page 9
+00:21 +44: local recipe discovery production capture page 10
+00:22 +45: local recipe discovery production capture page 11
+00:23 +46: local recipe discovery production capture page 12
+00:24 +47: local recipe discovery production capture page 13
+00:26 +48: local recipe detail production capture
+00:28 +49: local recipe regional collection capture
+00:29 +50: local recipe quick collection capture
+00:30 +51: local recipe plant collection capture
+00:31 +52: local recipe saved collection capture
+00:32 +53: local recipe search filters the authoritative catalog
+00:33 +54: local recipe yogurt detail capture
+00:35 +55: local recipe chickpea detail capture
+00:36 +56: local recipe shakshuka detail capture
+00:38 +57: professional workout library production capture
+00:38 +58: workout logging production page capture
+00:39 +59: workout logging Cardio category capture
+00:39 +60: workout logging Strength category capture
+00:39 +61: workout logging Recovery category capture
+00:40 +62: strength all-exercises scroll evidence 1
+00:40 +63: strength all-exercises scroll evidence 2
+00:40 +64: strength all-exercises scroll evidence 3
+00:40 +65: strength all-exercises scroll evidence 4
+00:40 +66: strength all-exercises scroll evidence 5
+00:40 +67: strength all-exercises scroll evidence 6
+00:41 +68: strength all-exercises scroll evidence 7
+00:41 +69: strength all-exercises scroll evidence 8
+00:41 +70: strength all-exercises scroll evidence 9
+00:41 +71: strength all-exercises scroll evidence 10
+00:41 +72: workout custom exercises empty state capture
+00:42 +73: strength custom exercises empty state capture
+00:42 +74: custom exercise editor production capture
+00:42 +75: workout display options production capture
+00:42 +76: workout multi-add selected state capture
+00:43 +77: strength workout history empty state capture
+00:43 +78: saved custom workout routine production capture
+00:44 +79: custom workout routine builder production capture
+00:44 +80: workout walk selection form production capture
+00:44 +81: workout run selection form production capture
+00:45 +82: workout cycle selection form production capture
+00:45 +83: workout strength selection form production capture
+00:46 +84: workout upper selection form production capture
+00:46 +85: workout lower selection form production capture
+00:46 +86: workout mobility selection form production capture
+00:46 +87: workout stretch selection form production capture
+00:47 +88: workout swim selection form production capture
+00:47 +89: workout hike selection form production capture
+00:47 +90: workout stairs selection form production capture
+00:47 +91: workout row selection form production capture
+00:47 +92: workout dance selection form production capture
+00:48 +93: workout core selection form production capture
+00:48 +94: workout circuit selection form production capture
+00:48 +95: workout yoga selection form production capture
+00:48 +96: workout pilates selection form production capture
+00:49 +97: workout breathing selection form production capture
+00:49 +98: dashboard customization production capture
+00:49 +99: dashboard customization lower modules production capture
+00:49 +100: dashboard current goal editing destination capture
+00:49 +101: dashboard customization Arabic RTL production capture
+00:50 +102: dashboard free nutrient cards locked preview capture
+00:50 +103: dashboard Premium nutrient cards chooser capture
+00:50 +104: steps settings persisted honest state capture
+00:50 +105: dashboard customization calories disabled capture
+00:51 +106: dashboard customization macros disabled capture
+00:51 +107: dashboard customization activity disabled capture
+00:51 +108: dashboard customization quick_log disabled capture
+00:51 +109: dashboard customization discover disabled capture
+00:52 +110: dashboard customization best_action disabled capture
+00:52 +111: dashboard customization connected_health disabled capture
+00:52 +112: dashboard customization body_twin disabled capture
+00:53 +113: help center production capture
+00:53 +114: help targets answer production capture
+00:53 +115: help offline answer production capture
+00:53 +116: help medical answer production capture
+00:53 +117: help about production dialog capture
+00:53 +118: help troubleshooting production dialog capture
+00:53 +119: help service_status production dialog capture
+00:53 +120: sleep production page capture
+00:53 +121: sleep production saved record capture
+00:54 +122: sleep measured trend production capture
+00:54 +123: fasting production page capture
+00:54 +124: wellness directory production page capture
+00:55 +125: notification settings production page capture
+00:55 +126: (tearDownAll)
+00:55 +126: All tests passed!

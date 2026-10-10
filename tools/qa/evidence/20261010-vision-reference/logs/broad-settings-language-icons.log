@@ -1,0 +1,43 @@
+Command: flutter test --no-pub --timeout=3m test/semantic_icon_badge_spacing_test.dart test/bil_semantic_icons_test.dart test/launch_readiness/navigation_and_more_master_closure_test.dart test/localization/bil_25_locale_fallback_closure_test.dart test/visual_closure/visual_defect_regression_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: Shared theme separates unconfigured icon rows in rtl dark
+00:00 +1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: Shared theme separates unconfigured icon rows in rtl dark
+00:00 +2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: Shared theme separates unconfigured icon rows in rtl dark
+00:00 +3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: Shared theme separates unconfigured icon rows in rtl dark
+00:00 +4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: Shared theme separates unconfigured icon rows in rtl dark
+00:01 +5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/bil_semantic_icons_test.dart: a badge inside a labelled tile does not repeat its label
+00:01 +6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/bil_semantic_icons_test.dart: a badge inside a labelled tile does not repeat its label
+00:01 +7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/bil_semantic_icons_test.dart: a badge inside a labelled tile does not repeat its label
+00:01 +8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/bil_semantic_icons_test.dart: a badge inside a labelled tile does not repeat its label
+00:01 +9: G:/BIL_Project/worktrees/bil-test-only-20261010/test/bil_semantic_icons_test.dart: a badge inside a labelled tile does not repeat its label
+00:01 +10: G:/BIL_Project/worktrees/bil-test-only-20261010/test/bil_semantic_icons_test.dart: a badge inside a labelled tile does not repeat its label
+00:01 +11: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: More secondary navigation rows stay icon-free in rtl
+00:01 +12: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: More secondary navigation rows stay icon-free in rtl
+00:02 +13: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: More secondary navigation rows stay icon-free in rtl
+00:02 +14: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: More secondary navigation rows stay icon-free in rtl
+00:02 +15: G:/BIL_Project/worktrees/bil-test-only-20261010/test/semantic_icon_badge_spacing_test.dart: More secondary navigation rows stay icon-free in rtl
+00:03 +16: G:/BIL_Project/worktrees/bil-test-only-20261010/test/localization/bil_25_locale_fallback_closure_test.dart: all tracked 25-locale surfaces close English fallback paths
+00:03 +17: G:/BIL_Project/worktrees/bil-test-only-20261010/test/localization/bil_25_locale_fallback_closure_test.dart: all tracked 25-locale surfaces close English fallback paths
+00:03 +18: G:/BIL_Project/worktrees/bil-test-only-20261010/test/localization/bil_25_locale_fallback_closure_test.dart: all tracked 25-locale surfaces close English fallback paths
+00:03 +19: G:/BIL_Project/worktrees/bil-test-only-20261010/test/localization/bil_25_locale_fallback_closure_test.dart: all tracked 25-locale surfaces close English fallback paths
+00:03 +20: G:/BIL_Project/worktrees/bil-test-only-20261010/test/localization/bil_25_locale_fallback_closure_test.dart: all tracked 25-locale surfaces close English fallback paths
+00:04 +21: G:/BIL_Project/worktrees/bil-test-only-20261010/test/localization/bil_25_locale_fallback_closure_test.dart: all tracked 25-locale surfaces close English fallback paths
+00:04 +22: G:/BIL_Project/worktrees/bil-test-only-20261010/test/localization/bil_25_locale_fallback_closure_test.dart: all tracked 25-locale surfaces close English fallback paths
+00:04 +23: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:04 +24: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:05 +25: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:05 +26: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:05 +27: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:05 +28: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:05 +29: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:05 +30: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: auth language selector reflects the saved Arabic locale
+00:05 +31: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: Arabic account gateway actions inherit a real Arabic family
+00:05 +32: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: one page-level glass group renders at most one Premium label
+00:05 +33: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: a paid collection route keeps one page label over all locked previews
+00:06 +34: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: real daily log, meal, food, analytics and dashboard routes never show more than one Premium word
+00:07 +35: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: connected health route renders one glass group without repeated Premium
+00:07 +36: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: quick add, profile, pathways, meal settings and route glass each render at most one visible Premium word
+00:07 +37: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: confirmed visual defects stay closed in production source
+00:07 +38: G:/BIL_Project/worktrees/bil-test-only-20261010/test/visual_closure/visual_defect_regression_test.dart: AI Coach product copy does not promise unsupported languages
+00:07 +39: All tests passed!
