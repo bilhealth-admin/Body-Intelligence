@@ -141,7 +141,9 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                                 progress * progress * (index % 3) * 17 -
                                 15,
                             child: Opacity(
-                              opacity: (particleFade * (index % 3 == 0 ? .85 : 1.0)).clamp(0.0, 1.0),
+                              opacity: (
+                                particleFade * (index % 3 == 0 ? .85 : 1.0)
+                              ).clamp(0.0, 1.0),
                               child: Transform.rotate(
                                 angle: progress * (index.isEven ? 2.4 : -2.1),
                                 child: Icon(
@@ -164,14 +166,34 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                           ),
                       Center(
                         child: Opacity(
-                          opacity: _reducedMotion ? 1 : (1 - ((_controller.value - .72) / .28).clamp(0.0, 1.0)),
+                          opacity: _reducedMotion
+                              ? 1
+                              : (1 -
+                                  ((_controller.value - .72) / .28).clamp(
+                                    0.0,
+                                    1.0,
+                                  )),
                           child: Transform.scale(
-                          scale: _reducedMotion ? 1 : .88 + .12 * Curves.easeOutBack.transform((_controller.value * 3).clamp(0.0, 1.0)),
+                            scale: _reducedMotion
+                                ? 1
+                                : .88 +
+                                    .12 *
+                                        Curves.easeOutBack.transform(
+                                          (_controller.value * 3).clamp(0.0, 1.0),
+                                        ),
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: const Color(0xF1092753),
                               borderRadius: BorderRadius.circular(26),
-                              boxShadow: [BoxShadow(color: const Color(0xFF76EEDB).withValues(alpha: .28 * fade), blurRadius: 38, spreadRadius: 3)],
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF76EEDB).withValues(
+                                    alpha: .28 * fade,
+                                  ),
+                                  blurRadius: 38,
+                                  spreadRadius: 3,
+                                ),
+                              ],
                               border: Border.all(
                                 color: const Color(0xFFACDAFF),
                               ),
