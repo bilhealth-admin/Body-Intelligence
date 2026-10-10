@@ -14,6 +14,7 @@ import '../../app/services/recoverable_image_picker.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/food_repository.dart';
+import '../../data/repositories/meal_repository.dart';
 import '../commerce/presentation/premium_barcode_access.dart';
 import '../dashboard/widgets/first_use_context_coachmark.dart';
 import '../dashboard/widgets/first_meal_celebration.dart';

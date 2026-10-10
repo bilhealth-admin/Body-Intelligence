@@ -221,12 +221,12 @@ void main() {
           final todayLabel = tester.widget<Text>(
             find.descendant(of: calories, matching: find.text('Today')),
           );
-          expect(todayLabel.style?.fontSize, caloriesTitle.style?.fontSize);
-          expect(todayLabel.style?.fontWeight, caloriesTitle.style?.fontWeight);
-          expect(
-            todayLabel.style?.letterSpacing,
-            caloriesTitle.style?.letterSpacing,
-          );
+          // Title and Today action have intentionally different hierarchy.
+          expect(caloriesTitle.style?.fontSize, 15);
+          expect(caloriesTitle.style?.fontWeight, FontWeight.w700);
+          expect(todayLabel.style?.fontSize, 18);
+          expect(todayLabel.style?.fontWeight, FontWeight.w800);
+          expect(todayLabel.style?.letterSpacing, -.25);
           await tester.tap(todayAction);
           await tester.pumpAndSettle();
           expect(router.routeInformationProvider.value.uri.path, '/daily-log');

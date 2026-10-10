@@ -33,16 +33,19 @@ extension MealRepositoryVisionCommits on MealRepository {
     }
     final owner = LocalDatabaseScope.keyForOwner(_database.localOwnerId);
     final requestDigest = sha256.convert(utf8.encode(request)).toString();
-    final arguments = jsonEncode({
+    final payload = <String, Object>{
       'dayKey': dayKeyFor(date),
       'mealType': mealType,
       'grams': quantitiesInGrams,
-      if (itemGramModes != null) 'itemGramModes': itemGramModes,
       'items': [
         for (final item in items)
           {'foodId': item.foodId, 'quantity': item.quantity},
       ],
-    });
+    };
+    if (itemGramModes != null) {
+      payload['itemGramModes'] = itemGramModes;
+    }
+    final arguments = jsonEncode(payload);
     final payloadDigest = sha256.convert(utf8.encode(arguments)).toString();
     return _VisionCommitIntent(
       key: 'visionMealCommitV1.$owner.$requestDigest',

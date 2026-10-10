@@ -157,10 +157,10 @@ void main() {
     expect(find.text('415'), findsOneWidget);
     expect(find.text('7.5'), findsOneWidget);
     expect(find.text('—'), findsNothing);
-    expect(find.byIcon(Icons.directions_walk_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.favorite_outline_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.local_fire_department_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.bedtime_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.directions_run_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.local_fire_department_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.nightlight_round), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp(r'Steps, 4321 steps')), findsOneWidget);
     expect(
       find.bySemanticsLabel(RegExp(r'Heart rate, 71 bpm')),

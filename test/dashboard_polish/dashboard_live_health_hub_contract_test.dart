@@ -42,8 +42,11 @@ void main() {
       expect(painter, isNot(contains(brightEdge)), reason: brightEdge);
     }
     expect(painter, contains('final shell = RRect.fromRectAndRadius('));
-    expect(painter, contains('Color(0xFF07131B)'));
-    expect(painter, contains('Color(0xFF163442)'));
+    // Actual silver case, live dark screen and physical crown contracts.
+    expect(painter, contains('Color(0xFFEAF0F3)'));
+    expect(painter, contains('Color(0xFF69818F)'));
+    expect(painter, contains('Color(0xFF102D42)'));
+    expect(painter, contains('Color(0xFF647B88)'));
     expect(emptyState, contains("Text(tr('Connect now', 'ربط الآن'))"));
 
     expect(shell, contains("Key('dashboard-twin-header-slot')"));

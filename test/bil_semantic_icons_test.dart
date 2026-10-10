@@ -332,11 +332,15 @@ void main() {
       'lib/features/settings/reference_settings_home_page.dart',
     ).readAsStringSync();
     expect(iosSettings, isNot(contains('Color(0xFF007AFF)')));
-    // Settings rows intentionally drop nonfunctional leading badges. Route
-    // actions must remain connected and the neutral chevron is directional.
+    // Flat SF/native icons (without decorative badges) are the intended
+    // settings treatment. Direct route navigation must still work.
     expect(iosSettings, contains('return CupertinoListTile('));
     expect(iosSettings, contains('onTap: () => context.push(route)'));
-    expect(iosSettings, isNot(contains('BilNativeSettingsIcon(')));
+    expect(
+      iosSettings,
+      contains('BilNativeSettingsIcon(kind: kind, flat: true)'),
+    );
+    expect(iosSettings, isNot(contains('BilNativeSettingsIcon(kind: kind)')));
 
     final quickAdd = File(
       'lib/app/router/bil_quick_add_sheet.dart',

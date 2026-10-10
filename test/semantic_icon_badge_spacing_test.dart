@@ -143,7 +143,7 @@ void main() {
         expect(tester.widget<ListTile>(tile).leading, isNull);
         expect(tester.getSize(tile).height, greaterThanOrEqualTo(48));
         expect(tester.widget<Text>(title).style?.fontSize, 15.5);
-        expect(tester.widget<Text>(title).style?.fontWeight, FontWeight.w500);
+        expect(tester.widget<Text>(title).style?.fontWeight, FontWeight.w400);
         expect(Directionality.of(tester.element(tile)), direction);
 
         await tester.pumpWidget(const SizedBox.shrink());
