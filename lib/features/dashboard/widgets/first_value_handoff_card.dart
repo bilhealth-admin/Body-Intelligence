@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/premium_design_tokens.dart';
-import '../../../shared/widgets/premium_surface.dart';
+import 'first_use_glass_surface.dart';
 
 class FirstValueHandoffCard extends StatefulWidget {
   const FirstValueHandoffCard({
@@ -24,8 +24,7 @@ class _FirstValueHandoffCardState extends State<FirstValueHandoffCard> {
   @override
   Widget build(BuildContext context) {
     if (_skippedThisSession) return const SizedBox.shrink();
-    return PremiumSurface(
-      emphasized: true,
+    return FirstUseGlassSurface(
       padding: PremiumDesignTokens.cardPaddingLarge,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,28 +70,28 @@ class _FirstValueHandoffCardState extends State<FirstValueHandoffCard> {
             ],
           ),
           const SizedBox(height: PremiumDesignTokens.spaceMd),
-          Row(
-            children: [
-              if (widget.onSkip != null)
-                TextButton(
-                  key: const Key('first-value-guide-skip'),
-                  onPressed: widget.onSkip == null
-                      ? null
-                      : () {
-                          // Never trap a reviewer while local storage retries.
-                          setState(() => _skippedThisSession = true);
-                          widget.onSkip?.call();
-                        },
-                  child: Text(context.strings.text('Skip')),
-                ),
-              const Spacer(),
-              FilledButton.icon(
-                onPressed: widget.onContinue,
-                icon: const Icon(Icons.monitor_weight_outlined),
-                label: Text(context.strings.text('Record first check-in')),
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: widget.onContinue,
+              icon: const Icon(Icons.monitor_weight_outlined),
+              label: Text(context.strings.text('Record first check-in')),
+            ),
           ),
+          if (widget.onSkip != null)
+            Center(
+              child: TextButton(
+                key: const Key('first-value-guide-skip'),
+                onPressed: () {
+                  setState(() => _skippedThisSession = true);
+                  widget.onSkip?.call();
+                },
+                child: Text(
+                  context.strings.text('Skip'),
+                  style: const TextStyle(color: Color(0xFFDCE8F0)),
+                ),
+              ),
+            ),
         ],
       ),
     );
