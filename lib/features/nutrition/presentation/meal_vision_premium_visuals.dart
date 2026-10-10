@@ -293,6 +293,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                 ],
               ),
             ),
+          if (selected) ...[
           const SizedBox(height: 7),
           Text(
             _word(
@@ -452,6 +453,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
               label: Text(_word(context, 'Exclude', 'استبعاد')),
             ),
           ),
+          ],
         ],
       ),
     );
