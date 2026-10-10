@@ -42,3 +42,8 @@
 - [Verify #38033226049](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38033226049): اكتشف ثمانية ملفات تحتاج Dart Format وتحذير analyzer واحد على BuildContext في `food_log_actions.dart`. تم تطبيق patch التنسيق الأصلي للمصدر والاحتفال واختبار Home وتصحيح حارس BuildContext. ما زالت بقية ملفات التنسيق بحاجة إلى إعادة تشغيل وتقرير patch الكامل.
 - [Android debug #38033226046](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38033226046) كان قيد التنفيذ عند إضافة هذا التحديث؛ لا يُنقل نجاحه لآخر SHA.
 - يرفض هذا التقرير اعتبار المصدر جاهزًا قبل وصول check أخضر **على SHA واحد**.
+
+### الجولة الثانية من التحقق
+- [Verify #38033657383](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38033657383): **Flutter Analyze PASS**، فشل Dart Format بسبب 5 ملفات، وخمس focused وثماني full لم تُشغّل بسبب بوابة المصدر.
+- طُبّقت فروق Dart formatter الحقيقية للخمسة مع احترام اختبار تمرير Food Log، وأضيفت محلية التوجيه للعربية والإنجليزية والفرنسية والإسبانية والتركية، وحماية `BuildContext`.
+- هذه الصفحة تسجل ما تم التحقق منه، **لا تشهد نجاح الكوميت الجديد مسبقًا**.
