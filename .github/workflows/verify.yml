@@ -111,6 +111,8 @@ jobs:
           flutter test --no-pub --timeout=2m
           test/data/repositories/first_food_milestone_commit_test.dart
           test/features/dashboard/dashboard_first_use_guidance_test.dart
+          test/features/dashboard/first_use_context_coachmark_test.dart
+          test/features/daily_log/food_log_first_use_coachmark_test.dart
           test/features/commerce/reviewer_subscription_mirror_fallback_test.dart
 
       - name: Verify cold and warm notification Back navigation
