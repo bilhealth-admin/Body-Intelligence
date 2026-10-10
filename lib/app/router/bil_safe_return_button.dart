@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// A Community page reached from a cold notification tap may be a route root.
-/// Never depend on a previous route, trust a return URL, or exit the process.
-class CommunityReturnButton extends StatelessWidget {
-  const CommunityReturnButton({
+/// A visible, always-working Back action for routes opened without history.
+/// Never derive a destination from an external URL or notification payload.
+class BilSafeReturnButton extends StatelessWidget {
+  const BilSafeReturnButton({
     super.key,
-    this.fallbackLocation = '/dashboard',
+    required this.fallbackLocation,
   });
 
-  /// Cold-start screens with no stack use a trusted, app-owned destination.
   final String fallbackLocation;
 
   @override
   Widget build(BuildContext context) => BackButton(
-    key: const Key('community-safe-return'),
+    key: const Key('bil-safe-return'),
     onPressed: () {
       final navigator = Navigator.of(context);
       if (navigator.canPop()) {
-        // Also works for Community subpages pushed with MaterialPageRoute.
         navigator.pop();
         return;
       }

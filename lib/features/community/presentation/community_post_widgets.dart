@@ -447,6 +447,7 @@ class _CommunityPhotoPage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.black,
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
       titleTextStyle: Theme.of(

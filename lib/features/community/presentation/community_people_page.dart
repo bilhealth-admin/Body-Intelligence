@@ -346,6 +346,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const CommunityReturnButton(),
         title: Text(
           _copy(
             context,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/router/bil_safe_return_button.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
@@ -343,6 +344,7 @@ class HelpFaqPage extends StatelessWidget {
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
         appBar: AppBar(
+          leading: const BilSafeReturnButton(fallbackLocation: '/help'),
           title: Text(
             t(
               'Frequently Asked Questions',

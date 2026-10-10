@@ -17,6 +17,7 @@ import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_copy.dart';
+import 'community_return_button.dart';
 
 part 'community_profile_copy.dart';
 part 'community_profile_cover_editor.dart';
@@ -249,7 +250,13 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     return PopScope(
       canPop: !_saving,
       child: Scaffold(
-        appBar: AppBar(title: Text(copy.title)),
+        appBar: AppBar(
+          leading: AbsorbPointer(
+            absorbing: _saving,
+            child: const CommunityReturnButton(),
+          ),
+          title: Text(copy.title),
+        ),
         body: _repository == null
             ? _CommunityProfileUnavailable(copy: copy)
             : FutureBuilder<void>(

@@ -267,6 +267,28 @@ void main() {
   });
   tearDown(() async => client.dispose());
 
+  testWidgets('Community tab has no Back when it is the root', (tester) async {
+    await _mount(tester, repository);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('community-safe-return')), findsNothing);
+    expect(
+      find.byKey(const Key('bil-reference-navigation')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Community opened over another page provides real Back', (
+    tester,
+  ) async {
+    final router = await _mount(tester, repository, initial: '/dashboard');
+    router.push('/community');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('community-safe-return')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('community-safe-return')));
+    await tester.pumpAndSettle();
+    expect(router.routeInformationProvider.value.uri.path, '/dashboard');
+  });
+
   testWidgets('one Home tab row retains all four authoritative feed modes', (
     tester,
   ) async {

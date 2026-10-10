@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/router/bil_safe_return_button.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
 const _aiCoachPrivacyDisclosure =
@@ -40,7 +41,10 @@ class LegalDocumentPage extends StatelessWidget {
     final effectiveStatus = copy.effective.split(' • ').take(2).join(' • ');
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
-        appBar: AppBar(title: Text(title)),
+        appBar: AppBar(
+          leading: const BilSafeReturnButton(fallbackLocation: '/settings'),
+          title: Text(title),
+        ),
         body: SelectionArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 18, 24, 48),

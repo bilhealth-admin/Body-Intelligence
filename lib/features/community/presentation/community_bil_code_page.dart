@@ -12,6 +12,7 @@ import '../data/community_public_code_failure.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_copy.dart';
+import 'community_return_button.dart';
 import 'community_member_share.dart';
 import '../../notifications/domain/community_deep_link.dart';
 
@@ -138,6 +139,7 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(communityText(context, 'My BIL Code', 'رمز BIL الخاص بي')),
     ),
     body: _repository == null || _code == null
@@ -316,6 +318,7 @@ class _CommunityCodeScannerPageState extends State<CommunityCodeScannerPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(fallbackLocation: '/community/code'),
       title: Text(communityText(context, 'Scan Friend Code', 'مسح رمز صديق')),
     ),
     body: !widget.scannerEnabled || !_supported
@@ -436,6 +439,7 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(communityText(context, 'BIL member', 'عضو BIL')),
     ),
     body: _repository == null || _member == null

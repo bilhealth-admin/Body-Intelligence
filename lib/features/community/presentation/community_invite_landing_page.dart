@@ -9,6 +9,7 @@ import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_referral.dart';
 import 'community_copy.dart';
+import 'community_return_button.dart';
 
 class CommunityInviteLandingPage extends StatefulWidget {
   const CommunityInviteLandingPage({
@@ -131,6 +132,7 @@ class _CommunityInviteLandingPageState
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(fallbackLocation: '/dashboard'),
       title: Text(communityText(context, 'BIL invitation', 'دعوة BIL')),
     ),
     body: FutureBuilder<CommunityInvitePreview>(

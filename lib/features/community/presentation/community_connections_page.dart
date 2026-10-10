@@ -8,6 +8,7 @@ import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import 'community_attention_scope.dart';
+import 'community_return_button.dart';
 
 part 'community_connections_copy.dart';
 
@@ -139,6 +140,7 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
     final copy = _ConnectionsCopy.of(context);
     return Scaffold(
       appBar: AppBar(
+        leading: const CommunityReturnButton(),
         title: Text(copy.title),
         actions: [
           IconButton(

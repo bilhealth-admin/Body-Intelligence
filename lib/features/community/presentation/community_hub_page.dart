@@ -236,7 +236,12 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
               },
             ),
       appBar: AppBar(
+        // Community is normally a bottom tab (no Back). If a notification
+        // pushed it above an existing screen, expose the real previous route.
         automaticallyImplyLeading: false,
+        leading: Navigator.of(context).canPop()
+            ? const CommunityReturnButton()
+            : null,
         centerTitle: false,
         titleSpacing: 16,
         title: Text(
@@ -482,6 +487,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             context,
             Scaffold(
               appBar: AppBar(
+                leading: const CommunityReturnButton(),
                 title: Text(
                   communityText(
                     context,
@@ -498,6 +504,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             context,
             Scaffold(
               appBar: AppBar(
+                leading: const CommunityReturnButton(),
                 title: Text(
                   communityText(context, 'Verified food', 'غذاء موثّق'),
                 ),

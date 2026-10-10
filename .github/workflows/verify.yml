@@ -107,6 +107,16 @@ jobs:
           test/features/dashboard/dashboard_first_use_guidance_test.dart
           test/features/commerce/reviewer_subscription_mirror_fallback_test.dart
 
+      - name: Verify cold and warm notification Back navigation
+        if: ${{ success() }}
+        shell: pwsh
+        run: >
+          flutter test --no-pub --timeout=2m
+          test/app/router/notification_return_navigation_test.dart
+          test/app/router/audited_route_return_source_contract_test.dart
+          test/features/notifications/ios_notification_navigation_test.dart
+          test/features/community/community_deep_link_test.dart
+
       - name: Verify More UI behavior before Golden captures
         if: ${{ success() }}
         shell: pwsh

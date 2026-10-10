@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/community_models.dart';
 import 'community_copy.dart';
+import 'community_return_button.dart';
 
 /// Opens the exact ordered media of a post at the tapped thumbnail. The feed's
 /// compact collage does not replace full-resolution, accessible gallery access.
@@ -64,6 +65,7 @@ class _CommunityPostGalleryPageState extends State<CommunityPostGalleryPage> {
       key: const Key('community-full-post-gallery'),
       backgroundColor: Colors.black,
       appBar: AppBar(
+        leading: const CommunityReturnButton(),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Text(communityText(context, 'Post photos', 'صور المنشور')),
