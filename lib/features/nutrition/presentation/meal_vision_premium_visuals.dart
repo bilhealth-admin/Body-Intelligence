@@ -272,7 +272,8 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                   _word(context, 'I ate this amount', 'أكلت هذه الكمية'),
                 ),
                 selected: _amountMeaning[index] == true,
-                onSelected: (_) => _visualUpdate(() => _amountMeaning[index] = true),
+                onSelected: (_) =>
+                    _visualUpdate(() => _amountMeaning[index] = true),
               ),
               ChoiceChip(
                 key: Key('premium-vision-remaining-$index'),
@@ -348,7 +349,8 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
               ),
               suffixIcon: PopupMenuButton<String>(
                 tooltip: _word(context, 'Choose unit', 'اختيار الوحدة'),
-                onSelected: (unit) => _visualUpdate(() => _units[index].text = unit),
+                onSelected: (unit) =>
+                    _visualUpdate(() => _units[index].text = unit),
                 itemBuilder: (_) => [
                   for (final unit in const ['g', 'kg', 'oz', 'lb', 'serving'])
                     PopupMenuItem(value: unit, child: Text(unit)),
@@ -367,8 +369,9 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                     ChoiceChip(
                       label: Text(item.alternatives[alt].name),
                       selected: _alternatives[index] == alt,
-                      onSelected: (v) =>
-                          _visualUpdate(() => _alternatives[index] = v ? alt : null),
+                      onSelected: (v) => _visualUpdate(
+                        () => _alternatives[index] = v ? alt : null,
+                      ),
                     ),
                 ],
               ),

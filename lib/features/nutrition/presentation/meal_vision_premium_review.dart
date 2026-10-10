@@ -490,67 +490,67 @@ class _PremiumVisionReviewDialogState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                this._photo(context),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: _glassDecoration(context),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.schedule_outlined,
-                            color: _accent(context),
-                            size: 18,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              _word(context, 'Meal type: ', 'نوع الوجبة: ') +
-                                  this._mealLabel(context, widget.mealType),
-                              style: TextStyle(color: _foreground(context)),
+                  this._photo(context),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: _glassDecoration(context),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.schedule_outlined,
+                              color: _accent(context),
+                              size: 18,
                             ),
-                          ),
-                          Text(
-                            widget.photographedAt == null
-                                ? '—'
-                                : '${widget.photographedAt!.hour.toString().padLeft(2, '0')}: '
-                                      '${widget.photographedAt!.minute.toString().padLeft(2, '0')}',
-                            style: TextStyle(color: _secondary(context)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      this._stageChooser(context),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                for (var index = 0; index < _foods.length; index++)
-                  if (!_excluded.contains(index)) this._candidateCard(index),
-                if (_excluded.isNotEmpty)
-                  Wrap(
-                    children: [
-                      for (final index in _excluded)
-                        ActionChip(
-                          label: Text(
-                            _word(context, 'Restore ', 'استعادة ') +
-                                _foods[index].name,
-                          ),
-                          onPressed: () =>
-                              setState(() => _excluded.remove(index)),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _word(context, 'Meal type: ', 'نوع الوجبة: ') +
+                                    this._mealLabel(context, widget.mealType),
+                                style: TextStyle(color: _foreground(context)),
+                              ),
+                            ),
+                            Text(
+                              widget.photographedAt == null
+                                  ? '—'
+                                  : '${widget.photographedAt!.hour.toString().padLeft(2, '0')}: '
+                                        '${widget.photographedAt!.minute.toString().padLeft(2, '0')}',
+                              style: TextStyle(color: _secondary(context)),
+                            ),
+                          ],
                         ),
-                    ],
+                        const SizedBox(height: 8),
+                        this._stageChooser(context),
+                      ],
+                    ),
                   ),
-                TextButton.icon(
-                  key: const Key('premium-vision-add-food'),
-                  onPressed: _addFood,
-                  icon: const Icon(Icons.add_rounded),
-                  label: Text(
-                    _word(context, 'Add missing food', 'إضافة عنصر مفقود'),
+                  const SizedBox(height: 12),
+                  for (var index = 0; index < _foods.length; index++)
+                    if (!_excluded.contains(index)) this._candidateCard(index),
+                  if (_excluded.isNotEmpty)
+                    Wrap(
+                      children: [
+                        for (final index in _excluded)
+                          ActionChip(
+                            label: Text(
+                              _word(context, 'Restore ', 'استعادة ') +
+                                  _foods[index].name,
+                            ),
+                            onPressed: () =>
+                                setState(() => _excluded.remove(index)),
+                          ),
+                      ],
+                    ),
+                  TextButton.icon(
+                    key: const Key('premium-vision-add-food'),
+                    onPressed: _addFood,
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(
+                      _word(context, 'Add missing food', 'إضافة عنصر مفقود'),
+                    ),
                   ),
-                ),
                 ],
               ),
             ),
@@ -635,6 +635,4 @@ class _PremiumVisionReviewDialogState
       ),
     );
   }
-
-
 }
