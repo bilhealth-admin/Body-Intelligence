@@ -51,10 +51,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const Key('food-log-search-guide')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('food-log-search-guide')), findsOneWidget);
     expect(find.byKey(const Key('food-log-search')), findsOneWidget);
     await tester.tap(find.byKey(const Key('food-log-search-guide-skip')));
     await tester.pumpAndSettle();
@@ -112,20 +109,14 @@ void main() {
     );
     await tester.tap(find.byKey(Key('food-log-add-$foodId')));
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const Key('food-log-quantity-guide')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('food-log-quantity-guide')), findsOneWidget);
     expect(
       find.byKey(const Key('food-log-serving-quantity-field')),
       findsOneWidget,
     );
     await tester.tap(find.byKey(const Key('food-log-quantity-guide-skip')));
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const Key('food-log-quantity-guide')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('food-log-quantity-guide')), findsNothing);
     expect(
       find.byKey(const Key('food-log-serving-quantity-field')),
       findsOneWidget,
