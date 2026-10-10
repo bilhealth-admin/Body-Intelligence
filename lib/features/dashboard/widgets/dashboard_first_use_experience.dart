@@ -223,10 +223,23 @@ class _FoodGuideStep extends StatelessWidget {
       container: true,
       label: '$title. $message',
       child: AnimatedSwitcher(
-        duration: Duration(milliseconds: MediaQuery.maybeOf(context)?.disableAnimations == true ? 1 : 420),
-        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, .08), end: Offset.zero).animate(animation), child: child)),
+        duration: Duration(
+          milliseconds: MediaQuery.maybeOf(context)?.disableAnimations == true
+              ? 1
+              : 420,
+        ),
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, .08),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        ),
         child: FirstUseGlassSurface(
-        key: ValueKey(step),
+          key: ValueKey(step),
         accent: second ? const Color(0xFF8CC7FF) : const Color(0xFF70F1D4),
         child: Padding(
           padding: EdgeInsets.zero,
@@ -273,7 +286,11 @@ class _FoodGuideStep extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(second ? _copy(context, en: 'Open Food Log', ar: 'فتح تسجيل الطعام', fr: 'Ouvrir le journal', es: 'Abrir el diario', tr: 'Yemek kaydını aç') : _copy(context, en: 'Next', ar: 'التالي', fr: 'Suivant', es: 'Siguiente', tr: 'İleri')),
+                  child: Text(
+                    second
+                        ? _copy(context, en: 'Open Food Log', ar: 'فتح تسجيل الطعام', fr: 'Ouvrir le journal', es: 'Abrir el diario', tr: 'Yemek kaydını aç')
+                        : _copy(context, en: 'Next', ar: 'التالي', fr: 'Suivant', es: 'Siguiente', tr: 'İleri'),
+                  ),
                 ),
               ),
               const SizedBox(height: 6),
@@ -281,7 +298,10 @@ class _FoodGuideStep extends StatelessWidget {
                 child: TextButton(
                   key: const Key('dashboard-guide-skip'),
                   onPressed: saving ? null : onSkip,
-                  child: Text(_copy(context, en: 'Skip', ar: 'تخطي', fr: 'Ignorer', es: 'Omitir', tr: 'Atla'), style: const TextStyle(color: Colors.white70)),
+                  child: Text(
+                    _copy(context, en: 'Skip', ar: 'تخطي', fr: 'Ignorer', es: 'Omitir', tr: 'Atla'),
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ),
               ),
             ],
