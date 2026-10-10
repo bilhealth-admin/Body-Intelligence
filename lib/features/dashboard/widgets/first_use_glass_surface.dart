@@ -35,8 +35,8 @@ class FirstUseGlassSurface extends StatelessWidget {
         borderRadius: radius,
         child: BackdropFilter(
           filter: ImageFilter.blur(
-            sigmaX: reduceMotion ? 0 : 11,
-            sigmaY: reduceMotion ? 0 : 11,
+            sigmaX: reduceMotion ? 0 : 14,
+            sigmaY: reduceMotion ? 0 : 14,
           ),
           child: Stack(
             children: [
@@ -47,9 +47,9 @@ class FirstUseGlassSurface extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xF70A213B),
-                        Color(0xF4193E54),
-                        Color(0xF5132745),
+                        Color(0xDD0A213B),
+                        Color(0xDA193E54),
+                        Color(0xE5132745),
                       ],
                     ),
                   ),
