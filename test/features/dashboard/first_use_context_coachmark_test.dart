@@ -87,8 +87,8 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        locale: Locale('ar'),
+      MaterialApp(
+        locale: const Locale('ar'),
         home: Scaffold(
           body: MediaQuery(
             data: MediaQueryData(textScaler: TextScaler.linear(1.8)),
