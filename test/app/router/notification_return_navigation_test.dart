@@ -85,7 +85,13 @@ void main() {
 
     BilExternalRouteNavigator(router).open(destination!);
     await tester.pumpAndSettle();
-    expect(router.routeInformationProvider.value.uri.path, destination);
+    // go_router's RouteInformationProvider describes the declarative parent
+    // after an imperative push; assert the actually mounted destination.
+    expect(
+      tester.widget<Text>(find.byKey(const Key('destination'))).data,
+      destination,
+    );
+    expect(router.canPop(), isTrue);
     expect(find.byKey(const Key('community-safe-return')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('community-safe-return')));
@@ -133,9 +139,10 @@ void main() {
     BilExternalRouteNavigator(router).open('/community/connections');
     await tester.pumpAndSettle();
     expect(
-      router.routeInformationProvider.value.uri.path,
+      tester.widget<Text>(find.byKey(const Key('destination'))).data,
       '/community/connections',
     );
+    expect(router.canPop(), isTrue);
     await tester.tap(find.byKey(const Key('community-safe-return')));
     await tester.pumpAndSettle();
     expect(router.routeInformationProvider.value.uri.path, '/settings');
@@ -250,9 +257,9 @@ void main() {
         BilExternalRouteNavigator(router).open(route);
         await tester.pumpAndSettle();
         expect(
-          router.routeInformationProvider.value.uri.path,
-          route,
-          reason: 'External destination failed: $route',
+          find.text(route),
+          findsOneWidget,
+          reason: 'External destination did not render: $route',
         );
         if (route != '/dashboard' && route != '/community') {
           expect(
