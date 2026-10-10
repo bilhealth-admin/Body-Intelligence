@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
@@ -41,6 +42,7 @@ void main() {
           locale: Locale('ar'),
           supportedLocales: [Locale('ar'), Locale('en')],
           localizationsDelegates: [
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
@@ -98,7 +100,17 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [databaseProvider.overrideWithValue(database)],
-        child: const MaterialApp(home: FoodLogPage()),
+        child: const MaterialApp(
+          locale: Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: FoodLogPage(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
