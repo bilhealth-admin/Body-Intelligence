@@ -90,10 +90,11 @@ class _PremiumTrustedMatchDialogState
                       child: Material(
                         type: MaterialType.transparency,
                         child: ListTile(
-                          onTap: mealVisionFoodCanBeUsed(
-                            food,
-                            evidenceOwnerKey: widget.evidenceOwnerKey,
-                          )
+                          onTap:
+                              mealVisionFoodCanBeUsed(
+                                food,
+                                evidenceOwnerKey: widget.evidenceOwnerKey,
+                              )
                               ? () => setState(() => _selected = food)
                               : null,
                           leading: Icon(
@@ -113,8 +114,8 @@ class _PremiumTrustedMatchDialogState
                           ),
                           subtitle: Text(
                             food.verified
-                              ? '${food.servingSize} ${food.servingUnit} · ${food.source}'
-                              : '${food.servingSize} ${food.servingUnit} · ${food.source} · ${_word(context, 'Label evidence, not catalog-verified', 'دليل من ملصق غذائي، غير موثّق من الكتالوج')}',
+                                ? '${food.servingSize} ${food.servingUnit} · ${food.source}'
+                                : '${food.servingSize} ${food.servingUnit} · ${food.source} · ${_word(context, 'Label evidence, not catalog-verified', 'دليل من ملصق غذائي، غير موثّق من الكتالوج')}',
                             style: TextStyle(
                               color: _secondary(context),
                               fontSize: 12,

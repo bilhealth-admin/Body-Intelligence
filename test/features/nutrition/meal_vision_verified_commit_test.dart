@@ -102,9 +102,7 @@ void main() {
       expect(saved.single.quantity, 80);
       final preferences = await db.select(db.preferences).get();
       expect(
-        preferences.where(
-          (row) => row.key.startsWith('visionMealCommitV1.'),
-        ),
+        preferences.where((row) => row.key.startsWith('visionMealCommitV1.')),
         hasLength(1),
       );
     },
@@ -130,27 +128,30 @@ void main() {
     expect(await db.select(db.mealItems).get(), hasLength(1));
   });
 
-  test('reused Vision request with different food amount fails closed', () async {
-    final foodId = await verifiedFood();
-    await meals.addReviewedMealItemsAtomically(
-      date: DateTime(2026, 10, 10),
-      mealType: 'dinner',
-      items: [(foodId: foodId, quantity: 80)],
-      visionRequestId: 'vision-conflict',
-    );
-    await expectLater(
-      meals.addReviewedMealItemsAtomically(
+  test(
+    'reused Vision request with different food amount fails closed',
+    () async {
+      final foodId = await verifiedFood();
+      await meals.addReviewedMealItemsAtomically(
         date: DateTime(2026, 10, 10),
         mealType: 'dinner',
-        items: [(foodId: foodId, quantity: 90)],
+        items: [(foodId: foodId, quantity: 80)],
         visionRequestId: 'vision-conflict',
-      ),
-      throwsStateError,
-    );
-    final saved = await db.select(db.mealItems).get();
-    expect(saved, hasLength(1));
-    expect(saved.single.quantity, 80);
-  });
+      );
+      await expectLater(
+        meals.addReviewedMealItemsAtomically(
+          date: DateTime(2026, 10, 10),
+          mealType: 'dinner',
+          items: [(foodId: foodId, quantity: 90)],
+          visionRequestId: 'vision-conflict',
+        ),
+        throwsStateError,
+      );
+      final saved = await db.select(db.mealItems).get();
+      expect(saved, hasLength(1));
+      expect(saved.single.quantity, 80);
+    },
+  );
 
   test('failed Vision batch rolls back item and idempotency receipt', () async {
     final foodId = await verifiedFood();

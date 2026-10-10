@@ -54,10 +54,11 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
               const SizedBox(height: 10),
               for (final food in foods)
                 ListTile(
-                  onTap: mealVisionFoodCanBeUsed(
-                    food,
-                    evidenceOwnerKey: evidenceOwnerKey,
-                  )
+                  onTap:
+                      mealVisionFoodCanBeUsed(
+                        food,
+                        evidenceOwnerKey: evidenceOwnerKey,
+                      )
                       ? () => setState(() => selected = food)
                       : null,
                   leading: Icon(
@@ -79,7 +80,8 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
             child: Text(copy.cancel),
           ),
           FilledButton(
-            onPressed: selected == null ||
+            onPressed:
+                selected == null ||
                     !mealVisionFoodCanBeUsed(
                       selected!,
                       evidenceOwnerKey: evidenceOwnerKey,
