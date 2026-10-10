@@ -275,9 +275,12 @@ Finder get _matchUse {
 }
 
 Future<void> _chooseMatch(WidgetTester tester, String name) async {
-  await _until(tester, find.text(name));
+  // Premium repeats the recognized name in its heading. Select the actual
+  // catalog row, not a text matcher that also sees the recognition heading.
+  final row = find.widgetWithText(ListTile, name);
+  await _until(tester, row);
   expect(tester.widget<FilledButton>(_matchUse).onPressed, isNull);
-  await tester.tap(find.text(name));
+  await tester.tap(row);
   await tester.pump();
   expect(tester.widget<FilledButton>(_matchUse).onPressed, isNotNull);
   await tester.tap(_matchUse);

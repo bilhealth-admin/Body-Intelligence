@@ -24,6 +24,7 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
   required List<Food> foods,
   double? reviewedAmount,
   String? reviewedUnit,
+  String? evidenceOwnerKey,
 }) {
   if (foods.isEmpty) return Future<Food?>.value(null);
   if (MediaQuery.sizeOf(context).width >= 320) {
@@ -33,6 +34,7 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
       foods: foods,
       reviewedAmount: reviewedAmount,
       reviewedUnit: reviewedUnit,
+      evidenceOwnerKey: evidenceOwnerKey,
     );
   }
   Food? selected;
@@ -52,7 +54,12 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
               const SizedBox(height: 10),
               for (final food in foods)
                 ListTile(
-                  onTap: () => setState(() => selected = food),
+                  onTap: mealVisionFoodCanBeUsed(
+                    food,
+                    evidenceOwnerKey: evidenceOwnerKey,
+                  )
+                      ? () => setState(() => selected = food)
+                      : null,
                   leading: Icon(
                     identical(selected, food)
                         ? Icons.radio_button_checked
@@ -72,7 +79,11 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
             child: Text(copy.cancel),
           ),
           FilledButton(
-            onPressed: selected == null
+            onPressed: selected == null ||
+                    !mealVisionFoodCanBeUsed(
+                      selected!,
+                      evidenceOwnerKey: evidenceOwnerKey,
+                    )
                 ? null
                 : () => Navigator.pop(dialogContext, selected),
             child: Text(copy.useFood),

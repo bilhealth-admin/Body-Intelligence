@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:body_intelligence_log/features/nutrition/presentation/meal_vision_premium_review.dart';
 import 'package:body_intelligence_log/features/nutrition/services/meal_image_gateway_contract.dart';
 
+import 'food_basis_fixtures.dart';
+
 void main() {
   MealImageAnalysis sample({bool leftovers = false}) => MealImageAnalysis(
     requestId: 'review-test',
@@ -236,4 +238,61 @@ void main() {
     expect(find.textContaining('الصورة غير متاحة'), findsOneWidget);
     expect(find.byKey(const Key('premium-vision-photo')), findsNothing);
   });
+  test('modern label source needs matching owner proof, not just a food name', () {
+    final record = basisFood(snapshot: basisSnapshot(ownerKey: 'source-owner'));
+    expect(record.verified, isFalse);
+    expect(mealVisionFoodCanBeUsed(record), isFalse);
+    expect(
+      mealVisionFoodCanBeUsed(record, evidenceOwnerKey: 'other-owner'),
+      isFalse,
+    );
+    expect(
+      mealVisionFoodCanBeUsed(record, evidenceOwnerKey: 'source-owner'),
+      isTrue,
+    );
+    final corrupt = basisFood(
+      snapshot: basisSnapshot(ownerKey: 'source-owner'),
+      raw: '{"schema":"unsupported"}',
+    );
+    expect(
+      mealVisionFoodCanBeUsed(corrupt, evidenceOwnerKey: 'source-owner'),
+      isFalse,
+    );
+  });
+
+  testWidgets('owner-bound label may be selected without claiming verification', (
+    tester,
+  ) async {
+    final record = basisFood(snapshot: basisSnapshot(ownerKey: 'source-owner'));
+    Object? chosen;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showPremiumTrustedVisionFoodMatchDialog(
+                context,
+                recognizedName: 'Recognized cooked food',
+                foods: [record],
+                evidenceOwnerKey: 'source-owner',
+              ).then((value) => chosen = value),
+              child: const Text('Open source'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open source'));
+    await tester.pumpAndSettle();
+    final use = find.byKey(const Key('premium-vision-use-food'));
+    expect(tester.widget<FilledButton>(use).onPressed, isNull);
+    await tester.tap(find.text(record.name));
+    await tester.pump();
+    expect(tester.widget<FilledButton>(use).onPressed, isNotNull);
+    expect(find.textContaining('not catalog-verified'), findsOneWidget);
+    await tester.tap(use);
+    await tester.pumpAndSettle();
+    expect(chosen, same(record));
+  });
+
 }

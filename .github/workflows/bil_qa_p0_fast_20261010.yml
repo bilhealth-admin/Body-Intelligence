@@ -9,6 +9,12 @@ on:
       - .github/workflows/bil_qa_p0_fast_20261010.yml
       - lib/data/repositories/meal_repository.dart
       - lib/data/repositories/meal_repository_validation.dart
+      - lib/data/repositories/meal_repository_vision_journal.dart
+      - lib/features/daily_log/food_log_actions.dart
+      - lib/features/daily_log/daily_log_capture_actions.dart
+      - lib/features/intelligence_center/presentation/intelligence_vision_flow.dart
+      - lib/features/nutrition/presentation/meal_image_review_dialog.dart
+      - test/features/nutrition/meal_vision_verified_commit_test.dart
       - lib/features/daily_log/food_log_page.dart
       - lib/features/daily_log/food_log_tile_widgets.dart
       - lib/features/nutrition/presentation/meal_vision_premium_review.dart
@@ -47,6 +53,11 @@ jobs:
           dart format --output=none --set-exit-if-changed \
             lib/data/repositories/meal_repository.dart \
             lib/data/repositories/meal_repository_validation.dart \
+            lib/data/repositories/meal_repository_vision_journal.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/daily_log_capture_actions.dart \
+            lib/features/intelligence_center/presentation/intelligence_vision_flow.dart \
+            lib/features/nutrition/presentation/meal_image_review_dialog.dart \
             lib/features/daily_log/food_log_page.dart \
             lib/features/daily_log/food_log_tile_widgets.dart \
             lib/features/nutrition/presentation/meal_vision_premium_review.dart \
@@ -81,6 +92,8 @@ jobs:
             path: test/data/repositories/first_food_milestone_commit_test.dart
           - suite: vision-review
             path: test/features/nutrition/meal_vision_premium_review_test.dart
+          - suite: vision-durable-idempotency
+            path: test/features/nutrition/meal_vision_verified_commit_test.dart
           - suite: vision-capture
             path: test/features/nutrition/meal_vision_flutter_capture_test.dart
           - suite: architecture

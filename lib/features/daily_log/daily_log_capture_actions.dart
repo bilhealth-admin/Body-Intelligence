@@ -408,6 +408,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
             for (final (food, quantityGrams) in confirmed)
               (foodId: food.id, quantity: quantityGrams),
           ],
+          visionRequestId: analysis.requestId,
         );
         for (final (food, _) in confirmed) {
           try {

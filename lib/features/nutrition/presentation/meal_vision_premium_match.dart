@@ -6,11 +6,13 @@ class _PremiumTrustedMatchDialog extends StatefulWidget {
     required this.foods,
     this.reviewedAmount,
     this.reviewedUnit,
+    this.evidenceOwnerKey,
   });
   final String recognizedName;
   final List<Food> foods;
   final double? reviewedAmount;
   final String? reviewedUnit;
+  final String? evidenceOwnerKey;
 
   @override
   State<_PremiumTrustedMatchDialog> createState() =>
@@ -88,7 +90,10 @@ class _PremiumTrustedMatchDialogState
                       child: Material(
                         type: MaterialType.transparency,
                         child: ListTile(
-                          onTap: food.verified
+                          onTap: mealVisionFoodCanBeUsed(
+                            food,
+                            evidenceOwnerKey: widget.evidenceOwnerKey,
+                          )
                               ? () => setState(() => _selected = food)
                               : null,
                           leading: Icon(
@@ -107,7 +112,9 @@ class _PremiumTrustedMatchDialogState
                             ),
                           ),
                           subtitle: Text(
-                            '${food.servingSize} ${food.servingUnit} · ${food.source}',
+                            food.verified
+                              ? '${food.servingSize} ${food.servingUnit} · ${food.source}'
+                              : '${food.servingSize} ${food.servingUnit} · ${food.source} · ${_word(context, 'Label evidence, not catalog-verified', 'دليل من ملصق غذائي، غير موثّق من الكتالوج')}',
                             style: TextStyle(
                               color: _secondary(context),
                               fontSize: 12,
@@ -130,8 +137,12 @@ class _PremiumTrustedMatchDialogState
                       Text(
                         _word(
                           context,
-                          'Nutrition from trusted record',
-                          'القيمة الغذائية من السجل الموثوق',
+                          _selected!.verified
+                              ? 'Nutrition from trusted record'
+                              : 'Nutrition from reviewed label evidence',
+                          _selected!.verified
+                              ? 'القيمة الغذائية من السجل الموثوق'
+                              : 'القيمة الغذائية من دليل ملصق راجعته أنت',
                         ),
                         style: TextStyle(
                           color: _accent(context),
@@ -190,7 +201,10 @@ class _PremiumTrustedMatchDialogState
               key: const Key('premium-vision-use-food'),
               onPressed:
                   _selected == null ||
-                      !(_selected!.verified) ||
+                      !mealVisionFoodCanBeUsed(
+                        _selected!,
+                        evidenceOwnerKey: widget.evidenceOwnerKey,
+                      ) ||
                       (widget.reviewedAmount != null &&
                           widget.reviewedUnit != null &&
                           mealImageAmountInGrams(
@@ -205,8 +219,12 @@ class _PremiumTrustedMatchDialogState
               child: Text(
                 _word(
                   context,
-                  'Use this verified food',
-                  'استخدام الطعام الموثوق',
+                  _selected?.verified == true
+                      ? 'Use this verified food'
+                      : 'Use this reviewed food source',
+                  _selected?.verified == true
+                      ? 'استخدام الطعام الموثوق'
+                      : 'استخدام مصدر الطعام الذي راجعته',
                 ),
               ),
             ),

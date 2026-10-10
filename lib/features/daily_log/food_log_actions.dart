@@ -401,7 +401,17 @@ extension _FoodLogActions on _FoodLogPageState {
                 selection.candidate.name,
                 limit: 10,
               )).where((food) => food.verified).toList(growable: false);
-        if (!mounted || foods.isEmpty) continue;
+        if (!mounted) return;
+        if (foods.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${selection.candidate.name}: ${visionCopy.text('no_match')}',
+              ),
+            ),
+          );
+          continue;
+        }
         final reviewed = await showTrustedVisionFoodMatchDialog(
           context,
           recognizedName: selection.candidate.name,
@@ -428,6 +438,7 @@ extension _FoodLogActions on _FoodLogPageState {
               for (final (food, quantity) in confirmed)
                 (foodId: food.id, quantity: quantity),
             ],
+            visionRequestId: analysis.requestId,
           );
       for (final (food, _) in confirmed) {
         try {

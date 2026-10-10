@@ -31,6 +31,7 @@ part 'meal_repository_coach_undo.dart';
 part 'meal_repository_coach_food.dart';
 part 'meal_repository_food_portions.dart';
 part 'meal_repository_validation.dart';
+part 'meal_repository_vision_journal.dart';
 
 class MealRepository {
   final AppDatabase _database;
@@ -161,6 +162,7 @@ class MealRepository {
     required String mealType,
     required List<({int foodId, double quantity})> items,
     bool quantitiesInGrams = true,
+    String? visionRequestId,
   }) async {
     if (items.isEmpty) {
       throw ArgumentError.value(items, 'items', 'Must not be empty');
@@ -168,7 +170,18 @@ class MealRepository {
     for (final item in items) {
       _validateQuantity(item.quantity);
     }
+    final intent = _visionCommitIntent(
+      visionRequestId,
+      date,
+      mealType,
+      items,
+      quantitiesInGrams,
+    );
     return _database.transaction(() async {
+      if (intent != null) {
+        final priorMealId = await _visionCommittedMealId(intent);
+        if (priorMealId != null) return priorMealId;
+      }
       final mealId = await createMeal(
         date: date,
         name: mealType,
@@ -182,6 +195,7 @@ class MealRepository {
           quantityInGrams: quantitiesInGrams,
         );
       }
+      if (intent != null) await _saveVisionCommitReceipt(intent, mealId);
       return mealId;
     });
   }

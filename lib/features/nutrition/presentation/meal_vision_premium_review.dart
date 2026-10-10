@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../data/database/app_database.dart';
+import '../../../data/database/food_basis_evidence.dart';
 import '../services/meal_image_gateway_contract.dart';
 import '../domain/unified_food.dart';
 
@@ -50,6 +51,7 @@ Future<Food?> showPremiumTrustedVisionFoodMatchDialog(
   required List<Food> foods,
   double? reviewedAmount,
   String? reviewedUnit,
+  String? evidenceOwnerKey,
 }) {
   if (foods.isEmpty) return Future<Food?>.value(null);
   return showDialog<Food>(
@@ -60,8 +62,19 @@ Future<Food?> showPremiumTrustedVisionFoodMatchDialog(
       foods: foods,
       reviewedAmount: reviewedAmount,
       reviewedUnit: reviewedUnit,
+      evidenceOwnerKey: evidenceOwnerKey,
     ),
   );
+}
+
+/// A normal Vision match requires a verified catalog row. Coach can also
+/// present an owner-checked immutable modern label snapshot, but never a
+/// free-form, unverifiable local or model-generated record.
+bool mealVisionFoodCanBeUsed(Food food, {String? evidenceOwnerKey}) {
+  if (food.verified) return true;
+  if (evidenceOwnerKey == null || evidenceOwnerKey.isEmpty) return false;
+  final evidence = FoodBasisEvidence.read(food, ownerKey: evidenceOwnerKey);
+  return evidence.isModern && evidence.isValid && evidence.snapshot != null;
 }
 
 String _word(BuildContext context, String english, String arabic) {

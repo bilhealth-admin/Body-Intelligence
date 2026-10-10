@@ -32,6 +32,16 @@ jobs:
         run: |
           set -euo pipefail
           dart format \
+            lib/data/repositories/meal_repository.dart \
+            lib/data/repositories/meal_repository_vision_journal.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/daily_log_capture_actions.dart \
+            lib/features/intelligence_center/presentation/intelligence_vision_flow.dart \
+            lib/features/nutrition/presentation/meal_image_review_dialog.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_review.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_match.dart \
+            test/features/nutrition/meal_vision_verified_commit_test.dart \
+            test/features/nutrition/meal_vision_premium_review_test.dart \
             test/features/nutrition/coach_food_commit_test.dart \
             test/features/nutrition/coach_meal_commit_boundary_test.dart \
             test/features/nutrition/coach_meal_journal_cases.dart \
@@ -43,6 +53,16 @@ jobs:
           git config user.name "BIL QA exact SDK formatter"
           git config user.email "bil-qa-format@users.noreply.github.com"
           git add -- \
+            lib/data/repositories/meal_repository.dart \
+            lib/data/repositories/meal_repository_vision_journal.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/daily_log_capture_actions.dart \
+            lib/features/intelligence_center/presentation/intelligence_vision_flow.dart \
+            lib/features/nutrition/presentation/meal_image_review_dialog.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_review.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_match.dart \
+            test/features/nutrition/meal_vision_verified_commit_test.dart \
+            test/features/nutrition/meal_vision_premium_review_test.dart \
             test/features/nutrition/coach_food_commit_test.dart \
             test/features/nutrition/coach_meal_commit_boundary_test.dart \
             test/features/nutrition/coach_meal_journal_cases.dart \
@@ -55,7 +75,7 @@ jobs:
             echo "BIL_QA_SDK_FORMAT_ALREADY_PASS"
             exit 0
           fi
-          git commit -m "style(qa): apply exact Flutter 3.44.6 formatting to six scoped regression tests"
+          git commit -m "style(qa): apply exact Flutter 3.44.6 formatting to scoped Vision and QA files"
           git fetch origin qa/bil-quality-ux-integration-20261009
           local_parent="$(git rev-parse HEAD^)"
           remote_head="$(git rev-parse origin/qa/bil-quality-ux-integration-20261009)"
