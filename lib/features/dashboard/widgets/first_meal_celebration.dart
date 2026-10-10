@@ -42,9 +42,7 @@ abstract final class FirstMealCelebration {
       entry.dispose();
     }
 
-    entry = OverlayEntry(
-      builder: (_) => _FirstFoodBurst(onFinished: finish),
-    );
+    entry = OverlayEntry(builder: (_) => _FirstFoodBurst(onFinished: finish));
     overlay.insert(entry);
     return true;
   }
@@ -100,19 +98,14 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
     super.dispose();
   }
 
-  String _copy(
-    String en,
-    String ar,
-    String fr,
-    String es,
-    String tr,
-  ) => switch (Localizations.localeOf(context).languageCode) {
-    'ar' => ar,
-    'fr' => fr,
-    'es' => es,
-    'tr' => tr,
-    _ => en,
-  };
+  String _copy(String en, String ar, String fr, String es, String tr) =>
+      switch (Localizations.localeOf(context).languageCode) {
+        'ar' => ar,
+        'fr' => fr,
+        'es' => es,
+        'tr' => tr,
+        _ => en,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -177,10 +170,12 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                       if (!_reducedMotion)
                         for (var i = 0; i < 10; i++)
                           Positioned(
-                            left: 155 +
+                            left:
+                                155 +
                                 math.cos(i * math.pi * 2 / 10) *
                                     (35 + burst * (116 + i % 3 * 14)),
-                            top: 165 +
+                            top:
+                                165 +
                                 math.sin(i * math.pi * 2 / 10) *
                                     (30 + burst * (108 + i % 4 * 12)),
                             child: Opacity(
@@ -264,10 +259,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
 /// Deterministic vector pieces remain crisp when emoji fonts differ across
 /// devices. The larger emoji layer above adds joyful native OS glyphs.
 class _ConfettiBurstPainter extends CustomPainter {
-  const _ConfettiBurstPainter({
-    required this.progress,
-    required this.opacity,
-  });
+  const _ConfettiBurstPainter({required this.progress, required this.opacity});
 
   final double progress;
   final double opacity;
@@ -301,11 +293,7 @@ class _ConfettiBurstPainter extends CustomPainter {
       canvas.translate(origin.dx + dx, origin.dy + dy);
       canvas.rotate(angle + local * (i.isEven ? 3 : -3));
       if (i % 3 == 0) {
-        canvas.drawCircle(
-          Offset.zero,
-          2.3 + (i % 3),
-          paint,
-        );
+        canvas.drawCircle(Offset.zero, 2.3 + (i % 3), paint);
       } else {
         canvas.drawRRect(
           RRect.fromRectAndRadius(
