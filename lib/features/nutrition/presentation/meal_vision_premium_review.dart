@@ -328,12 +328,12 @@ class _PremiumVisionReviewDialogState
       final amount = double.tryParse(_digits(_amounts[index].text));
       final unit = mealImageCanonicalUnit(_units[index].text, locale);
       if (amount == null ||
-           !amount.isFinite ||
-           amount <= 0 ||
-           amount > 100000 ||
-           unit.trim().isEmpty) {
-      return false;
-    }
+          !amount.isFinite ||
+          amount <= 0 ||
+          amount > 100000 ||
+          unit.trim().isEmpty) {
+        return false;
+      }
     }
     return true;
   }
