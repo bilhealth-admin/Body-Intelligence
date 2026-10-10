@@ -5,9 +5,11 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
     if (_photoBusy || _saving) return;
     _setProfileEditorState(() => _photoBusy = true);
     try {
-      final result = await ref
-          .read(profilePhotoServiceProvider)
-          .chooseAndSave();
+      final result = await ref.read(profilePhotoServiceProvider).chooseAndSave(
+        confirmSelection: (bytes) => mounted
+            ? showBilSingleImageBytesReview(context, bytes: bytes)
+            : Future<bool>.value(false),
+      );
       if (!mounted || result == null) return;
       _setProfileEditorState(() {
         if (result.publicUrl != null) _avatarUrl = result.publicUrl;
@@ -40,7 +42,18 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
     try {
       final image = await CommunityPostImagePicker().pick();
       if (image == null || !mounted) return;
-      final url = await repository.uploadMyCommunityProfileCover(image);
+      final reviewed = await showBilMediaReviewSheet<CommunityPostImageDraft>(
+        context,
+        entries: [
+          BilMediaReviewEntry(
+            value: image,
+            preview: MemoryImage(image.bytes),
+          ),
+        ],
+        purpose: BilMediaReviewPurpose.coverPhoto,
+      );
+      if (!mounted || reviewed == null || reviewed.isEmpty) return;
+      final url = await repository.uploadMyCommunityProfileCover(reviewed.single);
       if (!mounted) return;
       _setProfileEditorState(() => _coverUrl = url);
       ScaffoldMessenger.of(context).showSnackBar(

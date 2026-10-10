@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+
+enum BilMediaReviewPurpose { meal, communityPost, profilePhoto, coverPhoto }
 
 /// A staged media selection. Confirming this sheet only adds files to the
 /// local composition or analysis journey; it never publishes or uploads them.
@@ -18,7 +22,12 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
   BuildContext context, {
   required List<BilMediaReviewEntry<T>> entries,
   bool forCommunity = false,
+  BilMediaReviewPurpose? purpose,
 }) {
+  final scope = purpose ??
+      (forCommunity
+          ? BilMediaReviewPurpose.communityPost
+          : BilMediaReviewPurpose.meal);
   if (entries.isEmpty) return Future<List<T>?>.value(null);
   final selected = List<BilMediaReviewEntry<T>>.of(entries);
   return showModalBottomSheet<List<T>>(
@@ -53,7 +62,13 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        tr('Review selected photos', 'مراجعة الصور المحددة'),
+                        switch (scope) {
+                          BilMediaReviewPurpose.profilePhoto =>
+                            tr('Review your profile photo', 'مراجعة الصورة الشخصية'),
+                          BilMediaReviewPurpose.coverPhoto =>
+                            tr('Review your cover photo', 'مراجعة صورة الغلاف'),
+                          _ => tr('Review selected photos', 'مراجعة الصور المحددة'),
+                        },
                         style: Theme.of(sheetContext).textTheme.titleLarge
                             ?.copyWith(fontWeight: FontWeight.w700),
                       ),
@@ -72,15 +87,24 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  forCommunity
-                      ? tr(
-                          'Nothing is published until you press Publish in your post.',
-                          'لن يُنشر شيء حتى تضغط نشر داخل المنشور.',
-                        )
-                      : tr(
-                          'Confirm this photo before AI analysis. Nothing is saved yet.',
-                          'أكّد هذه الصورة قبل التحليل. لم يُحفظ شيء بعد.',
-                        ),
+                  switch (scope) {
+                    BilMediaReviewPurpose.communityPost => tr(
+                      'Nothing is published until you press Publish in your post.',
+                      'لن يُنشر شيء حتى تضغط نشر داخل المنشور.',
+                    ),
+                    BilMediaReviewPurpose.profilePhoto => tr(
+                      'Your current photo remains until you confirm the replacement.',
+                      'تبقى صورتك الحالية حتى تؤكد استبدالها.',
+                    ),
+                    BilMediaReviewPurpose.coverPhoto => tr(
+                      'Confirm this image before updating your profile cover.',
+                      'أكّد هذه الصورة قبل تحديث غلاف ملفك.',
+                    ),
+                    BilMediaReviewPurpose.meal => tr(
+                      'Confirm this photo before AI analysis. Nothing is saved yet.',
+                      'أكّد هذه الصورة قبل التحليل. لم يُحفظ شيء بعد.',
+                    ),
+                  },
                   style: Theme.of(sheetContext).textTheme.bodyMedium
                       ?.copyWith(color: scheme.onSurfaceVariant),
                 ),
@@ -195,9 +219,16 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                             ),
                     icon: const Icon(Icons.check_circle_outline_rounded),
                     label: Text(
-                      forCommunity
-                          ? tr('Add to draft', 'إضافة إلى المسودة')
-                          : tr('Use this photo', 'استخدام هذه الصورة'),
+                      switch (scope) {
+                        BilMediaReviewPurpose.communityPost =>
+                          tr('Add to draft', 'إضافة إلى المسودة'),
+                        BilMediaReviewPurpose.profilePhoto =>
+                          tr('Update photo', 'تحديث الصورة'),
+                        BilMediaReviewPurpose.coverPhoto =>
+                          tr('Use cover photo', 'استخدام صورة الغلاف'),
+                        BilMediaReviewPurpose.meal =>
+                          tr('Use this photo', 'استخدام هذه الصورة'),
+                      },
                     ),
                   ),
                 ),
@@ -217,4 +248,25 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
       },
     ),
   );
+}
+
+/// Shared review boundary for gallery bytes destined for a profile image.
+/// Only the original validated bytes leave this sheet; Cancel never saves.
+Future<bool> showBilSingleImageBytesReview(
+  BuildContext context, {
+  required Uint8List bytes,
+  BilMediaReviewPurpose purpose = BilMediaReviewPurpose.profilePhoto,
+}) async {
+  if (bytes.isEmpty) return false;
+  final selected = await showBilMediaReviewSheet<Uint8List>(
+    context,
+    entries: [
+      BilMediaReviewEntry<Uint8List>(
+        value: bytes,
+        preview: MemoryImage(bytes),
+      ),
+    ],
+    purpose: purpose,
+  );
+  return selected != null && selected.isNotEmpty;
 }
