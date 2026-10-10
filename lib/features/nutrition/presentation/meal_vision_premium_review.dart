@@ -104,8 +104,10 @@ BoxDecoration _glassDecoration(BuildContext context, {bool active = false}) {
 Widget _glassShell(BuildContext context, Widget child) {
   final size = MediaQuery.sizeOf(context);
   final light = _light(context);
-  return Dialog(
-    insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+  return RepaintBoundary(
+    key: const Key('premium-vision-render-surface'),
+    child: Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
     elevation: 0,
     backgroundColor: Colors.transparent,
     child: ConstrainedBox(
@@ -149,6 +151,7 @@ Widget _glassShell(BuildContext context, Widget child) {
           ),
         ),
       ),
+    ),
     ),
   );
 }
