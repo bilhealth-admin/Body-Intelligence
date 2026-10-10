@@ -1,0 +1,167 @@
+[
+  {
+    "stage": "affected-vision",
+    "job": "affected-quantity",
+    "exit_code": 1,
+    "seconds": 16.0,
+    "log": "logs/affected-quantity-1791668786491741800.log",
+    "PASS": 9,
+    "FAIL": 1,
+    "SKIP": 0,
+    "done_event": {
+      "success": false,
+      "type": "done",
+      "time": 11632
+    }
+  },
+  {
+    "stage": "affected-body-twin",
+    "job": "affected-runtime",
+    "exit_code": 1,
+    "seconds": 9.9,
+    "log": "logs/affected-runtime-1791668802445608600.log",
+    "PASS": 1,
+    "FAIL": 1,
+    "SKIP": 0,
+    "done_event": {
+      "success": false,
+      "type": "done",
+      "time": 5285
+    }
+  },
+  {
+    "stage": "broad-dashboard-nutrition",
+    "job": "broad-dashboard-nutrition",
+    "exit_code": 0,
+    "seconds": 36.4,
+    "log": "logs/broad-dashboard-nutrition-1791668812302547500.log",
+    "PASS": 85,
+    "FAIL": 0,
+    "SKIP": 0,
+    "done_event": {
+      "success": true,
+      "type": "done",
+      "time": 32006
+    }
+  },
+  {
+    "stage": "broad-dashboard-contract-health",
+    "job": "broad-dashboard-contract-health",
+    "exit_code": 1,
+    "seconds": 13.4,
+    "log": "logs/broad-dashboard-contract-health-1791668848666232700.log",
+    "PASS": 28,
+    "FAIL": 1,
+    "SKIP": 0,
+    "done_event": {
+      "success": false,
+      "type": "done",
+      "time": 10366
+    }
+  },
+  {
+    "stage": "broad-weekly-onboarding-goldens",
+    "job": "broad-weekly-onboarding-goldens",
+    "exit_code": 1,
+    "seconds": 27.9,
+    "log": "logs/broad-weekly-onboarding-goldens-1791668862034597000.log",
+    "PASS": 19,
+    "FAIL": 26,
+    "SKIP": 0,
+    "done_event": {
+      "success": false,
+      "type": "done",
+      "time": 25050
+    }
+  },
+  {
+    "stage": "broad-settings-language-icons",
+    "job": "broad-settings-language-icons",
+    "exit_code": 0,
+    "seconds": 21.2,
+    "log": "logs/broad-settings-language-icons-1791668889920439900.log",
+    "PASS": 39,
+    "FAIL": 0,
+    "SKIP": 0,
+    "done_event": {
+      "success": true,
+      "type": "done",
+      "time": 18236
+    }
+  },
+  {
+    "stage": "broad-wellness-commerce",
+    "job": "broad-wellness-commerce",
+    "exit_code": 1,
+    "seconds": 13.9,
+    "log": "logs/broad-wellness-commerce-1791668911082141700.log",
+    "PASS": 9,
+    "FAIL": 2,
+    "SKIP": 0,
+    "done_event": {
+      "success": false,
+      "type": "done",
+      "time": 11078
+    }
+  },
+  {
+    "stage": "broad-community-cold-back",
+    "job": "broad-community-cold-back",
+    "exit_code": 0,
+    "seconds": 14.0,
+    "log": "logs/broad-community-cold-back-1791668924998795600.log",
+    "PASS": 46,
+    "FAIL": 0,
+    "SKIP": 0,
+    "done_event": {
+      "success": true,
+      "type": "done",
+      "time": 11234
+    }
+  },
+  {
+    "stage": "affected-p0-food-owner-atomic",
+    "job": "affected-p0-food-owner-atomic",
+    "exit_code": 0,
+    "seconds": 8.0,
+    "log": "logs/affected-p0-food-owner-atomic-1791668944030404800.log",
+    "PASS": 32,
+    "FAIL": 0,
+    "SKIP": 0,
+    "done_event": {
+      "success": true,
+      "type": "done",
+      "time": 5584
+    }
+  },
+  {
+    "stage": "affected-p0-meal-owner-atomic",
+    "job": "affected-p0-meal-owner-atomic",
+    "exit_code": 0,
+    "seconds": 7.8,
+    "log": "logs/affected-p0-meal-owner-atomic-1791668952012870900.log",
+    "PASS": 16,
+    "FAIL": 0,
+    "SKIP": 0,
+    "done_event": {
+      "success": true,
+      "type": "done",
+      "time": 4914
+    }
+  },
+  {
+    "stage": "affected-p0-architecture",
+    "job": "affected-p0-architecture",
+    "exit_code": 0,
+    "seconds": 7.3,
+    "log": "logs/affected-p0-architecture-1791668959844866500.log",
+    "PASS": 1,
+    "FAIL": 0,
+    "SKIP": 0,
+    "done_event": {
+      "success": true,
+      "type": "done",
+      "time": 4230
+    }
+  }
+]
