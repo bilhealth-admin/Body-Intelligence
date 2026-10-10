@@ -274,4 +274,53 @@ void main() {
     expect(result.cloudSynced, isFalse);
     expect(await preferences.get('profilePhoto'), base64Encode(bytes));
   });
+  test('gallery Cancel prevents all local and cloud photo mutations', () async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final preferences = PreferencesRepository(database);
+    var reviews = 0;
+    final service = ProfilePhotoService(
+      preferences,
+      authenticatedOwnerId: () => null,
+      photoPicker: (_) async => XFile.fromData(
+        Uint8List.fromList(const [4, 5, 6, 7]),
+        name: 'selected.png',
+        mimeType: 'image/png',
+      ),
+    );
+    final result = await service.chooseAndSave(
+      confirmSelection: (bytes) async {
+        reviews += 1;
+        expect(bytes.length, 4);
+        return false;
+      },
+    );
+    expect(result, isNull);
+    expect(reviews, 1);
+    expect(await preferences.get('profilePhoto'), isNull);
+    expect(await preferences.get('profilePhotoPublicUrl'), isNull);
+  });
+
+  test('gallery explicit confirmation persists only reviewed original bytes', () async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final preferences = PreferencesRepository(database);
+    final source = Uint8List.fromList(const [51, 52, 53, 54]);
+    final service = ProfilePhotoService(
+      preferences,
+      authenticatedOwnerId: () => null,
+      photoPicker: (_) async =>
+          XFile.fromData(source, name: 'avatar.png', mimeType: 'image/png'),
+    );
+    final result = await service.chooseAndSave(
+      confirmSelection: (bytes) async {
+        expect(bytes, source);
+        return true;
+      },
+    );
+    expect(result, isNotNull);
+    expect(result!.bytes, source);
+    expect(await preferences.get('profilePhoto'), base64Encode(source));
+  });
+
 }
