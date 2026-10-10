@@ -438,6 +438,15 @@ extension _FoodLogActions on _FoodLogPageState {
           SnackBar(content: Text(visionCopy.text('confirmed_added'))),
         );
       }
+      // Show the same one-time first-food celebration after a fully reviewed,
+      // atomic photo log. A cancelled or rejected image never reaches here.
+      if (!mounted) return;
+      if (_tourVisible) await _dismissFoodTour(completed: true);
+      if (!mounted) return;
+      await FirstMealCelebration.showIfPending(
+        context,
+        ref.read(preferencesRepositoryProvider),
+      );
     } on MealImageAnalysisException catch (error) {
       if (!mounted) return;
       if (error.failure == MealImageAnalysisFailure.boostRequired) {
@@ -512,6 +521,14 @@ extension _FoodLogActions on _FoodLogPageState {
       ref.invalidate(dailyMealsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_t(context, 'Quick Add saved locally.'))),
+      );
+      // Quick Add writes a real diary snapshot. Only the repository milestone
+      // may arm the effect, and cancellation never claims it.
+      if (_tourVisible) await _dismissFoodTour(completed: true);
+      if (!mounted) return;
+      await FirstMealCelebration.showIfPending(
+        context,
+        ref.read(preferencesRepositoryProvider),
       );
     } finally {
       quickAddBusy = false;
