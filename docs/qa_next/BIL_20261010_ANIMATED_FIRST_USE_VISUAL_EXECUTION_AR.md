@@ -67,3 +67,6 @@ Verify run 38035105337: format and analyzer passed; 14 functional tests passed a
 
 ## Latest source-gate correction
 The first-use source gate for SHA `108cc7a4` passed Dart Format and Flutter Analyze. It passed 15 targeted tests but failed the lazy Food Log serving-guide test because `ensureVisible` could not locate an unmounted off-screen row. The test now drives the Food Log ListView's exact Scrollable using `scrollUntilVisible` rather than touching application code or weakening assertions. The new commit must still pass the strict source gate and all downstream checks.
+
+## Source gate on 2b9a8435
+The strict CI format gate identified one final Dart formatter change in the Food Log scroll finder. Flutter Analyze passed with zero issues. The exact SDK formatting patch was applied. The source now also triggers the milestone after successfully committed photo and quick-macro entries, without changing transactional writes. This branch still requires a fresh green source gate, all five focused suites, eight full shards, and native visual inspection before release readiness.
