@@ -34,6 +34,8 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          theme: visualEvidenceTheme(ThemeData()),
+          builder: (context, child) => visualEvidenceTextSurface(child),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
