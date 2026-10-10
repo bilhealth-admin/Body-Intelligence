@@ -86,7 +86,11 @@ class FirstUseContextCoachmark extends StatelessWidget {
                             color: accent.withValues(alpha: .36),
                           ),
                         ),
-                        child: Icon(icon, color: accent, size: compact ? 20 : 25),
+                        child: Icon(
+                          icon,
+                          color: accent,
+                          size: compact ? 20 : 25,
+                        ),
                       ),
                       const Spacer(),
                       if (step != null && stepCount != null)
@@ -206,10 +210,7 @@ class _GlassGuidePointer extends CustomPainter {
       ..lineTo(size.width, 0)
       ..lineTo(size.width / 2, size.height)
       ..close();
-    canvas.drawPath(
-      path,
-      Paint()..color = const Color(0xEC173B4E),
-    );
+    canvas.drawPath(path, Paint()..color = const Color(0xEC173B4E));
     canvas.drawLine(
       Offset.zero,
       Offset(size.width / 2, size.height),
