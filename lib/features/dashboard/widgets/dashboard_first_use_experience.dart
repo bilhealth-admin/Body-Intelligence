@@ -240,9 +240,7 @@ class _FoodGuideStep extends StatelessWidget {
         ),
         child: FirstUseGlassSurface(
           key: ValueKey(step),
-        accent: second ? const Color(0xFF8CC7FF) : const Color(0xFF70F1D4),
-        child: Padding(
-          padding: EdgeInsets.zero,
+          accent: second ? const Color(0xFF8CC7FF) : const Color(0xFF70F1D4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -306,7 +304,6 @@ class _FoodGuideStep extends StatelessWidget {
               ),
             ],
           ),
-        ),
         ),
       ),
     );
