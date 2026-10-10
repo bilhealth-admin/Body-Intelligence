@@ -365,6 +365,19 @@ extension _FoodLogActions on _FoodLogPageState {
                 imageQuality: 88,
                 maxWidth: 1800,
               );
+        if (source == ImageSource.gallery && image != null && mounted) {
+          final reviewed = await showBilMediaReviewSheet<XFile>(
+            context,
+            entries: [
+              BilMediaReviewEntry(
+                value: image,
+                preview: FileImage(File(image.path)),
+              ),
+            ],
+          );
+          if (!mounted || reviewed == null || reviewed.isEmpty) return;
+          image = reviewed.single;
+        }
       }
       if (image == null || !mounted) return;
       final analysis = await service.analyze(image);
