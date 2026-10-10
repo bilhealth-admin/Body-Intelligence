@@ -97,7 +97,7 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
         Checkbox(
           key: Key('premium-vision-select-$index'),
           value: _selected.contains(index),
-          onChanged: (value) => setState(() {
+          onChanged: (value) => _visualUpdate(() {
             if (value == true) {
               _selected.add(index);
             } else {
@@ -191,13 +191,14 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
       key: const Key('premium-vision-edit-ingredients'),
       onPressed: () {
         final target = _ingredientsAnchor.currentContext;
-        if (target != null)
+        if (target != null) {
           Scrollable.ensureVisible(
             target,
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
                 : const Duration(milliseconds: 250),
           );
+        }
       },
       icon: const Icon(Icons.tune_rounded, size: 18),
       label: Text(_word(context, 'Edit ingredients', 'تعديل المكونات')),

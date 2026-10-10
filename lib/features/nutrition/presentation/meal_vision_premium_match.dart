@@ -269,6 +269,7 @@ class _PremiumTrustedMatchDialogState
                                 null)
                     ? null
                     : () => Navigator.pop(context, _selected),
+                style: _visionActionStyle(context),
                 child: Text(
                   _word(
                     context,
@@ -280,7 +281,6 @@ class _PremiumTrustedMatchDialogState
                         : 'استخدام مصدر الطعام الذي راجعته',
                   ),
                 ),
-                style: _visionActionStyle(context),
               ),
             ),
           ),
