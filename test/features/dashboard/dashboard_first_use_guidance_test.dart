@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   testWidgets(
@@ -134,4 +135,61 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 10));
   });
+  testWidgets('continuing the guide enables contextual Food Log help', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+      localOwnerId: 'owner-a',
+    );
+    addTearDown(database.close);
+    final preferences = PreferencesRepository(database);
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const Scaffold(
+            body: DashboardFirstUseExperience(
+              ownerScope: 'owner-a',
+              ownerReady: true,
+              child: Text('The Home screen remains available'),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/daily-log',
+          builder: (context, state) => const Scaffold(
+            body: Text('Real Food Log destination'),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [databaseProvider.overrideWithValue(database)],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('dashboard-guide-skip')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('dashboard-guide-next')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('dashboard-food-guide-step-1')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('dashboard-guide-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Real Food Log destination'), findsOneWidget);
+    expect(
+      await preferences.get('experience.dashboard_food_guide.v1.owner-a'),
+      'started',
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 10));
+  });
+
 }
