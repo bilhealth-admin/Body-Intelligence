@@ -6,12 +6,18 @@ import '../../../data/repositories/first_meal_milestone.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'first_meal_celebration.dart';
-import 'first_use_glass_surface.dart';
+import 'first_use_context_coachmark.dart';
 
 final _firstFoodMilestoneStatusProvider = StreamProvider<String?>(
   (ref) => ref
       .watch(preferencesRepositoryProvider)
       .watch(firstMealCelebrationPreferenceKey),
+);
+
+final _firstFoodStreakStatusProvider = StreamProvider<String?>(
+  (ref) => ref
+      .watch(preferencesRepositoryProvider)
+      .watch(firstMealStreakGuidePreferenceKey),
 );
 
 /// Non-modal food walkthrough. Skip is always available and never changes data.
@@ -37,6 +43,7 @@ class _DashboardFirstUseExperienceState
   bool _ready = false;
   bool _canGuide = false;
   bool _saving = false;
+  bool _streakDismissed = false;
   int _step = 0;
 
   String get _guideKey =>
@@ -56,6 +63,7 @@ class _DashboardFirstUseExperienceState
       _ready = false;
       _canGuide = false;
       _saving = false;
+      _streakDismissed = false;
       _step = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) => _load());
     }
@@ -91,7 +99,7 @@ class _DashboardFirstUseExperienceState
       _canGuide = false;
     });
     try {
-      await preferences.set(key, 'dismissed');
+      await preferences.set(key, openFood ? 'started' : 'dismissed');
     } catch (_) {
       // Skip always works for this visit when persistence is unavailable.
     }
@@ -101,10 +109,25 @@ class _DashboardFirstUseExperienceState
     if (openFood) context.go('/daily-log?foodLog=1&from=%2Fdashboard');
   }
 
+  Future<void> _dismissStreak() async {
+    if (_streakDismissed) return;
+    final scope = widget.ownerScope;
+    setState(() => _streakDismissed = true);
+    try {
+      await ref
+          .read(preferencesRepositoryProvider)
+          .set(firstMealStreakGuidePreferenceKey, 'seen');
+    } on Object {
+      // This optional guide must never trap the user on a storage error.
+    }
+    if (!mounted || widget.ownerScope != scope) return;
+  }
+
   @override
   Widget build(BuildContext context) {
     final meals = ref.watch(allMealsProvider);
     final firstFoodStatus = ref.watch(_firstFoodMilestoneStatusProvider);
+    final streakStatus = ref.watch(_firstFoodStreakStatusProvider);
     // Empty meal buckets are not evidence of a recorded food item, and a
     // previously celebrated/deleted first food must not reopen onboarding.
     final hasLoggedFood =
@@ -117,6 +140,15 @@ class _DashboardFirstUseExperienceState
         firstFoodStatus.hasValue &&
         firstFoodStatus.value == null &&
         !hasLoggedFood;
+    final needsStreakGuide =
+        widget.ownerReady &&
+        _ready &&
+        !_streakDismissed &&
+        !needsGuide &&
+        meals.hasValue &&
+        hasLoggedFood &&
+        firstFoodStatus.value == 'done' &&
+        streakStatus.value == 'ready';
     // Put the optional walkthrough in the normal Home scroll flow.
     // A fixed bottom overlay covered calories/weight and could intercept
     // underlying controls, especially with large text or narrow viewports.
@@ -142,6 +174,16 @@ class _DashboardFirstUseExperienceState
                   }
                 },
               ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (needsStreakGuide) ...[
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: _StreakGuideStep(onFinish: _dismissStreak),
             ),
           ),
           const SizedBox(height: 12),
@@ -183,11 +225,10 @@ class _FoodGuideStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final second = step == 1;
-    const foreground = Colors.white;
     final title = second
         ? _copy(
             context,
-            en: 'Search for your food',
+            en: 'Find your food',
             ar: 'ابحث عن طعامك',
             fr: 'Recherchez votre aliment',
             es: 'Busca tu alimento',
@@ -204,153 +245,87 @@ class _FoodGuideStep extends StatelessWidget {
     final message = second
         ? _copy(
             context,
-            en: 'Search, check the amount, and confirm. Nothing is saved automatically.',
-            ar: 'ابحث عن طعامك وراجع الكمية ثم أكّدها. لن يُحفظ شيء تلقائيًا.',
-            fr: 'Recherchez, vérifiez la quantité, puis confirmez.',
-            es: 'Busca, revisa la cantidad y confirma.',
-            tr: 'Yemeği ara, miktarı kontrol et ve onayla.',
+            en: 'Search for a food, choose its serving, then confirm. Nothing is saved automatically.',
+            ar: 'ابحث عن الطعام، حدّد الكمية، ثم أكّد الحفظ. لا نسجّل شيئًا تلقائيًا.',
+            fr: 'Recherchez, choisissez la portion et confirmez.',
+            es: 'Busca, elige la porción y confirma.',
+            tr: 'Yemeği ara, porsiyonu seç ve onayla.',
           )
         : _copy(
             context,
-            en: 'We can guide you. Skip at any time to explore freely.',
-            ar: 'يمكننا إرشادك خطوة بخطوة. تخطَّ متى أردت واستخدم التطبيق بحرية.',
-            fr: 'Nous pouvons vous guider. Ignorez ces conseils à tout moment.',
-            es: 'Podemos guiarte. Puedes omitir los consejos.',
-            tr: 'Size yol gösterebiliriz. İpuçlarını atlayabilirsiniz.',
+            en: 'A quick guided start, completely optional.',
+            ar: 'بداية تفاعلية سريعة، ويمكنك تخطيها متى شئت.',
+            fr: 'Un départ guidé, entièrement facultatif.',
+            es: 'Una introducción guiada y opcional.',
+            tr: 'Tamamen isteğe bağlı kısa bir rehber.',
           );
     return Semantics(
       key: Key('dashboard-food-guide-step-$step'),
       container: true,
-      label: '$title. $message',
       child: AnimatedSwitcher(
         duration: Duration(
-          milliseconds: MediaQuery.maybeOf(context)?.disableAnimations == true
-              ? 1
-              : 420,
+          milliseconds: MediaQuery.disableAnimationsOf(context) ? 1 : 370,
         ),
-        transitionBuilder: (child, animation) => FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, .08),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          ),
-        ),
-        child: FirstUseGlassSurface(
+        child: FirstUseContextCoachmark(
           key: ValueKey(step),
-          accent: second ? const Color(0xFF8CC7FF) : const Color(0xFF70F1D4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        color: foreground,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 23,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Icon(
-                    second ? Icons.search_rounded : Icons.celebration_rounded,
-                    size: 26,
-                    color: const Color(0xFFAEF9E8),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Text(
-                message,
-                style: TextStyle(
-                  color: foreground.withValues(alpha: .88),
-                  fontSize: 14,
-                  height: 1.38,
+          title: title,
+          message: message,
+          step: step + 1,
+          stepCount: 2,
+          icon: second ? Icons.search_rounded : Icons.celebration_rounded,
+          accent: second
+              ? const Color(0xFF9ACBFF)
+              : const Color(0xFF95F5E1),
+          onAction: saving ? null : onNext,
+          actionLabel: second
+              ? _copy(
+                  context,
+                  en: 'Open Food Log',
+                  ar: 'فتح تسجيل الطعام',
+                  fr: 'Ouvrir le journal',
+                  es: 'Abrir el diario',
+                  tr: 'Yemek kaydını aç',
+                )
+              : _copy(
+                  context,
+                  en: 'Next',
+                  ar: 'التالي',
+                  fr: 'Suivant',
+                  es: 'Siguiente',
+                  tr: 'İleri',
                 ),
-              ),
-              const SizedBox(height: 15),
-              Row(
-                children: [
-                  for (var i = 0; i < 2; i++) ...[
-                    Expanded(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: i <= step
-                              ? const Color(0xFF9DF6E5)
-                              : Colors.white24,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                    ),
-                    if (i == 0) const SizedBox(width: 7),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: FilledButton(
-                  key: const Key('dashboard-guide-next'),
-                  onPressed: saving ? null : onNext,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFAEF9E8),
-                    foregroundColor: const Color(0xFF0D2B40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    second
-                        ? _copy(
-                            context,
-                            en: 'Open Food Log',
-                            ar: 'فتح تسجيل الطعام',
-                            fr: 'Ouvrir le journal',
-                            es: 'Abrir el diario',
-                            tr: 'Yemek kaydını aç',
-                          )
-                        : _copy(
-                            context,
-                            en: 'Next',
-                            ar: 'التالي',
-                            fr: 'Suivant',
-                            es: 'Siguiente',
-                            tr: 'İleri',
-                          ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Center(
-                child: TextButton(
-                  key: const Key('dashboard-guide-skip'),
-                  onPressed: saving ? null : onSkip,
-                  child: Text(
-                    _copy(
-                      context,
-                      en: 'Skip',
-                      ar: 'تخطي',
-                      fr: 'Ignorer',
-                      es: 'Omitir',
-                      tr: 'Atla',
-                    ),
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          onSkip: onSkip,
+          skipKey: const Key('dashboard-guide-skip'),
+          actionKey: const Key('dashboard-guide-next'),
         ),
       ),
+    );
+  }
+}
+
+class _StreakGuideStep extends StatelessWidget {
+  const _StreakGuideStep({required this.onFinish});
+
+  final VoidCallback onFinish;
+
+  @override
+  Widget build(BuildContext context) {
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    return FirstUseContextCoachmark(
+      key: const Key('dashboard-first-food-streak-guide'),
+      title: ar ? 'أول يوم في رحلتك!' : 'Day one of your journey!',
+      message: ar
+          ? 'سجلّك بدأ بالفعل. تابع أيامك هنا بعد كل وجبة، دون خطوات إضافية أو اشتراك.'
+          : 'Your streak begins here. Come back after each meal to follow your days.',
+      step: 3,
+      stepCount: 3,
+      icon: Icons.calendar_month_rounded,
+      accent: const Color(0xFFFBD583),
+      onAction: onFinish,
+      actionLabel: ar ? 'رائع، فهمت' : 'Got it',
+      onSkip: onFinish,
+      skipKey: const Key('dashboard-streak-guide-skip'),
+      actionKey: const Key('dashboard-streak-guide-done'),
     );
   }
 }
