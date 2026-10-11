@@ -99,3 +99,16 @@ tools/qa/evidence/20261011-final-closure/records/first-use-preserved.json
 - أحدث CI قيد الفحص: https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38114955005
 
 **نقطة النهاية للتسليم:** كل ما ظهر من كود/أدلة في GitHub محفوظ على الفروع، لكن First Use المحلي غير مرفوع، والتكامل لم يثبت نجاحه نهائياً، والأجهزة والمتجر لم تُعتمد. لا تقل Release Ready.
+
+
+## 10) تحديث نهائي بعد إكمال GitHub CI الخاص بـ a993f172
+بعد إنشاء نسخة التوثيق، انتهى تشغيل 38114955005 بنتيجة **failure**، لكن السبب مختلف عن حالات Community الثلاث السابقة:
+
+- Strict Dart Format: **FAIL** لأن ملفًا واحدًا فقط يحتاج تنسيقًا: lib/shared/widgets/bil_media_review_sheet.dart. التقرير: Formatted 21 files (1 changed)، دون تعديل GitHub تلقائيًا.
+- Flutter Analyze: **SUCCESS**.
+- Python policy guard: **SUCCESS**.
+- Focused media/account tests: **SKIPPED** بسبب فشل بوابة التنسيق، لذا لا تُدّع نجاحها أو فشل حالات Community على هذا SHA.
+- Strict aggregate: **FAIL** بحق لأن Format=failure وTests=skipped.
+- المصدر: https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38114955005 — Job 114397909707.
+
+**الأولوية العملية التالية دون إهدار الرصيد:** في فرع integration الحالي، شغّل dart format فقط للملف أعلاه، وراجع Git diff وافحص ألا يتغير المنطق، وارفع الكوميت الصغير، ثم أعد تشغيل Focused الحالي. إذا بقيت حالات Community حمراء، افحصها على السجل الجديد فقط ثم أصلحها منفردة. لا تشغل Full8 أو تغيّر baseline القديم لهذا الإصلاح الشكلي.
