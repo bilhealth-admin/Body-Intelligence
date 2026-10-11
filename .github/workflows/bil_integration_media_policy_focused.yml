@@ -1,0 +1,160 @@
+name: BIL isolated integration focused QA
+
+# Scope is restricted to the post-Codex media+policy integration only.
+# No full 8-shard run, builds, secrets, deployment, or source writeback.
+on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_integration_media_policy_focused.yml
+      - lib/**
+      - test/**
+      - tool/prebuild/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-integration-focused-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve pinned dependencies
+        run: |
+          git rev-parse HEAD
+          flutter --version
+          flutter pub get
+      - name: Strict Dart formatting
+        id: fmt
+        continue-on-error: true
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            lib/app/services/recoverable_image_picker.dart \
+            lib/app/services/store_review_prompt_service.dart \
+            lib/features/community/presentation/community_hub_page.dart \
+            lib/features/community/presentation/community_post_composer_image_preview.dart \
+            lib/features/community/presentation/community_post_composer_page.dart \
+            lib/features/community/presentation/community_profile_cover_editor.dart \
+            lib/features/community/presentation/community_profile_page.dart \
+            lib/features/community/services/community_post_image_picker.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/dashboard/dashboard_page.dart \
+            lib/features/profile/premium_profile_actions.dart \
+            lib/features/profile/premium_profile_page.dart \
+            lib/features/profile/services/profile_photo_service.dart \
+            lib/shared/widgets/bil_camera_capture_page.dart \
+            lib/shared/widgets/bil_media_review_sheet.dart \
+            test/app/services/store_review_prompt_service_test.dart \
+            test/features/community/community_post_image_support_test.dart \
+            test/features/profile/premium_profile_page_test.dart \
+            test/features/profile/profile_photo_account_isolation_test.dart \
+            test/shared/widgets/bil_media_review_sheet_test.dart
+      - name: Print exact format patch without changing GitHub
+        if: steps.fmt.outcome == 'failure'
+        run: |
+          dart format \
+            lib/app/services/recoverable_image_picker.dart \
+            lib/app/services/store_review_prompt_service.dart \
+            lib/features/community/presentation/community_hub_page.dart \
+            lib/features/community/presentation/community_post_composer_image_preview.dart \
+            lib/features/community/presentation/community_post_composer_page.dart \
+            lib/features/community/presentation/community_profile_cover_editor.dart \
+            lib/features/community/presentation/community_profile_page.dart \
+            lib/features/community/services/community_post_image_picker.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/dashboard/dashboard_page.dart \
+            lib/features/profile/premium_profile_actions.dart \
+            lib/features/profile/premium_profile_page.dart \
+            lib/features/profile/services/profile_photo_service.dart \
+            lib/shared/widgets/bil_camera_capture_page.dart \
+            lib/shared/widgets/bil_media_review_sheet.dart \
+            test/app/services/store_review_prompt_service_test.dart \
+            test/features/community/community_post_image_support_test.dart \
+            test/features/profile/premium_profile_page_test.dart \
+            test/features/profile/profile_photo_account_isolation_test.dart \
+            test/shared/widgets/bil_media_review_sheet_test.dart
+          git diff --stat
+          git diff -- \
+            lib/app/services/recoverable_image_picker.dart \
+            lib/app/services/store_review_prompt_service.dart \
+            lib/features/community/presentation/community_hub_page.dart \
+            lib/features/community/presentation/community_post_composer_image_preview.dart \
+            lib/features/community/presentation/community_post_composer_page.dart \
+            lib/features/community/presentation/community_profile_cover_editor.dart \
+            lib/features/community/presentation/community_profile_page.dart \
+            lib/features/community/services/community_post_image_picker.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/dashboard/dashboard_page.dart \
+            lib/features/profile/premium_profile_actions.dart \
+            lib/features/profile/premium_profile_page.dart \
+            lib/features/profile/services/profile_photo_service.dart \
+            lib/shared/widgets/bil_camera_capture_page.dart \
+            lib/shared/widgets/bil_media_review_sheet.dart \
+            test/app/services/store_review_prompt_service_test.dart \
+            test/features/community/community_post_image_support_test.dart \
+            test/features/profile/premium_profile_page_test.dart \
+            test/features/profile/profile_photo_account_isolation_test.dart \
+            test/shared/widgets/bil_media_review_sheet_test.dart
+      - name: Flutter analyze (complete source)
+        id: analyze
+        continue-on-error: true
+        run: flutter analyze --no-pub
+      - name: Run source-only privacy and policy guard
+        id: policy
+        continue-on-error: true
+        run: |
+          python -m unittest discover -s tool/prebuild -p test_store_policy_source_guard.py -v
+          python tool/prebuild/store_policy_source_guard.py --json-out build/store-policy/guard.json
+      - name: Focused media, account, review and architecture regressions
+        id: regressions
+        if: steps.fmt.outcome == 'success' && steps.analyze.outcome == 'success' && steps.policy.outcome == 'success'
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout=3m \
+            test/shared/widgets/bil_media_review_sheet_test.dart \
+            test/features/community/community_post_image_support_test.dart \
+            test/features/community/community_multi_image_v1_contract_test.dart \
+            test/features/community/community_draft_mosaic_repository_test.dart \
+            test/features/community/community_post_gallery_behavior_test.dart \
+            test/features/profile/profile_photo_account_isolation_test.dart \
+            test/features/profile/premium_profile_page_test.dart \
+            test/features/daily_log/meal_photo_initial_action_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart \
+            test/app/services/store_review_prompt_service_test.dart \
+            test/architecture_source_file_size_guard_test.dart
+      - name: Export source-only guard report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-integration-guard-${{ github.sha }}
+          path: build/store-policy/guard.json
+          if-no-files-found: ignore
+          retention-days: 10
+      - name: Strict aggregate — failure cannot be hidden
+        if: always()
+        env:
+          FORMAT: ${{ steps.fmt.outcome }}
+          ANALYZE: ${{ steps.analyze.outcome }}
+          POLICY: ${{ steps.policy.outcome }}
+          REGRESSIONS: ${{ steps.regressions.outcome }}
+        run: |
+          echo "format=$FORMAT analyze=$ANALYZE policy=$POLICY tests=$REGRESSIONS"
+          test "$FORMAT" = success
+          test "$ANALYZE" = success
+          test "$POLICY" = success
+          test "$REGRESSIONS" = success
