@@ -55,7 +55,6 @@ class _DaysGuideState extends ConsumerState<FirstFoodDaysGuide> {
     }
 
     return FirstUseTargetGuide(
-      child: widget.child,
       guide: status == 'ready' && !_dismissed
           ? FirstUseContextCoachmark(
               key: const Key('dashboard-first-food-streak-guide'),
@@ -89,6 +88,7 @@ class _DaysGuideState extends ConsumerState<FirstFoodDaysGuide> {
               actionKey: const Key('dashboard-streak-guide-done'),
             )
           : null,
+      child: widget.child,
     );
   }
 }

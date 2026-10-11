@@ -3,7 +3,7 @@ part of 'food_log_page.dart';
 extension _FoodLogActions on _FoodLogPageState {
   Future<void> _addFood(BuildContext context, Food food) async {
     if (!addingFoodIds.add(food.id)) return;
-    setState(() {});
+    _updateState(() {});
     final preferences = ref.read(preferencesRepositoryProvider);
     final meals = ref.read(mealRepositoryProvider);
     final foods = ref.read(foodRepositoryProvider);
@@ -173,7 +173,7 @@ extension _FoodLogActions on _FoodLogPageState {
           targetContext: _foodTargets[food.id]?.currentContext,
           onFinished: () {
             if (!ownerIsCurrent()) return;
-            setState(() {
+            _updateState(() {
               _postSaveOwner = preferences.localOwnerId;
               _postSaveGuide = true;
             });
@@ -185,7 +185,7 @@ extension _FoodLogActions on _FoodLogPageState {
       }
     } finally {
       addingFoodIds.remove(food.id);
-      if (mounted) setState(() {});
+      if (mounted) _updateState(() {});
     }
   }
 

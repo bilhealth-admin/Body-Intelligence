@@ -116,8 +116,9 @@ class _AnchoredGuideState extends State<FirstUseAnchoredGuide> {
         context,
         rootOverlay: true,
       ).context.findRenderObject();
-      if (target is! RenderBox || !target.hasSize)
+      if (target is! RenderBox || !target.hasSize) {
         return const SizedBox.shrink();
+      }
       final position = target.localToGlobal(Offset.zero, ancestor: overlay);
       final center = position.dx + target.size.width / 2;
       final left = (center - width / 2).clamp(

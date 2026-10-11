@@ -17,8 +17,9 @@ abstract final class FirstMealCelebration {
     VoidCallback? onFinished,
     bool Function()? ownerIsCurrent,
   }) async {
-    if (!context.mounted || (ownerIsCurrent != null && !ownerIsCurrent()))
+    if (!context.mounted || (ownerIsCurrent != null && !ownerIsCurrent())) {
       return false;
+    }
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return false;
 
@@ -47,8 +48,9 @@ abstract final class FirstMealCelebration {
     }
     if (!claimed ||
         !context.mounted ||
-        (ownerIsCurrent != null && !ownerIsCurrent()))
+        (ownerIsCurrent != null && !ownerIsCurrent())) {
       return false;
+    }
 
     late OverlayEntry entry;
     var removed = false;

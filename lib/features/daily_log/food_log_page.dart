@@ -475,7 +475,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         ),
         const SizedBox(height: 10),
         FirstUseTargetGuide(
-          child: _buildActions(context),
           guide:
               _postSaveGuide &&
                   _postSaveOwner ==
@@ -503,6 +502,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                   skipKey: const Key('food-log-success-guide-skip'),
                 )
               : null,
+          child: _buildActions(context),
         ),
         if (searchLoading) ...[
           const SizedBox(height: 8),

@@ -60,7 +60,7 @@ Future<void> showBilQuickAdd(
           foodGuideBuilder: showFoodGuide
               ? (child) => FirstUseTargetGuide(
                   preferBelow: false,
-                  child: child,
+
                   guide: FirstUseContextCoachmark(
                     key: const Key('quick-add-food-guide'),
                     compact: true,
@@ -87,6 +87,7 @@ Future<void> showBilQuickAdd(
                     },
                     skipKey: const Key('quick-add-food-guide-skip'),
                   ),
+                  child: child,
                 )
               : null,
           photoAsset:
