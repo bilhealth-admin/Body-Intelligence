@@ -209,7 +209,7 @@ extension _CoachMealJournalStorage on MealRepository {
     return CoachMealSnapshot(
       item: item,
       meal: meal,
-      foodName: evidence.portion?.food.name ?? food.name,
+      foodName: evidence.foodName ?? food.name,
       arabicFoodName: evidence.isModern ? null : food.arabicName,
     );
   }

@@ -108,7 +108,7 @@ class _DiaryFoodRow extends StatelessWidget {
       Localizations.localeOf(context),
     );
     final evidence = MealFoodEvidence.read(item, ownerKey: ownerKey);
-    final immutableName = evidence.portion?.food.name;
+    final immutableName = evidence.foodName;
     final name =
         immutableName ??
         (evidence.isModern || food == null

@@ -344,6 +344,8 @@ final class CoachMealSnapshot {
       item,
     ).fullValue(FoodNutrient.vitaminC),
     'food_evidence': MealFoodEvidence.read(item).portion?.toJson(),
+    if (MealFoodEvidence.read(item).recipe case final recipe?)
+      'recipe_serving_evidence': recipe.toJson(),
     'nutrient_evidence_mask': item.nutrientEvidenceMask,
     'source': item.foodSourceSnapshot,
     'source_verified': item.foodVerifiedSnapshot,

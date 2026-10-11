@@ -7,6 +7,7 @@ import '../database/app_database.dart';
 import '../database/date_keys.dart';
 import '../database/nutrient_evidence.dart';
 import '../database/meal_food_evidence.dart';
+import '../database/recipe_serving_evidence.dart';
 import '../database/food_basis_evidence.dart';
 import '../database/database_scope.dart';
 import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
@@ -222,6 +223,8 @@ class MealRepository {
     double? calcium,
     double? magnesium,
     double? phosphorus,
+    double? iron,
+    double? vitaminC,
     double servings = 1,
   }) async {
     if (!const {'breakfast', 'lunch', 'dinner', 'snack'}.contains(mealType)) {
@@ -243,6 +246,8 @@ class MealRepository {
         calcium,
         magnesium,
         phosphorus,
+        iron,
+        vitaminC,
       ].whereType<double>(),
     ];
     if (foodUuid.trim().isEmpty ||
@@ -263,6 +268,28 @@ class MealRepository {
       calcium: calcium,
       magnesium: magnesium,
       phosphorus: phosphorus,
+    );
+    final recipeEvidence = RecipeServingEvidence(
+      identity: foodUuid.trim(),
+      name: recipeName.trim(),
+      source: source.trim(),
+      ownerKey: _coachOwnerKey,
+      servings: servings,
+      perServing: CoachFoodNutrients({
+        FoodNutrient.calories: calories,
+        FoodNutrient.protein: protein,
+        FoodNutrient.carbohydrates: carbohydrates,
+        FoodNutrient.fat: fat,
+        FoodNutrient.fiber: fiber,
+        FoodNutrient.sugar: sugar,
+        FoodNutrient.sodium: sodium,
+        FoodNutrient.potassium: potassium,
+        FoodNutrient.calcium: calcium,
+        FoodNutrient.magnesium: magnesium,
+        FoodNutrient.phosphorus: phosphorus,
+        FoodNutrient.iron: iron,
+        FoodNutrient.vitaminC: vitaminC,
+      }),
     );
     return _database.transaction(() async {
       await _requireOpenDayForMeals(dayKeyFor(date));
@@ -293,6 +320,8 @@ class MealRepository {
                 calcium: Value(calcium ?? 0),
                 magnesium: Value(magnesium ?? 0),
                 phosphorus: Value(phosphorus ?? 0),
+                iron: Value(iron ?? 0),
+                vitaminC: Value(vitaminC ?? 0),
                 nutrientEvidenceMask: Value(evidence),
                 source: Value(source.trim()),
                 verified: const Value(false),
@@ -319,6 +348,8 @@ class MealRepository {
             food.calcium == (calcium ?? 0) &&
             food.magnesium == (magnesium ?? 0) &&
             food.phosphorus == (phosphorus ?? 0) &&
+            food.iron == (iron ?? 0) &&
+            food.vitaminC == (vitaminC ?? 0) &&
             food.nutrientEvidenceMask == evidence &&
             food.source == source.trim() &&
             !food.verified &&
@@ -366,7 +397,8 @@ class MealRepository {
               magnesium: Value((magnesium ?? 0) * servings),
               phosphorus: Value((phosphorus ?? 0) * servings),
               nutrientEvidenceMask: Value(evidence),
-              foodSourceSnapshot: Value(source.trim()),
+              foodSourceSnapshot: Value(recipeEvidence.sourceLabel),
+              foodEvidenceJson: Value(recipeEvidence.encodeForStorage()),
               foodVerifiedSnapshot: const Value(false),
               servingSizeSnapshot: const Value(1),
               servingUnitSnapshot: const Value('serving'),
@@ -478,6 +510,11 @@ class MealRepository {
       }
       _validateQuantity(existing.quantity);
       if (await _updateCoachFoodQuantity(existing, quantity)) return;
+      final recipeEvidence = MealFoodEvidence.read(
+        existing,
+        ownerKey: _coachOwnerKey,
+      ).recipe;
+      final revisedRecipe = recipeEvidence?.withServings(quantity);
       // A diary item owns its historical nutrition and evidence. A catalog
       // refresh must not relabel new nutrition as that older source snapshot.
       final scale = quantity / existing.quantity;
@@ -498,11 +535,15 @@ class MealRepository {
           phosphorus: Value(existing.phosphorus * scale),
           sugar: Value(existing.sugar * scale),
           nutrientEvidenceMask: Value(existing.nutrientEvidenceMask),
+          foodEvidenceJson: revisedRecipe == null
+              ? const Value.absent()
+              : Value(revisedRecipe.encodeForStorage()),
           updatedAt: Value(DateTime.now()),
           revision: Value(existing.revision + 1),
           syncStatus: const Value('pending'),
         ),
       );
+      if (revisedRecipe != null) await _verifyAddedFoodEvidence(id);
     });
   }
 

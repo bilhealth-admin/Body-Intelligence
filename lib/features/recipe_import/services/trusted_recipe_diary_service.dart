@@ -111,6 +111,7 @@ final class TrustedRecipeDiaryService {
     final digest = sha256.convert(
       utf8.encode(
         jsonEncode({
+          'servingEvidenceSchema': 'bil.recipe.serving.v1',
           'recipeFingerprint': saved.recipe.fingerprint,
           'nutritionSnapshot': nutrition.toJson(),
           'caloriesKcal': nutrition.caloriesKcal,
@@ -142,6 +143,8 @@ final class TrustedRecipeDiaryService {
       calcium: nutrition.calciumMg,
       magnesium: nutrition.magnesiumMg,
       phosphorus: nutrition.phosphorusMg,
+      iron: nutrition.ironMg,
+      vitaminC: nutrition.vitaminCMg,
     );
   }
 }

@@ -32,7 +32,7 @@ extension _CoachFoodHostTarget on CoachFoodHost {
       for (final item in meal.items) {
         final evidence = MealFoodEvidence.read(item, ownerKey: ownerKey);
         final names = <String>[
-          ?evidence.portion?.food.name,
+          ?evidence.foodName,
           ?meal.foodsById[item.foodId]?.name,
           ?meal.foodsById[item.foodId]?.arabicName,
         ];

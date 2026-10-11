@@ -364,7 +364,9 @@ class _TrustedRecipeImportPageState
                     name: label,
                     quantity: row.quantity,
                     unit: row.unit,
-                    sourceRecordId: 'local:${food.uuid}',
+                    sourceRecordId: RegExp(r'^usda:\d+$').hasMatch(food.uuid)
+                        ? food.uuid
+                        : 'local:${food.uuid}',
                   )
                 : row,
         ],

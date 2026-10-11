@@ -1,5 +1,6 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
+import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/features/recipe_import/domain/trusted_recipe.dart';
@@ -36,8 +37,12 @@ void main() {
       expect(logged.single.items.first.foodVerifiedSnapshot, isFalse);
       expect(
         logged.single.items.first.foodSourceSnapshot,
-        startsWith('recipe-calculation:'),
+        startsWith('recipe_serving_v1:recipe-calculation:'),
       );
+      final evidence = MealFoodEvidence.read(logged.single.items.first);
+      expect(evidence.isValid, isTrue);
+      expect(evidence.recipe?.source, startsWith('recipe-calculation:'));
+      expect(logged.single.items.first.servingUnitSnapshot, 'serving');
       expect((await database.select(database.foods).get()), hasLength(1));
       final mask = logged.single.items.first.nutrientEvidenceMask;
       for (final nutrient in const [

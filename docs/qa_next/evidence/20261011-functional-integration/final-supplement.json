@@ -1,0 +1,89 @@
+{
+  "base": "f9eeea2017ed4c7929e0017754634a0599b41a72",
+  "preparation_head": "ebd0ffd19d649ace383a4364daf2b0dadefc1e58",
+  "run_id": "38136049208",
+  "source_files": 14,
+  "format": "passed",
+  "analyze": "passed",
+  "flutter_tests_run": false,
+  "full8_run": false,
+  "builds": false,
+  "production_changed": false,
+  "store_approved": false,
+  "protected_sha256": {
+    "lib/features/dashboard/dashboard_page.dart": "bc8347c33124f3a010f252b9c0dc22be2f1019da31659127d7ae1621436df840",
+    "lib/features/dashboard/widgets/dashboard_reference_phone.dart": "e0130da70437d687329cb1f6872d44f7b23217d9c2d14ad8bc97348f0ce8d94d",
+    "lib/shared/widgets/bil_reference_bottom_bar.dart": "7e070a02b70dff05408dcb48ac4473b81d719f1e89d2b34c599b53268b5df909",
+    "lib/app/router/responsive_app_shell.dart": "4399856cf50e96dbcf584ac5fac89e09f27be7707878e196df86802013545fd4",
+    "lib/features/dashboard/widgets/first_meal_celebration.dart": "d80d4106ca583b6a297da905973997a7af2db7c505495f75394e7213ecbce0c3",
+    "lib/features/dashboard/widgets/first_use_context_coachmark.dart": "5e27b18c055be9fda08f657e62665ce013674feb456adf1f9df466406e7a72db",
+    "lib/features/dashboard/widgets/first_use_glass_surface.dart": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+    "lib/shared/widgets/first_use_guide_anchor.dart": "2813d9180e02fb7a39a898bc0f0f60d1d6550a25f90def482be937d523a3eb80",
+    "lib/features/connected_health/widgets/live_health_watch.dart": "673294d00837c29b50fd8b53486f68a9bccf5b37bcad97384c212483c682393b",
+    "lib/features/connected_health/widgets/live_health_watch_painter.dart": "274caf4a697acc779d74d0fa90fb7e059fe4c6623d4870cbe270bedc4fc4295f",
+    "pubspec.yaml": "12bbc904221f85b4ff71f5fd2e2755e002c2dc0b6040a731dad52b473946f796",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  },
+  "files": [
+    {
+      "path": "lib/data/database/meal_food_evidence.dart",
+      "sha256": "acddebc3c2bf4db5ba0840da6c26a4d4d70bbe3884680aa3ff1a1af08ac7cf73"
+    },
+    {
+      "path": "lib/data/database/recipe_serving_evidence.dart",
+      "sha256": "674759c17a7b934c91dcb9638b7d38fc59c534799b8e66422691dea1b9ccd696"
+    },
+    {
+      "path": "lib/data/repositories/meal_repository.dart",
+      "sha256": "fe8cd7c36cb132fdc792bd4f51ca0a8639ec165b7c5da405d0f916f1bdab97d8"
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_journal.dart",
+      "sha256": "cbe42a38db3c3e8ca659813ba49a410153cd841c480cd6881fcd5008e4534a87"
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_models.dart",
+      "sha256": "863f8e72135bb7d3829dc2d00edb145ea5aaa70d4df167b62554f49796f9b3b6"
+    },
+    {
+      "path": "lib/features/daily_log/presentation/daily_log_meal_detail_items.dart",
+      "sha256": "83d9e4af4a53a0de82f8fbb2d972c6a7ad175397935f06203588183225e761d0"
+    },
+    {
+      "path": "lib/features/intelligence_center/food_flow/coach_food_host_target.dart",
+      "sha256": "7ce248562bfa7c9bcf2d2da2d70fe095ab348706887f6079391d933395f86d60"
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_context_assembly.dart",
+      "sha256": "ee26541ca6404f214e85afbadddfa0ca941182d692c3764831e55ec001200de4"
+    },
+    {
+      "path": "lib/features/recipe_import/presentation/trusted_recipe_import_page.dart",
+      "sha256": "ba0a0053b3b7bca2c47aa75276017bbe5d5a53827aa7685bd50342aacb9c1077"
+    },
+    {
+      "path": "lib/features/recipe_import/services/trusted_recipe_diary_service.dart",
+      "sha256": "49f7b31e13b03b90cb37a8cc04ea63acb0519e7a92ffea354ccf5d0457ac261a"
+    },
+    {
+      "path": "lib/features/wellness/presentation/bil_workout_routines_page.dart",
+      "sha256": "19ad735766797213dfdb67a2cd9a0c0dae1bbcb0701fae18a48440da8e7a5ef6"
+    },
+    {
+      "path": "test/data/repositories/recipe_serving_evidence_test.dart",
+      "sha256": "d010e4eb0d45ba276bd3c9b644d1ffe578a78ae8d8684130a621f5e118324b74"
+    },
+    {
+      "path": "test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
+      "sha256": "77c37a9cfac1b2a28a4193a819b13db93661312926cd18462d1e4a9acff4ffea"
+    },
+    {
+      "path": "test/features/recipe_import/trusted_recipe_diary_service_test.dart",
+      "sha256": "6f940c24d323dd450ab6a0a70f0d64f43ffbfcc6b137516ff5af2922594c28f6"
+    }
+  ],
+  "scope": "Immutable per-serving 13-nutrient evidence, USDA links, no automatic workout paywall.",
+  "resumed_from_run": "38135758330",
+  "test_contract_note": "Original provenance assertions retained and strengthened for serving envelope.",
+  "pending": "Independent focused Codex tests, device UX, cloud round-trip and performance verification."
+}

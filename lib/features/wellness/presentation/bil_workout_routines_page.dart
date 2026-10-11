@@ -541,15 +541,8 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
         _initialItemHandled = false;
         return;
       }
-      if (_isLocked(item)) {
-        final storefrontPlan = ref.read(storefrontTargetPlanProvider).value;
-        context.push(
-          storefrontPlan == CommercePlan.premiumAiCoach
-              ? '/plans?focus=boost'
-              : '/plans?focus=subscription',
-        );
-        return;
-      }
+      // A deep link opens its requested detail, never an unsolicited paywall.
+      // The detail retains its real content gate and explicit upgrade action.
       _openDetails(item);
     });
   }
