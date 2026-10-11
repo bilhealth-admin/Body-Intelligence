@@ -285,7 +285,7 @@ void main() {
     },
   );
 
-  for (final size in const [Size(320, 568), Size(640, 320)]) {
+  for (final size in const [Size(320, 568), Size(390, 844), Size(640, 320)]) {
     testWidgets('Arabic 2x review scrolls to actions at $size', (tester) async {
       await tester.binding.setSurfaceSize(size);
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -310,6 +310,12 @@ void main() {
       await tester.tap(find.text('Open review'));
       await tester.pumpAndSettle();
       await _pumpDecodedPreviews(tester);
+      final confirm = find.byKey(const Key('bil-media-review-confirm'));
+      expect(
+        tester.getBottomRight(confirm).dy,
+        lessThanOrEqualTo(size.height),
+        reason: 'Review confirmation must remain visible without scrolling.',
+      );
       expect(tester.takeException(), isNull);
       await _tap(tester, 'bil-media-review-confirm');
       expect(chosen, [5]);

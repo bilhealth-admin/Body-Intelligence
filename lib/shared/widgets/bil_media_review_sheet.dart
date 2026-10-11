@@ -187,104 +187,118 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.sizeOf(sheetContext).height * .85,
               ),
-              child: SingleChildScrollView(
-                key: const Key('bil-media-review-body'),
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.photo_library_outlined,
-                          color: scheme.primary,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: SingleChildScrollView(
+                      key: const Key('bil-media-review-body'),
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.photo_library_outlined,
+                                color: scheme.primary,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  switch (scope) {
+                                    BilMediaReviewPurpose.profilePhoto => tr(
+                                      'Review your profile photo',
+                                      'مراجعة الصورة الشخصية',
+                                    ),
+                                    BilMediaReviewPurpose.coverPhoto => tr(
+                                      'Review your cover photo',
+                                      'مراجعة صورة الغلاف',
+                                    ),
+                                    _ => tr(
+                                      'Review selected photos',
+                                      'مراجعة الصور المحددة',
+                                    ),
+                                  },
+                                  style: Theme.of(sheetContext).textTheme.titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              IconButton(
+                                key: const Key('bil-media-review-close'),
+                                tooltip: tr('Cancel', 'إلغاء'),
+                                onPressed: () => Navigator.of(sheetContext).pop(),
+                                constraints: const BoxConstraints(
+                                  minWidth: 48,
+                                  minHeight: 48,
+                                ),
+                                icon: const Icon(Icons.close_rounded),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
                             switch (scope) {
+                              BilMediaReviewPurpose.communityPost => tr(
+                                'Nothing is published until you press Publish in your post.',
+                                'لن يُنشر شيء حتى تضغط نشر داخل المنشور.',
+                              ),
                               BilMediaReviewPurpose.profilePhoto => tr(
-                                'Review your profile photo',
-                                'مراجعة الصورة الشخصية',
+                                'Your current photo remains until you confirm the replacement.',
+                                'تبقى صورتك الحالية حتى تؤكد استبدالها.',
                               ),
                               BilMediaReviewPurpose.coverPhoto => tr(
-                                'Review your cover photo',
-                                'مراجعة صورة الغلاف',
+                                'Confirm this image before updating your profile cover.',
+                                'أكّد هذه الصورة قبل تحديث غلاف ملفك.',
                               ),
-                              _ => tr(
-                                'Review selected photos',
-                                'مراجعة الصور المحددة',
+                              BilMediaReviewPurpose.meal => tr(
+                                'Confirm this photo before AI analysis. Nothing is saved yet.',
+                                'أكّد هذه الصورة قبل التحليل. لم يُحفظ شيء بعد.',
                               ),
                             },
-                            style: Theme.of(sheetContext).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                            style: Theme.of(sheetContext).textTheme.bodyMedium
+                                ?.copyWith(color: scheme.onSurfaceVariant),
                           ),
-                        ),
-                        IconButton(
-                          key: const Key('bil-media-review-close'),
-                          tooltip: tr('Cancel', 'إلغاء'),
-                          onPressed: () => Navigator.of(sheetContext).pop(),
-                          constraints: const BoxConstraints(
-                            minWidth: 48,
-                            minHeight: 48,
+                          const SizedBox(height: 16),
+                          // Eagerly build this bounded set so off-screen selected
+                          // photos are decoded too; readiness must not require swipes.
+                          SingleChildScrollView(
+                            key: const Key('bil-media-review-previews'),
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (var i = 0; i < selected.length; i++) preview(i),
+                              ],
+                            ),
                           ),
-                          icon: const Icon(Icons.close_rounded),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      switch (scope) {
-                        BilMediaReviewPurpose.communityPost => tr(
-                          'Nothing is published until you press Publish in your post.',
-                          'لن يُنشر شيء حتى تضغط نشر داخل المنشور.',
-                        ),
-                        BilMediaReviewPurpose.profilePhoto => tr(
-                          'Your current photo remains until you confirm the replacement.',
-                          'تبقى صورتك الحالية حتى تؤكد استبدالها.',
-                        ),
-                        BilMediaReviewPurpose.coverPhoto => tr(
-                          'Confirm this image before updating your profile cover.',
-                          'أكّد هذه الصورة قبل تحديث غلاف ملفك.',
-                        ),
-                        BilMediaReviewPurpose.meal => tr(
-                          'Confirm this photo before AI analysis. Nothing is saved yet.',
-                          'أكّد هذه الصورة قبل التحليل. لم يُحفظ شيء بعد.',
-                        ),
-                      },
-                      style: Theme.of(sheetContext).textTheme.bodyMedium
-                          ?.copyWith(color: scheme.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 16),
-                    // Eagerly build this bounded set so off-screen selected
-                    // photos are decoded too; readiness must not require swipes.
-                    SingleChildScrollView(
-                      key: const Key('bil-media-review-previews'),
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          for (var i = 0; i < selected.length; i++) preview(i),
+                          if (selected.any((entry) => failed.contains(entry))) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              tr(
+                                'A photo could not be previewed. Remove it or choose another photo.',
+                                'تعذرت معاينة إحدى الصور. أزلها أو اختر صورة أخرى.',
+                              ),
+                              key: const Key('bil-media-review-error'),
+                              style: TextStyle(color: scheme.error),
+                            ),
+                          ],
+                          const SizedBox(height: 14),
+                          Text(
+                            tr('Selected: ', 'المحدد: ') + selected.length.toString(),
+                            key: const Key('bil-media-review-count'),
+                            style: Theme.of(sheetContext).textTheme.labelLarge,
+                          ),
                         ],
                       ),
                     ),
-                    if (selected.any((entry) => failed.contains(entry))) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        tr(
-                          'A photo could not be previewed. Remove it or choose another photo.',
-                          'تعذرت معاينة إحدى الصور. أزلها أو اختر صورة أخرى.',
-                        ),
-                        key: const Key('bil-media-review-error'),
-                        style: TextStyle(color: scheme.error),
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    Text(
-                      tr('Selected: ', 'المحدد: ') + selected.length.toString(),
-                      key: const Key('bil-media-review-count'),
-                      style: Theme.of(sheetContext).textTheme.labelLarge,
-                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                     const SizedBox(height: 12),
                     FilledButton.icon(
                       key: const Key('bil-media-review-confirm'),
@@ -331,8 +345,10 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                       onPressed: () => Navigator.of(sheetContext).pop(),
                       child: Text(tr('Cancel', 'إلغاء')),
                     ),
-                  ],
-                ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
