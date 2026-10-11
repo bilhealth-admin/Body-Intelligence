@@ -24,7 +24,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Verify complete patch and protected source before apply
-        run: python3 docs/qa_next/candidate_20261011/prepare.py apply
+        run: |
+          python3 docs/qa_next/candidate_20261011/prepare.py apply
+          python3 docs/qa_next/candidate_20261011/correct.py apply
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -33,9 +35,11 @@ jobs:
         run: |
           flutter --version
           flutter pub get
-      - name: Format exactly the candidate files
+      - name: Format and insert required control-flow braces
         run: |
           mapfile -t files < build/bil-candidate-20261011/paths.txt
+          dart format "${files[@]}"
+          dart fix --apply --code=curly_braces_in_flow_control_structures
           dart format "${files[@]}"
           dart format --output=none --set-exit-if-changed "${files[@]}"
       - name: Analyze complete source strictly
@@ -46,7 +50,7 @@ jobs:
       - name: Recheck source boundaries and record preparation evidence
         env:
           ANALYZE_OUTCOME: ${{ steps.analyze.outcome }}
-        run: python3 docs/qa_next/candidate_20261011/prepare.py finalize
+        run: python3 docs/qa_next/candidate_20261011/correct.py finalize
       - name: Commit prepared source only when branch is unchanged
         env:
           GH_TOKEN: ${{ github.token }}
