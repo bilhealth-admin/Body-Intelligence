@@ -3,6 +3,7 @@ import 'bil_gold_coin.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/bil_persistent_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

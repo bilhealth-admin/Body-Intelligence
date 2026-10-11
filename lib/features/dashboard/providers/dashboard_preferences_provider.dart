@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/nutrient_dashboard.dart';
 import '../../nutrition/domain/macro_gram_goals.dart';
 import '../../nutrition/domain/percentage_nutrition_goals.dart';
+import '../../nutrition/providers/nutrition_goal_defaults_provider.dart';
 
 abstract final class DashboardSectionIds {
   static const calories = 'calories';
@@ -104,15 +104,17 @@ final dashboardNutrientGoalProvider = StreamProvider.family<double?, String>((
   ref,
   key,
 ) {
+  final defaults = ref.watch(nutritionGoalDefaultsProvider);
   return ref.watch(preferencesRepositoryProvider).watch(key).map((value) {
-    final parsed = double.tryParse(value ?? '');
+    final parsed = double.tryParse(value ?? '') ?? defaults[key];
     return validDashboardNutrientGoal(key, parsed) ? parsed : null;
   });
 });
 
-@visibleForTesting
+/// Shared validation for persisted goals and the user-facing goal editor.
 bool validDashboardNutrientGoal(String key, double? value) {
-  if (value == null || !value.isFinite || value <= 0) return false;
+  if (value == null || !value.isFinite || value < 0) return false;
+  if (key == 'goal.calories' && value == 0) return false;
   if (key == 'goal.calories') return value <= 10000;
   if (key.endsWith('Percent')) return value <= 100;
   if (key == 'goal.sodium' || key == 'goal.potassium') {
@@ -122,14 +124,14 @@ bool validDashboardNutrientGoal(String key, double? value) {
   if (key == 'goal.proteinGrams' ||
       key == 'goal.carbsGrams' ||
       key == 'goal.fatGrams') {
-    return value <= 1000;
+    return value <= 2500;
   }
   return value <= 10000;
 }
 
 final dashboardMacroGramGoalsProvider = Provider<MacroGramGoals>((ref) {
   double? valid(double? value) =>
-      value != null && value > 0 && value <= 1000 ? value : null;
+      value != null && value >= 0 && value <= 2500 ? value : null;
   return MacroGramGoals(
     protein: valid(
       ref.watch(dashboardNutrientGoalProvider('goal.proteinGrams')).value,

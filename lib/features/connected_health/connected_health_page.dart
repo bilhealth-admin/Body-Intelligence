@@ -1,3 +1,4 @@
+import '../commerce/presentation/optional_access_offer.dart';
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -318,7 +319,11 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                               ),
                               onTap: () {
                                 if (confirmedFree) {
-                                  context.push('/plans?focus=subscription');
+                                  showOptionalAccessOffer(
+                                    context,
+                                    ref,
+                                    verifiedDenied: true,
+                                  );
                                   return;
                                 }
                                 // A pending or unverified owner entitlement

@@ -100,6 +100,7 @@ class WellnessMediaCache implements WellnessMediaResolver {
     required bool online,
   }) {
     _validateAsset(asset);
+    if (!online) return _peekVerified(asset);
     final identity = _operationIdentity(asset);
     return _inFlight.putIfAbsent(identity, () {
       final operation = _resolve(asset, online: online);
@@ -107,6 +108,17 @@ class WellnessMediaCache implements WellnessMediaResolver {
         _inFlight.remove(identity);
       });
     });
+  }
+
+  Future<WellnessMediaCacheResult> _peekVerified(
+    WellnessMediaAsset asset,
+  ) async {
+    final target = _fileFor(await _directory(), asset);
+    // Do not remove a partial online transfer or its target during a peek.
+    if (await _isVerified(target, asset)) {
+      return WellnessMediaCacheResult.ready(target, fromCache: true);
+    }
+    return const WellnessMediaCacheResult.unavailableOffline();
   }
 
   Future<WellnessMediaCacheResult> _resolve(

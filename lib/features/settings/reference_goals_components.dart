@@ -209,6 +209,7 @@ class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
     onTap: () async {
       if (editorOpen) return;
       editorOpen = true;
+      final repository = ref.read(preferencesRepositoryProvider);
       final maximum = widget.keyName == 'goals.workoutsPerWeek' ? 14 : 300;
       int? next;
       try {
@@ -260,11 +261,30 @@ class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
         editorOpen = false;
       }
       final saved = next;
-      if (saved == null) return;
-      setState(() => value = saved);
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set(widget.keyName, '$saved');
+      if (saved == null ||
+          !mounted ||
+          !identical(repository, ref.read(preferencesRepositoryProvider))) {
+        return;
+      }
+      try {
+        await repository.set(widget.keyName, '$saved');
+        if (mounted &&
+            identical(repository, ref.read(preferencesRepositoryProvider))) {
+          setState(() => value = saved);
+        }
+      } on Object {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'تعذر حفظ الهدف. أعد المحاولة.'
+                    : 'Could not save the goal. Retry.',
+              ),
+            ),
+          );
+        }
+      }
     },
   );
 }

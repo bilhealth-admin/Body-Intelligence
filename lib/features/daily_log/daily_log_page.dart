@@ -1,3 +1,4 @@
+import '../commerce/presentation/optional_access_offer.dart';
 import '../dashboard/widgets/first_food_days_guide.dart';
 import 'dart:async';
 
@@ -102,6 +103,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   bool mealFocusApplied = false;
   bool initialActionApplied = false;
   String? initialActionInFlight;
+  bool logSaving = false;
   bool mealSaving = false;
   bool mealImageBusy = false;
   bool mealSearchActive = false;
@@ -229,7 +231,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         }
       });
     });
-    final mutationBusy = mealSaving;
+    final mutationBusy = mealSaving || logSaving;
     final today = DateUtils.dateOnly(DateTime.now());
     final latestPlannableDate = DateTime(
       today.year + 1,
@@ -639,7 +641,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                   key: const Key(
                                     'daily_log_save_primary_action',
                                   ),
-                                  onPressed: _save,
+                                  onPressed: logSaving ? null : _save,
                                   child: Text(context.strings.text('Save log')),
                                 ),
                               ),

@@ -5,6 +5,7 @@ class MealTemplate {
   final List<MealTemplateItem> items;
   final DateTime createdAt;
   final String? sourceMealUuid;
+  final String? ownerKey;
 
   const MealTemplate({
     required this.id,
@@ -13,6 +14,7 @@ class MealTemplate {
     required this.items,
     required this.createdAt,
     this.sourceMealUuid,
+    this.ownerKey,
   });
 
   double get totalCalories =>

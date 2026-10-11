@@ -47,49 +47,13 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
             )
             .timeout(const Duration(seconds: 15));
         visit.check();
-        final ids = page.posts.map((post) => post.id).toList(growable: false);
-        final authorIds = page.posts
-            .map((post) => post.authorId)
-            .toSet()
-            .toList(growable: false);
-        final List<CommunityPostReferenceMetadata> references;
-        final Map<String, int> viewCounts;
-        final Map<String, CommunityComment> commentPreviews;
-        final Map<String, String> membershipTiers;
-        if (repository.useServerCommunityReferenceParity && ids.isNotEmpty) {
-          final extras = await Future.wait<Object>([
-            repository.loadCommunityPostReferenceMetadata(ids),
-            repository.loadCommunityPostViewCounts(ids),
-            repository.loadCommunityFeedCommentPreviews(ids),
-            repository.loadVisibleMembershipTiers(authorIds),
-          ]);
-          visit.check();
-          references = extras[0] as List<CommunityPostReferenceMetadata>;
-          viewCounts = extras[1] as Map<String, int>;
-          commentPreviews = extras[2] as Map<String, CommunityComment>;
-          membershipTiers = extras[3] as Map<String, String>;
-        } else {
-          references = const <CommunityPostReferenceMetadata>[];
-          viewCounts = const <String, int>{};
-          commentPreviews = const <String, CommunityComment>{};
-          membershipTiers = const <String, String>{};
-        }
         visit.check();
         if (generation != _feedGeneration) return;
-        _referenceByPost
-          ..clear()
-          ..addEntries(
-            references.map((value) => MapEntry(value.postId, value)),
-          );
-        _viewCountByPost
-          ..clear()
-          ..addAll(viewCounts);
-        _commentPreviewByPost
-          ..clear()
-          ..addAll(commentPreviews);
-        _membershipTierByAuthor
-          ..clear()
-          ..addAll(membershipTiers);
+        _referenceByPost.clear();
+        _viewCountByPost.clear();
+        _commentPreviewByPost.clear();
+        _membershipTierByAuthor.clear();
+        unawaited(_loadFeedExtras(visit, generation, page.posts));
         _hasMore = page.hasMore;
         _feedCursorPriority = page.nextPriority;
         _feedCursorCreatedAt = page.nextBefore;
@@ -104,6 +68,57 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         _feedRefreshing = false;
       }
     }
+  }
+
+  Future<void> _loadFeedExtras(
+    _CommunityFeedVisit visit,
+    int generation,
+    List<CommunityPost> posts,
+  ) async {
+    final repository = visit.repository;
+    if (!repository.useServerCommunityReferenceParity || posts.isEmpty) return;
+    final ids = posts.map((post) => post.id).toList(growable: false);
+    final authors = posts
+        .map((post) => post.authorId)
+        .toSet()
+        .toList(growable: false);
+    Future<void> apply<T>(
+      Future<T> Function() load,
+      void Function(T) update,
+    ) async {
+      try {
+        await visit.run(() async {
+          final value = await load().timeout(const Duration(seconds: 10));
+          visit.check();
+          if (!mounted || generation != _feedGeneration) return;
+          setState(() => update(value));
+        });
+      } on Object {
+        // Missing decoration never hides an authorized feed or becomes a
+        // fake subscription/reputation value. A later refresh retries it.
+      }
+    }
+
+    await Future.wait([
+      apply(
+        () => repository.loadCommunityPostReferenceMetadata(ids),
+        (values) => _referenceByPost.addEntries(
+          values.map((value) => MapEntry(value.postId, value)),
+        ),
+      ),
+      apply(
+        () => repository.loadCommunityPostViewCounts(ids),
+        _viewCountByPost.addAll,
+      ),
+      apply(
+        () => repository.loadCommunityFeedCommentPreviews(ids),
+        _commentPreviewByPost.addAll,
+      ),
+      apply(
+        () => repository.loadVisibleMembershipTiers(authors),
+        _membershipTierByAuthor.addAll,
+      ),
+    ]);
   }
 
   Future<void> _loadMore(List<CommunityPost> visiblePosts) async {
@@ -131,33 +146,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           limit: _FeedTabState._pageSize,
         );
         visit.check();
-        final ids = page.posts.map((post) => post.id).toList(growable: false);
-        final authorIds = page.posts
-            .map((post) => post.authorId)
-            .toSet()
-            .toList(growable: false);
-        final List<CommunityPostReferenceMetadata> references;
-        final Map<String, int> viewCounts;
-        final Map<String, CommunityComment> commentPreviews;
-        final Map<String, String> membershipTiers;
-        if (repository.useServerCommunityReferenceParity && ids.isNotEmpty) {
-          final extras = await Future.wait<Object>([
-            repository.loadCommunityPostReferenceMetadata(ids),
-            repository.loadCommunityPostViewCounts(ids),
-            repository.loadCommunityFeedCommentPreviews(ids),
-            repository.loadVisibleMembershipTiers(authorIds),
-          ]);
-          visit.check();
-          references = extras[0] as List<CommunityPostReferenceMetadata>;
-          viewCounts = extras[1] as Map<String, int>;
-          commentPreviews = extras[2] as Map<String, CommunityComment>;
-          membershipTiers = extras[3] as Map<String, String>;
-        } else {
-          references = const <CommunityPostReferenceMetadata>[];
-          viewCounts = const <String, int>{};
-          commentPreviews = const <String, CommunityComment>{};
-          membershipTiers = const <String, String>{};
-        }
+        unawaited(_loadFeedExtras(visit, generation, page.posts));
         visit.check();
         if (generation != _feedGeneration) return;
         final known = visiblePosts.map((post) => post.id).toSet();
@@ -166,12 +155,6 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           ...page.posts.where((post) => known.add(post.id)),
         ];
         setState(() {
-          _referenceByPost.addEntries(
-            references.map((value) => MapEntry(value.postId, value)),
-          );
-          _viewCountByPost.addAll(viewCounts);
-          _commentPreviewByPost.addAll(commentPreviews);
-          _membershipTierByAuthor.addAll(membershipTiers);
           _feed = Future.value(combined);
           _hasMore = page.hasMore;
           _feedCursorPriority = page.nextPriority;

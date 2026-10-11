@@ -1,3 +1,4 @@
+import '../../../app/services/scoped_media_file_cache.dart';
 import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -277,7 +278,10 @@ class CommunityRepository
     );
   }
 
-  Future<void> deletePost(String postId) => _posts.delete(postId);
+  Future<void> deletePost(String postId) async {
+    await _posts.delete(postId);
+    await ScopedMediaFileCache.instance.invalidatePost(postId);
+  }
 
   Future<List<Map<String, dynamic>>> loadReviewableFoods() async {
     final response = await _client.rpc('bil_list_reviewable_products');

@@ -153,9 +153,11 @@ extension MealRepositoryQueries on MealRepository {
   Future<int> createMealFromDraft({
     required MealBuilderDraft draft,
     required DateTime date,
+    bool appendToExisting = false,
   }) async {
     final canonical = _mealBuilderEngine.canonicalize(draft);
     return _database.transaction(() async {
+      final firstFood = await _firstFoodMilestoneBeforeInsert();
       final mealId = await createMeal(
         date: date,
         name: canonical.name,
@@ -166,12 +168,21 @@ extension MealRepositoryQueries on MealRepository {
                 (item) => item.mealId.equals(mealId) & item.deletedAt.isNull(),
               ))
               .get();
-      if (existingItems.isNotEmpty) {
+      if (existingItems.isNotEmpty && !appendToExisting) {
         throw StateError(
           'Cannot build a meal over an existing meal that already has items',
         );
       }
 
+      final offset = existingItems.fold<int>(
+        0,
+        (value, item) => item.position > value ? item.position : value,
+      );
+      if (existingItems.isEmpty) {
+        await (_database.update(_database.meals)
+              ..where((row) => row.id.equals(mealId)))
+            .write(MealsCompanion(name: Value(canonical.name)));
+      }
       for (final item in canonical.items) {
         final food = await _activeFood(item.foodId);
         final values = _mealFoodPortionValues(
@@ -185,11 +196,12 @@ extension MealRepositoryQueries on MealRepository {
               values.copyWith(
                 mealId: Value(mealId),
                 foodId: Value(item.foodId),
-                position: Value(item.position),
+                position: Value(offset + item.position),
               ),
             );
         await _verifyAddedFoodEvidence(itemId);
       }
+      await _firstFoodMilestoneAfterInsert(firstFood);
       return mealId;
     });
   }
@@ -200,42 +212,64 @@ extension MealRepositoryQueries on MealRepository {
     required String templateName,
     DateTime? createdAt,
   }) {
+    if (meal.ownerKey != null && meal.ownerKey != _coachOwnerKey) {
+      throw const CoachMealConflict(CoachMealConflictReason.ownerChanged);
+    }
     for (final item in meal.items) {
       if (!MealFoodEvidence.read(item, ownerKey: _coachOwnerKey).isValid) {
         throw const CoachMealConflict(CoachMealConflictReason.invalidEvidence);
       }
     }
-    return _mealTemplateEngine.fromHistoricalMeal(
+    final source = _mealTemplateEngine.fromHistoricalMeal(
       meal: meal.meal,
       items: meal.items,
       templateId: templateId,
       templateName: templateName,
       createdAt: createdAt,
     );
+    return MealTemplate(
+      id: source.id,
+      name: source.name,
+      mealType: source.mealType,
+      items: source.items,
+      createdAt: source.createdAt,
+      sourceMealUuid: source.sourceMealUuid,
+      ownerKey: _coachOwnerKey,
+    );
   }
 
   Future<int> instantiateTemplate({
     required MealTemplate template,
     required DateTime date,
+    bool appendToExisting = false,
+    String? destinationMealType,
   }) async {
+    if (template.ownerKey != null && template.ownerKey != _coachOwnerKey) {
+      throw const CoachMealConflict(CoachMealConflictReason.ownerChanged);
+    }
     _mealTemplateEngine.validateForInstantiation(template);
     return _database.transaction(() async {
+      final firstFood = await _firstFoodMilestoneBeforeInsert();
       final mealId = await createMeal(
         date: date,
         name: template.name,
-        type: template.mealType,
+        type: destinationMealType ?? template.mealType,
       );
       final existingItems =
           await (_database.select(_database.mealItems)..where(
                 (item) => item.mealId.equals(mealId) & item.deletedAt.isNull(),
               ))
               .get();
-      if (existingItems.isNotEmpty) {
+      if (existingItems.isNotEmpty && !appendToExisting) {
         throw StateError(
           'Cannot instantiate a template into a meal that already has items',
         );
       }
 
+      final offset = existingItems.fold<int>(
+        0,
+        (value, item) => item.position > value ? item.position : value,
+      );
       final ordered = List<MealTemplateItem>.from(template.items)
         ..sort((left, right) => left.position.compareTo(right.position));
       for (final item in ordered) {
@@ -247,7 +281,7 @@ extension MealRepositoryQueries on MealRepository {
                 mealId: mealId,
                 foodId: item.foodId,
                 quantity: Value(item.quantityGrams),
-                position: Value(item.position),
+                position: Value(offset + item.position),
                 calories: Value(item.calories),
                 protein: Value(item.protein),
                 carbs: Value(item.carbohydrates),
@@ -276,6 +310,7 @@ extension MealRepositoryQueries on MealRepository {
           );
         }
       }
+      await _firstFoodMilestoneAfterInsert(firstFood);
       return mealId;
     });
   }

@@ -388,11 +388,8 @@ void main() {
     );
     await tester.pump();
 
-    final material = MaterialLocalizations.of(
-      tester.element(find.byType(DailyLogWeekStrip)),
-    );
-    final first = material.firstDayOfWeekIndex;
-    final offset = (selected.weekday % 7 - first + 7) % 7;
+    // The selected date now remains centred rather than moving with weekday.
+    const offset = 3;
     for (var index = 0; index < 7; index++) {
       final day = DateTime(
         selected.year,

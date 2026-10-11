@@ -7,28 +7,55 @@ bool dailyLogShouldExportNutritionSample({
 
 extension _DailyLogMutationActions on _DailyLogPageState {
   Future<void> _save() async {
-    if (!await _ensureDiaryOpen()) return;
+    if (logSaving || mealSaving) return;
     final date = ref.read(selectedLogDateProvider);
     final repository = ref.read(dailyLogRepositoryProvider);
-    final existing = await repository.getForDay(date);
-    final exerciseNotesView = DailyExerciseNotesCodec.decode(
-      existing?.exerciseNotes,
-    );
-    final composedExerciseNotes = exerciseNotesView.compose(
-      manualText: exerciseNotes.text,
-    );
-    await repository.save(
-      date: date,
-      notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
-      exerciseNotes:
-          exerciseNotes.text.trim().isEmpty &&
-              exerciseNotesView.preservedStructuredLines.isEmpty
-          ? null
-          : composedExerciseNotes,
-    );
-    ref.invalidate(selectedDailyLedgerProvider);
-    if (!mounted) return;
-    context.go('/dashboard');
+    bool current() =>
+        mounted &&
+        identical(ref.read(dailyLogRepositoryProvider), repository) &&
+        DateUtils.isSameDay(ref.read(selectedLogDateProvider), date);
+    _updateState(() => logSaving = true);
+    try {
+      final existing = await repository.getForDay(date);
+      final ledger = await repository.readLedger(date);
+      if (!current()) return;
+      // Today edits notes in the dedicated editor, which commits them itself.
+      // Its passive controllers may not have received the initial stream value;
+      // never overwrite a saved note/workout with an empty, stale UI mirror.
+      // Save/Done acknowledges this day. It does not implicitly reopen it.
+      if (ledger.state != DayLifecycleState.closed) {
+        await repository.saveNotesAtomically(
+          date: date,
+          expectedNotes: existing?.notes,
+          expectedExerciseNotes: existing?.exerciseNotes,
+          notes: existing?.notes,
+          exerciseNotes: existing?.exerciseNotes,
+        );
+        if (!current()) return;
+        final committed = await repository.getForDay(date);
+        if (!current()) return;
+        if (committed == null ||
+            committed.notes != existing?.notes ||
+            committed.exerciseNotes != existing?.exerciseNotes) {
+          throw StateError('diary_save_readback_mismatch');
+        }
+      }
+      if (!mounted || !current()) return;
+      ref.invalidate(selectedDailyLedgerProvider);
+      ref.invalidate(selectedDailyLogProvider);
+      context.go('/dashboard');
+    } on Object {
+      if (current()) {
+        _message(
+          _tr(
+            'Could not confirm the save. Your saved entries are unchanged; retry.',
+            'تعذر تأكيد الحفظ. بقيت مدخلاتك المحفوظة كما هي؛ أعد المحاولة.',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) _updateState(() => logSaving = false);
+    }
   }
 
   Future<void> _saveMeal() async {

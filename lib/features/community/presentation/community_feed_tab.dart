@@ -50,21 +50,14 @@ class _FeedTabState extends State<_FeedTab>
       .loadCommunityTopics();
   bool _managingPost = false;
   bool _openingComposer = false;
-  Timer? _entryWelcomeTimer;
   bool _entryWelcomeVisible = true;
 
   @override
   void initState() {
     super.initState();
     _selectedFeedMode = widget.initialMode;
-    // Match AI Coach's entry welcome: keep Community's branded first paint
-    // visible for at least 2.2 seconds without delaying the feed request itself.
-    _entryWelcomeVisible = !widget.entryWelcomeHandled;
-    if (_entryWelcomeVisible) {
-      _entryWelcomeTimer = Timer(const Duration(milliseconds: 2200), () {
-        if (mounted) setState(() => _entryWelcomeVisible = false);
-      });
-    }
+    // Never hold a ready feed behind an artificial welcome timer.
+    _entryWelcomeVisible = false;
   }
 
   @override
@@ -78,7 +71,6 @@ class _FeedTabState extends State<_FeedTab>
 
   @override
   void dispose() {
-    _entryWelcomeTimer?.cancel();
     super.dispose();
   }
 

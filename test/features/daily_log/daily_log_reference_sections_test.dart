@@ -32,6 +32,52 @@ Widget _app(
 );
 
 void main() {
+  for (final locale in const [Locale('en'), Locale('ar')]) {
+    testWidgets('selected date remains centred after navigation in $locale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      var date = DateTime(2026, 10, 11);
+      await tester.pumpWidget(
+        _app(
+          StatefulBuilder(
+            builder: (context, update) => DailyLogWeekStrip(
+              date: date,
+              onSelected: (value) => update(() => date = value),
+            ),
+          ),
+          locale: locale,
+          scale: 2,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final circle = find.byKey(const Key('daily-log-selected-date-circle'));
+      final strip = find.byKey(const Key('daily-log-week-strip'));
+      expect(tester.getSize(circle), const Size(36, 36));
+      expect(
+        tester.getCenter(circle).dx,
+        closeTo(tester.getCenter(strip).dx, 0.1),
+      );
+      final next = DateTime(2026, 10, 12);
+      await tester.tap(
+        find.byKey(ValueKey('daily-log-week-${next.toIso8601String()}')),
+      );
+      await tester.pumpAndSettle();
+      expect(date, next);
+      expect(
+        tester.getCenter(circle).dx,
+        closeTo(tester.getCenter(strip).dx, 0.1),
+      );
+      expect(
+        find.descendant(of: circle, matching: find.text('12')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('Today cards stay distinct from the light canvas', (
     tester,
   ) async {

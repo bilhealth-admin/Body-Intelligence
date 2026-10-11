@@ -48,6 +48,15 @@ final class TrustedRecipeNutrition {
     required this.carbohydrateG,
     required this.fatG,
     required this.provenance,
+    this.fiberG,
+    this.sugarG,
+    this.sodiumMg,
+    this.potassiumMg,
+    this.calciumMg,
+    this.magnesiumMg,
+    this.phosphorusMg,
+    this.ironMg,
+    this.vitaminCMg,
   });
 
   final double caloriesKcal;
@@ -55,6 +64,15 @@ final class TrustedRecipeNutrition {
   final double carbohydrateG;
   final double fatG;
   final RecipeNutritionProvenance provenance;
+  final double? fiberG,
+      sugarG,
+      sodiumMg,
+      potassiumMg,
+      calciumMg,
+      magnesiumMg,
+      phosphorusMg,
+      ironMg,
+      vitaminCMg;
 
   Map<String, Object?> toJson() => {
     'caloriesKcal': caloriesKcal,
@@ -62,6 +80,15 @@ final class TrustedRecipeNutrition {
     'carbohydrateG': carbohydrateG,
     'fatG': fatG,
     'provenance': provenance.toJson(),
+    if (fiberG != null) 'fiberG': fiberG,
+    if (sugarG != null) 'sugarG': sugarG,
+    if (sodiumMg != null) 'sodiumMg': sodiumMg,
+    if (potassiumMg != null) 'potassiumMg': potassiumMg,
+    if (calciumMg != null) 'calciumMg': calciumMg,
+    if (magnesiumMg != null) 'magnesiumMg': magnesiumMg,
+    if (phosphorusMg != null) 'phosphorusMg': phosphorusMg,
+    if (ironMg != null) 'ironMg': ironMg,
+    if (vitaminCMg != null) 'vitaminCMg': vitaminCMg,
   };
 }
 

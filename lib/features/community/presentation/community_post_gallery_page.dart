@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/bil_persistent_network_image.dart';
 
 import '../domain/community_models.dart';
 import 'community_copy.dart';
@@ -172,8 +173,9 @@ class _GalleryImage extends StatelessWidget {
             semanticLabel: label,
             errorBuilder: (_, _, _) => unavailable(),
           )
-        : Image.network(
+        : BilPersistentNetworkImage(
             url,
+            decodeWidth: null,
             fit: BoxFit.contain,
             semanticLabel: label,
             errorBuilder: (_, _, _) => unavailable(),

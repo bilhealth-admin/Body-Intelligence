@@ -1,4 +1,5 @@
 import '../../wellness/repositories/recipe_release_repository.dart';
+import '../../wellness/domain/recipe_content_localizer.dart';
 import '../domain/recipe_ingredient_evidence.dart';
 import '../domain/trusted_recipe.dart';
 
@@ -24,7 +25,10 @@ abstract final class CatalogRecipeDraft {
         for (final item
             in (record['ingredients'] as List).cast<Map<String, dynamic>>())
           TrustedRecipeIngredient(
-            name: item['itemId'] as String,
+            name: RecipeContentLocalizer.ingredientName(
+              item['itemId'] as String,
+              locale,
+            ),
             quantity: (item['grams'] as num).toDouble(),
             unit: 'g',
             sourceRecordId: item['recordId'] as String?,
@@ -39,6 +43,10 @@ abstract final class CatalogRecipeDraft {
               proteinG: (perServing['proteinG'] as num).toDouble(),
               carbohydrateG: (perServing['carbohydrateG'] as num).toDouble(),
               fatG: (perServing['fatG'] as num).toDouble(),
+              fiberG: (perServing['fiberG'] as num?)?.toDouble(),
+              sugarG: (perServing['sugarG'] as num?)?.toDouble(),
+              sodiumMg: (perServing['sodiumMg'] as num?)?.toDouble(),
+              potassiumMg: (perServing['potassiumMg'] as num?)?.toDouble(),
               provenance: RecipeNutritionProvenance(
                 source: 'BIL calculated recipe / USDA FoodData Central',
                 recordId:

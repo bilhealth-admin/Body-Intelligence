@@ -6,44 +6,58 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     String query,
     String locale,
   ) async {
-    // SearchAnchor can keep an older async suggestion request alive while a
-    // user types quickly (or an accessibility/ADB input method commits a whole
-    // word at once). Resolve every in-flight request against the latest field
-    // value so a slow result for `a` can never replace the result for `apple`.
-    var effectiveQuery = query.trim();
-    await Future<void>.delayed(const Duration(milliseconds: 180));
-    effectiveQuery = controller.text.trim();
+    final effectiveQuery = query.trim();
     if (effectiveQuery.isEmpty) return const <Widget>[];
-
     final authority = ref.read(foodRuntimeSearchAuthorityProvider);
-    var results = await authority.search(effectiveQuery, limit: 20);
-    if (results.isEmpty) {
-      // A phrase can contain a reviewed food concept plus an extra word that
-      // USDA does not index as part of the food name (for example
-      // "بطيخ الكيوي"). Retry once with the first reviewed Latin concept so
-      // the daily-log picker can still show the authoritative food row.
-      final fallbackQuery = _DailyLogPageState._searchAssistance
-          .expand(effectiveQuery)
-          .firstWhere(
-            (candidate) =>
-                candidate != effectiveQuery &&
-                RegExp(r'^[A-Za-z0-9]').hasMatch(candidate),
-            orElse: () => '',
+    bool current() =>
+        mounted &&
+        controller.text.trim() == effectiveQuery &&
+        identical(authority, ref.read(foodRuntimeSearchAuthorityProvider));
+    return <Widget>[
+      StreamBuilder<List<Food>>(
+        key: ValueKey((authority, effectiveQuery)),
+        stream: authority.searchProgressively(effectiveQuery, limit: 20),
+        builder: (context, snapshot) {
+          if (!current()) return const SizedBox.shrink();
+          if (!snapshot.hasData) {
+            return const Padding(
+              padding: EdgeInsets.all(20),
+              child: LinearProgressIndicator(),
+            );
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ..._mealSuggestionTiles(
+                controller,
+                effectiveQuery,
+                locale,
+                snapshot.data!,
+                current: current,
+              ),
+              if (snapshot.connectionState != ConnectionState.done)
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'نتائج الجهاز أولًا؛ يجري البحث عن نتائج إضافية.'
+                        : 'On-device results first; checking for more matches.',
+                  ),
+                ),
+            ],
           );
-      if (fallbackQuery.isNotEmpty) {
-        results = await authority.search(fallbackQuery, limit: 20);
-      }
-    }
-    for (var refresh = 0; refresh < 3; refresh++) {
-      final latestQuery = controller.text.trim();
-      if (latestQuery == effectiveQuery) break;
-      if (latestQuery.isEmpty) return const <Widget>[];
-      effectiveQuery = latestQuery;
-      results = await ref
-          .read(foodRuntimeSearchAuthorityProvider)
-          .search(effectiveQuery, limit: 20);
-    }
+        },
+      ),
+    ];
+  }
 
+  Iterable<Widget> _mealSuggestionTiles(
+    SearchController controller,
+    String effectiveQuery,
+    String locale,
+    List<Food> results, {
+    required bool Function() current,
+  }) {
     final resultLocale = FoodPresentationLocalizer.resultLocaleForQuery(
       query: effectiveQuery,
       interfaceLocaleTag: locale,
@@ -124,6 +138,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
         food: food,
         controller: controller,
         languageCode: resultLocale,
+        current: current,
       ),
     );
   }
@@ -132,6 +147,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     required Food food,
     required SearchController controller,
     required String languageCode,
+    bool Function()? current,
   }) {
     final displayName = _displayFoodName(food, languageCode);
     final servingSize = intl.NumberFormat.decimalPattern(
@@ -217,7 +233,11 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           customBorder: const CircleBorder(),
-          onTap: () => _selectFood(food, controller, displayName),
+          onTap: () {
+            if (current?.call() ?? true) {
+              _selectFood(food, controller, displayName);
+            }
+          },
           child: SizedBox.square(
             dimension: largeText ? 58 : 54,
             child: Icon(
@@ -240,7 +260,11 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _selectFood(food, controller, displayName),
+        onTap: () {
+          if (current?.call() ?? true) {
+            _selectFood(food, controller, displayName);
+          }
+        },
         child: Padding(
           padding: EdgeInsetsDirectional.fromSTEB(
             18,

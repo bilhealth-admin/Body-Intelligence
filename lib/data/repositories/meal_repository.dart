@@ -215,11 +215,36 @@ class MealRepository {
     required double protein,
     required double carbohydrates,
     required double fat,
+    double? fiber,
+    double? sugar,
+    double? sodium,
+    double? potassium,
+    double? calcium,
+    double? magnesium,
+    double? phosphorus,
+    double servings = 1,
   }) async {
     if (!const {'breakfast', 'lunch', 'dinner', 'snack'}.contains(mealType)) {
       throw ArgumentError.value(mealType, 'mealType', 'Unsupported meal type');
     }
-    final nutrients = [calories, protein, carbohydrates, fat];
+    if (!servings.isFinite || servings <= 0 || servings > 100) {
+      throw ArgumentError.value(servings, 'servings');
+    }
+    final nutrients = [
+      calories,
+      protein,
+      carbohydrates,
+      fat,
+      ...[
+        fiber,
+        sugar,
+        sodium,
+        potassium,
+        calcium,
+        magnesium,
+        phosphorus,
+      ].whereType<double>(),
+    ];
     if (foodUuid.trim().isEmpty ||
         recipeName.trim().isEmpty ||
         source.trim().isEmpty ||
@@ -231,6 +256,13 @@ class MealRepository {
       protein: protein,
       carbohydrates: carbohydrates,
       fat: fat,
+      fiber: fiber,
+      sugar: sugar,
+      sodium: sodium,
+      potassium: potassium,
+      calcium: calcium,
+      magnesium: magnesium,
+      phosphorus: phosphorus,
     );
     return _database.transaction(() async {
       await _requireOpenDayForMeals(dayKeyFor(date));
@@ -254,6 +286,13 @@ class MealRepository {
                 protein: protein,
                 carbs: carbohydrates,
                 fats: fat,
+                fiber: Value(fiber ?? 0),
+                sugar: Value(sugar ?? 0),
+                sodium: Value(sodium ?? 0),
+                potassium: Value(potassium ?? 0),
+                calcium: Value(calcium ?? 0),
+                magnesium: Value(magnesium ?? 0),
+                phosphorus: Value(phosphorus ?? 0),
                 nutrientEvidenceMask: Value(evidence),
                 source: Value(source.trim()),
                 verified: const Value(false),
@@ -273,6 +312,13 @@ class MealRepository {
             food.protein == protein &&
             food.carbs == carbohydrates &&
             food.fats == fat &&
+            food.fiber == (fiber ?? 0) &&
+            food.sugar == (sugar ?? 0) &&
+            food.sodium == (sodium ?? 0) &&
+            food.potassium == (potassium ?? 0) &&
+            food.calcium == (calcium ?? 0) &&
+            food.magnesium == (magnesium ?? 0) &&
+            food.phosphorus == (phosphorus ?? 0) &&
             food.nutrientEvidenceMask == evidence &&
             food.source == source.trim() &&
             !food.verified &&
@@ -306,12 +352,19 @@ class MealRepository {
             MealItemsCompanion.insert(
               mealId: mealId,
               foodId: food.id,
-              quantity: const Value(1),
+              quantity: Value(servings),
               position: Value(position),
-              calories: Value(calories),
-              protein: Value(protein),
-              carbs: Value(carbohydrates),
-              fats: Value(fat),
+              calories: Value(calories * servings),
+              protein: Value(protein * servings),
+              carbs: Value(carbohydrates * servings),
+              fats: Value(fat * servings),
+              fiber: Value((fiber ?? 0) * servings),
+              sugar: Value((sugar ?? 0) * servings),
+              sodium: Value((sodium ?? 0) * servings),
+              potassium: Value((potassium ?? 0) * servings),
+              calcium: Value((calcium ?? 0) * servings),
+              magnesium: Value((magnesium ?? 0) * servings),
+              phosphorus: Value((phosphorus ?? 0) * servings),
               nutrientEvidenceMask: Value(evidence),
               foodSourceSnapshot: Value(source.trim()),
               foodVerifiedSnapshot: const Value(false),

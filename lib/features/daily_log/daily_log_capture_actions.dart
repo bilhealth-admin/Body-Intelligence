@@ -209,7 +209,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       );
       if (!mounted) return;
       if (!hasVisionTokens) {
-        await context.push('/plans?focus=boost');
+        await explainVisionAccess(context, ref);
         return;
       }
       final service = MealImageAnalysisService(
@@ -437,8 +437,9 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       } on MealImageAnalysisException catch (error) {
         if (!mounted) return;
         if (error.failure == MealImageAnalysisFailure.boostRequired) {
+          ref.invalidate(aiVisionCreditStateProvider);
           ref.invalidate(aiBoostVisionAccessProvider);
-          await context.push('/plans?focus=boost');
+          await explainVisionAccess(context, ref);
           return;
         }
         ScaffoldMessenger.of(context).showSnackBar(
@@ -468,6 +469,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         );
       }
     } finally {
+      ref.invalidate(aiVisionCreditStateProvider);
       ref.invalidate(aiBoostVisionAccessProvider);
       if (mounted) _updateState(() => mealImageBusy = false);
     }

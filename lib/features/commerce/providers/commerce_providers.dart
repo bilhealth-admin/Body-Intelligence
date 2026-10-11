@@ -402,25 +402,46 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
 /// Meal-photo analysis uses the same shared BIL AI Token balance as AI Coach.
 /// The server reports a reserved-aware total, so the client never unlocks a
 /// request from a stale local purchase callback or a plan label alone.
-final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
-  ref.watch(verifiedEntitlementOwnerProvider);
+enum AiVisionCreditState { available, insufficient, unavailable }
+
+final aiVisionCreditStateProvider = FutureProvider<AiVisionCreditState>((
+  ref,
+) async {
+  final owner = ref.watch(verifiedEntitlementOwnerIdProvider);
   ref.watch(aiCoachUsageRefreshProvider);
-  final client = Supabase.instance.client;
-  if (client.auth.currentSession == null) return false;
-  try {
-    final value = await client.rpc('bil_get_ai_usage_status');
-    final status = Map<String, Object?>.from(value as Map);
-    final rawCredits = status['credits'];
-    if (rawCredits is! Map) return false;
-    final credits = Map<String, Object?>.from(rawCredits);
-    final totalRemaining = credits['total_remaining'];
-    return totalRemaining is num &&
-        totalRemaining.isFinite &&
-        totalRemaining >= 100;
-  } on Object {
-    // Cloud-paid access fails closed when current credit cannot be verified.
-    return false;
+  var active = true;
+  ref.onDispose(() => active = false);
+  if (owner == null || !AppEnvironment.supabaseRuntimeReady) {
+    return AiVisionCreditState.unavailable;
   }
+  try {
+    final client = Supabase.instance.client;
+    if (client.auth.currentUser?.id != owner) {
+      return AiVisionCreditState.unavailable;
+    }
+    final value = await client
+        .rpc('bil_get_ai_usage_status')
+        .timeout(const Duration(seconds: 8));
+    if (!active || client.auth.currentUser?.id != owner || value is! Map) {
+      return AiVisionCreditState.unavailable;
+    }
+    final credits = value['credits'];
+    if (credits is! Map) return AiVisionCreditState.unavailable;
+    final remaining = credits['total_remaining'];
+    if (remaining is! num || !remaining.isFinite || remaining < 0) {
+      return AiVisionCreditState.unavailable;
+    }
+    return remaining >= 100
+        ? AiVisionCreditState.available
+        : AiVisionCreditState.insufficient;
+  } on Object {
+    return AiVisionCreditState.unavailable;
+  }
+}, retry: (_, _) => null);
+
+final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
+  return await ref.watch(aiVisionCreditStateProvider.future) ==
+      AiVisionCreditState.available;
 });
 
 /// The device store is authoritative for the market-facing tier before a

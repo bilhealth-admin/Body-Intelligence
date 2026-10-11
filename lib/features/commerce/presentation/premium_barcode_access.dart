@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'optional_access_offer.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../domain/commerce_plan.dart';
@@ -46,7 +46,9 @@ Future<bool> requestPremiumBarcodeAccess(
     }.contains(verified!.plan)) {
       return true;
     }
-    if (context.mounted) await context.push('/plans?focus=subscription');
+    if (context.mounted) {
+      await showOptionalAccessOffer(context, ref, verifiedDenied: true);
+    }
     return false;
   }
   if (context.mounted) {

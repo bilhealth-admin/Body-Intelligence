@@ -161,8 +161,9 @@ abstract final class TrustedRecipeParser {
   }
 
   static String _sourceRecordId(Object? value) {
-    final result = _text(value, max: 40, code: 'invalid_ingredient');
-    if (!RegExp(r'^usda:\d+$').hasMatch(result)) {
+    final result = _text(value, max: 200, code: 'invalid_ingredient');
+    if (!RegExp(r'^usda:\d+$').hasMatch(result) &&
+        !RegExp(r'^local:[A-Za-z0-9:_-]{1,160}$').hasMatch(result)) {
       throw const TrustedRecipeParseException('invalid_ingredient');
     }
     return result;
@@ -183,8 +184,21 @@ abstract final class TrustedRecipeParser {
       'fatG',
       'provenance',
     };
-    if (raw.length != nutritionKeys.length ||
-        raw.keys.any((key) => !nutritionKeys.contains(key))) {
+    const optionalKeys = {
+      'fiberG',
+      'sugarG',
+      'sodiumMg',
+      'potassiumMg',
+      'calciumMg',
+      'magnesiumMg',
+      'phosphorusMg',
+      'ironMg',
+      'vitaminCMg',
+    };
+    if (!raw.keys.toSet().containsAll(nutritionKeys) ||
+        raw.keys.any(
+          (key) => !nutritionKeys.contains(key) && !optionalKeys.contains(key),
+        )) {
       throw const TrustedRecipeParseException('invalid_nutrition');
     }
     const provenanceKeys = {'source', 'recordId', 'verifiedAt'};
@@ -227,6 +241,17 @@ abstract final class TrustedRecipeParser {
       proteinG: nutrient('proteinG'),
       carbohydrateG: nutrient('carbohydrateG'),
       fatG: nutrient('fatG'),
+      fiberG: raw['fiberG'] == null ? null : nutrient('fiberG'),
+      sugarG: raw['sugarG'] == null ? null : nutrient('sugarG'),
+      sodiumMg: raw['sodiumMg'] == null ? null : nutrient('sodiumMg'),
+      potassiumMg: raw['potassiumMg'] == null ? null : nutrient('potassiumMg'),
+      calciumMg: raw['calciumMg'] == null ? null : nutrient('calciumMg'),
+      magnesiumMg: raw['magnesiumMg'] == null ? null : nutrient('magnesiumMg'),
+      phosphorusMg: raw['phosphorusMg'] == null
+          ? null
+          : nutrient('phosphorusMg'),
+      ironMg: raw['ironMg'] == null ? null : nutrient('ironMg'),
+      vitaminCMg: raw['vitaminCMg'] == null ? null : nutrient('vitaminCMg'),
       provenance: RecipeNutritionProvenance(
         source: source,
         recordId: recordId,

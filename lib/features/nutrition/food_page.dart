@@ -74,6 +74,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   final search = TextEditingController();
   List<Food>? results;
   Timer? debounce;
+  StreamSubscription<FoodRuntimeSearchResult>? _progressiveSearch;
   int searchGeneration = 0;
   _CatalogView catalogView = _CatalogView.all;
   _RuntimeSearchUiState runtimeSearchState = _RuntimeSearchUiState.idle;
@@ -89,6 +90,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   @override
   void dispose() {
     debounce?.cancel();
+    _progressiveSearch?.cancel();
     // Let the current detach frame finish before disposing the controller.
     // A wall-clock delay leaked a pending timer into widget tests and kept the
     // controller alive needlessly after the route had settled.
@@ -111,23 +113,17 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       );
     }
 
-    final outcome = widget.userOwnedOnly
-        ? FoodRuntimeSearchResult(
-            foods: _foodsInScope(
-              await ref.read(foodRepositoryProvider).searchCustomFoods(value),
-            ),
-            source: FoodRuntimeSearchSource.localOnly,
-          )
-        : await ref
-              .read(foodRuntimeSearchAuthorityProvider)
-              .searchDetailed(value);
-
-    if (mounted && generation == searchGeneration) {
+    final repository = ref.read(foodRepositoryProvider);
+    final authority = ref.read(foodRuntimeSearchAuthorityProvider);
+    bool current() =>
+        mounted &&
+        generation == searchGeneration &&
+        identical(repository, ref.read(foodRepositoryProvider)) &&
+        identical(authority, ref.read(foodRuntimeSearchAuthorityProvider));
+    void accept(FoodRuntimeSearchResult outcome) {
+      if (!current()) return;
       setState(() {
         results = _foodsInScope(outcome.foods);
-        // Empty-state suggestions must be authored synonyms/translations only.
-        // A fuzzy nearest-neighbour can turn a misspelling into a different
-        // food, which is unsafe and confusing in a nutrition log.
         correction = results!.isEmpty
             ? _assistance.explicitCorrectionFor(trimmed)
             : null;
@@ -143,10 +139,44 @@ class _FoodPageState extends ConsumerState<FoodPage> {
         };
       });
     }
+
+    await _progressiveSearch?.cancel();
+    if (!current()) return;
+    if (widget.userOwnedOnly) {
+      try {
+        accept(
+          FoodRuntimeSearchResult(
+            foods: await repository.searchCustomFoods(value),
+            source: FoodRuntimeSearchSource.localOnly,
+          ),
+        );
+      } on Object {
+        if (current()) {
+          setState(
+            () => runtimeSearchState = _RuntimeSearchUiState.localFallback,
+          );
+        }
+      }
+    } else {
+      _progressiveSearch = authority
+          .searchResultsProgressively(value)
+          .listen(
+            accept,
+            onError: (Object _) {
+              if (current()) {
+                setState(
+                  () =>
+                      runtimeSearchState = _RuntimeSearchUiState.localFallback,
+                );
+              }
+            },
+          );
+    }
   }
 
   void _scheduleSearch(String value) {
     debounce?.cancel();
+    _progressiveSearch?.cancel();
     final trimmed = value.trim();
     // Rebuild immediately. Waiting for the debounce left the browse filters
     // and a false empty state visible underneath an active search.
@@ -161,10 +191,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       searchGeneration++;
       return;
     }
-    debounce = Timer(
-      const Duration(milliseconds: 180),
-      () => _runSearch(value),
-    );
+    unawaited(_runSearch(value));
   }
 
   List<Food> _foodsInScope(Iterable<Food> foods) => widget.userOwnedOnly
@@ -173,6 +200,12 @@ class _FoodPageState extends ConsumerState<FoodPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(foodRuntimeSearchAuthorityProvider, (previous, next) {
+      searchGeneration++;
+      _progressiveSearch?.cancel();
+      results = null;
+      if (mounted) unawaited(_runSearch(search.text));
+    });
     final t = context.strings.text;
     final allFoods = ref.watch(foodsProvider);
     final favorites = ref.watch(favoriteFoodsProvider);
@@ -232,6 +265,29 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                ],
+                if (widget.embedded && widget.userOwnedOnly) ...[
+                  Text(
+                    nutritionText(
+                      context,
+                      'My foods stores individual foods with their label values. Meals combine foods; recipes calculate ingredients per serving.',
+                      'أطعمتي تحفظ الطعام المفرد بقيم ملصقه. الوجبة تجمع أطعمة، والوصفة تحسب مكوّناتها لكل حصة.',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    key: const Key('my-foods-create-custom'),
+                    onPressed: _createFood,
+                    icon: const Icon(Icons.add),
+                    label: Text(
+                      nutritionText(
+                        context,
+                        'Create custom food',
+                        'إنشاء طعام مخصص',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                 ],
                 _NutritionTaskBar(
                   searchField: SearchBar(

@@ -28,10 +28,27 @@ class _RecipesTab extends ConsumerWidget {
             ],
           ],
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 18),
+        Text(
+          nutritionEntryText(
+            context,
+            'Create recipe links foods and calculates nutrition per serving. Discover opens the recipe library; review and save a recipe there to add it here. Tap a saved recipe to review or edit; its menu logs selected servings.',
+            '«إنشاء وصفة» يربط الأطعمة ويحسب التغذية لكل حصة. «اكتشف» يفتح مكتبة الوصفات؛ راجع الوصفة واحفظها لتظهر هنا. اضغط وصفة محفوظة لمراجعتها أو تعديلها، واستخدم قائمتها لتسجيل الحصص.',
+          ),
+        ),
+        const SizedBox(height: 18),
         if (saved.isLoading) const Center(child: CircularProgressIndicator()),
-        if (saved.hasError) Text(_recipeListCopy(context, 'loadFailed')),
-        if (saved.value?.isEmpty ?? true)
+        if (saved.hasError)
+          TextButton.icon(
+            onPressed: () => ref.invalidate(trustedRecipesProvider),
+            icon: const Icon(Icons.refresh),
+            label: Text(
+              '${_recipeListCopy(context, 'loadFailed')} ${_c(context, 'Retry')}',
+            ),
+          ),
+        if (!saved.isLoading &&
+            !saved.hasError &&
+            (saved.value?.isEmpty ?? false))
           _EmptyState(
             icon: Icons.menu_book_rounded,
             title: _c(context, 'Build your recipe collection'),
@@ -47,8 +64,11 @@ class _RecipesTab extends ConsumerWidget {
                 kind: BilSemanticIconKind.recipes,
               ),
               title: Text(savedRecipe.recipe.name),
+              onTap: () => context.push(
+                '/nutrition/recipes/import?recipeId=${Uri.encodeQueryComponent(savedRecipe.id)}',
+              ),
               subtitle: Text(
-                '${savedRecipe.recipe.servings} ${_recipeListCopy(context, 'servings')} · ${savedRecipe.recipe.totalMinutes} min',
+                '${savedRecipe.recipe.servings} ${_recipeListCopy(context, 'servings')} · ${savedRecipe.recipe.totalMinutes} ${nutritionEntryText(context, 'min', 'د')}',
               ),
               trailing: PopupMenuButton<String>(
                 tooltip: _recipeListCopy(context, 'recipeActions'),
@@ -65,7 +85,7 @@ class _RecipesTab extends ConsumerWidget {
                   ),
                   if (savedRecipe.recipe.nutrition == null)
                     PopupMenuItem<String>(
-                      enabled: false,
+                      value: '_edit',
                       child: Text(
                         _recipeListCopy(context, 'nutritionRequired'),
                       ),
@@ -100,6 +120,7 @@ class _RecipesTab extends ConsumerWidget {
       return;
     }
     if (mealType == '_delete') {
+      final repository = ref.read(trustedRecipeRepositoryProvider);
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
@@ -117,8 +138,33 @@ class _RecipesTab extends ConsumerWidget {
           ],
         ),
       );
-      if (confirmed != true) return;
-      await ref.read(trustedRecipeRepositoryProvider).delete(savedRecipe.id);
+      if (confirmed != true ||
+          !context.mounted ||
+          !identical(repository, ref.read(trustedRecipeRepositoryProvider))) {
+        return;
+      }
+      try {
+        await repository.delete(savedRecipe.id);
+      } on Object {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                nutritionEntryText(
+                  context,
+                  'Could not delete the recipe. Retry.',
+                  'تعذر حذف الوصفة. أعد المحاولة.',
+                ),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+      if (!context.mounted ||
+          !identical(repository, ref.read(trustedRecipeRepositoryProvider))) {
+        return;
+      }
       ref.invalidate(trustedRecipesProvider);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,14 +172,14 @@ class _RecipesTab extends ConsumerWidget {
       );
       return;
     }
-    await TrustedRecipeDiaryService(
-      ref.read(foodRepositoryProvider),
-      ref.read(mealRepositoryProvider),
-    ).addServing(saved: savedRecipe, date: DateTime.now(), mealType: mealType);
-    ref.invalidate(dailyMealsProvider);
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(_recipeListCopy(context, 'addedToDiary'))),
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => RecipeDiaryConfirmationPage(
+          saved: savedRecipe,
+          initialDate: ref.read(selectedLogDateProvider),
+          initialMealType: mealType,
+        ),
+      ),
     );
   }
 
@@ -184,7 +230,7 @@ String _recipeListCopy(BuildContext context, String key) {
       'servings': 'servings',
       'addToDiary': 'Add one serving to diary',
       'recipeActions': 'Recipe actions',
-      'addedToDiary': 'One recipe serving was added to today.',
+      'addedToDiary': 'Recipe servings were added to the selected diary date.',
       'nutritionRequired':
           'Calculated nutrition with sources is required before logging.',
       'breakfast': 'Breakfast',
@@ -203,7 +249,7 @@ String _recipeListCopy(BuildContext context, String key) {
       'servings': 'حصص',
       'addToDiary': 'أضف حصة إلى اليوميات',
       'recipeActions': 'إجراءات الوصفة',
-      'addedToDiary': 'أُضيفت حصة من الوصفة إلى اليوم.',
+      'addedToDiary': 'أُضيفت حصص الوصفة إلى تاريخ اليوميات المحدد.',
       'nutritionRequired': 'يلزم توفر تغذية محسوبة بمصادر قبل التسجيل.',
       'edit': 'تعديل الوصفة',
       'delete': 'حذف الوصفة',

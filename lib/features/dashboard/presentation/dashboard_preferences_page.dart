@@ -21,7 +21,7 @@ part 'dashboard_preferences_body.dart';
 
 @visibleForTesting
 String dashboardPremiumFeatureDestination(bool paid, String featureRoute) =>
-    paid ? featureRoute : '/plans';
+    featureRoute;
 
 class DashboardPreferencesPage extends ConsumerStatefulWidget {
   const DashboardPreferencesPage({super.key});

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../data/database/app_database.dart';
 import '../../../data/repositories/food_repository.dart';
 import '../repositories/mobile_catalog_food_repository.dart';
@@ -129,10 +131,81 @@ class FoodRuntimeSearchAuthority {
     }
   }
 
+  /// Emits owner-local rows, then the installed on-device catalog, then optional
+  /// cloud enrichment. Only the cloud phase is debounced. Cancellation prevents
+  /// a new remote call and prevents old results from entering a newer visit.
+  Stream<FoodRuntimeSearchResult> searchResultsProgressively(
+    String query, {
+    int limit = 50,
+    Duration remoteDebounce = const Duration(milliseconds: 180),
+  }) => Stream<FoodRuntimeSearchResult>.multi((sink) {
+    var cancelled = false;
+    sink.onCancel = () {
+      cancelled = true;
+    };
+    unawaited(() async {
+      var emitted = false;
+      try {
+        final local = await _searchLocal(query, limit: limit);
+        if (cancelled) return;
+        sink.add(
+          FoodRuntimeSearchResult(
+            foods: local,
+            source: FoodRuntimeSearchSource.localOnly,
+          ),
+        );
+        emitted = true;
+        if (query.trim().isEmpty) return;
+        final installed = await searchDetailed(
+          query,
+          limit: limit,
+          includeNetwork: false,
+          includeCommunity: false,
+          active: () => !cancelled,
+        );
+        if (cancelled) return;
+        sink.add(installed);
+        await Future<void>.delayed(remoteDebounce);
+        if (cancelled) return;
+        final enriched = await searchDetailed(
+          query,
+          limit: limit,
+          active: () => !cancelled,
+        );
+        if (!cancelled) sink.add(enriched);
+      } on Object catch (error, stack) {
+        // Optional enrichment must not erase a usable local response.
+        if (!cancelled && !emitted) sink.addError(error, stack);
+      } finally {
+        if (!cancelled) sink.close();
+      }
+    }());
+  });
+
+  Stream<List<Food>> searchProgressively(
+    String query, {
+    int limit = 50,
+    Duration remoteDebounce = const Duration(milliseconds: 180),
+  }) => searchResultsProgressively(
+    query,
+    limit: limit,
+    remoteDebounce: remoteDebounce,
+  ).map((result) => result.foods);
+
   Future<FoodRuntimeSearchResult> searchDetailed(
     String query, {
     int limit = 50,
+    bool includeNetwork = true,
+    bool includeCommunity = true,
+    bool Function()? active,
   }) async {
+    if (active != null && !active()) throw StateError('Search retired.');
+    if (limit <= 0) {
+      return const FoodRuntimeSearchResult(
+        foods: <Food>[],
+        source: FoodRuntimeSearchSource.localOnly,
+      );
+    }
     if (query.trim().isEmpty) {
       return FoodRuntimeSearchResult(
         foods: await _localRepository.search(query, limit: limit),
@@ -140,15 +213,18 @@ class FoodRuntimeSearchAuthority {
       );
     }
 
-    // Non-Latin food queries must reach the authenticated BIL gateway before
-    // the offline catalog decides whether the phrase is understood. This is
-    // the production path for Arabic and other multilingual searches; local
-    // catalog rows remain a resilient fallback when the network is unavailable.
-    final networkFirst = _isMultilingualQuery(query)
-        ? await _loadTrustedNetwork(query, limit: limit)
+    // The one-shot API retains full trusted enrichment. Progressive callers
+    // first run this same authority with both remote sources disabled.
+    final networkFirst =
+        includeNetwork &&
+            (active?.call() ?? true) &&
+            _isMultilingualQuery(query)
+        ? await _loadTrustedNetwork(query, limit: limit, active: active)
         : const <Food>[];
     final local = await _searchLocal(query, limit: limit);
-    final community = await _loadCommunity(query, limit: limit);
+    final community = includeCommunity && (active?.call() ?? true)
+        ? await _loadCommunity(query, limit: limit, active: active)
+        : const <Food>[];
 
     UnifiedFoodRepository? catalog;
     try {
@@ -156,8 +232,11 @@ class FoodRuntimeSearchAuthority {
     } catch (_) {
       final network = networkFirst.isNotEmpty
           ? networkFirst
-          : local.isEmpty && community.isEmpty
-          ? await _loadTrustedNetwork(query, limit: limit)
+          : includeNetwork &&
+                (active?.call() ?? true) &&
+                local.isEmpty &&
+                community.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit, active: active)
           : const <Food>[];
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
@@ -177,8 +256,11 @@ class FoodRuntimeSearchAuthority {
     if (catalog == null) {
       final network = networkFirst.isNotEmpty
           ? networkFirst
-          : local.isEmpty && community.isEmpty
-          ? await _loadTrustedNetwork(query, limit: limit)
+          : includeNetwork &&
+                (active?.call() ?? true) &&
+                local.isEmpty &&
+                community.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit, active: active)
           : const <Food>[];
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
@@ -196,7 +278,8 @@ class FoodRuntimeSearchAuthority {
     }
 
     try {
-      final expandedLimit = (limit * 5).clamp(limit, 250);
+      final boundedLimit = limit.clamp(1, 250);
+      final expandedLimit = (boundedLimit * 5).clamp(boundedLimit, 250);
       final hits = await catalog.searchUnified(query, limit: expandedLimit);
       final matchedHits = hits
           .map((hit) => (hit: hit, match: _matchQuery(hit.food, query)))
@@ -213,6 +296,7 @@ class FoodRuntimeSearchAuthority {
           });
       final materialized = <Food>[];
       for (final entry in rankedHits) {
+        if (active != null && !active()) throw StateError('Search retired.');
         materialized.add(
           await _localRepository.materializeUnifiedFood(entry.hit.food),
         );
@@ -227,8 +311,8 @@ class FoodRuntimeSearchAuthority {
       );
       final network = networkFirst.isNotEmpty
           ? networkFirst
-          : current.isEmpty
-          ? await _loadTrustedNetwork(query, limit: limit)
+          : includeNetwork && (active?.call() ?? true) && current.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit, active: active)
           : const <Food>[];
       return FoodRuntimeSearchResult(
         foods: network.isEmpty
@@ -244,8 +328,12 @@ class FoodRuntimeSearchAuthority {
         source: FoodRuntimeSearchSource.catalogAndLocal,
       );
     } catch (_) {
-      final network = local.isEmpty && community.isEmpty
-          ? await _loadTrustedNetwork(query, limit: limit)
+      final network =
+          includeNetwork &&
+              (active?.call() ?? true) &&
+              local.isEmpty &&
+              community.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit, active: active)
           : const <Food>[];
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
@@ -274,8 +362,9 @@ class FoodRuntimeSearchAuthority {
   Future<List<Food>> _loadTrustedNetwork(
     String query, {
     required int limit,
+    bool Function()? active,
   }) async {
-    if (limit <= 0) return const <Food>[];
+    if (limit <= 0 || (active != null && !active())) return const <Food>[];
     try {
       final unified = await networkSearchResolver.search(
         query,
@@ -291,6 +380,7 @@ class FoodRuntimeSearchAuthority {
       // its bounded order here instead of applying the offline text matcher a
       // second time with a different language.
       for (final food in unified) {
+        if (active != null && !active()) return const <Food>[];
         foods.add(await _localRepository.materializeUnifiedFood(food));
         if (foods.length >= limit) break;
       }
@@ -300,15 +390,22 @@ class FoodRuntimeSearchAuthority {
     }
   }
 
-  Future<List<Food>> _loadCommunity(String query, {required int limit}) async {
+  Future<List<Food>> _loadCommunity(
+    String query, {
+    required int limit,
+    bool Function()? active,
+  }) async {
     final resolver = communitySearchResolver;
-    if (resolver == null || limit <= 0) return const <Food>[];
+    if (resolver == null || limit <= 0 || (active != null && !active())) {
+      return const <Food>[];
+    }
     try {
       final unified = await resolver(query, limit: limit < 10 ? limit : 10);
       final foods = <Food>[];
       // The server is an acceleration source, not the search authority. A
       // stale RPC/cache must never inject unrelated foods into a typed query.
       for (final food in _rankUnifiedFoods(unified, query)) {
+        if (active != null && !active()) return const <Food>[];
         foods.add(await _localRepository.materializeUnifiedFood(food));
       }
       return foods;

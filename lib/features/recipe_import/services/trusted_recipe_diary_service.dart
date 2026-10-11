@@ -44,15 +44,15 @@ final class TrustedRecipeDiaryService {
         FoodNutrient.protein: nutrition.proteinG,
         FoodNutrient.carbohydrates: nutrition.carbohydrateG,
         FoodNutrient.fat: nutrition.fatG,
-        FoodNutrient.fiber: null,
-        FoodNutrient.sugar: null,
-        FoodNutrient.sodium: null,
-        FoodNutrient.potassium: null,
-        FoodNutrient.calcium: null,
-        FoodNutrient.magnesium: null,
-        FoodNutrient.phosphorus: null,
-        FoodNutrient.iron: null,
-        FoodNutrient.vitaminC: null,
+        FoodNutrient.fiber: nutrition.fiberG,
+        FoodNutrient.sugar: nutrition.sugarG,
+        FoodNutrient.sodium: nutrition.sodiumMg,
+        FoodNutrient.potassium: nutrition.potassiumMg,
+        FoodNutrient.calcium: nutrition.calciumMg,
+        FoodNutrient.magnesium: nutrition.magnesiumMg,
+        FoodNutrient.phosphorus: nutrition.phosphorusMg,
+        FoodNutrient.iron: nutrition.ironMg,
+        FoodNutrient.vitaminC: nutrition.vitaminCMg,
       }),
       source: CoachFoodSourceEvidence(
         kind: CoachFoodSourceKind.calculatedRecipe,
@@ -104,6 +104,7 @@ final class TrustedRecipeDiaryService {
     required SavedTrustedRecipe saved,
     required DateTime date,
     required String mealType,
+    double servings = 1,
   }) async {
     final nutrition = saved.recipe.nutrition;
     if (nutrition == null) throw const RecipeNutritionUnavailableException();
@@ -111,6 +112,7 @@ final class TrustedRecipeDiaryService {
       utf8.encode(
         jsonEncode({
           'recipeFingerprint': saved.recipe.fingerprint,
+          'nutritionSnapshot': nutrition.toJson(),
           'caloriesKcal': nutrition.caloriesKcal,
           'proteinG': nutrition.proteinG,
           'carbohydrateG': nutrition.carbohydrateG,
@@ -125,6 +127,7 @@ final class TrustedRecipeDiaryService {
       mealType: mealType,
       foodUuid: 'calculated-recipe-$digest',
       recipeName: saved.recipe.name,
+      servings: servings,
       source:
           'recipe-calculation:${nutrition.provenance.source}:'
           '${nutrition.provenance.recordId}:${saved.recipe.fingerprint}',
@@ -132,6 +135,13 @@ final class TrustedRecipeDiaryService {
       protein: nutrition.proteinG,
       carbohydrates: nutrition.carbohydrateG,
       fat: nutrition.fatG,
+      fiber: nutrition.fiberG,
+      sugar: nutrition.sugarG,
+      sodium: nutrition.sodiumMg,
+      potassium: nutrition.potassiumMg,
+      calcium: nutrition.calciumMg,
+      magnesium: nutrition.magnesiumMg,
+      phosphorus: nutrition.phosphorusMg,
     );
   }
 }

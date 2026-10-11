@@ -1,3 +1,7 @@
+import 'package:go_router/go_router.dart';
+import '../../data/database/meal_food_evidence.dart';
+import '../../data/database/nutrient_evidence.dart';
+import '../dashboard/providers/dashboard_preferences_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/localization/app_localizations.dart';
@@ -17,52 +21,99 @@ final challengesProvider = StreamProvider(
   (ref) => ref.watch(challengeRepositoryProvider).watchAll(),
 );
 final challengeProgressProvider =
-    FutureProvider.family<ChallengeProgress, Challenge>((ref, challenge) async {
+    StreamProvider.family<ChallengeProgress, Challenge>((
+      ref,
+      challenge,
+    ) async* {
       final database = ref.watch(databaseProvider);
-      final meals = await MealRepository(database).watchAll().first;
-      final weights = await (database.select(
-        database.weightEntries,
-      )..where((row) => row.deletedAt.isNull())).get();
-      final water = await database.select(database.waterEntries).get();
-      final plan = await database
-          .select(database.planSettings)
-          .getSingleOrNull();
-      String key(DateTime value) =>
-          '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
-      final today = DateTime.now();
-      final end = challenge.endsAt.isBefore(today) ? challenge.endsAt : today;
-      final days = <ChallengeDayEvidence>[];
-      for (
-        var day = DateTime(
-          challenge.startedAt.year,
-          challenge.startedAt.month,
-          challenge.startedAt.day,
-        );
-        !day.isAfter(DateTime(end.year, end.month, end.day));
-        day = day.add(const Duration(days: 1))
-      ) {
-        final dayMeals = meals.where((meal) => key(meal.meal.date) == key(day));
-        final items = dayMeals.expand((meal) => meal.items);
-        days.add(
-          ChallengeDayEvidence(
-            hasMeal: items.isNotEmpty,
-            hasWeight: weights.any((entry) => key(entry.date) == key(day)),
-            protein: items.fold(0, (sum, item) => sum + item.protein),
-            fiber: items.fold(0, (sum, item) => sum + item.fiber),
-            waterMl: water
-                .where((entry) => key(entry.occurredAt) == key(day))
-                .fold(0, (sum, entry) => sum + entry.amountMl),
-          ),
+      final proteinGoal = ref
+          .watch(dashboardNutrientGoalProvider('goal.proteinGrams'))
+          .value;
+      final fiberGoal = ref
+          .watch(dashboardNutrientGoalProvider('goal.fiber'))
+          .value;
+      await for (final _
+          in database
+              .customSelect(
+                'SELECT 1',
+                readsFrom: {
+                  database.meals,
+                  database.mealItems,
+                  database.weightEntries,
+                  database.waterEntries,
+                  database.planSettings,
+                },
+              )
+              .watch()) {
+        final meals = await MealRepository(database).watchAll().first;
+        final weights = await (database.select(
+          database.weightEntries,
+        )..where((row) => row.deletedAt.isNull())).get();
+        final water = await database.select(database.waterEntries).get();
+        final plan = await database
+            .select(database.planSettings)
+            .getSingleOrNull();
+        String key(DateTime value) =>
+            '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
+        final today = DateTime.now();
+        final end = challenge.endsAt.isBefore(today) ? challenge.endsAt : today;
+        final days = <ChallengeDayEvidence>[];
+        for (
+          var day = DateTime(
+            challenge.startedAt.year,
+            challenge.startedAt.month,
+            challenge.startedAt.day,
+          );
+          !day.isAfter(DateTime(end.year, end.month, end.day));
+          day = day.add(const Duration(days: 1))
+        ) {
+          final dayMeals = meals.where(
+            (meal) => key(meal.meal.date) == key(day),
+          );
+          final items = dayMeals.expand((meal) => meal.items);
+          days.add(
+            ChallengeDayEvidence(
+              hasMeal: items.isNotEmpty,
+              hasWeight: weights.any((entry) => key(entry.date) == key(day)),
+              protein: items
+                  .map(
+                    (item) => MealFoodEvidence.read(
+                      item,
+                    ).value(TrackedNutrient.protein),
+                  )
+                  .whereType<double>()
+                  .fold(0, (sum, value) => sum + value),
+              fiber: items
+                  .map(
+                    (item) => MealFoodEvidence.read(
+                      item,
+                    ).value(TrackedNutrient.fiber),
+                  )
+                  .whereType<double>()
+                  .fold(0, (sum, value) => sum + value),
+              waterMl: water
+                  .where((entry) => key(entry.occurredAt) == key(day))
+                  .fold(0, (sum, entry) => sum + entry.amountMl),
+            ),
+          );
+        }
+        yield ChallengeEngine.calculate(
+          type: challenge.type,
+          targetDays: challenge.targetDays,
+          days: days,
+          proteinTarget:
+              proteinGoal?.round() ??
+              plan?.overrideProtein ??
+              plan?.recommendedProtein ??
+              100,
+          fiberTarget:
+              fiberGoal?.round() ??
+              plan?.overrideFiber ??
+              plan?.recommendedFiber ??
+              28,
+          waterTarget: plan?.overrideWater ?? plan?.recommendedWater ?? 2500,
         );
       }
-      return ChallengeEngine.calculate(
-        type: challenge.type,
-        targetDays: challenge.targetDays,
-        days: days,
-        proteinTarget: plan?.overrideProtein ?? plan?.recommendedProtein ?? 100,
-        fiberTarget: plan?.overrideFiber ?? plan?.recommendedFiber ?? 30,
-        waterTarget: plan?.overrideWater ?? plan?.recommendedWater ?? 2500,
-      );
     });
 
 class ChallengesPage extends ConsumerWidget {
@@ -95,6 +146,36 @@ class ChallengesPage extends ConsumerWidget {
         data: (items) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'تحديات شخصية مرتبطة بسجلك'
+                          : 'Personal challenges linked to your diary',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'يُحتسب التقدم تلقائيًا من الطعام والماء والوزن المسجل خلال مدة التحدي. البروتين والألياف والماء: بلوغ 80% من الهدف اليومي. أيام التسجيل والوزن: وجود سجل فعلي. اليوم يُحتسب مرة واحدة. هذه ليست منافسة مجموعات المجتمع؛ ولا يؤدي فتح الصفحة وحده إلى تقدم.'
+                          : 'Progress updates from food, water and weight recorded during the challenge. Protein, fiber and water qualify at 80% of the daily target. Logging and check-ins need a real entry. Each day counts once. These are personal challenges, not Community group competitions.',
+                    ),
+                    TextButton(
+                      onPressed: () => context.push('/daily-log'),
+                      child: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'افتح السجل اليومي'
+                            : 'Open diary',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -302,11 +383,22 @@ class _ChallengeTile extends ConsumerWidget {
               Text(t('Could not calculate challenge progress.')),
           data: (value) {
             if (value.complete && challenge.status != 'completed') {
-              Future.microtask(
-                () => ref
-                    .read(challengeRepositoryProvider)
-                    .markComplete(challenge.id),
-              );
+              final repository = ref.read(challengeRepositoryProvider);
+              Future.microtask(() async {
+                // Do not let a queued completion write into another account.
+                if (!context.mounted ||
+                    !identical(
+                      ref.read(challengeRepositoryProvider),
+                      repository,
+                    )) {
+                  return;
+                }
+                try {
+                  await repository.markComplete(challenge.id);
+                } on Object {
+                  // A transient badge-write failure never changes diary evidence.
+                }
+              });
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

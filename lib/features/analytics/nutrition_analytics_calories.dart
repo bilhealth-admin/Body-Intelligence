@@ -47,14 +47,16 @@ class _CaloriesTab extends StatelessWidget {
                         ? !primary.contains(meal.meal.type)
                         : meal.meal.type == type;
                   })
-                  .expand((meal) => meal.items)
-                  .where(
-                    (item) => NutrientEvidenceMask.contains(
-                      item.nutrientEvidenceMask,
-                      TrackedNutrient.calories,
+                  .expand(
+                    (meal) => meal.items.map(
+                      (item) => MealFoodEvidence.read(
+                        item,
+                        ownerKey: meal.ownerKey,
+                      ).value(TrackedNutrient.calories),
                     ),
                   )
-                  .fold<double>(0, (sum, item) => sum + item.calories);
+                  .whereType<double>()
+                  .fold<double>(0, (sum, value) => sum + value);
               return _DistributionRow(
                 label: _t(context, type),
                 value: calories,
@@ -78,7 +80,7 @@ class _CaloriesTab extends StatelessWidget {
   }
 }
 
-class _NutrientsTab extends StatelessWidget {
+class _NutrientsTab extends ConsumerWidget {
   const _NutrientsTab({
     required this.totals,
     required this.targets,
@@ -92,7 +94,9 @@ class _NutrientsTab extends StatelessWidget {
   final Map<TrackedNutrient, EvidencedNutrientValue> evidence;
   final NutrientDashboardGoalSet goals;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    double? nutrientGoal(String key) =>
+        ref.watch(dashboardNutrientGoalProvider(key)).value;
     final rows = [
       (_t(context, 'Protein'), TrackedNutrient.protein, targets.protein, 'g'),
       (
@@ -101,14 +105,49 @@ class _NutrientsTab extends StatelessWidget {
         targets.carbs,
         'g',
       ),
-      (_t(context, 'Fiber'), TrackedNutrient.fiber, targets.fiber, 'g'),
-      (_t(context, 'Sugar'), TrackedNutrient.sugar, null, 'g'),
+      (
+        _t(context, 'Fiber'),
+        TrackedNutrient.fiber,
+        nutrientGoal('goal.fiber') ?? targets.fiber,
+        'g',
+      ),
+      (
+        _t(context, 'Sugar'),
+        TrackedNutrient.sugar,
+        nutrientGoal('goal.sugar'),
+        'g',
+      ),
       (_t(context, 'Fat'), TrackedNutrient.fat, targets.fats, 'g'),
-      (_t(context, 'Sodium'), TrackedNutrient.sodium, null, 'mg'),
-      (_t(context, 'Potassium'), TrackedNutrient.potassium, null, 'mg'),
-      (_t(context, 'Calcium'), TrackedNutrient.calcium, null, 'mg'),
-      (_t(context, 'Magnesium'), TrackedNutrient.magnesium, null, 'mg'),
-      (_t(context, 'Phosphorus'), TrackedNutrient.phosphorus, null, 'mg'),
+      (
+        _t(context, 'Sodium'),
+        TrackedNutrient.sodium,
+        nutrientGoal('goal.sodium'),
+        'mg',
+      ),
+      (
+        _t(context, 'Potassium'),
+        TrackedNutrient.potassium,
+        nutrientGoal('goal.potassium'),
+        'mg',
+      ),
+      (
+        _t(context, 'Calcium'),
+        TrackedNutrient.calcium,
+        nutrientGoal('goal.calciumMg'),
+        'mg',
+      ),
+      (
+        _t(context, 'Magnesium'),
+        TrackedNutrient.magnesium,
+        nutrientGoal('goal.magnesium'),
+        'mg',
+      ),
+      (
+        _t(context, 'Phosphorus'),
+        TrackedNutrient.phosphorus,
+        nutrientGoal('goal.phosphorus'),
+        'mg',
+      ),
     ];
     return ListView(
       key: const Key('nutrition-nutrients-tab'),
@@ -129,14 +168,66 @@ class _NutrientsTab extends StatelessWidget {
             ),
           ),
         ),
+        if (TrackedNutrient.values.any(
+          (n) => totals.isKnown(n) && !totals.isComplete(n),
+        ))
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'المجموع الجزئي يعتمد على السجلات المعروفة فقط. القيم الناقصة لا تُحسب صفرًا.'
+                  : 'Partial totals include known records only. Missing values are not zero.',
+            ),
+          ),
         _TableHeader(),
         for (final row in rows)
           _NutrientRow(
-            label: row.$1,
+            label: totals.isComplete(row.$2) ? row.$1 : '${row.$1} *',
             total: totals.isKnown(row.$2) ? totals.value(row.$2) : null,
             goal: row.$3,
             unit: row.$4,
           ),
+        for (final extra in const [
+          (FoodNutrient.iron, 'Iron', 'goal.ironMg'),
+          (FoodNutrient.vitaminC, 'Vitamin C', 'goal.vitaminCMg'),
+        ])
+          _NutrientRow(
+            label:
+                '${_t(context, extra.$2)}${totals.fullComplete(extra.$1) ? '' : ' *'}',
+            total: totals.fullTotal(extra.$1),
+            goal: nutrientGoal(extra.$3),
+            unit: 'mg',
+          ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            Localizations.localeOf(context).languageCode == 'ar'
+                ? 'المرجع اليومي العام ليس تحليلًا طبيًا. النجمة تعني بيانات غير مكتملة. الحديد وفيتامين C يظهران عند وجودهما في لقطة الطعام المسجلة؛ لن نستخدم طعامًا عُدّل لاحقًا لتغيير يوم سابق.'
+                : 'Daily references are not laboratory ranges. An asterisk means incomplete evidence. Iron and vitamin C require a recorded food snapshot; later food edits never rewrite historical days.',
+          ),
+        ),
+        for (final extra in const [
+          ('Saturated fat', 'goal.saturatedFat', 'g'),
+          ('Polyunsaturated fat', 'goal.polyunsaturatedFat', 'g'),
+          ('Monounsaturated fat', 'goal.monounsaturatedFat', 'g'),
+          ('Trans fat', 'goal.transFat', 'g'),
+          ('Cholesterol', 'goal.cholesterol', 'mg'),
+          ('Vitamin A', 'goal.vitaminAMcg', 'mcg RAE'),
+        ])
+          _NutrientRow(
+            label: '${_t(context, extra.$1)} *',
+            total: null,
+            goal: nutrientGoal(extra.$2),
+            unit: extra.$3,
+          ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            Localizations.localeOf(context).languageCode == 'ar'
+                ? 'سجل الطعام الحالي لا يحفظ تفصيل أنواع الدهون أو الكوليسترول أو فيتامين A. تُعرض أهدافها، لكن إجمالياتها غير متاحة بدل اختلاق أرقام.'
+                : 'Current food snapshots do not store fat subtypes, cholesterol or vitamin A. Their targets are shown, but totals remain unavailable rather than invented.',
+          ),
+        ),
       ],
     );
   }

@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'recipe_editor_copy.dart';
+import '../../nutrition/presentation/nutrition_food_picker.dart';
+import '../services/recipe_nutrition_calculator.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../data/database/database_provider.dart';
+import '../../../data/database/database_scope.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../nutrition/services/food_presentation_localizer.dart';
 import '../domain/trusted_recipe.dart';
@@ -28,7 +34,10 @@ class _TrustedRecipeImportPageState
   TrustedRecipeDraft? _draft;
   String? _error;
   bool _saving = false;
+  bool _loading = false;
+  int _generation = 0;
   bool _confirmed = false;
+  bool _retired = false;
   List<TrustedIngredientMatch> _matches = const [];
 
   @override
@@ -44,13 +53,33 @@ class _TrustedRecipeImportPageState
   }
 
   Future<void> _loadExisting() async {
-    final rows = await ref.read(trustedRecipeRepositoryProvider).load();
-    final matches = rows.where((row) => row.id == widget.recipeId);
-    if (matches.isEmpty || !mounted) return;
-    await _setDraft(matches.single.recipe);
+    final repository = ref.read(trustedRecipeRepositoryProvider);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final rows = await repository.load();
+      if (!mounted ||
+          _retired ||
+          !identical(repository, ref.read(trustedRecipeRepositoryProvider))) {
+        return;
+      }
+      final matches = rows.where((row) => row.id == widget.recipeId);
+      if (matches.length != 1) throw StateError('Recipe unavailable');
+      await _setDraft(matches.single.recipe);
+    } on Object {
+      if (mounted) {
+        setState(
+          () => _error = _text('Saved recipe could not be loaded. Retry.'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
-  String _text(String english) => context.strings.text(english);
+  String _text(String english) => recipeEditorText(context, english);
   String get _locale =>
       BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
   String _unit(String unit) =>
@@ -58,20 +87,56 @@ class _TrustedRecipeImportPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.strings.text(
-            widget.recipeId == null ? 'Create recipe' : 'Edit recipe',
+    ref.listen(trustedRecipeRepositoryProvider, (previous, next) {
+      _retired = true;
+      _generation++;
+      if (mounted) {
+        setState(() {
+          _draft = null;
+          _formDraft = null;
+          _loading = false;
+          _error = _text('Account changed. Reopen the recipe.');
+        });
+      }
+    });
+    return PopScope(
+      canPop: !_saving,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            _text(widget.recipeId == null ? 'Create recipe' : 'Edit recipe'),
           ),
+          centerTitle: true,
         ),
-        centerTitle: true,
+        body: _loading && _draft == null
+            ? const Center(child: CircularProgressIndicator())
+            : _retired
+            ? Center(child: Text(_error!))
+            : _draft == null
+            ? _input()
+            : _review(_draft!),
       ),
-      body: _draft == null ? _input() : _review(_draft!),
     );
   }
 
-  Widget _input() => RecipeDraftForm(initial: _formDraft, onReview: _setDraft);
+  Widget _input() => Column(
+    children: [
+      if (_error != null)
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            _error!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ),
+      if (widget.recipeId != null && _formDraft == null && _error != null)
+        TextButton(onPressed: _loadExisting, child: Text(_text('Retry')))
+      else
+        Expanded(
+          child: RecipeDraftForm(initial: _formDraft, onReview: _setDraft),
+        ),
+    ],
+  );
 
   Widget _review(TrustedRecipeDraft recipe) => ListView(
     key: const Key('trusted-recipe-review'),
@@ -89,7 +154,12 @@ class _TrustedRecipeImportPageState
       Text(
         "${_text('Servings')}: ${_number(recipe.servings.toDouble())} · ${_text('Prep time (min)')}: ${_number(recipe.prepMinutes.toDouble())} · ${_text('Cook time (min)')}: ${_number(recipe.cookMinutes.toDouble())}",
       ),
-      if (recipe.sourceUrl != null) Text(recipe.sourceUrl.toString()),
+      if (recipe.sourceUrl != null)
+        TextButton.icon(
+          icon: const Icon(Icons.menu_book_outlined, size: 19),
+          onPressed: () => _openSource(recipe.sourceUrl!),
+          label: Text(_text('Source')),
+        ),
       const SizedBox(height: 20),
       Text(
         _text('Ingredients'),
@@ -98,6 +168,12 @@ class _TrustedRecipeImportPageState
       for (final item in recipe.ingredients)
         ListTile(
           dense: true,
+          onTap: _saving || _loading ? null : () => _linkIngredient(item),
+          leading: IconButton(
+            tooltip: _text('Source'),
+            icon: const Icon(Icons.menu_book_outlined, size: 18),
+            onPressed: () => _ingredientSource(item),
+          ),
           title: Text(
             FoodPresentationLocalizer.foodName(
               name: item.name,
@@ -105,14 +181,9 @@ class _TrustedRecipeImportPageState
               isCustom: widget.initialDraft == null,
             ),
           ),
-          subtitle: _matchFor(item)?.foodName == null
-              ? null
-              : Text(
-                  FoodPresentationLocalizer.foodName(
-                    name: _matchFor(item)!.foodName!,
-                    localeTag: _locale,
-                  ),
-                ),
+          subtitle: _matchFor(item)?.status == IngredientMatchStatus.exact
+              ? Text(_text('Linked food record'))
+              : Text(_text('Tap to choose the matching food')),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -151,6 +222,17 @@ class _TrustedRecipeImportPageState
               : Text(_nutrition(recipe.nutrition!)),
         ),
       ),
+      if (recipe.nutrition != null)
+        ExpansionTile(
+          leading: const Icon(Icons.menu_book_outlined, size: 19),
+          title: Text(_text('Source')),
+          children: [
+            ListTile(
+              title: SelectableText(recipe.nutrition!.provenance.source),
+              subtitle: SelectableText(recipe.nutrition!.provenance.recordId),
+            ),
+          ],
+        ),
       const SizedBox(height: 18),
       if (widget.initialDraft != null) ...[
         CheckboxListTile(
@@ -160,7 +242,7 @@ class _TrustedRecipeImportPageState
               ? (value) => setState(() => _confirmed = value == true)
               : null,
           title: Text(
-            context.strings.text(
+            _text(
               'I reviewed the ingredients, serving size, and source links.',
             ),
           ),
@@ -180,6 +262,7 @@ class _TrustedRecipeImportPageState
         key: const Key('save-reviewed-recipe'),
         onPressed:
             _saving ||
+                _loading ||
                 (widget.initialDraft != null && (!_allResolved || !_confirmed))
             ? null
             : _save,
@@ -198,17 +281,141 @@ class _TrustedRecipeImportPageState
   );
 
   Future<void> _setDraft(TrustedRecipeDraft draft) async {
-    final matches = await TrustedRecipeIngredientReconciler(
-      ref.read(foodRuntimeSearchAuthorityProvider),
-    ).reconcile(draft);
-    if (!mounted) return;
+    if (_retired || !mounted) return;
+    final generation = ++_generation;
+    final authority = ref.read(foodRuntimeSearchAuthorityProvider);
     setState(() {
-      _draft = draft;
-      _formDraft = draft;
-      _matches = matches;
-      _confirmed = false;
+      _loading = true;
       _error = null;
     });
+    try {
+      final matches = await TrustedRecipeIngredientReconciler(
+        authority,
+        localeTag: _locale,
+      ).reconcile(draft);
+      if (!mounted ||
+          generation != _generation ||
+          !identical(authority, ref.read(foodRuntimeSearchAuthorityProvider))) {
+        return;
+      }
+      final calculated =
+          draft.nutrition ??
+          RecipeNutritionCalculator.calculate(
+            draft,
+            matches,
+            ownerKey: LocalDatabaseScope.keyForOwner(
+              ref.read(databaseProvider).localOwnerId,
+            ),
+          );
+      final reviewed = TrustedRecipeDraft(
+        name: draft.name,
+        servings: draft.servings,
+        prepMinutes: draft.prepMinutes,
+        cookMinutes: draft.cookMinutes,
+        ingredients: draft.ingredients,
+        steps: draft.steps,
+        sourceUrl: draft.sourceUrl,
+        nutrition: calculated,
+      );
+      setState(() {
+        _draft = reviewed;
+        _formDraft = reviewed;
+        _matches = matches;
+        _confirmed = false;
+      });
+    } on Object {
+      if (mounted && generation == _generation) {
+        setState(() => _error = _text('The recipe could not be saved.'));
+      }
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  Future<void> _linkIngredient(TrustedRecipeIngredient ingredient) async {
+    final draft = _draft;
+    if (draft == null) return;
+    final food = await selectNutritionFood(
+      context,
+      initialQuery: ingredient.name,
+    );
+    if (!mounted || food == null || _draft != draft) return;
+    final label = FoodPresentationLocalizer.foodName(
+      name: food.name,
+      arabicName: food.arabicName,
+      localeTag: _locale,
+      isCustom: food.isCustom,
+      source: food.source,
+    );
+    await _setDraft(
+      TrustedRecipeDraft(
+        name: draft.name,
+        servings: draft.servings,
+        prepMinutes: draft.prepMinutes,
+        cookMinutes: draft.cookMinutes,
+        steps: draft.steps,
+        sourceUrl: draft.sourceUrl,
+        ingredients: [
+          for (final row in draft.ingredients)
+            identical(row, ingredient)
+                ? TrustedRecipeIngredient(
+                    name: label,
+                    quantity: row.quantity,
+                    unit: row.unit,
+                    sourceRecordId: 'local:${food.uuid}',
+                  )
+                : row,
+        ],
+      ),
+    );
+  }
+
+  Future<void> _ingredientSource(TrustedRecipeIngredient ingredient) async {
+    final match = _matchFor(ingredient), id = ingredient.sourceRecordId;
+    if (id != null && RegExp(r'^usda:\d+$').hasMatch(id)) {
+      await _openSource(
+        Uri.parse(
+          'https://fdc.nal.usda.gov/food-details/${id.substring(5)}/nutrients',
+        ),
+      );
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(_text('Source')),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            '${match?.foodName ?? ingredient.name}\n${match?.food?.source ?? _text('No linked source')}\n'
+            '${id ?? ''}\n${match?.food?.servingSize ?? ''} ${match?.food?.servingUnit ?? ''}',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(_text('Close')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openSource(Uri uri) async {
+    if (uri.scheme != 'https' || uri.host.isEmpty || uri.userInfo.isNotEmpty) {
+      return;
+    }
+    try {
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+    } on Object {
+      /* Visible failure below. */
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_text('Could not open link.'))));
+    }
   }
 
   TrustedIngredientMatch? _matchFor(TrustedRecipeIngredient ingredient) {
@@ -223,6 +430,7 @@ class _TrustedRecipeImportPageState
       _matches.every((match) => match.status == IngredientMatchStatus.exact);
 
   Future<void> _save() async {
+    if (_retired || _saving || _loading || _draft == null) return;
     setState(() {
       _saving = true;
       _error = null;
@@ -235,7 +443,17 @@ class _TrustedRecipeImportPageState
       } else {
         saved = await repository.replaceReviewed(widget.recipeId!, _draft!);
       }
+      if (!mounted ||
+          _retired ||
+          !identical(repository, ref.read(trustedRecipeRepositoryProvider))) {
+        return;
+      }
       final readback = await repository.load();
+      if (!mounted ||
+          _retired ||
+          !identical(repository, ref.read(trustedRecipeRepositoryProvider))) {
+        return;
+      }
       if (!readback.any(
         (row) =>
             row.id == saved.id &&
@@ -264,8 +482,8 @@ class _TrustedRecipeImportPageState
   );
   String _nutrition(TrustedRecipeNutrition value) =>
       '${_number(value.caloriesKcal)} ${_unit('kcal')} · '
-      '${context.strings.get('protein')} ${_number(value.proteinG)} ${_unit('g')} · '
-      '${context.strings.get('carbs')} ${_number(value.carbohydrateG)} ${_unit('g')} · '
-      '${context.strings.get('fat')} ${_number(value.fatG)} ${_unit('g')}\n'
-      '${_text('Source')}: ${value.provenance.source} (${value.provenance.recordId})';
+      '${_text('Protein')} ${_number(value.proteinG)} ${_unit('g')} · '
+      '${_text('Carbohydrates')} ${_number(value.carbohydrateG)} ${_unit('g')} · '
+      '${_text('Fat')} ${_number(value.fatG)} ${_unit('g')}\n'
+      '${_text('Source')}: ${_locale.startsWith('ar') ? 'محسوبة من سجلات المكونات المرتبطة' : 'Calculated from linked ingredient records'}';
 }

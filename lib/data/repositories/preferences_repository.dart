@@ -120,6 +120,14 @@ class PreferencesRepository {
     });
   }
 
+  Stream<Map<String, String>> watchSnapshot(Iterable<String> keys) {
+    final selected = keys.toSet().toList(growable: false);
+    return (_database.select(_database.preferences)
+          ..where((row) => row.key.isIn(selected)))
+        .watch()
+        .map((rows) => {for (final row in rows) row.key: row.value});
+  }
+
   Stream<String?> watch(String key) {
     return (_database.select(_database.preferences)
           ..where((item) => item.key.equals(key)))

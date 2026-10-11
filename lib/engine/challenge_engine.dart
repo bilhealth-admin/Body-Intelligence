@@ -51,10 +51,10 @@ class ChallengeEngine {
     }
     final qualifying = days.where((day) {
       return switch (type) {
-        'protein' => day.protein >= proteinTarget * .8,
-        'water' => day.waterMl >= waterTarget * .8,
+        'protein' => proteinTarget > 0 && day.protein >= proteinTarget * .8,
+        'water' => waterTarget > 0 && day.waterMl >= waterTarget * .8,
         'consistentLogging' => day.hasMeal || day.hasWeight || day.waterMl > 0,
-        'fiber' => day.fiber >= fiberTarget * .8,
+        'fiber' => fiberTarget > 0 && day.fiber >= fiberTarget * .8,
         'return' => day.hasMeal || day.hasWeight || day.waterMl > 0,
         'weightCheckIn' => day.hasWeight,
         _ => false,

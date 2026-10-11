@@ -63,13 +63,19 @@ class _ReferenceNutritionGoalsPageState
         'goal.carbsGrams',
         'goal.proteinGrams',
         'goal.fatGrams',
+        'goal.macroEditor.v2',
       ];
       final values = await Future.wait(keys.map(repository.get));
       final repair = nutritionGoalRepairSnapshot({
         for (var index = 0; index < keys.length; index++)
           keys[index]: values[index],
       });
-      if (repair != null) await repository.setMany(repair);
+      if (repair != null) {
+        await repository.mutateIfUnchanged(
+          expected: {for (var i = 0; i < keys.length; i++) keys[i]: values[i]},
+          set: repair,
+        );
+      }
     } on Object {
       // The rows keep their existing retry/error behavior if local storage is
       // temporarily unavailable; migration must never block page rendering.
@@ -87,7 +93,10 @@ class _ReferenceNutritionGoalsPageState
         _StoredNumber('goal.proteinPercent', 'Protein', null, '%'),
         _StoredNumber('goal.fatPercent', 'Fat', null, '%'),
         _SectionLabel('Daily macro goals in grams'),
-        _DerivedMacroGrams(),
+        _StoredNumber('goal.carbsGrams', 'Carbohydrates', null, 'g'),
+        _StoredNumber('goal.proteinGrams', 'Protein', null, 'g'),
+        _StoredNumber('goal.fatGrams', 'Fat', null, 'g'),
+        _NutritionGoalHelp(),
         _SectionLabel('Additional nutrient goals'),
         _StoredNumber('goal.saturatedFat', 'Saturated fat', null, 'g'),
         _StoredNumber(
@@ -108,11 +117,37 @@ class _ReferenceNutritionGoalsPageState
         _StoredNumber('goal.potassium', 'Potassium', null, 'mg'),
         _StoredNumber('goal.fiber', 'Fiber', null, 'g'),
         _StoredNumber('goal.sugar', 'Sugar', null, 'g'),
-        _StoredNumber('goal.vitaminA', 'Vitamin A', null, '%'),
-        _StoredNumber('goal.vitaminC', 'Vitamin C', null, '%'),
-        _StoredNumber('goal.calcium', 'Calcium', null, '%'),
-        _StoredNumber('goal.iron', 'Iron', null, '%'),
+        _StoredNumber('goal.vitaminAMcg', 'Vitamin A', null, 'mcg RAE'),
+        _StoredNumber('goal.vitaminCMg', 'Vitamin C', null, 'mg'),
+        _StoredNumber('goal.calciumMg', 'Calcium', null, 'mg'),
+        _StoredNumber('goal.ironMg', 'Iron', null, 'mg'),
+        _StoredNumber('goal.magnesium', 'Magnesium', null, 'mg'),
+        _StoredNumber('goal.phosphorus', 'Phosphorus', null, 'mg'),
       ],
+    );
+  }
+}
+
+class _NutritionGoalHelp extends StatelessWidget {
+  const _NutritionGoalHelp();
+  @override
+  Widget build(BuildContext context) {
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    return ListTile(
+      leading: IconButton(
+        icon: const Icon(Icons.menu_book_outlined, size: 20),
+        tooltip: ar ? 'المصادر والمنهجية' : 'Sources and methodology',
+        onPressed: () =>
+            context.push('/health-information-sources?topic=nutrition-targets'),
+      ),
+      title: Text(
+        ar ? 'النسبة والجرام هدف واحد' : 'Percent and grams are one goal',
+      ),
+      subtitle: Text(
+        ar
+            ? 'ثبّت العنصر بالقفل لحمايته. يُوازن العنصر غير المثبت فقط؛ عند التعارض لن تتغير أهدافك. القيم المرجعية العامة ليست احتياجًا طبيًا شخصيًا. لا يوجد مرجع يومي موحد للسكر الكلي أو الدهون المتحولة والأحادية والمتعددة؛ يمكنك تحديد هدفك. مسح هدف غير ماكرو يعيد المقترح.'
+            : 'Lock a macro to protect it; only an unlocked macro balances. Conflicts do not change goals. General references are not personal medical requirements. Total sugar, trans, mono- and polyunsaturated fats have no universal Daily Value here. Clearing a non-macro override restores the suggestion.',
+      ),
     );
   }
 }
@@ -199,7 +234,7 @@ class _PremiumFeature extends ConsumerWidget {
           ? entitlement.hasError
                 ? () => ref.invalidate(verifiedSubscriptionStateProvider)
                 : null
-          : () => context.push(active ? route : '/plans'),
+          : () => context.push(route),
     );
   }
 }

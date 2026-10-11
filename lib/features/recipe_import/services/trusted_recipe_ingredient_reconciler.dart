@@ -1,3 +1,5 @@
+import '../../../data/database/app_database.dart';
+import '../../nutrition/services/food_presentation_localizer.dart';
 import '../../nutrition/services/food_runtime_search_authority.dart';
 import '../../nutrition/services/food_search_normalizer.dart';
 import '../domain/trusted_recipe.dart';
@@ -11,15 +13,21 @@ final class TrustedIngredientMatch {
     required this.status,
     this.foodId,
     this.foodName,
+    this.food,
   });
   final TrustedRecipeIngredient ingredient;
   final IngredientMatchStatus status;
   final int? foodId;
   final String? foodName;
+  final Food? food;
 }
 
 final class TrustedRecipeIngredientReconciler {
-  const TrustedRecipeIngredientReconciler(this._search);
+  const TrustedRecipeIngredientReconciler(
+    this._search, {
+    this.localeTag = 'en',
+  });
+  final String localeTag;
   final FoodRuntimeSearchAuthority _search;
 
   Future<List<TrustedIngredientMatch>> reconcile(
@@ -29,18 +37,31 @@ final class TrustedRecipeIngredientReconciler {
     for (final ingredient in recipe.ingredients) {
       final sourceRecordId = ingredient.sourceRecordId;
       if (sourceRecordId != null) {
-        final exactFood = await _search.findExact(sourceRecordId);
+        final exactFood = await _search.findExact(
+          sourceRecordId.startsWith('local:')
+              ? sourceRecordId.substring(6)
+              : sourceRecordId,
+        );
         if (exactFood != null &&
-            !RecipeIngredientEvidence.hasKnownMismatch(
-              ingredient.name,
-              exactFood.name,
-            )) {
+            (ingredient.name ==
+                    FoodPresentationLocalizer.foodName(
+                      name: exactFood.name,
+                      arabicName: exactFood.arabicName,
+                      localeTag: localeTag,
+                      isCustom: exactFood.isCustom,
+                      source: exactFood.source,
+                    ) ||
+                !RecipeIngredientEvidence.hasKnownMismatch(
+                  ingredient.name,
+                  exactFood.name,
+                ))) {
           output.add(
             TrustedIngredientMatch(
               ingredient: ingredient,
               status: IngredientMatchStatus.exact,
               foodId: exactFood.id,
               foodName: exactFood.name,
+              food: exactFood,
             ),
           );
           continue;
@@ -60,7 +81,24 @@ final class TrustedRecipeIngredientReconciler {
         );
         continue;
       }
-      final candidates = await _search.search(ingredient.name, limit: 8);
+      if (localExact.length == 1) {
+        output.add(
+          TrustedIngredientMatch(
+            ingredient: ingredient,
+            status: IngredientMatchStatus.exact,
+            foodId: localExact.single.id,
+            foodName: localExact.single.name,
+            food: localExact.single,
+          ),
+        );
+        continue;
+      }
+      final candidates = (await _search.searchDetailed(
+        ingredient.name,
+        limit: 8,
+        includeNetwork: false,
+        includeCommunity: false,
+      )).foods;
       final exact = candidates
           .where(
             (food) => FoodSearchNormalizer.normalize(food.name) == normalized,
@@ -73,6 +111,7 @@ final class TrustedRecipeIngredientReconciler {
             status: IngredientMatchStatus.exact,
             foodId: exact.single.id,
             foodName: exact.single.name,
+            food: exact.single,
           ),
         );
       } else {

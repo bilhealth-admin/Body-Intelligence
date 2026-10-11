@@ -1,3 +1,4 @@
+import 'fitness_goal_progress_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -658,6 +659,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
+                          const FitnessGoalProgressCard(),
                           const _StoredFitnessNumber(
                             'goals.workoutsPerWeek',
                             'Workouts/Week',

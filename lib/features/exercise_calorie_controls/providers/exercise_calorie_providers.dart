@@ -15,15 +15,15 @@ const exerciseMacrosAdjustedPreferenceKey =
 final exerciseCaloriePreferencesProvider =
     StreamProvider<ExerciseCaloriePreferences>((ref) async* {
       final repository = ref.watch(preferencesRepositoryProvider);
-      await for (final includeValue in repository.watch(
+      await for (final snapshot in repository.watchSnapshot([
         exerciseCaloriesIncludedPreferenceKey,
-      )) {
-        final adjustValue = await repository.get(
-          exerciseMacrosAdjustedPreferenceKey,
-        );
+        exerciseMacrosAdjustedPreferenceKey,
+      ])) {
         yield ExerciseCaloriePreferences(
-          includeInRemainingGoal: includeValue == 'true',
-          adjustMacroGoals: adjustValue == 'true',
+          includeInRemainingGoal:
+              snapshot[exerciseCaloriesIncludedPreferenceKey] == 'true',
+          adjustMacroGoals:
+              snapshot[exerciseMacrosAdjustedPreferenceKey] == 'true',
         );
       }
     });

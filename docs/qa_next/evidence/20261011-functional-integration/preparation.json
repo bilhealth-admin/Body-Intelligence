@@ -1,0 +1,369 @@
+{
+  "candidate_base": "ebd5ae03780dfb1caa18668b43f70a51d6ef3b91",
+  "preparation_head": "cc18e73e2c0d91d82a226c802a7ceb16fadddd5d",
+  "run_id": "38134803131",
+  "file_count": 84,
+  "format": "passed",
+  "analyze": "passed",
+  "protected_sha256": {
+    "lib/features/dashboard/dashboard_page.dart": "bc8347c33124f3a010f252b9c0dc22be2f1019da31659127d7ae1621436df840",
+    "lib/features/dashboard/widgets/dashboard_reference_phone.dart": "e0130da70437d687329cb1f6872d44f7b23217d9c2d14ad8bc97348f0ce8d94d",
+    "lib/shared/widgets/bil_reference_bottom_bar.dart": "7e070a02b70dff05408dcb48ac4473b81d719f1e89d2b34c599b53268b5df909",
+    "lib/app/router/responsive_app_shell.dart": "4399856cf50e96dbcf584ac5fac89e09f27be7707878e196df86802013545fd4",
+    "lib/features/dashboard/widgets/first_meal_celebration.dart": "d80d4106ca583b6a297da905973997a7af2db7c505495f75394e7213ecbce0c3",
+    "lib/features/dashboard/widgets/first_use_context_coachmark.dart": "5e27b18c055be9fda08f657e62665ce013674feb456adf1f9df466406e7a72db",
+    "lib/features/dashboard/widgets/first_use_glass_surface.dart": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+    "lib/shared/widgets/first_use_guide_anchor.dart": "2813d9180e02fb7a39a898bc0f0f60d1d6550a25f90def482be937d523a3eb80",
+    "lib/features/connected_health/widgets/live_health_watch.dart": "673294d00837c29b50fd8b53486f68a9bccf5b37bcad97384c212483c682393b",
+    "lib/features/connected_health/widgets/live_health_watch_painter.dart": "274caf4a697acc779d74d0fa90fb7e059fe4c6623d4870cbe270bedc4fc4295f",
+    "pubspec.yaml": "12bbc904221f85b4ff71f5fd2e2755e002c2dc0b6040a731dad52b473946f796",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  },
+  "files": [
+    {
+      "path": "lib/app/services/scoped_media_file_cache.dart",
+      "sha256": "fa998bd86e693ffe35fc4e2fc7e740552217b92f887e90231d3d705f47ec5947"
+    },
+    {
+      "path": "lib/core/health_evidence/health_evidence_catalog.dart",
+      "sha256": "c9a487517fa3e346439d4322a36521833a45cbe8c5d0cfc97be3a67831c6f35f"
+    },
+    {
+      "path": "lib/data/repositories/daily_log_repository.dart",
+      "sha256": "8053c59c4997054c68636b475dd1f138d744b7d8950e7efaaa0e3ba131f078f4"
+    },
+    {
+      "path": "lib/data/repositories/meal_repository.dart",
+      "sha256": "5a5df062d644a63bb17e6c178138786ee334dbf24c398e673b8b6d496d0f4f4b"
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_queries.dart",
+      "sha256": "7ba0b68c21a162842d911d0c98ae798c5a6e4e15e8396102c7617c7ae28c712b"
+    },
+    {
+      "path": "lib/data/repositories/preferences_repository.dart",
+      "sha256": "4c2785ea6302184cd30f1e01da0f85ed6b19679825bd94d99aa54480c988afb5"
+    },
+    {
+      "path": "lib/engine/challenge_engine.dart",
+      "sha256": "dcf9922c2280b3a950b4b15a50870b3e0c045ac66d14ec807e4cb310a2308298"
+    },
+    {
+      "path": "lib/features/analytics/nutrition_analytics_calories.dart",
+      "sha256": "edf25f22ef1f64b33c834c14ace2668a77b792cd9a57826d2b0aef0e8d6be006"
+    },
+    {
+      "path": "lib/features/analytics/nutrition_analytics_page.dart",
+      "sha256": "ac99349f475e171782bae8d245252295a978a859ec4eb0aff7b44d5dfde881ba"
+    },
+    {
+      "path": "lib/features/analytics/nutrition_analytics_totals.dart",
+      "sha256": "e1c40265942ea9755cb0e9159edbb2bb3afc9ed3d825091734dae62da0994b7f"
+    },
+    {
+      "path": "lib/features/challenges/challenges_page.dart",
+      "sha256": "b8f47db865322f1ee77d2cf94d86e35ee70ad08bd431cf86c6036123ee3983cd"
+    },
+    {
+      "path": "lib/features/commerce/presentation/optional_access_offer.dart",
+      "sha256": "521a3c0cc87cd473c34299ec38b335f5d2ec00628dc186ddb25fadd988652b34"
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_barcode_access.dart",
+      "sha256": "b223dd3006e4df56d7d074e5295b430da00d625ff0187b26b09e0bc97aa2718c"
+    },
+    {
+      "path": "lib/features/commerce/providers/commerce_providers.dart",
+      "sha256": "46a026bc4c8f1ef9840adfee68cf93f4710543e69ae8184b8dc79aac88ad483b"
+    },
+    {
+      "path": "lib/features/community/data/community_repository.dart",
+      "sha256": "3b93bfa09fdb972369248165cab4ff556de5a154cbaef96824f32b3a4d152370"
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_pagination.dart",
+      "sha256": "a4bc270a0317d8aaa0484ff1d518e6f5db1fa1c256e813e162a891bdc39b1bdf"
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_tab.dart",
+      "sha256": "ef1cd7603af4f588490f50f46c17eb3f034a6d5780c8173a5d103defd12f4211"
+    },
+    {
+      "path": "lib/features/community/presentation/community_hub_page.dart",
+      "sha256": "f1a74714d3b0675867291fa8813dd65a2b05992e58a6b9db6e4731202dd61518"
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_gallery_page.dart",
+      "sha256": "ef1e4183fcf6bd0cf3d857b92f776ba525680fa377fb7842b26c858090374789"
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_widgets.dart",
+      "sha256": "44c476cc11d65c0058f5f13fecfb05b49ce6ede0d9bdf6895c818e496e9484d2"
+    },
+    {
+      "path": "lib/features/connected_health/connected_health_page.dart",
+      "sha256": "bd76e263aa0790db39c437540acf62e6c49ce065905b5f6b2de3a2d7f8159c08"
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_capture_actions.dart",
+      "sha256": "08dd881a70ce6ed148f5b9d54efa1f9999d42ff7a96d656f3e4dbf861d5cf8f3"
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_meal_search.dart",
+      "sha256": "61db5d4f7b9c438f50345ecd7364637a5223c4c3e54c9d1bf7828ea92506e730"
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_mutation_actions.dart",
+      "sha256": "5a5e574305b87b3aba5c36d67ebd88700a920d1dd5008143d2ad2a02106dd5c9"
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_page.dart",
+      "sha256": "a02dec850071be0c2e72c86913d648b2efcadb298a75e9c2e36d3dca9cc414be"
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_page_actions.dart",
+      "sha256": "d5c763413cd29973781af8bf31bd9792cfb07c1d163e8f5a44422bb5df792e1d"
+    },
+    {
+      "path": "lib/features/daily_log/food_log_actions.dart",
+      "sha256": "0ac51bf1da30af333f21ba75a8e849a890f62ec3827b3c3d9f48d028d13108f8"
+    },
+    {
+      "path": "lib/features/daily_log/food_log_page.dart",
+      "sha256": "36165aa69d51ce19952d0f2d48bea570198a38602e8fc01bee7f5ecab5d77be8"
+    },
+    {
+      "path": "lib/features/daily_log/presentation/daily_log_today_sections.dart",
+      "sha256": "9e73cce2dca655c0cc8149a7ed949bdbaaf929b9b5c05cd55e0d898dd2568a0a"
+    },
+    {
+      "path": "lib/features/daily_log/quick_add_meal_camera_page.dart",
+      "sha256": "b7557f5ef03ef86a336dd749dd6ce2df9e4366a503ea7ff2a2949342a0248231"
+    },
+    {
+      "path": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
+      "sha256": "16d9f8235d027725e9e184c75d5a9a23e93e8ff8a7a0c1f9f8d12c3ae718e2cb"
+    },
+    {
+      "path": "lib/features/dashboard/providers/dashboard_preferences_provider.dart",
+      "sha256": "2e54aee87c637e339711c3f5cec962955c831267c4141eebf9600d91aa2abfd0"
+    },
+    {
+      "path": "lib/features/exercise_calorie_controls/providers/exercise_calorie_providers.dart",
+      "sha256": "3655977c2f5edb7df55dad2f478df29f6c4596dfcdb211ffb5bd29619dd82950"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart",
+      "sha256": "d519679b8861e5f4d81d25febf31ca2e67a6ee8b1ac118b78abbc997406e82ff"
+    },
+    {
+      "path": "lib/features/nutrition/domain/macro_goal_editor.dart",
+      "sha256": "c474318abb9efc8b9e13de994530d520ade89942cb7a64602c2cde19e3f92cb4"
+    },
+    {
+      "path": "lib/features/nutrition/domain/macro_gram_goals.dart",
+      "sha256": "d8de97f89e321f11dfd750c931660003ef3024dd6d298b0b95d1e750434a323a"
+    },
+    {
+      "path": "lib/features/nutrition/domain/meal_template.dart",
+      "sha256": "fe49c722aeb3d2eb389740c3ce5a4f1f49b871131652da616c9f3fe8b4a8dd46"
+    },
+    {
+      "path": "lib/features/nutrition/domain/nutrient_daily_references.dart",
+      "sha256": "2e49d78b3edae8c6bcdbae208cbbd4f3b362bb7924890044f616708e43b387b2"
+    },
+    {
+      "path": "lib/features/nutrition/domain/percentage_nutrition_goals.dart",
+      "sha256": "8911d0c0949d31fbc1c10186874b973037e7059b2b9f0ad2eef3d03fc7ad5d39"
+    },
+    {
+      "path": "lib/features/nutrition/food_page.dart",
+      "sha256": "cf07c979daa18664fa6409b9216d1bba719fdd1b049dc2a8251f21cbf005a137"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/meal_builder_page.dart",
+      "sha256": "ac6382d484671a2fada8e6a8ed5355c052146cf39671a67f4bde0948e50fc497"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/meal_copy_page.dart",
+      "sha256": "29c7f8435a283f3862628a01f1fa62540a079a3ccfb28f06a9921f87e17048ff"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/meals_recipes_foods_page.dart",
+      "sha256": "ec6045a80337e5684d27a2c1053bca8b8ae3744069b6ee5f396592de9e139e85"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/meals_tab.dart",
+      "sha256": "97e4acde2bad20978b54eb573e09bb4a5c608b418f68d35018978e2fa232cb72"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/nutrition_entry_fields.dart",
+      "sha256": "0f7f340b624a979d9a08b96cd0a74c51783f691112c58ce11931a32c01d07f73"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/nutrition_food_picker.dart",
+      "sha256": "0d9f34422bc842d720f08bf9b87b3119665915f52e8db881cef162ceb5572dee"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/recipe_diary_confirmation_page.dart",
+      "sha256": "f562a3cb65ad70b4b7008dcc79e51c9d35390fabf25fec56da415e72122d4397"
+    },
+    {
+      "path": "lib/features/nutrition/presentation/recipes_tab.dart",
+      "sha256": "b22260058738878677cf9f98e36ab7c0d39c8522d4daf9dc2f77946d26d5de8d"
+    },
+    {
+      "path": "lib/features/nutrition/providers/nutrition_goal_defaults_provider.dart",
+      "sha256": "7016e9df7cb6ef13122bf73128deb0f0cf30d5f5be78cbdc0d58891e26e2f1d3"
+    },
+    {
+      "path": "lib/features/nutrition/services/food_runtime_search_authority.dart",
+      "sha256": "64b71e8384477c2406a2a9c5500c103b855f1c4476600fb1282d2970ec4535f1"
+    },
+    {
+      "path": "lib/features/recipe_import/domain/trusted_recipe.dart",
+      "sha256": "4df35102e9167499356d09d7354c29af07cdf9c8348100de9d8be2f0d0bf6e3f"
+    },
+    {
+      "path": "lib/features/recipe_import/presentation/recipe_draft_form.dart",
+      "sha256": "b1e446ca989adea4e4b175214c3963447940f0e6a06b2c4fcfc8d3a055103344"
+    },
+    {
+      "path": "lib/features/recipe_import/presentation/recipe_editor_copy.dart",
+      "sha256": "aca75628ca39f0d583a68db682a7c043cf813871246803eeade54c12df9b27ad"
+    },
+    {
+      "path": "lib/features/recipe_import/presentation/trusted_recipe_import_page.dart",
+      "sha256": "dd2b4cc85dc82f5484d4d8c27e39888610f77e6a91e58762f45af750269e609b"
+    },
+    {
+      "path": "lib/features/recipe_import/providers/trusted_recipe_providers.dart",
+      "sha256": "f99c75c226ce129703c929427ed065c1f9591287a7eb949ffc936b50cc3d165b"
+    },
+    {
+      "path": "lib/features/recipe_import/repositories/trusted_recipe_repository.dart",
+      "sha256": "ded13f84e5a11b4dce717a784b8ff5b8917dafcd172174b57cae5537ade1bb02"
+    },
+    {
+      "path": "lib/features/recipe_import/services/catalog_recipe_draft.dart",
+      "sha256": "995108aa6e86120c9c8c783a12422815484eae9eb49bae24c217710813de6697"
+    },
+    {
+      "path": "lib/features/recipe_import/services/recipe_nutrition_calculator.dart",
+      "sha256": "470180d01490b57fa8d6fc8154d8624e48a83127ecea4e7d72fd08f9661c3bf9"
+    },
+    {
+      "path": "lib/features/recipe_import/services/trusted_recipe_diary_service.dart",
+      "sha256": "6e0e7ec47e9cd653aaaee9e258638a6f16a95d011d8b3c205fdc7129411f7894"
+    },
+    {
+      "path": "lib/features/recipe_import/services/trusted_recipe_ingredient_reconciler.dart",
+      "sha256": "47717f71f866bf67617d17222e2d5983edefd8439e969d599ff9a0195da2ae8c"
+    },
+    {
+      "path": "lib/features/recipe_import/services/trusted_recipe_parser.dart",
+      "sha256": "e53af39f1844408a442f845b98c83615970b3be4b92c42ba1cf78e7e12ff1eb2"
+    },
+    {
+      "path": "lib/features/settings/fitness_goal_progress_card.dart",
+      "sha256": "cfdf42667aab8b340f5f8f8b6c25ce2e418474663685d6c45a583ebca819178f"
+    },
+    {
+      "path": "lib/features/settings/reference_goals_components.dart",
+      "sha256": "11c9083d8cabf2bd5a1a21a631a66a46b36d93a516c13ccbdeb0dca97a6955a8"
+    },
+    {
+      "path": "lib/features/settings/reference_goals_page.dart",
+      "sha256": "d355357d1d27a7014f4d9d322777b9f1b2f8ecad2f8696b15c1a86e219d03471"
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_controls.dart",
+      "sha256": "a15240843bf537a1bf2a12097e401271da26985f76b5165e83338a2a274174fc"
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_numeric.dart",
+      "sha256": "3df4e96870ac7a0abd76339af809f6ca43b887b9f81f226b7a878423895f300b"
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_pages.dart",
+      "sha256": "28306815f4a9af96600012edcce4a469d09ee2689728b5c414733ce4715ea92a"
+    },
+    {
+      "path": "lib/features/wellness/domain/recipe_content_localizer.dart",
+      "sha256": "6a51fe162e0686f2885e9794d9f07b0ebb92b0f5f9669f3af7992d686f0da779"
+    },
+    {
+      "path": "lib/features/wellness/services/recipe_image_delivery_client.dart",
+      "sha256": "95ec46241cd4f7f24e0af93ee2e1326190d2d0bd71d13d776091fa5b939dfe66"
+    },
+    {
+      "path": "lib/features/wellness/services/wellness_media_cache.dart",
+      "sha256": "fa76116152ba584f2fd74e62ff44d207ffc68c14c1eea6c7cb8ff9ff785c9043"
+    },
+    {
+      "path": "lib/shared/widgets/bil_account_avatar.dart",
+      "sha256": "e47a1f22af690e3add2d55d0dcb857d8c1bfa44b3b2b5527889399ac29667672"
+    },
+    {
+      "path": "lib/shared/widgets/bil_persistent_network_image.dart",
+      "sha256": "d5831c16c29ba2c4f67603145c9c1c40b492282319cb49f7e61cfc58c33385f0"
+    },
+    {
+      "path": "test/app/services/scoped_media_file_cache_test.dart",
+      "sha256": "8596aa9c770f2c0ba56b974985baeb35cab63455cb999fe0921bcc38a3147fd6"
+    },
+    {
+      "path": "test/data/repositories/daily_log_notes_atomic_test.dart",
+      "sha256": "bae5bd38c28dc70fe7b12e506469f03ec7af9765e73966cf8bf143ef0ea4ee42"
+    },
+    {
+      "path": "test/data/repositories/meal_reuse_destination_test.dart",
+      "sha256": "34d57896e1a8b6fc3c5f72735e3703fdd2ce3c9de328844768c195eca2d3dbcc"
+    },
+    {
+      "path": "test/features/daily_log/daily_log_reference_sections_test.dart",
+      "sha256": "89becb5f4c42eae7f717372fb648c5befc02c9f0d54db2d001fdca12ab42f6a7"
+    },
+    {
+      "path": "test/features/daily_log/daily_log_today_regression_test.dart",
+      "sha256": "ccbc49f7530c60d3d848270da5292d52dc37d21dc93cd2cdc2555e4a98db3504"
+    },
+    {
+      "path": "test/features/nutrition/food_search_ui_state_test.dart",
+      "sha256": "b201564648abb5a24f353246b1a4317f2a33b0249c0ee37aae799cf4c66cde17"
+    },
+    {
+      "path": "test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "sha256": "26dde24a602217eb06dea4ea372f791991a3cceca1d96c72da9ebb82f25fa728"
+    },
+    {
+      "path": "test/features/nutrition/progressive_food_local_first_test.dart",
+      "sha256": "658505014aa2f7d1b6dd51d87285bfbc312cfcb77482f41e311b5d4f21d4adf3"
+    },
+    {
+      "path": "test/features/recipe_import/recipe_nutrition_calculator_test.dart",
+      "sha256": "9768436180473abfabfc097b3a1993af1af2b4591fec665c9fff7691196dedd5"
+    },
+    {
+      "path": "test/features/recipe_import/trusted_recipe_collection_integrity_test.dart",
+      "sha256": "375a33752a5d7ae9887cff59551f0e7cca429c811f2930c1cde0ebb9408ae619"
+    },
+    {
+      "path": "test/parallel/bil03/memory_selective_delete_test.dart",
+      "sha256": "64d52b13bd23369b0a67c331254b02705e0d436b29a0737d32d5e5f42e414cfc"
+    },
+    {
+      "path": "test/parallel/bil03/unit_command_test.dart",
+      "sha256": "028174228715b80e1d8901a754f9fa609633802f5458b2f21a6691d39b797822"
+    }
+  ],
+  "flutter_tests_run_by_this_workflow": false,
+  "full8_run": false,
+  "device_visual_performance_verification": "pending",
+  "production_deployment": false,
+  "store_ready": false,
+  "today_date_circle": "36px; selected calendar day centred in seven-day window",
+  "resumed_from_failed_run": "38134129366",
+  "last_analyzer_fix": "Remove unused foundation import only; no diagnostic suppression.",
+  "note": "Strict formatting and analyzer only. Independent focused Codex tests required."
+}

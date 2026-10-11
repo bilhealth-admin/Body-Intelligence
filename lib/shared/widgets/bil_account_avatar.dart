@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'bil_persistent_network_image.dart';
 
 /// The single visual contract for the signed-in member's avatar.
 ///
@@ -42,15 +43,28 @@ class BilAccountAvatar extends StatelessWidget {
     // delayed NetworkImage can never replace a newer local selection or flash
     // during an unrelated rebuild.
     final foreground = _foregroundImage;
-    final background = _backgroundImage;
+    final background = foreground == null ? _backgroundImage : null;
     final avatar = CircleAvatar(
       radius: radius,
       backgroundColor: backgroundColor,
       foregroundImage: foreground,
       onForegroundImageError: foreground == null ? null : (_, _) {},
-      backgroundImage: background,
-      onBackgroundImageError: background == null ? null : (_, _) {},
-      child: foreground == null && background == null
+      child: foreground == null && background != null
+          ? ClipOval(
+              child: SizedBox.square(
+                dimension: radius * 2,
+                child: BilPersistentNetworkImage(
+                  networkUrl!.trim(),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Icon(
+                    Icons.person_rounded,
+                    size: radius,
+                    color: placeholderColor ?? Colors.white,
+                  ),
+                ),
+              ),
+            )
+          : foreground == null && background == null
           ? Icon(
               Icons.person_rounded,
               size: radius,

@@ -1,3 +1,4 @@
+import '../commerce/presentation/optional_access_offer.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -40,7 +41,7 @@ class _QuickAddMealCameraPageState
       final available = await ref.read(aiBoostVisionAccessProvider.future);
       if (!mounted) return;
       if (!available) {
-        await context.push('/plans?focus=boost');
+        await explainVisionAccess(context, ref);
         if (mounted) context.pop();
         return;
       }

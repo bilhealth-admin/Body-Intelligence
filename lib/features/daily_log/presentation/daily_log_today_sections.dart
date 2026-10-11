@@ -113,8 +113,9 @@ class DailyLogWeekStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final material = MaterialLocalizations.of(context);
-    final first = material.firstDayOfWeekIndex;
-    final offset = (date.weekday % 7 - first + 7) % 7;
+    // A rolling seven-day window keeps the selected date in the middle.
+    // Construct calendar dates rather than adding 24h across DST boundaries.
+    const offset = 3;
     final scheme = Theme.of(context).colorScheme;
     return Row(
       key: const Key('daily-log-week-strip'),
@@ -142,7 +143,7 @@ class DailyLogWeekStrip extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      material.narrowWeekdays[(first + index) % 7],
+                      material.narrowWeekdays[day.weekday % 7],
                       style: TextStyle(
                         color: selected
                             ? scheme.primary
@@ -154,8 +155,11 @@ class DailyLogWeekStrip extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      width: 28,
-                      height: 28,
+                      key: selected
+                          ? const Key('daily-log-selected-date-circle')
+                          : null,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: selected

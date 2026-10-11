@@ -37,6 +37,7 @@ abstract final class HealthEvidenceIds {
   static const cdcWeightLoss = 'cdc_weight_loss';
   static const weightEnergyApproximation = 'wishnofsky_weight_energy';
   static const dietaryReferenceIntakes = 'national_academies_dri';
+  static const fdaDailyValues = 'fda_label_daily_values';
   static const healthyEating = 'cdc_healthy_eating';
   static const whoSodiumPotassium = 'who_sodium_potassium';
   static const mifflinStJeor = 'mifflin_st_jeor';
@@ -62,6 +63,20 @@ abstract final class HealthEvidenceCatalog {
   static final DateTime _reviewed = DateTime.utc(2026, 9, 22);
 
   static final List<HealthEvidenceSource> all = List.unmodifiable([
+    HealthEvidenceSource(
+      id: HealthEvidenceIds.fdaDailyValues,
+      title: 'Daily Values / القيم اليومية المرجعية',
+      organization: 'FDA',
+      url: Uri.parse(
+        'https://www.fda.gov/food/nutrition-facts-label/daily-value-nutrition-and-supplement-facts-labels',
+      ),
+      category: HealthEvidenceCategory.nutrition,
+      shortDescription:
+          'General label references, not personal RDA/AI. مراجع عامة للملصقات، وليست احتياجًا شخصيًا.',
+      methodologyNote:
+          'Editable references, not a supplement dose or treatment. مراجع قابلة للتعديل، وليست جرعات مكملات أو وصفة علاجية.',
+      lastReviewed: DateTime.utc(2026, 10, 11),
+    ),
     _source(
       HealthEvidenceIds.cdcWeightLoss,
       'Steps for Losing Weight',
@@ -310,6 +325,7 @@ abstract final class HealthEvidenceCatalog {
       ],
       'heart-health' => const [HealthEvidenceIds.whoSodiumPotassium],
       'nutrition-targets' => const [
+        HealthEvidenceIds.fdaDailyValues,
         HealthEvidenceIds.mifflinStJeor,
         HealthEvidenceIds.dietaryReferenceIntakes,
         HealthEvidenceIds.proteinExercise,

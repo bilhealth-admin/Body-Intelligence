@@ -320,7 +320,7 @@ extension _FoodLogActions on _FoodLogPageState {
     if (!mounted) return;
     if (!hasVisionTokens) {
       try {
-        await context.push('/plans?focus=boost');
+        await explainVisionAccess(context, ref);
       } finally {
         if (mounted) _updateState(() => mealImageBusy = false);
       }
@@ -569,8 +569,9 @@ extension _FoodLogActions on _FoodLogPageState {
     } on MealImageAnalysisException catch (error) {
       if (!mounted) return;
       if (error.failure == MealImageAnalysisFailure.boostRequired) {
+        ref.invalidate(aiVisionCreditStateProvider);
         ref.invalidate(aiBoostVisionAccessProvider);
-        await context.push('/plans?focus=boost');
+        await explainVisionAccess(context, ref);
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
@@ -596,6 +597,7 @@ extension _FoodLogActions on _FoodLogPageState {
       ).showSnackBar(SnackBar(content: Text(visionCopy.text('camera_failed'))));
     } finally {
       if (mounted) _updateState(() => mealImageBusy = false);
+      ref.invalidate(aiVisionCreditStateProvider);
       ref.invalidate(aiBoostVisionAccessProvider);
     }
   }

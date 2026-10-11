@@ -266,9 +266,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                             accent: row.$4,
                             progress: row.$5,
                             locked: !unlocked,
-                            onTap: () => onRoute(
-                              unlocked ? '/analytics/nutrition' : '/plans',
-                            ),
+                            onTap: () => onRoute('/analytics/nutrition'),
                           ),
                         ),
                     ],

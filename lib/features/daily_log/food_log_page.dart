@@ -1,3 +1,4 @@
+import '../commerce/presentation/optional_access_offer.dart';
 import '../../shared/widgets/first_use_target_guide.dart';
 import 'dart:async';
 import 'dart:io';
@@ -89,6 +90,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   final search = TextEditingController();
   String mealType = 'breakfast';
   Timer? _searchDebounce;
+  StreamSubscription<List<Food>>? _progressiveSearch;
   List<Food>? searchResults;
   bool searchLoading = false;
   bool mealImageBusy = false;
@@ -245,6 +247,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _progressiveSearch?.cancel();
     search.dispose();
     super.dispose();
   }
@@ -461,6 +464,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                   onPressed: () {
                     search.clear();
                     _searchDebounce?.cancel();
+                    _progressiveSearch?.cancel();
                     _searchGeneration++;
                     setState(() {
                       searchResults = null;
@@ -556,6 +560,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
 
   void _scheduleSearch(String value) {
     _searchDebounce?.cancel();
+    _progressiveSearch?.cancel();
     final query = value.trim();
     _searchGeneration++;
     if (query.isEmpty) {
@@ -566,28 +571,34 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       return;
     }
     setState(() {
+      // Results for a previous phrase are never presented as the new phrase.
       searchResults = null;
       searchLoading = true;
     });
     final generation = _searchGeneration;
-    _searchDebounce = Timer(const Duration(milliseconds: 180), () async {
-      try {
-        final result = await ref
-            .read(foodRuntimeSearchAuthorityProvider)
-            .search(query, limit: 30);
-        if (!mounted || generation != _searchGeneration) return;
-        setState(() {
-          searchResults = result.take(30).toList(growable: false);
-          searchLoading = false;
-        });
-      } on Object {
-        if (!mounted || generation != _searchGeneration) return;
-        setState(() {
-          searchResults = const <Food>[];
-          searchLoading = false;
-        });
-      }
-    });
+    final authority = ref.read(foodRuntimeSearchAuthorityProvider);
+    bool current() =>
+        mounted &&
+        generation == _searchGeneration &&
+        identical(ref.read(foodRuntimeSearchAuthorityProvider), authority);
+    _progressiveSearch = authority
+        .searchProgressively(query, limit: 30)
+        .listen(
+          (result) {
+            if (!current()) return;
+            setState(() {
+              searchResults = result;
+              searchLoading = false;
+            });
+          },
+          onError: (Object error, StackTrace stack) {
+            if (!current()) return;
+            setState(() {
+              searchResults ??= const <Food>[];
+              searchLoading = false;
+            });
+          },
+        );
   }
 
   Widget _buildActions(BuildContext context) {

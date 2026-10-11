@@ -14,8 +14,11 @@ import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../recipe_import/providers/trusted_recipe_providers.dart';
 import '../../recipe_import/domain/trusted_recipe.dart';
-import '../../recipe_import/services/trusted_recipe_diary_service.dart';
 import '../food_page.dart';
+import 'meal_builder_page.dart';
+import 'meal_copy_page.dart';
+import 'nutrition_entry_fields.dart';
+import 'recipe_diary_confirmation_page.dart';
 import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'meals_tab.dart';

@@ -185,5 +185,12 @@ class _FakePreferences implements PreferencesRepository {
   }
 
   @override
+  Stream<Map<String, String>> watchSnapshot(Iterable<String> keys) =>
+      Stream.value({
+        for (final key in keys.toSet())
+          if (values.containsKey(key)) key: values[key]!,
+      });
+
+  @override
   Stream<String?> watch(String key) => Stream<String?>.value(values[key]);
 }

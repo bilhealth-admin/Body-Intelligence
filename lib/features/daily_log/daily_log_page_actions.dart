@@ -1,20 +1,11 @@
 part of 'daily_log_page.dart';
 
 extension _DailyLogPageActions on _DailyLogPageState {
-  Future<bool> _requirePremiumNutrition() async {
-    try {
-      final subscription = await ref
-          .read(verifiedSubscriptionStateProvider.future)
-          .timeout(const Duration(seconds: 8));
-      if (subscription.grants(CommerceEntitlement.advancedIntelligence)) {
-        return true;
-      }
-    } on Object {
-      // Commerce access fails closed when the server cannot verify it.
-    }
-    if (mounted) await GoRouter.maybeOf(context)?.push('/plans');
-    return false;
-  }
+  Future<bool> _requirePremiumNutrition() => requestVerifiedFeatureAccess(
+    context,
+    ref,
+    CommerceEntitlement.advancedIntelligence,
+  );
 
   Future<void> _quickAddMacros() async {
     if (!await _requirePremiumNutrition() || !mounted) return;

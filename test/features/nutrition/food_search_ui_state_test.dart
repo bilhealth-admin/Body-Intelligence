@@ -30,7 +30,13 @@ final class _ControlledFoodSearchAuthority extends FoodRuntimeSearchAuthority {
   Future<FoodRuntimeSearchResult> searchDetailed(
     String query, {
     int limit = 50,
+    bool includeNetwork = true,
+    bool includeCommunity = true,
+    bool Function()? active,
   }) {
+    if (active != null && !active()) {
+      throw StateError('Search retired.');
+    }
     calls += 1;
     return pending
         .putIfAbsent(query, Completer<FoodRuntimeSearchResult>.new)

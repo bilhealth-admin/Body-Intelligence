@@ -12,6 +12,10 @@ import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
 import '../../data/repositories/preferences_repository.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../nutrition/domain/macro_goal_editor.dart';
+import '../dashboard/providers/dashboard_preferences_provider.dart';
+import '../nutrition/domain/nutrient_daily_references.dart';
+import '../nutrition/providers/nutrition_goal_defaults_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
 import 'data/diary_sharing_support_repository.dart';
@@ -21,6 +25,13 @@ part 'reference_preferences_controls.dart';
 part 'reference_preferences_numeric.dart';
 part 'reference_preferences_macros.dart';
 part 'reference_preferences_email.dart';
+
+final _macroLockProvider = StreamProvider.family<bool, String>(
+  (ref, key) => ref
+      .watch(preferencesRepositoryProvider)
+      .watch(key)
+      .map((value) => value == 'true'),
+);
 
 bool diarySharingAccessKeyLengthIsValid(String key) {
   final characterCount = key.runes.length;

@@ -69,6 +69,46 @@ class DailyLogRepository {
     await _database.into(_database.dailyLogs).insertOnConflictUpdate(companion);
   }
 
+  /// Narrow compare-and-set used by Today. Never wipes concurrently synced
+  /// sleep, steps, structured workouts, lifecycle or final nutrition snapshots.
+  Future<void> saveNotesAtomically({
+    required DateTime date,
+    required String? expectedNotes,
+    required String? expectedExerciseNotes,
+    required String? notes,
+    required String? exerciseNotes,
+  }) => _database.transaction(() async {
+    final key = dayKeyFor(date);
+    final existing = await getForDay(date);
+    if (existing?.lifecycleState == 'closed') throw StateError('diary_closed');
+    if (existing?.notes != expectedNotes ||
+        existing?.exerciseNotes != expectedExerciseNotes) {
+      throw StateError('diary_notes_changed_concurrently');
+    }
+    if (existing == null) {
+      await _database
+          .into(_database.dailyLogs)
+          .insert(
+            DailyLogsCompanion.insert(
+              date: date,
+              dayKey: key,
+              notes: Value(notes),
+              exerciseNotes: Value(exerciseNotes),
+            ),
+          );
+    } else {
+      await (_database.update(
+        _database.dailyLogs,
+      )..where((row) => row.id.equals(existing.id))).write(
+        DailyLogsCompanion(
+          notes: Value(notes),
+          exerciseNotes: Value(exerciseNotes),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    }
+  });
+
   /// Atomically records only the sleep duration for [date]. Existing notes,
   /// steps, and exercise entries are preserved even when another feature
   /// updates the same daily ledger concurrently.

@@ -19,7 +19,7 @@ final class PercentageNutritionGoals {
   }) {
     final values = [calories, carbohydratesPercent, proteinPercent, fatPercent];
     if (values.any((value) => !value.isFinite || value < 0) ||
-        calories < 500 ||
+        calories < 1 ||
         calories > 10000 ||
         (carbohydratesPercent + proteinPercent + fatPercent - 100).abs() >
             .001) {

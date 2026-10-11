@@ -1,3 +1,5 @@
+import '../nutrition/domain/unified_food.dart';
+import '../../data/database/meal_food_evidence.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -159,7 +161,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
             protein: selectedDayTarget.proteinGrams,
             carbs: selectedDayTarget.carbsGrams,
             fats: selectedDayTarget.fatGrams,
-            fiber: planTargets.fiber,
+            fiber: fiberGoal ?? planTargets.fiber,
           );
     final targets =
         scheduledTargets ??
@@ -170,7 +172,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
                 protein: percentageGoals.proteinGrams,
                 carbs: percentageGoals.carbohydratesGrams,
                 fats: percentageGoals.fatGrams,
-                fiber: planTargets.fiber,
+                fiber: fiberGoal ?? planTargets.fiber,
               ));
     return BilCalmVisualScope(
       builder: (context) => DefaultTabController(

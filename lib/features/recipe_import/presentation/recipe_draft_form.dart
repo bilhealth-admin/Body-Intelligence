@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../nutrition/services/food_presentation_localizer.dart';
 import '../domain/trusted_recipe.dart';
+import '../../nutrition/presentation/nutrition_food_picker.dart';
 import '../services/trusted_recipe_parser.dart';
+import 'recipe_editor_copy.dart';
 
 /// A human-facing editor. Serialization and validation stay internal.
 class RecipeDraftForm extends StatefulWidget {
@@ -126,7 +127,7 @@ class _RecipeDraftFormState extends State<RecipeDraftForm> {
 
   @override
   Widget build(BuildContext context) {
-    String t(String text) => context.strings.text(text);
+    String t(String text) => recipeEditorText(context, text);
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
@@ -183,9 +184,65 @@ class _RecipeDraftFormState extends State<RecipeDraftForm> {
         ),
         const SizedBox(height: 20),
         Text(t('Ingredients'), style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          locale.startsWith('ar')
+              ? 'اختر كل مكوّن من سجل الطعام وحدد كميته وحالته بدقة. تُحسب القيم لكل حصة من المكونات المرتبطة؛ كتابة الاسم وحده لا تكفي.'
+              : 'Link each ingredient to its food record and specify its amount and preparation. Nutrition is calculated per serving; a typed name alone is not nutritional evidence.',
+        ),
         for (var i = 0; i < _ingredients.length; i++) ...[
           const SizedBox(height: 12),
           field('recipe-ingredient-name-$i', 'Name', _ingredients[i].name),
+          TextButton.icon(
+            key: ValueKey('recipe-link-ingredient-$i'),
+            onPressed: _busy
+                ? null
+                : () async {
+                    final row = _ingredients[i];
+                    final food = await selectNutritionFood(
+                      context,
+                      initialQuery: row.name.text,
+                    );
+                    if (!mounted ||
+                        food == null ||
+                        !_ingredients.contains(row)) {
+                      return;
+                    }
+                    final label = FoodPresentationLocalizer.foodName(
+                      name: food.name,
+                      arabicName: food.arabicName,
+                      localeTag: locale,
+                      isCustom: food.isCustom,
+                      source: food.source,
+                    );
+                    setState(() {
+                      row.name.text = label;
+                      row.unit =
+                          TrustedRecipeParser.allowedUnits.contains(
+                            food.servingUnit,
+                          )
+                          ? food.servingUnit
+                          : 'g';
+                      row.quantity.text = food.servingUnit == row.unit
+                          ? food.servingSize.toString()
+                          : '100';
+                      row.original = TrustedRecipeIngredient(
+                        name: label,
+                        quantity: double.parse(row.quantity.text),
+                        unit: row.unit,
+                        sourceRecordId:
+                            RegExp(r'^usda:\d+$').hasMatch(food.uuid)
+                            ? food.uuid
+                            : 'local:${food.uuid}',
+                      );
+                    });
+                  },
+            icon: const Icon(Icons.link, size: 19),
+            label: Text(
+              locale.startsWith('ar')
+                  ? 'اختيار الطعام وحساب قيمه'
+                  : 'Choose food and calculate nutrition',
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -200,7 +257,7 @@ class _RecipeDraftFormState extends State<RecipeDraftForm> {
               const SizedBox(width: 8),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  key: ObjectKey(_ingredients[i]),
+                  key: ValueKey((_ingredients[i], _ingredients[i].unit)),
                   initialValue: _ingredients[i].unit,
                   isExpanded: true,
                   decoration: const InputDecoration(
@@ -277,7 +334,7 @@ class _IngredientFields {
     : name = TextEditingController(text: original?.name),
       quantity = TextEditingController(text: '${original?.quantity ?? 100}'),
       unit = original?.unit ?? 'g';
-  final TrustedRecipeIngredient? original;
+  TrustedRecipeIngredient? original;
   final TextEditingController name;
   final TextEditingController quantity;
   String unit;

@@ -10,6 +10,6 @@ final trustedRecipeRepositoryProvider = Provider<TrustedRecipeRepository>((
   return TrustedRecipeRepository(ref.watch(preferencesRepositoryProvider));
 });
 
-final trustedRecipesProvider = FutureProvider<List<SavedTrustedRecipe>>((ref) {
-  return ref.watch(trustedRecipeRepositoryProvider).load();
+final trustedRecipesProvider = StreamProvider<List<SavedTrustedRecipe>>((ref) {
+  return ref.watch(trustedRecipeRepositoryProvider).watch();
 });

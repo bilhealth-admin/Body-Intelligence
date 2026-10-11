@@ -415,7 +415,7 @@ class _CommunityPostMediaTile extends StatelessWidget {
             filterQuality: FilterQuality.medium,
             errorBuilder: (_, _, _) => const _CommunityImageFallback(),
           )
-        : Image.network(
+        : BilPersistentNetworkImage(
             url,
             fit: BoxFit.cover,
             filterQuality: FilterQuality.medium,
@@ -472,7 +472,7 @@ class _CommunityPhotoPage extends StatelessWidget {
                   ),
                   errorBuilder: (_, _, _) => const _CommunityImageFallback(),
                 )
-              : Image.network(
+              : BilPersistentNetworkImage(
                   url,
                   fit: BoxFit.contain,
                   semanticLabel: communityText(

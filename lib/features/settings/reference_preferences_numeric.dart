@@ -14,10 +14,7 @@ class _StoredNumber extends ConsumerStatefulWidget {
 bool validStoredNutritionGoal(String key, String suffix, String input) {
   final number = double.tryParse(input);
   if (number == null || !number.isFinite || number < 0) return false;
-  if (key == 'goal.calories') return number >= 1 && number <= 10000;
-  if (key.endsWith('Percent') || suffix == '%') return number <= 100;
-  if (suffix == 'mg') return number <= 1000000;
-  return number <= 10000;
+  return validDashboardNutrientGoal(key, number);
 }
 
 typedef MacroPercentages = ({double carbs, double protein, double fat});
@@ -87,6 +84,7 @@ Map<String, String>? nutritionGoalRepairSnapshot(Map<String, String?> stored) {
       calories > 10000) {
     return null;
   }
+  if (stored['goal.macroEditor.v2'] == 'true') return null;
   final canonical = nutritionGoalSnapshotForCalories(
     calories: calories,
     carbsPercent: double.tryParse(stored['goal.carbsPercent'] ?? ''),
@@ -114,6 +112,17 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
   };
 
   bool get _isMacroPercent => _macroPercentKeys.contains(widget.keyName);
+  bool get _isMacroGrams => const {
+    'goal.carbsGrams',
+    'goal.proteinGrams',
+    'goal.fatGrams',
+  }.contains(widget.keyName);
+  MacroGoal get _macro => widget.keyName.contains('protein')
+      ? MacroGoal.protein
+      : widget.keyName.contains('fat')
+      ? MacroGoal.fat
+      : MacroGoal.carbohydrate;
+  String get _lockKey => 'goal.lock.${MacroGoalAllocation.key(_macro)}';
 
   bool _valid(String input) {
     return validStoredNutritionGoal(widget.keyName, widget.suffix, input);
@@ -131,7 +140,7 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
         .watch(widget.keyName)
         .listen((saved) {
           if (!mounted || saving || editorOpen) return;
-          final candidate = saved ?? widget.defaultValue;
+          final candidate = saved;
           final next = candidate != null && _valid(candidate)
               ? candidate
               : null;
@@ -152,77 +161,117 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
     PreferencesRepository repository,
     double next,
   ) async {
-    final stored = await Future.wait([
-      repository.get('goal.carbsPercent'),
-      repository.get('goal.proteinPercent'),
-      repository.get('goal.fatPercent'),
-      repository.get('goal.calories'),
-    ]);
-    var carbs = double.tryParse(stored[0] ?? '') ?? 45;
-    var protein = double.tryParse(stored[1] ?? '') ?? 30;
-    var fat = double.tryParse(stored[2] ?? '') ?? 25;
-    if (widget.keyName == 'goal.carbsPercent') carbs = next;
-    if (widget.keyName == 'goal.proteinPercent') protein = next;
-    if (widget.keyName == 'goal.fatPercent') fat = next;
-
-    // Keep the three-way split closed at 100% after every edit.  The field
-    // being edited is authoritative; protein is the balancing remainder for
-    // carbs/fat edits, while fat is the remainder for a direct protein edit.
-    if (widget.keyName == 'goal.proteinPercent') {
-      fat = 100 - carbs - protein;
-    } else {
-      protein = 100 - carbs - fat;
-    }
-    if (![carbs, protein, fat].every((item) => item.isFinite && item >= 0)) {
-      throw const FormatException('Macro percentages must total 100%.');
-    }
-    if ((carbs + protein + fat - 100).abs() > 0.001) {
-      throw const FormatException('Macro percentages must total 100%.');
-    }
-    final values = <String, String>{
-      'goal.carbsPercent': _formatNumber(carbs),
-      'goal.proteinPercent': _formatNumber(protein),
-      'goal.fatPercent': _formatNumber(fat),
-    };
-    final calories = double.tryParse(stored[3] ?? '');
-    if (calories != null && calories.isFinite && calories > 0) {
-      values.addAll({
-        'goal.carbsGrams': _formatNumber(calories * carbs / 400),
-        'goal.proteinGrams': _formatNumber(calories * protein / 400),
-        'goal.fatGrams': _formatNumber(calories * fat / 900),
-      });
-    }
-    await repository.setMany(values);
+    const keys = [
+      'goal.calories',
+      'goal.carbsPercent',
+      'goal.proteinPercent',
+      'goal.fatPercent',
+      'goal.macroLastEdited',
+      'goal.lock.carbs',
+      'goal.lock.protein',
+      'goal.lock.fat',
+    ];
+    final read = await Future.wait(keys.map(repository.get));
+    final expected = {for (var i = 0; i < keys.length; i++) keys[i]: read[i]};
+    final defaults = ref.read(nutritionGoalDefaultsProvider);
+    double number(String key) =>
+        double.tryParse(expected[key] ?? '') ?? defaults[key] ?? double.nan;
+    final allocation = MacroGoalAllocation(
+      number('goal.calories'),
+      number('goal.carbsPercent'),
+      number('goal.proteinPercent'),
+      number('goal.fatPercent'),
+    );
+    final previous = MacroGoal.values
+        .where(
+          (item) =>
+              MacroGoalAllocation.key(item) == expected['goal.macroLastEdited'],
+        )
+        .firstOrNull;
+    final changed = allocation.edit(
+      _macro,
+      next,
+      inGrams: _isMacroGrams,
+      previous: previous,
+      locked: {
+        for (final item in MacroGoal.values)
+          if (expected['goal.lock.${MacroGoalAllocation.key(item)}'] == 'true')
+            item,
+      },
+    );
+    final committed = await repository.mutateIfUnchanged(
+      expected: expected,
+      set: {
+        ...changed.toPreferences(),
+        'goal.macroLastEdited': MacroGoalAllocation.key(_macro),
+        'goal.macroEditor.v2': 'true',
+        'goal.lockMode.${MacroGoalAllocation.key(_macro)}': _isMacroGrams
+            ? 'grams'
+            : 'percent',
+      },
+    );
+    if (!committed) throw StateError('Goals changed while editing. Retry.');
   }
 
   Future<void> _saveCalories(
     PreferencesRepository repository,
     String draft,
   ) async {
+    const keys = [
+      'goal.calories',
+      'goal.carbsPercent',
+      'goal.proteinPercent',
+      'goal.fatPercent',
+      'goal.carbsGrams',
+      'goal.proteinGrams',
+      'goal.fatGrams',
+      'goal.macroLastEdited',
+      'goal.macroEditor.v2',
+      'goal.lock.carbs',
+      'goal.lock.protein',
+      'goal.lock.fat',
+      'goal.lockMode.carbs',
+      'goal.lockMode.protein',
+      'goal.lockMode.fat',
+    ];
+    final read = await Future.wait(keys.map(repository.get));
+    final expected = {for (var i = 0; i < keys.length; i++) keys[i]: read[i]};
     if (draft.isEmpty) {
-      await repository.mutate(
-        remove: [
-          widget.keyName,
-          'goal.carbsGrams',
-          'goal.proteinGrams',
-          'goal.fatGrams',
-        ],
+      final committed = await repository.mutateIfUnchanged(
+        expected: expected,
+        remove: keys,
       );
+      if (!committed) throw StateError('Goals changed while editing.');
       return;
     }
-    final calories = double.parse(draft);
-    final stored = await Future.wait([
-      repository.get('goal.carbsPercent'),
-      repository.get('goal.fatPercent'),
-    ]);
-    final snapshot = nutritionGoalSnapshotForCalories(
-      calories: calories,
-      carbsPercent: double.tryParse(stored[0] ?? ''),
-      fatPercent: double.tryParse(stored[1] ?? ''),
+    final defaults = ref.read(nutritionGoalDefaultsProvider);
+    double number(String key) =>
+        double.tryParse(expected[key] ?? '') ?? defaults[key] ?? double.nan;
+    final allocation = MacroGoalAllocation(
+      number('goal.calories'),
+      number('goal.carbsPercent'),
+      number('goal.proteinPercent'),
+      number('goal.fatPercent'),
     );
-    // setMany is one database transaction, so the calorie target, repaired
-    // percentages, and derived grams are never observed as a partial plan.
-    await repository.setMany(snapshot);
+    final updated = allocation.withCalories(
+      double.parse(draft),
+      locked: {
+        for (final item in MacroGoal.values)
+          if (expected['goal.lock.${MacroGoalAllocation.key(item)}'] == 'true')
+            item,
+      },
+      gramLocks: {
+        for (final item in MacroGoal.values)
+          if (expected['goal.lockMode.${MacroGoalAllocation.key(item)}'] ==
+              'grams')
+            item,
+      },
+    );
+    final committed = await repository.mutateIfUnchanged(
+      expected: expected,
+      set: {...updated.toPreferences(), 'goal.macroEditor.v2': 'true'},
+    );
+    if (!committed) throw StateError('Goals changed while editing.');
   }
 
   Future<void> _load() async {
@@ -231,11 +280,13 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
       error = null;
     });
     try {
-      final saved = await ref
-          .read(preferencesRepositoryProvider)
-          .get(widget.keyName);
-      if (!mounted) return;
-      final candidate = saved ?? widget.defaultValue;
+      final repository = ref.read(preferencesRepositoryProvider);
+      final saved = await repository.get(widget.keyName);
+      if (!mounted ||
+          !identical(repository, ref.read(preferencesRepositoryProvider))) {
+        return;
+      }
+      final candidate = saved;
       setState(() {
         value = candidate != null && _valid(candidate) ? candidate : null;
         loading = false;
@@ -251,177 +302,311 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
   }
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    title: Text(_nutritionGoalText(context, widget.label)),
-    trailing: loading || saving
-        ? const SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        : error != null
-        ? TextButton(
-            onPressed: _load,
-            child: Text(context.strings.text('Retry')),
-          )
-        : Directionality(
-            textDirection: TextDirection.ltr,
-            child: Text(
-              value == null
-                  ? '—'
-                  : widget.suffix == '%'
-                  ? '$value%'
-                  : '$value${widget.suffix.isEmpty ? '' : ' ${widget.suffix}'}',
-              textAlign: TextAlign.end,
-              style: const TextStyle(
-                color: Color(0xFF0A6FF5),
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                fontFeatures: [FontFeature.tabularFigures()],
+  Widget build(BuildContext context) {
+    ref.listen(preferencesRepositoryProvider, (previous, next) {
+      _valueSubscription?.cancel();
+      value = null;
+      _valueSubscription = next.watch(widget.keyName).listen((saved) {
+        if (mounted && !saving && !editorOpen) {
+          setState(() => value = saved != null && _valid(saved) ? saved : null);
+        }
+      });
+      if (!editorOpen) unawaited(_load());
+    });
+    final defaults = ref.watch(nutritionGoalDefaultsProvider);
+    final reference = defaults[widget.keyName];
+    final displayed = value ?? widget.defaultValue ?? reference?.toString();
+    final displayNumber = double.tryParse(displayed ?? '');
+    final displayText = displayNumber == null
+        ? null
+        : _formatNumber(displayNumber);
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final lock = (_isMacroPercent || _isMacroGrams)
+        ? ref.watch(_macroLockProvider(_lockKey))
+        : const AsyncValue<bool>.data(false);
+    return ListTile(
+      key: ValueKey('nutrition-goal-${widget.keyName}'),
+      leading: (_isMacroPercent || _isMacroGrams)
+          ? IconButton(
+              tooltip: arabic
+                  ? 'تثبيت / تحرير هذا العنصر'
+                  : 'Lock / unlock this macro',
+              icon: Icon(
+                lock.value == true
+                    ? Icons.lock_outline
+                    : Icons.lock_open_outlined,
+                size: 19,
+              ),
+              onPressed: saving || lock.isLoading || lock.hasError
+                  ? null
+                  : () async {
+                      final repository = ref.read(
+                        preferencesRepositoryProvider,
+                      );
+                      try {
+                        await repository.set(
+                          _lockKey,
+                          lock.value == true ? 'false' : 'true',
+                        );
+                      } on Object {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                context.strings.text('Could not save changes.'),
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+            )
+          : null,
+      subtitle: reference == null
+          ? null
+          : Text(
+              '${arabic ? (NutrientDailyReferences.values.containsKey(widget.keyName) ? 'مرجع الملصق اليومي العام (FDA)، قابل للتعديل' : 'المقترح من ملفك ونشاطك، قابل للتعديل') : (NutrientDailyReferences.values.containsKey(widget.keyName) ? 'General FDA label reference, editable' : 'Suggested from your profile and activity, editable')}: ${_formatNumber(reference)} ${widget.suffix}',
+            ),
+      title: Text(_nutritionGoalText(context, widget.label)),
+      trailing: loading || saving
+          ? const SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : error != null
+          ? TextButton(
+              onPressed: _load,
+              child: Text(context.strings.text('Retry')),
+            )
+          : Directionality(
+              textDirection: TextDirection.ltr,
+              child: Text(
+                displayText == null
+                    ? '—'
+                    : widget.suffix == '%'
+                    ? '$displayText%'
+                    : '$displayText${widget.suffix.isEmpty ? '' : ' ${widget.suffix}'}',
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                  color: Color(0xFF0A6FF5),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
               ),
             ),
-          ),
-    onTap: loading || saving || error != null
-        ? null
-        : () async {
-            if (editorOpen) return;
-            editorOpen = true;
-            final controller = TextEditingController(
-              text: retainedDraft ?? value ?? '',
-            );
-            String? next;
-            try {
-              next = await showDialog<String>(
-                context: context,
-                barrierDismissible: false,
-                builder: (dialogContext) {
-                  var dialogSaving = false;
-                  String? dialogError;
-                  return StatefulBuilder(
-                    builder: (dialogContext, setDialogState) => PopScope(
-                      canPop: !dialogSaving,
-                      child: AlertDialog(
-                        title: Text(_nutritionGoalText(context, widget.label)),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              controller: controller,
-                              autofocus: true,
-                              enabled: !dialogSaving,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                            ),
-                            if (dialogError != null) ...[
-                              const SizedBox(height: 12),
-                              Text(
-                                dialogError!,
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    dialogContext,
-                                  ).colorScheme.error,
+      onTap: loading || saving || error != null
+          ? null
+          : () async {
+              if (editorOpen) return;
+              editorOpen = true;
+              final editorRepository = ref.read(preferencesRepositoryProvider);
+              final controller = TextEditingController(
+                text: retainedDraft ?? displayed ?? '',
+              );
+              String? next;
+              try {
+                next = await showDialog<String>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (dialogContext) {
+                    var dialogSaving = false;
+                    String? dialogError;
+                    return StatefulBuilder(
+                      builder: (dialogContext, setDialogState) => PopScope(
+                        canPop: !dialogSaving,
+                        child: AlertDialog(
+                          title: Text(
+                            _nutritionGoalText(context, widget.label),
+                          ),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (widget.keyName == 'goal.calories')
+                                Text(
+                                  arabic
+                                      ? 'تغيير السعرات يحافظ على العناصر المثبتة. إفراغ الحقل يعيد السعرات والماكروز والتثبيت إلى اقتراح ملفك.'
+                                      : 'Changing calories preserves locked targets. Clearing restores profile calorie and macro suggestions and removes locks.',
                                 ),
+                              TextField(
+                                controller: controller,
+                                autofocus: true,
+                                enabled: !dialogSaving,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
                               ),
+                              if (dialogError != null) ...[
+                                const SizedBox(height: 12),
+                                Text(
+                                  dialogError!,
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      dialogContext,
+                                    ).colorScheme.error,
+                                  ),
+                                ),
+                              ],
+                              if (dialogSaving) ...[
+                                const SizedBox(height: 12),
+                                const LinearProgressIndicator(),
+                              ],
                             ],
-                            if (dialogSaving) ...[
-                              const SizedBox(height: 12),
-                              const LinearProgressIndicator(),
-                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: dialogSaving
+                                  ? null
+                                  : () => Navigator.pop(dialogContext),
+                              child: Text(context.strings.text('Cancel')),
+                            ),
+                            FilledButton(
+                              onPressed: dialogSaving
+                                  ? null
+                                  : () async {
+                                      final draft = controller.text
+                                          .trim()
+                                          .replaceAll('٫', '.')
+                                          .replaceAll(',', '.')
+                                          .replaceAllMapped(RegExp(r'[٠-٩۰-۹]'), (
+                                            match,
+                                          ) {
+                                            const arabic = '٠١٢٣٤٥٦٧٨٩';
+                                            const persian = '۰۱۲۳۴۵۶۷۸۹';
+                                            final digit = match[0]!;
+                                            return '${arabic.contains(digit) ? arabic.indexOf(digit) : persian.indexOf(digit)}';
+                                          });
+                                      if (draft.isNotEmpty && !_valid(draft)) {
+                                        setDialogState(
+                                          () => dialogError = context.strings
+                                              .text('Review values and retry.'),
+                                        );
+                                        return;
+                                      }
+                                      if ((_isMacroPercent || _isMacroGrams) &&
+                                          draft.isEmpty) {
+                                        setDialogState(
+                                          () => dialogError = context.strings
+                                              .text('Review values and retry.'),
+                                        );
+                                        return;
+                                      }
+                                      setDialogState(() {
+                                        dialogSaving = true;
+                                        dialogError = null;
+                                      });
+                                      if (mounted) {
+                                        setState(() => saving = true);
+                                      }
+                                      try {
+                                        final repository = editorRepository;
+                                        if (!mounted ||
+                                            !identical(
+                                              repository,
+                                              ref.read(
+                                                preferencesRepositoryProvider,
+                                              ),
+                                            )) {
+                                          throw StateError(
+                                            'Account changed while editing.',
+                                          );
+                                        }
+                                        if (widget.keyName == 'goal.calories') {
+                                          await _saveCalories(
+                                            repository,
+                                            draft,
+                                          );
+                                        } else if (draft.isEmpty) {
+                                          await repository.remove(
+                                            widget.keyName,
+                                          );
+                                        } else if (_isMacroPercent ||
+                                            _isMacroGrams) {
+                                          await _saveMacroPercent(
+                                            repository,
+                                            double.parse(draft),
+                                          );
+                                        } else {
+                                          await repository.set(
+                                            widget.keyName,
+                                            draft,
+                                          );
+                                        }
+                                        if (!mounted ||
+                                            !identical(
+                                              repository,
+                                              ref.read(
+                                                preferencesRepositoryProvider,
+                                              ),
+                                            )) {
+                                          if (dialogContext.mounted) {
+                                            Navigator.pop(dialogContext);
+                                          }
+                                          return;
+                                        }
+                                        if (dialogContext.mounted) {
+                                          Navigator.pop(dialogContext, draft);
+                                        }
+                                      } catch (_) {
+                                        if (dialogContext.mounted) {
+                                          setDialogState(() {
+                                            dialogSaving = false;
+                                            dialogError =
+                                                (_isMacroPercent ||
+                                                    _isMacroGrams ||
+                                                    widget.keyName ==
+                                                        'goal.calories')
+                                                ? (arabic
+                                                      ? 'راجع مجموع الطاقة وحرّر عنصرًا عند الحاجة، ثم أعد المحاولة. لم تُغيّر العناصر المثبتة.'
+                                                      : 'Review the energy total and unlock a macro if needed, then retry. Locked targets were not changed.')
+                                                : context.strings.text(
+                                                    'Could not save changes.',
+                                                  );
+                                          });
+                                        }
+                                        if (mounted) {
+                                          setState(() => saving = false);
+                                        }
+                                      }
+                                    },
+                              child: Text(context.strings.text('Save')),
+                            ),
                           ],
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: dialogSaving
-                                ? null
-                                : () => Navigator.pop(dialogContext),
-                            child: Text(context.strings.text('Cancel')),
-                          ),
-                          FilledButton(
-                            onPressed: dialogSaving
-                                ? null
-                                : () async {
-                                    final draft = controller.text.trim();
-                                    if (draft.isNotEmpty && !_valid(draft)) {
-                                      setDialogState(
-                                        () => dialogError = context.strings
-                                            .text('Review values and retry.'),
-                                      );
-                                      return;
-                                    }
-                                    if (_isMacroPercent && draft.isEmpty) {
-                                      setDialogState(
-                                        () => dialogError = context.strings
-                                            .text('Review values and retry.'),
-                                      );
-                                      return;
-                                    }
-                                    setDialogState(() {
-                                      dialogSaving = true;
-                                      dialogError = null;
-                                    });
-                                    if (mounted) {
-                                      setState(() => saving = true);
-                                    }
-                                    try {
-                                      final repository = ref.read(
-                                        preferencesRepositoryProvider,
-                                      );
-                                      if (widget.keyName == 'goal.calories') {
-                                        await _saveCalories(repository, draft);
-                                      } else if (draft.isEmpty) {
-                                        await repository.remove(widget.keyName);
-                                      } else if (_isMacroPercent) {
-                                        await _saveMacroPercent(
-                                          repository,
-                                          double.parse(draft),
-                                        );
-                                      } else {
-                                        await repository.set(
-                                          widget.keyName,
-                                          draft,
-                                        );
-                                      }
-                                      if (dialogContext.mounted) {
-                                        Navigator.pop(dialogContext, draft);
-                                      }
-                                    } catch (_) {
-                                      if (dialogContext.mounted) {
-                                        setDialogState(() {
-                                          dialogSaving = false;
-                                          dialogError = context.strings.text(
-                                            'Could not save changes.',
-                                          );
-                                        });
-                                      }
-                                      if (mounted) {
-                                        setState(() => saving = false);
-                                      }
-                                    }
-                                  },
-                            child: Text(context.strings.text('Save')),
-                          ),
-                        ],
                       ),
-                    ),
-                  );
-                },
-              );
-            } finally {
-              await WidgetsBinding.instance.endOfFrame;
-              await Future<void>.delayed(const Duration(milliseconds: 250));
-              controller.dispose();
-              editorOpen = false;
-            }
-            final saved = next;
-            if (saved == null || !mounted || !context.mounted) {
-              return;
-            }
-            setState(() {
-              value = saved.isEmpty ? null : saved;
-              retainedDraft = null;
-              saving = false;
-            });
-          },
-  );
+                    );
+                  },
+                );
+              } finally {
+                await WidgetsBinding.instance.endOfFrame;
+                await Future<void>.delayed(const Duration(milliseconds: 250));
+                controller.dispose();
+                editorOpen = false;
+              }
+              if (mounted &&
+                  !identical(
+                    editorRepository,
+                    ref.read(preferencesRepositoryProvider),
+                  )) {
+                setState(() {
+                  retainedDraft = null;
+                  saving = false;
+                  value = null;
+                });
+                await _load();
+                return;
+              }
+              final saved = next;
+              if (saved == null || !mounted || !context.mounted) {
+                return;
+              }
+              setState(() {
+                value = saved.isEmpty ? null : saved;
+                retainedDraft = null;
+                saving = false;
+              });
+            },
+    );
+  }
 }

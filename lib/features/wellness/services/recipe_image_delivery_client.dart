@@ -53,6 +53,13 @@ final class RecipeImageDeliveryClient
     required bool online,
   }) async {
     final original = await _repository.loadImageAsset(canonicalId);
+    // A ready original must not wait behind a missing thumbnail download.
+    // Offline resolution still checks the release digest and exact length.
+    final cachedOriginal = await _cache.resolve(
+      original.mediaAsset,
+      online: false,
+    );
+    if (cachedOriginal.isReady) return cachedOriginal;
     try {
       final thumbnails = await (_verifiedThumbnailsFuture ??=
           _loadVerifiedThumbnails());

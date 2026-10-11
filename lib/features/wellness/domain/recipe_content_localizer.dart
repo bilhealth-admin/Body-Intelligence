@@ -19,6 +19,10 @@ abstract final class RecipeContentLocalizer {
     ],
   };
 
+  static String ingredientName(String name, String locale) =>
+      (locale == 'ar' ? _arabicNames[name.trim().toLowerCase()] : null) ??
+      FoodPresentationLocalizer.foodName(name: name, localeTag: locale);
+
   static String ingredient(String line, String locale) {
     final match = RegExp(
       r'^(\d+(?:\.\d+)?)\s*(g|kg|ml|oz|lb)\s+(.+)$',
@@ -55,6 +59,14 @@ abstract final class RecipeContentLocalizer {
   }
 
   static const _arabicNames = <String, String>{
+    'black beans': 'فاصوليا سوداء',
+    'cooked black beans': 'فاصوليا سوداء مطهوة',
+    'corn': 'ذرة',
+    'cooked corn': 'ذرة مطهوة',
+    'raw red onion': 'بصل أحمر نيئ',
+    'red onion': 'بصل أحمر',
+    'raw lime juice': 'عصير ليمون أخضر نيئ',
+    'lime juice': 'عصير ليمون أخضر',
     'rice': 'أرز',
     'chicken breast': 'صدر الدجاج',
     'eggplant': 'باذنجان',

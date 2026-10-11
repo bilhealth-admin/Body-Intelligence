@@ -5,7 +5,16 @@ class NutritionAnalyticsTotals {
     required this.values,
     required this.knownCounts,
     required this.unknownCounts,
+    this.fullValues = const {},
+    this.fullKnownCounts = const {},
+    this.fullUnknownCounts = const {},
   });
+  final Map<FoodNutrient, double> fullValues;
+  final Map<FoodNutrient, int> fullKnownCounts, fullUnknownCounts;
+  double? fullTotal(FoodNutrient n) =>
+      (fullKnownCounts[n] ?? 0) > 0 ? fullValues[n] : null;
+  bool fullComplete(FoodNutrient n) =>
+      (fullKnownCounts[n] ?? 0) > 0 && (fullUnknownCounts[n] ?? 0) == 0;
   final Map<TrackedNutrient, double> values;
   final Map<TrackedNutrient, int> knownCounts;
   final Map<TrackedNutrient, int> unknownCounts;
@@ -28,7 +37,11 @@ class NutritionAnalyticsTotals {
   double get phosphorus => value(TrackedNutrient.phosphorus);
 
   factory NutritionAnalyticsTotals.fromMeals(List<MealWithItems> meals) {
-    final items = meals.expand((meal) => meal.items).toList(growable: false);
+    final items = [
+      for (final meal in meals)
+        for (final item in meal.items)
+          MealFoodEvidence.read(item, ownerKey: meal.ownerKey),
+    ];
     final values = <TrackedNutrient, double>{};
     final known = <TrackedNutrient, int>{};
     final unknown = <TrackedNutrient, int>{};
@@ -37,12 +50,8 @@ class NutritionAnalyticsTotals {
       var knownCount = 0;
       var unknownCount = 0;
       for (final item in items) {
-        final amount = _itemNutrientValue(item, nutrient);
-        final evidenced = NutrientEvidenceMask.contains(
-          item.nutrientEvidenceMask,
-          nutrient,
-        );
-        if (!evidenced || !amount.isFinite || amount < 0) {
+        final amount = item.value(nutrient);
+        if (amount == null || !amount.isFinite || amount < 0) {
           unknownCount++;
           continue;
         }
@@ -53,28 +62,34 @@ class NutritionAnalyticsTotals {
       known[nutrient] = knownCount;
       unknown[nutrient] = unknownCount;
     }
+    final fullValues = <FoodNutrient, double>{};
+    final fullKnown = <FoodNutrient, int>{};
+    final fullUnknown = <FoodNutrient, int>{};
+    for (final nutrient in FoodNutrient.values) {
+      var total = 0.0, known = 0, unknown = 0;
+      for (final item in items) {
+        final value = item.fullValue(nutrient);
+        if (value == null) {
+          unknown++;
+        } else {
+          total += value;
+          known++;
+        }
+      }
+      fullValues[nutrient] = total;
+      fullKnown[nutrient] = known;
+      fullUnknown[nutrient] = unknown;
+    }
     return NutritionAnalyticsTotals(
       values: Map.unmodifiable(values),
       knownCounts: Map.unmodifiable(known),
       unknownCounts: Map.unmodifiable(unknown),
+      fullValues: Map.unmodifiable(fullValues),
+      fullKnownCounts: Map.unmodifiable(fullKnown),
+      fullUnknownCounts: Map.unmodifiable(fullUnknown),
     );
   }
 }
-
-double _itemNutrientValue(MealItem item, TrackedNutrient nutrient) =>
-    switch (nutrient) {
-      TrackedNutrient.calories => item.calories,
-      TrackedNutrient.protein => item.protein,
-      TrackedNutrient.carbohydrates => item.carbs,
-      TrackedNutrient.fat => item.fats,
-      TrackedNutrient.fiber => item.fiber,
-      TrackedNutrient.sugar => item.sugar,
-      TrackedNutrient.sodium => item.sodium,
-      TrackedNutrient.potassium => item.potassium,
-      TrackedNutrient.calcium => item.calcium,
-      TrackedNutrient.magnesium => item.magnesium,
-      TrackedNutrient.phosphorus => item.phosphorus,
-    };
 
 class _NutritionTargets {
   const _NutritionTargets({
