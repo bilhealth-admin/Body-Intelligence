@@ -1,0 +1,107 @@
+{
+  "task": "BIL First Use original-source recovery and reference inspection",
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "inspected_source_head": "aa7f73d8c37331ef56f55e49a92d212f410954b7",
+  "recovery_status": {
+    "original_reference_bytes_recovered": true,
+    "preserved_10_file_source_bytes_recovered": false,
+    "original_patch_filename_known": false,
+    "safe_to_three_way_merge": false,
+    "certified_visual_match": false
+  },
+  "preservation": {
+    "head": "944973ed3556ccb9b8cd8a09b451562aea3cf652",
+    "files": {
+      "lib/app/router/responsive_app_shell.dart": "bd5c6fd1e9924d584e7f6b69f28c4a4844178bed497f70cbbac8a5da3341c71b",
+      "lib/features/daily_log/food_log_actions.dart": "d5c824ec93689ef0d3ffb4086210224e1b364c91a753f795658bb994d6e7082f",
+      "lib/features/daily_log/food_log_page.dart": "44f6b5432360caeaa6e115f584825b68f22ebbf2ff4bbafdd5d152b9808fff4e",
+      "lib/features/dashboard/widgets/dashboard_first_use_experience.dart": "25435fc2b80e3f9e81957206c35db521905baef7bac23f206a4a0d4ad92fe25d",
+      "lib/features/dashboard/widgets/first_meal_celebration.dart": "985c46d31d01de74fcda040f702e270c2c7653d5c8df56b9f1c21e1e1f2545ff",
+      "lib/features/dashboard/widgets/first_use_context_coachmark.dart": "1c1f4a7bf47150835a8afe094133edf51d177232044ffa33ea39192db131a263",
+      "lib/features/dashboard/widgets/first_use_glass_surface.dart": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+      "lib/shared/widgets/bil_reference_bottom_bar.dart": "2a399e040b44b24338eb0002b65ba139d667c40243738af4b2f45dffa9e8d4a5",
+      "lib/shared/widgets/first_use_guide_anchor.dart": "6085b9690a5c2251e8a1089613e96ad4bd23c305b422ee0f44f2c753b12387fd",
+      "test/features/dashboard/first_use_reference_journey_test.dart": "5f7d615d8021b4b4d04e0f51870501d9e0397b14fdb1292861a9b394d6c43d78"
+    },
+    "patch_sha256": "8364714ef80cd8ef8bc4af710cb339fb6692341d609f4cb232caf98020599205",
+    "integrated": false,
+    "original_worktree": "G:/BIL_Project/worktrees/bil-test-only-20261010",
+    "preserved_directory": "G:/BIL_Project/qa-preserved/first-use-before-final-closure-20261011",
+    "untracked_visual_review": "docs/qa_next/BIL_20261010_FIRST_USE_PREMIUM_LOCAL_REVIEW_AR.md",
+    "untracked_visual_evidence": "docs/qa_next/evidence/first_use_premium_20261010/",
+    "source": "https://github.com/bilhealth-admin/Body-Intelligence/blob/d073dcb39c4d4ba5cef856a5d39935ca1f7de1ca/tools/qa/evidence/20261011-final-closure/records/first-use-preserved.json",
+    "note": "Receipts verify local byte preservation at time of prior run; they do not contain the original source bytes. Historical ~175 local tests do not certify current integration."
+  },
+  "reference": {
+    "archive_name": "الاحتفال والالارشادات.zip",
+    "library_file_id": "libfile_f1b7c9efcfa48191b44c3ad910dd0a26",
+    "archive_bytes": 56484400,
+    "archive_sha256": "587abb19a0a71ed95dceee344698912c90c123a642ed899a9978d27a9ccdeee5",
+    "original_member_name": "الاحتفال والالارشادات/ScreenRecording_10-10-2026 08-57-17_1.MP4",
+    "video_bytes": 59053938,
+    "video_sha256": "e36c4c9fee9768315ca634b70b826cfdaf2ba8ddbfd7bb806f1d37c0a27b428c",
+    "duration_seconds": 90.356825,
+    "width": 1284,
+    "height": 2778,
+    "frame_rate": "60/1",
+    "scenes": [
+      {
+        "seconds": 3,
+        "observation": "MFP Today dims surrounding content; bottom white coachmark points at the real +; small I already know how to log dismissal inside card."
+      },
+      {
+        "seconds": 6,
+        "observation": "Quick-add menu opens; Log Food tile remains highlighted and explanatory bubble points at the actual tile."
+      },
+      {
+        "seconds": 8,
+        "observation": "Search guidance is visible with keyboard open and without removing the actual search input."
+      },
+      {
+        "seconds": 20,
+        "observation": "Tap a food name bubble points upward at a search result."
+      },
+      {
+        "seconds": 22,
+        "observation": "Edit quantity and serving size bubble points to the editable serving controls."
+      },
+      {
+        "seconds": 40,
+        "observation": "Ready to log bubble points to actual top-right Log action."
+      },
+      {
+        "seconds": 41,
+        "observation": "After save, First food logged guidance persists; success checkmark and small colored particles occur by the logged row, plus Food logged toast."
+      },
+      {
+        "seconds": 56,
+        "observation": "Back on Today, streak/day bubble points to the day row and offers Sounds like a plan dismissal."
+      }
+    ],
+    "caution": "Reference includes mistaken sample input 100 servings of 100g causing 10900 kcal. It is visual journey evidence only; do not copy those nutritional fixture values into BIL.",
+    "other_reference_names_searched_but_not_found": [
+      "IMG_9637",
+      "IMG_9638"
+    ]
+  },
+  "current_source_observations": [
+    "FirstUseContextCoachmark explicitly implements an inline Column and static decorative pointer, not a live element anchor.",
+    "DashboardFoodGuide has two inline steps and directly navigates to /daily-log?foodLog=1&guide=1&from=%2Fdashboard.",
+    "Skip exists beneath the glass surface; current animation/reduced-motion behavior does not prove reference parity.",
+    "Current celebration is a center overlay. The separate uncommitted ten-file source cannot be judged without actual bytes and its screenshots."
+  ],
+  "completed_recovery_checks": [
+    "Desktop Commander primary account: no connected devices.",
+    "Desktop Commander BIL account: DESKTOP-PO6C3QG id 4a6f439e-687f-4846-a037-b9d05d700eab offline, last seen 42h at check.",
+    "Desktop Commander retained background calls: none.",
+    "Personal Context unavailable for this conversation.",
+    "GitHub d073 recursive tree, current branch list 86, PR11 comments 55, final and known-failures records inspected.",
+    "No patch basename or patch bytes in those records. Both first_use_guide_anchor.dart and first_use_reference_journey_test.dart absent from inspected committed trees.",
+    "Library exact searches for preserved folder/local review/first_use_premium found no preservation artifact.",
+    "Original uploaded video archive found, materialized unchanged, extracted and inspected."
+  ],
+  "external_mutations": [],
+  "next_required_input": "Authorized device must come online, or exact preserved directory be made available as an archive. Re-fetch integration HEAD before future merge; verify 10 hashes and original patch hash against receipt, then three-way merge base 944973ed preserving post-base changes.",
+  "read_only_device_listing_command": "Get-ChildItem -LiteralPath 'G:\\BIL_Project\\qa-preserved\\first-use-before-final-closure-20261011' -Recurse -File | Select-Object FullName,Length",
+  "source_scope_note": "First Use production source is identical between intake84b24f86 and tested aa7f73d8; helper-only CI fix does not integrate local source."
+}

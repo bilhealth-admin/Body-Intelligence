@@ -1,0 +1,62 @@
+{
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "head_sha": "aa7f73d8c37331ef56f55e49a92d212f410954b7",
+  "workflow": "BIL isolated integration focused QA",
+  "run_id": 38115649502,
+  "job_id": 114399901105,
+  "conclusion": "success",
+  "completed_at": "2026-10-11T05:46:25Z",
+  "run_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38115649502",
+  "results": {
+    "format": {
+      "status": "success",
+      "files": 21,
+      "changed": 0
+    },
+    "analyze": {
+      "status": "success",
+      "scope": "complete source"
+    },
+    "policy_fixture_tests": {
+      "passed": 3,
+      "failed": 0
+    },
+    "policy_source_guard": {
+      "status": "success",
+      "limits": "source-only; not store approval or device runtime certification"
+    },
+    "isolated_cases": {
+      "passed": 3,
+      "failed": 0,
+      "executed": "separate flutter test invocations"
+    },
+    "community_file": {
+      "passed": 12,
+      "failed": 0
+    },
+    "focused_suite": {
+      "files": 11,
+      "passed": 80,
+      "failed": 0,
+      "skipped": 0
+    },
+    "aggregate": "success"
+  },
+  "counting_note": "The 3 isolated cases and 12 Community tests overlap the 80-test focused suite; do not sum them as distinct coverage.",
+  "missed_tap_warnings": 0,
+  "full8_rerun": false,
+  "production_source_modified_by_this_fix": false,
+  "original_parent": "84b24f86eafcaf4e681d0f77782c2a5e79298305",
+  "log_evidence": [
+    "2026-10-11T05:44:12.8656122Z Formatted 21 files (0 changed) in 0.19 seconds.",
+    "2026-10-11T05:44:53.7569153Z No issues found! (ran in 40.5s)",
+    "2026-10-11T05:44:53.8398255Z Ran 3 tests in 0.009s",
+    "2026-10-11T05:45:13.4225910Z 🎉 1 test passed.",
+    "2026-10-11T05:45:18.8056887Z 🎉 1 test passed.",
+    "2026-10-11T05:45:23.8781393Z 🎉 1 test passed.",
+    "2026-10-11T05:45:35.5557754Z 🎉 12 tests passed.",
+    "2026-10-11T05:46:05.8764135Z 🎉 80 tests passed.",
+    "2026-10-11T05:46:07.0682055Z format=success analyze=success policy=success isolated=success community=success tests=success"
+  ]
+}
