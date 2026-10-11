@@ -1,3 +1,4 @@
+import '../dashboard/widgets/first_food_days_guide.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -440,21 +441,23 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             ),
                             children: [
                               if (!widget.focusMealEntry) ...[
-                                DailyLogWeekStrip(
-                                  date: date,
-                                  firstDate: DateTime(2000),
-                                  lastDate: latestPlannableDate,
-                                  onSelected: mutationBusy
-                                      ? null
-                                      : (selected) {
-                                          ref
-                                                  .read(
-                                                    selectedLogDateProvider
-                                                        .notifier,
-                                                  )
-                                                  .state =
-                                              selected;
-                                        },
+                                FirstFoodDaysGuide(
+                                  child: DailyLogWeekStrip(
+                                    date: date,
+                                    firstDate: DateTime(2000),
+                                    lastDate: latestPlannableDate,
+                                    onSelected: mutationBusy
+                                        ? null
+                                        : (selected) {
+                                            ref
+                                                    .read(
+                                                      selectedLogDateProvider
+                                                          .notifier,
+                                                    )
+                                                    .state =
+                                                selected;
+                                          },
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 // Date navigation must not flash loading

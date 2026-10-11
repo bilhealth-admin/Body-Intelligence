@@ -1,3 +1,4 @@
+import '../../shared/widgets/first_use_target_guide.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -94,6 +95,9 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   bool barcodeBusy = false;
   bool voiceBusy = false;
   bool quickAddBusy = false;
+  final Map<int, GlobalKey> _foodTargets = <int, GlobalKey>{};
+  bool _postSaveGuide = false;
+  String? _postSaveOwner;
   final Set<int> addingFoodIds = <int>{};
   bool initialCaptureActionApplied = false;
   String? initialCaptureActionInFlight;
@@ -374,12 +378,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 ),
               )
               .toList(growable: false);
-    return ListView(
-      key: const Key('food-log-reference-page'),
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
-      children: [
-        if (_tourVisible && query.isEmpty) ...[
-          FirstUseContextCoachmark(
+    final searchGuide = _tourVisible && query.isEmpty && addingFoodIds.isEmpty
+        ? FirstUseContextCoachmark(
             key: const Key('food-log-search-guide'),
             compact: true,
             title: _foodTourText(
@@ -401,51 +401,14 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
             icon: Icons.search_rounded,
             onSkip: _dismissFoodTour,
             skipKey: const Key('food-log-search-guide-skip'),
-          ),
-          const SizedBox(height: 8),
-        ],
-        SearchBar(
-          key: const Key('food-log-search'),
-          controller: search,
-          hintText: _t(context, _searchHintKey()),
-          leading: Icon(Icons.search_rounded, color: scheme.primary),
-          elevation: const WidgetStatePropertyAll(0),
-          backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
-          side: WidgetStatePropertyAll(
-            BorderSide(color: scheme.primary.withValues(alpha: .18)),
-          ),
-          shape: const WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(22)),
-            ),
-          ),
-          trailing: [
-            if (search.text.isNotEmpty)
-              IconButton(
-                tooltip: _t(context, 'Clear'),
-                onPressed: () {
-                  search.clear();
-                  _searchDebounce?.cancel();
-                  _searchGeneration++;
-                  setState(() {
-                    searchResults = null;
-                    searchLoading = false;
-                  });
-                },
-                icon: const Icon(Icons.close_rounded),
-              ),
-          ],
-          onChanged: _scheduleSearch,
-        ),
-        const SizedBox(height: 10),
-        _buildActions(context),
-        if (searchLoading) ...[
-          const SizedBox(height: 8),
-          const LinearProgressIndicator(minHeight: 2),
-        ],
-        const SizedBox(height: 14),
-        if (_tourVisible && query.isNotEmpty && filtered.isNotEmpty) ...[
-          FirstUseContextCoachmark(
+          )
+        : null;
+    final chooseGuide =
+        _tourVisible &&
+            query.isNotEmpty &&
+            filtered.isNotEmpty &&
+            addingFoodIds.isEmpty
+        ? FirstUseContextCoachmark(
             key: const Key('food-log-choose-guide'),
             compact: true,
             title: _foodTourText(
@@ -468,9 +431,85 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
             accent: const Color(0xFF9BCBFF),
             onSkip: _dismissFoodTour,
             skipKey: const Key('food-log-choose-guide-skip'),
+          )
+        : null;
+    return ListView(
+      key: const Key('food-log-reference-page'),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
+      children: [
+        FirstUseTargetGuide(
+          guide: searchGuide,
+          child: SearchBar(
+            key: const Key('food-log-search'),
+            controller: search,
+            hintText: _t(context, _searchHintKey()),
+            leading: Icon(Icons.search_rounded, color: scheme.primary),
+            elevation: const WidgetStatePropertyAll(0),
+            backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
+            side: WidgetStatePropertyAll(
+              BorderSide(color: scheme.primary.withValues(alpha: .18)),
+            ),
+            shape: const WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(22)),
+              ),
+            ),
+            trailing: [
+              if (search.text.isNotEmpty)
+                IconButton(
+                  tooltip: _t(context, 'Clear'),
+                  onPressed: () {
+                    search.clear();
+                    _searchDebounce?.cancel();
+                    _searchGeneration++;
+                    setState(() {
+                      searchResults = null;
+                      searchLoading = false;
+                    });
+                  },
+                  icon: const Icon(Icons.close_rounded),
+                ),
+            ],
+            onChanged: _scheduleSearch,
           ),
+        ),
+        const SizedBox(height: 10),
+        FirstUseTargetGuide(
+          child: _buildActions(context),
+          guide:
+              _postSaveGuide &&
+                  _postSaveOwner ==
+                      ref.read(preferencesRepositoryProvider).localOwnerId
+              ? FirstUseContextCoachmark(
+                  key: const Key('food-log-success-guide'),
+                  compact: true,
+                  title: _foodTourText(
+                    context,
+                    en: 'First food logged!',
+                    ar: 'تم تسجيل أول طعام!',
+                    fr: 'Premier aliment enregistré !',
+                    es: '¡Primera comida registrada!',
+                    tr: 'İlk yiyecek kaydedildi!',
+                  ),
+                  message: _foodTourText(
+                    context,
+                    en: 'These real buttons let you log with search, voice or a reviewed meal photo. Open Diary to review each day.',
+                    ar: 'هذه الأزرار لتسجيل الطعام بالبحث أو الصوت أو صورة تراجعها أولًا. افتح السجل لمراجعة أيامك.',
+                    fr: 'Utilisez la recherche, la voix ou une photo vérifiée. Ouvrez le journal pour consulter les jours.',
+                    es: 'Usa búsqueda, voz o una foto revisada. Abre el diario para ver tus días.',
+                    tr: 'Arama, ses veya incelenen fotoğrafla kaydet. Günlerini görmek için günlüğü aç.',
+                  ),
+                  onSkip: () => setState(() => _postSaveGuide = false),
+                  skipKey: const Key('food-log-success-guide-skip'),
+                )
+              : null,
+        ),
+        if (searchLoading) ...[
           const SizedBox(height: 8),
+          const LinearProgressIndicator(minHeight: 2),
         ],
+        const SizedBox(height: 14),
+
         Text(
           _t(context, 'Most popular'),
           style: Theme.of(
@@ -484,6 +523,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               context,
               food,
               localeTag: query.isEmpty ? interfaceLocale : resultLocale,
+              guide: food.id == filtered.first.id ? chooseGuide : null,
             ),
         if (filtered.isEmpty)
           Padding(

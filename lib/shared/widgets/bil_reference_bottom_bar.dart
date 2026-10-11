@@ -17,6 +17,7 @@ class BilReferenceBottomBar extends StatelessWidget {
     this.moreAttentionCount = 0,
     this.destinationKeys = const {},
     this.quickAddLayerLink,
+    this.quickAddTargetKey,
     super.key,
   });
 
@@ -30,6 +31,7 @@ class BilReferenceBottomBar extends StatelessWidget {
   final int moreAttentionCount;
   final Map<int, Key> destinationKeys;
   final LayerLink? quickAddLayerLink;
+  final GlobalKey? quickAddTargetKey;
 
   // Index 2 is the shared Quick Add action, never a navigation to this entry.
   static const routes = <String>[
@@ -252,7 +254,11 @@ class BilReferenceBottomBar extends StatelessWidget {
   Widget _anchorQuickAdd(int index, Widget child) {
     final link = quickAddLayerLink;
     if (index != 2 || link == null) return child;
-    return CompositedTransformTarget(link: link, child: child);
+    return CompositedTransformTarget(
+      key: quickAddTargetKey,
+      link: link,
+      child: child,
+    );
   }
 
   Widget _glyph(

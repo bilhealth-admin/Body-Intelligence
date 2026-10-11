@@ -15,12 +15,6 @@ final _firstFoodMilestoneStatusProvider = StreamProvider<String?>(
       .watch(firstMealCelebrationPreferenceKey),
 );
 
-final _firstFoodStreakStatusProvider = StreamProvider<String?>(
-  (ref) => ref
-      .watch(preferencesRepositoryProvider)
-      .watch(firstMealStreakGuidePreferenceKey),
-);
-
 /// Non-modal food walkthrough. Skip is always available and never changes data.
 class DashboardFirstUseExperience extends ConsumerStatefulWidget {
   const DashboardFirstUseExperience({
@@ -44,7 +38,6 @@ class _DashboardFirstUseExperienceState
   bool _ready = false;
   bool _canGuide = false;
   bool _saving = false;
-  bool _streakDismissed = false;
   int _step = 0;
 
   String get _guideKey =>
@@ -64,7 +57,6 @@ class _DashboardFirstUseExperienceState
       _ready = false;
       _canGuide = false;
       _saving = false;
-      _streakDismissed = false;
       _step = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) => _load());
     }
@@ -90,7 +82,8 @@ class _DashboardFirstUseExperienceState
     }
   }
 
-  Future<void> _finish({required bool openFood}) async {
+  Future<void> _finish({required bool openFood, String? expectedScope}) async {
+    if (expectedScope != null && widget.ownerScope != expectedScope) return;
     if (_saving) return;
     final scope = widget.ownerScope;
     final key = _guideKey;
@@ -108,20 +101,6 @@ class _DashboardFirstUseExperienceState
     if (!mounted || !widget.ownerReady || widget.ownerScope != scope) return;
     setState(() => _saving = false);
     if (openFood) context.go('/daily-log?foodLog=1&guide=1&from=%2Fdashboard');
-  }
-
-  Future<void> _dismissStreak() async {
-    if (_streakDismissed) return;
-    final scope = widget.ownerScope;
-    setState(() => _streakDismissed = true);
-    try {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set(firstMealStreakGuidePreferenceKey, 'seen');
-    } on Object {
-      // This optional guide must never trap the user on a storage error.
-    }
-    if (!mounted || widget.ownerScope != scope) return;
   }
 
   String _guideCopy(
@@ -143,7 +122,6 @@ class _DashboardFirstUseExperienceState
   Widget build(BuildContext context) {
     final meals = ref.watch(allMealsProvider);
     final firstFoodStatus = ref.watch(_firstFoodMilestoneStatusProvider);
-    final streakStatus = ref.watch(_firstFoodStreakStatusProvider);
     // Empty meal buckets are not evidence of a recorded food item, and a
     // previously celebrated/deleted first food must not reopen onboarding.
     final hasLoggedFood =
@@ -156,22 +134,13 @@ class _DashboardFirstUseExperienceState
         firstFoodStatus.hasValue &&
         firstFoodStatus.value == null &&
         !hasLoggedFood;
-    final needsStreakGuide =
-        widget.ownerReady &&
-        _ready &&
-        !_streakDismissed &&
-        !needsGuide &&
-        meals.hasValue &&
-        hasLoggedFood &&
-        firstFoodStatus.value == 'done' &&
-        streakStatus.value == 'ready';
+    final guideScope = widget.ownerScope;
     final anchor = FirstUseGuideAnchor.maybeOf(context);
-    if (needsGuide &&
-        anchor != null &&
-        MediaQuery.sizeOf(context).width < 900) {
+    if (needsGuide && anchor != null) {
       return FirstUseAnchoredGuide(
         anchor: anchor,
-        onStart: () => _finish(openFood: true),
+        onStart: () => _finish(openFood: true, expectedScope: guideScope),
+        onSkip: () => _finish(openFood: false, expectedScope: guideScope),
         guide: FirstUseContextCoachmark(
           key: const Key('dashboard-food-guide-anchored'),
           title: _guideCopy(
@@ -194,7 +163,7 @@ class _DashboardFirstUseExperienceState
           pointerAlignment: Alignment.center,
           onSkip: () => _finish(openFood: false),
           skipKey: const Key('dashboard-guide-skip'),
-          onAction: () => _finish(openFood: true),
+          onAction: () => anchor.openMenu?.call(),
           actionLabel: _guideCopy(
             context,
             'Let’s begin',
@@ -208,7 +177,7 @@ class _DashboardFirstUseExperienceState
         child: widget.child,
       );
     }
-    // Wide layouts and standalone surfaces retain accessible inline guidance.
+    // Standalone surfaces without a shell anchor retain accessible inline guidance.
     return Column(
       key: const Key('dashboard-first-use-inline-region'),
       mainAxisSize: MainAxisSize.min,
@@ -231,16 +200,6 @@ class _DashboardFirstUseExperienceState
                   }
                 },
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
-        if (needsStreakGuide) ...[
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: _StreakGuideStep(onFinish: _dismissStreak),
             ),
           ),
           const SizedBox(height: 12),
@@ -354,33 +313,6 @@ class _FoodGuideStep extends StatelessWidget {
           actionKey: const Key('dashboard-guide-next'),
         ),
       ),
-    );
-  }
-}
-
-class _StreakGuideStep extends StatelessWidget {
-  const _StreakGuideStep({required this.onFinish});
-
-  final VoidCallback onFinish;
-
-  @override
-  Widget build(BuildContext context) {
-    final ar = Localizations.localeOf(context).languageCode == 'ar';
-    return FirstUseContextCoachmark(
-      key: const Key('dashboard-first-food-streak-guide'),
-      title: ar ? 'أول يوم في رحلتك!' : 'Day one of your journey!',
-      message: ar
-          ? 'سجلّك بدأ بالفعل. تابع أيامك هنا بعد كل وجبة، دون خطوات إضافية أو اشتراك.'
-          : 'Your streak begins here. Come back after each meal to follow your days.',
-      step: 3,
-      stepCount: 3,
-      icon: Icons.calendar_month_rounded,
-      accent: const Color(0xFFFBD583),
-      onAction: onFinish,
-      actionLabel: ar ? 'رائع، فهمت' : 'Got it',
-      onSkip: onFinish,
-      skipKey: const Key('dashboard-streak-guide-skip'),
-      actionKey: const Key('dashboard-streak-guide-done'),
     );
   }
 }

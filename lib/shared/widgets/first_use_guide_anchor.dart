@@ -1,3 +1,4 @@
+import 'first_use_target_guide.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -5,7 +6,11 @@ import 'package:flutter/material.dart';
 /// A shell-local anchor. It neither stores an account nor owns meal data.
 class FirstUseGuideAnchor {
   final link = LayerLink();
+  final target = GlobalKey();
   VoidCallback? startFoodGuide;
+  VoidCallback? openMenu;
+  VoidCallback? skipFoodGuide;
+  final menuOpen = ValueNotifier<bool>(false);
 
   static FirstUseGuideAnchor? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_AnchorScope>()?.anchor;
@@ -41,11 +46,13 @@ class FirstUseAnchoredGuide extends StatefulWidget {
     super.key,
     required this.anchor,
     required this.onStart,
+    this.onSkip,
     required this.guide,
     required this.child,
   });
   final FirstUseGuideAnchor anchor;
   final VoidCallback onStart;
+  final VoidCallback? onSkip;
   final Widget guide;
   final Widget child;
   @override
@@ -54,13 +61,23 @@ class FirstUseAnchoredGuide extends StatefulWidget {
 
 class _AnchoredGuideState extends State<FirstUseAnchoredGuide> {
   final portal = OverlayPortalController();
-  void start() => widget.onStart();
+  void menuChanged() {
+    if (!mounted) return;
+    if (widget.anchor.menuOpen.value) {
+      portal.hide();
+    } else {
+      portal.show();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.anchor.startFoodGuide = start;
+    widget.anchor.menuOpen.addListener(menuChanged);
+    widget.anchor.startFoodGuide = widget.onStart;
+    widget.anchor.skipFoodGuide = widget.onSkip;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) portal.show();
+      if (mounted && !widget.anchor.menuOpen.value) portal.show();
     });
   }
 
@@ -68,18 +85,22 @@ class _AnchoredGuideState extends State<FirstUseAnchoredGuide> {
   void didUpdateWidget(FirstUseAnchoredGuide oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.anchor != widget.anchor) {
-      if (oldWidget.anchor.startFoodGuide == start) {
-        oldWidget.anchor.startFoodGuide = null;
-      }
-      widget.anchor.startFoodGuide = start;
+      oldWidget.anchor.menuOpen.removeListener(menuChanged);
+      oldWidget.anchor.startFoodGuide = null;
+      oldWidget.anchor.skipFoodGuide = null;
+      widget.anchor.menuOpen.addListener(menuChanged);
     }
+    widget.anchor.startFoodGuide = widget.onStart;
+    widget.anchor.skipFoodGuide = widget.onSkip;
   }
 
   @override
   void dispose() {
-    if (widget.anchor.startFoodGuide == start) {
+    if (widget.anchor.startFoodGuide == widget.onStart) {
       widget.anchor.startFoodGuide = null;
     }
+    widget.anchor.menuOpen.removeListener(menuChanged);
+    widget.anchor.skipFoodGuide = null;
     super.dispose();
   }
 
@@ -89,6 +110,20 @@ class _AnchoredGuideState extends State<FirstUseAnchoredGuide> {
     controller: portal,
     overlayChildBuilder: (context) {
       final media = MediaQuery.of(context);
+      final width = math.min(360.0, media.size.width - 32);
+      final target = widget.anchor.target.currentContext?.findRenderObject();
+      final overlay = Overlay.of(
+        context,
+        rootOverlay: true,
+      ).context.findRenderObject();
+      if (target is! RenderBox || !target.hasSize)
+        return const SizedBox.shrink();
+      final position = target.localToGlobal(Offset.zero, ancestor: overlay);
+      final center = position.dx + target.size.width / 2;
+      final left = (center - width / 2).clamp(
+        16.0,
+        media.size.width - width - 16,
+      );
       return Positioned(
         top: 0,
         left: 0,
@@ -98,7 +133,7 @@ class _AnchoredGuideState extends State<FirstUseAnchoredGuide> {
           showWhenUnlinked: false,
           targetAnchor: Alignment.topCenter,
           followerAnchor: Alignment.bottomCenter,
-          offset: const Offset(0, -12),
+          offset: Offset(left + width / 2 - center, -12),
           child: Align(
             alignment: Alignment.topLeft,
             widthFactor: 1,
@@ -109,13 +144,22 @@ class _AnchoredGuideState extends State<FirstUseAnchoredGuide> {
                 constraints: BoxConstraints(
                   maxHeight: math.max(
                     120,
-                    media.size.height -
-                        media.padding.vertical -
-                        media.viewInsets.bottom -
-                        130,
+                    position.dy - media.padding.top - 12,
                   ),
                 ),
-                child: SingleChildScrollView(child: widget.guide),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: SingleChildScrollView(
+                    child: FirstUseGuidePlacement(
+                      below: false,
+                      pointerAlignment: Alignment(
+                        ((center - left) / width * 2 - 1).clamp(-.88, .88),
+                        0,
+                      ),
+                      child: widget.guide,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

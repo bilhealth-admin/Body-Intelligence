@@ -17,8 +17,10 @@ class BilQuickAddSheet extends StatelessWidget {
     required this.onNotes,
     required this.onSearch,
     this.photoAsset,
+    this.foodGuideBuilder,
   });
 
+  final Widget Function(Widget)? foodGuideBuilder;
   final VoidCallback onFood;
   final VoidCallback onBarcode;
   final VoidCallback onVoice;
@@ -217,7 +219,7 @@ class BilQuickAddSheet extends StatelessWidget {
                                 ],
                                 _ => null,
                               };
-                              return _PrimaryQuickAction(
+                              final tile = _PrimaryQuickAction(
                                 actionKey: Key('quick-add-primary-$index'),
                                 badgeKey: Key('quick-add-primary-badge-$index'),
                                 iconKey: Key('quick-add-primary-icon-$index'),
@@ -234,6 +236,9 @@ class BilQuickAddSheet extends StatelessWidget {
                                 label: action.label,
                                 onTap: action.onTap,
                               );
+                              return index == 0 && foodGuideBuilder != null
+                                  ? foodGuideBuilder!(tile)
+                                  : tile;
                             },
                           ),
                           const SizedBox(height: 3),

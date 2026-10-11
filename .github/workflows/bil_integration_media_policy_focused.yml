@@ -58,6 +58,23 @@ jobs:
             lib/features/profile/services/profile_photo_service.dart \
             lib/shared/widgets/bil_camera_capture_page.dart \
             lib/shared/widgets/bil_media_review_sheet.dart \
+            lib/app/router/bil_quick_add_presenter.dart \
+            lib/app/router/bil_quick_add_sheet.dart \
+            lib/app/router/responsive_app_shell.dart \
+            lib/features/daily_log/daily_log_page.dart \
+            lib/features/daily_log/food_log_tile_widgets.dart \
+            lib/features/dashboard/widgets/dashboard_first_use_experience.dart \
+            lib/features/dashboard/widgets/first_meal_celebration.dart \
+            lib/features/dashboard/widgets/first_use_context_coachmark.dart \
+            lib/features/dashboard/widgets/first_use_glass_surface.dart \
+            lib/features/dashboard/widgets/first_food_days_guide.dart \
+            lib/shared/widgets/bil_reference_bottom_bar.dart \
+            lib/shared/widgets/first_use_guide_anchor.dart \
+            lib/shared/widgets/first_use_target_guide.dart \
+            test/features/dashboard/first_use_reference_journey_test.dart \
+            test/features/dashboard/first_use_recovery_regression_test.dart \
+            test/features/dashboard/first_use_actual_home_capture_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart \
             test/app/services/store_review_prompt_service_test.dart \
             test/features/community/community_post_image_support_test.dart \
             test/features/profile/premium_profile_page_test.dart \
@@ -83,6 +100,23 @@ jobs:
             lib/features/profile/services/profile_photo_service.dart \
             lib/shared/widgets/bil_camera_capture_page.dart \
             lib/shared/widgets/bil_media_review_sheet.dart \
+            lib/app/router/bil_quick_add_presenter.dart \
+            lib/app/router/bil_quick_add_sheet.dart \
+            lib/app/router/responsive_app_shell.dart \
+            lib/features/daily_log/daily_log_page.dart \
+            lib/features/daily_log/food_log_tile_widgets.dart \
+            lib/features/dashboard/widgets/dashboard_first_use_experience.dart \
+            lib/features/dashboard/widgets/first_meal_celebration.dart \
+            lib/features/dashboard/widgets/first_use_context_coachmark.dart \
+            lib/features/dashboard/widgets/first_use_glass_surface.dart \
+            lib/features/dashboard/widgets/first_food_days_guide.dart \
+            lib/shared/widgets/bil_reference_bottom_bar.dart \
+            lib/shared/widgets/first_use_guide_anchor.dart \
+            lib/shared/widgets/first_use_target_guide.dart \
+            test/features/dashboard/first_use_reference_journey_test.dart \
+            test/features/dashboard/first_use_recovery_regression_test.dart \
+            test/features/dashboard/first_use_actual_home_capture_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart \
             test/app/services/store_review_prompt_service_test.dart \
             test/features/community/community_post_image_support_test.dart \
             test/features/profile/premium_profile_page_test.dart \
@@ -106,6 +140,23 @@ jobs:
             lib/features/profile/services/profile_photo_service.dart \
             lib/shared/widgets/bil_camera_capture_page.dart \
             lib/shared/widgets/bil_media_review_sheet.dart \
+            lib/app/router/bil_quick_add_presenter.dart \
+            lib/app/router/bil_quick_add_sheet.dart \
+            lib/app/router/responsive_app_shell.dart \
+            lib/features/daily_log/daily_log_page.dart \
+            lib/features/daily_log/food_log_tile_widgets.dart \
+            lib/features/dashboard/widgets/dashboard_first_use_experience.dart \
+            lib/features/dashboard/widgets/first_meal_celebration.dart \
+            lib/features/dashboard/widgets/first_use_context_coachmark.dart \
+            lib/features/dashboard/widgets/first_use_glass_surface.dart \
+            lib/features/dashboard/widgets/first_food_days_guide.dart \
+            lib/shared/widgets/bil_reference_bottom_bar.dart \
+            lib/shared/widgets/first_use_guide_anchor.dart \
+            lib/shared/widgets/first_use_target_guide.dart \
+            test/features/dashboard/first_use_reference_journey_test.dart \
+            test/features/dashboard/first_use_recovery_regression_test.dart \
+            test/features/dashboard/first_use_actual_home_capture_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart \
             test/app/services/store_review_prompt_service_test.dart \
             test/features/community/community_post_image_support_test.dart \
             test/features/profile/premium_profile_page_test.dart \
@@ -121,6 +172,40 @@ jobs:
         run: |
           python -m unittest discover -s tool/prebuild -p test_store_policy_source_guard.py -v
           python tool/prebuild/store_policy_source_guard.py --json-out build/store-policy/guard.json
+      - name: Recovered First Use journey, actual Home and atomic owner regressions
+        id: firstuse
+        if: steps.fmt.outcome == 'success' && steps.analyze.outcome == 'success' && steps.policy.outcome == 'success'
+        env:
+          BIL_CAPTURE_FIRST_USE: '1'
+        run: |
+          mkdir -p build/first-use-recovery
+          set -o pipefail
+          flutter test --no-pub --concurrency=1 --timeout=3m --reporter=json \
+            test/features/dashboard/first_use_reference_journey_test.dart \
+            test/features/dashboard/first_use_recovery_regression_test.dart \
+            test/features/dashboard/first_use_actual_home_capture_test.dart \
+            test/features/dashboard/dashboard_first_use_guidance_test.dart \
+            test/features/dashboard/first_use_context_coachmark_test.dart \
+            test/features/dashboard/first_meal_celebration_visual_test.dart \
+            test/features/daily_log/food_log_first_use_coachmark_test.dart \
+            test/data/repositories/first_food_milestone_commit_test.dart \
+            test/shared/bil_reference_navigation_test.dart \
+            test/app/router/bil_quick_add_presenter_test.dart \
+            test/features/daily_log/food_log_meal_selector_test.dart \
+            test/features/daily_log/food_log_page_reference_test.dart \
+            test/features/daily_log/food_log_popular_ranking_test.dart \
+            test/features/dashboard/dashboard_restore_source_contract_test.dart \
+            | tee build/first-use-recovery/ci-first-use.jsonl
+      - name: Preserve First Use logs and Flutter image evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-first-use-recovery-${{ github.sha }}
+          path: |
+            build/first-use-recovery/ci-first-use.jsonl
+            build/first-use-reference/flutter/
+          if-no-files-found: ignore
+          retention-days: 10
       - name: Reproduce each previously failing Community case
         id: isolated
         if: steps.fmt.outcome == 'success' && steps.analyze.outcome == 'success' && steps.policy.outcome == 'success'
@@ -166,6 +251,7 @@ jobs:
       - name: Strict aggregate — failure cannot be hidden
         if: always()
         env:
+          FIRSTUSE: ${{ steps.firstuse.outcome }}
           FORMAT: ${{ steps.fmt.outcome }}
           ANALYZE: ${{ steps.analyze.outcome }}
           POLICY: ${{ steps.policy.outcome }}
@@ -174,6 +260,7 @@ jobs:
           REGRESSIONS: ${{ steps.regressions.outcome }}
         run: |
           echo "format=$FORMAT analyze=$ANALYZE policy=$POLICY isolated=$ISOLATED community=$COMMUNITY tests=$REGRESSIONS"
+          test "$FIRSTUSE" = success
           test "$FORMAT" = success
           test "$ANALYZE" = success
           test "$POLICY" = success

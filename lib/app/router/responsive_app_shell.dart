@@ -155,19 +155,37 @@ class ResponsiveAppShell extends StatelessWidget {
     }
 
     Future<void> quickAdd() async {
-      final guide = FirstUseGuideAnchor.maybeOf(context)?.startFoodGuide;
-      if (isDashboardRoot && !wide && guide != null) {
-        guide();
-        return;
+      final anchor = FirstUseGuideAnchor.maybeOf(context);
+      final guide = isDashboardRoot ? anchor?.startFoodGuide : null;
+      if (guide != null) anchor!.menuOpen.value = true;
+      try {
+        await showBilQuickAdd(
+          context,
+          originPath: paths[index],
+          startFoodGuide: guide,
+          skipFoodGuide: anchor?.skipFoodGuide,
+        );
+      } finally {
+        if (guide != null) anchor!.menuOpen.value = false;
       }
-      await showBilQuickAdd(context, originPath: paths[index]);
     }
 
-    final quickButton = _GlassQuickAdd(
+    FirstUseGuideAnchor.maybeOf(context)?.openMenu = () {
+      if (context.mounted) quickAdd();
+    };
+    final rawQuickButton = _GlassQuickAdd(
       key: const Key('shell-quick-add'),
       onTap: quickAdd,
       size: wide ? 62 : 64,
     );
+
+    final quickButton = wide && FirstUseGuideAnchor.maybeOf(context) != null
+        ? CompositedTransformTarget(
+            key: FirstUseGuideAnchor.maybeOf(context)!.target,
+            link: FirstUseGuideAnchor.maybeOf(context)!.link,
+            child: rawQuickButton,
+          )
+        : rawQuickButton;
 
     void handleSystemBack(bool didPop) {
       if (didPop || kIsWeb) return;
@@ -208,6 +226,9 @@ class ResponsiveAppShell extends StatelessWidget {
                     label: context.strings.get('primary_navigation'),
                     child: BilReferenceBottomBar(
                       key: const Key('glass-bottom-navigation'),
+                      quickAddTargetKey: FirstUseGuideAnchor.maybeOf(
+                        context,
+                      )?.target,
                       quickAddLayerLink: FirstUseGuideAnchor.maybeOf(
                         context,
                       )?.link,

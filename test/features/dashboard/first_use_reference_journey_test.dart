@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/features/dashboard/dashboard_page.dart';
+import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -22,44 +24,51 @@ import '../../visual_closure/visual_evidence_font.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 
-GoRouter journeyRouter({VoidCallback? onHomeTap}) => GoRouter(
-  initialLocation: '/dashboard',
-  routes: [
-    ShellRoute(
-      builder: (context, state, child) =>
-          ResponsiveAppShell(currentUri: state.uri, child: child),
+GoRouter journeyRouter({VoidCallback? onHomeTap, bool actualHome = false}) =>
+    GoRouter(
+      initialLocation: '/dashboard',
       routes: [
-        GoRoute(
-          path: '/dashboard',
-          builder: (_, _) => Scaffold(
-            body: SingleChildScrollView(
-              child: DashboardFirstUseExperience(
-                ownerScope: 'reference-test',
-                ownerReady: true,
-                child: SizedBox(
-                  height: 480,
-                  child: Center(
-                    child: TextButton(
-                      key: const Key('test-home-control'),
-                      onPressed: onHomeTap ?? () {},
-                      child: const Text('TEST • Home stays usable'),
+        ShellRoute(
+          builder: (context, state, child) =>
+              ResponsiveAppShell(currentUri: state.uri, child: child),
+          routes: [
+            GoRoute(
+              path: '/dashboard',
+              builder: (_, _) => actualHome
+                  ? const DashboardPage()
+                  : Scaffold(
+                      body: SingleChildScrollView(
+                        child: DashboardFirstUseExperience(
+                          ownerScope: 'reference-test',
+                          ownerReady: true,
+                          child: SizedBox(
+                            height: 480,
+                            child: Center(
+                              child: TextButton(
+                                key: const Key('test-home-control'),
+                                onPressed: onHomeTap ?? () {},
+                                child: const Text('TEST • Home stays usable'),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
-          ),
-        ),
-        GoRoute(
-          path: '/daily-log',
-          builder: (_, state) => FoodLogPage(
-            startGuide: state.uri.queryParameters['guide'] == '1',
-          ),
+            GoRoute(
+              path: '/daily-log',
+              builder: (_, state) =>
+                  state.uri.queryParameters['foodLog'] == '1' ||
+                      state.uri.queryParameters['guide'] == '1'
+                  ? FoodLogPage(
+                      startGuide: state.uri.queryParameters['guide'] == '1',
+                    )
+                  : const DailyLogPage(),
+            ),
+          ],
         ),
       ],
-    ),
-  ],
-);
+    );
 
 Widget journeyApp(
   AppDatabase database,
@@ -67,6 +76,7 @@ Widget journeyApp(
   String language, {
   double scale = 1,
   bool reduced = false,
+  ThemeData? referenceTheme,
 }) => ProviderScope(
   overrides: [
     databaseProvider.overrideWithValue(database),
@@ -90,7 +100,11 @@ Widget journeyApp(
       GlobalCupertinoLocalizations.delegate,
     ],
     theme: visualEvidenceTheme(
-      ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF079D87)),
+      referenceTheme ??
+          ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: const Color(0xFF079D87),
+          ),
       fontFamily: language == 'ar' ? 'NotoArabicEvidence' : 'RobotoEvidence',
     ),
     builder: (context, child) => RepaintBoundary(
@@ -255,6 +269,10 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('shell-quick-add')));
         await tester.pumpAndSettle();
+        expect(find.byKey(const Key('quick-add-food-guide')), findsOneWidget);
+        await capture(tester, '00-menu-$language');
+        await tester.tap(find.byKey(const Key('quick-add-primary-0')));
+        await tester.pumpAndSettle();
         expect(
           router.routeInformationProvider.value.uri.queryParameters['guide'],
           '1',
@@ -289,7 +307,13 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('food-log-save-guide')), findsOneWidget);
         await capture(tester, '04-ready-$language');
-        await tester.tap(find.byKey(const Key('food-log-serving-confirm')));
+        final confirm = tester
+            .widget<FilledButton>(
+              find.byKey(const Key('food-log-serving-confirm')),
+            )
+            .onPressed!;
+        confirm();
+        confirm();
         // Allow the asynchronous SQLite commit without settling away the burst.
         for (
           var i = 0;
@@ -308,6 +332,10 @@ void main() {
         );
         await tester.pump(const Duration(milliseconds: 700));
         await capture(tester, '05-celebration-$language');
+        expect(
+          find.byKey(const Key('food-log-reference-page')),
+          findsOneWidget,
+        );
         final meals = await MealRepository(db).watchAll().first;
         expect(meals, hasLength(1));
         expect(meals.single.items, hasLength(1));
@@ -324,8 +352,19 @@ void main() {
           isFalse,
         );
         await tester.pumpAndSettle();
+        expect(find.byKey(const Key('food-log-success-guide')), findsOneWidget);
+        await capture(tester, '06-success-$language');
+        await tester.tap(find.byKey(const Key('food-log-success-guide-skip')));
+        await tester.pumpAndSettle();
         router.go('/dashboard');
         await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('dashboard-first-food-streak-guide')),
+          findsNothing,
+        );
+        router.go('/daily-log');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('daily-log-week-strip')), findsOneWidget);
         expect(
           find.byKey(const Key('dashboard-first-food-streak-guide')),
           findsOneWidget,

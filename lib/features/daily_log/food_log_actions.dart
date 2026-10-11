@@ -3,6 +3,13 @@ part of 'food_log_page.dart';
 extension _FoodLogActions on _FoodLogPageState {
   Future<void> _addFood(BuildContext context, Food food) async {
     if (!addingFoodIds.add(food.id)) return;
+    setState(() {});
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final meals = ref.read(mealRepositoryProvider);
+    final foods = ref.read(foodRepositoryProvider);
+    bool ownerIsCurrent() =>
+        mounted &&
+        identical(preferences, ref.read(preferencesRepositoryProvider));
     try {
       final messenger = ScaffoldMessenger.of(context);
       final addedCopy = _t(context, 'Added to diary');
@@ -10,128 +17,145 @@ extension _FoodLogActions on _FoodLogPageState {
       var enteredQuantity = food.servingSize.toString();
       var showQuantityGuide = _tourVisible;
       var quantityEdited = false;
+      var dialogSubmitted = false;
       final quantity = await showDialog<double>(
         context: context,
         builder: (dialogContext) => StatefulBuilder(
-          builder: (dialogContext, refreshDialog) => AlertDialog(
-            title: Text(_t(dialogContext, 'Choose a serving')),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (showQuantityGuide && !quantityEdited) ...[
-                    FirstUseContextCoachmark(
-                      key: const Key('food-log-quantity-guide'),
-                      compact: true,
-                      title: _foodTourText(
-                        dialogContext,
-                        en: 'Make it accurate',
-                        ar: 'خلّي الكمية دقيقة',
-                        fr: 'Soyez précis',
-                        es: 'Ajusta la cantidad',
-                        tr: 'Miktarı doğru gir',
-                      ),
-                      message: _foodTourText(
-                        dialogContext,
-                        en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
-                        ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
-                        fr: 'Ajustez la portion et confirmez avec Ajouter.',
-                        es: 'Ajusta la porción y confirma con Añadir.',
-                        tr: 'Porsiyonu ayarla ve Ekle ile onayla.',
-                      ),
-                      icon: Icons.scale_rounded,
-                      accent: const Color(0xFFFFDB95),
-                      onSkip: () {
-                        refreshDialog(() => showQuantityGuide = false);
-                        _dismissFoodTour();
-                      },
-                      skipKey: const Key('food-log-quantity-guide-skip'),
+          builder: (dialogContext, refreshDialog) {
+            final quantityGuide = showQuantityGuide && !quantityEdited
+                ? FirstUseContextCoachmark(
+                    key: const Key('food-log-quantity-guide'),
+                    compact: true,
+                    title: _foodTourText(
+                      dialogContext,
+                      en: 'Make it accurate',
+                      ar: 'خلّي الكمية دقيقة',
+                      fr: 'Soyez précis',
+                      es: 'Ajusta la cantidad',
+                      tr: 'Miktarı doğru gir',
                     ),
-                    const SizedBox(height: 10),
-                  ],
-                  TextFormField(
-                    onChanged: (value) {
-                      enteredQuantity = value;
-                      refreshDialog(() => quantityEdited = true);
+                    message: _foodTourText(
+                      dialogContext,
+                      en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
+                      ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
+                      fr: 'Ajustez la portion et confirmez avec Ajouter.',
+                      es: 'Ajusta la porción y confirma con Añadir.',
+                      tr: 'Porsiyonu ayarla ve Ekle ile onayla.',
+                    ),
+                    icon: Icons.scale_rounded,
+                    accent: const Color(0xFFFFDB95),
+                    onSkip: () {
+                      refreshDialog(() => showQuantityGuide = false);
+                      _dismissFoodTour();
                     },
-                    key: const Key('food-log-serving-quantity-field'),
-                    initialValue: enteredQuantity,
-                    autofocus: !showQuantityGuide,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                    skipKey: const Key('food-log-quantity-guide-skip'),
+                  )
+                : null;
+            final saveGuide = showQuantityGuide && quantityEdited
+                ? FirstUseContextCoachmark(
+                    key: const Key('food-log-save-guide'),
+                    compact: true,
+                    title: _foodTourText(
+                      dialogContext,
+                      en: 'Ready to save?',
+                      ar: 'جاهز لحفظ وجبتك؟',
+                      fr: 'Prêt à enregistrer ?',
+                      es: '¿Listo para guardar?',
+                      tr: 'Kaydetmeye hazır mısın?',
                     ),
-                    decoration: InputDecoration(
-                      labelText:
-                          '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+                    message: _foodTourText(
+                      dialogContext,
+                      en: 'Review your portion, then tap Add. Your meal is saved only after confirmation.',
+                      ar: 'راجع الكمية ثم اضغط إضافة. نحفظ وجبتك بعد تأكيدك فقط.',
+                      fr: 'Vérifiez la portion, puis appuyez sur Ajouter.',
+                      es: 'Revisa la porción y pulsa Añadir.',
+                      tr: 'Porsiyonu kontrol et ve Ekle’ye dokun.',
                     ),
-                  ),
-                  if (showQuantityGuide && quantityEdited) ...[
-                    const SizedBox(height: 14),
-                    FirstUseContextCoachmark(
-                      key: const Key('food-log-save-guide'),
-                      compact: true,
-                      title: _foodTourText(
-                        dialogContext,
-                        en: 'Ready to save?',
-                        ar: 'جاهز لحفظ وجبتك؟',
-                        fr: 'Prêt à enregistrer ?',
-                        es: '¿Listo para guardar?',
-                        tr: 'Kaydetmeye hazır mısın?',
+                    icon: Icons.check_circle_outline_rounded,
+                    onSkip: () {
+                      refreshDialog(() => showQuantityGuide = false);
+                      _dismissFoodTour();
+                    },
+                    skipKey: const Key('food-log-save-guide-skip'),
+                  )
+                : null;
+            return AlertDialog(
+              title: Text(_t(dialogContext, 'Choose a serving')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FirstUseTargetGuide(
+                      preferBelow: false,
+                      guide: quantityGuide,
+                      child: TextFormField(
+                        onChanged: (value) {
+                          enteredQuantity = value;
+                          refreshDialog(() => quantityEdited = true);
+                        },
+                        key: const Key('food-log-serving-quantity-field'),
+                        initialValue: enteredQuantity,
+                        autofocus: !showQuantityGuide,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText:
+                              '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+                        ),
                       ),
-                      message: _foodTourText(
-                        dialogContext,
-                        en: 'Review your portion, then tap Add. Your meal is saved only after confirmation.',
-                        ar: 'راجع الكمية ثم اضغط إضافة. نحفظ وجبتك بعد تأكيدك فقط.',
-                        fr: 'Vérifiez la portion, puis appuyez sur Ajouter.',
-                        es: 'Revisa la porción y pulsa Añadir.',
-                        tr: 'Porsiyonu kontrol et ve Ekle’ye dokun.',
-                      ),
-                      icon: Icons.check_circle_outline_rounded,
-                      onSkip: () {
-                        refreshDialog(() => showQuantityGuide = false);
-                        _dismissFoodTour();
-                      },
-                      skipKey: const Key('food-log-save-guide-skip'),
                     ),
                   ],
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: Text(_t(dialogContext, 'Cancel')),
-              ),
-              FilledButton(
-                key: const Key('food-log-serving-confirm'),
-                onPressed: () => Navigator.pop(
-                  dialogContext,
-                  double.tryParse(enteredQuantity.replaceAll(',', '.')),
                 ),
-                child: Text(_t(dialogContext, 'Add')),
               ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (dialogSubmitted) return;
+                    dialogSubmitted = true;
+                    Navigator.pop(dialogContext);
+                  },
+                  child: Text(_t(dialogContext, 'Cancel')),
+                ),
+                FirstUseTargetGuide(
+                  preferBelow: false,
+                  guide: saveGuide,
+                  child: FilledButton(
+                    key: const Key('food-log-serving-confirm'),
+                    onPressed: () {
+                      if (dialogSubmitted) return;
+                      dialogSubmitted = true;
+                      Navigator.pop(
+                        dialogContext,
+                        double.tryParse(enteredQuantity.replaceAll(',', '.')),
+                      );
+                    },
+                    child: Text(_t(dialogContext, 'Add')),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       );
       if (!mounted || quantity == null || !quantity.isFinite || quantity <= 0) {
         return;
       }
+      if (!ownerIsCurrent()) return;
       try {
-        await ref
-            .read(mealRepositoryProvider)
-            .addReviewedMealItemsAtomically(
-              date: ref.read(selectedLogDateProvider),
-              mealType: mealType,
-              items: [(foodId: food.id, quantity: quantity)],
-              quantitiesInGrams: false,
-            );
+        await meals.addReviewedMealItemsAtomically(
+          date: ref.read(selectedLogDateProvider),
+          mealType: mealType,
+          items: [(foodId: food.id, quantity: quantity)],
+          quantitiesInGrams: false,
+        );
         try {
-          await ref.read(foodRepositoryProvider).recordRecent(food.id);
+          await foods.recordRecent(food.id);
         } on Object {
           // The diary commit already succeeded. Ranking metadata is best effort
           // and must never make a saved meal look unsuccessful.
         }
+        if (!ownerIsCurrent()) return;
         ref.invalidate(foodLogPopularFoodsProvider);
         ref.invalidate(dailyMealsProvider);
         if (!mounted) return;
@@ -144,7 +168,16 @@ extension _FoodLogActions on _FoodLogPageState {
         if (!context.mounted) return;
         await FirstMealCelebration.showIfPending(
           context,
-          ref.read(preferencesRepositoryProvider),
+          preferences,
+          ownerIsCurrent: ownerIsCurrent,
+          targetContext: _foodTargets[food.id]?.currentContext,
+          onFinished: () {
+            if (!ownerIsCurrent()) return;
+            setState(() {
+              _postSaveOwner = preferences.localOwnerId;
+              _postSaveGuide = true;
+            });
+          },
         );
       } on Object {
         if (!mounted) return;
@@ -152,6 +185,7 @@ extension _FoodLogActions on _FoodLogPageState {
       }
     } finally {
       addingFoodIds.remove(food.id);
+      if (mounted) setState(() {});
     }
   }
 

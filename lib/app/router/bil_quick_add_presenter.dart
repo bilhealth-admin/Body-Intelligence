@@ -1,3 +1,5 @@
+import '../../features/dashboard/widgets/first_use_context_coachmark.dart';
+import '../../shared/widgets/first_use_target_guide.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,7 +29,10 @@ String? safeBilQuickAddReturnPath(String? value) =>
 Future<void> showBilQuickAdd(
   BuildContext context, {
   required String originPath,
+  VoidCallback? startFoodGuide,
+  VoidCallback? skipFoodGuide,
 }) async {
+  var showFoodGuide = startFoodGuide != null;
   final currentPath = GoRouterState.of(context).uri.path;
   final action = await showBilModalBottomSheet<String>(
     context: context,
@@ -50,30 +55,64 @@ Future<void> showBilQuickAdd(
       ),
     ),
     builder: (sheetContext) {
-      return BilQuickAddSheet(
-        photoAsset:
-            'assets/images/onboarding_2026/bil_onboarding_meal_quick_add_photo_v1.webp',
-        onFood: () {
-          Navigator.of(sheetContext).pop('food');
-        },
-        onBarcode: () {
-          Navigator.of(sheetContext).pop('barcode');
-        },
-        onVoice: () {
-          Navigator.of(sheetContext).pop('voice');
-        },
-        onPhoto: () {
-          Navigator.of(sheetContext).pop('photo');
-        },
-        onExercise: () {
-          Navigator.of(sheetContext).pop('exercise');
-        },
-        onNotes: () {
-          Navigator.of(sheetContext).pop('notes');
-        },
-        onSearch: () {
-          Navigator.of(sheetContext).pop('search');
-        },
+      return StatefulBuilder(
+        builder: (sheetContext, refresh) => BilQuickAddSheet(
+          foodGuideBuilder: showFoodGuide
+              ? (child) => FirstUseTargetGuide(
+                  preferBelow: false,
+                  child: child,
+                  guide: FirstUseContextCoachmark(
+                    key: const Key('quick-add-food-guide'),
+                    compact: true,
+                    title: _foodGuideCopy(
+                      sheetContext,
+                      'Log your food',
+                      'سجّل طعامك',
+                      'Enregistrez votre aliment',
+                      'Registra tu comida',
+                      'Yemeğini kaydet',
+                    ),
+                    message: _foodGuideCopy(
+                      sheetContext,
+                      'Tap Log food to search and choose your portion.',
+                      'اضغط تسجيل الطعام للبحث واختيار الكمية.',
+                      'Touchez Enregistrer pour rechercher et choisir la portion.',
+                      'Toca Registrar comida para buscar y elegir tu porción.',
+                      'Aramak ve porsiyonunu seçmek için Yemeği kaydet’e dokun.',
+                    ),
+                    icon: Icons.restaurant_rounded,
+                    onSkip: () {
+                      refresh(() => showFoodGuide = false);
+                      skipFoodGuide?.call();
+                    },
+                    skipKey: const Key('quick-add-food-guide-skip'),
+                  ),
+                )
+              : null,
+          photoAsset:
+              'assets/images/onboarding_2026/bil_onboarding_meal_quick_add_photo_v1.webp',
+          onFood: () {
+            Navigator.of(sheetContext).pop('food');
+          },
+          onBarcode: () {
+            Navigator.of(sheetContext).pop('barcode');
+          },
+          onVoice: () {
+            Navigator.of(sheetContext).pop('voice');
+          },
+          onPhoto: () {
+            Navigator.of(sheetContext).pop('photo');
+          },
+          onExercise: () {
+            Navigator.of(sheetContext).pop('exercise');
+          },
+          onNotes: () {
+            Navigator.of(sheetContext).pop('notes');
+          },
+          onSearch: () {
+            Navigator.of(sheetContext).pop('search');
+          },
+        ),
       );
     },
   );
@@ -89,6 +128,10 @@ Future<void> showBilQuickAdd(
   final cancelledTaskReturn = Uri.encodeComponent('/dashboard');
   switch (action) {
     case 'food':
+      if (showFoodGuide && startFoodGuide != null) {
+        startFoodGuide();
+        break;
+      }
       // Quick Add's Log food action owns a separate entry surface. The
       // legacy Daily Log and its breakfast/lunch/dinner pages stay on
       // their original route and are not rebuilt or altered here.
@@ -124,3 +167,18 @@ Future<void> showBilQuickAdd(
       break;
   }
 }
+
+String _foodGuideCopy(
+  BuildContext context,
+  String en,
+  String ar,
+  String fr,
+  String es,
+  String tr,
+) => switch (Localizations.localeOf(context).languageCode) {
+  'ar' => ar,
+  'fr' => fr,
+  'es' => es,
+  'tr' => tr,
+  _ => en,
+};

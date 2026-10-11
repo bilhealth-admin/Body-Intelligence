@@ -23,7 +23,11 @@ void main() {
     // actually delegates to it with the current origin.
     expect(
       shell,
-      contains('showBilQuickAdd(context, originPath: paths[index])'),
+      matches(
+        RegExp(
+          r'await\s+showBilQuickAdd\(\s*context,\s*originPath:\s*paths\[index\],\s*startFoodGuide:\s*guide,\s*skipFoodGuide:\s*anchor\?\.skipFoodGuide,\s*\)',
+        ),
+      ),
     );
     expect(presenter, contains('/quick-add/meal-camera?from='));
     expect(shell, isNot(contains('source=camera')));

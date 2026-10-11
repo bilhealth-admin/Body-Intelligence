@@ -1,9 +1,10 @@
+import '../../../shared/widgets/first_use_target_guide.dart';
 import 'package:flutter/material.dart';
 
 import 'first_use_glass_surface.dart';
 
-/// Inline, contextual guidance: deliberately not a modal or a tap-blocking
-/// overlay. It sits immediately before the real field or action it describes.
+/// A glass bubble placed by the real control's target wrapper. Standalone
+/// surfaces may place it inline; Skip never writes food or blocks navigation.
 class FirstUseContextCoachmark extends StatelessWidget {
   const FirstUseContextCoachmark({
     super.key,
@@ -48,6 +49,24 @@ class FirstUseContextCoachmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final below = FirstUseGuidePlacement.belowOf(context);
+    final pointer = Align(
+      alignment:
+          FirstUseGuidePlacement.maybeOf(context)?.pointerAlignment ??
+          pointerAlignment,
+      child: Padding(
+        padding: FirstUseGuidePlacement.maybeOf(context) == null
+            ? const EdgeInsetsDirectional.only(start: 25)
+            : EdgeInsets.zero,
+        child: RotatedBox(
+          quarterTurns: below ? 2 : 0,
+          child: CustomPaint(
+            size: const Size(25, 11),
+            painter: _GlassGuidePointer(accent),
+          ),
+        ),
+      ),
+    );
     return Semantics(
       container: true,
       label: '$title. $message',
@@ -66,6 +85,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (below) pointer,
             FirstUseGlassSurface(
               accent: accent,
               padding: EdgeInsets.symmetric(
@@ -95,21 +115,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      TextButton(
-                        key: skipKey,
-                        onPressed: onSkip,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(48, 48),
-                        ),
-                        child: Text(
-                          _skipLabel(context),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+
                       if (step != null && stepCount != null)
                         Text(
                           '$step / $stepCount',
@@ -147,7 +153,9 @@ class FirstUseContextCoachmark extends StatelessWidget {
                         for (var i = 1; i <= stepCount!; i++) ...[
                           Expanded(
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 260),
+                              duration: Duration(
+                                milliseconds: reduceMotion ? 1 : 260,
+                              ),
                               height: 3,
                               decoration: BoxDecoration(
                                 color: i <= step!
@@ -187,13 +195,23 @@ class FirstUseContextCoachmark extends StatelessWidget {
                 ],
               ),
             ),
+            if (!below) pointer,
             Align(
-              alignment: pointerAlignment,
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(start: 25),
-                child: CustomPaint(
-                  size: const Size(25, 11),
-                  painter: _GlassGuidePointer(accent),
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                key: skipKey,
+                onPressed: onSkip,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xF0102B49),
+                  minimumSize: const Size(48, 48),
+                ),
+                child: Text(
+                  _skipLabel(context),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

@@ -12,12 +12,26 @@ import 'first_use_glass_surface.dart';
 abstract final class FirstMealCelebration {
   static Future<bool> showIfPending(
     BuildContext context,
-    PreferencesRepository preferences,
-  ) async {
-    if (!context.mounted) return false;
+    PreferencesRepository preferences, {
+    BuildContext? targetContext,
+    VoidCallback? onFinished,
+    bool Function()? ownerIsCurrent,
+  }) async {
+    if (!context.mounted || (ownerIsCurrent != null && !ownerIsCurrent()))
+      return false;
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return false;
 
+    Rect? targetRect;
+    final target = targetContext?.findRenderObject();
+    final overlayBox = overlay.context.findRenderObject();
+    if (target is RenderBox &&
+        target.hasSize &&
+        target.attached &&
+        overlayBox is RenderBox) {
+      targetRect =
+          target.localToGlobal(Offset.zero, ancestor: overlayBox) & target.size;
+    }
     bool claimed;
     try {
       claimed = await preferences.mutateIfUnchanged(
@@ -31,7 +45,10 @@ abstract final class FirstMealCelebration {
       // A decoration must not interfere with an already committed meal.
       return false;
     }
-    if (!claimed || !context.mounted) return false;
+    if (!claimed ||
+        !context.mounted ||
+        (ownerIsCurrent != null && !ownerIsCurrent()))
+      return false;
 
     late OverlayEntry entry;
     var removed = false;
@@ -40,16 +57,29 @@ abstract final class FirstMealCelebration {
       removed = true;
       entry.remove();
       entry.dispose();
+      if (ownerIsCurrent == null || ownerIsCurrent()) onFinished?.call();
     }
 
-    entry = OverlayEntry(builder: (_) => _FirstFoodBurst(onFinished: finish));
+    entry = OverlayEntry(
+      builder: (_) => _FirstFoodBurst(
+        onFinished: finish,
+        targetRect: targetRect,
+        ownerIsCurrent: ownerIsCurrent,
+      ),
+    );
     overlay.insert(entry);
     return true;
   }
 }
 
 class _FirstFoodBurst extends StatefulWidget {
-  const _FirstFoodBurst({required this.onFinished});
+  const _FirstFoodBurst({
+    required this.onFinished,
+    this.targetRect,
+    this.ownerIsCurrent,
+  });
+  final Rect? targetRect;
+  final bool Function()? ownerIsCurrent;
 
   final VoidCallback onFinished;
 
@@ -135,6 +165,13 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, _) {
+                if (widget.ownerIsCurrent != null &&
+                    !widget.ownerIsCurrent!()) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => widget.onFinished(),
+                  );
+                  return const SizedBox.shrink();
+                }
                 final value = _reducedMotion ? .40 : _controller.value;
                 final burst = Curves.easeOutCubic.transform(
                   (value / .76).clamp(0.0, 1.0),
@@ -152,6 +189,94 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                               Curves.easeOutBack.transform(
                                 (value / .32).clamp(0.0, 1.0),
                               );
+                if (widget.targetRect case final Rect target) {
+                  final media = MediaQuery.of(context);
+                  final width = math.min(340.0, media.size.width - 24);
+                  final left = (target.center.dx - width / 2).clamp(
+                    12.0,
+                    media.size.width - width - 12,
+                  );
+                  final top = target.bottom.clamp(
+                    media.padding.top + 8,
+                    math.max(
+                      media.padding.top + 8,
+                      media.size.height - media.viewInsets.bottom - 210,
+                    ),
+                  );
+                  return Opacity(
+                    opacity: fade,
+                    child: Stack(
+                      children: [
+                        if (!_reducedMotion)
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: _ConfettiBurstPainter(
+                                progress: burst,
+                                opacity: particleFade,
+                                origin: target.center,
+                              ),
+                            ),
+                          ),
+                        Positioned(
+                          left: left,
+                          top: top.toDouble(),
+                          width: width,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: math.max(
+                                48,
+                                media.size.height -
+                                    media.viewInsets.bottom -
+                                    top -
+                                    8,
+                              ),
+                            ),
+                            child: SingleChildScrollView(
+                              child: FirstUseGlassSurface(
+                                accent: const Color(0xFFFFD879),
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_rounded,
+                                      color: Color(0xFFFFD879),
+                                      size: 44,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            title,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 19,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          Text(
+                                            subtitle,
+                                            style: const TextStyle(
+                                              color: Color(0xFFE1FFF4),
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 return Opacity(
                   opacity: fade,
                   child: Stack(
@@ -295,7 +420,12 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
 
 /// Deterministic gold ribbons and jewel confetti, independent of emoji fonts.
 class _ConfettiBurstPainter extends CustomPainter {
-  const _ConfettiBurstPainter({required this.progress, required this.opacity});
+  const _ConfettiBurstPainter({
+    required this.progress,
+    required this.opacity,
+    this.origin,
+  });
+  final Offset? origin;
 
   final double progress;
   final double opacity;
@@ -311,7 +441,7 @@ class _ConfettiBurstPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (opacity <= 0) return;
-    final origin = Offset(size.width / 2, size.height / 2 - 8);
+    final origin = this.origin ?? Offset(size.width / 2, size.height / 2 - 8);
     for (var i = 0; i < 120; i++) {
       final delay = (i % 7) * .037;
       final local = ((progress - delay) / (1 - delay)).clamp(0.0, 1.0);
