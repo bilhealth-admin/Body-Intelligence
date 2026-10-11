@@ -127,6 +127,60 @@ void main() {
     expect(gateway.requests, 1);
   });
 
+  test('background state defers the native sheet without burning cooldown', () async {
+    final gateway = _ReviewGateway();
+    var now = DateTime.utc(2026, 8, 1, 12);
+    var foreground = true;
+    final service = StoreReviewPromptService(
+      gateway: gateway,
+      now: () => now,
+      isSupportedPlatform: () => true,
+      canRequestNow: () => foreground,
+      presentationDelay: Duration.zero,
+    );
+    for (var day = 1; day <= 5; day++) {
+      now = DateTime.utc(2026, 8, day, 12);
+      await service.recordPositiveMoment(StoreReviewMoment.dailyCheckIn);
+    }
+    now = DateTime.utc(2026, 8, 8, 12);
+    foreground = false;
+    expect(
+      await service.recordPositiveMoment(StoreReviewMoment.diaryCompleted),
+      StoreReviewOutcome.deferred,
+    );
+    expect(gateway.requests, 0);
+    foreground = true;
+    expect(
+      await service.recordPositiveMoment(StoreReviewMoment.planSaved),
+      StoreReviewOutcome.requested,
+    );
+    expect(gateway.requests, 1);
+  });
+
+  test('leaving BIL during the wait cannot trigger review in background', () async {
+    final gateway = _ReviewGateway();
+    var now = DateTime.utc(2026, 8, 1, 12);
+    var foreground = true;
+    final service = StoreReviewPromptService(
+      gateway: gateway,
+      now: () => now,
+      isSupportedPlatform: () => true,
+      canRequestNow: () => foreground,
+      presentationDelay: const Duration(milliseconds: 10),
+    );
+    for (var day = 1; day <= 5; day++) {
+      now = DateTime.utc(2026, 8, day, 12);
+      await service.recordPositiveMoment(StoreReviewMoment.dailyCheckIn);
+    }
+    now = DateTime.utc(2026, 8, 9, 12);
+    final pending = service.recordPositiveMoment(StoreReviewMoment.diaryCompleted);
+    // A separate app or native permission prompt may cover BIL.
+    await Future<void>.delayed(const Duration(milliseconds: 3));
+    foreground = false;
+    expect(await pending, StoreReviewOutcome.deferred);
+    expect(gateway.requests, 0);
+  });
+
   test('Google Play review boundary has no custom prompt or sentiment gate', () {
     final serviceSource = File(
       'lib/app/services/store_review_prompt_service.dart',
