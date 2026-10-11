@@ -221,14 +221,17 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                                       'مراجعة الصور المحددة',
                                     ),
                                   },
-                                  style: Theme.of(sheetContext).textTheme.titleLarge
+                                  style: Theme.of(sheetContext)
+                                      .textTheme
+                                      .titleLarge
                                       ?.copyWith(fontWeight: FontWeight.w700),
                                 ),
                               ),
                               IconButton(
                                 key: const Key('bil-media-review-close'),
                                 tooltip: tr('Cancel', 'إلغاء'),
-                                onPressed: () => Navigator.of(sheetContext).pop(),
+                                onPressed: () =>
+                                    Navigator.of(sheetContext).pop(),
                                 constraints: const BoxConstraints(
                                   minWidth: 48,
                                   minHeight: 48,
@@ -268,11 +271,14 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                for (var i = 0; i < selected.length; i++) preview(i),
+                                for (var i = 0; i < selected.length; i++)
+                                  preview(i),
                               ],
                             ),
                           ),
-                          if (selected.any((entry) => failed.contains(entry))) ...[
+                          if (selected.any(
+                            (entry) => failed.contains(entry),
+                          )) ...[
                             const SizedBox(height: 12),
                             Text(
                               tr(
@@ -285,7 +291,8 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                           ],
                           const SizedBox(height: 14),
                           Text(
-                            tr('Selected: ', 'المحدد: ') + selected.length.toString(),
+                            tr('Selected: ', 'المحدد: ') +
+                                selected.length.toString(),
                             key: const Key('bil-media-review-count'),
                             style: Theme.of(sheetContext).textTheme.labelLarge,
                           ),
@@ -299,52 +306,52 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
-                      key: const Key('bil-media-review-confirm'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(0, 52),
-                      ),
-                      onPressed: !canConfirm
-                          ? null
-                          : () {
-                              if (accepted) return;
-                              accepted = true;
-                              Navigator.of(sheetContext).pop(
-                                List<T>.unmodifiable(
-                                  selected.map((entry) => entry.value),
-                                ),
-                              );
-                            },
-                      icon: const Icon(Icons.check_circle_outline_rounded),
-                      label: Text(switch (scope) {
-                        BilMediaReviewPurpose.communityPost => tr(
-                          'Add to draft',
-                          'إضافة إلى المسودة',
+                        const SizedBox(height: 12),
+                        FilledButton.icon(
+                          key: const Key('bil-media-review-confirm'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(0, 52),
+                          ),
+                          onPressed: !canConfirm
+                              ? null
+                              : () {
+                                  if (accepted) return;
+                                  accepted = true;
+                                  Navigator.of(sheetContext).pop(
+                                    List<T>.unmodifiable(
+                                      selected.map((entry) => entry.value),
+                                    ),
+                                  );
+                                },
+                          icon: const Icon(Icons.check_circle_outline_rounded),
+                          label: Text(switch (scope) {
+                            BilMediaReviewPurpose.communityPost => tr(
+                              'Add to draft',
+                              'إضافة إلى المسودة',
+                            ),
+                            BilMediaReviewPurpose.profilePhoto => tr(
+                              'Update photo',
+                              'تحديث الصورة',
+                            ),
+                            BilMediaReviewPurpose.coverPhoto => tr(
+                              'Use cover photo',
+                              'استخدام صورة الغلاف',
+                            ),
+                            BilMediaReviewPurpose.meal => tr(
+                              'Use this photo',
+                              'استخدام هذه الصورة',
+                            ),
+                          }, textAlign: TextAlign.center),
                         ),
-                        BilMediaReviewPurpose.profilePhoto => tr(
-                          'Update photo',
-                          'تحديث الصورة',
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                          key: const Key('bil-media-review-cancel'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                          ),
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          child: Text(tr('Cancel', 'إلغاء')),
                         ),
-                        BilMediaReviewPurpose.coverPhoto => tr(
-                          'Use cover photo',
-                          'استخدام صورة الغلاف',
-                        ),
-                        BilMediaReviewPurpose.meal => tr(
-                          'Use this photo',
-                          'استخدام هذه الصورة',
-                        ),
-                      }, textAlign: TextAlign.center),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      key: const Key('bil-media-review-cancel'),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, 48),
-                      ),
-                      onPressed: () => Navigator.of(sheetContext).pop(),
-                      child: Text(tr('Cancel', 'إلغاء')),
-                    ),
                       ],
                     ),
                   ),
