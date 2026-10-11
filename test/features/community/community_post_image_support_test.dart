@@ -186,6 +186,16 @@ Future<void> _waitForMediaReview(
   fail('Photo review did not become ready within a bounded wait.');
 }
 
+Future<void> _tapReviewControl(WidgetTester tester, String key) async {
+  final target = find.byKey(Key(key));
+  expect(target, findsOneWidget);
+  await tester.ensureVisible(target);
+  await tester.pump();
+  // Leave missed-tap warnings intact: this must hit the actual button.
+  await tester.tap(target);
+  await tester.pump();
+}
+
 void main() {
   setUp(() {
     _testClient = SupabaseClient(
@@ -380,7 +390,7 @@ void main() {
       await _waitForMediaReview(tester);
       expect(find.byKey(const Key('bil-media-review-confirm')), findsOneWidget);
       expect(repository.imagePublishCalls, 0);
-      await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
+      await _tapReviewControl(tester, 'bil-media-review-confirm');
       await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('community-post-remove-photo')),
@@ -430,7 +440,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-post-add-photo')));
     await _waitForMediaReview(tester);
-    await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
+    await _tapReviewControl(tester, 'bil-media-review-confirm');
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('community-post-composer')),
@@ -478,9 +488,10 @@ void main() {
     await _waitForMediaReview(tester);
     expect(find.byKey(const Key('bil-media-review-confirm')), findsOneWidget);
     expect(find.byKey(const Key('community-selected-photo-0')), findsNothing);
-    await tester.tap(find.byKey(const Key('bil-media-review-remove-1')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
+    await _tapReviewControl(tester, 'bil-media-review-remove-1');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Selected: 2'), findsOneWidget);
+    await _tapReviewControl(tester, 'bil-media-review-confirm');
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('community-selected-photo-0')), findsOneWidget);
     expect(find.byKey(const Key('community-selected-photo-1')), findsOneWidget);
@@ -505,7 +516,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-post-add-photo')));
     await _waitForMediaReview(tester, requirePreview: false);
-    await tester.tap(find.byKey(const Key('bil-media-review-cancel')));
+    await _tapReviewControl(tester, 'bil-media-review-cancel');
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('community-selected-photo-0')), findsNothing);
     expect(repository.imagePublishCalls, 0);
