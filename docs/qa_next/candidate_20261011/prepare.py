@@ -27,17 +27,18 @@ def read_part(name, expected):
     raw = (ROOT / name).read_text().strip().encode('ascii')
     if digest(raw) == expected:
         return raw
-    # Two initial transport strings contained short duplicated sequences.
-    # Accept only an exact match to the ORIGINAL frozen cryptographic hash.
-    # This cannot relax source integrity or guess missing source content.
-    excess = len(raw) - (536 if name == 'part10.b64' else 8000)
-    if name in ('part00.b64', 'part02.b64') and 0 < excess <= 4:
-        for start in range(len(raw) - excess + 1):
-            restored = raw[:start] + raw[start + excess:]
-            if digest(restored) == expected:
-                print(f'Transport restored: {name}, remove {excess} bytes at {start}; original SHA256 matched.')
-                return restored
-    raise AssertionError(f'Part integrity failed: {name}; expected {expected}; actual {digest(raw)}')
+    repairs = {
+        'part00.b64': ('e2969a20b2462b2361e5a0c303c5627c7c8f8c13c36e1298df7b25b625c11372', [(6097, 6099), (5732, 5734)]),
+        'part02.b64': ('fb455393ecc647fd55084ac8ec5c654db35ef2d0dc501f1d760f81ef289bed0f', [(6466, 6468)]),
+    }
+    assert name in repairs, f'Unexpected transport error: {name}'
+    received_hash, ranges = repairs[name]
+    assert digest(raw) == received_hash, f'Unknown received bytes: {name}'
+    for start, end in ranges:
+        raw = raw[:start] + raw[end:]
+    assert digest(raw) == expected, f'Original integrity not restored: {name}'
+    print(f'Byte-exact transport repair: {name}; original frozen SHA256 verified.')
+    return raw
 
 
 def bundle():
