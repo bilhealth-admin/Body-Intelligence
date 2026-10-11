@@ -1,0 +1,56 @@
+{
+  "tested_code_head": "62254928bcf33922d0659782adccece0e0228b6e",
+  "ancestry": {
+    "3f0085e6e6686f2e87e9cf14789e9e578ea64159": true,
+    "944973ed3556ccb9b8cd8a09b451562aea3cf652": true,
+    "06c365022f20e0f0c5d6e901b19a8efb1419b81f": true,
+    "c1f1f47a627169fb692763d3a96dc81afcdc7b17": true,
+    "d073dcb39c4d4ba5cef856a5d39935ca1f7de1ca": true,
+    "aa7f73d8c37331ef56f55e49a92d212f410954b7": true,
+    "88721616e1d4e7d579c9963e7141e460c4978c08": true
+  },
+  "protected_paths_unchanged": [
+    "lib/features/connected_health",
+    "lib/features/commerce",
+    "lib/features/dashboard/dashboard_page.dart",
+    "android",
+    "ios",
+    "supabase",
+    "pubspec.yaml",
+    "pubspec.lock",
+    "assets"
+  ],
+  "changed_files": [
+    ".github/workflows/bil_integration_media_policy_focused.yml",
+    "lib/app/router/bil_quick_add_presenter.dart",
+    "lib/app/router/bil_quick_add_sheet.dart",
+    "lib/app/router/responsive_app_shell.dart",
+    "lib/features/daily_log/daily_log_page.dart",
+    "lib/features/daily_log/food_log_actions.dart",
+    "lib/features/daily_log/food_log_page.dart",
+    "lib/features/daily_log/food_log_tile_widgets.dart",
+    "lib/features/dashboard/widgets/dashboard_first_use_experience.dart",
+    "lib/features/dashboard/widgets/first_food_days_guide.dart",
+    "lib/features/dashboard/widgets/first_meal_celebration.dart",
+    "lib/features/dashboard/widgets/first_use_context_coachmark.dart",
+    "lib/features/dashboard/widgets/first_use_glass_surface.dart",
+    "lib/shared/widgets/bil_reference_bottom_bar.dart",
+    "lib/shared/widgets/first_use_guide_anchor.dart",
+    "lib/shared/widgets/first_use_target_guide.dart",
+    "test/features/daily_log/quick_add_meal_camera_contract_test.dart",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart",
+    "test/features/dashboard/first_use_recovery_regression_test.dart",
+    "test/features/dashboard/first_use_reference_journey_test.dart"
+  ],
+  "golden_master_changes": [],
+  "first_use_revalidation": {
+    "PASS": 56,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "retained_integration_passes": 116,
+  "isolated_source_contract_revalidation": 1,
+  "effective_flutter_cases": 173,
+  "retained_integration_execution_head": "786658391a2a9e3dc576364b8b828b54d348ea31",
+  "retention_reason": "Only State-owned update delegation, named child ordering, braces and an unused test import changed. First Use and affected Food Log flows revalidated; silver clock, benchmark renderer, navigation routes, media service and policy modules unchanged."
+}

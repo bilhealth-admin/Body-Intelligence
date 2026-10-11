@@ -1,0 +1,21 @@
+{
+  "lib/app/router/bil_quick_add_presenter.dart": "4a46f20277a10140b6ae8c9226734ebdce15447d31000dcd84914510dcec8f33",
+  "lib/app/router/bil_quick_add_sheet.dart": "51c399d66aaa6b33979a7e78209f37546f60ffef9befab2c18fb52685fef1844",
+  "lib/app/router/responsive_app_shell.dart": "4399856cf50e96dbcf584ac5fac89e09f27be7707878e196df86802013545fd4",
+  "lib/features/daily_log/daily_log_page.dart": "d2a82cead67284425857f6e413475e35e67fbdc648842925d00a1fca561b471c",
+  "lib/features/daily_log/food_log_actions.dart": "0ef3d1e2f8e05f6a12671182ca198eaee2463cf66cc67fb3443e503d43534966",
+  "lib/features/daily_log/food_log_page.dart": "bd8ce91b1b2fdbbca0ec8a63b5d0a8cb365d0250f34a4e1e1b171bb98a8e5eb2",
+  "lib/features/daily_log/food_log_tile_widgets.dart": "a573bef46758c57bb285b6f8df341b6bc5ed10abfe007ccb46603d477702b827",
+  "lib/features/dashboard/widgets/dashboard_first_use_experience.dart": "429c8fae0ed5e51926f3576aeb22af6b13f7d7193e2b8462f8a2296857869d52",
+  "lib/features/dashboard/widgets/first_food_days_guide.dart": "49174103ccd8b69beb7d1299835daf4de8126eadd16dbc101e1f33d3b225f4e1",
+  "lib/features/dashboard/widgets/first_meal_celebration.dart": "d80d4106ca583b6a297da905973997a7af2db7c505495f75394e7213ecbce0c3",
+  "lib/features/dashboard/widgets/first_use_context_coachmark.dart": "5e27b18c055be9fda08f657e62665ce013674feb456adf1f9df466406e7a72db",
+  "lib/features/dashboard/widgets/first_use_glass_surface.dart": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+  "lib/shared/widgets/bil_reference_bottom_bar.dart": "7e070a02b70dff05408dcb48ac4473b81d719f1e89d2b34c599b53268b5df909",
+  "lib/shared/widgets/first_use_guide_anchor.dart": "2813d9180e02fb7a39a898bc0f0f60d1d6550a25f90def482be937d523a3eb80",
+  "lib/shared/widgets/first_use_target_guide.dart": "fe9e4f24aa31f80a201d5483b9db491afea07948b01357e564dbcbb05d30eaab",
+  "test/features/daily_log/quick_add_meal_camera_contract_test.dart": "937f668fc199827d868bfb99ff287a4510d9f25fd345efbdf8a3eef8aba2a4e4",
+  "test/features/dashboard/first_use_actual_home_capture_test.dart": "9d2588ed62a0b7cffdf69fda526e992eaadc2abfd38fc82e1c9fb1221581c593",
+  "test/features/dashboard/first_use_recovery_regression_test.dart": "3a0c9286d4ef55e79c08765caa63d94d972dfc08b542d1499d165858ba27fa64",
+  "test/features/dashboard/first_use_reference_journey_test.dart": "955f71160603d5bb5173ef04e332c94fccae5f4492b4ad2b90fd80945b9aa749"
+}

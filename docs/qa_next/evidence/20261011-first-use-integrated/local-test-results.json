@@ -1,0 +1,1587 @@
+{
+  "recovered-journey": {
+    "counts": {
+      "PASS": 30,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "done_success": true,
+    "cases": [
+      {
+        "name": "ar anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      }
+    ]
+  },
+  "first-use-complete": {
+    "counts": {
+      "PASS": 52,
+      "FAIL": 1,
+      "SKIP": 0
+    },
+    "done_success": false,
+    "cases": [
+      {
+        "name": "ar anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "menu Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "search Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "choose Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "quantity Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "save Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "failed real SQLite meal insert cannot celebrate or create partial food",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "A to B while quantity is open rejects stale save for both owners",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip",
+        "result": "PASS",
+        "suiteID": 47
+      },
+      {
+        "name": "actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip",
+        "result": "FAIL",
+        "suiteID": 47
+      },
+      {
+        "name": "empty meal bucket shows optional steps and Skip dismisses them",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "completed first food does not reopen the tutorial",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "continuing the guide enables contextual Food Log help",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "glassy contextual guide is optional and does not cover content",
+        "result": "PASS",
+        "suiteID": 60
+      },
+      {
+        "name": "reduce-motion mode has no entrance transition",
+        "result": "PASS",
+        "suiteID": 60
+      },
+      {
+        "name": "narrow Arabic layout with large text keeps Skip available",
+        "result": "PASS",
+        "suiteID": 60
+      },
+      {
+        "name": "first successful marker celebrates once and arms streak tip",
+        "result": "PASS",
+        "suiteID": 66
+      },
+      {
+        "name": "Food Log search guide can be skipped without blocking food",
+        "result": "PASS",
+        "suiteID": 70
+      },
+      {
+        "name": "quantity coachmark Skip leaves editable serving dialog open",
+        "result": "PASS",
+        "suiteID": 70
+      },
+      {
+        "name": "a meal bucket alone is not a first committed food",
+        "result": "PASS",
+        "suiteID": 75
+      },
+      {
+        "name": "manual food marks ready and edits or later foods cannot rearm",
+        "result": "PASS",
+        "suiteID": 75
+      },
+      {
+        "name": "a failed atomic first food cannot create a celebration",
+        "result": "PASS",
+        "suiteID": 75
+      },
+      {
+        "name": "calculated recipe first serving creates milestone atomically",
+        "result": "PASS",
+        "suiteID": 75
+      },
+      {
+        "name": "legacy deleted food is not classified as a new first food",
+        "result": "PASS",
+        "suiteID": 75
+      }
+    ]
+  },
+  "first-use-final": {
+    "counts": {
+      "PASS": 56,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "done_success": true,
+    "cases": [
+      {
+        "name": "ar anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "ar Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "en Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "menu Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "search Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "choose Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "quantity Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "save Skip is below glass and preserves the real control without saving",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "fr starter CTA opens the actual optional Log Food menu",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "es starter CTA opens the actual optional Log Food menu",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "tr starter CTA opens the actual optional Log Food menu",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "failed real SQLite meal insert cannot celebrate or create partial food",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "A to B to A while quantity is open rejects stale save for both owners",
+        "result": "PASS",
+        "suiteID": 35
+      },
+      {
+        "name": "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip",
+        "result": "PASS",
+        "suiteID": 50
+      },
+      {
+        "name": "actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip",
+        "result": "PASS",
+        "suiteID": 50
+      },
+      {
+        "name": "empty meal bucket shows optional steps and Skip dismisses them",
+        "result": "PASS",
+        "suiteID": 57
+      },
+      {
+        "name": "completed first food does not reopen the tutorial",
+        "result": "PASS",
+        "suiteID": 57
+      },
+      {
+        "name": "continuing the guide enables contextual Food Log help",
+        "result": "PASS",
+        "suiteID": 57
+      },
+      {
+        "name": "glassy contextual guide is optional and does not cover content",
+        "result": "PASS",
+        "suiteID": 63
+      },
+      {
+        "name": "reduce-motion mode has no entrance transition",
+        "result": "PASS",
+        "suiteID": 63
+      },
+      {
+        "name": "narrow Arabic layout with large text keeps Skip available",
+        "result": "PASS",
+        "suiteID": 63
+      },
+      {
+        "name": "first successful marker celebrates once and arms streak tip",
+        "result": "PASS",
+        "suiteID": 69
+      },
+      {
+        "name": "Food Log search guide can be skipped without blocking food",
+        "result": "PASS",
+        "suiteID": 73
+      },
+      {
+        "name": "quantity coachmark Skip leaves editable serving dialog open",
+        "result": "PASS",
+        "suiteID": 73
+      },
+      {
+        "name": "a meal bucket alone is not a first committed food",
+        "result": "PASS",
+        "suiteID": 78
+      },
+      {
+        "name": "manual food marks ready and edits or later foods cannot rearm",
+        "result": "PASS",
+        "suiteID": 78
+      },
+      {
+        "name": "a failed atomic first food cannot create a celebration",
+        "result": "PASS",
+        "suiteID": 78
+      },
+      {
+        "name": "calculated recipe first serving creates milestone atomically",
+        "result": "PASS",
+        "suiteID": 78
+      },
+      {
+        "name": "legacy deleted food is not classified as a new first food",
+        "result": "PASS",
+        "suiteID": 78
+      }
+    ]
+  },
+  "affected-integration": {
+    "counts": {
+      "PASS": 116,
+      "FAIL": 1,
+      "SKIP": 0
+    },
+    "done_success": false,
+    "cases": [
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_en_dark_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_en_dark_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_en_light_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_en_light_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_dark_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_dark_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_light_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_light_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_en_dark_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_en_dark_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_en_light_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_en_light_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_dark_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_dark_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_light_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_light_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_en_dark_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_en_dark_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_en_light_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_en_light_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_dark_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_dark_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_light_1.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_light_2.0",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in ar",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in en",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in fr",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in es",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in tr",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in de",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in it",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in pt-BR",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in pt-PT",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in ur",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in fa",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in hi",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in id",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in ms",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in ja",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in ko",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in zh-Hans",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in zh-Hant",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in ru",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in bn",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in vi",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in th",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in pl",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in nl",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "all five labels remain complete at 200% in uk",
+        "result": "PASS",
+        "suiteID": 0
+      },
+      {
+        "name": "return destinations are the exact known roots, never a redirect or prefix",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "shared Quick Add invokes quick-add-primary-0 after the sheet closes",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "shared Quick Add invokes quick-add-primary-1 after the sheet closes",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "shared Quick Add invokes quick-add-primary-2 after the sheet closes",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "shared Quick Add invokes quick-add-primary-3 after the sheet closes",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "shared Quick Add invokes quick-add-secondary-0 after the sheet closes",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "shared Quick Add invokes quick-add-secondary-1 after the sheet closes",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "shared Quick Add invokes quick-add-secondary-2 after the sheet closes",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "Quick Add dismiss keeps the originating page /intelligence-center",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "Quick Add dismiss keeps the originating page /community/notifications",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "Quick Add dismiss keeps the originating page /settings",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "Search does not duplicate Nutrition when its return context is More",
+        "result": "PASS",
+        "suiteID": 54
+      },
+      {
+        "name": "Quick Add photo captures before Food Log analysis",
+        "result": "FAIL",
+        "suiteID": 71
+      },
+      {
+        "name": "Food Log exposes four explicit meal destinations",
+        "result": "PASS",
+        "suiteID": 75
+      },
+      {
+        "name": "Food Log shows the all-foods surface without tabs",
+        "result": "PASS",
+        "suiteID": 79
+      },
+      {
+        "name": "popular foods require more than three confirmed selections",
+        "result": "PASS",
+        "suiteID": 83
+      },
+      {
+        "name": "most-used popular food has priority",
+        "result": "PASS",
+        "suiteID": 83
+      },
+      {
+        "name": "preserved dashboard stays primary and AI Coach remains visible",
+        "result": "PASS",
+        "suiteID": 88
+      },
+      {
+        "name": "first value handoff is honest and has one action in Arabic",
+        "result": "PASS",
+        "suiteID": 92
+      },
+      {
+        "name": "compact watch keeps all four readings below the clock",
+        "result": "PASS",
+        "suiteID": 96
+      },
+      {
+        "name": "legacy insight deck is removed from the unified dashboard",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "legacy recommendation flag cannot replace current sections",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "unresolved entitlement keeps local dashboard visible without false Free",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "light unified dashboard retains readable theme contrast",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "supports RTL large text high contrast and reduced motion",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "phone premium dashboard golden",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "tablet premium dashboard golden",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "desktop premium dashboard golden",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "corrected light morning premium dashboard golden",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "corrected light dashboard supports Arabic large text semantics",
+        "result": "PASS",
+        "suiteID": 102
+      },
+      {
+        "name": "community post image validation accepts decoded PNG and records bounded truthful metadata",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "community post image validation accepts truthful JPEG and WebP signatures",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "community post image validation re-encodes a large valid selection before it reaches the upload",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "community post image validation rejects unsupported, corrupt, oversized, and unsafe dimensions",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "migration and repository keep private media owner-scoped",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "all Community photo copy is native across the 25 locales",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "photo draft previews, shows upload progress, and publishes once",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "failed image publish retains both text and photo for retry",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "one native selection stages several photos only after review",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "cancelled photo review leaves the draft without a new image",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "private image signing failure renders a bounded safe fallback",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "photo affordance survives 25 locales at 390x844 and 160%",
+        "result": "PASS",
+        "suiteID": 117
+      },
+      {
+        "name": "multi-selection is staged, removable and never auto-accepted",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "cancel closes review without returning any media",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "small Arabic screen uses localized actions without overflow",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "profile review has explicit update action and can be cancelled",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "shared camera does not commit the picture at shutter press",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "all four previews become ready without scrolling each into view",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "corrupt preview cannot be approved and can always be cancelled",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "Arabic 2x review scrolls to actions at Size(320.0, 568.0)",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "Arabic 2x review scrolls to actions at Size(390.0, 844.0)",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "Arabic 2x review scrolls to actions at Size(640.0, 320.0)",
+        "result": "PASS",
+        "suiteID": 133
+      },
+      {
+        "name": "guest photo save stays local and succeeds without cloud identity",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "offline owner-scoped photo save and sync stay local without auth",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "large valid photo is compressed instead of being rejected",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "guest removal clears local photo and cached public URL",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "authenticated removal clears cloud before local profile photo",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "cloud removal failure preserves both local profile keys",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "mismatched authenticated owner performs no local mutation",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "account switch while picker is open performs no mutation",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "recovery-only profile save never falls back to a new picker",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "recovery-only profile save persists the recovered file once",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "gallery Cancel prevents all local and cloud photo mutations",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "gallery explicit confirmation persists only reviewed original bytes",
+        "result": "PASS",
+        "suiteID": 146
+      },
+      {
+        "name": "meal photo action opens step one and returns false safely",
+        "result": "PASS",
+        "suiteID": 161
+      },
+      {
+        "name": "Daily Log photo action verifies shared AI tokens then offers camera or gallery",
+        "result": "PASS",
+        "suiteID": 161
+      },
+      {
+        "name": "Quick Add voice and meal-photo actions keep flagship treatment",
+        "result": "PASS",
+        "suiteID": 166
+      },
+      {
+        "name": "hand-maintained Dart sources stay below the architecture ceiling",
+        "result": "PASS",
+        "suiteID": 170
+      }
+    ]
+  },
+  "camera-contract-fixed": {
+    "counts": {
+      "PASS": 1,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "done_success": true,
+    "cases": [
+      {
+        "name": "Quick Add photo captures before Food Log analysis",
+        "result": "PASS",
+        "suiteID": 0
+      }
+    ]
+  },
+  "tablet-anchor-fixed": {
+    "counts": {
+      "PASS": 1,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "done_success": true,
+    "cases": [
+      {
+        "name": "actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip",
+        "result": "PASS",
+        "suiteID": 0
+      }
+    ]
+  },
+  "first-use-post-ci-fix": {
+    "code_head": "62254928bcf33922d0659782adccece0e0228b6e",
+    "counts": {
+      "PASS": 56,
+      "FAIL": 0,
+      "SKIP": 0
+    },
+    "done_success": true,
+    "cases": [
+      {
+        "name": "ar anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+        "result": "PASS"
+      },
+      {
+        "name": "en real food journey: cancel, edit 80g, commit once, celebrate, streak",
+        "result": "PASS"
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS"
+      },
+      {
+        "name": "ar celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS"
+      },
+      {
+        "name": "en celebration 320px 2x reduced=false remains nonblocking",
+        "result": "PASS"
+      },
+      {
+        "name": "en celebration 320px 2x reduced=true remains nonblocking",
+        "result": "PASS"
+      },
+      {
+        "name": "ar Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS"
+      },
+      {
+        "name": "ar Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS"
+      },
+      {
+        "name": "ar Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS"
+      },
+      {
+        "name": "en Food Log 320.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS"
+      },
+      {
+        "name": "en Food Log 390.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS"
+      },
+      {
+        "name": "en Food Log 430.0 px 2x text and keyboard can confirm quantity",
+        "result": "PASS"
+      },
+      {
+        "name": "menu Skip is below glass and preserves the real control without saving",
+        "result": "PASS"
+      },
+      {
+        "name": "search Skip is below glass and preserves the real control without saving",
+        "result": "PASS"
+      },
+      {
+        "name": "choose Skip is below glass and preserves the real control without saving",
+        "result": "PASS"
+      },
+      {
+        "name": "quantity Skip is below glass and preserves the real control without saving",
+        "result": "PASS"
+      },
+      {
+        "name": "save Skip is below glass and preserves the real control without saving",
+        "result": "PASS"
+      },
+      {
+        "name": "fr starter CTA opens the actual optional Log Food menu",
+        "result": "PASS"
+      },
+      {
+        "name": "es starter CTA opens the actual optional Log Food menu",
+        "result": "PASS"
+      },
+      {
+        "name": "tr starter CTA opens the actual optional Log Food menu",
+        "result": "PASS"
+      },
+      {
+        "name": "failed real SQLite meal insert cannot celebrate or create partial food",
+        "result": "PASS"
+      },
+      {
+        "name": "A to B to A while quantity is open rejects stale save for both owners",
+        "result": "PASS"
+      },
+      {
+        "name": "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip",
+        "result": "PASS"
+      },
+      {
+        "name": "actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip",
+        "result": "PASS"
+      },
+      {
+        "name": "empty meal bucket shows optional steps and Skip dismisses them",
+        "result": "PASS"
+      },
+      {
+        "name": "completed first food does not reopen the tutorial",
+        "result": "PASS"
+      },
+      {
+        "name": "continuing the guide enables contextual Food Log help",
+        "result": "PASS"
+      },
+      {
+        "name": "glassy contextual guide is optional and does not cover content",
+        "result": "PASS"
+      },
+      {
+        "name": "reduce-motion mode has no entrance transition",
+        "result": "PASS"
+      },
+      {
+        "name": "narrow Arabic layout with large text keeps Skip available",
+        "result": "PASS"
+      },
+      {
+        "name": "first successful marker celebrates once and arms streak tip",
+        "result": "PASS"
+      },
+      {
+        "name": "Food Log search guide can be skipped without blocking food",
+        "result": "PASS"
+      },
+      {
+        "name": "quantity coachmark Skip leaves editable serving dialog open",
+        "result": "PASS"
+      },
+      {
+        "name": "a meal bucket alone is not a first committed food",
+        "result": "PASS"
+      },
+      {
+        "name": "manual food marks ready and edits or later foods cannot rearm",
+        "result": "PASS"
+      },
+      {
+        "name": "a failed atomic first food cannot create a celebration",
+        "result": "PASS"
+      },
+      {
+        "name": "calculated recipe first serving creates milestone atomically",
+        "result": "PASS"
+      },
+      {
+        "name": "legacy deleted food is not classified as a new first food",
+        "result": "PASS"
+      }
+    ]
+  }
+}

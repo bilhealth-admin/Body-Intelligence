@@ -1,0 +1,10 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":24916,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart"},"type":"suite","time":1}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":7}
+{"count":1,"time":32,"type":"allSuites"}
+lib/features/dashboard/widgets/first_meal_celebration.dart:222:32: Error: The argument type 'num' can't be assigned to the parameter type 'double?'.
+                          top: top,
+                               ^
+{"testID":1,"error":"Failed to load \"G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart\":\nCompilation failed for testPath=G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart: lib/features/dashboard/widgets/first_meal_celebration.dart:222:32: Error: The argument type 'num' can't be assigned to the parameter type 'double?'.\n                          top: top,\n                               ^\n.","stackTrace":"","isFailure":false,"type":"error","time":20094}
+{"testID":1,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":20102}
+{"success":false,"type":"done","time":20113}

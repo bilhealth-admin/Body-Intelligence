@@ -1,0 +1,13 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":25612,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart"},"type":"suite","time":2}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":8}
+{"count":1,"time":37,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":75924}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":75936}
+{"test":{"id":3,"name":"(setUpAll)","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":38,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart"},"type":"testStart","time":75939}
+{"testID":3,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":76229}
+{"test":{"id":4,"name":"actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":40,"root_column":5,"root_url":"file:///G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart"},"type":"testStart","time":76232}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":90147}
+{"test":{"id":5,"name":"(tearDownAll)","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":90148}
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":90156}
+{"success":true,"type":"done","time":90338}

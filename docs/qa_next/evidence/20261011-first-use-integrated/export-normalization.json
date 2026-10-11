@@ -1,0 +1,272 @@
+[
+  {
+    "file": "ci-final-results.json",
+    "raw_sha256": "a5780d5116156a19c7adc46125ec24564323cd93d034057ee427c21783a3484a",
+    "export_sha256": "d91ef77237dfea15bf7f7fa8533bcdf141709985967f94c3debce04140cf7c6c",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "effective-local-results.json",
+    "raw_sha256": "437c369a625390fa5ce1428c44bfea2f96bc5db50931369a6ae9a4b44c887816",
+    "export_sha256": "8c34309b8a7f0220634e2f3f283d96eac4ed7c244116946edcab0d88fcfba7ec",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "final-changed-file-sha256.json",
+    "raw_sha256": "23c2715080bc56728ed1609f179a507d952c02b0f908f0d30dd6916358728e5d",
+    "export_sha256": "3af8f7ad9278a01d6664eed0ef3902cac85abc79322770af265f4e9e7bb6e5f8",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "local-test-results.json",
+    "raw_sha256": "039a74c4d245fc5d991e65a177c6f4df04dcb70ed2d38dff1be942b8b63c03cb",
+    "export_sha256": "537620ed7060f356d20e7a2244984827dfb548cee9e962756ebb100e8dbbd653",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "original-final-byte-check.json",
+    "raw_sha256": "3c9672265ffe5851382147fbad70f654af2602f5e53dc68b6baac712706d095f",
+    "export_sha256": "334864e57541c5b4233f5b0c51b07f8551d234c6d5253367c489669a4eb29fb5",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "preservation-and-final-validation.json",
+    "raw_sha256": "50fe179a4acf2bf3a73f2faad5e7d39df79dd977be3794349a0b9b9cc27eb5a4",
+    "export_sha256": "c9167c15affd9e520f9850952aeb32d334af57607bc2c775b7a7764acf42859a",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "recovery-provenance.json",
+    "raw_sha256": "b5cba7b644dbc95a609f49049e97640cbc0b623f2242bd9a368c169069224c52",
+    "export_sha256": "911755d70837d595d0266c1cf5de9d195593adde8c4da56b89580aae9fd6ee12",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "source-checks.json",
+    "raw_sha256": "41bf4fee33889e486ed60788ce471006119ecd55461b14aed8b01d9b996c8c5c",
+    "export_sha256": "0b567bad0f58c05c2e18638da1601f80889958ca0d5f05b6500623148d2aaa85",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "source-policy-guard.json",
+    "raw_sha256": "56a507829633557c372e0f1e4cb1b94ce6be2ab25c1cca95eb4704382c446fed",
+    "export_sha256": "096446a74efb1f06b7f7e7f7942d08f24d23b28e9c8e31a3933ec6aeb5ceeedc",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "diagnostics/anchored-success-ar.jsonl",
+    "raw_sha256": "a17643eb8b09e97d01848dc4ecfe7980b2b6f1d513abcd2152288b6746bd0bb8",
+    "export_sha256": "4ddbe747f113937e95572d8cff94cae251d0cedae7e53a0775227d1d43c55e1f",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "diagnostics/first-use-complete.jsonl",
+    "raw_sha256": "ae1fc7c339f95a0332e9af8e24d9a23f4c432db8a0c6aa17e6baa07ac8b75733",
+    "export_sha256": "ad5dd6e65b372f7ddff6706356a30a5439deb4ff6760d20ea2f3c6ce2d254e55",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "diagnostics/new-regressions.jsonl",
+    "raw_sha256": "69fc10bd20368792c61196adc22ad1d996d3cf894c74afac25b2eeeede6f3086",
+    "export_sha256": "83e2bb8b63f9c329922d93cff51635609ddb2f8d0ad4ae2fa6735806af2480cb",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/affected-integration.jsonl",
+    "raw_sha256": "cd9279bc46bd6939da5eb8c66308a65e4e9851fa7a62a0b9c32251378b710a72",
+    "export_sha256": "4c54864f09fa8b3e3b8d055f4c0aeafd86600390a9c7ea56345c0bd53f4a7f0c",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/analyze-corrections.log",
+    "raw_sha256": "83b6a387c8da91c433dc6460286f6ffff5e9a5ce0cd43fa8483b6d134f03dd00",
+    "export_sha256": "c15de463bb93c989d198c04fe8b0a19cecca3497ff91c93c9fc07e637e147314",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/analyze-final-source.log",
+    "raw_sha256": "ac947b66ba5ecb38af19a3cc62b0c79e8f9538db785013cdf871b90fa4c005f7",
+    "export_sha256": "8468a96b14164a1ace0a47c7d11141bf957f7eb6a36e4e7c45e3cad792245b11",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/anchored-journey-ar.jsonl",
+    "raw_sha256": "97015504e14e6d0212135d9f1ed489f47998a2132510136e8a696f7cc5f04cfd",
+    "export_sha256": "5cfefdce80eba006370f3a68366da5d94b59c2a99bca244dfff37b01d4439d25",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/anchored-success-ar-retry.jsonl",
+    "raw_sha256": "7b4531fd826167632333dd1a64d6e1b6357187812d3e5982dcf4280fecfc0016",
+    "export_sha256": "079d018f26f6f0932427cfe613aca554761c1783d548f73d691ace9b17e69581",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/anchored-success-ar.jsonl",
+    "raw_sha256": "a17643eb8b09e97d01848dc4ecfe7980b2b6f1d513abcd2152288b6746bd0bb8",
+    "export_sha256": "4ddbe747f113937e95572d8cff94cae251d0cedae7e53a0775227d1d43c55e1f",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/camera-contract-fixed.jsonl",
+    "raw_sha256": "c8bd0b519cc480b43be7fcaa3c5b7e7668e7489eae0b980f170c6efa855c5ad8",
+    "export_sha256": "7f626fb2ad52bd1e6518e4c546b21c458a9e809ecf8551c8ff0389ea490715f3",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/ci-38118620558.log",
+    "raw_sha256": "a044afeb034c255632b6d0c629be411a4c984afa007cb37d04d1f2cf3a4c1295",
+    "export_sha256": "ac73296a488ce45783f27272afa30e6b6c3ccf92acbe39c5b640ca6a00b0e418",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/ci-38119262120.log",
+    "raw_sha256": "f735e90c882825429d8bf982626cc9e7d8a68ab5dbf988638f9468e423f2ed27",
+    "export_sha256": "7513832a4f9e63737f118df0f392fffe6af3be6be2105239edafbe36efb275ed",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/ci-fix-narrow-ar.jsonl",
+    "raw_sha256": "036b8b16f90d8cb7be3fe985c2bafd87d823095802aa632c7c2ec09b8721d1fe",
+    "export_sha256": "5f97a9ba2d1b777d832566afb0beaff1a9a2479c645cc710241fc4b2a5e33fc0",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/first-use-complete.jsonl",
+    "raw_sha256": "ae1fc7c339f95a0332e9af8e24d9a23f4c432db8a0c6aa17e6baa07ac8b75733",
+    "export_sha256": "ad5dd6e65b372f7ddff6706356a30a5439deb4ff6760d20ea2f3c6ce2d254e55",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/first-use-final.jsonl",
+    "raw_sha256": "3bf3db61b54861cfc49641e37ac99f1c85af22b3c378dbb978762ab19dc29da8",
+    "export_sha256": "32108ce4655a199568917edcb18161978c0cb6d2cb2b988936a1a990a0707238",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/first-use-post-ci-fix.jsonl",
+    "raw_sha256": "2ee347b0fab4e5ae5b159bd1a844e1b6da7a262825620a7cd71a24888d2e240f",
+    "export_sha256": "ab0a184f98e2b6a6f6ef86680ef94e88b91a1ac7757d28339f02542c1741bf3e",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-camera-contract.log",
+    "raw_sha256": "0f31ef16eb5aad4ad2816b92ff55ab2c8a07315113ec031a26d6f90feaee38ea",
+    "export_sha256": "306e20bb2b93c4ee62ef43d238ac5f1694ea735d833c235be998a8fc0a9af687",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-compact.log",
+    "raw_sha256": "69ed0a237b0deb58bddab22a65c1cd5ac3f99d75dbef449d232aff9093c875b5",
+    "export_sha256": "d7c68641288404e0317ef4fe9c62cc7d50fa12ddd7f43e4dd94a78c91c62ef4f",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-corrections.log",
+    "raw_sha256": "369f637880831a4ac93b285ee026fe8f853d89459f297d1ac94e6b86c54744dd",
+    "export_sha256": "856e9f6e50660f7881b7ed31a889fe86b879623d0775a5d6654d7c19f352d28b",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-final.log",
+    "raw_sha256": "5736fb10a2be364b5ffc7eb7a69242a5f33eb25ce327b5920366fd1508586d53",
+    "export_sha256": "90cb834047ad0598f587334e8542cf9dfc0a556e12758038a5a0df4cf42048e2",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-fixture-cleanup.log",
+    "raw_sha256": "c781e31dfcc413e1488b02070396c73190d2b4a8bd1233f935b30808612c4099",
+    "export_sha256": "fc88b30ee0b7e83e650f7695a75c0054e6cfe7f3f4b51517f7cc43d951aedd9e",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-home-tests.log",
+    "raw_sha256": "a806cf8fb5b5f324b3d3f2edbf21e9d2f73ad853b84e107df2c17a2484e7ae34",
+    "export_sha256": "64f9d0f86275bfbced371ac2aacfb14c02fe58042cf1a9f9c56da3f24079676f",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-new-tests.log",
+    "raw_sha256": "dd90bbe7828d533fe3bbdda0b7f1050c1313252a1f84f9627a5f93a764cd18b6",
+    "export_sha256": "de90893c3b21010bff0634ffd58cc7d020e65a17b4b4d9465ba35be00391c475",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-owner.log",
+    "raw_sha256": "edb0b9cfeb6a8da01abcfc6e5e32efd7eb16cca6a27876c7cda30ff6c44b786f",
+    "export_sha256": "8b11af4738b9c693b2174ee89c222842597b9dc0f4a78be60907e60ef4031d10",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-success.log",
+    "raw_sha256": "f0b82f25a7648d087e3aaee14afafb4b541744b20fcb1d2bd4f1556312ce0be7",
+    "export_sha256": "a840a153c831d88fbf311ee6a58b9993e40b334e84c08f938565a0424576a224",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-tablet-fix.log",
+    "raw_sha256": "8d7fc99dcb0dbd27191fc4462b1e72ec1b166188d63b9116488fe2618b2441a7",
+    "export_sha256": "db5cf367f9274b245c0a9fb3705c3618f1cd1e20c77cadf857ecb59b17b08a39",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/format-targets.log",
+    "raw_sha256": "b8d7f5385c84fdcfeddfd443f4cf9d8d6c3be011defc10c8e95a5a7b000c5c95",
+    "export_sha256": "e5eacc48b92912e360d1f1d186cfe0645a53713f048509e78186f1d7b02ae40d",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/menu-skip-cleanup-fixed.jsonl",
+    "raw_sha256": "d32a3b143ca3a9c3f36099f24c0bcc4cfa7387c50f3531cb5fd367e45551d5cf",
+    "export_sha256": "97300dce3f53cfdb9300bbf57c9f3557e19ca42c01b159094aa913c77cf1c13b",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/new-regressions.jsonl",
+    "raw_sha256": "69fc10bd20368792c61196adc22ad1d996d3cf894c74afac25b2eeeede6f3086",
+    "export_sha256": "83e2bb8b63f9c329922d93cff51635609ddb2f8d0ad4ae2fa6735806af2480cb",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/policy-guard-tests.log",
+    "raw_sha256": "7d0365a5fcc323eb4c64deb85f2d6d30901565df4783c0661f9fa3235d974d15",
+    "export_sha256": "136866da4b933d2412f395f75eababe925d4b2c08310cd5d5fd90260a67de021",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/pub-get.log",
+    "raw_sha256": "71f6a7c9f4a3d136080554b540481b2c843b81f2de69856b3b496e0d64ea544f",
+    "export_sha256": "d50838093ef0ed4e397629a17ac895ae373adb8eca6c645489b5f153c997edfe",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/recovered-journey.jsonl",
+    "raw_sha256": "e5b325bdc88ab390aa6abe722d253f35730117cd94f2264eb88a0100b22f69c0",
+    "export_sha256": "e3bbce3148133618d6346043d50ff0a68988e1e94cc8047c9d215d38d6b3b124",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/strict-camera-contract-final.log",
+    "raw_sha256": "c751a5a119f17c4391d8b9ee94f3b4c832831c6bfa5f725139097ca4c229ee76",
+    "export_sha256": "c3bcc35222b18b2e9aab96a1ebd0350c9c73fade030cdbddf7b75d7a11c7c95f",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/strict-ci-fix-format.log",
+    "raw_sha256": "747596945e006c64f5f507cd5d195573a88325679e59f1ab687b24eec695489d",
+    "export_sha256": "a79520f28b6f5a5d4d755cef41e960ffe8bfd9d7e5dbff5b80351e0bcd3b4f26",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/strict-format-final.log",
+    "raw_sha256": "c97aa0cfe00faa04829f8292570314821012e9fe296128bfb89b7012b3f78ad1",
+    "export_sha256": "982e79414fe5f0cce25f7befe91223b813eb4bc9799895491562cdc9bcd0fc35",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  },
+  {
+    "file": "logs/tablet-anchor-fixed.jsonl",
+    "raw_sha256": "cc82b4d51ac8bc9699f619ad8ca7b24ccb2d86d0a10f7cc7a79bb49cf23d4db4",
+    "export_sha256": "d07d7240d0a26486e7d6d5e9ef47f0f9b3c40ea138563c21232b456d64fd55e5",
+    "change": "LF and terminal line padding only; results retained; raw logs retained under build"
+  }
+]

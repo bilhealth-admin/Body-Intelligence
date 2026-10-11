@@ -1,0 +1,13 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":24300,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart"},"type":"suite","time":1}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":7}
+{"count":1,"time":21,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":18312}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":18323}
+{"test":{"id":3,"name":"(setUpAll)","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":134,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart"},"type":"testStart","time":18325}
+{"testID":3,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":18600}
+{"test":{"id":4,"name":"ar real food journey: cancel, edit 80g, commit once, celebrate, streak","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":220,"root_column":5,"root_url":"file:///G:/BIL_Project/worktrees/bil-first-use-recovery-20261011/test/features/dashboard/first_use_reference_journey_test.dart"},"type":"testStart","time":18603}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":41086}
+{"test":{"id":5,"name":"(tearDownAll)","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":41087}
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":41099}
+{"success":true,"type":"done","time":41254}

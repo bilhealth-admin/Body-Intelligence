@@ -1,0 +1,18 @@
+{
+  "first_use": {
+    "PASS": 56,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "affected_integration": {
+    "PASS": 117,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "flutter_total": 173,
+  "policy_unit_tests": 3,
+  "integration_failure_original": "Quick Add photo captures before Food Log analysis",
+  "revalidation": "camera-contract-fixed.jsonl",
+  "unchanged_app_inputs_for_retained_green_cases": true,
+  "full8_executed": false
+}

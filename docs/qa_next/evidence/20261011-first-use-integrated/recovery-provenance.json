@@ -1,0 +1,150 @@
+{
+  "base": "944973ed3556ccb9b8cd8a09b451562aea3cf652",
+  "remote_before_writing": "88721616e1d4e7d579c9963e7141e460c4978c08",
+  "recovery_commit": "19c3d66560f28d5d118083eb436492c126e995b8",
+  "patch_sha256": "8364714ef80cd8ef8bc4af710cb339fb6692341d609f4cb232caf98020599205",
+  "files": [
+    {
+      "path": "lib/app/router/responsive_app_shell.dart",
+      "original_sha256": "bd5c6fd1e9924d584e7f6b69f28c4a4844178bed497f70cbbac8a5da3341c71b",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/app/router/responsive_app_shell.dart.txt"
+    },
+    {
+      "path": "lib/features/daily_log/food_log_actions.dart",
+      "original_sha256": "d5c824ec93689ef0d3ffb4086210224e1b364c91a753f795658bb994d6e7082f",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/features/daily_log/food_log_actions.dart.txt"
+    },
+    {
+      "path": "lib/features/daily_log/food_log_page.dart",
+      "original_sha256": "44f6b5432360caeaa6e115f584825b68f22ebbf2ff4bbafdd5d152b9808fff4e",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/features/daily_log/food_log_page.dart.txt"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_first_use_experience.dart",
+      "original_sha256": "25435fc2b80e3f9e81957206c35db521905baef7bac23f206a4a0d4ad92fe25d",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/features/dashboard/widgets/dashboard_first_use_experience.dart.txt"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_meal_celebration.dart",
+      "original_sha256": "985c46d31d01de74fcda040f702e270c2c7653d5c8df56b9f1c21e1e1f2545ff",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/features/dashboard/widgets/first_meal_celebration.dart.txt"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_use_context_coachmark.dart",
+      "original_sha256": "1c1f4a7bf47150835a8afe094133edf51d177232044ffa33ea39192db131a263",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/features/dashboard/widgets/first_use_context_coachmark.dart.txt"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_use_glass_surface.dart",
+      "original_sha256": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/features/dashboard/widgets/first_use_glass_surface.dart.txt"
+    },
+    {
+      "path": "lib/shared/widgets/bil_reference_bottom_bar.dart",
+      "original_sha256": "2a399e040b44b24338eb0002b65ba139d667c40243738af4b2f45dffa9e8d4a5",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/shared/widgets/bil_reference_bottom_bar.dart.txt"
+    },
+    {
+      "path": "lib/shared/widgets/first_use_guide_anchor.dart",
+      "original_sha256": "6085b9690a5c2251e8a1089613e96ad4bd23c305b422ee0f44f2c753b12387fd",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/lib/shared/widgets/first_use_guide_anchor.dart.txt"
+    },
+    {
+      "path": "test/features/dashboard/first_use_reference_journey_test.dart",
+      "original_sha256": "5f7d615d8021b4b4d04e0f51870501d9e0397b14fdb1292861a9b394d6c43d78",
+      "backup_matches": true,
+      "local_matches": true,
+      "source_evidence": "recovered-original/test/features/dashboard/first_use_reference_journey_test.dart.txt"
+    }
+  ],
+  "three_way_merges": [
+    {
+      "file": "lib/app/router/responsive_app_shell.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "bd5c6fd1e9924d584e7f6b69f28c4a4844178bed497f70cbbac8a5da3341c71b",
+      "current_sha256": "806a39fb7d192b5468784ff71b43eca7f3873c95c29420b0201f92d84a52d86b"
+    },
+    {
+      "file": "lib/features/daily_log/food_log_actions.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "d5c824ec93689ef0d3ffb4086210224e1b364c91a753f795658bb994d6e7082f",
+      "current_sha256": "a88c528bc98977ef3af24d3cdac2b51c7fd2390963e615b85cd117c55a8dd639"
+    },
+    {
+      "file": "lib/features/daily_log/food_log_page.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "44f6b5432360caeaa6e115f584825b68f22ebbf2ff4bbafdd5d152b9808fff4e",
+      "current_sha256": "0486a5b0f45765abefd878ef3b0f773f5e70f472d6891d1635b7a9c28d26b912"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_first_use_experience.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "25435fc2b80e3f9e81957206c35db521905baef7bac23f206a4a0d4ad92fe25d",
+      "current_sha256": "98b9928c3af8bc55acfab4a55de052633f085594d267149e7a693a49ab56658a"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/first_meal_celebration.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "985c46d31d01de74fcda040f702e270c2c7653d5c8df56b9f1c21e1e1f2545ff",
+      "current_sha256": "3512a20e3191f88c4e354d7969a50e85134d280ea35f6ad7af7de7a5730b7e3e"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/first_use_context_coachmark.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "1c1f4a7bf47150835a8afe094133edf51d177232044ffa33ea39192db131a263",
+      "current_sha256": "615a01d163e683ab77644e6b0e219d8572cb49b432dc03b741f9d4ed997f40a5"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/first_use_glass_surface.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+      "current_sha256": "3cf273c4cdfa9dfff92b490337a56c503997cb8726ea35805d77d792f59ee720"
+    },
+    {
+      "file": "lib/shared/widgets/bil_reference_bottom_bar.dart",
+      "method": "three-way",
+      "exit": 0,
+      "original_sha256": "2a399e040b44b24338eb0002b65ba139d667c40243738af4b2f45dffa9e8d4a5",
+      "current_sha256": "10ab66d7dda8d532047ad6f9b26d0486fa4f5c542576c8a5d11f9232b6b2021b"
+    },
+    {
+      "file": "lib/shared/widgets/first_use_guide_anchor.dart",
+      "method": "recovered-new",
+      "original_sha256": "6085b9690a5c2251e8a1089613e96ad4bd23c305b422ee0f44f2c753b12387fd"
+    },
+    {
+      "file": "test/features/dashboard/first_use_reference_journey_test.dart",
+      "method": "recovered-new",
+      "original_sha256": "5f7d615d8021b4b4d04e0f51870501d9e0397b14fdb1292861a9b394d6c43d78"
+    }
+  ],
+  "text_conflicts": 0,
+  "reference_video_sha256": "e36c4c9fee9768315ca634b70b826cfdaf2ba8ddbfd7bb806f1d37c0a27b428c",
+  "local_attachment_zip_sha256": "4f07a5fdb272d7b35051633a6f6d45f4a8f73dfe77953fc055d501557a9bcdbe",
+  "reference_container_differs_but_video_identical": true
+}

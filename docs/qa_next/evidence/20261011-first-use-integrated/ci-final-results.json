@@ -1,0 +1,519 @@
+{
+  "id": 38119262120,
+  "head_sha": "62254928bcf33922d0659782adccece0e0228b6e",
+  "conclusion": "success",
+  "status": "completed",
+  "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38119262120",
+  "full_analyze": "No issues found",
+  "first_use_and_integration_cases": {
+    "PASS": 122,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "cases": [
+    {
+      "name": "ar anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+      "result": "PASS"
+    },
+    {
+      "name": "en real food journey: cancel, edit 80g, commit once, celebrate, streak",
+      "result": "PASS"
+    },
+    {
+      "name": "ar celebration 320px 2x reduced=false remains nonblocking",
+      "result": "PASS"
+    },
+    {
+      "name": "ar celebration 320px 2x reduced=true remains nonblocking",
+      "result": "PASS"
+    },
+    {
+      "name": "en celebration 320px 2x reduced=false remains nonblocking",
+      "result": "PASS"
+    },
+    {
+      "name": "en celebration 320px 2x reduced=true remains nonblocking",
+      "result": "PASS"
+    },
+    {
+      "name": "ar Food Log 320.0 px 2x text and keyboard can confirm quantity",
+      "result": "PASS"
+    },
+    {
+      "name": "ar Food Log 390.0 px 2x text and keyboard can confirm quantity",
+      "result": "PASS"
+    },
+    {
+      "name": "ar Food Log 430.0 px 2x text and keyboard can confirm quantity",
+      "result": "PASS"
+    },
+    {
+      "name": "en Food Log 320.0 px 2x text and keyboard can confirm quantity",
+      "result": "PASS"
+    },
+    {
+      "name": "en Food Log 390.0 px 2x text and keyboard can confirm quantity",
+      "result": "PASS"
+    },
+    {
+      "name": "en Food Log 430.0 px 2x text and keyboard can confirm quantity",
+      "result": "PASS"
+    },
+    {
+      "name": "menu Skip is below glass and preserves the real control without saving",
+      "result": "PASS"
+    },
+    {
+      "name": "search Skip is below glass and preserves the real control without saving",
+      "result": "PASS"
+    },
+    {
+      "name": "choose Skip is below glass and preserves the real control without saving",
+      "result": "PASS"
+    },
+    {
+      "name": "quantity Skip is below glass and preserves the real control without saving",
+      "result": "PASS"
+    },
+    {
+      "name": "save Skip is below glass and preserves the real control without saving",
+      "result": "PASS"
+    },
+    {
+      "name": "fr starter CTA opens the actual optional Log Food menu",
+      "result": "PASS"
+    },
+    {
+      "name": "es starter CTA opens the actual optional Log Food menu",
+      "result": "PASS"
+    },
+    {
+      "name": "tr starter CTA opens the actual optional Log Food menu",
+      "result": "PASS"
+    },
+    {
+      "name": "failed real SQLite meal insert cannot celebrate or create partial food",
+      "result": "PASS"
+    },
+    {
+      "name": "A to B to A while quantity is open rejects stale save for both owners",
+      "result": "PASS"
+    },
+    {
+      "name": "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip",
+      "result": "PASS"
+    },
+    {
+      "name": "actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip",
+      "result": "PASS"
+    },
+    {
+      "name": "empty meal bucket shows optional steps and Skip dismisses them",
+      "result": "PASS"
+    },
+    {
+      "name": "completed first food does not reopen the tutorial",
+      "result": "PASS"
+    },
+    {
+      "name": "continuing the guide enables contextual Food Log help",
+      "result": "PASS"
+    },
+    {
+      "name": "glassy contextual guide is optional and does not cover content",
+      "result": "PASS"
+    },
+    {
+      "name": "reduce-motion mode has no entrance transition",
+      "result": "PASS"
+    },
+    {
+      "name": "narrow Arabic layout with large text keeps Skip available",
+      "result": "PASS"
+    },
+    {
+      "name": "first successful marker celebrates once and arms streak tip",
+      "result": "PASS"
+    },
+    {
+      "name": "Food Log search guide can be skipped without blocking food",
+      "result": "PASS"
+    },
+    {
+      "name": "quantity coachmark Skip leaves editable serving dialog open",
+      "result": "PASS"
+    },
+    {
+      "name": "a meal bucket alone is not a first committed food",
+      "result": "PASS"
+    },
+    {
+      "name": "manual food marks ready and edits or later foods cannot rearm",
+      "result": "PASS"
+    },
+    {
+      "name": "a failed atomic first food cannot create a celebration",
+      "result": "PASS"
+    },
+    {
+      "name": "calculated recipe first serving creates milestone atomically",
+      "result": "PASS"
+    },
+    {
+      "name": "legacy deleted food is not classified as a new first food",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_en_dark_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_en_dark_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_en_light_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_en_light_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_dark_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_dark_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_light_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_320_ar_light_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_en_dark_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_en_dark_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_en_light_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_en_light_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_dark_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_dark_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_light_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_390_ar_light_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_en_dark_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_en_dark_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_en_light_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_en_light_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_dark_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_dark_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_light_1.0",
+      "result": "PASS"
+    },
+    {
+      "name": "reference geometry, baseline, theme and real hit regions dock_414_ar_light_2.0",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in ar",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in en",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in fr",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in es",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in tr",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in de",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in it",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in pt-BR",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in pt-PT",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in ur",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in fa",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in hi",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in id",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in ms",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in ja",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in ko",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in zh-Hans",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in zh-Hant",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in ru",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in bn",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in vi",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in th",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in pl",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in nl",
+      "result": "PASS"
+    },
+    {
+      "name": "all five labels remain complete at 200% in uk",
+      "result": "PASS"
+    },
+    {
+      "name": "return destinations are the exact known roots, never a redirect or prefix",
+      "result": "PASS"
+    },
+    {
+      "name": "shared Quick Add invokes quick-add-primary-0 after the sheet closes",
+      "result": "PASS"
+    },
+    {
+      "name": "shared Quick Add invokes quick-add-primary-1 after the sheet closes",
+      "result": "PASS"
+    },
+    {
+      "name": "shared Quick Add invokes quick-add-primary-2 after the sheet closes",
+      "result": "PASS"
+    },
+    {
+      "name": "shared Quick Add invokes quick-add-primary-3 after the sheet closes",
+      "result": "PASS"
+    },
+    {
+      "name": "shared Quick Add invokes quick-add-secondary-0 after the sheet closes",
+      "result": "PASS"
+    },
+    {
+      "name": "shared Quick Add invokes quick-add-secondary-1 after the sheet closes",
+      "result": "PASS"
+    },
+    {
+      "name": "shared Quick Add invokes quick-add-secondary-2 after the sheet closes",
+      "result": "PASS"
+    },
+    {
+      "name": "Quick Add dismiss keeps the originating page /intelligence-center",
+      "result": "PASS"
+    },
+    {
+      "name": "Quick Add dismiss keeps the originating page /community/notifications",
+      "result": "PASS"
+    },
+    {
+      "name": "Quick Add dismiss keeps the originating page /settings",
+      "result": "PASS"
+    },
+    {
+      "name": "Search does not duplicate Nutrition when its return context is More",
+      "result": "PASS"
+    },
+    {
+      "name": "Food Log exposes four explicit meal destinations",
+      "result": "PASS"
+    },
+    {
+      "name": "Food Log shows the all-foods surface without tabs",
+      "result": "PASS"
+    },
+    {
+      "name": "popular foods require more than three confirmed selections",
+      "result": "PASS"
+    },
+    {
+      "name": "most-used popular food has priority",
+      "result": "PASS"
+    },
+    {
+      "name": "preserved dashboard stays primary and AI Coach remains visible",
+      "result": "PASS"
+    }
+  ],
+  "isolated_community_cases": {
+    "PASS": 3,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "community_file": {
+    "PASS": 12,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "focused_media": {
+    "PASS": 80,
+    "FAIL": 0,
+    "SKIP": 0
+  },
+  "counts_are_overlapping_not_unique_total": true
+}

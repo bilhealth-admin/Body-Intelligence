@@ -1,0 +1,103 @@
+{
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "Account deletion must be genuinely functional on authenticated account."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "Play Console reviewer app-access credentials and paid entitlements must be real."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "Google Play app status/suspension and appeal must be verified in Console."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "App Store Connect privacy disclosures must match shipped SDK/network behavior."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "Merged Android manifest and release AAB must be inspected, not just source XML."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "All subscriptions need real store lifecycle tests and legally clear terms."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "UGC reporting/blocking requires backend enforcement and ongoing moderation."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "Apple Health and Android Health Connect permissions need physical-device tests."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "Accessibility, VoiceOver/TalkBack, locale fonts, iPad/tablet must be exercised."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "Google Play review UI on approved store test track and iOS development StoreKit UI must be exercised."
+    },
+    {
+      "code": "MANUAL_RELEASE_GATE",
+      "detail": "AI medical claims must not imply diagnostic accuracy without validated evidence."
+    }
+  ],
+  "evidence": [
+    "ANDROID_TARGET_SDK_AT_LEAST_35",
+    "COMMUNITY_'block'",
+    "COMMUNITY_'report'",
+    "COMMUNITY_POLICY_ACCEPTANCE",
+    "HC_RATIONALE_android.intent.action.VIEW_PERMISSION_USAGE",
+    "HC_RATIONALE_android.intent.category.HEALTH_PERMISSIONS",
+    "HC_RATIONALE_androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE",
+    "HC_THREE_ACTIVITY_READ_PERMISSIONS",
+    "IOS_PRIVACY_MANIFEST_NO_TRACKING_DECLARED",
+    "NATIVE_REVIEW_GATEWAY",
+    "OFFICIAL_NATIVE_REVIEW_PLUGIN",
+    "PAYWALL_onRestore",
+    "PAYWALL_paywall-privacy-link",
+    "PAYWALL_paywall-terms-link",
+    "REVIEW_FOREGROUND_GUARD",
+    "REVIEW_LOCAL_COOLDOWN",
+    "REVIEW_MINIMUM_EXPERIENCE",
+    "THREE_AUDITED_SUCCESS_MOMENTS"
+  ],
+  "counts": {
+    "dart_files_scanned_for_patterns": 1501,
+    "native_source_files_in_inventory": 26,
+    "android_permissions_declared_after_source_remove_directives": [
+      "android.permission.POST_NOTIFICATIONS",
+      "android.permission.RECEIVE_BOOT_COMPLETED",
+      "android.permission.CAMERA",
+      "android.permission.RECORD_AUDIO",
+      "android.permission.ACCESS_COARSE_LOCATION",
+      "android.permission.ACCESS_FINE_LOCATION",
+      "android.permission.BLUETOOTH_CONNECT",
+      "android.permission.BLUETOOTH_SCAN",
+      "android.permission.BLUETOOTH_ADMIN",
+      "android.permission.BLUETOOTH",
+      "android.permission.INTERNET",
+      "android.permission.health.READ_STEPS",
+      "android.permission.health.READ_DISTANCE",
+      "android.permission.health.READ_ACTIVE_CALORIES_BURNED"
+    ],
+    "health_permissions": [
+      "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+      "android.permission.health.READ_DISTANCE",
+      "android.permission.health.READ_STEPS"
+    ],
+    "android_target_sdk_source": 36,
+    "review_success_call_sites": [
+      "dailyCheckIn",
+      "diaryCompleted",
+      "planSaved"
+    ],
+    "human_review_required": 11
+  },
+  "meaning": "Source-only heuristics, not an approved build/store/device certificate."
+}

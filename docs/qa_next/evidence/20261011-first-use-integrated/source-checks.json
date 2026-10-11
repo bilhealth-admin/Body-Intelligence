@@ -1,0 +1,27 @@
+{
+  "flutter_version": "3.44.6",
+  "dart_version": "3.12.2",
+  "code_head": "62254928bcf33922d0659782adccece0e0228b6e",
+  "full_project_analyze": {
+    "environment": "GitHub ubuntu-24.04",
+    "run": 38119262120,
+    "result": "No issues found",
+    "exit": 0
+  },
+  "local_food_log_dart_analyze": {
+    "command": "dart analyze --format machine lib/features/daily_log/food_log_page.dart",
+    "exit": 0
+  },
+  "format": {
+    "changed_dart_files": 19,
+    "changes": 0,
+    "ci": "success"
+  },
+  "superseded_windows_full_scans": "Stopped after source changes / definitive CI diagnostic; no complete local whole-project analysis claimed",
+  "ci_initial_failed": {
+    "id": 38118620558,
+    "reason": "10 strict analyzer diagnostics; tests gated and not run",
+    "fixed_without_rule_suppression": true
+  },
+  "policy_unit_tests": 3
+}

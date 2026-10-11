@@ -1,0 +1,1118 @@
+diff --git a/lib/app/router/responsive_app_shell.dart b/lib/app/router/responsive_app_shell.dart
+index b6c3395c..5c1ac2a3 100644
+--- a/lib/app/router/responsive_app_shell.dart
++++ b/lib/app/router/responsive_app_shell.dart
+@@ -11,6 +11,7 @@ import '../theme/bil_navigation_icons.dart';
+ import '../../shared/widgets/bil_wordmark.dart';
+ import '../../shared/widgets/bil_reference_bottom_bar.dart';
+ import 'bil_quick_add_presenter.dart';
++import '../../shared/widgets/first_use_guide_anchor.dart';
+ 
+ part 'responsive_app_shell_top_navigation.dart';
+ 
+@@ -59,9 +60,11 @@ class ResponsiveAppShell extends StatelessWidget {
+   }
+ 
+   @override
+-  Widget build(BuildContext context) => ListenableBuilder(
+-    listenable: GoRouter.of(context).routerDelegate,
+-    builder: (context, _) => _buildShell(context),
++  Widget build(BuildContext context) => FirstUseGuideAnchorHost(
++    builder: (context, anchor) => ListenableBuilder(
++      listenable: GoRouter.of(context).routerDelegate,
++      builder: (context, _) => _buildShell(context),
++    ),
+   );
+ 
+   Widget _buildShell(BuildContext context) {
+@@ -151,8 +154,14 @@ class ResponsiveAppShell extends StatelessWidget {
+       context.go(paths[next]);
+     }
+ 
+-    Future<void> quickAdd() =>
+-        showBilQuickAdd(context, originPath: paths[index]);
++    Future<void> quickAdd() async {
++      final guide = FirstUseGuideAnchor.maybeOf(context)?.startFoodGuide;
++      if (isDashboardRoot && !wide && guide != null) {
++        guide();
++        return;
++      }
++      await showBilQuickAdd(context, originPath: paths[index]);
++    }
+ 
+     final quickButton = _GlassQuickAdd(
+       key: const Key('shell-quick-add'),
+@@ -199,6 +208,9 @@ class ResponsiveAppShell extends StatelessWidget {
+                     label: context.strings.get('primary_navigation'),
+                     child: BilReferenceBottomBar(
+                       key: const Key('glass-bottom-navigation'),
++                      quickAddLayerLink: FirstUseGuideAnchor.maybeOf(
++                        context,
++                      )?.link,
+                       selected: mobileIndex,
+                       moreAttentionCount:
+                           CommunityAttentionScope.controllerOf(
+diff --git a/lib/features/daily_log/food_log_actions.dart b/lib/features/daily_log/food_log_actions.dart
+index 0cbe176b..ba5aa66d 100644
+--- a/lib/features/daily_log/food_log_actions.dart
++++ b/lib/features/daily_log/food_log_actions.dart
+@@ -7,86 +7,113 @@ extension _FoodLogActions on _FoodLogPageState {
+       final messenger = ScaffoldMessenger.of(context);
+       final addedCopy = _t(context, 'Added to diary');
+       final errorCopy = _t(context, 'Could not add food');
+-      final controller = TextEditingController(
+-        text: food.servingSize.toString(),
+-      );
+-      final quantity = await (() async {
+-        try {
+-          var showQuantityGuide = _tourVisible;
+-          return await showDialog<double>(
+-            context: context,
+-            builder: (dialogContext) => StatefulBuilder(
+-              builder: (dialogContext, refreshDialog) => AlertDialog(
+-                title: Text(_t(dialogContext, 'Choose a serving')),
+-                content: SingleChildScrollView(
+-                  child: Column(
+-                    mainAxisSize: MainAxisSize.min,
+-                    children: [
+-                      if (showQuantityGuide) ...[
+-                        FirstUseContextCoachmark(
+-                          key: const Key('food-log-quantity-guide'),
+-                          compact: true,
+-                          title: _foodTourText(
+-                            dialogContext,
+-                            en: 'Make it accurate',
+-                            ar: 'خلّي الكمية دقيقة',
+-                            fr: 'Soyez précis',
+-                            es: 'Ajusta la cantidad',
+-                            tr: 'Miktarı doğru gir',
+-                          ),
+-                          message: _foodTourText(
+-                            dialogContext,
+-                            en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
+-                            ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
+-                            fr: 'Ajustez la portion et confirmez avec Ajouter.',
+-                            es: 'Ajusta la porción y confirma con Añadir.',
+-                            tr: 'Porsiyonu ayarla ve Ekle ile onayla.',
+-                          ),
+-                          icon: Icons.scale_rounded,
+-                          accent: const Color(0xFFFFDB95),
+-                          onSkip: () {
+-                            refreshDialog(() => showQuantityGuide = false);
+-                            _dismissFoodTour();
+-                          },
+-                          skipKey: const Key('food-log-quantity-guide-skip'),
+-                        ),
+-                        const SizedBox(height: 10),
+-                      ],
+-                      TextField(
+-                        key: const Key('food-log-serving-quantity-field'),
+-                        controller: controller,
+-                        autofocus: !showQuantityGuide,
+-                        keyboardType: const TextInputType.numberWithOptions(
+-                          decimal: true,
+-                        ),
+-                        decoration: InputDecoration(
+-                          labelText:
+-                              '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+-                        ),
++      var enteredQuantity = food.servingSize.toString();
++      var showQuantityGuide = _tourVisible;
++      var quantityEdited = false;
++      final quantity = await showDialog<double>(
++        context: context,
++        builder: (dialogContext) => StatefulBuilder(
++          builder: (dialogContext, refreshDialog) => AlertDialog(
++            title: Text(_t(dialogContext, 'Choose a serving')),
++            content: SingleChildScrollView(
++              child: Column(
++                mainAxisSize: MainAxisSize.min,
++                children: [
++                  if (showQuantityGuide && !quantityEdited) ...[
++                    FirstUseContextCoachmark(
++                      key: const Key('food-log-quantity-guide'),
++                      compact: true,
++                      title: _foodTourText(
++                        dialogContext,
++                        en: 'Make it accurate',
++                        ar: 'خلّي الكمية دقيقة',
++                        fr: 'Soyez précis',
++                        es: 'Ajusta la cantidad',
++                        tr: 'Miktarı doğru gir',
+                       ),
+-                    ],
+-                  ),
+-                ),
+-                actions: [
+-                  TextButton(
+-                    onPressed: () => Navigator.pop(dialogContext),
+-                    child: Text(_t(dialogContext, 'Cancel')),
+-                  ),
+-                  FilledButton(
+-                    onPressed: () => Navigator.pop(
+-                      dialogContext,
+-                      double.tryParse(controller.text.replaceAll(',', '.')),
++                      message: _foodTourText(
++                        dialogContext,
++                        en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
++                        ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
++                        fr: 'Ajustez la portion et confirmez avec Ajouter.',
++                        es: 'Ajusta la porción y confirma con Añadir.',
++                        tr: 'Porsiyonu ayarla ve Ekle ile onayla.',
++                      ),
++                      icon: Icons.scale_rounded,
++                      accent: const Color(0xFFFFDB95),
++                      onSkip: () {
++                        refreshDialog(() => showQuantityGuide = false);
++                        _dismissFoodTour();
++                      },
++                      skipKey: const Key('food-log-quantity-guide-skip'),
++                    ),
++                    const SizedBox(height: 10),
++                  ],
++                  TextFormField(
++                    onChanged: (value) {
++                      enteredQuantity = value;
++                      refreshDialog(() => quantityEdited = true);
++                    },
++                    key: const Key('food-log-serving-quantity-field'),
++                    initialValue: enteredQuantity,
++                    autofocus: !showQuantityGuide,
++                    keyboardType: const TextInputType.numberWithOptions(
++                      decimal: true,
++                    ),
++                    decoration: InputDecoration(
++                      labelText:
++                          '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+                     ),
+-                    child: Text(_t(dialogContext, 'Add')),
+                   ),
++                  if (showQuantityGuide && quantityEdited) ...[
++                    const SizedBox(height: 14),
++                    FirstUseContextCoachmark(
++                      key: const Key('food-log-save-guide'),
++                      compact: true,
++                      title: _foodTourText(
++                        dialogContext,
++                        en: 'Ready to save?',
++                        ar: 'جاهز لحفظ وجبتك؟',
++                        fr: 'Prêt à enregistrer ?',
++                        es: '¿Listo para guardar?',
++                        tr: 'Kaydetmeye hazır mısın?',
++                      ),
++                      message: _foodTourText(
++                        dialogContext,
++                        en: 'Review your portion, then tap Add. Your meal is saved only after confirmation.',
++                        ar: 'راجع الكمية ثم اضغط إضافة. نحفظ وجبتك بعد تأكيدك فقط.',
++                        fr: 'Vérifiez la portion, puis appuyez sur Ajouter.',
++                        es: 'Revisa la porción y pulsa Añadir.',
++                        tr: 'Porsiyonu kontrol et ve Ekle’ye dokun.',
++                      ),
++                      icon: Icons.check_circle_outline_rounded,
++                      onSkip: () {
++                        refreshDialog(() => showQuantityGuide = false);
++                        _dismissFoodTour();
++                      },
++                      skipKey: const Key('food-log-save-guide-skip'),
++                    ),
++                  ],
+                 ],
+               ),
+             ),
+-          );
+-        } finally {
+-          controller.dispose();
+-        }
+-      })();
++            actions: [
++              TextButton(
++                onPressed: () => Navigator.pop(dialogContext),
++                child: Text(_t(dialogContext, 'Cancel')),
++              ),
++              FilledButton(
++                key: const Key('food-log-serving-confirm'),
++                onPressed: () => Navigator.pop(
++                  dialogContext,
++                  double.tryParse(enteredQuantity.replaceAll(',', '.')),
++                ),
++                child: Text(_t(dialogContext, 'Add')),
++              ),
++            ],
++          ),
++        ),
++      );
+       if (!mounted || quantity == null || !quantity.isFinite || quantity <= 0) {
+         return;
+       }
+diff --git a/lib/features/daily_log/food_log_page.dart b/lib/features/daily_log/food_log_page.dart
+index 5d5fc171..82b18558 100644
+--- a/lib/features/daily_log/food_log_page.dart
++++ b/lib/features/daily_log/food_log_page.dart
+@@ -575,21 +575,40 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
+             onTap: _showQuickAdd,
+           ),
+         ];
+-    return GridView.count(
+-      shrinkWrap: true,
+-      physics: const NeverScrollableScrollPhysics(),
+-      crossAxisCount: actions.length,
+-      crossAxisSpacing: 8,
+-      childAspectRatio: 1.18,
+-      children: [
+-        for (final action in actions)
+-          _buildActionTile(
+-            key: Key('food-log-action-${action.keyId}'),
+-            icon: action.icon,
+-            label: action.label,
+-            onTap: action.onTap,
+-          ),
+-      ],
++    return LayoutBuilder(
++      builder: (context, constraints) {
++        final tileWidth = (constraints.maxWidth - 24) / 4;
++        var tileHeight = tileWidth / 1.18;
++        final style = DefaultTextStyle.of(context).style.merge(
++          const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
++        );
++        for (final action in actions) {
++          final text = TextPainter(
++            text: TextSpan(text: action.label, style: style),
++            textDirection: Directionality.of(context),
++            textScaler: MediaQuery.textScalerOf(context),
++          )..layout(maxWidth: tileWidth - 8);
++          final requiredHeight = text.height + 22 + 5 + 16;
++          if (requiredHeight > tileHeight) tileHeight = requiredHeight;
++          text.dispose();
++        }
++        return GridView.count(
++          shrinkWrap: true,
++          physics: const NeverScrollableScrollPhysics(),
++          crossAxisCount: actions.length,
++          crossAxisSpacing: 8,
++          mainAxisExtent: tileHeight.ceilToDouble(),
++          children: [
++            for (final action in actions)
++              _buildActionTile(
++                key: Key('food-log-action-${action.keyId}'),
++                icon: action.icon,
++                label: action.label,
++                onTap: action.onTap,
++              ),
++          ],
++        );
++      },
+     );
+   }
+ 
+@@ -616,8 +635,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
+               Text(
+                 label,
+                 textAlign: TextAlign.center,
+-                maxLines: 2,
+-                overflow: TextOverflow.ellipsis,
+                 style: const TextStyle(
+                   fontSize: 11,
+                   fontWeight: FontWeight.w700,
+diff --git a/lib/features/dashboard/widgets/dashboard_first_use_experience.dart b/lib/features/dashboard/widgets/dashboard_first_use_experience.dart
+index e39d7d37..cda62724 100644
+--- a/lib/features/dashboard/widgets/dashboard_first_use_experience.dart
++++ b/lib/features/dashboard/widgets/dashboard_first_use_experience.dart
+@@ -7,6 +7,7 @@ import '../../profile/providers/user_profile_provider.dart';
+ import '../providers/dashboard_provider.dart';
+ import 'first_meal_celebration.dart';
+ import 'first_use_context_coachmark.dart';
++import '../../../shared/widgets/first_use_guide_anchor.dart';
+ 
+ final _firstFoodMilestoneStatusProvider = StreamProvider<String?>(
+   (ref) => ref
+@@ -123,6 +124,21 @@ class _DashboardFirstUseExperienceState
+     if (!mounted || widget.ownerScope != scope) return;
+   }
+ 
++  String _guideCopy(
++    BuildContext context,
++    String en,
++    String ar,
++    String fr,
++    String es,
++    String tr,
++  ) => switch (Localizations.localeOf(context).languageCode) {
++    'ar' => ar,
++    'fr' => fr,
++    'es' => es,
++    'tr' => tr,
++    _ => en,
++  };
++
+   @override
+   Widget build(BuildContext context) {
+     final meals = ref.watch(allMealsProvider);
+@@ -149,9 +165,50 @@ class _DashboardFirstUseExperienceState
+         hasLoggedFood &&
+         firstFoodStatus.value == 'done' &&
+         streakStatus.value == 'ready';
+-    // Put the optional walkthrough in the normal Home scroll flow.
+-    // A fixed bottom overlay covered calories/weight and could intercept
+-    // underlying controls, especially with large text or narrow viewports.
++    final anchor = FirstUseGuideAnchor.maybeOf(context);
++    if (needsGuide &&
++        anchor != null &&
++        MediaQuery.sizeOf(context).width < 900) {
++      return FirstUseAnchoredGuide(
++        anchor: anchor,
++        onStart: () => _finish(openFood: true),
++        guide: FirstUseContextCoachmark(
++          key: const Key('dashboard-food-guide-anchored'),
++          title: _guideCopy(
++            context,
++            'Log your first meal!',
++            'سجّل أول وجبة!',
++            'Enregistrez votre premier repas !',
++            '¡Registra tu primera comida!',
++            'İlk öğününü kaydet!',
++          ),
++          message: _guideCopy(
++            context,
++            'Tap Add to begin. Find your food, choose the portion, then save your meal.',
++            'اضغط زر الإضافة لنبدأ. ابحث عن طعامك، حدّد الكمية ثم احفظ وجبتك.',
++            'Appuyez sur Ajouter. Recherchez votre aliment, choisissez la portion et confirmez.',
++            'Pulsa Añadir. Busca tu alimento, elige la porción y confirma.',
++            'Ekle’ye dokun. Yemeğini ara, porsiyonu seç ve onayla.',
++          ),
++          compact: true,
++          pointerAlignment: Alignment.center,
++          onSkip: () => _finish(openFood: false),
++          skipKey: const Key('dashboard-guide-skip'),
++          onAction: () => _finish(openFood: true),
++          actionLabel: _guideCopy(
++            context,
++            'Let’s begin',
++            'لنبدأ',
++            'Commençons',
++            'Empecemos',
++            'Başlayalım',
++          ),
++          actionKey: const Key('dashboard-guide-next'),
++        ),
++        child: widget.child,
++      );
++    }
++    // Wide layouts and standalone surfaces retain accessible inline guidance.
+     return Column(
+       key: const Key('dashboard-first-use-inline-region'),
+       mainAxisSize: MainAxisSize.min,
+diff --git a/lib/features/dashboard/widgets/first_meal_celebration.dart b/lib/features/dashboard/widgets/first_meal_celebration.dart
+index c2973936..f14fd7c3 100644
+--- a/lib/features/dashboard/widgets/first_meal_celebration.dart
++++ b/lib/features/dashboard/widgets/first_meal_celebration.dart
+@@ -126,38 +126,49 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
+     return Positioned.fill(
+       child: IgnorePointer(
+         ignoring: true,
+-        child: Semantics(
+-          key: const Key('dashboard-first-food-celebration'),
+-          liveRegion: true,
+-          label: '$title $subtitle',
+-          child: AnimatedBuilder(
+-            animation: _controller,
+-            builder: (context, _) {
+-              final value = _reducedMotion ? .40 : _controller.value;
+-              final burst = Curves.easeOutCubic.transform(
+-                (value / .76).clamp(0.0, 1.0),
+-              );
+-              final fade = _reducedMotion
+-                  ? 1.0
+-                  : (1 - ((value - .80) / .20).clamp(0.0, 1.0));
+-              final particleFade = _reducedMotion
+-                  ? 0.0
+-                  : (1 - ((value - .52) / .48).clamp(0.0, 1.0));
+-              final cardScale = _reducedMotion
+-                  ? 1.0
+-                  : .78 +
+-                        .22 *
+-                            Curves.easeOutBack.transform(
+-                              (value / .32).clamp(0.0, 1.0),
+-                            );
+-              return Center(
+-                child: SizedBox(
+-                  width: 340,
+-                  height: 380,
++        child: Material(
++          type: MaterialType.transparency,
++          child: Semantics(
++            key: const Key('dashboard-first-food-celebration'),
++            liveRegion: true,
++            label: '$title $subtitle',
++            child: AnimatedBuilder(
++              animation: _controller,
++              builder: (context, _) {
++                final value = _reducedMotion ? .40 : _controller.value;
++                final burst = Curves.easeOutCubic.transform(
++                  (value / .76).clamp(0.0, 1.0),
++                );
++                final fade = _reducedMotion
++                    ? 1.0
++                    : (1 - ((value - .80) / .20).clamp(0.0, 1.0));
++                final particleFade = _reducedMotion
++                    ? 0.0
++                    : (1 - ((value - .52) / .48).clamp(0.0, 1.0));
++                final cardScale = _reducedMotion
++                    ? 1.0
++                    : .78 +
++                          .22 *
++                              Curves.easeOutBack.transform(
++                                (value / .32).clamp(0.0, 1.0),
++                              );
++                return Opacity(
++                  opacity: fade,
+                   child: Stack(
+-                    clipBehavior: Clip.none,
+-                    alignment: Alignment.center,
+                     children: [
++                      Positioned.fill(
++                        child: DecoratedBox(
++                          decoration: BoxDecoration(
++                            gradient: RadialGradient(
++                              radius: .85,
++                              colors: [
++                                const Color(0xFF064B47).withValues(alpha: .26),
++                                const Color(0xFF062038).withValues(alpha: .04),
++                              ],
++                            ),
++                          ),
++                        ),
++                      ),
+                       if (!_reducedMotion)
+                         Positioned.fill(
+                           child: CustomPaint(
+@@ -167,77 +178,103 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
+                             ),
+                           ),
+                         ),
+-                      if (!_reducedMotion)
+-                        for (var i = 0; i < 10; i++)
+-                          Positioned(
+-                            left:
+-                                155 +
+-                                math.cos(i * math.pi * 2 / 10) *
+-                                    (35 + burst * (116 + i % 3 * 14)),
+-                            top:
+-                                165 +
+-                                math.sin(i * math.pi * 2 / 10) *
+-                                    (30 + burst * (108 + i % 4 * 12)),
+-                            child: Opacity(
+-                              opacity: particleFade,
+-                              child: Transform.rotate(
+-                                angle: burst * (i.isEven ? 1.4 : -1.6),
+-                                child: Text(
+-                                  const ['🎉', '✨', '🎊', '🥳', '💚'][i % 5],
+-                                  style: TextStyle(
+-                                    fontSize: 19.0 + (i % 3) * 6,
+-                                    fontFamilyFallback: const [
+-                                      'Apple Color Emoji',
+-                                      'Noto Color Emoji',
+-                                      'Segoe UI Emoji',
+-                                    ],
+-                                  ),
++                      SafeArea(
++                        child: Center(
++                          child: SingleChildScrollView(
++                            padding: const EdgeInsets.all(20),
++                            child: Transform.scale(
++                              scale: cardScale,
++                              child: ConstrainedBox(
++                                constraints: const BoxConstraints(
++                                  maxWidth: 340,
+                                 ),
+-                              ),
+-                            ),
+-                          ),
+-                      Center(
+-                        child: Opacity(
+-                          opacity: fade,
+-                          child: Transform.scale(
+-                            scale: cardScale,
+-                            child: ConstrainedBox(
+-                              constraints: const BoxConstraints(maxWidth: 298),
+-                              child: FirstUseGlassSurface(
+-                                accent: const Color(0xFFB8FFE6),
+-                                padding: const EdgeInsets.symmetric(
+-                                  horizontal: 25,
+-                                  vertical: 23,
+-                                ),
+-                                child: Column(
+-                                  mainAxisSize: MainAxisSize.min,
+-                                  children: [
+-                                    const Icon(
+-                                      Icons.celebration_rounded,
+-                                      size: 40,
+-                                      color: Color(0xFFFFD76A),
+-                                    ),
+-                                    const SizedBox(height: 12),
+-                                    Text(
+-                                      title,
+-                                      textAlign: TextAlign.center,
+-                                      style: const TextStyle(
+-                                        color: Colors.white,
+-                                        fontSize: 24,
+-                                        fontWeight: FontWeight.w800,
++                                child: FirstUseGlassSurface(
++                                  accent: const Color(0xFF66F0C1),
++                                  padding: const EdgeInsets.symmetric(
++                                    horizontal: 24,
++                                    vertical: 28,
++                                  ),
++                                  child: Column(
++                                    mainAxisSize: MainAxisSize.min,
++                                    children: [
++                                      Container(
++                                        width: 104,
++                                        height: 104,
++                                        decoration: BoxDecoration(
++                                          shape: BoxShape.circle,
++                                          gradient: const LinearGradient(
++                                            begin: Alignment.topLeft,
++                                            end: Alignment.bottomRight,
++                                            colors: [
++                                              Color(0xFFFFF0BA),
++                                              Color(0xFFFFCC61),
++                                              Color(0xFFC7882F),
++                                            ],
++                                          ),
++                                          border: Border.all(
++                                            color: const Color(0xFFFFF5D2),
++                                            width: 2,
++                                          ),
++                                          boxShadow: [
++                                            BoxShadow(
++                                              color: const Color(
++                                                0xFFFFD76A,
++                                              ).withValues(alpha: .3),
++                                              blurRadius: 36,
++                                              spreadRadius: 4,
++                                            ),
++                                          ],
++                                        ),
++                                        child: const Icon(
++                                          Icons.celebration_rounded,
++                                          size: 48,
++                                          color: Color(0xFF644016),
++                                        ),
++                                      ),
++                                      const SizedBox(height: 22),
++                                      Text(
++                                        title,
++                                        textAlign: TextAlign.center,
++                                        style: const TextStyle(
++                                          color: Colors.white,
++                                          fontSize: 26,
++                                          height: 1.2,
++                                          fontWeight: FontWeight.w800,
++                                        ),
++                                      ),
++                                      const SizedBox(height: 12),
++                                      Text(
++                                        subtitle,
++                                        textAlign: TextAlign.center,
++                                        style: const TextStyle(
++                                          color: Color(0xFFE1FFF4),
++                                          fontSize: 16,
++                                          height: 1.45,
++                                        ),
+                                       ),
+-                                    ),
+-                                    const SizedBox(height: 6),
+-                                    Text(
+-                                      subtitle,
+-                                      textAlign: TextAlign.center,
+-                                      style: const TextStyle(
+-                                        color: Color(0xFFDCEFEF),
+-                                        fontSize: 15,
+-                                        height: 1.4,
++                                      const SizedBox(height: 20),
++                                      const Row(
++                                        mainAxisSize: MainAxisSize.min,
++                                        children: [
++                                          Icon(
++                                            Icons.check_circle_rounded,
++                                            color: Color(0xFF8BFFD4),
++                                            size: 18,
++                                          ),
++                                          SizedBox(width: 8),
++                                          Text(
++                                            'BIL',
++                                            style: TextStyle(
++                                              color: Color(0xFFE8FFF7),
++                                              letterSpacing: 3,
++                                              fontSize: 13,
++                                              fontWeight: FontWeight.w700,
++                                            ),
++                                          ),
++                                        ],
+                                       ),
+-                                    ),
+-                                  ],
++                                    ],
++                                  ),
+                                 ),
+                               ),
+                             ),
+@@ -246,9 +283,9 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
+                       ),
+                     ],
+                   ),
+-                ),
+-              );
+-            },
++                );
++              },
++            ),
+           ),
+         ),
+       ),
+@@ -256,8 +293,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
+   }
+ }
+ 
+-/// Deterministic vector pieces remain crisp when emoji fonts differ across
+-/// devices. The larger emoji layer above adds joyful native OS glyphs.
++/// Deterministic gold ribbons and jewel confetti, independent of emoji fonts.
+ class _ConfettiBurstPainter extends CustomPainter {
+   const _ConfettiBurstPainter({required this.progress, required this.opacity});
+ 
+@@ -276,13 +312,14 @@ class _ConfettiBurstPainter extends CustomPainter {
+   void paint(Canvas canvas, Size size) {
+     if (opacity <= 0) return;
+     final origin = Offset(size.width / 2, size.height / 2 - 8);
+-    for (var i = 0; i < 72; i++) {
++    for (var i = 0; i < 120; i++) {
+       final delay = (i % 7) * .037;
+       final local = ((progress - delay) / (1 - delay)).clamp(0.0, 1.0);
+       if (local <= 0) continue;
+       final eased = Curves.easeOutCubic.transform(local);
+       final angle = i * 2.39996;
+-      final distance = (62 + (i % 6) * 27) * eased;
++      final distance =
++          math.min(size.width, size.height) * (.28 + (i % 9) * .06) * eased;
+       final dx = math.cos(angle) * distance;
+       final dy = math.sin(angle) * distance + local * local * (i % 4) * 11;
+       final paint = Paint()
+@@ -292,7 +329,19 @@ class _ConfettiBurstPainter extends CustomPainter {
+       canvas.save();
+       canvas.translate(origin.dx + dx, origin.dy + dy);
+       canvas.rotate(angle + local * (i.isEven ? 3 : -3));
+-      if (i % 3 == 0) {
++      if (i % 11 == 0) {
++        final ribbon = Path()
++          ..moveTo(-4, -20)
++          ..cubicTo(18, -10, -18, 8, 4, 24);
++        canvas.drawPath(
++          ribbon,
++          Paint()
++            ..color = paint.color
++            ..style = PaintingStyle.stroke
++            ..strokeWidth = 2.5
++            ..strokeCap = StrokeCap.round,
++        );
++      } else if (i % 3 == 0) {
+         canvas.drawCircle(Offset.zero, 2.3 + (i % 3), paint);
+       } else {
+         canvas.drawRRect(
+diff --git a/lib/features/dashboard/widgets/first_use_context_coachmark.dart b/lib/features/dashboard/widgets/first_use_context_coachmark.dart
+index a21d4af6..ccbff026 100644
+--- a/lib/features/dashboard/widgets/first_use_context_coachmark.dart
++++ b/lib/features/dashboard/widgets/first_use_context_coachmark.dart
+@@ -19,6 +19,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
+     this.compact = false,
+     this.step,
+     this.stepCount,
++    this.pointerAlignment = AlignmentDirectional.centerStart,
+   });
+ 
+   final String title;
+@@ -33,6 +34,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
+   final bool compact;
+   final int? step;
+   final int? stepCount;
++  final AlignmentGeometry pointerAlignment;
+ 
+   String _skipLabel(BuildContext context) =>
+       switch (Localizations.localeOf(context).languageCode) {
+@@ -93,6 +95,21 @@ class FirstUseContextCoachmark extends StatelessWidget {
+                         ),
+                       ),
+                       const Spacer(),
++                      TextButton(
++                        key: skipKey,
++                        onPressed: onSkip,
++                        style: TextButton.styleFrom(
++                          foregroundColor: Colors.white,
++                          minimumSize: const Size(48, 48),
++                        ),
++                        child: Text(
++                          _skipLabel(context),
++                          style: const TextStyle(
++                            fontSize: 12,
++                            fontWeight: FontWeight.w600,
++                          ),
++                        ),
++                      ),
+                       if (step != null && stepCount != null)
+                         Text(
+                           '$step / $stepCount',
+@@ -149,7 +166,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
+                     const SizedBox(height: 16),
+                     SizedBox(
+                       width: double.infinity,
+-                      height: 48,
++
+                       child: FilledButton(
+                         key: actionKey,
+                         onPressed: onAction,
+@@ -171,7 +188,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
+               ),
+             ),
+             Align(
+-              alignment: AlignmentDirectional.centerStart,
++              alignment: pointerAlignment,
+               child: Padding(
+                 padding: const EdgeInsetsDirectional.only(start: 25),
+                 child: CustomPaint(
+@@ -180,17 +197,6 @@ class FirstUseContextCoachmark extends StatelessWidget {
+                 ),
+               ),
+             ),
+-            Align(
+-              alignment: Alignment.center,
+-              child: TextButton(
+-                key: skipKey,
+-                onPressed: onSkip,
+-                child: Text(
+-                  _skipLabel(context),
+-                  style: const TextStyle(fontWeight: FontWeight.w700),
+-                ),
+-              ),
+-            ),
+           ],
+         ),
+       ),
+@@ -210,7 +216,10 @@ class _GlassGuidePointer extends CustomPainter {
+       ..lineTo(size.width, 0)
+       ..lineTo(size.width / 2, size.height)
+       ..close();
+-    canvas.drawPath(path, Paint()..color = const Color(0xEC173B4E));
++    canvas.drawPath(
++      path,
++      Paint()..color = Color.lerp(const Color(0xFF102B49), accent, .16)!,
++    );
+     canvas.drawLine(
+       Offset.zero,
+       Offset(size.width / 2, size.height),
+diff --git a/lib/features/dashboard/widgets/first_use_glass_surface.dart b/lib/features/dashboard/widgets/first_use_glass_surface.dart
+index 1a806f0b..4b9f8a78 100644
+--- a/lib/features/dashboard/widgets/first_use_glass_surface.dart
++++ b/lib/features/dashboard/widgets/first_use_glass_surface.dart
+@@ -17,16 +17,17 @@ class FirstUseGlassSurface extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final radius = BorderRadius.circular(27);
+-    final reduceMotion =
+-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
++    final radius = BorderRadius.circular(24);
++    final tint = HSVColor.fromColor(
++      accent,
++    ).withSaturation(.72).withValue(.36).toColor();
+     return DecoratedBox(
+       decoration: BoxDecoration(
+         borderRadius: radius,
+-        border: Border.all(color: Colors.white.withValues(alpha: .24)),
++        border: Border.all(color: Colors.white.withValues(alpha: .48)),
+         boxShadow: [
+           BoxShadow(
+-            color: const Color(0xFF06192C).withValues(alpha: .22),
++            color: accent.withValues(alpha: .18),
+             blurRadius: 26,
+             offset: const Offset(0, 11),
+           ),
+@@ -35,22 +36,23 @@ class FirstUseGlassSurface extends StatelessWidget {
+       child: ClipRRect(
+         borderRadius: radius,
+         child: BackdropFilter(
+-          filter: ImageFilter.blur(
+-            sigmaX: reduceMotion ? 0 : 14,
+-            sigmaY: reduceMotion ? 0 : 14,
+-          ),
++          filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+           child: Stack(
+             children: [
+-              const Positioned.fill(
++              Positioned.fill(
+                 child: DecoratedBox(
+                   decoration: BoxDecoration(
+                     gradient: LinearGradient(
+                       begin: Alignment.topLeft,
+                       end: Alignment.bottomRight,
+                       colors: [
+-                        Color(0xDD0A213B),
+-                        Color(0xDA193E54),
+-                        Color(0xE5132745),
++                        Color.lerp(tint, accent, .22)!.withValues(alpha: .92),
++                        Color.lerp(
++                          const Color(0xFF102B49),
++                          accent,
++                          .16,
++                        )!.withValues(alpha: .88),
++                        const Color(0xE609243B),
+                       ],
+                     ),
+                   ),
+@@ -66,7 +68,7 @@ class FirstUseGlassSurface extends StatelessWidget {
+                     shape: BoxShape.circle,
+                     gradient: RadialGradient(
+                       colors: [
+-                        accent.withValues(alpha: .34),
++                        accent.withValues(alpha: .55),
+                         accent.withValues(alpha: 0),
+                       ],
+                     ),
+@@ -89,7 +91,7 @@ class FirstUseGlassSurface extends StatelessWidget {
+               ),
+               Positioned.fill(
+                 child: IgnorePointer(
+-                  child: CustomPaint(painter: _GlassPinpoints(accent)),
++                  child: CustomPaint(painter: _GlassReflection(accent)),
+                 ),
+               ),
+               Padding(padding: padding, child: child),
+@@ -101,43 +103,42 @@ class FirstUseGlassSurface extends StatelessWidget {
+   }
+ }
+ 
+-class _GlassPinpoints extends CustomPainter {
+-  const _GlassPinpoints(this.accent);
+-
++class _GlassReflection extends CustomPainter {
++  const _GlassReflection(this.accent);
+   final Color accent;
+ 
+   @override
+   void paint(Canvas canvas, Size size) {
+-    const points = <Offset>[
+-      Offset(.08, .14),
+-      Offset(.26, .075),
+-      Offset(.71, .06),
+-      Offset(.91, .18),
+-      Offset(.86, .42),
+-      Offset(.14, .49),
+-      Offset(.67, .68),
+-      Offset(.94, .83),
+-      Offset(.34, .92),
+-    ];
+-    final dot = Paint()..color = Colors.white.withValues(alpha: .35);
+-    for (var i = 0; i < points.length; i++) {
+-      final p = Offset(points[i].dx * size.width, points[i].dy * size.height);
+-      canvas.drawCircle(p, i.isEven ? 1.6 : 1.0, dot);
+-    }
+-    final edge = Paint()
+-      ..color = accent.withValues(alpha: .22)
+-      ..strokeWidth = 1.0
+-      ..style = PaintingStyle.stroke;
+-    canvas.drawArc(
+-      Rect.fromLTWH(size.width - 112, -63, 170, 170),
+-      1.25,
+-      1.6,
+-      false,
+-      edge,
++    // A broad reflected light, rather than a decorative star texture.
++    final sheen = Path()
++      ..moveTo(0, 0)
++      ..lineTo(size.width, 0)
++      ..quadraticBezierTo(
++        size.width * .55,
++        size.height * .28,
++        0,
++        size.height * .44,
++      )
++      ..close();
++    canvas.drawPath(
++      sheen,
++      Paint()
++        ..shader = const LinearGradient(
++          begin: Alignment.topLeft,
++          end: Alignment.bottomRight,
++          colors: [Color(0x30FFFFFF), Color(0x00FFFFFF)],
++        ).createShader(Offset.zero & size),
++    );
++    canvas.drawLine(
++      const Offset(24, 1),
++      Offset(size.width - 24, 1),
++      Paint()
++        ..color = Colors.white.withValues(alpha: .55)
++        ..strokeWidth = 1,
+     );
+   }
+ 
+   @override
+-  bool shouldRepaint(covariant _GlassPinpoints oldDelegate) =>
++  bool shouldRepaint(covariant _GlassReflection oldDelegate) =>
+       oldDelegate.accent != accent;
+ }
+diff --git a/lib/shared/widgets/bil_reference_bottom_bar.dart b/lib/shared/widgets/bil_reference_bottom_bar.dart
+index d93648da..76215299 100644
+--- a/lib/shared/widgets/bil_reference_bottom_bar.dart
++++ b/lib/shared/widgets/bil_reference_bottom_bar.dart
+@@ -16,6 +16,7 @@ class BilReferenceBottomBar extends StatelessWidget {
+     this.dark,
+     this.moreAttentionCount = 0,
+     this.destinationKeys = const {},
++    this.quickAddLayerLink,
+     super.key,
+   });
+ 
+@@ -28,6 +29,7 @@ class BilReferenceBottomBar extends StatelessWidget {
+   /// Authoritative count supplied by the caller's existing attention scope.
+   final int moreAttentionCount;
+   final Map<int, Key> destinationKeys;
++  final LayerLink? quickAddLayerLink;
+ 
+   // Index 2 is the shared Quick Add action, never a navigation to this entry.
+   static const routes = <String>[
+@@ -171,65 +173,68 @@ class BilReferenceBottomBar extends StatelessWidget {
+                   top: 0,
+                   width: boundaries[i + 1] - boundaries[i],
+                   height: contentHeight,
+-                  child: KeyedSubtree(
+-                    key: destinationKeys[i],
+-                    child: Semantics(
+-                      label: i == 4 && moreAttentionCount > 0
+-                          ? '${labels[i]}, $moreAttentionCount'
+-                          : labels[i],
+-                      button: true,
+-                      selected: i != 2 && selected == i,
+-                      onTap: () => onSelected(i),
+-                      child: ExcludeSemantics(
+-                        child: Material(
+-                          color: Colors.transparent,
+-                          child: InkWell(
+-                            key: Key('bil-reference-nav-$i'),
+-                            excludeFromSemantics: true,
+-                            onTap: () => onSelected(i),
+-                            borderRadius: BorderRadius.circular(14),
+-                            child: Stack(
+-                              clipBehavior: Clip.none,
+-                              children: [
+-                                PositionedDirectional(
+-                                  start:
+-                                      centres[i] -
+-                                      boundaries[i] -
+-                                      (i == 2 ? 24 : 16) * opticalScale,
+-                                  top: i == 2 ? 0 : rise + 13 * opticalScale,
+-                                  width: (i == 2 ? 48 : 32) * opticalScale,
+-                                  height: (i == 2 ? 48 : 32) * opticalScale,
+-                                  child: _glyph(
+-                                    i,
+-                                    isDark,
+-                                    opticalScale,
+-                                    muted,
+-                                    active,
++                  child: _anchorQuickAdd(
++                    i,
++                    KeyedSubtree(
++                      key: destinationKeys[i],
++                      child: Semantics(
++                        label: i == 4 && moreAttentionCount > 0
++                            ? '${labels[i]}, $moreAttentionCount'
++                            : labels[i],
++                        button: true,
++                        selected: i != 2 && selected == i,
++                        onTap: () => onSelected(i),
++                        child: ExcludeSemantics(
++                          child: Material(
++                            color: Colors.transparent,
++                            child: InkWell(
++                              key: Key('bil-reference-nav-$i'),
++                              excludeFromSemantics: true,
++                              onTap: () => onSelected(i),
++                              borderRadius: BorderRadius.circular(14),
++                              child: Stack(
++                                clipBehavior: Clip.none,
++                                children: [
++                                  PositionedDirectional(
++                                    start:
++                                        centres[i] -
++                                        boundaries[i] -
++                                        (i == 2 ? 24 : 16) * opticalScale,
++                                    top: i == 2 ? 0 : rise + 13 * opticalScale,
++                                    width: (i == 2 ? 48 : 32) * opticalScale,
++                                    height: (i == 2 ? 48 : 32) * opticalScale,
++                                    child: _glyph(
++                                      i,
++                                      isDark,
++                                      opticalScale,
++                                      muted,
++                                      active,
++                                    ),
+                                   ),
+-                                ),
+-                                PositionedDirectional(
+-                                  start:
+-                                      centres[i] -
+-                                      boundaries[i] -
+-                                      labelWidths[i] / 2,
+-                                  top:
+-                                      rise +
+-                                      labelTop +
+-                                      maxLabelAscent -
+-                                      labelAscents[i],
+-                                  width: labelWidths[i],
+-                                  child: Text(
+-                                    labels[i],
+-                                    key: Key('bil-reference-nav-label-$i'),
+-                                    textAlign: TextAlign.center,
+-                                    style: labelStyle.copyWith(
+-                                      color: selected == i && i != 2
+-                                          ? active
+-                                          : muted,
++                                  PositionedDirectional(
++                                    start:
++                                        centres[i] -
++                                        boundaries[i] -
++                                        labelWidths[i] / 2,
++                                    top:
++                                        rise +
++                                        labelTop +
++                                        maxLabelAscent -
++                                        labelAscents[i],
++                                    width: labelWidths[i],
++                                    child: Text(
++                                      labels[i],
++                                      key: Key('bil-reference-nav-label-$i'),
++                                      textAlign: TextAlign.center,
++                                      style: labelStyle.copyWith(
++                                        color: selected == i && i != 2
++                                            ? active
++                                            : muted,
++                                      ),
+                                     ),
+                                   ),
+-                                ),
+-                              ],
++                                ],
++                              ),
+                             ),
+                           ),
+                         ),
+@@ -244,6 +249,12 @@ class BilReferenceBottomBar extends StatelessWidget {
+     );
+   }
+ 
++  Widget _anchorQuickAdd(int index, Widget child) {
++    final link = quickAddLayerLink;
++    if (index != 2 || link == null) return child;
++    return CompositedTransformTarget(link: link, child: child);
++  }
++
+   Widget _glyph(
+     int index,
+     bool isDark,
