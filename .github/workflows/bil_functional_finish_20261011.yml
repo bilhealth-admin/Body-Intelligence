@@ -1,0 +1,78 @@
+name: BIL focused source finalization without tests
+# Authorized source preparation only; no Full8, behavioral tests, builds or deployment.
+on:
+  push:
+    branches: [integration/bil-qa-media-policy-20261011]
+    paths:
+      - .github/workflows/bil_functional_finish_20261011.yml
+      - docs/qa_next/functional_finish_20261011/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-functional-source-prepare
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exact source and apply the narrow supplement
+        run: python3 docs/qa_next/functional_finish_20261011/prepare.py apply
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Pinned dependencies and strict format
+        run: |
+          flutter pub get
+          mapfile -t files < build/bil-functional-finish/paths.txt
+          dart format "${files[@]}"
+          dart fix --apply --code=curly_braces_in_flow_control_structures
+          dart format "${files[@]}"
+          dart format --output=none --set-exit-if-changed "${files[@]}"
+      - name: Analyze complete source strictly
+        id: analyze
+        run: |
+          set -o pipefail
+          flutter analyze --no-pub 2>&1 | tee build/bil-functional-finish/analyze.txt
+      - name: Verify protected files and record evidence
+        env:
+          ANALYZE_OUTCOME: ${{ steps.analyze.outcome }}
+        run: python3 docs/qa_next/functional_finish_20261011/prepare.py finalize
+      - name: Commit only when remote integration has not advanced
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: integration/bil-qa-media-policy-20261011
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = bilhealth-admin/Body-Intelligence
+          test "$GITHUB_REF" = "refs/heads/$BRANCH"
+          AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          REMOTE=$(git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" ls-remote origin "refs/heads/$BRANCH" | cut -f1)
+          test "$REMOTE" = "$GITHUB_SHA" || { echo 'Branch advanced; preserving concurrent work.'; exit 1; }
+          mapfile -t files < build/bil-functional-finish/paths.txt
+          git add -- "${files[@]}" docs/qa_next/evidence/20261011-functional-integration/final-supplement.json
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(bil): retain full recipe serving evidence and stop workout deep-link paywall [skip ci]' -m 'Format and complete analyze passed. Focused behavioral, device and sync tests remain for Codex. No Full8, builds, Production or store changes.'
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push origin "HEAD:refs/heads/$BRANCH"
+          git rev-parse HEAD | tee build/bil-functional-finish/integrated-head.txt
+          unset AUTH GH_TOKEN
+      - name: Preserve evidence even on failure
+        if: always()
+        run: |
+          mkdir -p build/bil-functional-finish
+          git diff --binary HEAD -- lib test > build/bil-functional-finish/current.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bil-functional-finish-${{ github.run_id }}
+          path: build/bil-functional-finish/
+          if-no-files-found: error
+          retention-days: 10

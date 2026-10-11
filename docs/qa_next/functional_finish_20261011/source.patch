@@ -1,0 +1,538 @@
+diff --git a/lib/data/database/meal_food_evidence.dart b/lib/data/database/meal_food_evidence.dart
+index 0b03c09..a9e0048 100644
+--- a/lib/data/database/meal_food_evidence.dart
++++ b/lib/data/database/meal_food_evidence.dart
+@@ -1,3 +1,5 @@
++import 'recipe_serving_evidence.dart';
++
+ import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
+ import 'app_database.dart';
+ import 'nutrient_evidence.dart';
+@@ -7,18 +9,35 @@ enum MealFoodEvidenceState { legacy, valid, invalid }
+ /// Validates the complete immutable basis and its compatibility projection.
+ /// An invalid modern snapshot is unavailable evidence, never a legacy fallback.
+ final class MealFoodEvidence {
+-  MealFoodEvidence._(this.item, this.state, this.portion)
++  MealFoodEvidence._(this.item, this.state, this.portion, [this.recipe])
+     : _nutrients = portion?.nutrients;
+ 
+   factory MealFoodEvidence.read(MealItem item, {String? ownerKey}) {
+     final raw = item.foodEvidenceJson;
+     if (raw == null) {
+-      if (item.foodSourceSnapshot.startsWith('coach_food_v2:')) {
++      if (item.foodSourceSnapshot.startsWith('coach_food_v2:') ||
++          item.foodSourceSnapshot.startsWith(RecipeServingEvidence.sourcePrefix)) {
+         return MealFoodEvidence._(item, MealFoodEvidenceState.invalid, null);
+       }
+       return MealFoodEvidence._(item, MealFoodEvidenceState.legacy, null);
+     }
+     try {
++      if (item.foodSourceSnapshot.startsWith(RecipeServingEvidence.sourcePrefix)) {
++        final recipe = RecipeServingEvidence.decode(raw);
++        final expectedMask = TrackedNutrient.values.fold<int>(0,
++          (mask, nutrient) => recipe.value(foodNutrient(nutrient)) == null
++            ? mask : mask | NutrientEvidenceMask.bit(nutrient));
++        final matches = (ownerKey == null || recipe.ownerKey == ownerKey) &&
++          _near(item.quantity, recipe.servings) &&
++          _near(item.servingSizeSnapshot, 1) &&
++          item.servingUnitSnapshot == 'serving' && !item.foodVerifiedSnapshot &&
++          item.foodSourceSnapshot == recipe.sourceLabel &&
++          item.nutrientEvidenceMask == expectedMask &&
++          TrackedNutrient.values.every((nutrient) => _near(
++            _legacyValue(item, nutrient), recipe.value(foodNutrient(nutrient)) ?? 0));
++        return MealFoodEvidence._(item, matches ? MealFoodEvidenceState.valid
++          : MealFoodEvidenceState.invalid, null, matches ? recipe : null);
++      }
+       final portion = CoachFoodPortion.decodeFromStorage(raw);
+       final sources = [
+         portion.food.source,
+@@ -50,12 +69,16 @@ final class MealFoodEvidence {
+       );
+     } on CoachFoodContractError {
+       return MealFoodEvidence._(item, MealFoodEvidenceState.invalid, null);
++    } on FormatException {
++      return MealFoodEvidence._(item, MealFoodEvidenceState.invalid, null);
+     }
+   }
+ 
+   final MealItem item;
+   final MealFoodEvidenceState state;
+   final CoachFoodPortion? portion;
++  final RecipeServingEvidence? recipe;
++  String? get foodName => portion?.food.name ?? recipe?.name;
+   final CoachFoodNutrients? _nutrients;
+ 
+   bool get isModern => state != MealFoodEvidenceState.legacy;
+@@ -63,6 +86,7 @@ final class MealFoodEvidence {
+ 
+   double? value(TrackedNutrient nutrient) {
+     if (state == MealFoodEvidenceState.invalid) return null;
++    if (recipe != null) return recipe!.value(foodNutrient(nutrient));
+     final modern = portion;
+     if (modern != null) return _nutrients![foodNutrient(nutrient)];
+     final raw = _legacyValue(item, nutrient);
+@@ -80,6 +104,7 @@ final class MealFoodEvidence {
+ 
+   double? fullValue(FoodNutrient nutrient) {
+     if (state == MealFoodEvidenceState.invalid) return null;
++    if (recipe != null) return recipe!.value(nutrient);
+     if (portion != null) return _nutrients![nutrient];
+     for (final tracked in TrackedNutrient.values) {
+       if (foodNutrient(tracked) == nutrient) return value(tracked);
+diff --git a/lib/data/database/recipe_serving_evidence.dart b/lib/data/database/recipe_serving_evidence.dart
+new file mode 100644
+index 0000000..d36c939
+--- /dev/null
++++ b/lib/data/database/recipe_serving_evidence.dart
+@@ -0,0 +1,73 @@
++import 'dart:convert';
++
++import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
++
++/// Immutable per-serving evidence. A serving is NOT assigned an invented gram
++/// weight. This extends the existing nullable JSON column without a migration.
++final class RecipeServingEvidence {
++  RecipeServingEvidence({
++    required this.identity,
++    required this.name,
++    required this.source,
++    required this.ownerKey,
++    required this.perServing,
++    required this.servings,
++  }) {
++    if (identity.trim().isEmpty || identity.length > 240 ||
++        name.trim().isEmpty || name.length > 500 ||
++        source.trim().isEmpty || source.length > 4096 ||
++        ownerKey.trim().isEmpty || ownerKey.length > 200 ||
++        !servings.isFinite || servings <= 0 || servings > 100) {
++      throw const FormatException('Invalid recipe serving evidence.');
++    }
++    for (final nutrient in FoodNutrient.values) {
++      final amount = perServing[nutrient];
++      if (amount != null && !(amount * servings).isFinite) {
++        throw const FormatException('Invalid recipe nutrient total.');
++      }
++    }
++  }
++
++  static const schema = 'bil.recipe.serving.v1';
++  static const sourcePrefix = 'recipe_serving_v1:';
++  final String identity, name, source, ownerKey;
++  final CoachFoodNutrients perServing;
++  final double servings;
++
++  String get sourceLabel => '$sourcePrefix$source';
++  double? value(FoodNutrient nutrient) => perServing[nutrient] == null
++      ? null : perServing[nutrient]! * servings;
++
++  RecipeServingEvidence withServings(double amount) => RecipeServingEvidence(
++    identity: identity, name: name, source: source, ownerKey: ownerKey,
++    perServing: perServing, servings: amount,
++  );
++
++  Map<String, Object?> toJson() => {
++    'schema': schema, 'identity': identity, 'name': name, 'source': source,
++    'ownerKey': ownerKey, 'servings': servings, 'nutrients': perServing.toJson(),
++  };
++
++  String encodeForStorage() => jsonEncode(toJson());
++
++  factory RecipeServingEvidence.decode(String raw) {
++    if (utf8.encode(raw).length > 65536) {
++      throw const FormatException('Recipe evidence exceeds the storage bound.');
++    }
++    final data = jsonDecode(raw);
++    const keys = {'schema', 'identity', 'name', 'source', 'ownerKey', 'servings', 'nutrients'};
++    if (data is! Map<String, dynamic> || data.length != keys.length ||
++        !keys.every(data.containsKey) || data['schema'] != schema ||
++        data['identity'] is! String || data['name'] is! String ||
++        data['source'] is! String || data['ownerKey'] is! String ||
++        data['servings'] is! num) {
++      throw const FormatException('Unsupported recipe serving evidence.');
++    }
++    return RecipeServingEvidence(
++      identity: data['identity'] as String, name: data['name'] as String,
++      source: data['source'] as String, ownerKey: data['ownerKey'] as String,
++      servings: (data['servings'] as num).toDouble(),
++      perServing: CoachFoodNutrients.fromJson(data['nutrients']),
++    );
++  }
++}
+diff --git a/lib/data/repositories/meal_repository.dart b/lib/data/repositories/meal_repository.dart
+index 0e8abbb..4fd9882 100644
+--- a/lib/data/repositories/meal_repository.dart
++++ b/lib/data/repositories/meal_repository.dart
+@@ -7,6 +7,7 @@ import '../database/app_database.dart';
+ import '../database/date_keys.dart';
+ import '../database/nutrient_evidence.dart';
+ import '../database/meal_food_evidence.dart';
++import '../database/recipe_serving_evidence.dart';
+ import '../database/food_basis_evidence.dart';
+ import '../database/database_scope.dart';
+ import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
+@@ -222,6 +223,8 @@ class MealRepository {
+     double? calcium,
+     double? magnesium,
+     double? phosphorus,
++    double? iron,
++    double? vitaminC,
+     double servings = 1,
+   }) async {
+     if (!const {'breakfast', 'lunch', 'dinner', 'snack'}.contains(mealType)) {
+@@ -243,6 +246,8 @@ class MealRepository {
+         calcium,
+         magnesium,
+         phosphorus,
++        iron,
++        vitaminC,
+       ].whereType<double>(),
+     ];
+     if (foodUuid.trim().isEmpty ||
+@@ -264,6 +269,19 @@ class MealRepository {
+       magnesium: magnesium,
+       phosphorus: phosphorus,
+     );
++    final recipeEvidence = RecipeServingEvidence(
++      identity: foodUuid.trim(), name: recipeName.trim(), source: source.trim(),
++      ownerKey: _coachOwnerKey, servings: servings,
++      perServing: CoachFoodNutrients({
++        FoodNutrient.calories: calories, FoodNutrient.protein: protein,
++        FoodNutrient.carbohydrates: carbohydrates, FoodNutrient.fat: fat,
++        FoodNutrient.fiber: fiber, FoodNutrient.sugar: sugar,
++        FoodNutrient.sodium: sodium, FoodNutrient.potassium: potassium,
++        FoodNutrient.calcium: calcium, FoodNutrient.magnesium: magnesium,
++        FoodNutrient.phosphorus: phosphorus, FoodNutrient.iron: iron,
++        FoodNutrient.vitaminC: vitaminC,
++      }),
++    );
+     return _database.transaction(() async {
+       await _requireOpenDayForMeals(dayKeyFor(date));
+       final firstFoodMilestone = await _firstFoodMilestoneBeforeInsert();
+@@ -293,6 +311,8 @@ class MealRepository {
+                 calcium: Value(calcium ?? 0),
+                 magnesium: Value(magnesium ?? 0),
+                 phosphorus: Value(phosphorus ?? 0),
++                iron: Value(iron ?? 0),
++                vitaminC: Value(vitaminC ?? 0),
+                 nutrientEvidenceMask: Value(evidence),
+                 source: Value(source.trim()),
+                 verified: const Value(false),
+@@ -319,6 +339,8 @@ class MealRepository {
+             food.calcium == (calcium ?? 0) &&
+             food.magnesium == (magnesium ?? 0) &&
+             food.phosphorus == (phosphorus ?? 0) &&
++            food.iron == (iron ?? 0) &&
++            food.vitaminC == (vitaminC ?? 0) &&
+             food.nutrientEvidenceMask == evidence &&
+             food.source == source.trim() &&
+             !food.verified &&
+@@ -366,7 +388,8 @@ class MealRepository {
+               magnesium: Value((magnesium ?? 0) * servings),
+               phosphorus: Value((phosphorus ?? 0) * servings),
+               nutrientEvidenceMask: Value(evidence),
+-              foodSourceSnapshot: Value(source.trim()),
++              foodSourceSnapshot: Value(recipeEvidence.sourceLabel),
++              foodEvidenceJson: Value(recipeEvidence.encodeForStorage()),
+               foodVerifiedSnapshot: const Value(false),
+               servingSizeSnapshot: const Value(1),
+               servingUnitSnapshot: const Value('serving'),
+@@ -478,6 +501,8 @@ class MealRepository {
+       }
+       _validateQuantity(existing.quantity);
+       if (await _updateCoachFoodQuantity(existing, quantity)) return;
++      final recipeEvidence = MealFoodEvidence.read(existing, ownerKey: _coachOwnerKey).recipe;
++      final revisedRecipe = recipeEvidence?.withServings(quantity);
+       // A diary item owns its historical nutrition and evidence. A catalog
+       // refresh must not relabel new nutrition as that older source snapshot.
+       final scale = quantity / existing.quantity;
+@@ -498,11 +523,15 @@ class MealRepository {
+           phosphorus: Value(existing.phosphorus * scale),
+           sugar: Value(existing.sugar * scale),
+           nutrientEvidenceMask: Value(existing.nutrientEvidenceMask),
++          foodEvidenceJson: revisedRecipe == null
++            ? const Value.absent()
++            : Value(revisedRecipe.encodeForStorage()),
+           updatedAt: Value(DateTime.now()),
+           revision: Value(existing.revision + 1),
+           syncStatus: const Value('pending'),
+         ),
+       );
++      if (revisedRecipe != null) await _verifyAddedFoodEvidence(id);
+     });
+   }
+ 
+diff --git a/lib/data/repositories/meal_repository_coach_journal.dart b/lib/data/repositories/meal_repository_coach_journal.dart
+index d42c6e9..773ae59 100644
+--- a/lib/data/repositories/meal_repository_coach_journal.dart
++++ b/lib/data/repositories/meal_repository_coach_journal.dart
+@@ -209,7 +209,7 @@ extension _CoachMealJournalStorage on MealRepository {
+     return CoachMealSnapshot(
+       item: item,
+       meal: meal,
+-      foodName: evidence.portion?.food.name ?? food.name,
++      foodName: evidence.foodName ?? food.name,
+       arabicFoodName: evidence.isModern ? null : food.arabicName,
+     );
+   }
+diff --git a/lib/data/repositories/meal_repository_coach_models.dart b/lib/data/repositories/meal_repository_coach_models.dart
+index af38339..70746d0 100644
+--- a/lib/data/repositories/meal_repository_coach_models.dart
++++ b/lib/data/repositories/meal_repository_coach_models.dart
+@@ -344,6 +344,8 @@ final class CoachMealSnapshot {
+       item,
+     ).fullValue(FoodNutrient.vitaminC),
+     'food_evidence': MealFoodEvidence.read(item).portion?.toJson(),
++    if (MealFoodEvidence.read(item).recipe case final recipe?)
++      'recipe_serving_evidence': recipe.toJson(),
+     'nutrient_evidence_mask': item.nutrientEvidenceMask,
+     'source': item.foodSourceSnapshot,
+     'source_verified': item.foodVerifiedSnapshot,
+diff --git a/lib/features/daily_log/presentation/daily_log_meal_detail_items.dart b/lib/features/daily_log/presentation/daily_log_meal_detail_items.dart
+index 8fe1d8a..59a52fd 100644
+--- a/lib/features/daily_log/presentation/daily_log_meal_detail_items.dart
++++ b/lib/features/daily_log/presentation/daily_log_meal_detail_items.dart
+@@ -108,7 +108,7 @@ class _DiaryFoodRow extends StatelessWidget {
+       Localizations.localeOf(context),
+     );
+     final evidence = MealFoodEvidence.read(item, ownerKey: ownerKey);
+-    final immutableName = evidence.portion?.food.name;
++    final immutableName = evidence.foodName;
+     final name =
+         immutableName ??
+         (evidence.isModern || food == null
+diff --git a/lib/features/intelligence_center/food_flow/coach_food_host_target.dart b/lib/features/intelligence_center/food_flow/coach_food_host_target.dart
+index 0924e0d..55f7a0a 100644
+--- a/lib/features/intelligence_center/food_flow/coach_food_host_target.dart
++++ b/lib/features/intelligence_center/food_flow/coach_food_host_target.dart
+@@ -32,7 +32,7 @@ extension _CoachFoodHostTarget on CoachFoodHost {
+       for (final item in meal.items) {
+         final evidence = MealFoodEvidence.read(item, ownerKey: ownerKey);
+         final names = <String>[
+-          ?evidence.portion?.food.name,
++          ?evidence.foodName,
+           ?meal.foodsById[item.foodId]?.name,
+           ?meal.foodsById[item.foodId]?.arabicName,
+         ];
+diff --git a/lib/features/intelligence_center/services/coach_context_assembly.dart b/lib/features/intelligence_center/services/coach_context_assembly.dart
+index 9b9a382..7fdf100 100644
+--- a/lib/features/intelligence_center/services/coach_context_assembly.dart
++++ b/lib/features/intelligence_center/services/coach_context_assembly.dart
+@@ -126,7 +126,6 @@ List<CoachNutritionDay> assembleCoachNutritionDays(List<MealWithItems> meals) {
+       for (final item in meal.items) {
+         itemCount += 1;
+         final evidence = MealFoodEvidence.read(item, ownerKey: meal.ownerKey);
+-        final portion = evidence.portion;
+         final ownerAvailable = meal.ownerKey != null || !evidence.isModern;
+         final values = <String, double?>{
+           for (final nutrient in nutrients.entries)
+@@ -144,7 +143,7 @@ List<CoachNutritionDay> assembleCoachNutritionDays(List<MealWithItems> meals) {
+         }
+         final quickAdd = item.foodSourceSnapshot == 'quick_add';
+         final foodName =
+-            (ownerAvailable ? portion?.food.name : null) ??
++            (ownerAvailable ? evidence.foodName : null) ??
+             (evidence.isModern ? null : meal.foodsById[item.foodId]?.name);
+         items.add({
+           'itemId': item.id,
+diff --git a/lib/features/recipe_import/presentation/trusted_recipe_import_page.dart b/lib/features/recipe_import/presentation/trusted_recipe_import_page.dart
+index 4312045..ddd312e 100644
+--- a/lib/features/recipe_import/presentation/trusted_recipe_import_page.dart
++++ b/lib/features/recipe_import/presentation/trusted_recipe_import_page.dart
+@@ -364,7 +364,9 @@ class _TrustedRecipeImportPageState
+                     name: label,
+                     quantity: row.quantity,
+                     unit: row.unit,
+-                    sourceRecordId: 'local:${food.uuid}',
++                    sourceRecordId: RegExp(r'^usda:\d+$').hasMatch(food.uuid)
++                        ? food.uuid
++                        : 'local:${food.uuid}',
+                   )
+                 : row,
+         ],
+diff --git a/lib/features/recipe_import/services/trusted_recipe_diary_service.dart b/lib/features/recipe_import/services/trusted_recipe_diary_service.dart
+index 7cbda94..651317a 100644
+--- a/lib/features/recipe_import/services/trusted_recipe_diary_service.dart
++++ b/lib/features/recipe_import/services/trusted_recipe_diary_service.dart
+@@ -111,6 +111,7 @@ final class TrustedRecipeDiaryService {
+     final digest = sha256.convert(
+       utf8.encode(
+         jsonEncode({
++          'servingEvidenceSchema': 'bil.recipe.serving.v1',
+           'recipeFingerprint': saved.recipe.fingerprint,
+           'nutritionSnapshot': nutrition.toJson(),
+           'caloriesKcal': nutrition.caloriesKcal,
+@@ -142,6 +143,8 @@ final class TrustedRecipeDiaryService {
+       calcium: nutrition.calciumMg,
+       magnesium: nutrition.magnesiumMg,
+       phosphorus: nutrition.phosphorusMg,
++      iron: nutrition.ironMg,
++      vitaminC: nutrition.vitaminCMg,
+     );
+   }
+ }
+diff --git a/lib/features/wellness/presentation/bil_workout_routines_page.dart b/lib/features/wellness/presentation/bil_workout_routines_page.dart
+index 634f000..5ec9c89 100644
+--- a/lib/features/wellness/presentation/bil_workout_routines_page.dart
++++ b/lib/features/wellness/presentation/bil_workout_routines_page.dart
+@@ -541,15 +541,8 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
+         _initialItemHandled = false;
+         return;
+       }
+-      if (_isLocked(item)) {
+-        final storefrontPlan = ref.read(storefrontTargetPlanProvider).value;
+-        context.push(
+-          storefrontPlan == CommercePlan.premiumAiCoach
+-              ? '/plans?focus=boost'
+-              : '/plans?focus=subscription',
+-        );
+-        return;
+-      }
++      // A deep link opens its requested detail, never an unsolicited paywall.
++      // The detail retains its real content gate and explicit upgrade action.
+       _openDetails(item);
+     });
+   }
+diff --git a/test/data/repositories/recipe_serving_evidence_test.dart b/test/data/repositories/recipe_serving_evidence_test.dart
+new file mode 100644
+index 0000000..80ce5cd
+--- /dev/null
++++ b/test/data/repositories/recipe_serving_evidence_test.dart
+@@ -0,0 +1,112 @@
++import 'dart:convert';
++
++import 'package:body_intelligence_log/data/database/app_database.dart';
++import 'package:body_intelligence_log/data/database/database_scope.dart';
++import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
++import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
++import 'package:body_intelligence_log/features/intelligence_center/domain/food_v2/coach_food_v2.dart';
++import 'package:drift/drift.dart';
++import 'package:drift/native.dart';
++import 'package:flutter_test/flutter_test.dart';
++
++void main() {
++  late AppDatabase db;
++  late MealRepository meals;
++  final day = DateTime(2026, 10, 11);
++  final owner = LocalDatabaseScope.keyForOwner('recipe-owner');
++  setUp(() {
++    db = AppDatabase.forTesting(NativeDatabase.memory(), localOwnerId: 'recipe-owner');
++    meals = MealRepository(db);
++  });
++  tearDown(() => db.close());
++
++  Future<MealItem> log({double? iron = 2, double? vitaminC = 12}) async {
++    await meals.addCalculatedRecipeServingAtomically(
++      date: day, mealType: 'lunch', foodUuid: 'reviewed-recipe-snapshot',
++      recipeName: 'سلطة الفاصوليا', source: 'reviewed-exact-ingredient-snapshot',
++      calories: 200, protein: 20, carbohydrates: 25, fat: 4,
++      fiber: 6, sodium: 100, iron: iron, vitaminC: vitaminC, servings: 1.5,
++    );
++    return db.select(db.mealItems).getSingle();
++  }
++
++  test('fractional servings retain all 13 fields without inventing grams', () async {
++    final item = await log();
++    final evidence = MealFoodEvidence.read(item, ownerKey: owner);
++    expect(evidence.isValid, isTrue);
++    expect(evidence.foodName, 'سلطة الفاصوليا');
++    expect(evidence.portion, isNull);
++    expect(item.servingUnitSnapshot, 'serving');
++    expect(item.quantity, 1.5);
++    expect(evidence.fullValue(FoodNutrient.calories), 300);
++    expect(evidence.fullValue(FoodNutrient.fiber), 9);
++    expect(evidence.fullValue(FoodNutrient.sodium), 150);
++    expect(evidence.fullValue(FoodNutrient.iron), 3);
++    expect(evidence.fullValue(FoodNutrient.vitaminC), 18);
++    expect(evidence.fullValue(FoodNutrient.magnesium), isNull);
++  });
++
++  test('known zero is different from an unavailable nutrient', () async {
++    final item = await log(iron: 0, vitaminC: null);
++    final evidence = MealFoodEvidence.read(item, ownerKey: owner);
++    expect(evidence.fullValue(FoodNutrient.iron), 0);
++    expect(evidence.fullValue(FoodNutrient.vitaminC), isNull);
++  });
++
++  test('editing portion reuses immutable nutrition, never updated catalog', () async {
++    final original = await log();
++    await (db.update(db.foods)..where((f) => f.id.equals(original.foodId))).write(
++      const FoodsCompanion(iron: Value(999), vitaminC: Value(888), name: Value('Changed name')),
++    );
++    await meals.updateMealItem(id: original.id, quantity: .5);
++    final saved = await meals.getMealItem(original.id);
++    final evidence = MealFoodEvidence.read(saved, ownerKey: owner);
++    expect(evidence.isValid, isTrue);
++    expect(evidence.foodName, 'سلطة الفاصوليا');
++    expect(evidence.fullValue(FoodNutrient.iron), 1);
++    expect(evidence.fullValue(FoodNutrient.vitaminC), 6);
++    expect(evidence.fullValue(FoodNutrient.calories), 100);
++  });
++
++  test('explicit historical copy preserves serving evidence and source', () async {
++    final original = await log();
++    final source = (await meals.watchAll().first).single;
++    final template = meals.createTemplateFromHistoricalMeal(
++      meal: source, templateId: 'recipe-copy', templateName: 'Copy',
++    );
++    await meals.instantiateTemplate(template: template,
++      date: DateTime(2026, 10, 12), destinationMealType: 'dinner');
++    final copy = (await meals.watchAll().first)
++        .singleWhere((m) => m.meal.type == 'dinner').items.single;
++    expect(copy.foodEvidenceJson, original.foodEvidenceJson);
++    expect(MealFoodEvidence.read(copy, ownerKey: owner).fullValue(FoodNutrient.iron), 3);
++    expect((await meals.getMealItem(original.id)).quantity, 1.5);
++  });
++
++  test('wrong owner and missing envelope fail closed without legacy fallback', () async {
++    final item = await log();
++    final wrong = MealFoodEvidence.read(item, ownerKey: 'other-account');
++    expect(wrong.isValid, isFalse);
++    expect(wrong.fullValue(FoodNutrient.iron), isNull);
++    final missing = item.copyWith(foodEvidenceJson: const Value(null));
++    expect(MealFoodEvidence.read(missing, ownerKey: owner).isValid, isFalse);
++  });
++
++  test('changed projection, malformed JSON and unknown schema are unavailable', () async {
++    final item = await log();
++    final badProjection = item.copyWith(calories: item.calories + 1);
++    expect(MealFoodEvidence.read(badProjection, ownerKey: owner).isValid, isFalse);
++    final encoded = jsonDecode(item.foodEvidenceJson!) as Map<String, dynamic>;
++    encoded['schema'] = 'unknown';
++    for (final raw in ['{bad', jsonEncode(encoded)]) {
++      final altered = item.copyWith(foodEvidenceJson: Value(raw));
++      expect(MealFoodEvidence.read(altered, ownerKey: owner).isValid, isFalse);
++    }
++  });
++
++  test('invalid serving update rolls back the whole snapshot', () async {
++    final item = await log();
++    await expectLater(meals.updateMealItem(id: item.id, quantity: 101), throwsFormatException);
++    expect(await meals.getMealItem(item.id), item);
++  });
++}
+diff --git a/test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart b/test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart
+new file mode 100644
+index 0000000..63c30df
+--- /dev/null
++++ b/test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart
+@@ -0,0 +1,20 @@
++import 'dart:io';
++
++import 'package:flutter_test/flutter_test.dart';
++
++void main() {
++  test('initial workout deep link opens details without Plans navigation', () {
++    final source = File('lib/features/wellness/presentation/bil_workout_routines_page.dart').readAsStringSync();
++    final start = source.indexOf('  void _scheduleInitialItem(');
++    final end = source.indexOf('  bool _isLocked(', start);
++    expect(start, greaterThanOrEqualTo(0));
++    expect(end, greaterThan(start));
++    final initial = source.substring(start, end);
++    expect(initial, contains('_openDetails(item)'));
++    expect(initial, contains('EntitlementAuthority.verifiedServer'));
++    expect(initial, isNot(contains("'/plans")));
++    expect(initial, isNot(contains('context.push(')));
++    // Existing paid-content enforcement remains independent from navigation.
++    expect(source.substring(end), contains('workoutItemAccessGranted'));
++  });
++}
