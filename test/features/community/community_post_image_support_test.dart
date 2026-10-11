@@ -357,10 +357,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('community-post-add-photo')));
       await tester.pumpAndSettle();
-      expect(
-        find.byKey(const Key('bil-media-review-confirm')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('bil-media-review-confirm')), findsOneWidget);
       expect(repository.imagePublishCalls, 0);
       await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
       await tester.pumpAndSettle();

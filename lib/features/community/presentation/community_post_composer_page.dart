@@ -500,13 +500,13 @@ class _CommunityPostComposerPageState
       final remaining = 4 - _selectedImages.length;
       final picker = widget.imagePicker;
       final List<CommunityPostImageDraft> incoming;
-      if (picker is CommunityPostMultiImagePickerContract) {
-        incoming = await picker.pickMany(maxImages: remaining);
+      if (picker case CommunityPostMultiImagePickerContract multiPicker) {
+        incoming = await multiPicker.pickMany(maxImages: remaining);
       } else {
         // Existing single-pick integrations retain the same API, but still
         // require an explicit review before the image enters the draft.
         final item = await picker.pick();
-        incoming = <CommunityPostImageDraft>[if (item != null) item];
+        incoming = <CommunityPostImageDraft>[?item];
       }
       if (incoming.isEmpty || !mounted || !_checkComposerOwner()) return;
       final accepted = await showBilMediaReviewSheet<CommunityPostImageDraft>(

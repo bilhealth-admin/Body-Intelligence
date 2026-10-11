@@ -138,11 +138,13 @@ class DashboardPage extends ConsumerWidget {
     }
 
     try {
-      await ref.read(profilePhotoServiceProvider).chooseAndSave(
-        confirmSelection: (bytes) => context.mounted
-            ? showBilSingleImageBytesReview(context, bytes: bytes)
-            : Future<bool>.value(false),
-      );
+      await ref
+          .read(profilePhotoServiceProvider)
+          .chooseAndSave(
+            confirmSelection: (bytes) => context.mounted
+                ? showBilSingleImageBytesReview(context, bytes: bytes)
+                : Future<bool>.value(false),
+          );
     } on ProfilePhotoIdentityChangedException {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

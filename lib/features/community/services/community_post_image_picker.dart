@@ -56,7 +56,8 @@ abstract interface class CommunityPostMultiImagePickerContract {
 }
 
 class CommunityPostImagePicker
-    implements CommunityPostImagePickerContract,
+    implements
+        CommunityPostImagePickerContract,
         CommunityPostMultiImagePickerContract {
   CommunityPostImagePicker({
     ImagePicker? picker,

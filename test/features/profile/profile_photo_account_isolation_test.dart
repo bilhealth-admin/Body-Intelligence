@@ -301,26 +301,28 @@ void main() {
     expect(await preferences.get('profilePhotoPublicUrl'), isNull);
   });
 
-  test('gallery explicit confirmation persists only reviewed original bytes', () async {
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
-    final preferences = PreferencesRepository(database);
-    final source = Uint8List.fromList(const [51, 52, 53, 54]);
-    final service = ProfilePhotoService(
-      preferences,
-      authenticatedOwnerId: () => null,
-      photoPicker: (_) async =>
-          XFile.fromData(source, name: 'avatar.png', mimeType: 'image/png'),
-    );
-    final result = await service.chooseAndSave(
-      confirmSelection: (bytes) async {
-        expect(bytes, source);
-        return true;
-      },
-    );
-    expect(result, isNotNull);
-    expect(result!.bytes, source);
-    expect(await preferences.get('profilePhoto'), base64Encode(source));
-  });
-
+  test(
+    'gallery explicit confirmation persists only reviewed original bytes',
+    () async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final preferences = PreferencesRepository(database);
+      final source = Uint8List.fromList(const [51, 52, 53, 54]);
+      final service = ProfilePhotoService(
+        preferences,
+        authenticatedOwnerId: () => null,
+        photoPicker: (_) async =>
+            XFile.fromData(source, name: 'avatar.png', mimeType: 'image/png'),
+      );
+      final result = await service.chooseAndSave(
+        confirmSelection: (bytes) async {
+          expect(bytes, source);
+          return true;
+        },
+      );
+      expect(result, isNotNull);
+      expect(result!.bytes, source);
+      expect(await preferences.get('profilePhoto'), base64Encode(source));
+    },
+  );
 }

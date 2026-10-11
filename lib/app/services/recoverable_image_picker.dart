@@ -279,9 +279,8 @@ class BilRecoverableImagePicker {
     SharedPreferences? preferences;
     String? token;
     if (_usesAndroidRecovery) {
-      token = _clock().toUtc().microsecondsSinceEpoch.toString() +
-          '-' +
-          purpose.name;
+      final micros = _clock().toUtc().microsecondsSinceEpoch;
+      token = '$micros-${purpose.name}';
       try {
         preferences = await _preferences();
         await preferences.setString(

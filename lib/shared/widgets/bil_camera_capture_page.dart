@@ -261,7 +261,8 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                 },
                 errorBuilder: (_, _, _) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted && _capturedForReview != null &&
+                    if (mounted &&
+                        _capturedForReview != null &&
                         !_reviewFailed) {
                       setState(() => _reviewFailed = true);
                     }

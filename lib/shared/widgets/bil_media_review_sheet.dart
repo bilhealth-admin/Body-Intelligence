@@ -22,7 +22,8 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
   BilMediaReviewPurpose? purpose,
 }) {
   if (entries.isEmpty) return Future<List<T>?>.value(null);
-  final scope = purpose ??
+  final scope =
+      purpose ??
       (forCommunity
           ? BilMediaReviewPurpose.communityPost
           : BilMediaReviewPurpose.meal);
@@ -44,9 +45,11 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
     builder: (sheetContext) => StatefulBuilder(
       builder: (sheetContext, update) {
         final scheme = Theme.of(sheetContext).colorScheme;
-        final arabic = Localizations.localeOf(sheetContext).languageCode == 'ar';
+        final arabic =
+            Localizations.localeOf(sheetContext).languageCode == 'ar';
         String tr(String en, String ar) => arabic ? ar : en;
-        final canConfirm = !accepted &&
+        final canConfirm =
+            !accepted &&
             selected.isNotEmpty &&
             selected.every((entry) => ready.contains(entry)) &&
             !selected.any((entry) => failed.contains(entry));
@@ -56,7 +59,9 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
           if (valid && ready.contains(entry)) return;
           if (!valid && failed.contains(entry)) return;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!sheetContext.mounted || accepted || !selected.contains(entry)) {
+            if (!sheetContext.mounted ||
+                accepted ||
+                !selected.contains(entry)) {
               return;
             }
             if (valid && failed.contains(entry)) return;
@@ -74,7 +79,9 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
         Widget preview(int index) {
           final entry = selected[index];
           return Padding(
-            padding: EdgeInsetsDirectional.only(end: index + 1 < selected.length ? 10 : 0),
+            padding: EdgeInsetsDirectional.only(
+              end: index + 1 < selected.length ? 10 : 0,
+            ),
             child: SizedBox(
               width: 158,
               height: 196,
@@ -98,13 +105,19 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                           // No animation loop: cancellation must remain usable
                           // while the original file is still being decoded.
                           return Center(
-                            child: Icon(Icons.photo_outlined, color: scheme.onSurfaceVariant),
+                            child: Icon(
+                              Icons.photo_outlined,
+                              color: scheme.onSurfaceVariant,
+                            ),
                           );
                         },
                         errorBuilder: (_, _, _) {
                           reportFrame(entry, valid: false);
                           return Center(
-                            child: Icon(Icons.broken_image_outlined, color: scheme.onSurfaceVariant),
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              color: scheme.onSurfaceVariant,
+                            ),
                           );
                         },
                       ),
@@ -117,12 +130,17 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                           child: IconButton(
                             key: Key('bil-media-review-remove-$index'),
                             tooltip: tr('Remove photo', 'إزالة الصورة'),
-                            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                            onPressed: accepted ? null : () => update(() {
-                              selected.removeAt(index);
-                              ready.remove(entry);
-                              failed.remove(entry);
-                            }),
+                            constraints: const BoxConstraints(
+                              minWidth: 48,
+                              minHeight: 48,
+                            ),
+                            onPressed: accepted
+                                ? null
+                                : () => update(() {
+                                    selected.removeAt(index);
+                                    ready.remove(entry);
+                                    failed.remove(entry);
+                                  }),
                             icon: const Icon(Icons.close_rounded, size: 20),
                           ),
                         ),
@@ -136,11 +154,17 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
                             child: Text(
                               (index + 1).toString(),
                               textDirection: TextDirection.ltr,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
@@ -156,9 +180,13 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
         return SafeArea(
           top: false,
           child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(sheetContext).bottom),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+            ),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * .85),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(sheetContext).height * .85,
+              ),
               child: SingleChildScrollView(
                 key: const Key('bil-media-review-body'),
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
@@ -168,23 +196,39 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.photo_library_outlined, color: scheme.primary),
+                        Icon(
+                          Icons.photo_library_outlined,
+                          color: scheme.primary,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             switch (scope) {
-                              BilMediaReviewPurpose.profilePhoto => tr('Review your profile photo', 'مراجعة الصورة الشخصية'),
-                              BilMediaReviewPurpose.coverPhoto => tr('Review your cover photo', 'مراجعة صورة الغلاف'),
-                              _ => tr('Review selected photos', 'مراجعة الصور المحددة'),
+                              BilMediaReviewPurpose.profilePhoto => tr(
+                                'Review your profile photo',
+                                'مراجعة الصورة الشخصية',
+                              ),
+                              BilMediaReviewPurpose.coverPhoto => tr(
+                                'Review your cover photo',
+                                'مراجعة صورة الغلاف',
+                              ),
+                              _ => tr(
+                                'Review selected photos',
+                                'مراجعة الصور المحددة',
+                              ),
                             },
-                            style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                            style: Theme.of(sheetContext).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                         ),
                         IconButton(
                           key: const Key('bil-media-review-close'),
                           tooltip: tr('Cancel', 'إلغاء'),
                           onPressed: () => Navigator.of(sheetContext).pop(),
-                          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
                           icon: const Icon(Icons.close_rounded),
                         ),
                       ],
@@ -209,7 +253,8 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                           'أكّد هذه الصورة قبل التحليل. لم يُحفظ شيء بعد.',
                         ),
                       },
-                      style: Theme.of(sheetContext).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                      style: Theme.of(sheetContext).textTheme.bodyMedium
+                          ?.copyWith(color: scheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 16),
                     // Eagerly build this bounded set so off-screen selected
@@ -217,13 +262,19 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                     SingleChildScrollView(
                       key: const Key('bil-media-review-previews'),
                       scrollDirection: Axis.horizontal,
-                      child: Row(children: [for (var i = 0; i < selected.length; i++) preview(i)]),
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < selected.length; i++) preview(i),
+                        ],
+                      ),
                     ),
                     if (selected.any((entry) => failed.contains(entry))) ...[
                       const SizedBox(height: 12),
                       Text(
-                        tr('A photo could not be previewed. Remove it or choose another photo.',
-                           'تعذرت معاينة إحدى الصور. أزلها أو اختر صورة أخرى.'),
+                        tr(
+                          'A photo could not be previewed. Remove it or choose another photo.',
+                          'تعذرت معاينة إحدى الصور. أزلها أو اختر صورة أخرى.',
+                        ),
                         key: const Key('bil-media-review-error'),
                         style: TextStyle(color: scheme.error),
                       ),
@@ -237,29 +288,46 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
                     const SizedBox(height: 12),
                     FilledButton.icon(
                       key: const Key('bil-media-review-confirm'),
-                      style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
-                      onPressed: !canConfirm ? null : () {
-                        if (accepted) return;
-                        accepted = true;
-                        Navigator.of(sheetContext).pop(
-                          List<T>.unmodifiable(selected.map((entry) => entry.value)),
-                        );
-                      },
-                      icon: const Icon(Icons.check_circle_outline_rounded),
-                      label: Text(
-                        switch (scope) {
-                          BilMediaReviewPurpose.communityPost => tr('Add to draft', 'إضافة إلى المسودة'),
-                          BilMediaReviewPurpose.profilePhoto => tr('Update photo', 'تحديث الصورة'),
-                          BilMediaReviewPurpose.coverPhoto => tr('Use cover photo', 'استخدام صورة الغلاف'),
-                          BilMediaReviewPurpose.meal => tr('Use this photo', 'استخدام هذه الصورة'),
-                        },
-                        textAlign: TextAlign.center,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 52),
                       ),
+                      onPressed: !canConfirm
+                          ? null
+                          : () {
+                              if (accepted) return;
+                              accepted = true;
+                              Navigator.of(sheetContext).pop(
+                                List<T>.unmodifiable(
+                                  selected.map((entry) => entry.value),
+                                ),
+                              );
+                            },
+                      icon: const Icon(Icons.check_circle_outline_rounded),
+                      label: Text(switch (scope) {
+                        BilMediaReviewPurpose.communityPost => tr(
+                          'Add to draft',
+                          'إضافة إلى المسودة',
+                        ),
+                        BilMediaReviewPurpose.profilePhoto => tr(
+                          'Update photo',
+                          'تحديث الصورة',
+                        ),
+                        BilMediaReviewPurpose.coverPhoto => tr(
+                          'Use cover photo',
+                          'استخدام صورة الغلاف',
+                        ),
+                        BilMediaReviewPurpose.meal => tr(
+                          'Use this photo',
+                          'استخدام هذه الصورة',
+                        ),
+                      }, textAlign: TextAlign.center),
                     ),
                     const SizedBox(height: 8),
                     OutlinedButton(
                       key: const Key('bil-media-review-cancel'),
-                      style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 48),
+                      ),
                       onPressed: () => Navigator.of(sheetContext).pop(),
                       child: Text(tr('Cancel', 'إلغاء')),
                     ),
@@ -283,7 +351,9 @@ Future<bool> showBilSingleImageBytesReview(
   if (bytes.isEmpty) return false;
   final selected = await showBilMediaReviewSheet<Uint8List>(
     context,
-    entries: [BilMediaReviewEntry<Uint8List>(value: bytes, preview: MemoryImage(bytes))],
+    entries: [
+      BilMediaReviewEntry<Uint8List>(value: bytes, preview: MemoryImage(bytes)),
+    ],
     purpose: purpose,
   );
   return selected != null && selected.isNotEmpty;
