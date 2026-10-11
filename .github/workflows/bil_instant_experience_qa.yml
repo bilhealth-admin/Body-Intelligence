@@ -1,0 +1,46 @@
+name: BIL instant experience isolated QA
+
+# Inspection artifact only. No builds, deployment, secrets or source writeback.
+on:
+  push:
+    branches: [integration/bil-qa-media-policy-20261011]
+    paths:
+      - .github/workflows/bil_instant_experience_qa.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-snapshot:
+    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Export tracked source for isolated performance inspection
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, subprocess, zipfile
+          out = pathlib.Path('build/instant-experience')
+          out.mkdir(parents=True, exist_ok=True)
+          files = subprocess.check_output(['git', 'ls-files', '-z', 'lib', 'test', 'tool', '.github/workflows', 'pubspec.yaml', 'pubspec.lock', 'analysis_options.yaml', 'dart_test.yaml']).decode().split('\0')
+          suffixes = {'.dart', '.yaml', '.yml', '.json', '.py', '.sh', '.ps1', '.lock', '.sql'}
+          with zipfile.ZipFile(out / 'source.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+              for name in files:
+                  path = pathlib.Path(name)
+                  if name and path.is_file() and path.suffix in suffixes:
+                      archive.write(path, name)
+          head = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
+          (out / 'snapshot.json').write_text(json.dumps({'head': head, 'scope': 'tracked source only; no performance results'}, indent=2))
+          print(head)
+          print('Source snapshot only; no tests or performance claims.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bil-instant-source-${{ github.sha }}
+          path: build/instant-experience/
+          if-no-files-found: error
+          retention-days: 3
