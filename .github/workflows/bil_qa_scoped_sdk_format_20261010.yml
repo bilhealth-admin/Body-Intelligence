@@ -1,0 +1,90 @@
+name: BIL QA scoped Dart 3.44.6 format finalizer
+
+on:
+  push:
+    branches: [qa/bil-quality-ux-integration-20261009]
+    paths:
+      - .github/workflows/bil_qa_scoped_sdk_format_20261010.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bil-qa-sdk-format-20261010
+  cancel-in-progress: false
+
+jobs:
+  formatter:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/bil-quality-ux-integration-20261009'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Apply EXACT Flutter SDK formatter to QA-only regression edits
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format \
+            lib/data/repositories/meal_repository.dart \
+            lib/data/repositories/meal_repository_vision_journal.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/daily_log_capture_actions.dart \
+            lib/features/intelligence_center/presentation/intelligence_vision_flow.dart \
+            lib/features/nutrition/presentation/meal_image_review_dialog.dart \
+            lib/features/nutrition/services/meal_image_gateway_contract.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_review.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_match.dart \
+            test/features/nutrition/meal_image_unified_review_contract_test.dart \
+            test/features/nutrition/meal_vision_verified_commit_test.dart \
+            test/features/nutrition/meal_vision_premium_review_test.dart \
+            test/features/nutrition/coach_food_commit_test.dart \
+            test/features/nutrition/coach_meal_commit_boundary_test.dart \
+            test/features/nutrition/coach_meal_journal_cases.dart \
+            test/parallel/bil02/coach_media_page_overlay_test.dart \
+            test/features/intelligence_center/coach_image_source_regression_test.dart \
+            test/features/nutrition/meal_image_language_regression_test.dart \
+            test/features/nutrition/meal_vision_flutter_capture_test.dart
+          git diff --check
+          git config user.name "BIL QA exact SDK formatter"
+          git config user.email "bil-qa-format@users.noreply.github.com"
+          git add -- \
+            lib/data/repositories/meal_repository.dart \
+            lib/data/repositories/meal_repository_vision_journal.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/daily_log_capture_actions.dart \
+            lib/features/intelligence_center/presentation/intelligence_vision_flow.dart \
+            lib/features/nutrition/presentation/meal_image_review_dialog.dart \
+            lib/features/nutrition/services/meal_image_gateway_contract.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_review.dart \
+            lib/features/nutrition/presentation/meal_vision_premium_match.dart \
+            test/features/nutrition/meal_image_unified_review_contract_test.dart \
+            test/features/nutrition/meal_vision_verified_commit_test.dart \
+            test/features/nutrition/meal_vision_premium_review_test.dart \
+            test/features/nutrition/coach_food_commit_test.dart \
+            test/features/nutrition/coach_meal_commit_boundary_test.dart \
+            test/features/nutrition/coach_meal_journal_cases.dart \
+            test/parallel/bil02/coach_media_page_overlay_test.dart \
+            test/features/intelligence_center/coach_image_source_regression_test.dart \
+            test/features/nutrition/meal_image_language_regression_test.dart \
+            test/features/nutrition/meal_vision_flutter_capture_test.dart
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "BIL_QA_SDK_FORMAT_ALREADY_PASS"
+            exit 0
+          fi
+          git commit -m "style(qa): apply exact Flutter 3.44.6 formatting to scoped Vision and QA files"
+          git fetch origin qa/bil-quality-ux-integration-20261009
+          local_parent="$(git rev-parse HEAD^)"
+          remote_head="$(git rev-parse origin/qa/bil-quality-ux-integration-20261009)"
+          if [[ "$local_parent" != "$remote_head" ]]; then
+            echo "::error::QA HEAD moved; refusing formatter push without an explicit rebase/review"
+            exit 1
+          fi
+          git push origin HEAD:refs/heads/qa/bil-quality-ux-integration-20261009

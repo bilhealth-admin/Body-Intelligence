@@ -1,0 +1,16 @@
+Strict dart format targets: 192
+[PASS] source-format-1 -> build\bil-main-qa-intake\final\source-format-1-1791660922340556800.log
+[PASS] source-format-2 -> build\bil-main-qa-intake\final\source-format-2-1791660925139244100.log
+[PASS] source-format-3 -> build\bil-main-qa-intake\final\source-format-3-1791660928014599800.log
+[PASS] source-format-4 -> build\bil-main-qa-intake\final\source-format-4-1791660930759072900.log
+[PASS] source-format-5 -> build\bil-main-qa-intake\final\source-format-5-1791660932816548100.log
+[PASS] source-analyze -> build\bil-main-qa-intake\final\source-analyze-1791660935322441400.log
+[PASS] arabic-noto-capture -> build\bil-main-qa-intake\final\arabic-noto-capture-1791661446790764000.log
+[PASS] arabic-vision-v2 -> build\bil-main-qa-intake\final\arabic-vision-v2-1791661470435159400.log
+[PASS] affected-contracts-home-card-all -> build\bil-main-qa-intake\final\affected-contracts-home-card-all-1791661503998836700.log
+[PASS] affected-contracts-vision-final-portion -> build\bil-main-qa-intake\final\affected-contracts-vision-final-portion-1791661515320398700.log
+[PASS] broad-dashboard-nutrition -> build\bil-main-qa-intake\final\broad-dashboard-nutrition-1791661524765816800.log
+[FAIL] broad-dashboard-contract-health -> build\bil-main-qa-intake\final\broad-dashboard-contract-health-1791661540791804700.log
+[FAIL] broad-weekly-onboarding-goldens -> build\bil-main-qa-intake\final\broad-weekly-onboarding-goldens-1791661551401918800.log
+[FAIL] broad-wellness-commerce -> build\bil-main-qa-intake\final\broad-wellness-commerce-1791661569379131000.log
+Full intentionally blocked; no cached prerequisite or golden approval synthesized.

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../connected_health/connected_health_copy.dart';
 import '../../../data/database/app_database.dart';
 import '../../connected_health/connected_health_model.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
@@ -22,6 +23,7 @@ import '../domain/sleep_schedule.dart';
 import '../domain/static_workout_artwork.dart';
 import 'wellness_copy.dart';
 import 'sleep_stage_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'sleep_tracker_page.dart';
 part 'sleep_tracker_experience.dart';

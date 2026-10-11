@@ -99,10 +99,25 @@ void main() {
     expect(source, contains("Key('settings-connected-health-entry')"));
     expect(source, contains('Directionality.of(context) == TextDirection.rtl'));
     expect(source, isNot(contains("Key('more-devices-sync-card')")));
-    expect(source, contains('width: 44'));
-    expect(source, contains('height: 44'));
-    expect(source, contains('size: 24'));
+    // Owner-approved More uses a 34dp flat tile and 20dp SF/Material glyph;
+    // the obsolete raised 44dp badge must not return.
+    final flatIcon = File(
+      'lib/features/settings/settings_page_polish.dart',
+    ).readAsStringSync().split('class _CloudSyncRow').first;
+    expect(flatIcon, contains('return BilFlatIcon('));
+    expect(flatIcon, contains('size: 34,'));
+    expect(flatIcon, contains('iconSize: 20,'));
+    expect(flatIcon, isNot(contains('boxShadow:')));
     expect(source, contains(r"Key('more-premium-icon-${kind.name}')"));
-    expect(source, contains('PremiumCrownEmblem'));
+    // The current optional Premium row is a flat, direction-aware link, not
+    // a decorative crown/paywall. It must stay keyboard/gesture actionable.
+    expect(source, contains("Key('more-premium-entry')"));
+    expect(source, contains('ReferenceSettingsCopy.of(context)'));
+    expect(
+      source,
+      contains('isRetry ? Icons.refresh_rounded : directionalIcon'),
+    );
+    expect(source, contains("onTap: () => context.push('/plans')"));
+    expect(source, isNot(contains('PremiumCrownEmblem')));
   });
 }

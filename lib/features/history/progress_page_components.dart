@@ -8,18 +8,12 @@ class _Point {
 
 class _ProgressSelector extends StatelessWidget {
   const _ProgressSelector({
-    required this.kind,
     required this.eyebrow,
     required this.value,
     required this.onTap,
-    this.iconOverride,
-    this.appleIconOverride,
     super.key,
   });
 
-  final BilSemanticIconKind kind;
-  final IconData? iconOverride;
-  final IconData? appleIconOverride;
   final String eyebrow;
   final String value;
   final VoidCallback onTap;
@@ -34,15 +28,6 @@ class _ProgressSelector extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
         child: Row(
           children: [
-            BilSemanticIconBadge(
-              kind: kind,
-              iconOverride: iconOverride,
-              appleIconOverride: appleIconOverride,
-              size: 38,
-              iconSize: 19,
-              shape: BoxShape.rectangle,
-            ),
-            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,13 +46,17 @@ class _ProgressSelector extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 18,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ],
         ),
       ),
@@ -109,16 +98,7 @@ class _ProgressChartCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colors.surface,
-              colors.primaryContainer.withValues(alpha: .2),
-            ],
-          ),
-        ),
+        decoration: BoxDecoration(color: colors.surface),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
           child: Column(
@@ -134,7 +114,7 @@ class _ProgressChartCard extends StatelessWidget {
                         Text(
                           title,
                           style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w800),
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -168,7 +148,7 @@ class _ProgressChartCard extends StatelessWidget {
                             ],
                           ),
                           style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w900),
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
@@ -253,7 +233,7 @@ class _SummaryValue extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: Theme.of(
               context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(height: 3),

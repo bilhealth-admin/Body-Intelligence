@@ -1,0 +1,41 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: compact watch keeps all four readings below the clock
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/live_health_watch_compact_all_metrics.png": Pixel test failed, 10.18%, 4927px diff
+detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart:83:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: compact watch keeps all four readings below the clock [E]
+  Test failed. See exception logs above.
+  The test description was: compact watch keeps all four readings below the clock
+  
+00:00 +0 -1: (tearDownAll)
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart: compact watch keeps all four readings below the clock

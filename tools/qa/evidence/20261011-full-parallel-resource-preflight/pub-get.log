@@ -1,0 +1,6 @@
+Resolving dependencies...
+Downloading packages...
+! app_links 7.2.1 from path tool\vendor_app_links (overridden)
+! archive 4.0.9 from path tool\vendor_archive (overridden)
+! dart_jsonwebtoken 3.4.1 from path tool\vendor_dart_jsonwebtoken (overridden)
+Got dependencies!

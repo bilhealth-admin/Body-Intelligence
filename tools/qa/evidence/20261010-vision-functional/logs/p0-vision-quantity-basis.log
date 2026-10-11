@@ -1,0 +1,36 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/meal_image_unified_review_contract_test.dart test/features/nutrition/meal_vision_final_portion_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart: parses every unified review field without selecting an item
+00:00 +1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart: reviewed image amounts convert to the diary gram contract
+00:00 +2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart: Vision preserves catalog count or volume without fake grams
+00:00 +3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart: Vision mass conversions scale per actual catalog mass basis
+00:00 +4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart: vision UI copy is clean and complete in five locales
+00:00 +5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_image_unified_review_contract_test.dart: vision review copy resolves honestly across all 25 locales
+00:01 +6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: (setUpAll)
+00:01 +6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: cancel final review returns no selection and no substitute photo
+00:02 +7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: final edited portion returns the food and exact commit basis
+
+Warning: A call to tap() with finder "Found 1 widget with widget matching predicate: [
+  RawTooltip-[LabeledGlobalKey<RawTooltipState>#c6023]("إغلاق الصورة", hover delay: 0:00:00.000000, touch delay: 0:00:01.500000, dismiss delay: 0:00:00.100000, triggerMode: TooltipTriggerMode.longPress, enableFeedback: true, positionDelegate: Closure: (TooltipPositionContext) => Offset from Function '_getDefaultPositionDelegate@683220820':., state: RawTooltipState#a2a4d),
+]" derived an Offset (Offset(311.0, 446.0)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: _RenderLayoutSurrogateProxyBox#b11a6 relayoutBoundary=up12
+The hit test result at that offset is: HitTestResult(_RenderColoredBox#bba36@Offset(311.0, 446.0), RenderConstrainedBox#ad303@Offset(311.0, 446.0), RenderMouseRegion#ddd0d@Offset(311.0, 446.0), RenderSemanticsAnnotations#a11f8@Offset(311.0, 446.0), RenderPointerListener#588fe@Offset(311.0, 446.0), RenderSemanticsGestureHandler#4bb2e@Offset(311.0, 446.0), RenderExcludeSemantics#37bab@Offset(311.0, 446.0), RenderBlockSemantics#e5522@Offset(311.0, 446.0), RenderIgnorePointer#85442@Offset(311.0, 446.0), RenderSemanticsAnnotations#4121d@Offset(311.0, 446.0), _RenderTheater#dec14@Offset(311.0, 446.0), RenderAbsorbPointer#43549@Offset(311.0, 446.0), RenderPointerListener#c56cf@Offset(311.0, 446.0), RenderSemanticsAnnotations#97a49@Offset(311.0, 446.0), RenderRepaintBoundary#a8ec3@Offset(311.0, 446.0), RenderCustomPaint#21420@Offset(311.0, 446.0), RenderSemanticsAnnotations#e2ee6@Offset(311.0, 446.0), RenderSemanticsAnnotations#d5bb2@Offset(311.0, 446.0), RenderSemanticsAnnotations#8f92d@Offset(311.0, 446.0), RenderTapRegionSurface#55ada@Offset(311.0, 446.0), RenderSemanticsAnnotations#1a814@Offset(311.0, 446.0), RenderSemanticsAnnotations#55415@Offset(311.0, 446.0), HitTestEntry<HitTestTarget>#fc8b8(_ReusableRenderView#04440), HitTestEntry<HitTestTarget>#7effd(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+#3      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart:100:18)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+00:03 +8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: both diary entry points commit final values and route-scoped original photo
+00:03 +9: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: (tearDownAll)
+00:03 +9: All tests passed!

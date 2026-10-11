@@ -1,0 +1,38 @@
+import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_review_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+import '../../test/features/nutrition/vision_v2_test_fixture.dart';
+void main() {
+  setUpAll(prepareVisionV2Fixture);
+  for (final width in [320.0, 390.0, 430.0]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('current final photo and editable portion $width $scale', (tester) async {
+        await setVisionV2Viewport(tester, Size(width, 932));
+        await tester.pumpWidget(visionV2App(Builder(builder: (context) => TextButton(
+          onPressed: () => showReviewedVisionFoodMatchDialog(context,
+            recognizedName: 'فول مدمس مع طحينة — عينة اختبار', foods: [visionV2Food(serving:60)],
+            reviewedAmount:60, reviewedUnit:'g', imagePath:visionV2PhotoPath),
+          child:const Text('OPEN TEST'))),scale:scale));
+        await tester.tap(find.text('OPEN TEST'));
+        await tester.pumpAndSettle();
+        for (var i=0;i<100;i++) {
+          final images=tester.widgetList<RawImage>(find.descendant(of:find.byKey(const Key('premium-vision-final-photo')),matching:find.byType(RawImage)));
+          if(images.any((image)=>image.image!=null)) break;
+          await tester.runAsync(()=>Future<void>.delayed(const Duration(milliseconds:10)));
+          await tester.pump(const Duration(milliseconds:10));
+        }
+        expect(tester.widgetList<RawImage>(find.descendant(of:find.byKey(const Key('premium-vision-final-photo')),matching:find.byType(RawImage))).any((image)=>image.image!=null),isTrue);
+        await tester.enterText(find.byKey(const Key('premium-vision-final-amount')),'60');
+        tester.testTextInput.hide();
+        await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
+        void repaint(RenderObject object) {object.markNeedsPaint();object.visitChildren(repaint);}
+        repaint(tester.renderObject(find.byKey(const Key('premium-vision-render-surface'))));
+        await tester.pump();
+        await captureVisionV2(tester,'functional_photo_portion_${width.toInt()}_${scale}x');
+        expect(tester.takeException(),isNull);
+      });
+    }
+  }
+}

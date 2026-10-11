@@ -1,0 +1,37 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/meal_image_unified_review_contract_test.dart test/features/nutrition/meal_vision_final_portion_test.dart --reporter=json --concurrency=1
+
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":20912,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"count":2,"time":10,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3865}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":6,"line":null,"column":null,"url":null},"type":"group","time":3866}
+{"test":{"id":3,"name":"parses every unified review field without selecting an item","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":9,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart"},"type":"testStart","time":3867}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3888}
+{"test":{"id":4,"name":"reviewed image amounts convert to the diary gram contract","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":45,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart"},"type":"testStart","time":3888}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3891}
+{"test":{"id":5,"name":"Vision preserves catalog count or volume without fake grams","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":102,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart"},"type":"testStart","time":3892}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3895}
+{"test":{"id":6,"name":"Vision mass conversions scale per actual catalog mass basis","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":154,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart"},"type":"testStart","time":3895}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3898}
+{"test":{"id":7,"name":"vision UI copy is clean and complete in five locales","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":188,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart"},"type":"testStart","time":3899}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3902}
+{"test":{"id":8,"name":"vision review copy resolves honestly across all 25 locales","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":209,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_image_unified_review_contract_test.dart"},"type":"testStart","time":3902}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4042}
+{"suite":{"id":9,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"suite","time":4083}
+{"test":{"id":10,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart","suiteID":9,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":4083}
+{"testID":10,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5147}
+{"group":{"id":11,"suiteID":9,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":5147}
+{"test":{"id":12,"name":"(setUpAll)","suiteID":9,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":12,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":5148}
+{"testID":12,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5200}
+{"test":{"id":13,"name":"cancel final review returns no selection and no substitute photo","suiteID":9,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":36,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":5201}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6252}
+{"test":{"id":14,"name":"zoom close remains tappable before original photo decodes","suiteID":9,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":80,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":6253}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6569}
+{"test":{"id":15,"name":"final edited portion returns the food and exact commit basis","suiteID":9,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":154,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":6569}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7863}
+{"test":{"id":16,"name":"both diary entry points commit final values and route-scoped original photo","suiteID":9,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":267,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":7863}
+{"testID":16,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7874}
+{"test":{"id":17,"name":"(tearDownAll)","suiteID":9,"groupIDs":[11],"metadata":{"skip":false,"skipReason":null},"line":14,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":7875}
+{"testID":17,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":7877}
+{"success":true,"type":"done","time":7921}

@@ -4,7 +4,13 @@ import 'package:go_router/go_router.dart';
 /// A Community page reached from a cold notification tap may be a route root.
 /// Never depend on a previous route, trust a return URL, or exit the process.
 class CommunityReturnButton extends StatelessWidget {
-  const CommunityReturnButton({super.key});
+  const CommunityReturnButton({
+    super.key,
+    this.fallbackLocation = '/dashboard',
+  });
+
+  /// Cold-start screens with no stack use a trusted, app-owned destination.
+  final String fallbackLocation;
 
   @override
   Widget build(BuildContext context) => BackButton(
@@ -21,7 +27,7 @@ class CommunityReturnButton extends StatelessWidget {
         router.pop();
         return;
       }
-      router.go('/dashboard');
+      router.go(fallbackLocation);
     },
   );
 }

@@ -1,10 +1,18 @@
 import 'package:flutter/widgets.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/bil_locale_policy.dart';
 
 /// Locale-aware copy for analytics surfaces while their legacy prose is
 /// progressively moved into the central catalog.
 String analyticsText(BuildContext context, String english, String arabic) {
+  // The Analytics return affordance names the Home destination, not the
+  // internal /dashboard route. Resolve by canonical locale to distinguish
+  // Portuguese and Chinese variants without changing route identifiers.
+  if (english == 'Back to Home') {
+    final tag = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
+    return _backToHomeLabels[tag] ?? english;
+  }
   final language = Localizations.localeOf(context).languageCode;
   final authored = _copy[english];
   return switch (language) {
@@ -16,6 +24,34 @@ String analyticsText(BuildContext context, String english, String arabic) {
     _ => context.strings.text(english),
   };
 }
+
+const _backToHomeLabels = <String, String>{
+  'ar': 'العودة إلى الرئيسية',
+  'en': 'Back to Home',
+  'fr': 'Retour à l’accueil',
+  'es': 'Volver al inicio',
+  'tr': 'Ana sayfaya dön',
+  'de': 'Zurück zur Startseite',
+  'it': 'Torna alla Home',
+  'pt-BR': 'Voltar ao início',
+  'pt-PT': 'Voltar ao início',
+  'ur': 'ہوم پر واپس جائیں',
+  'fa': 'بازگشت به صفحه اصلی',
+  'hi': 'होम पर वापस जाएँ',
+  'id': 'Kembali ke Beranda',
+  'ms': 'Kembali ke Laman Utama',
+  'ja': 'ホームに戻る',
+  'ko': '홈으로 돌아가기',
+  'zh-Hans': '返回首页',
+  'zh-Hant': '返回首頁',
+  'ru': 'Вернуться на главную',
+  'bn': 'হোমে ফিরুন',
+  'vi': 'Quay lại Trang chủ',
+  'th': 'กลับไปหน้าหลัก',
+  'pl': 'Wróć do strony głównej',
+  'nl': 'Terug naar startpagina',
+  'uk': 'Повернутися на головну',
+};
 
 const _copy = <String, ({String fr, String es, String tr})>{
   'Open nutrition analytics': (

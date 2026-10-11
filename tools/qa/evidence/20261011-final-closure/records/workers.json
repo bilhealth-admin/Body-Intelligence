@@ -1,0 +1,74 @@
+[
+  {
+    "index": 0,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard0-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-0-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  },
+  {
+    "index": 1,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard1-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-1-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  },
+  {
+    "index": 2,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard2-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-2-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  },
+  {
+    "index": 3,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard3-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-3-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  },
+  {
+    "index": 4,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard4-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-4-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  },
+  {
+    "index": 5,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard5-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-5-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  },
+  {
+    "index": 6,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard6-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-6-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  },
+  {
+    "index": 7,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard7-20261011",
+    "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "prior_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+    "setup_log": "build\\qa-final-closure\\shard-7-retarget-final.log",
+    "diagnostic_outputs_preserved": true,
+    "dependencies": "unchanged lock/package configuration; existing offline setup retained"
+  }
+]

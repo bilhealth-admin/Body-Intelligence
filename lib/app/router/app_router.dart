@@ -103,6 +103,7 @@ import '../../features/profile/profile_settings_page.dart';
 import '../../features/profile/profile_summary_page.dart';
 import '../../features/startup/startup_page.dart';
 import '../../shared/widgets/bil_feature_entry_splash.dart';
+import 'bil_external_route_navigator.dart';
 import 'invalid_route_page.dart';
 import 'responsive_app_shell.dart';
 
@@ -112,6 +113,11 @@ part 'app_community_routes.dart';
 
 class AppRouter {
   static Future<bool> Function()? nativeAuthCallbackRetry;
+
+  /// Notification taps and allow-listed app links preserve a usable return
+  /// journey; authentication callbacks retain their separate security flow.
+  static void openExternalRoute(String route) =>
+      BilExternalRouteNavigator(router).open(route);
 
   /// A billing surface is an overlay journey, not a destination that should
   /// grow the back stack. StoreKit may return control to Flutter more than
@@ -528,6 +534,7 @@ class AppRouter {
               );
               if (foodLogMode) {
                 return FoodLogPage(
+                  startGuide: state.uri.queryParameters['guide'] == '1',
                   initialMealType: state.uri.queryParameters['meal'],
                   initialAction: state.uri.queryParameters['action'],
                   directPhotoCapture:

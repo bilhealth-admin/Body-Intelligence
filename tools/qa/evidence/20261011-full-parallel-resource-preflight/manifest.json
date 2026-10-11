@@ -1,0 +1,113 @@
+{
+  "tested_head": "944973ed3556ccb9b8cd8a09b451562aea3cf652",
+  "tested_head_tree": "010ce874adcbd35e77452b4896268b88e1ff3336",
+  "tested_worktree_fingerprint": "f9436b7b15c48721e290e5db3f5a2dd116166e5ebcceafb37ce79452cf0b2eca",
+  "flutter": "3.44.6",
+  "full_test_files_at_head": 1253,
+  "shards": [
+    {
+      "index": 0,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    },
+    {
+      "index": 1,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    },
+    {
+      "index": 2,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    },
+    {
+      "index": 3,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    },
+    {
+      "index": 4,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    },
+    {
+      "index": 5,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    },
+    {
+      "index": 6,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    },
+    {
+      "index": 7,
+      "status": "NOT_STARTED_INSUFFICIENT_RAM",
+      "pass": 0,
+      "fail": 0,
+      "skip": 0,
+      "test_cases_executed": 0,
+      "files_executed": 0
+    }
+  ],
+  "full_test_cases_executed": 0,
+  "capacity_probe": {
+    "pass": 5,
+    "fail": 1,
+    "skip": 0,
+    "files_executed": 3,
+    "new_failures_detected": 0,
+    "golden_failure": "known watch fixture; exact SHA256 match to previous report"
+  },
+  "source": {
+    "format_targets": 192,
+    "format_batches_pass": 5,
+    "analyze_exit_code": 0,
+    "analyze": "No issues found",
+    "source_result": "source-result.json"
+  },
+  "production_changes": false,
+  "test_tool_changes": false,
+  "first_use_unmerged_coverage": false,
+  "whole_project_readiness": "NOT_ASSESSED",
+  "fingerprint_context": "Captured on clean tested HEAD before generating this evidence directory; diagnostic failures/*.png excluded by ladder.",
+  "code_input_sha256": "e83d853cb6749113c218313319e9a7edfe6f6269096f39393dff3e62b13d8e81",
+  "code_input_scope_count": 2828,
+  "tool_unit_tests": {
+    "pass": 9,
+    "fail": 0,
+    "skip": 0
+  },
+  "preflight_total_cases": 15,
+  "preflight_total_pass": 14,
+  "preflight_total_fail": 1,
+  "preflight_total_skip": 0
+}

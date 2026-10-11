@@ -37,21 +37,17 @@ void main() {
 
     expect(health, contains("Key('health-hub-device-carousel')"));
     expect(health, contains('viewportFraction: .88'));
-    // The approved watch is a dark fitness surface. Keep its exact dark shell
-    // palette and crown while preventing the retired white metallic frame and
-    // in-watch BIL logo from returning.
+    // Updated approved silver metal watch: visible crown and dark glass.
+    // Never restore a decorative BIL wordmark inside the watch face.
     expect(watch, contains("Key('bil-live-health-watch')"));
     expect(watch, contains('final shell = RRect.fromRectAndRadius('));
-    expect(watch, contains('Color(0xFF07131B)'));
-    expect(watch, contains('Color(0xFF163442)'));
-    expect(watch, contains('Color(0xFF0B202C)'));
-    expect(watch, contains('Color(0xFF050D13)'));
+    expect(watch, contains('Color(0xFFEAF0F3)'));
+    expect(watch, contains('Color(0xFF69818F)'));
+    expect(watch, contains('Color(0xFF102D42)'));
+    expect(watch, contains('Color(0xFF081A29)'));
     expect(watch, contains('stops: [0, .33, .68, 1]'));
     expect(watch, contains('crownCenter'));
     expect(watch, isNot(contains('Color(0xFF2D3439)')));
-    expect(watch, isNot(contains('Color(0xFFF4F6F7)')));
-    expect(watch, isNot(contains('Color(0xFFFFFFFF)')));
-    expect(watch, isNot(contains('Color(0xFFF7F8F8)')));
     expect(watch, isNot(contains('BilWordmark')));
     expect(watch, isNot(contains("bil_wordmark.dart")));
 

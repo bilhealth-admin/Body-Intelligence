@@ -1,0 +1,47 @@
+Command: flutter test --no-pub --timeout=3m test/features/commerce/verified_entitlement_surface_contract_test.dart test/features/wellness/recipe_library_polish_test.dart test/features/wellness/workout_reference_golden_test.dart --reporter=json --concurrency=1
+
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":14648,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/commerce/verified_entitlement_surface_contract_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/commerce/verified_entitlement_surface_contract_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"count":3,"time":5,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3778}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":3780}
+{"test":{"id":3,"name":"premium labels and AdGate consume verified entitlement only","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":6,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/commerce/verified_entitlement_surface_contract_test.dart"},"type":"testStart","time":3781}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3810}
+{"test":{"id":4,"name":"server entitlement fails closed before Supabase is initialized","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":41,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/commerce/verified_entitlement_surface_contract_test.dart"},"type":"testStart","time":3810}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3813}
+{"test":{"id":5,"name":"verified entitlement follows the Supabase owner lifecycle","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":53,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/commerce/verified_entitlement_surface_contract_test.dart"},"type":"testStart","time":3813}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3815}
+{"test":{"id":6,"name":"dashboard keeps local truth visible while entitlement resolves","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":65,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/commerce/verified_entitlement_surface_contract_test.dart"},"type":"testStart","time":3816}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3819}
+{"test":{"id":7,"name":"closed-test grant is a server-owned Premium AI Coach overlay","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":79,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/commerce/verified_entitlement_surface_contract_test.dart"},"type":"testStart","time":3819}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3840}
+{"suite":{"id":8,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/recipe_library_polish_test.dart"},"type":"suite","time":3865}
+{"test":{"id":9,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/recipe_library_polish_test.dart","suiteID":8,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":3865}
+{"testID":9,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5009}
+{"group":{"id":10,"suiteID":8,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":5009}
+{"test":{"id":11,"name":"(setUpAll)","suiteID":8,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":26,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/recipe_library_polish_test.dart"},"type":"testStart","time":5009}
+{"testID":11,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5386}
+{"test":{"id":12,"name":"promotes a verified remote resolver file into the card","suiteID":8,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":36,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/recipe_library_polish_test.dart"},"type":"testStart","time":5386}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6792}
+{"test":{"id":13,"name":"uses exact local art and verified nutrition on a real card","suiteID":8,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":80,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/recipe_library_polish_test.dart"},"type":"testStart","time":6793}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7061}
+{"test":{"id":14,"name":"grid adapts from one to two columns at large text scale","suiteID":8,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":136,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/recipe_library_polish_test.dart"},"type":"testStart","time":7061}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7506}
+{"test":{"id":15,"name":"(tearDownAll)","suiteID":8,"groupIDs":[10],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":7507}
+{"testID":15,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":7509}
+{"suite":{"id":16,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/workout_reference_golden_test.dart"},"type":"suite","time":7556}
+{"test":{"id":17,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/workout_reference_golden_test.dart","suiteID":16,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":7556}
+{"testID":17,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":8688}
+{"group":{"id":18,"suiteID":16,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":8688}
+{"test":{"id":19,"name":"(setUpAll)","suiteID":16,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":15,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/workout_reference_golden_test.dart"},"type":"testStart","time":8689}
+{"testID":19,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":8738}
+{"test":{"id":20,"name":"exercise chooser matches the compact reference hierarchy","suiteID":16,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":60,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/workout_reference_golden_test.dart"},"type":"testStart","time":8738}
+{"testID":20,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9550}
+{"test":{"id":21,"name":"exercise chooser remains distinct in Arabic dark mode","suiteID":16,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":78,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/workout_reference_golden_test.dart"},"type":"testStart","time":9551}
+{"testID":21,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9632}
+{"test":{"id":22,"name":"unconfigured routine library is visibly honest and offline","suiteID":16,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":96,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/wellness/workout_reference_golden_test.dart"},"type":"testStart","time":9632}
+{"testID":22,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10248}
+{"test":{"id":23,"name":"(tearDownAll)","suiteID":16,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10248}
+{"testID":23,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":10250}
+{"success":true,"type":"done","time":10296}

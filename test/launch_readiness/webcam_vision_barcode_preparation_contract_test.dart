@@ -55,7 +55,20 @@ void main() {
     expect(coach, contains('BilCameraCapturePage'));
     expect(diaryCapture, contains('ImageSource.gallery'));
     expect(coach, contains('Nothing was logged'));
-    expect(coach, contains('Review and confirm a verified BIL food match'));
+    // Assert the real review-first contract rather than stale presentation
+    // wording: explicit owner confirmation and verified receipt before log.
+    final confirmation = File(
+      'lib/features/intelligence_center/presentation/'
+      'intelligence_media_confirmation.dart',
+    ).readAsStringSync();
+    expect(coach, contains('showMealImageReviewDialog('));
+    expect(coach, contains('_handoffMediaFoodReview(request, review)'));
+    expect(confirmation, contains("Key('bil02-food-review-host')"));
+    expect(confirmation, contains('CoachFoodReviewCard('));
+    expect(confirmation, contains('onConfirm: () async {'));
+    expect(confirmation, contains('review.checkOwner('));
+    expect(confirmation, contains('.commitCoachMeal('));
+    expect(confirmation, contains('CoachFoodReceiptBinding.matches('));
     expect(gateway, contains("'x-idempotency-key': idempotencyKey"));
     expect(gateway, contains('maximumMealImageBytes'));
     expect(gateway, contains('timeout('));

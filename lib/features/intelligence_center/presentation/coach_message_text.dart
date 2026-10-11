@@ -35,8 +35,8 @@ class _CoachMessageTextState extends State<CoachMessageText>
   // must not restart the reveal animation when the user browses history.
   static final _startedRevealKeys = <Object>{};
   AnimationController? _revealController;
-  late List<int> _runes;
-  late String _visibleText;
+  late List<String> _graphemes;
+  final _visibleText = ValueNotifier<String>('');
 
   @override
   void initState() {
@@ -56,27 +56,32 @@ class _CoachMessageTextState extends State<CoachMessageText>
   void _resetReveal() {
     _revealController?.dispose();
     _revealController = null;
-    _runes = widget.text.runes.toList(growable: false);
+    _graphemes = widget.text.characters.toList(growable: false);
     final revealKey = widget.key;
     final animateReveal =
         widget.animateReveal &&
         (revealKey == null || _startedRevealKeys.add(revealKey));
-    if (!animateReveal || _runes.length <= 8) {
-      _visibleText = widget.text;
+    if (!animateReveal || _graphemes.length <= 8) {
+      _visibleText.value = widget.text;
       return;
     }
-    // Runes keep Arabic and emoji intact. The answer already exists locally;
+    // Grapheme clusters keep Arabic combining marks and joined emoji intact. The answer already exists locally;
     // this is a short visual reveal, not a streamed or delayed response.
     // A 40ms single-rune cadence is deliberately conversational rather than
     // the previous near-instant burst, while still keeping a normal reply
     // readable without a long wait.
     const initialVisible = 8;
-    final remaining = _runes.length - initialVisible;
+    final remaining = _graphemes.length - initialVisible;
     var visible = initialVisible;
-    _visibleText = String.fromCharCodes(_runes.take(visible));
+    _visibleText.value = _graphemes.take(visible).join();
     final controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: remaining * 40),
+      // Short answers keep their conversational reveal. Very long answers
+      // are already fully available, so cap the cosmetic reveal to avoid
+      // keeping a multi-paragraph message in motion for minutes.
+      duration: Duration(
+        milliseconds: (remaining * 40).clamp(320, 2400).toInt(),
+      ),
     );
     _revealController = controller;
     controller.addListener(() {
@@ -86,9 +91,9 @@ class _CoachMessageTextState extends State<CoachMessageText>
           (controller.value * remaining).floor().clamp(0, remaining);
       if (nextVisible == visible) return;
       visible = nextVisible;
-      setState(() {
-        _visibleText = String.fromCharCodes(_runes.take(visible));
-      });
+      // Only the selectable text subtree rebuilds; no parent bubble,
+      // reaction buttons or hidden full-text layout is dirtied per tick.
+      _visibleText.value = _graphemes.take(visible).join();
     });
     controller.forward();
   }
@@ -96,8 +101,18 @@ class _CoachMessageTextState extends State<CoachMessageText>
   @override
   void dispose() {
     _revealController?.dispose();
+    _visibleText.dispose();
     super.dispose();
   }
+
+  TextStyle _messageStyle(BuildContext context) =>
+      (widget.style ?? DefaultTextStyle.of(context).style).copyWith(
+        // The writing language can differ from the UI language.
+        fontFamilyFallback: <String>[
+          'BILArabic',
+          ...?widget.style?.fontFamilyFallback,
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -107,21 +122,64 @@ class _CoachMessageTextState extends State<CoachMessageText>
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: [
-        SelectableText(
-          _visibleText,
-          textDirection: widget.textDirection,
-          style: (widget.style ?? DefaultTextStyle.of(context).style).copyWith(
-            // A user's writing language can differ from the interface locale.
-            // Use the bundled Arabic face before an OS/test fallback glyph.
-            fontFamilyFallback: <String>[
-              'BILArabic',
-              ...?widget.style?.fontFamilyFallback,
+        // Text reveals must not grow the bubble on every tick. Reserve the
+        // complete reply's typography from the first frame so its timestamp,
+        // reactions, report button and Sources remain at a fixed offset.
+        if (widget.animateReveal && _graphemes.length > 8)
+          Stack(
+            fit: StackFit.passthrough,
+            children: [
+              // Size with TextPainter, not a hidden Text/RichText widget.
+              // An invisible duplicate was being matched as a second reply
+              // by find.text and by some accessibility traversal paths.
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final painter = TextPainter(
+                    text: TextSpan(
+                      text: widget.text,
+                      style: _messageStyle(context),
+                    ),
+                    textDirection: widget.textDirection,
+                    textScaler: MediaQuery.textScalerOf(context),
+                    textHeightBehavior: DefaultTextStyle.of(
+                      context,
+                    ).textHeightBehavior,
+                    locale: Localizations.maybeLocaleOf(context),
+                  )..layout(maxWidth: constraints.maxWidth);
+                  final height = painter.height;
+                  final width = constraints.hasBoundedWidth
+                      ? constraints.maxWidth
+                      : painter.width;
+                  painter.dispose();
+                  return SizedBox(width: width, height: height);
+                },
+              ),
+              Positioned.fill(
+                child: Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: _visibleText,
+                    builder: (context, visible, _) => SelectableText(
+                      visible,
+                      textDirection: widget.textDirection,
+                      style: _messageStyle(context),
+                      semanticsLabel: widget.text,
+                    ),
+                  ),
+                ),
+              ),
             ],
+          )
+        else
+          ValueListenableBuilder<String>(
+            valueListenable: _visibleText,
+            builder: (context, visible, _) => SelectableText(
+              visible,
+              textDirection: widget.textDirection,
+              style: _messageStyle(context),
+              semanticsLabel: widget.animateReveal ? widget.text : null,
+            ),
           ),
-          // Screen readers receive the complete answer while the visual layer
-          // reveals it quickly.
-          semanticsLabel: widget.animateReveal ? widget.text : null,
-        ),
         if (widget.showTime) ...[
           const SizedBox(height: 4),
           CoachMessageTime(createdAt: widget.createdAt),

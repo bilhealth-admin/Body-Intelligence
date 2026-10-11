@@ -1,0 +1,10 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/build/bil-vision-functional/capture_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: current final photo and editable portion 320.0 1.0
+00:01 +1: current final photo and editable portion 320.0 2.0
+00:01 +2: current final photo and editable portion 390.0 1.0
+00:01 +3: current final photo and editable portion 390.0 2.0
+00:02 +4: current final photo and editable portion 430.0 1.0
+00:02 +5: current final photo and editable portion 430.0 2.0
+00:02 +6: (tearDownAll)
+00:02 +6: All tests passed!

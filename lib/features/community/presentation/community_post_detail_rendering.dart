@@ -2,7 +2,10 @@ part of 'community_hub_page.dart';
 
 extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
   Widget buildCommunityPostDetail(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(communityText(context, 'Post', 'منشور'))),
+    appBar: AppBar(
+      leading: const CommunityReturnButton(),
+      title: Text(communityText(context, 'Post', 'منشور')),
+    ),
     body: FutureBuilder<void>(
       future: _loading,
       builder: (context, snapshot) {

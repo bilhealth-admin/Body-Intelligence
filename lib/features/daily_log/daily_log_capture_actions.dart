@@ -334,9 +334,13 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         final selections = await showMealImageReviewDialog(
           context,
           analysis: analysis,
+          imagePath: image.path,
+          mealType: mealType,
+          photographedAt: DateTime.now(),
         );
         if (selections == null || selections.isEmpty || !mounted) return;
-        final confirmed = <(Food, double)>[];
+        final confirmed =
+            <({Food food, double quantity, bool quantityInGrams})>[];
         for (final selection in selections) {
           final authority = ref.read(foodRuntimeSearchAuthorityProvider);
           final exactId = selection.candidate.verifiedFoodRecordId;
@@ -366,47 +370,59 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
             );
             continue;
           }
-          final reviewed = await showTrustedVisionFoodMatchDialog(
+          final reviewed = await showReviewedVisionFoodMatchDialog(
             context,
             recognizedName: selection.candidate.name,
             foods: foods,
+            reviewedAmount: selection.amount,
+            reviewedUnit: selection.unit,
+            imagePath: image.path,
           );
           if (!mounted) return;
           if (reviewed != null) {
-            final quantityGrams = mealImageAmountInGrams(
-              amount: selection.amount,
-              unit: selection.unit,
-              servingSize: reviewed.servingSize,
-              servingUnit: reviewed.servingUnit,
+            final portion = mealImageReviewedQuantity(
+              amount: reviewed.amount,
+              unit: reviewed.unit,
+              servingSize: reviewed.food.servingSize,
+              servingUnit: reviewed.food.servingUnit,
             );
-            if (quantityGrams == null) {
+            if (portion == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
                     '${selection.candidate.name}: '
                     '${visionCopy.text('unit_mismatch')} '
-                    '(${reviewed.servingUnit})',
+                    '(${reviewed.food.servingUnit})',
                   ),
                 ),
               );
               continue;
             }
-            confirmed.add((reviewed, quantityGrams));
+            confirmed.add((
+              food: reviewed.food,
+              quantity: portion.quantity,
+              quantityInGrams: portion.quantityInGrams,
+            ));
           }
         }
         if (confirmed.isEmpty || !await _ensureDiaryOpen()) return;
         final repository = ref.read(mealRepositoryProvider);
-        await repository.addReviewedMealItemsAtomically(
+        await repository.addReviewedVisionItemsAtomically(
           date: ref.read(selectedLogDateProvider),
           mealType: mealType,
+          visionRequestId: analysis.requestId,
           items: [
-            for (final (food, quantityGrams) in confirmed)
-              (foodId: food.id, quantity: quantityGrams),
+            for (final item in confirmed)
+              (
+                foodId: item.food.id,
+                quantity: item.quantity,
+                quantityInGrams: item.quantityInGrams,
+              ),
           ],
         );
-        for (final (food, _) in confirmed) {
+        for (final item in confirmed) {
           try {
-            await ref.read(foodRepositoryProvider).recordRecent(food.id);
+            await ref.read(foodRepositoryProvider).recordRecent(item.food.id);
           } on Object {
             // The atomic diary commit already succeeded. Recency is a
             // best-effort ranking signal and must never make a saved meal look

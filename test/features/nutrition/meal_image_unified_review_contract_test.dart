@@ -99,6 +99,92 @@ void main() {
     );
   });
 
+  test('Vision preserves catalog count or volume without fake grams', () {
+    final piece = mealImageReviewedQuantity(
+      amount: 1,
+      unit: 'piece',
+      servingSize: 2,
+      servingUnit: 'piece',
+    );
+    expect(piece, isNotNull);
+    expect(piece!.quantity, 1);
+    expect(piece.quantityInGrams, isFalse);
+    expect(piece.servingFactor, .5);
+
+    final liquid = mealImageReviewedQuantity(
+      amount: 250,
+      unit: 'ml',
+      servingSize: 100,
+      servingUnit: 'ml',
+    );
+    expect(liquid, isNotNull);
+    expect(liquid!.quantity, 250);
+    expect(liquid.quantityInGrams, isFalse);
+    expect(liquid.servingFactor, 2.5);
+
+    expect(
+      mealImageReviewedQuantity(
+        amount: 1,
+        unit: 'cup',
+        servingSize: 100,
+        servingUnit: 'g',
+      ),
+      isNull,
+    );
+    expect(
+      mealImageReviewedQuantity(
+        amount: 50,
+        unit: 'g',
+        servingSize: 1,
+        servingUnit: 'piece',
+      ),
+      isNull,
+    );
+    expect(
+      mealImageReviewedQuantity(
+        amount: 0,
+        unit: 'piece',
+        servingSize: 2,
+        servingUnit: 'piece',
+      ),
+      isNull,
+    );
+  });
+
+  test('Vision mass conversions scale per actual catalog mass basis', () {
+    final normal = mealImageReviewedQuantity(
+      amount: 80,
+      unit: 'g',
+      servingSize: 100,
+      servingUnit: 'g',
+    );
+    expect(normal, isNotNull);
+    expect(normal!.quantity, 80);
+    expect(normal.quantityInGrams, isTrue);
+    expect(normal.servingFactor, .8);
+
+    final kg = mealImageReviewedQuantity(
+      amount: .5,
+      unit: 'kg',
+      servingSize: .25,
+      servingUnit: 'kg',
+    );
+    expect(kg, isNotNull);
+    expect(kg!.quantity, 500);
+    expect(kg.quantityInGrams, isTrue);
+    expect(kg.servingFactor, 2);
+
+    final serving = mealImageReviewedQuantity(
+      amount: 2,
+      unit: 'serving',
+      servingSize: 125,
+      servingUnit: 'g',
+    );
+    expect(serving, isNotNull);
+    expect(serving!.quantity, 250);
+    expect(serving.servingFactor, 2);
+  });
+
   test('vision UI copy is clean and complete in five locales', () {
     for (final locale in const ['en', 'ar', 'fr', 'es', 'tr']) {
       final copy = MealVisionUiCopy.of(locale);

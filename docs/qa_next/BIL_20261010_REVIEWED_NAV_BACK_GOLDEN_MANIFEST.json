@@ -1,0 +1,132 @@
+{
+  "protocol": "BIL_QA_TEN_REVIEWED_BACK_ARROWS_V1",
+  "source_run": 38038239172,
+  "source_sha": "f385012bafb09da3b8e2608244a5b58d5f5e55e9",
+  "qa_branch": "qa/bil-quality-ux-integration-20261009",
+  "review": "Manually compared original and candidate PNGs. All RGB pixel differences occur exclusively in the new Back arrow at the top edge; correct RTL mirror retained.",
+  "scope": "Only 10 previously mismatched navigation-return Goldens, no app source, no test threshold changes.",
+  "automatic_bulk_update_goldens": false,
+  "real_device_visual_approval": false,
+  "rows": [
+    {
+      "name": "visual_closure_community_connections_phone",
+      "sha256_before": "409a4f88147b62786b6b37a757139241c14823cbbbc4038ed14d291ad5c391e1",
+      "sha256_after": "c16eb362ab83a941f54785d92f12345a613f539ba3ffce6d410d77461a72c5d5",
+      "changed_pixels": 93,
+      "pixel_bbox": [
+        20,
+        20,
+        37,
+        36
+      ]
+    },
+    {
+      "name": "visual_closure_community_friend_authenticated_phone",
+      "sha256_before": "cce5334bf72fe4e2915176f10d0e271740cd575e1d3296ccf35321d71fefc04f",
+      "sha256_after": "0657916326a55d2c10c0e177ae47285bf38b527108a60bf384796923dbb1fc7d",
+      "changed_pixels": 93,
+      "pixel_bbox": [
+        20,
+        20,
+        37,
+        36
+      ]
+    },
+    {
+      "name": "visual_closure_community_profile_phone",
+      "sha256_before": "82a0e9f138ce55d188af6e24ab080273f9519e962d96a11347d2df7500f5dd4f",
+      "sha256_after": "a15108dc5b73a7e7e78131cfd8da22ac1f4689e20778a14d7cabb2c9b7e8a12f",
+      "changed_pixels": 93,
+      "pixel_bbox": [
+        20,
+        20,
+        37,
+        36
+      ]
+    },
+    {
+      "name": "visual_closure_community_request_authenticated_phone",
+      "sha256_before": "b8c97585d6efe0603b3ceca89ef48edc1dd82a7b50c92dde68544351be704061",
+      "sha256_after": "5ccd19b29a34e2e72f718189f6593bff98c44ca13c7a76ddc86d09db58c59fdb",
+      "changed_pixels": 93,
+      "pixel_bbox": [
+        20,
+        20,
+        37,
+        36
+      ]
+    },
+    {
+      "name": "visual_closure_help_faq_medical_phone",
+      "sha256_before": "ae1f06afe63aa76898675b5ce2f598c38b69420cfd7482e77ca08f27a50c0074",
+      "sha256_after": "16cba471586639c463aeb1001fdad5a02f9ad2f0fe7fe0c25c8511a64fb77c02",
+      "changed_pixels": 64,
+      "pixel_bbox": [
+        22,
+        22,
+        35,
+        34
+      ]
+    },
+    {
+      "name": "visual_closure_help_faq_offline_phone",
+      "sha256_before": "138f89636f74cc0ab4879710d64ed6dfebd6d6b53eebf07bf99806e7bf833142",
+      "sha256_after": "3c8b7d47dd816ece10431bbf35733ea0c562ba1a63e3a28f6aab02dfb49ac741",
+      "changed_pixels": 64,
+      "pixel_bbox": [
+        22,
+        22,
+        35,
+        34
+      ]
+    },
+    {
+      "name": "visual_closure_help_faq_targets_phone",
+      "sha256_before": "69bdbc2bff63484969dbdf3bfc9f6cf0faba8b4b335ece048cac699521320367",
+      "sha256_after": "8670ae26aaf4408c1d7e6c3b6fba22506516564788fb53aa9d4f0757fe3ee1f1",
+      "changed_pixels": 64,
+      "pixel_bbox": [
+        22,
+        22,
+        35,
+        34
+      ]
+    },
+    {
+      "name": "visual_closure_privacy_policy_phone",
+      "sha256_before": "f8c2920bd781021d4fa295fd029d1416a21b17c2f0000835c051280fb74d4e45",
+      "sha256_after": "f7727078ea0133870b938e5ab309afa7e941c84017b5fde1ae81470ed70c7254",
+      "changed_pixels": 64,
+      "pixel_bbox": [
+        22,
+        22,
+        35,
+        34
+      ]
+    },
+    {
+      "name": "visual_closure_terms_phone",
+      "sha256_before": "03e2e7530740e05ca529d06413eeedf452fc2eb33378708570d61a0ac0a20361",
+      "sha256_after": "9eaccbe3e72d79787f219662c46a90f458e749930e021fe84500acfff97b77be",
+      "changed_pixels": 64,
+      "pixel_bbox": [
+        22,
+        22,
+        35,
+        34
+      ]
+    },
+    {
+      "name": "visual_closure_trust_support_rtl_dark_phone",
+      "sha256_before": "06729e60c70a445ab0bb041a06c28d53b4dc88c0fe025bf4704caa162333485e",
+      "sha256_after": "1bfd4a5cfe660b5ab897d8844b724c4397cbdd48dca1531074a665675f580e0b",
+      "changed_pixels": 64,
+      "pixel_bbox": [
+        356,
+        22,
+        369,
+        34
+      ]
+    }
+  ]
+}

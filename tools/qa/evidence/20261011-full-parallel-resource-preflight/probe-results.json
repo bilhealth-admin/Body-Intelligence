@@ -1,0 +1,79 @@
+{
+  "counts": {
+    "PASS": 5,
+    "FAIL": 1
+  },
+  "tests": [
+    {
+      "testID": 4,
+      "result": "success",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 15397,
+      "name": "cancel final review returns no selection and no substitute photo",
+      "file": "G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"
+    },
+    {
+      "testID": 5,
+      "result": "success",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 16787,
+      "name": "final edited portion returns the food and exact commit basis",
+      "file": "G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"
+    },
+    {
+      "testID": 6,
+      "result": "success",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 16822,
+      "name": "both diary entry points commit final values and route-scoped original photo",
+      "file": "G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"
+    },
+    {
+      "testID": 12,
+      "result": "error",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 20075,
+      "name": "compact watch keeps all four readings below the clock",
+      "file": "G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/dashboard_polish/live_health_watch_layout_golden_test.dart"
+    },
+    {
+      "testID": 18,
+      "result": "success",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 35442,
+      "name": "en current production dashboard and dock preview",
+      "file": "G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/dashboard_polish/dashboard_current_preview_test.dart"
+    },
+    {
+      "testID": 19,
+      "result": "success",
+      "skipped": false,
+      "hidden": false,
+      "type": "testDone",
+      "time": 35909,
+      "name": "ar current production dashboard and dock preview",
+      "file": "G:/BIL_Project/worktrees/bil-full-preflight-20261011/test/dashboard_polish/dashboard_current_preview_test.dart"
+    }
+  ],
+  "errors": [
+    {
+      "testID": 12,
+      "error": "Test failed. See exception logs above.\nThe test description was: compact watch keeps all four readings below the clock",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 20074
+    }
+  ],
+  "full_shards_started": 0
+}

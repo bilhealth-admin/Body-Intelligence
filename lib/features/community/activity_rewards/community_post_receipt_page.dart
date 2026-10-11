@@ -10,6 +10,7 @@ import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import '../domain/community_polls.dart';
 import '../presentation/community_copy.dart';
+import '../presentation/community_return_button.dart';
 
 /// Owner-scoped destination for a moderation receipt. It deliberately renders
 /// the post read-only; editing/publishing remains owned by the existing composer.
@@ -172,6 +173,7 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(
         communityText(context, 'Post review result', 'نتيجة مراجعة المنشور'),
       ),

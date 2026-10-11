@@ -1,0 +1,94 @@
+Command: flutter test --no-pub --timeout=3m test/features/commerce/verified_entitlement_surface_contract_test.dart test/features/wellness/recipe_library_polish_test.dart test/features/wellness/workout_reference_golden_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/commerce/verified_entitlement_surface_contract_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/commerce/verified_entitlement_surface_contract_test.dart: premium labels and AdGate consume verified entitlement only
+00:00 +1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/commerce/verified_entitlement_surface_contract_test.dart: server entitlement fails closed before Supabase is initialized
+00:00 +2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/commerce/verified_entitlement_surface_contract_test.dart: verified entitlement follows the Supabase owner lifecycle
+00:00 +3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/commerce/verified_entitlement_surface_contract_test.dart: dashboard keeps local truth visible while entitlement resolves
+00:00 +4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/commerce/verified_entitlement_surface_contract_test.dart: closed-test grant is a server-owned Premium AI Coach overlay
+00:00 +5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: (setUpAll)
+00:01 +5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: promotes a verified remote resolver file into the card
+00:02 +6: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: promotes a verified remote resolver file into the card
+00:02 +7: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: promotes a verified remote resolver file into the card
+00:03 +8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/workout_reference_golden_test.dart: unconfigured routine library is visibly honest and offline
+00:03 +8: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: uses exact local art and verified nutrition on a real card
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/recipe_library_polish_phone.png": Pixel test failed, 98.45%, 324058px diff detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart:130:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +8 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/workout_reference_golden_test.dart: unconfigured routine library is visibly honest and offline
+00:03 +8 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: uses exact local art and verified nutrition on a real card [E]
+  Test failed. See exception logs above.
+  The test description was: uses exact local art and verified nutrition on a real card
+  
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+00:03 +8 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/workout_reference_golden_test.dart: unconfigured routine library is visibly honest and offline
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "../../goldens/workouts/workout_library_offline_empty_phone.png": Pixel test failed, 90.83%,
+298980px diff detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/workout_reference_golden_test.dart:109:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +8 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: grid adapts from one to two columns at large text scale
+00:03 +8 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/workout_reference_golden_test.dart: unconfigured routine library is visibly honest and offline [E]
+  Test failed. See exception logs above.
+  The test description was: unconfigured routine library is visibly honest and offline
+  
+00:03 +8 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: grid adapts from one to two columns at large text scale
+00:04 +9 -2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: (tearDownAll)
+00:04 +9 -2: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/recipe_library_polish_test.dart: uses exact local art and verified nutrition on a real card
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/wellness/workout_reference_golden_test.dart: unconfigured routine library is visibly honest and offline

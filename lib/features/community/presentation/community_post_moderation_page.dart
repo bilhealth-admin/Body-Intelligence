@@ -9,6 +9,7 @@ import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import '../domain/community_polls.dart';
 import 'community_copy.dart';
+import 'community_return_button.dart';
 part 'community_post_moderation_widgets.dart';
 
 class CommunityPostModerationPage extends StatefulWidget {
@@ -432,6 +433,7 @@ class _CommunityPostModerationPageState
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(
         communityText(context, 'Community moderation', 'مراجعة المجتمع'),
       ),

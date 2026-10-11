@@ -26,6 +26,7 @@ import 'models/onboarding_draft.dart';
 import 'onboarding_runtime_copy.dart';
 import 'services/onboarding_permission_gateways.dart';
 import 'widgets/modern_onboarding_scaffold.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'onboarding_core_steps.dart';
 part 'onboarding_detail_steps.dart';
@@ -582,40 +583,42 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     // Consent work may disable Continue, but must not replace its stable label
     // with the navigation spinner.
     final navigationBusy = _busy || _transitionBusy;
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && !navigationBusy) unawaited(_goBack());
-      },
-      child: ModernOnboardingScaffold(
-        step: _index,
-        totalSteps: _steps.length,
-        title: view.title,
-        subtitle: view.subtitle,
-        artwork: _photoForStep(_stepId),
-        body: AnimatedSwitcher(
-          duration: reducedMotion
-              ? Duration.zero
-              : const Duration(milliseconds: 180),
-          child: Column(
-            key: ValueKey(_stepId),
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              view.body,
-              if (_inlineError case final error?) ...[
-                const SizedBox(height: 16),
-                _ErrorBanner(message: error),
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop && !navigationBusy) unawaited(_goBack());
+        },
+        child: ModernOnboardingScaffold(
+          step: _index,
+          totalSteps: _steps.length,
+          title: view.title,
+          subtitle: view.subtitle,
+          artwork: _photoForStep(_stepId),
+          body: AnimatedSwitcher(
+            duration: reducedMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
+            child: Column(
+              key: ValueKey(_stepId),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                view.body,
+                if (_inlineError case final error?) ...[
+                  const SizedBox(height: 16),
+                  _ErrorBanner(message: error),
+                ],
               ],
-            ],
+            ),
           ),
+          onBack: () => unawaited(_goBack()),
+          onNext: () => unawaited(_goNext()),
+          onSkip: view.skip,
+          nextLabel: _stepId == 'review' ? t('Finish setup') : null,
+          nextEnabled: view.nextEnabled && !_permissionBusy,
+          nextPending: _permissionBusy,
+          busy: navigationBusy,
         ),
-        onBack: () => unawaited(_goBack()),
-        onNext: () => unawaited(_goNext()),
-        onSkip: view.skip,
-        nextLabel: _stepId == 'review' ? t('Finish setup') : null,
-        nextEnabled: view.nextEnabled && !_permissionBusy,
-        nextPending: _permissionBusy,
-        busy: navigationBusy,
       ),
     );
   }

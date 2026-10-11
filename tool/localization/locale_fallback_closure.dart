@@ -30,6 +30,7 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_coach_review
 import 'package:body_intelligence_log/app/localization/runtime_copy_health_device_status.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_health_devices_review.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_review.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_quality_feedback.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_form_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_safety_locale_copy.dart';
 
@@ -166,6 +167,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...HealthDevicesReviewCopy.sources,
     ...CommunityReviewCopy.keys,
     ...CommunityReviewCopy.statusKeys,
+    ...QualityFeedbackRuntimeCopy.sources,
     ...CommunityFormCopy.catalogSources,
     ...communitySafetyEnglishKeys,
     ...communityPolicyEnglishKeys,

@@ -7,6 +7,7 @@ import '../../app/environment/app_environment.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../auth/apple_credential_lifecycle.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'account_deletion_copy.dart';
 
@@ -237,68 +238,70 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
   @override
   Widget build(BuildContext context) {
     final copy = _AccountDeletionCopy.of(context);
-    return PopScope(
-      canPop: !_submitting,
-      child: Scaffold(
-        appBar: AppBar(title: Text(copy.title)),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Icon(
-              Icons.person_remove_outlined,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              copy.heading,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            Text(copy.body),
-            const SizedBox(height: 12),
-            Text(
-              copy.billingNotice,
-              style: TextStyle(
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: !_submitting,
+        child: Scaffold(
+          appBar: AppBar(title: Text(copy.title)),
+          body: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Icon(
+                Icons.person_remove_outlined,
+                size: 22,
                 color: Theme.of(context).colorScheme.error,
-                fontWeight: FontWeight.w600,
               ),
-            ),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TextButton.icon(
-                onPressed: _submitting ? null : _openSubscriptionManagement,
-                icon: const Icon(Icons.open_in_new_rounded),
-                label: Text(copy.manageSubscription),
+              const SizedBox(height: 20),
+              Text(
+                copy.heading,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _confirmation,
-              enabled: !_submitting,
-              textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(
-                labelText: copy.confirmationLabel,
-                hintText: 'DELETE',
+              const SizedBox(height: 12),
+              Text(copy.body),
+              const SizedBox(height: 12),
+              Text(
+                copy.billingNotice,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: _submitting ? null : _submit,
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                foregroundColor: Theme.of(context).colorScheme.onError,
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  onPressed: _submitting ? null : _openSubscriptionManagement,
+                  icon: const Icon(Icons.open_in_new_rounded),
+                  label: Text(copy.manageSubscription),
+                ),
               ),
-              icon: _submitting
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.delete_forever_outlined),
-              label: Text(copy.submit),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _confirmation,
+                enabled: !_submitting,
+                textCapitalization: TextCapitalization.characters,
+                decoration: InputDecoration(
+                  labelText: copy.confirmationLabel,
+                  hintText: 'DELETE',
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: _submitting ? null : _submit,
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  foregroundColor: Theme.of(context).colorScheme.onError,
+                ),
+                icon: _submitting
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.delete_forever_outlined),
+                label: Text(copy.submit),
+              ),
+            ],
+          ),
         ),
       ),
     );

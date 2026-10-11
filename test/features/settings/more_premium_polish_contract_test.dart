@@ -40,11 +40,94 @@ void main() {
       expect(source, contains(route), reason: route);
     }
     expect(source, contains('class _MorePremiumIcon'));
-    expect(source, contains('const Color(0xFF0869E8)'));
-    expect(source, contains('const Color(0xFFEAF3FF)'));
-    expect(source, contains('BorderRadius.circular(24)'));
-    expect(source, contains('fontWeight: FontWeight.w900'));
+    expect(source, isNot(contains('const Color(0xFF0869E8)')));
+    expect(source, contains('minTileHeight: protectedEntry ? 60 : 54'));
+    expect(source, contains('leading: showIcon'));
+    expect(source, contains('color: theme.colorScheme.surface'));
+    expect(source, contains('elevation: 0'));
+    // Verify the approved flat treatment rather than the retired filled badge.
+    final flatIcon = File(
+      'lib/features/settings/settings_page_polish.dart',
+    ).readAsStringSync().split('class _CloudSyncRow').first;
+    expect(flatIcon, contains('return BilFlatIcon('));
+    expect(flatIcon, contains('kind: kind,'));
+    expect(flatIcon, contains('size: 34,'));
+    expect(flatIcon, contains('iconSize: 20,'));
+    expect(flatIcon, contains('color: foreground,'));
+    for (final forbidden in const [
+      'BoxDecoration(',
+      'LinearGradient(',
+      'ShaderMask(',
+      'BoxShadow(',
+      'AnimatedContainer(',
+    ]) {
+      expect(flatIcon, isNot(contains(forbidden)), reason: forbidden);
+    }
+    expect(source, contains('BorderRadius.circular(14)'));
+    expect(source, isNot(contains('fontWeight: FontWeight.w900')));
+    // The native font family is already supplied by the platform theme:
+    // only More's weights and sizes should be locally refined.
+    expect(source, contains('fontSize: 19,'));
+    expect(source, contains('fontSize: 14,'));
+    expect(source, contains('fontSize: 15.5,'));
+    expect(source, contains('fontWeight: FontWeight.w400'));
+    expect(source, contains('fontWeight: FontWeight.w600'));
     expect(source, contains('CommunityUnreadBadge'));
+    expect(source, contains("'/community/messages'"));
+    expect(source, contains("'/intelligence-center'"));
+  });
+
+  test('More typography follows the restrained system hierarchy', () {
+    final page = File(
+      'lib/features/settings/settings_page.dart',
+    ).readAsStringSync();
+    final helpers = File(
+      'lib/features/settings/settings_page_polish.dart',
+    ).readAsStringSync();
+    final start = page.indexOf('class _MoreRow extends StatelessWidget');
+    expect(start, greaterThanOrEqualTo(0));
+    final rows = page.substring(start);
+    expect(rows, contains('textTheme.bodyLarge?.copyWith('));
+    expect(rows, contains('fontSize: 15.5'));
+    expect(rows, contains('fontWeight: FontWeight.w400'));
+    expect(rows, isNot(contains('FontWeight.w700')));
+    expect(helpers, contains('fontSize: 15.5'));
+    expect(helpers, contains('fontWeight: FontWeight.w400'));
+    // Navigation, membership authority, and global themes are unchanged.
+    expect(page, contains("onTap: () => context.push(route)"));
+    expect(page, contains("onTap: () => context.push('/plans')"));
+  });
+
+  test('More Premium entry is subtle and preserves verified-state routing', () {
+    final source = File(
+      'lib/features/settings/settings_page.dart',
+    ).readAsStringSync();
+    final start = source.indexOf('class _PremiumMembershipLink');
+    final end = source.indexOf('class _MoreSection');
+    expect(start, greaterThanOrEqualTo(0));
+    expect(end, greaterThan(start));
+    final entry = source.substring(start, end);
+    expect(source, contains("Key('more-premium-entry')"));
+    expect(source, contains("copy('Explore Premium')"));
+    expect(source, contains("onTap: () => context.push('/plans')"));
+    expect(source, contains('EntitlementAuthority.verifiedServer'));
+    expect(source, contains("copy('Retry subscription check')"));
+    expect(entry, contains('BoxConstraints(minHeight: 52)'));
+    expect(entry, contains('fontWeight: FontWeight.w600'));
+    expect(entry, contains('Color(0xFF8B6429)'));
+    expect(entry, contains('Color(0xFFE2C78E)'));
+    expect(entry, contains('isChecking'));
+    expect(entry, contains('isRetry'));
+    for (final forbidden in const [
+      'PremiumCrownEmblem(',
+      'LinearGradient(',
+      'BoxDecoration(',
+      'BoxShadow(',
+      'ShaderMask(',
+      'BackdropFilter(',
+    ]) {
+      expect(entry, isNot(contains(forbidden)), reason: forbidden);
+    }
   });
 
   test('bottom dock is compact and Quick Add owns the premium gradient', () {

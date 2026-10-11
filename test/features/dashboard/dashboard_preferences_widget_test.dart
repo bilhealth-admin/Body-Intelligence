@@ -695,6 +695,130 @@ void main() {
     await tester.pump(Duration.zero);
   });
 
+  testWidgets('section does not flash back to stale stream data during save', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final pending = Completer<void>();
+    final repository = _TestPreferencesRepository(
+      database,
+      pendingWrite: pending,
+    );
+    final sectionStream = StreamController<bool>.broadcast();
+    addTearDown(sectionStream.close);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          preferencesRepositoryProvider.overrideWithValue(repository),
+          dashboardSectionVisibleProvider(
+            DashboardSectionIds.macros,
+          ).overrideWith((_) => sectionStream.stream),
+          for (final section in DashboardSectionIds.all)
+            if (section != DashboardSectionIds.macros)
+              dashboardSectionVisibleProvider(
+                section,
+              ).overrideWith((_) => Stream.value(true)),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: DashboardPreferencesPage(),
+        ),
+      ),
+    );
+    await tester.pump();
+    sectionStream.add(true);
+    await tester.pump(const Duration(milliseconds: 80));
+    final macros = find.byKey(const Key('dashboard-section-macros'));
+    expect(tester.widget<SwitchListTile>(macros).value, isTrue);
+    await tester.tap(macros);
+    await tester.pump();
+    expect(repository.writeCount, 1);
+    expect(tester.widget<SwitchListTile>(macros).value, isFalse);
+
+    // No other saved stream value has arrived: keep the requested switch and
+    // preserve the Done control's enabled presentation.
+    sectionStream.add(true);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.widget<SwitchListTile>(macros).value, isFalse);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const Key('dashboard-preferences-done')),
+          )
+          .onPressed,
+      isNotNull,
+    );
+    expect(
+      find.byKey(const Key('dashboard-section-macros-saving')),
+      findsNothing,
+    );
+
+    pending.complete();
+    await tester.pump();
+    sectionStream.add(false);
+    await tester.pump(const Duration(milliseconds: 80));
+    await tester.pump();
+    expect(tester.widget<SwitchListTile>(macros).value, isFalse);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('failed section save rolls back pending visible value', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final pending = Completer<void>();
+    final repository = _TestPreferencesRepository(
+      database,
+      pendingWrite: pending,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          preferencesRepositoryProvider.overrideWithValue(repository),
+          for (final section in DashboardSectionIds.all)
+            dashboardSectionVisibleProvider(
+              section,
+            ).overrideWith((_) => Stream.value(true)),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: DashboardPreferencesPage(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    final macros = find.byKey(const Key('dashboard-section-macros'));
+    await tester.tap(macros);
+    await tester.pump();
+    expect(tester.widget<SwitchListTile>(macros).value, isFalse);
+    pending.completeError(StateError('write failed'));
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(tester.widget<SwitchListTile>(macros).value, isTrue);
+    expect(find.textContaining('could not be saved'), findsWidgets);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('busy save blocks every exit and duplicate submission', (
     tester,
   ) async {

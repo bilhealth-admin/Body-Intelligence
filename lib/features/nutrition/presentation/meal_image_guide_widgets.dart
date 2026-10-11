@@ -57,88 +57,92 @@ class _MealImageGuidePageState extends ConsumerState<MealImageGuidePage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final usage = ref.watch(mealVisionUsageProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_mealGuideText(context, 'meal_scan')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(_mealGuideText(context, 'not_now')),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: _steps.length,
-                onPageChanged: (value) => setState(() => _page = value),
-                itemBuilder: (context, index) =>
-                    _GuideStepView(step: _steps[index], stepNumber: index + 1),
-              ),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: Text(_mealGuideText(context, 'meal_scan')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(_mealGuideText(context, 'not_now')),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _steps.length,
-                      (index) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        width: index == _page ? 24 : 8,
-                        height: 8,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: index == _page
-                              ? colorScheme.primary
-                              : colorScheme.outlineVariant,
-                          borderRadius: BorderRadius.circular(8),
+          ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: _steps.length,
+                  onPageChanged: (value) => setState(() => _page = value),
+                  itemBuilder: (context, index) => _GuideStepView(
+                    step: _steps[index],
+                    stepNumber: index + 1,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _steps.length,
+                        (index) => AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: index == _page ? 24 : 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: index == _page
+                                ? colorScheme.primary
+                                : colorScheme.outlineVariant,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  _VisionUsageCard(snapshot: usage),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      key: const Key('meal-image-guide-next'),
-                      onPressed: usage.asData?.value.canAnalyze == true
-                          ? () {
-                              if (_page == _steps.length - 1) {
-                                Navigator.of(context).pop(true);
-                              } else {
-                                _controller.nextPage(
-                                  duration: const Duration(milliseconds: 240),
-                                  curve: Curves.easeOutCubic,
-                                );
+                    const SizedBox(height: 18),
+                    _VisionUsageCard(snapshot: usage),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        key: const Key('meal-image-guide-next'),
+                        onPressed: usage.asData?.value.canAnalyze == true
+                            ? () {
+                                if (_page == _steps.length - 1) {
+                                  Navigator.of(context).pop(true);
+                                } else {
+                                  _controller.nextPage(
+                                    duration: const Duration(milliseconds: 240),
+                                    curve: Curves.easeOutCubic,
+                                  );
+                                }
                               }
-                            }
-                          : null,
-                      child: Text(
-                        _page == _steps.length - 1
-                            ? _mealGuideText(context, 'choose_photo')
-                            : _mealGuideText(context, 'continue'),
+                            : null,
+                        child: Text(
+                          _page == _steps.length - 1
+                              ? _mealGuideText(context, 'choose_photo')
+                              : _mealGuideText(context, 'continue'),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    _mealGuideText(context, 'suggestions_disclaimer'),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 10),
+                    Text(
+                      _mealGuideText(context, 'suggestions_disclaimer'),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

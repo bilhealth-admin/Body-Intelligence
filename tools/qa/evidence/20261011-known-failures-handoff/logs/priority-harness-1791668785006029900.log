@@ -1,0 +1,20 @@
+Command: python tools/qa/test_bil_codex_test_ladder.py
+
+.BIL local QA head fingerprint stamp
+==> stage: source
+Worktree changed while testing. Discard green gates.
+..BIL local QA head fingerprint stamp
+==> stage: source
+.STOP: source is RED. Fix root cause and retest narrowly.
+No full-shard run or baseline rewrite permitted.
+Strict dart format targets: 182
+...usage: ladder [-h] [--from-stage {source,arabic,p0,focused,broad,full}]
+              [--through-stage {source,arabic,p0,focused,broad,full}]
+              [--parallel PARALLEL] [--force]
+ladder: error: First pass earlier gate source on this exact worktree; run from source.
+..[REUSED GREEN SUITE] p0-green
+..
+----------------------------------------------------------------------
+Ran 11 tests in 1.013s
+
+OK

@@ -16,6 +16,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../visual_closure/visual_evidence_font.dart';
+
 const examples = <String, List<String>>{
   'en': ['tomato', 'A round red fruit is visible'],
   'ar': ['طماطم', 'ثمرة حمراء مستديرة ظاهرة'],
@@ -282,6 +284,7 @@ void main() {
   testWidgets(
     'Arabic photo review displays Arabic and returns a canonical unit',
     (tester) async {
+      await tester.runAsync(loadVisualEvidenceFont);
       tester.view.physicalSize = const Size(600, 1200);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -289,6 +292,14 @@ void main() {
       List<MealImageReviewSelection>? selected;
       await tester.pumpWidget(
         MaterialApp(
+          theme: visualEvidenceTheme(
+            ThemeData(useMaterial3: true),
+            fontFamily: 'NotoArabicEvidence',
+          ),
+          builder: (context, child) => visualEvidenceTextSurface(
+            child,
+            fontFamily: 'NotoArabicEvidence',
+          ),
           locale: const Locale('ar'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
@@ -316,18 +327,47 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<MaterialApp>(find.byType(MaterialApp))
+            .theme!
+            .textTheme
+            .bodyMedium
+            ?.fontFamily,
+        'NotoArabicEvidence',
+      );
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
-      expect(find.text('طماطم'), findsOneWidget);
+      // The new review contains a recognized title and an alternative chip:
+      // duplicated visible names are valid, but the selected card is unique.
+      final card = find.byKey(const Key('premium-vision-food-0'));
+      expect(card, findsOneWidget);
+      expect(
+        find.descendant(of: card, matching: find.text('طماطم')).first,
+        findsOneWidget,
+      );
       expect(find.text('tomato'), findsNothing);
       expect(find.text(payload('ar')['notice']! as String), findsNothing);
-      expect(find.text('قطعة'), findsOneWidget);
-      expect(find.text('piece'), findsNothing);
-      await tester.tap(find.byType(CheckboxListTile));
+      expect(find.byKey(const Key('premium-vision-unit-0')), findsNothing);
+      final stage = find.byKey(const Key('premium-vision-stage-before'));
+      await tester.ensureVisible(stage);
+      await tester.tap(stage);
       await tester.pump();
-      await tester.tap(
-        find.widgetWithText(FilledButton, 'مطابقة الأطعمة المحددة'),
+      final selectedFood = find.byKey(const Key('premium-vision-select-0'));
+      await tester.ensureVisible(selectedFood);
+      await tester.tap(selectedFood);
+      await tester.pump();
+      final unit = tester.widget<TextField>(
+        find.byKey(const Key('premium-vision-unit-0')),
       );
+      expect(unit.controller!.text, 'piece');
+      final eatenAmount = find.byKey(const Key('premium-vision-eaten-0'));
+      await tester.ensureVisible(eatenAmount);
+      await tester.tap(eatenAmount);
+      await tester.pump();
+      final confirmation = find.byKey(const Key('premium-vision-continue'));
+      expect(tester.widget<FilledButton>(confirmation).onPressed, isNotNull);
+      await tester.tap(confirmation);
       await tester.pumpAndSettle();
       expect(selected!.single.unit, 'piece');
       expect(selected!.single.amount, 1);

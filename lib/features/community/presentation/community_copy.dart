@@ -1,5 +1,6 @@
 import '../../../app/localization/runtime_copy_community_ai_reward.dart';
 import '../../../app/localization/runtime_copy_next_workspace.dart';
+import '../../../app/localization/runtime_copy_quality_feedback.dart';
 import '../../../app/localization/runtime_copy_community_creation.dart';
 import '../../../app/localization/runtime_copy_community_circles.dart';
 import 'community_chat_guard_copy.dart';
@@ -40,7 +41,8 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
     'Check again' => 'Retry',
     _ => en,
   };
-  return CommunityAiRewardRuntimeCopy.resolve(catalogEnglish, canonical) ??
+  return QualityFeedbackRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      CommunityAiRewardRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityChatGuardCopy.resolve(catalogEnglish, canonical) ??
       CommunityCirclesRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityCreationRuntimeCopy.resolve(catalogEnglish, canonical) ??

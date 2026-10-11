@@ -1,0 +1,22 @@
+{
+  "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+  "shard": 1,
+  "cases": [
+    {
+      "name": "V2 review 320_ar_light_2.0x original photo, clock, controls and overflow",
+      "result": "success"
+    },
+    {
+      "name": "V2 review 320_en_dark_1.0x original photo, clock, controls and overflow",
+      "result": "success"
+    },
+    {
+      "name": "V2 review 320_en_dark_1.8x original photo, clock, controls and overflow",
+      "result": "success"
+    },
+    {
+      "name": "V2 review 320_en_dark_2.0x original photo, clock, controls and overflow",
+      "result": "success"
+    }
+  ]
+}

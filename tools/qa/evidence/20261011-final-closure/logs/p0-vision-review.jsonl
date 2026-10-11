@@ -1,0 +1,23 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/meal_vision_premium_review_test.dart --reporter=json --concurrency=1
+
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":21860,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"count":1,"time":6,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":4300}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":4302}
+{"test":{"id":3,"name":"No selected food or inferred portion is auto-logged","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":64,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"testStart","time":4302}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5736}
+{"test":{"id":4,"name":"Leftovers are never mistaken for amount consumed","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":111,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"testStart","time":5736}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6210}
+{"test":{"id":5,"name":"Rejects zero portion with visible validation","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":168,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"testStart","time":6210}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6473}
+{"test":{"id":6,"name":"Alternative changes identity without retaining verified record","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":199,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"testStart","time":6474}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6729}
+{"test":{"id":7,"name":"Only image from user may appear; no substitute meal photo","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":238,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"testStart","time":6729}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6815}
+{"test":{"id":8,"name":"modern label source needs matching owner proof, not just a food name","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":245,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"testStart","time":6815}
+{"testID":8,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6825}
+{"test":{"id":9,"name":"owner-bound label may be selected without claiming verification","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":272,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_premium_review_test.dart"},"type":"testStart","time":6825}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7100}
+{"success":true,"type":"done","time":7148}

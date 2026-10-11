@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/router/bil_safe_return_button.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 String _localized(BuildContext context, Map<String, String> values) {
   final locale = Localizations.localeOf(context);
@@ -244,39 +246,39 @@ class HelpCenterPage extends StatelessWidget {
             ),
           ),
         ];
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/settings'),
-          icon: const Icon(Icons.arrow_back_rounded),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/settings'),
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+          title: Text(t('Help', 'المساعدة', 'Aide', 'Ayuda', 'Yardım')),
         ),
-        title: Text(t('Help', 'المساعدة', 'Aide', 'Ayuda', 'Yardım')),
-      ),
-      body: ListView.separated(
-        // Keep this route at its own top position. It must not inherit a
-        // PrimaryScrollController offset from the settings/help stack and
-        // hide About or FAQ when the reviewer opens Help.
-        primary: false,
-        itemCount: rows.length,
-        separatorBuilder: (_, _) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final row = rows[index];
-          return ListTile(
-            minTileHeight: 72,
-            leading: BilSemanticIconBadge(
-              key: Key('help-center-icon-${row.id}'),
-              kind: row.kind,
-              size: 42,
-              iconOverride: row.iconOverride,
-              appleIconOverride: row.appleIconOverride,
-              shape: BoxShape.rectangle,
-            ),
-            title: Text(row.title),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: row.action,
-          );
-        },
+        body: ListView.separated(
+          // Keep this route at its own top position. It must not inherit a
+          // PrimaryScrollController offset from the settings/help stack and
+          // hide About or FAQ when the reviewer opens Help.
+          primary: false,
+          itemCount: rows.length,
+          separatorBuilder: (_, _) => const Divider(height: 1),
+          itemBuilder: (context, index) {
+            final row = rows[index];
+            return ListTile(
+              minTileHeight: 54,
+              title: Text(row.title),
+              trailing: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              onTap: row.action,
+            );
+          },
+        ),
       ),
     );
   }
@@ -339,30 +341,31 @@ class HelpFaqPage extends StatelessWidget {
         ),
       ),
     ];
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          t(
-            'Frequently Asked Questions',
-            'الأسئلة الشائعة',
-            'Questions fréquentes',
-            'Preguntas frecuentes',
-            'Sık Sorulan Sorular',
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          leading: const BilSafeReturnButton(fallbackLocation: '/help'),
+          title: Text(
+            t(
+              'Frequently Asked Questions',
+              'الأسئلة الشائعة',
+              'Questions fréquentes',
+              'Preguntas frecuentes',
+              'Sık Sorulan Sorular',
+            ),
           ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          for (final question in questions)
-            Card(
-              child: ExpansionTile(
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            for (final question in questions)
+              ExpansionTile(
                 title: Text(question.$1),
                 childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 children: [Text(question.$2)],
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

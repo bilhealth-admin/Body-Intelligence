@@ -1,0 +1,24 @@
+import json,sys
+from pathlib import Path
+sys.path.insert(0,str(Path.cwd()/'tools/qa'))
+import bil_codex_test_ladder as q
+q.OUT=Path.cwd()/'build/bil-main-qa-intake/final'
+q.OUT.mkdir(exist_ok=True)
+head=q.git('rev-parse','HEAD').stdout.decode().strip();fp=q.fingerprint(head)
+state=dict(head=head,worktree_sha256=fp,flutter='3.44.6',stages={},skipped={'p0':'No full 11-group rerun requested: unchanged unrelated contracts; affected Vision contract rerun separately.', 'focused':'No full 5-group rerun requested: no change to those sources.', 'broad-settings-language-icons':'Unchanged, prior green only; not certified on this SHA.', 'broad-community-cold-back':'Unchanged, prior green only; not certified on this SHA.', 'full':'All 8 skipped: Broad still RED and full prerequisite set not green on final SHA.'})
+def record(stage,result):
+ state['stages'][stage]=result
+ assert q.fingerprint(head)==fp,'Source fingerprint changed during run'
+ (q.OUT/'manifest.json').write_text(json.dumps(state,indent=2),encoding='utf-8')
+record('source',q.run_stage('source',1))
+if not state['stages']['source']['passed']:sys.exit(1)
+record('arabic',q.run_stage('arabic',1))
+if not state['stages']['arabic']['passed']:sys.exit(1)
+record('affected-contracts',q.run_suites('affected-contracts',[
+ ('home-card-all','test/dashboard_polish/dashboard_polish_layout_review_test.dart'),
+ ('vision-final-portion','test/features/nutrition/meal_vision_final_portion_test.dart')],1))
+if not state['stages']['affected-contracts']['passed']:sys.exit(1)
+selected=[entry for entry in q.BROAD if entry[0] in {'dashboard-nutrition','dashboard-contract-health','weekly-onboarding-goldens','wellness-commerce'}]
+record('broad',q.run_suites('broad',selected,1))
+print('Full intentionally blocked; no cached prerequisite or golden approval synthesized.')
+sys.exit(0 if state['stages']['broad']['passed'] else 1)

@@ -1,0 +1,174 @@
+{
+  "head": "b60f4c1710243202187763b30ce444065573bdc6",
+  "worktree_sha256": "cafa4f4cad9bc63fff0b5c3bf862686d02ff24fef4de44085366706c80378a80",
+  "jobs": {
+    "arabic-noto-capture": {
+      "stage": "arabic",
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\arabic-noto-capture-1791655872133668200.log"
+    },
+    "arabic-vision-v2": {
+      "stage": "arabic",
+      "exit_code": 0,
+      "passed": 82,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\arabic-vision-v2-1791655889565786800.log"
+    },
+    "p0-food-owner-atomic": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 32,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-food-owner-atomic-1791655951968340500.log"
+    },
+    "p0-meal-owner-atomic": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 16,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-meal-owner-atomic-1791655965354939000.log"
+    },
+    "p0-first-food-commit": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 5,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-first-food-commit-1791655972956572000.log"
+    },
+    "p0-vision-review": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 7,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-vision-review-1791655979721116900.log"
+    },
+    "p0-vision-durable-replay": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 8,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-vision-durable-replay-1791655989460338600.log"
+    },
+    "p0-vision-quantity-basis": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 6,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-vision-quantity-basis-1791655996403579600.log"
+    },
+    "p0-vision-capture": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 2,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-vision-capture-1791656002949719600.log"
+    },
+    "p0-architecture": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-architecture-1791656013227837100.log"
+    },
+    "p0-coach-photo-bridge": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 12,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-coach-photo-bridge-1791656020499533700.log"
+    },
+    "p0-coach-image-source": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 31,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-coach-image-source-1791656040084504100.log"
+    },
+    "p0-vision-arabic": {
+      "stage": "p0",
+      "exit_code": 0,
+      "passed": 79,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\p0-vision-arabic-1791656051298723700.log"
+    },
+    "focused-store-captures": {
+      "stage": "focused",
+      "exit_code": 0,
+      "passed": 44,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\focused-store-captures-1791656059933130700.log"
+    },
+    "focused-production-goldens": {
+      "stage": "focused",
+      "exit_code": 0,
+      "passed": 126,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\focused-production-goldens-1791656077564462000.log"
+    },
+    "focused-data-goldens": {
+      "stage": "focused",
+      "exit_code": 0,
+      "passed": 61,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\focused-data-goldens-1791656144632081500.log"
+    },
+    "focused-splash-golden": {
+      "stage": "focused",
+      "exit_code": 0,
+      "passed": 5,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\focused-splash-golden-1791656167068111100.log"
+    },
+    "focused-transaction-queue": {
+      "stage": "focused",
+      "exit_code": 0,
+      "passed": 36,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\focused-transaction-queue-1791656175362459200.log"
+    },
+    "broad-dashboard-nutrition": {
+      "stage": "broad",
+      "exit_code": 1,
+      "passed": 75,
+      "failed": 4,
+      "log": "build\\bil-vision-reference\\broad-dashboard-nutrition-1791656183559830500.log"
+    },
+    "broad-dashboard-contract-health": {
+      "stage": "broad",
+      "exit_code": 1,
+      "passed": 28,
+      "failed": 1,
+      "log": "build\\bil-vision-reference\\broad-dashboard-contract-health-1791656201088468900.log"
+    },
+    "broad-weekly-onboarding-goldens": {
+      "stage": "broad",
+      "exit_code": 1,
+      "passed": 19,
+      "failed": 26,
+      "log": "build\\bil-vision-reference\\broad-weekly-onboarding-goldens-1791656211928461700.log"
+    },
+    "broad-settings-language-icons": {
+      "stage": "broad",
+      "exit_code": 0,
+      "passed": 39,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\broad-settings-language-icons-1791656230721340200.log"
+    },
+    "broad-wellness-commerce": {
+      "stage": "broad",
+      "exit_code": 1,
+      "passed": 9,
+      "failed": 2,
+      "log": "build\\bil-vision-reference\\broad-wellness-commerce-1791656246077568800.log"
+    },
+    "broad-community-cold-back": {
+      "stage": "broad",
+      "exit_code": 0,
+      "passed": 46,
+      "failed": 0,
+      "log": "build\\bil-vision-reference\\broad-community-cold-back-1791656257452593400.log"
+    }
+  }
+}

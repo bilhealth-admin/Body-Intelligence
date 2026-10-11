@@ -8,6 +8,7 @@ import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
 import 'weekly_report_engine.dart';
 import 'weekly_report_provider.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'weekly_report_body.dart';
 part 'weekly_report_food.dart';
@@ -484,76 +485,83 @@ class WeeklyReportPage extends ConsumerWidget {
   const WeeklyReportPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: AlignmentDirectional.centerStart,
-          child: Text(_t(context, 'title')),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/settings'),
-        ),
-        actions: [
-          IconButton(
-            key: const Key('weekly-report-health-sources'),
-            constraints: const BoxConstraints.tightFor(width: 40, height: 48),
-            tooltip: _t(context, 'health_sources'),
-            onPressed: () => context.push('/health-information-sources'),
-            icon: const Icon(Icons.menu_book_outlined),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(_t(context, 'title')),
           ),
-          IconButton(
-            key: const Key('weekly-report-previous'),
-            constraints: const BoxConstraints.tightFor(width: 40, height: 48),
-            tooltip: _weekNavigationCopy(context, previous: true),
-            onPressed: () {
-              final selected = ref.read(selectedWeeklyReportDateProvider);
-              ref.read(selectedWeeklyReportDateProvider.notifier).state =
-                  selected.subtract(const Duration(days: 7));
-            },
-            icon: Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_right_rounded
-                  : Icons.chevron_left_rounded,
-              textDirection: TextDirection.ltr,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/settings'),
+          ),
+          actions: [
+            IconButton(
+              key: const Key('weekly-report-health-sources'),
+              constraints: const BoxConstraints.tightFor(width: 40, height: 48),
+              tooltip: _t(context, 'health_sources'),
+              onPressed: () => context.push('/health-information-sources'),
+              icon: const Icon(Icons.menu_book_outlined),
             ),
-          ),
-          IconButton(
-            key: const Key('weekly-report-next'),
-            constraints: const BoxConstraints.tightFor(width: 40, height: 48),
-            tooltip: _weekNavigationCopy(context, previous: false),
-            onPressed: _canSelectNextWeek(ref)
-                ? () {
-                    final selected = ref.read(selectedWeeklyReportDateProvider);
-                    final today = ref.read(weeklyReportClockProvider)();
-                    final candidate = selected.add(const Duration(days: 7));
-                    ref.read(selectedWeeklyReportDateProvider.notifier).state =
-                        candidate.isAfter(today) ? today : candidate;
-                  }
-                : null,
-            icon: Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_left_rounded
-                  : Icons.chevron_right_rounded,
-              textDirection: TextDirection.ltr,
+            IconButton(
+              key: const Key('weekly-report-previous'),
+              constraints: const BoxConstraints.tightFor(width: 40, height: 48),
+              tooltip: _weekNavigationCopy(context, previous: true),
+              onPressed: () {
+                final selected = ref.read(selectedWeeklyReportDateProvider);
+                ref.read(selectedWeeklyReportDateProvider.notifier).state =
+                    selected.subtract(const Duration(days: 7));
+              },
+              icon: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_right_rounded
+                    : Icons.chevron_left_rounded,
+                textDirection: TextDirection.ltr,
+              ),
             ),
-          ),
-        ],
+            IconButton(
+              key: const Key('weekly-report-next'),
+              constraints: const BoxConstraints.tightFor(width: 40, height: 48),
+              tooltip: _weekNavigationCopy(context, previous: false),
+              onPressed: _canSelectNextWeek(ref)
+                  ? () {
+                      final selected = ref.read(
+                        selectedWeeklyReportDateProvider,
+                      );
+                      final today = ref.read(weeklyReportClockProvider)();
+                      final candidate = selected.add(const Duration(days: 7));
+                      ref
+                          .read(selectedWeeklyReportDateProvider.notifier)
+                          .state = candidate.isAfter(today)
+                          ? today
+                          : candidate;
+                    }
+                  : null,
+              icon: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                textDirection: TextDirection.ltr,
+              ),
+            ),
+          ],
+        ),
+        body: ref
+            .watch(weeklyReportProvider)
+            .when(
+              skipLoadingOnRefresh: true,
+              skipLoadingOnReload: true,
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) => _Message(
+                _t(context, 'read_error'),
+                onRetry: () => ref.invalidate(weeklyReportProvider),
+              ),
+              data: (report) => _Body(report: report),
+            ),
       ),
-      body: ref
-          .watch(weeklyReportProvider)
-          .when(
-            skipLoadingOnRefresh: true,
-            skipLoadingOnReload: true,
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => _Message(
-              _t(context, 'read_error'),
-              onRetry: () => ref.invalidate(weeklyReportProvider),
-            ),
-            data: (report) => _Body(report: report),
-          ),
     );
   }
 }

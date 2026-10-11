@@ -179,6 +179,7 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(
         widget.showProfileHeader
             ? communityText(context, 'Community profile', 'ملف المجتمع')

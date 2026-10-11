@@ -333,10 +333,12 @@ void _coachMealJournalCases() {
       );
     }
     expect(await fixture.meals.getMealItem(original.id), original);
-    expect(
-      await fixture.database.select(fixture.database.preferences).get(),
-      isEmpty,
-    );
+    final preferences = await fixture.database
+        .select(fixture.database.preferences)
+        .get();
+    expect(preferences, hasLength(1));
+    expect(preferences.single.key, firstMealCelebrationPreferenceKey);
+    expect(preferences.single.value, 'ready');
   });
 
   test(

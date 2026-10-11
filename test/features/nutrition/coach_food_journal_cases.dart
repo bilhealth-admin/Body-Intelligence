@@ -134,7 +134,7 @@ void _foodJournalCases() {
         _conflict(CoachMealConflictReason.ownerChanged),
       );
       expect(await f.active(), hasLength(1));
-      expect(await f.db.select(f.db.preferences).get(), hasLength(1));
+      await _expectSavedFoodJournalAndMilestone(f, 'fixed');
     },
   );
 
@@ -176,7 +176,7 @@ void _foodJournalCases() {
             if (error.committed) {
               durable++;
               expect(await f.active(), hasLength(2));
-              expect(await f.db.select(f.db.preferences).get(), hasLength(1));
+              await _expectSavedFoodJournalAndMilestone(f, 'scope-$stop');
             } else {
               rolledBack++;
               expect(await f.active(), isEmpty);

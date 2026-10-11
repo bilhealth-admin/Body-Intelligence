@@ -295,6 +295,7 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
     if (visit == null) {
       return Scaffold(
         appBar: AppBar(
+          leading: const CommunityReturnButton(),
           title: Text(communityText(context, 'Circles', 'الدوائر')),
         ),
         body: const _CommunityProfileOwnerChangedBody(),

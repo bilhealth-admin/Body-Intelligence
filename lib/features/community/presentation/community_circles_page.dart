@@ -462,7 +462,6 @@ class _CommunityCircleCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final slug = circle.slug;
     return CircleVerifiedMedia(
       media: circle is ManagedCommunityCircle
@@ -472,25 +471,12 @@ class _CommunityCircleCover extends StatelessWidget {
       width: 56,
       height: 56,
       radius: 28,
-      fallback: Container(
+      fallback: BilFlatIcon(
         key: Key('community-circle-cover-$slug'),
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [scheme.primaryContainer, scheme.secondaryContainer],
-          ),
-          border: Border.all(color: scheme.outlineVariant),
-        ),
-        alignment: Alignment.center,
-        child: Icon(
-          _circleIcon(slug),
-          size: 26,
-          color: scheme.onPrimaryContainer,
-        ),
+        kind: _circleSemanticKind(slug),
+        size: 56,
+        iconSize: 28,
+        materialIcon: _circleIcon(slug),
       ),
     );
   }
@@ -578,6 +564,16 @@ String _circleDescription(BuildContext context, String slug) => switch (slug) {
     'شارك تقدمًا مستدامًا ودعمًا دون ضغط المقارنة.',
   ),
   _ => '',
+};
+
+BilSemanticIconKind _circleSemanticKind(String slug) => switch (slug) {
+  '10k-steps' || 'running' => BilSemanticIconKind.steps,
+  'healthy-eating' => BilSemanticIconKind.nutrition,
+  'beginner-fitness' || 'strength' => BilSemanticIconKind.exercise,
+  'sleep' => BilSemanticIconKind.sleep,
+  'ramadan-fasting' => BilSemanticIconKind.fasting,
+  'weight-loss-journey' => BilSemanticIconKind.progress,
+  _ => BilSemanticIconKind.community,
 };
 
 IconData _circleIcon(String slug) => switch (slug) {

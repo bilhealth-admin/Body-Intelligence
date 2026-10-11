@@ -47,43 +47,48 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   @override
   Widget build(BuildContext context) {
     final today = recordDate;
-    return PopScope(
-      canPop: !saving,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: saving
-                ? null
-                : () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.go('/wellness-library');
-                    }
-                  },
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          title: Text(tr('Sleep', 'النوم')),
-          bottom: TabBar(
-            controller: tabController,
-            onTap: (index) {
-              if (saving) tabController.index = 0;
-            },
-            tabs: [
-              for (final label in [tr('Log', 'تسجيل'), tr('Insights', 'الرؤى')])
-                Tab(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(label, maxLines: 1),
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: !saving,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: saving
+                  ? null
+                  : () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/wellness-library');
+                      }
+                    },
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+            title: Text(tr('Sleep', 'النوم')),
+            bottom: TabBar(
+              controller: tabController,
+              onTap: (index) {
+                if (saving) tabController.index = 0;
+              },
+              tabs: [
+                for (final label in [
+                  tr('Log', 'تسجيل'),
+                  tr('Insights', 'الرؤى'),
+                ])
+                  Tab(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(label, maxLines: 1),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-        body: TabBarView(
-          controller: tabController,
-          physics: saving ? const NeverScrollableScrollPhysics() : null,
-          children: [_recordTab(today), _insightsTab()],
+          body: TabBarView(
+            controller: tabController,
+            physics: saving ? const NeverScrollableScrollPhysics() : null,
+            children: [_recordTab(today), _insightsTab()],
+          ),
         ),
       ),
     );
@@ -119,7 +124,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                 '${connectedSleep.signal.value.toStringAsFixed(1)} ${tr('hours', 'ساعة')}',
               ),
               subtitle: Text(
-                '${wellnessSleepMeasuredByLabel(context)} ${connectedHealthDisplaySource(connectedSleep.signal)} · '
+                '${wellnessSleepMeasuredByLabel(context)} ${connectedHealthDisplayName(context, connectedSleep.signal)} · '
                 '${tr('Last sync', 'آخر مزامنة')} ${MaterialLocalizations.of(context).formatShortDate(connectedSleep.lastSyncAt)}',
               ),
               trailing: const Icon(Icons.verified_rounded, color: Colors.green),

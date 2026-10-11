@@ -1,0 +1,31 @@
+name: BIL QA More flat-icon contract isolated
+on:
+  push:
+    branches:
+      - qa/bil-quality-ux-integration-20261009
+    paths:
+      - .github/workflows/bil_qa_more_flat_contract_20261010.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    name: more-flat-icons-route-permissions
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Use LF checkout on Windows
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Run existing More routes, authority, RTL and icon contract
+        run: flutter test --no-pub --timeout=3m test/launch_readiness/navigation_and_more_master_closure_test.dart

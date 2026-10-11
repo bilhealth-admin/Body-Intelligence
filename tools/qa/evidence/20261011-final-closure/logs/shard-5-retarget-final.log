@@ -1,0 +1,2 @@
+Previous HEAD position was 53f6643b fix(test): resolve real Vision image before cold shard rendering; cover Home copy delta
+HEAD is now at c1f1f47a fix(test): evict pending Vision photo from prior fake-clock case before real decode

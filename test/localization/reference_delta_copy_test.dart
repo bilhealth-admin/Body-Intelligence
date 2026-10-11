@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('reference delta is complete for all 25 production locales', () {
-    expect(ReferenceDeltaRuntimeCopy.sources, hasLength(17));
+    // The approved Home counter adds the localized over-goal label.
+    expect(ReferenceDeltaRuntimeCopy.sources, hasLength(18));
+    expect(ReferenceDeltaRuntimeCopy.sources, contains('over'));
     expect(ReferenceDeltaRuntimeCopy.balanced, isTrue);
     expect(
       ReferenceDeltaRuntimeCopy.supported,

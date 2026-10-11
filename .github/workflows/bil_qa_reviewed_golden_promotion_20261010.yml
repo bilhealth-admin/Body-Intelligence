@@ -1,0 +1,221 @@
+name: BIL QA reviewed Golden baseline promotion
+
+on:
+  push:
+    branches:
+      - qa/bil-quality-ux-integration-20261009
+    paths:
+      - .github/workflows/bil_qa_reviewed_golden_promotion_20261010.yml
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: bil-reviewed-golden-qa-only-20261010
+  cancel-in-progress: false
+
+jobs:
+  promote-reviewed-captures:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/bil-quality-ux-integration-20261009'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BIL_REVIEW_SOURCE_RUN: '38003344769'
+      BIL_REVIEW_SOURCE_SHA: '6c2e1332d155f24d32d3006b3441343c1906480c'
+      BIL_GOLDEN_AGGREGATE_SHA: '55b926ea496edd2dac70fc3b69c5fd452742610f2f1c0bea116d3290f6f5d3c3'
+    steps:
+      - name: Exact QA branch checkout, never main or deployment
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: true
+          fetch-depth: 2
+
+      - name: Validate source commit, GitHub artifact provenance and review gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/qa/bil-quality-ux-integration-20261009'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-list --parents -n 1 HEAD | awk '{print $2}')" = "$BIL_REVIEW_SOURCE_SHA"
+          test -z "$(git status --porcelain)"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BIL_REVIEW_SOURCE_RUN" --jq '.head_sha' | grep -Fx "$BIL_REVIEW_SOURCE_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BIL_REVIEW_SOURCE_RUN/jobs?per_page=100" > /tmp/bil-golden-source-jobs.json
+          python3 - <<'PY'
+          import json
+          jobs=json.load(open('/tmp/bil-golden-source-jobs.json'))['jobs']
+          outcomes={job['name']:job['conclusion'] for job in jobs}
+          for name in ['source-checks','focused-regressions (splash-golden)','focused-regressions (transaction-queue)']:
+              assert outcomes.get(name)=='success',(name,outcomes.get(name))
+          for suffix in ['production-goldens','data-goldens','store-captures']:
+              assert outcomes.get(f'focused-regressions ({suffix})')=='failure',suffix
+          print('SOURCE_GATES_CHECKED',outcomes)
+          PY
+
+      - name: Fetch immutable Windows Flutter capture artifacts for three reviewed categories
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in \
+            production:focused-golden-failures-production-goldens \
+            data:focused-golden-failures-data-goldens \
+            store:focused-golden-failures-store-captures; do
+            group="${spec%%:*}"
+            artifact="${spec#*:}"
+            mkdir -p "/tmp/bil-golden-source/$group"
+            gh run download "$BIL_REVIEW_SOURCE_RUN" \
+              --repo "$GITHUB_REPOSITORY" --name "$artifact" \
+              --dir "/tmp/bil-golden-source/$group"
+          done
+
+      - name: Verify all 145 individually hashed captured PNGs and existing tracked masters
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-reviewed-goldens
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, shutil, struct, subprocess
+          source_root=pathlib.Path('/tmp/bil-golden-source')
+          groups={'production':88,'data':32,'store':25}
+          tiny={
+              'visual_closure_recipe_detail_phone',
+              'visual_closure_recipe_detail_shakshuka_phone',
+              'visual_closure_recipe_detail_yogurt_phone',
+              'visual_closure_recipe_detail_chickpea_phone',
+              'visual_closure_workout_routine_builder_phone',
+          }
+          rows=[]; digests=[]; payloads={}
+          def png_size(content):
+              assert content[:8]==bytes.fromhex('89504e470d0a1a0a'), 'not PNG'
+              assert content[12:16]==b'IHDR', 'invalid PNG IHDR'
+              w,h=struct.unpack('>II', content[16:24])
+              assert 100 <= w <= 4000 and 100 <= h <= 6000,(w,h)
+              return (w,h)
+          def review_class(group,name):
+              if name in tiny:
+                  return 'R01_reviewed_tiny_edge_difference_0.04_to_0.36_percent'
+              if 'dashboard' in name:
+                  return 'R02_current_owner_scoped_home_visual_and_returning_member'
+              if 'help' in name or 'trust_support' in name:
+                  return 'R03_iconless_help_and_support_accessibility'
+              if 'recipe' in name or 'wellness' in name:
+                  return 'R04_recipe_wellness_visual_design_and_paid_gate'
+              if 'workout' in name:
+                  return 'R05_workout_state_and_flat_icon_screens'
+              if group=='store' and 'onboarding' in name:
+                  return 'R06_current_onboarding_screenshot_for_store_review'
+              if group=='store':
+                  return 'R07_current_store_device_language_fixture_capture'
+              return 'R08_current_data_settings_health_and_privacy_layout'
+          for group,expected_count in groups.items():
+              files=sorted((source_root/group).rglob('*_testImage.png'))
+              assert len(files)==expected_count,(group,len(files),expected_count)
+              for source in files:
+                  name=source.name.removesuffix('_testImage.png')
+                  allowed_prefix='epic15_' if group=='store' else 'visual_closure_'
+                  assert name.startswith(allowed_prefix)
+                  assert re.fullmatch(r'[a-zA-Z0-9_]+',name),name
+                  master=source.with_name(name+'_masterImage.png')
+                  diff=source.with_name(name+'_isolatedDiff.png')
+                  assert master.is_file() and diff.is_file(),name
+                  destination=pathlib.Path(
+                      ('test/goldens/' if group=='store'
+                       else 'test/visual_closure/goldens/')+name+'.png'
+                  )
+                  assert destination.is_file(),str(destination)
+                  subprocess.run(['git','ls-files','--error-unmatch',str(destination)],
+                                 check=True,stdout=subprocess.DEVNULL)
+                  content=source.read_bytes()
+                  original=destination.read_bytes()
+                  assert content != original,name
+                  assert png_size(content)==png_size(original)==png_size(master.read_bytes()),name
+                  current_sha=hashlib.sha256(content).hexdigest()
+                  digests.append(f'{group}\t{name}\t{current_sha}')
+                  row={
+                      'group':group,'path':str(destination),
+                      'source_artifact_test_image':str(source.relative_to(source_root)),
+                      'sha256_before':hashlib.sha256(original).hexdigest(),
+                      'sha256_after':current_sha,
+                      'image_dimensions':list(png_size(content)),
+                      'review_class':review_class(group,name),
+                  }
+                  rows.append(row)
+                  payloads[str(destination)]=content
+          combined='\n'.join(sorted(digests))+'\n'
+          verified=hashlib.sha256(combined.encode('utf-8')).hexdigest()
+          assert verified==os.environ['BIL_GOLDEN_AGGREGATE_SHA'],verified
+          assert len(payloads)==145 and len(tiny.intersection({p.split('/')[-1].removesuffix('.png') for p in payloads}))==5
+          for dest,content in payloads.items():
+              pathlib.Path(dest).write_bytes(content)
+          manifest={
+              'protocol':'BIL_QA_REVIEWED_WINDOWS_FLUTTER_GOLDEN_PROMOTION_V1',
+              'source_run':int(os.environ['BIL_REVIEW_SOURCE_RUN']),
+              'source_sha':os.environ['BIL_REVIEW_SOURCE_SHA'],
+              'aggregate_sha256':verified,
+              'qa_branch':'qa/bil-quality-ux-integration-20261009',
+              'counts':groups,
+              'pixel_thresholds_relaxed':False,
+              'update_goldens_flag_used':False,
+              'app_source_modified':False,
+              'real_device_certification':False,
+              'scope':'Reviewed baseline captures only; does not certify end-user design or Google Play',
+              'artifacts':rows,
+          }
+          out=pathlib.Path('docs/qa_next/BIL_20261010_REVIEWED_GOLDEN_SHA_MANIFEST.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('VERIFIED_REVIEWED_BASELINES',len(rows),'EXPECTED_SHA256',verified)
+          for group in groups:
+              print('CATEGORY',group,sum(1 for row in rows if row['group']==group))
+          PY
+
+      - name: Commit each visually reviewed group separately, preserving exact PNG provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'BIL QA Golden Evidence'
+          git config user.email 'bil-qa-goldens@users.noreply.github.com'
+          for group in production data store; do
+            export BIL_GROUP="$group"
+            python3 - <<'PY'
+          import json,os,subprocess
+          rows=json.load(open('docs/qa_next/BIL_20261010_REVIEWED_GOLDEN_SHA_MANIFEST.json'))['artifacts']
+          paths=[x['path'] for x in rows if x['group']==os.environ['BIL_GROUP']]
+          subprocess.run(['git','add','--',*paths],check=True)
+          got=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          assert set(got)==set(paths),(len(got),len(paths))
+          print('TRACKED_BINARY_REVIEWED',os.environ['BIL_GROUP'],len(got))
+          PY
+            git diff --cached --check
+            git commit -m "test(goldens): pin visually reviewed $group screenshot baselines"
+          done
+          git add docs/qa_next/BIL_20261010_REVIEWED_GOLDEN_SHA_MANIFEST.json
+          git diff --cached --check
+          git commit -m 'docs(qa): retain per-image SHA-256 review provenance for 145 Golden captures'
+          test -z "$(git status --porcelain)"
+          git diff --name-only "$GITHUB_SHA" HEAD | tee /tmp/bil-reviewed-goldens/changed-paths.txt
+          test "$(wc -l < /tmp/bil-reviewed-goldens/changed-paths.txt)" -eq 146
+          test "$(git diff --name-only "$GITHUB_SHA" HEAD | grep -E -v '^test/(visual_closure/)?goldens/|^docs/qa_next/BIL_20261010_REVIEWED_GOLDEN_SHA_MANIFEST.json$' | wc -l)" -eq 0
+          git rev-parse HEAD | tee /tmp/bil-reviewed-goldens/final-head.txt
+          cp docs/qa_next/BIL_20261010_REVIEWED_GOLDEN_SHA_MANIFEST.json /tmp/bil-reviewed-goldens/manifest.json
+
+      - name: Push only fast-forward to original QA branch, fail closed on branch drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/qa/bil-quality-ux-integration-20261009'
+          test "$(git rev-list --parents -n 1 "$GITHUB_SHA" | awk '{print $2}')" = "$BIL_REVIEW_SOURCE_SHA"
+          git push origin HEAD:refs/heads/qa/bil-quality-ux-integration-20261009
+          remote="$(git ls-remote origin refs/heads/qa/bil-quality-ux-integration-20261009 | cut -f1)"
+          test "$remote" = "$(cat /tmp/bil-reviewed-goldens/final-head.txt)"
+
+      - name: Preserve manifest and changed-path evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-qa-review-provenance-145
+          path: /tmp/bil-reviewed-goldens/
+          retention-days: 7
+          if-no-files-found: warn

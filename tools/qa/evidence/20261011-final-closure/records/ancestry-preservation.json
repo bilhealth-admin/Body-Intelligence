@@ -1,0 +1,43 @@
+{
+  "initial_head": "06c365022f20e0f0c5d6e901b19a8efb1419b81f",
+  "version": "1.0.0+8",
+  "ancestors": [
+    {
+      "ancestor": "3f0085e6e6686f2e87e9cf14789e9e578ea64159",
+      "preserved": true
+    },
+    {
+      "ancestor": "386d00a6",
+      "preserved": true
+    },
+    {
+      "ancestor": "08631043",
+      "preserved": true
+    },
+    {
+      "ancestor": "e5ba6e1677f92b7fe12c92ef84c95858e524d833",
+      "preserved": true
+    },
+    {
+      "ancestor": "944973ed",
+      "preserved": true
+    },
+    {
+      "ancestor": "570919ac",
+      "preserved": true
+    },
+    {
+      "ancestor": "23a9378f",
+      "preserved": true
+    },
+    {
+      "ancestor": "1aab837b",
+      "preserved": true
+    },
+    {
+      "ancestor": "06c36502",
+      "preserved": true
+    }
+  ],
+  "scope": "Ancestry and current targeted regression verification, not a store build certification"
+}

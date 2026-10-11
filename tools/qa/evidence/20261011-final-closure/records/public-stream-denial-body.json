@@ -1,0 +1,7 @@
+{
+  "url": "https://workouts.bilhealth.com/v2/objects/workouts/v1/gym-six-month/movements/mobility-flexibility-adductor-rock-back-gentle-flow.mp4",
+  "method": "GET",
+  "range": "bytes=0-31",
+  "authenticated": false,
+  "status": 206
+}

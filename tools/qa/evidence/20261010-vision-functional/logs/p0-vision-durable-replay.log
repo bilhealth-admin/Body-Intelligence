@@ -1,0 +1,12 @@
+Command: flutter test --no-pub --timeout=3m test/features/nutrition/meal_vision_verified_commit_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_verified_commit_test.dart
+00:00 +0: 80 g reviewed vision amount is really committed and readable
+00:00 +1: same Vision request replays its durable receipt without a duplicate
+00:00 +2: two concurrent identical Vision commits persist one item
+00:00 +3: reused Vision request with different food amount fails closed
+00:00 +4: failed Vision batch rolls back item and idempotency receipt
+00:00 +5: Vision mixed grams, pieces and milliliters commit actual quantities
+00:00 +6: mixed-unit Vision partial failure leaves neither rows nor receipt
+00:00 +7: zero reviewed amount cannot write a partial meal
+00:00 +8: All tests passed!

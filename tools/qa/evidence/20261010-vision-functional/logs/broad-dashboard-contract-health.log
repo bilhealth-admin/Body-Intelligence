@@ -1,0 +1,69 @@
+Command: flutter test --no-pub --timeout=3m test/dashboard_composition_contract_test.dart test/dashboard_epic_completion_contract_test.dart test/dashboard_polish/dashboard_live_health_hub_contract_test.dart test/dashboard_polish/dashboard_p9_r15_final_visual_contract_test.dart test/dashboard_polish/live_health_watch_layout_golden_test.dart test/dashboard_polish/live_health_watch_visibility_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_composition_contract_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_composition_contract_test.dart: DashboardPage delegates environment and composition responsibilities
+00:00 +1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_composition_contract_test.dart: weight and steps use real three-zone crystalline Cartesian bars
+00:00 +2: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_epic_completion_contract_test.dart: dashboard exposes explicit priority hierarchy
+00:00 +3: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_live_health_hub_contract_test.dart: P9-R9 live Health Hub and paired deck contracts are present
+00:01 +4: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/dashboard_p9_r15_final_visual_contract_test.dart: P9-R15 consolidated approved dashboard contracts are present
+00:02 +5: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart: compact watch keeps all four readings below the clock
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/live_health_watch_compact_all_metrics.png": Pixel test failed, 9.71%, 4700px diff
+detected.
+Failure feedback can be found at
+/G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart:80:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +5 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: health_sync_timed_out retains readings, not revoked access
+00:03 +5 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart: compact watch keeps all four readings below the clock [E]
+  Test failed. See exception logs above.
+  The test description was: compact watch keeps all four readings below the clock
+  
+00:03 +6 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: health_cached_snapshot_pending_refresh retains readings, not revoked access
+00:03 +7 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: native_health_status_unavailable retains readings, not revoked access
+00:03 +8 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: daily_activity_refresh_failed_cache_preserved retains readings, not revoked access
+00:03 +9 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: connected watch renders only actual supported readings
+00:03 +10 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: Apple Health uses its selected phone step total with verified watch data
+00:03 +11 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: ConnectedHealthStatus.unavailable hides stale readings but keeps clock and link CTA
+00:03 +12 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: ConnectedHealthStatus.permissionRequired hides stale readings but keeps clock and link CTA
+00:04 +13 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: ConnectedHealthStatus.permissionDenied hides stale readings but keeps clock and link CTA
+00:04 +14 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: ConnectedHealthStatus.authorizationRequested hides stale readings but keeps clock and link CTA
+00:04 +15 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: ConnectedHealthStatus.degraded hides stale readings but keeps clock and link CTA
+00:04 +16 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: iPhone HealthKit readings do not require Apple Watch evidence
+00:04 +17 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: sync failure keeps the last confirmed watch readings visible
+00:04 +18 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: source-less and invalid signals stay hidden
+00:04 +19 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: recent sync cannot present prior-day activity or two-day-old vitals as current
+00:04 +20 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: current observations replace retained older activity
+00:04 +21 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: watch scope contains no oxygen or SpO2 metric
+00:04 +22 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: watch clock pauses offscreen and resumes without polling
+00:04 +23 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: digital clock uses fixed-width figures for every digit
+00:04 +24 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: connected BLE heart rate is shown inside watch without body metrics
+00:04 +25 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: connected BLE with no packet is a source but invents no reading
+00:04 +26 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: disconnected BLE retained packets cannot appear on the watch
+00:04 +27 -1: G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_visibility_test.dart: dashboard snapshot and status follow aggregate connection truth
+00:04 +28 -1: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/dashboard_polish/live_health_watch_layout_golden_test.dart: compact watch keeps all four readings below the clock

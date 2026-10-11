@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/community_repository.dart';
 import 'community_copy.dart';
+import 'community_return_button.dart';
 
 class CommunityFoodReviewPage extends StatefulWidget {
   const CommunityFoodReviewPage({super.key});
@@ -74,6 +75,7 @@ class _CommunityFoodReviewPageState extends State<CommunityFoodReviewPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(communityText(context, 'Product review', 'مراجعة المنتجات')),
     ),
     body: FutureBuilder<List<Map<String, dynamic>>>(

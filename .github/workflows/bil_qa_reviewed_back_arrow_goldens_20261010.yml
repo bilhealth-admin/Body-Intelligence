@@ -1,0 +1,150 @@
+name: BIL QA reviewed navigation Back-arrow goldens
+
+on:
+  push:
+    branches:
+      - qa/bil-quality-ux-integration-20261009
+    paths:
+      - .github/workflows/bil_qa_reviewed_back_arrow_goldens_20261010.yml
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: bil-reviewed-back-arrow-goldens-20261010
+  cancel-in-progress: false
+
+jobs:
+  promote-ten-reviewed-back-arrows:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/bil-quality-ux-integration-20261009'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: "${{ github.token }}"
+      BIL_SOURCE_RUN: "38038239172"
+      BIL_SOURCE_SHA: "f385012bafb09da3b8e2608244a5b58d5f5e55e9"
+    steps:
+      - name: Check out exact QA commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: true
+
+      - name: Verify allowed branch and immutable CI artifact provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/qa/bil-quality-ux-integration-20261009'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
+          test "$(git ls-remote origin refs/heads/qa/bil-quality-ux-integration-20261009 | cut -f1)" = "$GITHUB_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BIL_SOURCE_RUN" --jq '.head_sha' | grep -Fx "$BIL_SOURCE_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BIL_SOURCE_RUN/jobs?per_page=100" > /tmp/back-arrow-source-jobs.json
+          python3 - <<'PY'
+          import json
+          jobs = json.load(open('/tmp/back-arrow-source-jobs.json'))['jobs']
+          outcomes = {j['name']: j['conclusion'] for j in jobs}
+          for name in [
+              'source-checks',
+              'focused-regressions (data-goldens)',
+              'focused-regressions (store-captures)',
+              'focused-regressions (splash-golden)',
+              'focused-regressions (transaction-queue)',
+          ]:
+              assert outcomes.get(name) == 'success', (name, outcomes.get(name))
+          assert outcomes.get('focused-regressions (production-goldens)') == 'failure'
+          print('SOURCE_CI_VERIFIED', outcomes)
+          PY
+
+      - name: Download source run failure images, never regenerate Goldens
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/back-arrow-captures
+          gh run download "$BIL_SOURCE_RUN" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name focused-golden-failures-production-goldens \
+            --dir /tmp/back-arrow-captures
+
+      - name: Verify reviewed image hashes, exact scope and navigation-only change
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import struct
+          source = Path('/tmp/back-arrow-captures/visual_closure/failures')
+          rows = json.loads(r'''[{"name":"visual_closure_community_connections_phone","sha256_before":"409a4f88147b62786b6b37a757139241c14823cbbbc4038ed14d291ad5c391e1","sha256_after":"c16eb362ab83a941f54785d92f12345a613f539ba3ffce6d410d77461a72c5d5","changed_pixels":93,"pixel_bbox":[20,20,37,36]},{"name":"visual_closure_community_friend_authenticated_phone","sha256_before":"cce5334bf72fe4e2915176f10d0e271740cd575e1d3296ccf35321d71fefc04f","sha256_after":"0657916326a55d2c10c0e177ae47285bf38b527108a60bf384796923dbb1fc7d","changed_pixels":93,"pixel_bbox":[20,20,37,36]},{"name":"visual_closure_community_profile_phone","sha256_before":"82a0e9f138ce55d188af6e24ab080273f9519e962d96a11347d2df7500f5dd4f","sha256_after":"a15108dc5b73a7e7e78131cfd8da22ac1f4689e20778a14d7cabb2c9b7e8a12f","changed_pixels":93,"pixel_bbox":[20,20,37,36]},{"name":"visual_closure_community_request_authenticated_phone","sha256_before":"b8c97585d6efe0603b3ceca89ef48edc1dd82a7b50c92dde68544351be704061","sha256_after":"5ccd19b29a34e2e72f718189f6593bff98c44ca13c7a76ddc86d09db58c59fdb","changed_pixels":93,"pixel_bbox":[20,20,37,36]},{"name":"visual_closure_help_faq_medical_phone","sha256_before":"ae1f06afe63aa76898675b5ce2f598c38b69420cfd7482e77ca08f27a50c0074","sha256_after":"16cba471586639c463aeb1001fdad5a02f9ad2f0fe7fe0c25c8511a64fb77c02","changed_pixels":64,"pixel_bbox":[22,22,35,34]},{"name":"visual_closure_help_faq_offline_phone","sha256_before":"138f89636f74cc0ab4879710d64ed6dfebd6d6b53eebf07bf99806e7bf833142","sha256_after":"3c8b7d47dd816ece10431bbf35733ea0c562ba1a63e3a28f6aab02dfb49ac741","changed_pixels":64,"pixel_bbox":[22,22,35,34]},{"name":"visual_closure_help_faq_targets_phone","sha256_before":"69bdbc2bff63484969dbdf3bfc9f6cf0faba8b4b335ece048cac699521320367","sha256_after":"8670ae26aaf4408c1d7e6c3b6fba22506516564788fb53aa9d4f0757fe3ee1f1","changed_pixels":64,"pixel_bbox":[22,22,35,34]},{"name":"visual_closure_privacy_policy_phone","sha256_before":"f8c2920bd781021d4fa295fd029d1416a21b17c2f0000835c051280fb74d4e45","sha256_after":"f7727078ea0133870b938e5ab309afa7e941c84017b5fde1ae81470ed70c7254","changed_pixels":64,"pixel_bbox":[22,22,35,34]},{"name":"visual_closure_terms_phone","sha256_before":"03e2e7530740e05ca529d06413eeedf452fc2eb33378708570d61a0ac0a20361","sha256_after":"9eaccbe3e72d79787f219662c46a90f458e749930e021fe84500acfff97b77be","changed_pixels":64,"pixel_bbox":[22,22,35,34]},{"name":"visual_closure_trust_support_rtl_dark_phone","sha256_before":"06729e60c70a445ab0bb041a06c28d53b4dc88c0fe025bf4704caa162333485e","sha256_after":"1bfd4a5cfe660b5ab897d8844b724c4397cbdd48dca1531074a665675f580e0b","changed_pixels":64,"pixel_bbox":[356,22,369,34]}]''')
+          assert len(rows) == 10
+          names = {row['name'] for row in rows}
+          assert len(names) == 10
+          assert {p.name.removesuffix('_testImage.png') for p in source.glob('*_testImage.png')} == names
+          updated = []
+          def digest(data):
+              return hashlib.sha256(data).hexdigest()
+          def dimensions(data):
+              assert data[:8] == bytes.fromhex('89504e470d0a1a0a')
+              return struct.unpack('>II', data[16:24])
+          for row in rows:
+              name = row['name']
+              assert name.startswith('visual_closure_')
+              dest = Path('test/visual_closure/goldens') / (name + '.png')
+              master = source / (name + '_masterImage.png')
+              candidate = source / (name + '_testImage.png')
+              diff = source / (name + '_isolatedDiff.png')
+              assert dest.is_file() and master.is_file() and candidate.is_file() and diff.is_file(), name
+              old_bytes, master_bytes, new_bytes = dest.read_bytes(), master.read_bytes(), candidate.read_bytes()
+              assert digest(old_bytes) == digest(master_bytes) == row['sha256_before'], name
+              assert digest(new_bytes) == row['sha256_after'], name
+              assert dimensions(old_bytes) == dimensions(new_bytes) == (390, 844), name
+              assert row['changed_pixels'] in (64, 93), name
+              x0, y0, x1, y1 = row['pixel_bbox']
+              if name.endswith('rtl_dark_phone'):
+                  assert (x0, y0, x1, y1) == (356, 22, 369, 34)
+              else:
+                  assert y0 >= 20 and y1 <= 36 and x0 >= 20 and x1 <= 37
+              dest.write_bytes(new_bytes)
+              updated.append(str(dest))
+          manifest = {
+              'protocol': 'BIL_QA_TEN_REVIEWED_BACK_ARROWS_V1',
+              'source_run': 38038239172,
+              'source_sha': 'f385012bafb09da3b8e2608244a5b58d5f5e55e9',
+              'qa_branch': 'qa/bil-quality-ux-integration-20261009',
+              'review': 'Manually compared original and candidate PNGs. All RGB pixel differences occur exclusively in the new Back arrow at the top edge; correct RTL mirror retained.',
+              'scope': 'Only 10 previously mismatched navigation-return Goldens, no app source, no test threshold changes.',
+              'automatic_bulk_update_goldens': False,
+              'real_device_visual_approval': False,
+              'rows': rows,
+          }
+          output = Path('docs/qa_next/BIL_20261010_REVIEWED_NAV_BACK_GOLDEN_MANIFEST.json')
+          output.parent.mkdir(parents=True, exist_ok=True)
+          output.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+          updated.append(str(output))
+          Path('/tmp/reviewed-back-arrow-paths.json').write_text(json.dumps(sorted(updated)))
+          print('REVIEWED_ONLY', len(rows), 'PANELS', [(row['name'], row['changed_pixels']) for row in rows])
+          PY
+
+      - name: Commit exactly 10 reviewed screenshots and SHA provenance, never production
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "BIL QA Visual Review"
+          git config user.email "bil-qa-goldens@users.noreply.github.com"
+          python3 - <<'PY'
+          import json
+          import subprocess
+          paths = json.load(open('/tmp/reviewed-back-arrow-paths.json'))
+          assert len(paths) == 11
+          subprocess.run(['git', 'add', '--', *paths], check=True)
+          staged = subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines()
+          assert sorted(staged) == sorted(paths), (staged, paths)
+          PY
+          git diff --cached --check
+          git commit -m 'test(goldens): pin ten visually reviewed navigation return arrows'
+          test -z "$(git status --porcelain)"
+          git push origin HEAD:refs/heads/qa/bil-quality-ux-integration-20261009
+          remote="$(git ls-remote origin refs/heads/qa/bil-quality-ux-integration-20261009 | cut -f1)"
+          test "$remote" = "$(git rev-parse HEAD)"

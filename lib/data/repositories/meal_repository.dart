@@ -11,6 +11,7 @@ import '../database/food_basis_evidence.dart';
 import '../database/database_scope.dart';
 import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'preferences_repository.dart';
+import 'first_meal_milestone.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
 import '../../features/nutrition/domain/daily_nutrition_intelligence.dart';
 import '../../features/nutrition/domain/dietary_preferences.dart';
@@ -29,6 +30,8 @@ part 'meal_repository_coach_journal.dart';
 part 'meal_repository_coach_undo.dart';
 part 'meal_repository_coach_food.dart';
 part 'meal_repository_food_portions.dart';
+part 'meal_repository_validation.dart';
+part 'meal_repository_vision_journal.dart';
 
 class MealRepository {
   final AppDatabase _database;
@@ -46,6 +49,29 @@ class MealRepository {
     this._mealBuilderEngine = const MealBuilderEngine(),
     this._dailyNutritionEngine = const DailyNutritionIntelligenceEngine(),
   });
+
+  /// Snapshot the first-food milestone before inserting an item.
+  /// A historical (even soft-deleted) item is not a new user's first meal.
+  /// Must be called within the transaction that will persist that item.
+  Future<bool?> _firstFoodMilestoneBeforeInsert() async {
+    final preferences = PreferencesRepository(_database);
+    if (await preferences.get(firstMealCelebrationPreferenceKey) != null) {
+      return null;
+    }
+    final historicalItem = await (_database.select(
+      _database.mealItems,
+    )..limit(1)).getSingleOrNull();
+    return historicalItem == null;
+  }
+
+  /// Mark only after a real item is persisted; the outer transaction makes
+  /// item + milestone atomic across manual, recipe, and AI Coach writes.
+  Future<void> _firstFoodMilestoneAfterInsert(bool? isFirstFood) async {
+    if (isFirstFood == null) return;
+    await PreferencesRepository(
+      _database,
+    ).set(firstMealCelebrationPreferenceKey, isFirstFood ? 'ready' : 'done');
+  }
 
   Future<int> createMeal({
     required DateTime date,
@@ -91,6 +117,9 @@ class MealRepository {
     _validateQuantity(quantity);
     await _database.transaction(() async {
       await _requireOpenMealDay(mealId);
+      // The milestone flag is committed in the SAME transaction as the
+      // first real food item. A failed write or draft cannot celebrate.
+      final firstFoodMilestone = await _firstFoodMilestoneBeforeInsert();
       final food = await _activeFood(foodId);
       final values = _mealFoodPortionValues(
         food,
@@ -119,6 +148,7 @@ class MealRepository {
             ),
           );
       await _verifyAddedFoodEvidence(itemId);
+      await _firstFoodMilestoneAfterInsert(firstFoodMilestone);
     });
   }
 
@@ -132,6 +162,7 @@ class MealRepository {
     required String mealType,
     required List<({int foodId, double quantity})> items,
     bool quantitiesInGrams = true,
+    String? visionRequestId,
   }) async {
     if (items.isEmpty) {
       throw ArgumentError.value(items, 'items', 'Must not be empty');
@@ -139,7 +170,18 @@ class MealRepository {
     for (final item in items) {
       _validateQuantity(item.quantity);
     }
+    final intent = _visionCommitIntent(
+      visionRequestId,
+      date,
+      mealType,
+      items,
+      quantitiesInGrams,
+    );
     return _database.transaction(() async {
+      if (intent != null) {
+        final priorMealId = await _visionCommittedMealId(intent);
+        if (priorMealId != null) return priorMealId;
+      }
       final mealId = await createMeal(
         date: date,
         name: mealType,
@@ -153,6 +195,7 @@ class MealRepository {
           quantityInGrams: quantitiesInGrams,
         );
       }
+      if (intent != null) await _saveVisionCommitReceipt(intent, mealId);
       return mealId;
     });
   }
@@ -191,6 +234,7 @@ class MealRepository {
     );
     return _database.transaction(() async {
       await _requireOpenDayForMeals(dayKeyFor(date));
+      final firstFoodMilestone = await _firstFoodMilestoneBeforeInsert();
       var food =
           await (_database.select(_database.foods)
                 ..where((row) => row.uuid.equals(foodUuid))
@@ -275,6 +319,7 @@ class MealRepository {
               servingUnitSnapshot: const Value('serving'),
             ),
           );
+      await _firstFoodMilestoneAfterInsert(firstFoodMilestone);
       return mealId;
     });
   }
@@ -647,50 +692,5 @@ class MealRepository {
             ),
           );
     });
-  }
-
-  Future<MealItem> _mealItem(int id) async {
-    final item = await (_database.select(
-      _database.mealItems,
-    )..where((row) => row.id.equals(id))).getSingleOrNull();
-    if (item == null) throw StateError('Meal item $id does not exist');
-    return item;
-  }
-
-  /// Call only inside the transaction that writes the diary. A closedAt
-  /// marker also fences a partially recovered legacy lifecycle state.
-  Future<void> _requireOpenDayForMeals(String dayKey) async {
-    final log = await (_database.select(
-      _database.dailyLogs,
-    )..where((row) => row.dayKey.equals(dayKey))).getSingleOrNull();
-    if (log?.lifecycleState == 'closed' || log?.closedAt != null) {
-      throw const CoachMealConflict(CoachMealConflictReason.closedDay);
-    }
-  }
-
-  Future<void> _requireOpenMealDay(int mealId) async {
-    final meal = await (_database.select(
-      _database.meals,
-    )..where((row) => row.id.equals(mealId))).getSingleOrNull();
-    if (meal == null) throw StateError('Meal $mealId does not exist');
-    await _requireOpenDayForMeals(meal.dayKey);
-  }
-
-  Future<Food> _activeFood(int id) async {
-    final food =
-        await (_database.select(_database.foods)
-              ..where((row) => row.id.equals(id) & row.deletedAt.isNull()))
-            .getSingleOrNull();
-    if (food == null) throw StateError('Food $id does not exist');
-    if (food.servingSize <= 0) {
-      throw StateError('Food $id has an invalid serving size');
-    }
-    return food;
-  }
-
-  void _validateQuantity(double quantity) {
-    if (!quantity.isFinite || quantity <= 0 || quantity > 100000) {
-      throw ArgumentError.value(quantity, 'quantity', 'Must be 0–100000');
-    }
   }
 }

@@ -1,0 +1,224 @@
+{
+  "head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+  "fingerprint": "77aee942beb18c9440e06850b50bc9ed2dab7939327d3ec35b2bd2bd209c6f93",
+  "max_simultaneous_shards": 2,
+  "test_concurrency_per_shard": 1,
+  "initial_memory": {
+    "total_bytes": 16895102976,
+    "available_bytes": 9249222656,
+    "load_percent": 45
+  },
+  "shards": {
+    "0": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard0-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=0",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-0.jsonl",
+      "exit_code": 0,
+      "seconds": 2481.0,
+      "PASS": 1031,
+      "FAIL": 0,
+      "SKIP": 0,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2475549
+      }
+    },
+    "1": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard1-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=1",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-1.jsonl",
+      "exit_code": 0,
+      "seconds": 2621.6,
+      "PASS": 1248,
+      "FAIL": 0,
+      "SKIP": 1,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2602969
+      }
+    },
+    "2": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard2-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=2",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-2.jsonl",
+      "exit_code": 0,
+      "seconds": 2424.3,
+      "PASS": 963,
+      "FAIL": 0,
+      "SKIP": 0,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2386029
+      }
+    },
+    "3": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard3-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=3",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-3.jsonl",
+      "exit_code": 0,
+      "seconds": 2509.3,
+      "PASS": 1353,
+      "FAIL": 0,
+      "SKIP": 1,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2483342
+      }
+    },
+    "4": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard4-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=4",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-4.jsonl",
+      "exit_code": 0,
+      "seconds": 2307.7,
+      "PASS": 858,
+      "FAIL": 0,
+      "SKIP": 0,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2280097
+      }
+    },
+    "5": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard5-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=5",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-5.jsonl",
+      "exit_code": 0,
+      "seconds": 2481.3,
+      "PASS": 1168,
+      "FAIL": 0,
+      "SKIP": 1,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2456079
+      }
+    },
+    "6": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard6-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=6",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-6.jsonl",
+      "exit_code": 0,
+      "seconds": 2455.8,
+      "PASS": 1043,
+      "FAIL": 0,
+      "SKIP": 0,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2426211
+      }
+    },
+    "7": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard7-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=7",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-7.jsonl",
+      "exit_code": 0,
+      "seconds": 2359.1,
+      "PASS": 864,
+      "FAIL": 0,
+      "SKIP": 0,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2333123
+      }
+    }
+  },
+  "passed": true,
+  "head_after": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+  "fingerprint_after": "77aee942beb18c9440e06850b50bc9ed2dab7939327d3ec35b2bd2bd209c6f93"
+}

@@ -255,7 +255,7 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
     super.initState();
     _controller = BilIncomingLinkController(
       analytics: const DisabledBilLaunchAnalyticsSink(),
-      navigate: AppRouter.router.go,
+      navigate: AppRouter.openExternalRoute,
       clock: DateTime.now,
     );
     _authController = BilAuthCallbackController(

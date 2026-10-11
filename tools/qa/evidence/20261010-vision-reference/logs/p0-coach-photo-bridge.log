@@ -1,0 +1,17 @@
+Command: flutter test --no-pub --timeout=3m test/parallel/bil02/coach_media_page_overlay_test.dart
+
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/parallel/bil02/coach_media_page_overlay_test.dart
+00:00 +0: barcode review commits one bound readback with unknowns, arabic=false
+00:02 +1: barcode review commits one bound readback with unknowns, arabic=true
+00:03 +2: read-only confirmation leaves review and storage untouched
+00:03 +3: revoking and restoring write mode cannot revive an open review
+00:03 +4: late local lookup cannot open review after owner A B A
+00:04 +5: late local lookup cannot open review after route exit
+00:04 +6: a valid barcode without a local match produces no review or write
+00:04 +7: multiple barcode matches require explicit selection of one identity
+00:04 +8: photo recognition reaches the same review with local source and labeled estimate
+00:05 +9: a delayed analysis cannot replace a newer query after the public Coach action
+00:06 +10: native camera denial leaves no route or write
+00:06 +11: native camera revocation after admission leaves no route or write
+00:06 +12: (tearDownAll)
+00:06 +12: All tests passed!

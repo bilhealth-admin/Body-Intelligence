@@ -353,7 +353,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                             onTap: widget.onStepsTap,
                                             child: _WatchMetric(
                                               icon:
-                                                  Icons.directions_walk_rounded,
+                                                  Icons.directions_run_rounded,
                                               color: const Color(0xFF55D66B),
                                               value: _value(steps),
                                               compact: widget.compact,
@@ -380,8 +380,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                             ),
                                             onTap: widget.onHeartTap,
                                             child: _WatchMetric(
-                                              icon: Icons
-                                                  .favorite_outline_rounded,
+                                              icon: Icons.favorite_rounded,
                                               color: const Color(0xFFFF6472),
                                               value: _value(heart),
                                               compact: widget.compact,
@@ -409,7 +408,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                             onTap: widget.onActiveEnergyTap,
                                             child: _WatchMetric(
                                               icon: Icons
-                                                  .local_fire_department_outlined,
+                                                  .local_fire_department_rounded,
                                               color: const Color(0xFFFFA24A),
                                               value: _value(activeEnergy),
                                               compact: widget.compact,
@@ -436,7 +435,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                             ),
                                             onTap: widget.onSleepTap,
                                             child: _WatchMetric(
-                                              icon: Icons.bedtime_outlined,
+                                              icon: Icons.nightlight_round,
                                               color: const Color(0xFFA982FF),
                                               value: _value(sleep, decimals: 1),
                                               compact: widget.compact,

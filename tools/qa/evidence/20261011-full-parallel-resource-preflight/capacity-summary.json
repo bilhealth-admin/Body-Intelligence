@@ -1,0 +1,9 @@
+{
+  "exitCode": 1,
+  "durationSeconds": 53.78,
+  "peakWorkingSetMiB": 1570.79,
+  "peakPrivateMiB": 1541.24,
+  "minimumFreeGiB": 6.334,
+  "command": "flutter test --no-pub --concurrency=1 --reporter=json test/features/nutrition/meal_vision_final_portion_test.dart test/dashboard_polish/live_health_watch_layout_golden_test.dart test/dashboard_polish/dashboard_current_preview_test.dart",
+  "head": "944973ed3556ccb9b8cd8a09b451562aea3cf652"
+}

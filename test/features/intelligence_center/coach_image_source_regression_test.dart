@@ -230,9 +230,21 @@ void main() {
         await tester.pumpAndSettle();
         expect(service!.received, same(image));
         expect(service!.requestedLocale, arabic ? 'ar' : 'en');
-        expect(find.byType(AlertDialog), findsOneWidget);
-        expect(find.text(arabic ? 'طماطم' : 'Tomato'), findsOneWidget);
-        await tester.tap(find.text(arabic ? 'إلغاء' : 'Cancel'));
+        // A regular Dialog hosts the premium review at phone widths.
+        expect(
+          find.byKey(const Key('premium-vision-render-surface')),
+          findsOneWidget,
+        );
+        expect(
+          find
+              .descendant(
+                of: find.byKey(const Key('premium-vision-food-0')),
+                matching: find.text(arabic ? 'طماطم' : 'Tomato'),
+              )
+              .first,
+          findsOneWidget,
+        );
+        await tester.tap(find.byTooltip(arabic ? 'إلغاء' : 'Cancel'));
         await tester.pumpAndSettle();
         expect(await PreferencesRepository(db).get(harness.activeKey), isNull);
         expect(tester.takeException(), isNull);

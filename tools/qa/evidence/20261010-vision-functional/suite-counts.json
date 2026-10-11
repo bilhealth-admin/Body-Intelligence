@@ -1,0 +1,174 @@
+{
+  "code_sha": "b3fa731fc4a4be5d8308e06fddb54299bdbd4d45",
+  "fingerprint": "9bfb464ddede39bb5199afe67b641560b7822df1e71aaf75195faa5caae1a6ff",
+  "jobs": {
+    "arabic-noto-capture": {
+      "stage": "arabic",
+      "passed": 2,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/arabic-noto-capture.log"
+    },
+    "arabic-vision-v2": {
+      "stage": "arabic",
+      "passed": 82,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/arabic-vision-v2.log"
+    },
+    "p0-food-owner-atomic": {
+      "stage": "p0",
+      "passed": 32,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-food-owner-atomic.log"
+    },
+    "p0-meal-owner-atomic": {
+      "stage": "p0",
+      "passed": 16,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-meal-owner-atomic.log"
+    },
+    "p0-first-food-commit": {
+      "stage": "p0",
+      "passed": 5,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-first-food-commit.log"
+    },
+    "p0-vision-review": {
+      "stage": "p0",
+      "passed": 7,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-vision-review.log"
+    },
+    "p0-vision-durable-replay": {
+      "stage": "p0",
+      "passed": 8,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-vision-durable-replay.log"
+    },
+    "p0-vision-quantity-basis": {
+      "stage": "p0",
+      "passed": 9,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-vision-quantity-basis.log"
+    },
+    "p0-vision-capture": {
+      "stage": "p0",
+      "passed": 2,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-vision-capture.log"
+    },
+    "p0-architecture": {
+      "stage": "p0",
+      "passed": 1,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-architecture.log"
+    },
+    "p0-coach-photo-bridge": {
+      "stage": "p0",
+      "passed": 12,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-coach-photo-bridge.log"
+    },
+    "p0-coach-image-source": {
+      "stage": "p0",
+      "passed": 31,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-coach-image-source.log"
+    },
+    "p0-vision-arabic": {
+      "stage": "p0",
+      "passed": 79,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/p0-vision-arabic.log"
+    },
+    "focused-store-captures": {
+      "stage": "focused",
+      "passed": 44,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/focused-store-captures.log"
+    },
+    "focused-production-goldens": {
+      "stage": "focused",
+      "passed": 126,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/focused-production-goldens.log"
+    },
+    "focused-data-goldens": {
+      "stage": "focused",
+      "passed": 61,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/focused-data-goldens.log"
+    },
+    "focused-splash-golden": {
+      "stage": "focused",
+      "passed": 5,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/focused-splash-golden.log"
+    },
+    "focused-transaction-queue": {
+      "stage": "focused",
+      "passed": 36,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/focused-transaction-queue.log"
+    },
+    "broad-dashboard-nutrition": {
+      "stage": "broad",
+      "passed": 75,
+      "failed": 4,
+      "exit_code": 1,
+      "log": "logs/broad-dashboard-nutrition.log"
+    },
+    "broad-dashboard-contract-health": {
+      "stage": "broad",
+      "passed": 28,
+      "failed": 1,
+      "exit_code": 1,
+      "log": "logs/broad-dashboard-contract-health.log"
+    },
+    "broad-weekly-onboarding-goldens": {
+      "stage": "broad",
+      "passed": 19,
+      "failed": 26,
+      "exit_code": 1,
+      "log": "logs/broad-weekly-onboarding-goldens.log"
+    },
+    "broad-settings-language-icons": {
+      "stage": "broad",
+      "passed": 39,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/broad-settings-language-icons.log"
+    },
+    "broad-wellness-commerce": {
+      "stage": "broad",
+      "passed": 9,
+      "failed": 2,
+      "exit_code": 1,
+      "log": "logs/broad-wellness-commerce.log"
+    },
+    "broad-community-cold-back": {
+      "stage": "broad",
+      "passed": 46,
+      "failed": 0,
+      "exit_code": 0,
+      "log": "logs/broad-community-cold-back.log"
+    }
+  }
+}

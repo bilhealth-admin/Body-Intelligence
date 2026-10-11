@@ -125,7 +125,7 @@ class ConnectedDailyHistoryRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      connectedHealthDisplaySource(signal),
+                      connectedHealthDisplayName(context, signal),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     if (!energy && signal.attributes['sampleCount'] is int)

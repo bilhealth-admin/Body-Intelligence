@@ -1,0 +1,16 @@
+import 'dart:convert';
+import 'dart:io';
+void main() {
+  final root = Directory.current.absolute.path;
+  final target = Directory('$root/build/qa-final-closure/symlink-probe/target')..createSync(recursive: true);
+  final link = Link('$root/build/qa-final-closure/symlink-probe/link');
+  Map<String, Object?> result;
+  try {
+    link.createSync(target.path);
+    result = {'supported': FileSystemEntity.isLinkSync(link.path), 'resolved_target_matches': Directory(link.path).resolveSymbolicLinksSync() == target.resolveSymbolicLinksSync()};
+  } on FileSystemException catch (error) {
+    result = {'supported': false, 'os_error': error.osError?.errorCode, 'message': error.message};
+  }
+  File('$root/build/qa-final-closure/symlink-capability.json').writeAsStringSync(jsonEncode(result));
+  print(jsonEncode(result));
+}

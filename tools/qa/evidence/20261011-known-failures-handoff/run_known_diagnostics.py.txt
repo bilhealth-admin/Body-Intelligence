@@ -1,0 +1,21 @@
+import runpy,json,subprocess,hashlib
+from pathlib import Path
+ns=runpy.run_path('tools/qa/bil_codex_test_ladder.py',run_name='known_failures_diagnostic_only')
+out=Path('build/qa-priority-review');out.mkdir(exist_ok=True)
+head=ns['git']('rev-parse','HEAD').stdout.decode().strip()
+state={'tested_head':head,'fingerprint_before':ns['fingerprint'](head),'flutter':'3.44.6','full':'NOT_STARTED','stages':{}}
+files=ns['git']('ls-files').stdout.decode().splitlines()
+code={f:hashlib.sha256(Path(f).read_bytes()).hexdigest() for f in files if f.endswith(('.dart','.py','.yaml','.yml','.lock','.json')) and not f.startswith(('docs/','tools/qa/evidence/'))}
+state['code_input_sha256']=hashlib.sha256(json.dumps(code,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+(out/'code-input-sha256.json').write_text(json.dumps(code,indent=2),encoding='utf-8')
+def save():
+    (out/'results.json').write_text(json.dumps(state,indent=2),encoding='utf-8')
+state['stages']['source']=ns['run_source']();save()
+if not state['stages']['source']['passed']:raise SystemExit('Source failed; stop broad diagnostics')
+state['stages']['harness']=ns['run_command']('priority-harness',['python','tools/qa/test_bil_codex_test_ladder.py']);save()
+state['stages']['affected-vision']=ns['run_suites']('affected',[('quantity', ['test/features/nutrition/meal_image_unified_review_contract_test.dart','test/features/nutrition/meal_vision_final_portion_test.dart','--reporter=json','--concurrency=1'])],1);save()
+state['stages']['affected-body-twin']=ns['run_suites']('affected',[('runtime',['test/features/ai_platform/local_intelligence_reality_runtime_test.dart','--reporter=json','--concurrency=1'])],1);save()
+# Explicit known-failure diagnostics, not ladder gate approval. Preserve RED.
+for label,files in ns['BROAD']:
+    state['stages']['broad-'+label]=ns['run_suites']('broad',[(label,files.split()+['--reporter=json','--concurrency=1'])],1);save()
+state['fingerprint_after']=ns['fingerprint'](head);save()

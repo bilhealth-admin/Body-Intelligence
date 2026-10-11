@@ -33,6 +33,7 @@ import '../commerce/presentation/premium_barcode_access.dart';
 import '../commerce/presentation/premium_nutrition_glass.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../settings/premium_meal_features_page.dart';
+import '../dashboard/widgets/first_meal_celebration.dart';
 import '../community/presentation/product_review_submission_dialog.dart';
 import '../nutrition/presentation/product_identity_copy.dart';
 import '../nutrition/presentation/barcode_food_review_dialog.dart';

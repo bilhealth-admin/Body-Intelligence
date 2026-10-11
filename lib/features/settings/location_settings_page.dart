@@ -11,6 +11,7 @@ import '../../shared/widgets/secondary_page_app_bar.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'location_catalog.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 class LocationSettingsPage extends ConsumerStatefulWidget {
   const LocationSettingsPage({super.key});
@@ -363,114 +364,118 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
         timezoneController.text.trim(),
     ].join(' · ');
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: SecondaryPageAppBar(
-        title: Text(l('title')),
-        showDashboardAction: false,
-        onBack: () =>
-            context.canPop() ? context.pop() : context.go('/settings'),
-      ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                PremiumSurface(
-                  emphasized: true,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          l('heading'),
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(l('description')),
-                      const SizedBox(height: 16),
-                      SwitchListTile(
-                        key: const Key('automatic-location-switch'),
-                        contentPadding: EdgeInsets.zero,
-                        secondary: const BilSemanticIconBadge(
-                          kind: BilSemanticIconKind.location,
-                        ),
-                        value: automaticLocation,
-                        onChanged: _setAutomatic,
-                        title: Text(l('automatic')),
-                        subtitle: Text(
-                          automaticLocation
-                              ? (automaticSummary.isEmpty
-                                    ? l('deviceOnSave')
-                                    : automaticSummary)
-                              : l('manualEnabled'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (!automaticLocation) ...[
-                  const SizedBox(height: 16),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: SecondaryPageAppBar(
+          title: Text(l('title')),
+          showDashboardAction: false,
+          onBack: () =>
+              context.canPop() ? context.pop() : context.go('/settings'),
+        ),
+        body: loading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
                   PremiumSurface(
+                    emphasized: true,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        ListTile(
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            l('heading'),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(l('description')),
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          key: const Key('automatic-location-switch'),
                           contentPadding: EdgeInsets.zero,
-                          leading: const BilSemanticIconBadge(
+                          secondary: const BilSemanticIconBadge(
                             kind: BilSemanticIconKind.location,
                           ),
-                          title: Text(l('country')),
-                          subtitle: Text(countryName ?? l('chooseCountry')),
-                          trailing: const Icon(Icons.expand_more_rounded),
-                          onTap: _pickCountry,
-                        ),
-                        const Divider(),
-                        TextField(
-                          key: const Key('location-city-field'),
-                          controller: cityController,
-                          autofillHints: const [AutofillHints.addressCity],
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.location_city_rounded),
-                            labelText: l('city'),
-                            helperText: cities.isEmpty
-                                ? l('enterAnyCity')
-                                : l('typeOrSuggest'),
-                            suffixIcon: IconButton(
-                              tooltip: l('showSuggested'),
-                              onPressed: _pickCity,
-                              icon: const Icon(Icons.list_alt_rounded),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          key: const Key('location-timezone-field'),
-                          controller: timezoneController,
-                          readOnly: true,
-                          onTap: _pickTimezone,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.schedule_rounded),
-                            suffixIcon: const Icon(Icons.expand_more_rounded),
-                            labelText: l('timezone'),
+                          value: automaticLocation,
+                          onChanged: _setAutomatic,
+                          title: Text(l('automatic')),
+                          subtitle: Text(
+                            automaticLocation
+                                ? (automaticSummary.isEmpty
+                                      ? l('deviceOnSave')
+                                      : automaticSummary)
+                                : l('manualEnabled'),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  if (!automaticLocation) ...[
+                    const SizedBox(height: 16),
+                    PremiumSurface(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const BilSemanticIconBadge(
+                              kind: BilSemanticIconKind.location,
+                            ),
+                            title: Text(l('country')),
+                            subtitle: Text(countryName ?? l('chooseCountry')),
+                            trailing: const Icon(Icons.expand_more_rounded),
+                            onTap: _pickCountry,
+                          ),
+                          const Divider(),
+                          TextField(
+                            key: const Key('location-city-field'),
+                            controller: cityController,
+                            autofillHints: const [AutofillHints.addressCity],
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Icons.location_city_rounded,
+                              ),
+                              labelText: l('city'),
+                              helperText: cities.isEmpty
+                                  ? l('enterAnyCity')
+                                  : l('typeOrSuggest'),
+                              suffixIcon: IconButton(
+                                tooltip: l('showSuggested'),
+                                onPressed: _pickCity,
+                                icon: const Icon(Icons.list_alt_rounded),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            key: const Key('location-timezone-field'),
+                            controller: timezoneController,
+                            readOnly: true,
+                            onTap: _pickTimezone,
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.schedule_rounded),
+                              suffixIcon: const Icon(Icons.expand_more_rounded),
+                              labelText: l('timezone'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    key: const Key('location-settings-save'),
+                    onPressed: saving ? null : _save,
+                    icon: const Icon(Icons.save_rounded),
+                    label: Text(saving ? l('saving') : l('saveAndReturn')),
+                  ),
                 ],
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  key: const Key('location-settings-save'),
-                  onPressed: saving ? null : _save,
-                  icon: const Icon(Icons.save_rounded),
-                  label: Text(saving ? l('saving') : l('saveAndReturn')),
-                ),
-              ],
-            ),
+              ),
+      ),
     );
   }
 }

@@ -264,6 +264,19 @@ class AppLocalizations {
       return 'نحتاج ${moreMeals.group(1)} أيام وجبات مكتملة إضافية';
     }
 
+    // Translate dynamic evidence via a reviewed template; the weight is not
+    // part of a static localization key and must remain its actual value.
+    if (locale.languageCode == 'ar') {
+      final firstBodyTwinBaseline = RegExp(
+        r'^Body Twin accepted your first trusted baseline at ([+-]?\d+(?:\.\d+)?) kg\. This describes your current recorded state; it does not claim a trend yet\.$',
+      ).firstMatch(english);
+      if (firstBodyTwinBaseline != null) {
+        final weight = isolate('${firstBodyTwinBaseline.group(1)} كجم');
+        return 'اعتمد التوأم الجسدي أول قياس أساسي موثوق لوزنك عند $weight. '
+            'هذا يصف حالتك المسجلة حاليًا ولا يعني وجود اتجاه لتغيّر الوزن بعد.';
+      }
+    }
+
     // Runtime copy can contain user-derived values and server evidence. Keep
     // the English source visible until a reviewed translation is supplied;
     // never show an internal localization failure to the user.

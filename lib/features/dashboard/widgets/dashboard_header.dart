@@ -57,8 +57,17 @@ class _CoachConversationEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(compact ? 14 : 26),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(compact ? 18 : 26),
+        // The same approved BIL coach as the small portrait, never stock art.
+        image: const DecorationImage(
+          image: AssetImage(bilApprovedAiCoachAsset),
+          fit: BoxFit.contain,
+          alignment: AlignmentDirectional.centerEnd,
+          opacity: .66,
+        ),
+        border: Border.all(color: const Color(0x5487DBEF), width: .8),
         gradient: const LinearGradient(
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
@@ -72,105 +81,133 @@ class _CoachConversationEntry extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                padding: const EdgeInsets.all(1.5),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFC8F3FF),
-                  border: Border.all(color: Colors.white70),
-                ),
-                child: ClipOval(
-                  child: const BilCoachPortrait(fit: BoxFit.cover),
+          // The approved portrait must never make title or subtitle unreadable.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: AlignmentDirectional.centerStart,
+                    end: AlignmentDirectional.centerEnd,
+                    colors: [
+                      Color(0xF20B2332),
+                      Color(0xD80B2332),
+                      Color(0x000B2332),
+                    ],
+                    stops: [0, .53, 1],
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Keep navigation copy readable above the right-hand portrait.
+              Padding(
+                padding: EdgeInsetsDirectional.only(end: compact ? 76 : 132),
+                child: Row(
                   children: [
-                    Text(
-                      'AI COACH',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: compact ? 16 : null,
-                        letterSpacing: .5,
+                    Container(
+                      width: 36,
+                      height: 36,
+                      padding: const EdgeInsets.all(1.5),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFFC8F3FF),
+                        border: Border.all(color: Colors.white70),
+                      ),
+                      child: ClipOval(
+                        child: const BilCoachPortrait(fit: BoxFit.cover),
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      _dashboardHeaderText(locale, 'subtitle'),
-                      style: TextStyle(
-                        color: const Color(0xFFBCD0DA),
-                        fontSize: compact ? 12 : null,
-                        height: 1.35,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AI COACH',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: compact ? 16 : null,
+                                  letterSpacing: .5,
+                                ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _dashboardHeaderText(locale, 'subtitle'),
+                            style: TextStyle(
+                              color: const Color(0xFFBCD0DA),
+                              fontSize: compact ? 12 : null,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: .09),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: const Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 17,
+                        color: Color(0xFF7CE8F5),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .09),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 17,
-                  color: Color(0xFF7CE8F5),
+              const SizedBox(height: 10),
+              TextField(
+                key: const Key('dashboard-ai-coach-entry'),
+                readOnly: true,
+                maxLines: 1,
+                style: const TextStyle(fontSize: 14),
+                onTap: () => context.push('/intelligence-center'),
+                decoration: InputDecoration(
+                  hintText: _dashboardHeaderText(locale, 'hint'),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                  hintStyle: const TextStyle(
+                    color: Color(0xFF5E6A72),
+                    fontSize: 14,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 20,
+                  ),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 44,
+                  ),
+                  suffixIcon: IconButton(
+                    tooltip: _dashboardHeaderText(locale, 'open'),
+                    onPressed: () => context.push('/intelligence-center'),
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xEDF7F9FA),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            key: const Key('dashboard-ai-coach-entry'),
-            readOnly: true,
-            maxLines: 1,
-            style: const TextStyle(fontSize: 14),
-            onTap: () => context.push('/intelligence-center'),
-            decoration: InputDecoration(
-              hintText: _dashboardHeaderText(locale, 'hint'),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-              hintStyle: const TextStyle(
-                color: Color(0xFF5E6A72),
-                fontSize: 14,
-              ),
-              prefixIcon: const Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 20,
-              ),
-              prefixIconConstraints: const BoxConstraints(
-                minWidth: 40,
-                minHeight: 44,
-              ),
-              suffixIcon: IconButton(
-                tooltip: _dashboardHeaderText(locale, 'open'),
-                onPressed: () => context.push('/intelligence-center'),
-                icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-              ),
-              filled: true,
-              fillColor: const Color(0xFFF7F9FA),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
           ),
         ],
       ),

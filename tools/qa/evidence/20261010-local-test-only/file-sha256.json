@@ -1,0 +1,45 @@
+{
+  "tested_head": "c3acb5c79d80f65488f3f048ab307b61aabb0ca3",
+  "files": [
+    {
+      "file": "01_review_ar_dark.png",
+      "bytes": 401043,
+      "sha256": "534e12ad1bd8d50a74e528aa228b9f44ea3e28ddea48001c1ef78f66dda946e4"
+    },
+    {
+      "file": "02_review_eaten_confirmation_ar_dark.png",
+      "bytes": 374405,
+      "sha256": "5359c99a5cb7791a1ae213cb856bf48e9bc1bc68aceb031dd5a1f15847cea8e3"
+    },
+    {
+      "file": "03_nutrition_quick_ar_dark.png",
+      "bytes": 442744,
+      "sha256": "80c0f46543a4a1a1e4f9c990341035271f54ccdc9d071b6c3053fb3fb6bfab33"
+    },
+    {
+      "file": "04_nutrition_full_ar_dark.png",
+      "bytes": 451423,
+      "sha256": "ab021da62a4cf822f96ca4e1955bdf5706f149c80737942c5edccd89ace9c002"
+    },
+    {
+      "file": "golden-review.md",
+      "bytes": 7057,
+      "sha256": "0ce60f33477774ec5c076df54f9a3fbc9cfb0aaa9ded76e98b574bd2bdd8d4fe"
+    },
+    {
+      "file": "local-evidence.zip",
+      "bytes": 24979240,
+      "sha256": "88df420737cccc579e004df4c7da40de40d927ae08e90587379be3323ae0200e"
+    },
+    {
+      "file": "README.md",
+      "bytes": 7697,
+      "sha256": "33532aaf4529fd6aea81780cae16774d3b34c6c4d61f5f99811a2c1c3b887d18"
+    },
+    {
+      "file": "results.json",
+      "bytes": 15340,
+      "sha256": "47ffb0ba198d4e134a94f2217bd482cb193ecc762e93956ffe9c205ed15e0331"
+    }
+  ]
+}

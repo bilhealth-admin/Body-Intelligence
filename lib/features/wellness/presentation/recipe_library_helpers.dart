@@ -2,7 +2,9 @@ part of 'recipe_library_page.dart';
 
 double _recipeCardExtent(BuildContext context) {
   final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 3.0);
-  return 306 + ((scale - 1) * 106);
+  // Give text-enlarged cards adequate room for labels and nutrition facts.
+  // The previous 106px growth overflowed ~2px at 180% on two-column phones.
+  return 306 + ((scale - 1) * 116);
 }
 
 double _recipePreviewWidth(BuildContext context) =>

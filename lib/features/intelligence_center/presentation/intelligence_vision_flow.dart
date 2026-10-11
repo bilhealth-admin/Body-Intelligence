@@ -201,6 +201,9 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
           ? '${tr('Barcode', 'الباركود')}: ${BarcodeIdentity.parse(input.barcode!).digits}'
           : input.name!,
       foods: found.candidates.map((entry) => entry.row).toList(),
+      // Only the Coach adapter has already validated an owner-bound modern
+      // Food V2 label snapshot. Standard Vision remains verified-catalog only.
+      evidenceOwnerKey: request.attempt.ownerScope.captured.ownerKey,
     );
     if (!await _mediaRequestCurrent(request) || selected == null) return null;
     final entries = found.candidates

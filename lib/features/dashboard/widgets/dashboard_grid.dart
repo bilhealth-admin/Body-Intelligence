@@ -618,12 +618,22 @@ class DashboardGrid extends ConsumerWidget {
             nutrientDashboardPreset:
                 nutrientDashboardPreset ?? 'Calories and macros',
             weightTrendValues: weights
-                .take(90)
-                .map(
-                  (entry) => UnitConverter.weightFromKg(entry.weight, system),
+                .where(
+                  (entry) =>
+                      !entry.date.isBefore(
+                        DateTime(now.year, now.month, now.day - 89),
+                      ) &&
+                      entry.date.isBefore(
+                        DateTime(now.year, now.month, now.day + 1),
+                      ) &&
+                      entry.weight.isFinite &&
+                      entry.weight > 0,
                 )
                 .toList(growable: false)
                 .reversed
+                .map(
+                  (entry) => UnitConverter.weightFromKg(entry.weight, system),
+                )
                 .toList(growable: false),
             stepTrendValues: stepTrend.values,
             todaySteps: stepTrend.today,

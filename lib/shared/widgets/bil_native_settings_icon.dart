@@ -7,9 +7,15 @@ export 'bil_native_symbols.dart'
     show BilSettingsSymbol, BilNativeSettingsSymbols;
 
 class BilNativeSettingsIcon extends StatefulWidget {
-  const BilNativeSettingsIcon({required this.kind, this.symbol, super.key});
+  const BilNativeSettingsIcon({
+    required this.kind,
+    this.symbol,
+    this.flat = false,
+    super.key,
+  });
   final BilSemanticIconKind kind;
   final BilSettingsSymbol? symbol;
+  final bool flat;
 
   static BilSettingsSymbol symbolFor(BilSemanticIconKind kind) =>
       BilSemanticIcons.nativeSymbol(kind);
@@ -40,6 +46,22 @@ class _BilNativeSettingsIconState extends State<BilNativeSettingsIcon> {
       BilSettingsSymbol.appearance => const Color(0xFF8E8E93),
       _ => const Color(0xFF007AFF),
     };
+    if (widget.flat) {
+      return ExcludeSemantics(
+        child: SizedBox(
+          width: 29,
+          height: 29,
+          child: Center(
+            child: BilNativeSymbolGlyph(
+              symbol: symbol,
+              fallback: _fallback(symbol, platform),
+              size: 22,
+              color: base,
+            ),
+          ),
+        ),
+      );
+    }
     return ExcludeSemantics(
       child: Container(
         width: 29,

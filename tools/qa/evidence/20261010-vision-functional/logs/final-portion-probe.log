@@ -1,0 +1,24 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart
+test/features/nutrition/meal_vision_final_portion_test.dart:73:34: Error: This expression has type 'void' and can't be used.
+      await tester.testTextInput.hide();
+                                 ^
+lib/features/nutrition/presentation/meal_vision_premium_match.dart:55:49: Error: The method '_digits' isn't defined for the type '_PremiumTrustedMatchDialogState'.
+ - '_PremiumTrustedMatchDialogState' is from 'package:body_intelligence_log/features/nutrition/presentation/meal_vision_premium_review.dart' ('lib/features/nutrition/presentation/meal_vision_premium_review.dart').
+Try correcting the name to the name of an existing method, or defining a method named '_digits'.
+  double? get _currentAmount => double.tryParse(_digits(_amount.text));
+                                                ^^^^^^^
+00:00 +0 -1: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart [E]
+  Failed to load "G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart":
+  Compilation failed for testPath=G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: test/features/nutrition/meal_vision_final_portion_test.dart:73:34: Error: This expression has type 'void' and can't be used.
+        await tester.testTextInput.hide();
+                                   ^
+  lib/features/nutrition/presentation/meal_vision_premium_match.dart:55:49: Error: The method '_digits' isn't defined for the type '_PremiumTrustedMatchDialogState'.
+   - '_PremiumTrustedMatchDialogState' is from 'package:body_intelligence_log/features/nutrition/presentation/meal_vision_premium_review.dart' ('lib/features/nutrition/presentation/meal_vision_premium_review.dart').
+  Try correcting the name to the name of an existing method, or defining a method named '_digits'.
+    double? get _currentAmount => double.tryParse(_digits(_amount.text));
+                                                  ^^^^^^^
+  .
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart: loading G:/BIL_Project/worktrees/bil-test-only-20261010/test/features/nutrition/meal_vision_final_portion_test.dart

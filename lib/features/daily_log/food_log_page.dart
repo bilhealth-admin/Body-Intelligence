@@ -14,7 +14,11 @@ import '../../app/services/recoverable_image_picker.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/food_repository.dart';
+import '../../data/repositories/meal_repository.dart';
 import '../commerce/presentation/premium_barcode_access.dart';
+import '../dashboard/widgets/first_use_context_coachmark.dart';
+import '../dashboard/widgets/first_meal_celebration.dart';
+import '../profile/providers/user_profile_provider.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../foods/providers/food_provider.dart';
 import '../nutrition/presentation/food_barcode_scanner_page.dart';
@@ -31,6 +35,7 @@ import 'presentation/quick_macro_entry_dialog.dart';
 import 'providers/daily_log_provider.dart';
 
 part 'food_log_actions.dart';
+part 'food_log_tile_widgets.dart';
 
 /// Ranked foods shown by the standalone Food Log browse surface.
 ///
@@ -56,6 +61,7 @@ class FoodLogPage extends ConsumerStatefulWidget {
   const FoodLogPage({
     super.key,
     this.initialMealType,
+    this.startGuide = false,
     this.initialAction,
     this.directPhotoCapture = false,
     this.initialImage,
@@ -64,6 +70,7 @@ class FoodLogPage extends ConsumerStatefulWidget {
   });
 
   final String? initialMealType;
+  final bool startGuide;
   final String? initialAction;
   final bool directPhotoCapture;
   final XFile? initialImage;
@@ -88,23 +95,82 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   bool initialCaptureActionApplied = false;
   String? initialCaptureActionInFlight;
   int _searchGeneration = 0;
+  bool _firstFoodTour = false;
+  String? _tourOwner;
 
   @override
   void initState() {
     super.initState();
     mealType = normalizeFoodLogMealType(widget.initialMealType);
     _scheduleInitialCaptureAction();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restoreFoodTour());
   }
 
   @override
   void didUpdateWidget(covariant FoodLogPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.startGuide != widget.startGuide) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _restoreFoodTour());
+    }
     if (oldWidget.initialAction != widget.initialAction ||
         oldWidget.directPhotoCapture != widget.directPhotoCapture) {
       initialCaptureActionApplied = false;
       if (initialCaptureActionInFlight == null) {
         _scheduleInitialCaptureAction();
       }
+    }
+  }
+
+  String _tourKey(String? owner) =>
+      'experience.dashboard_food_guide.v1.${owner ?? 'local'}';
+
+  bool get _tourVisible =>
+      _firstFoodTour &&
+      _tourOwner == ref.read(preferencesRepositoryProvider).localOwnerId;
+
+  Future<void> _restoreFoodTour() async {
+    if (!mounted) return;
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final owner = preferences.localOwnerId;
+    String? state;
+    try {
+      state = await preferences.get(_tourKey(owner));
+    } on Object {
+      // Keep the explicitly requested tutorial usable this visit even if
+      // local preference reads are temporarily unavailable.
+      if (!mounted ||
+          ref.read(preferencesRepositoryProvider).localOwnerId != owner) {
+        return;
+      }
+      setState(() {
+        _tourOwner = owner;
+        _firstFoodTour = widget.startGuide;
+      });
+      return;
+    }
+    if (!mounted ||
+        ref.read(preferencesRepositoryProvider).localOwnerId != owner) {
+      return;
+    }
+    setState(() {
+      _tourOwner = owner;
+      _firstFoodTour =
+          state == 'started' || (widget.startGuide && state == null);
+    });
+  }
+
+  Future<void> _dismissFoodTour({bool completed = false}) async {
+    if (!_tourVisible) return;
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final owner = preferences.localOwnerId;
+    setState(() => _firstFoodTour = false);
+    try {
+      await preferences.set(
+        _tourKey(owner),
+        completed ? 'completed' : 'dismissed',
+      );
+    } on Object {
+      // Skip works immediately, even when local preferences are unavailable.
     }
   }
 
@@ -309,6 +375,32 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       key: const Key('food-log-reference-page'),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
       children: [
+        if (_tourVisible && query.isEmpty) ...[
+          FirstUseContextCoachmark(
+            key: const Key('food-log-search-guide'),
+            compact: true,
+            title: _foodTourText(
+              context,
+              en: 'Find something delicious',
+              ar: 'ابحث عن طعامك',
+              fr: 'Trouvez votre aliment',
+              es: 'Encuentra tu alimento',
+              tr: 'Yemeğini bul',
+            ),
+            message: _foodTourText(
+              context,
+              en: 'Type a food name here. You can always skip this tour.',
+              ar: 'اكتب اسم الطعام في البحث. يمكنك تخطي الإرشادات في أي وقت.',
+              fr: 'Saisissez un aliment ici. Vous pouvez ignorer le guide.',
+              es: 'Escribe un alimento aquí. Puedes omitir esta guía.',
+              tr: 'Yiyecek adını yaz. Rehberi istediğin an atlayabilirsin.',
+            ),
+            icon: Icons.search_rounded,
+            onSkip: _dismissFoodTour,
+            skipKey: const Key('food-log-search-guide-skip'),
+          ),
+          const SizedBox(height: 8),
+        ],
         SearchBar(
           key: const Key('food-log-search'),
           controller: search,
@@ -349,6 +441,33 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
           const LinearProgressIndicator(minHeight: 2),
         ],
         const SizedBox(height: 14),
+        if (_tourVisible && query.isNotEmpty && filtered.isNotEmpty) ...[
+          FirstUseContextCoachmark(
+            key: const Key('food-log-choose-guide'),
+            compact: true,
+            title: _foodTourText(
+              context,
+              en: 'Choose the right food',
+              ar: 'اختر الطعام الصحيح',
+              fr: 'Choisissez le bon aliment',
+              es: 'Elige el alimento correcto',
+              tr: 'Doğru yiyeceği seç',
+            ),
+            message: _foodTourText(
+              context,
+              en: 'Tap + next to a matching food. Review the serving before saving.',
+              ar: 'اضغط + بجانب الطعام المناسب، ثم راجع الكمية قبل الحفظ.',
+              fr: 'Touchez + à côté de l’aliment, puis vérifiez la portion.',
+              es: 'Toca + junto al alimento y revisa la porción.',
+              tr: 'Yiyeceğin yanındaki + simgesine dokun, porsiyonu kontrol et.',
+            ),
+            icon: Icons.touch_app_rounded,
+            accent: const Color(0xFF9BCBFF),
+            onSkip: _dismissFoodTour,
+            skipKey: const Key('food-log-choose-guide-skip'),
+          ),
+          const SizedBox(height: 8),
+        ],
         Text(
           _t(context, 'Most popular'),
           style: Theme.of(
@@ -374,6 +493,21 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       ],
     );
   }
+
+  String _foodTourText(
+    BuildContext context, {
+    required String en,
+    required String ar,
+    String? fr,
+    String? es,
+    String? tr,
+  }) => switch (Localizations.localeOf(context).languageCode) {
+    'ar' => ar,
+    'fr' => fr ?? en,
+    'es' => es ?? en,
+    'tr' => tr ?? en,
+    _ => en,
+  };
 
   String _searchHintKey() => FoodLogRuntimeCopy.searchHint;
 
@@ -495,84 +629,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       ),
     );
   }
-
-  Widget _buildFoodTile(
-    BuildContext context,
-    Food food, {
-    required String localeTag,
-  }) {
-    final scheme = Theme.of(context).colorScheme;
-    final accent = scheme.primary;
-    final name = FoodPresentationLocalizer.foodName(
-      name: food.name,
-      arabicName: food.arabicName,
-      localeTag: localeTag,
-      isCustom: food.isCustom,
-      source: food.source,
-    );
-    return Card(
-      key: Key('food-log-food-${food.id}'),
-      margin: const EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      child: ListTile(
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 6, 8, 6),
-        leading: CircleAvatar(
-          radius: 18,
-          backgroundColor: food.verified
-              ? const Color(0xFFE2F8EC)
-              : accent.withValues(alpha: .10),
-          child: Icon(
-            food.verified
-                ? Icons.verified_rounded
-                : food.isCustom
-                ? Icons.person_rounded
-                : Icons.shield_outlined,
-            color: food.verified ? const Color(0xFF087A43) : accent,
-          ),
-        ),
-        title: Text(
-          name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        subtitle: Text(
-          '${food.calories.round()} kcal · ${food.servingSize} ${food.servingUnit}',
-        ),
-        trailing: IconButton(
-          key: Key('food-log-add-${food.id}'),
-          tooltip: _t(context, 'Add'),
-          onPressed: () => _addFood(context, food),
-          icon: const Icon(Icons.add_circle_rounded, color: Color(0xFF1677D2)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 70),
-    child: Column(
-      children: [
-        const BilSemanticIconBadge(
-          kind: BilSemanticIconKind.foodSearch,
-          size: 74,
-        ),
-        const SizedBox(height: 20),
-        Text(
-          _t(context, 'No foods found'),
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _t(context, 'Create and save your favorites for quick logging.'),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    ),
-  );
 
   void _close(BuildContext context) {
     if (widget.preferNavigatorPop && Navigator.of(context).canPop()) {

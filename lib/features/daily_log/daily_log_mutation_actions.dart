@@ -97,6 +97,12 @@ extension _DailyLogMutationActions on _DailyLogPageState {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.strings.text('Meal saved locally.'))),
       );
+      // The shared repository creates this marker only after an atomic,
+      // successful food write. The overlay does not touch Log Food layout.
+      await FirstMealCelebration.showIfPending(
+        context,
+        ref.read(preferencesRepositoryProvider),
+      );
     } catch (_) {
       if (!mounted) return;
       _message('Your saved data was not changed. Try again.');

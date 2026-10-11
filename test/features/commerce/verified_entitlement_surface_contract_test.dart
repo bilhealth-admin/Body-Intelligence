@@ -27,8 +27,13 @@ void main() {
     final settings = File(surfaces[0]).readAsStringSync();
     final profile = File(surfaces[1]).readAsStringSync();
     expect(settings, contains('Retry subscription check'));
-    expect(settings, contains("copy('Start 7-day free trial')"));
-    expect(settings, isNot(contains("copy('Explore Premium')")));
+    // More is optional plan discovery, not a mandatory trial paywall.
+    // Its entitlement text is gated on authoritative server verification.
+    expect(settings, contains('EntitlementAuthority.verifiedServer'));
+    expect(settings, contains('value.plan == CommercePlan.free'));
+    expect(settings, contains("copy('Explore Premium')"));
+    expect(settings, contains("onTap: () => context.push('/plans')"));
+    expect(settings, isNot(contains("copy('Start 7-day free trial')")));
     expect(settings, isNot(contains("copy('Try Premium for Free')")));
     expect(profile, contains('Retry subscription check'));
   });

@@ -1,0 +1,7 @@
+{
+  "file": "logs/source-analyze.log",
+  "change": "Removed only terminal progress padding at end of analyzing line; all diagnostics and results unchanged.",
+  "before_sha256": "0e662a6be6b0d41e9611a905d7a0be203b378b99ba193929a88578c450096420",
+  "after_sha256": "546baf2254d0754ba84fd7602052a3dbec3b3285cd59307796386bd8a9c665ab",
+  "original_build_log_retained": true
+}

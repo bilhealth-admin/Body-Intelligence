@@ -1,0 +1,50 @@
+[
+  {
+    "index": 0,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard0-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-0-setup.log"
+  },
+  {
+    "index": 1,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard1-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-1-setup.log"
+  },
+  {
+    "index": 2,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard2-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-2-setup.log"
+  },
+  {
+    "index": 3,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard3-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-3-setup.log"
+  },
+  {
+    "index": 4,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard4-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-4-setup.log"
+  },
+  {
+    "index": 5,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard5-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-5-setup.log"
+  },
+  {
+    "index": 6,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard6-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-6-setup.log"
+  },
+  {
+    "index": 7,
+    "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard7-20261011",
+    "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "setup_log": "build\\qa-final-closure\\shard-7-setup.log"
+  }
+]

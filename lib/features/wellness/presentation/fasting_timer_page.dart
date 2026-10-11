@@ -170,366 +170,375 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
     final active = session != null;
     final progress = session?.progressAt(DateTime.now()) ?? 0.0;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    return PopScope(
-      canPop: !busy,
-      child: Scaffold(
-        appBar: AppBar(
-          // Give translated and accessibility-scaled titles real vertical
-          // room. A wrapping AppBar title must never paint over the timer.
-          toolbarHeight: (64 * textScale).clamp(64, 112).toDouble(),
-          leading: IconButton(
-            onPressed: busy
-                ? null
-                : () => context.canPop()
-                      ? context.pop()
-                      : context.go('/dashboard'),
-            icon: const Icon(Icons.arrow_back_rounded),
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: !busy,
+        child: Scaffold(
+          appBar: AppBar(
+            // Give translated and accessibility-scaled titles real vertical
+            // room. A wrapping AppBar title must never paint over the timer.
+            toolbarHeight: (64 * textScale).clamp(64, 112).toDouble(),
+            leading: IconButton(
+              onPressed: busy
+                  ? null
+                  : () => context.canPop()
+                        ? context.pop()
+                        : context.go('/dashboard'),
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+            title: Text(
+              tr('Intermittent fasting', 'الصيام المتقطع'),
+              key: const Key('fasting-page-title'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          title: Text(
-            tr('Intermittent fasting', 'الصيام المتقطع'),
-            key: const Key('fasting-page-title'),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        body: loading
-            ? const Center(child: CircularProgressIndicator())
-            : loadError != null
-            ? Center(
-                child: FilledButton.icon(
-                  onPressed: _load,
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(tr('Retry', 'إعادة المحاولة')),
-                ),
-              )
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-                children: [
-                  Card(
-                    key: const Key('fasting-reference-introduction'),
-                    clipBehavior: Clip.antiAlias,
-                    child: Padding(
-                      padding: const EdgeInsets.all(22),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            height: 190,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(22),
-                              child: ExcludeSemantics(
-                                child: Image.asset(
-                                  'assets/images/brand/generated/intermittent_fasting_meal_window_v3.png',
-                                  fit: BoxFit.cover,
-                                  cacheWidth: 960,
-                                  matchTextDirection: true,
+          body: loading
+              ? const Center(child: CircularProgressIndicator())
+              : loadError != null
+              ? Center(
+                  child: FilledButton.icon(
+                    onPressed: _load,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(tr('Retry', 'إعادة المحاولة')),
+                  ),
+                )
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+                  children: [
+                    Card(
+                      key: const Key('fasting-reference-introduction'),
+                      clipBehavior: Clip.antiAlias,
+                      child: Padding(
+                        padding: const EdgeInsets.all(22),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              height: 190,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(22),
+                                child: ExcludeSemantics(
+                                  child: Image.asset(
+                                    'assets/images/brand/generated/intermittent_fasting_meal_window_v3.png',
+                                    fit: BoxFit.cover,
+                                    cacheWidth: 960,
+                                    matchTextDirection: true,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 18),
-                          Text(
-                            tr(
-                              'Intermittent fasting with BIL',
-                              'الصيام المتقطع مع BIL',
+                            const SizedBox(height: 18),
+                            Text(
+                              tr(
+                                'Intermittent fasting with BIL',
+                                'الصيام المتقطع مع BIL',
+                              ),
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w800),
                             ),
-                            style: Theme.of(context).textTheme.headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 12),
-                          _FastingBenefit(
-                            text: tr(
-                              'Choose a standard or custom intermittent fasting window',
-                              'اختر نافذة صيام متقطع قياسية أو مخصصة',
+                            const SizedBox(height: 12),
+                            _FastingBenefit(
+                              text: tr(
+                                'Choose a standard or custom intermittent fasting window',
+                                'اختر نافذة صيام متقطع قياسية أو مخصصة',
+                              ),
                             ),
-                          ),
-                          _FastingBenefit(
-                            text: tr(
-                              'The local timer survives app restarts',
-                              'يستمر المؤقت المحلي بعد إعادة تشغيل التطبيق',
+                            _FastingBenefit(
+                              text: tr(
+                                'The local timer survives app restarts',
+                                'يستمر المؤقت المحلي بعد إعادة تشغيل التطبيق',
+                              ),
                             ),
-                          ),
-                          _FastingBenefit(
-                            text: tr(
-                              'Review completed intermittent fasting sessions here',
-                              'راجع جلسات الصيام المتقطع المكتملة هنا',
+                            _FastingBenefit(
+                              text: tr(
+                                'Review completed intermittent fasting sessions here',
+                                'راجع جلسات الصيام المتقطع المكتملة هنا',
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Divider(height: 28),
-                          Text(
-                            tr(
-                              'Check with your clinician before significant dietary changes.',
-                              'استشر مختصك الصحي قبل إجراء تغييرات غذائية كبيرة.',
+                            const SizedBox(height: 8),
+                            const Divider(height: 28),
+                            Text(
+                              tr(
+                                'Check with your clinician before significant dietary changes.',
+                                'استشر مختصك الصحي قبل إجراء تغييرات غذائية كبيرة.',
+                              ),
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  _FastingStatusPanel(
-                    icon: Icons.timelapse_rounded,
-                    title: active
-                        ? tr(
-                            'Intermittent fast in progress',
-                            'الصيام المتقطع مستمر',
-                          )
-                        : tr('Choose your window', 'اختر نافذتك'),
-                    subtitle: active
-                        ? tr(
-                            'Started ${session!.startedAt.toLocal().hour.toString().padLeft(2, '0')}:${session!.startedAt.toLocal().minute.toString().padLeft(2, '0')}',
-                            'بدأ ${session!.startedAt.toLocal().hour.toString().padLeft(2, '0')}:${session!.startedAt.toLocal().minute.toString().padLeft(2, '0')}',
-                          )
-                        : tr(
-                            'A local intermittent fasting timer. You remain in control.',
-                            'مؤقت محلي للصيام المتقطع، وأنت صاحب القرار.',
-                          ),
-                  ),
-                  const SizedBox(height: 18),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          Semantics(
-                            label: active
-                                ? '${tr('Intermittent fast in progress', 'الصيام المتقطع مستمر')}. '
-                                      '${clock(elapsed)}. ${tr('Target', 'الهدف')} $targetHours ${tr('hours', 'ساعة')}.'
-                                : '${tr('No active fast', 'لا يوجد صيام نشط')}. '
-                                      '${tr('Target', 'الهدف')} $targetHours ${tr('hours', 'ساعة')}.',
-                            value: active
-                                ? '${(progress * 100).round()}%'
-                                : '0%',
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                final diameter = constraints.maxWidth < 220
-                                    ? constraints.maxWidth
-                                    : 220.0;
-                                return SizedBox(
-                                  key: const Key('fasting-timer-ring'),
-                                  width: diameter,
-                                  height: diameter,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox.expand(
-                                        child: CircularProgressIndicator(
-                                          value: progress,
-                                          strokeWidth: 14,
-                                          backgroundColor: Theme.of(
-                                            context,
-                                          ).colorScheme.surfaceContainerHighest,
+                    const SizedBox(height: 18),
+                    _FastingStatusPanel(
+                      icon: Icons.timelapse_rounded,
+                      title: active
+                          ? tr(
+                              'Intermittent fast in progress',
+                              'الصيام المتقطع مستمر',
+                            )
+                          : tr('Choose your window', 'اختر نافذتك'),
+                      subtitle: active
+                          ? tr(
+                              'Started ${session!.startedAt.toLocal().hour.toString().padLeft(2, '0')}:${session!.startedAt.toLocal().minute.toString().padLeft(2, '0')}',
+                              'بدأ ${session!.startedAt.toLocal().hour.toString().padLeft(2, '0')}:${session!.startedAt.toLocal().minute.toString().padLeft(2, '0')}',
+                            )
+                          : tr(
+                              'A local intermittent fasting timer. You remain in control.',
+                              'مؤقت محلي للصيام المتقطع، وأنت صاحب القرار.',
+                            ),
+                    ),
+                    const SizedBox(height: 18),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            Semantics(
+                              label: active
+                                  ? '${tr('Intermittent fast in progress', 'الصيام المتقطع مستمر')}. '
+                                        '${clock(elapsed)}. ${tr('Target', 'الهدف')} $targetHours ${tr('hours', 'ساعة')}.'
+                                  : '${tr('No active fast', 'لا يوجد صيام نشط')}. '
+                                        '${tr('Target', 'الهدف')} $targetHours ${tr('hours', 'ساعة')}.',
+                              value: active
+                                  ? '${(progress * 100).round()}%'
+                                  : '0%',
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final diameter = constraints.maxWidth < 220
+                                      ? constraints.maxWidth
+                                      : 220.0;
+                                  return SizedBox(
+                                    key: const Key('fasting-timer-ring'),
+                                    width: diameter,
+                                    height: diameter,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        SizedBox.expand(
+                                          child: CircularProgressIndicator(
+                                            value: progress,
+                                            strokeWidth: 14,
+                                            backgroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest,
+                                          ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(24),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              clock(elapsed),
-                                              maxLines: 1,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .headlineMedium
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              tr(
-                                                'of $targetHours hours',
-                                                'من $targetHours ساعة',
+                                        Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                clock(elapsed),
+                                                maxLines: 1,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .headlineMedium
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
                                               ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ],
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                tr(
+                                                  'of $targetHours hours',
+                                                  'من $targetHours ساعة',
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          Wrap(
-                            key: const Key('fasting-window-options'),
-                            spacing: 8,
-                            runSpacing: 8,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              for (final option in const [
-                                (13, '13:11'),
-                                (14, '14:10'),
-                                (16, '16:8'),
-                                (18, '18:6'),
-                                (20, '20:4'),
-                              ])
-                                ChoiceChip(
-                                  label: Text(option.$2),
-                                  selected: targetHours == option.$1,
-                                  onSelected: active || busy
+                            const SizedBox(height: 20),
+                            Wrap(
+                              key: const Key('fasting-window-options'),
+                              spacing: 8,
+                              runSpacing: 8,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                for (final option in const [
+                                  (13, '13:11'),
+                                  (14, '14:10'),
+                                  (16, '16:8'),
+                                  (18, '18:6'),
+                                  (20, '20:4'),
+                                ])
+                                  ChoiceChip(
+                                    label: Text(option.$2),
+                                    selected: targetHours == option.$1,
+                                    onSelected: active || busy
+                                        ? null
+                                        : (_) => setState(
+                                            () => targetHours = option.$1,
+                                          ),
+                                  ),
+                                ActionChip(
+                                  key: const Key('fasting-custom-window'),
+                                  avatar: const Icon(
+                                    Icons.tune_rounded,
+                                    size: 18,
+                                  ),
+                                  label: Text(tr('Custom', 'مخصص')),
+                                  onPressed: active || busy
                                       ? null
-                                      : (_) => setState(
-                                          () => targetHours = option.$1,
-                                        ),
+                                      : _chooseCustomWindow,
                                 ),
-                              ActionChip(
-                                key: const Key('fasting-custom-window'),
-                                avatar: const Icon(
-                                  Icons.tune_rounded,
-                                  size: 18,
-                                ),
-                                label: Text(tr('Custom', 'مخصص')),
-                                onPressed: active || busy
-                                    ? null
-                                    : _chooseCustomWindow,
-                              ),
-                            ],
-                          ),
-                          SwitchListTile.adaptive(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              tr(
-                                'Notify me at my target',
-                                'نبّهني عند بلوغ هدفي',
-                              ),
+                              ],
                             ),
-                            subtitle: Text(
-                              fastingNotificationScheduled
-                                  ? tr(
-                                      'Scheduled on this phone',
-                                      'مجدول على هذا الهاتف',
-                                    )
-                                  : notificationPermission ==
-                                        BilNotificationPermissionState.granted
-                                  ? tr(
-                                      'Allowed; starts when you begin a fast',
-                                      'مسموح؛ يُجدول عند بدء الصيام',
-                                    )
-                                  : tr(
-                                      'Notification permission is not active',
-                                      'إذن الإشعارات غير مفعّل',
-                                    ),
-                            ),
-                            value: notifyAtTarget,
-                            onChanged: active || busy
-                                ? null
-                                : _setTargetNotification,
-                          ),
-                          if (notifyAtTarget && _notificationNeedsSettings)
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton.icon(
-                                key: const Key(
-                                  'fasting-open-notification-settings',
-                                ),
-                                onPressed: busy
-                                    ? null
-                                    : _openNotificationSettings,
-                                icon: const Icon(Icons.settings_outlined),
-                                label: Text(
-                                  tr(
-                                    'Open notification settings',
-                                    'فتح إعدادات الإشعارات',
-                                  ),
+                            SwitchListTile.adaptive(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                tr(
+                                  'Notify me at my target',
+                                  'نبّهني عند بلوغ هدفي',
                                 ),
                               ),
-                            ),
-                          const SizedBox(height: 18),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              style: active
-                                  ? FilledButton.styleFrom(
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.error,
-                                    )
-                                  : null,
-                              onPressed: busy
-                                  ? null
-                                  : (active ? _stop : _start),
-                              icon: busy
-                                  ? const SizedBox.square(
-                                      dimension: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Icon(
-                                      active
-                                          ? Icons.stop_rounded
-                                          : Icons.play_arrow_rounded,
-                                    ),
-                              label: Text(
-                                active
+                              subtitle: Text(
+                                fastingNotificationScheduled
                                     ? tr(
-                                        'End intermittent fast',
-                                        'إنهاء الصيام المتقطع',
+                                        'Scheduled on this phone',
+                                        'مجدول على هذا الهاتف',
+                                      )
+                                    : notificationPermission ==
+                                          BilNotificationPermissionState.granted
+                                    ? tr(
+                                        'Allowed; starts when you begin a fast',
+                                        'مسموح؛ يُجدول عند بدء الصيام',
                                       )
                                     : tr(
-                                        'Start intermittent fast',
-                                        'بدء الصيام المتقطع',
+                                        'Notification permission is not active',
+                                        'إذن الإشعارات غير مفعّل',
                                       ),
                               ),
+                              value: notifyAtTarget,
+                              onChanged: active || busy
+                                  ? null
+                                  : _setTargetNotification,
                             ),
+                            if (notifyAtTarget && _notificationNeedsSettings)
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: TextButton.icon(
+                                  key: const Key(
+                                    'fasting-open-notification-settings',
+                                  ),
+                                  onPressed: busy
+                                      ? null
+                                      : _openNotificationSettings,
+                                  icon: const Icon(Icons.settings_outlined),
+                                  label: Text(
+                                    tr(
+                                      'Open notification settings',
+                                      'فتح إعدادات الإشعارات',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 18),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton.icon(
+                                style: active
+                                    ? FilledButton.styleFrom(
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
+                                      )
+                                    : null,
+                                onPressed: busy
+                                    ? null
+                                    : (active ? _stop : _start),
+                                icon: busy
+                                    ? const SizedBox.square(
+                                        dimension: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Icon(
+                                        active
+                                            ? Icons.stop_rounded
+                                            : Icons.play_arrow_rounded,
+                                      ),
+                                label: Text(
+                                  active
+                                      ? tr(
+                                          'End intermittent fast',
+                                          'إنهاء الصيام المتقطع',
+                                        )
+                                      : tr(
+                                          'Start intermittent fast',
+                                          'بدء الصيام المتقطع',
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (history.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        tr(
+                          'Intermittent fasting history',
+                          'سجل الصيام المتقطع',
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      for (final entry in history.take(10))
+                        ListTile(
+                          leading: Icon(
+                            entry.reachedTarget
+                                ? Icons.check_circle_outline_rounded
+                                : Icons.history_rounded,
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (history.isNotEmpty) ...[
+                          title: Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Text(clock(entry.duration)),
+                          ),
+                          subtitle: Text(
+                            '${MaterialLocalizations.of(context).formatMediumDate(entry.startedAt.toLocal())} · '
+                            '${tr('Target', 'الهدف')} ${entry.targetHours}h · '
+                            '${entry.reachedTarget ? tr('Reached', 'تم بلوغه') : tr('Ended early', 'انتهى مبكرًا')}',
+                          ),
+                        ),
+                    ],
                     const SizedBox(height: 12),
-                    Text(
-                      tr('Intermittent fasting history', 'سجل الصيام المتقطع'),
-                      style: Theme.of(context).textTheme.titleLarge,
+                    _SafetyNote(
+                      text: tr(
+                        'Fasting is optional and is not medical advice. Do not fast if it conflicts with pregnancy, medication, an eating-disorder history, diabetes care, or clinician guidance.',
+                        'الصيام اختياري وليس نصيحة طبية. لا تصم إذا تعارض مع الحمل أو الدواء أو تاريخ اضطراب الأكل أو رعاية السكري أو إرشادات طبيبك.',
+                      ),
                     ),
-                    for (final entry in history.take(10))
-                      ListTile(
-                        leading: Icon(
-                          entry.reachedTarget
-                              ? Icons.check_circle_outline_rounded
-                              : Icons.history_rounded,
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(
+                        key: const Key('fasting-health-sources'),
+                        onPressed: () => context.push(
+                          '/health-information-sources?topic=fasting',
                         ),
-                        title: Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Text(clock(entry.duration)),
-                        ),
-                        subtitle: Text(
-                          '${MaterialLocalizations.of(context).formatMediumDate(entry.startedAt.toLocal())} · '
-                          '${tr('Target', 'الهدف')} ${entry.targetHours}h · '
-                          '${entry.reachedTarget ? tr('Reached', 'تم بلوغه') : tr('Ended early', 'انتهى مبكرًا')}',
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: Text(
+                          tr(
+                            'Fasting sources & safety',
+                            'مصادر الصيام والسلامة',
+                          ),
                         ),
                       ),
+                    ),
                   ],
-                  const SizedBox(height: 12),
-                  _SafetyNote(
-                    text: tr(
-                      'Fasting is optional and is not medical advice. Do not fast if it conflicts with pregnancy, medication, an eating-disorder history, diabetes care, or clinician guidance.',
-                      'الصيام اختياري وليس نصيحة طبية. لا تصم إذا تعارض مع الحمل أو الدواء أو تاريخ اضطراب الأكل أو رعاية السكري أو إرشادات طبيبك.',
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      key: const Key('fasting-health-sources'),
-                      onPressed: () => context.push(
-                        '/health-information-sources?topic=fasting',
-                      ),
-                      icon: const Icon(Icons.menu_book_outlined),
-                      label: Text(
-                        tr('Fasting sources & safety', 'مصادر الصيام والسلامة'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+        ),
       ),
     );
   }

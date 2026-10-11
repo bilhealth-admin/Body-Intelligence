@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
@@ -24,6 +25,7 @@ class _Repository extends CommunityRepository {
   int imageCalls = 0;
   int textCalls = 0;
   int foodLoads = 0;
+  Completer<void>? pendingTextPublication;
   @override
   String get currentUserId => '11111111-1111-4111-8111-111111111111';
   @override
@@ -63,6 +65,7 @@ class _Repository extends CommunityRepository {
   @override
   Future<void> publishPost(String body) async {
     textCalls++;
+    if (pendingTextPublication case final pending?) await pending.future;
   }
 
   @override
@@ -210,6 +213,57 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets(
+    'Publish keeps its geometry and never duplicates an in-flight request',
+    (tester) async {
+      final repository = _Repository()
+        ..pendingTextPublication = Completer<void>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CommunityHubPage(
+            repository: repository,
+            postImagePicker: _Picker(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-create-post')));
+      await tester.pumpAndSettle();
+
+      final composer = find.byKey(const Key('community-post-composer'));
+      await tester.enterText(composer, 'Stable publish regression');
+      await tester.pumpAndSettle();
+      final publish = find.byKey(const Key('community-post-publish'));
+      await tester.ensureVisible(publish);
+      await tester.pumpAndSettle();
+      final before = tester.getSize(publish);
+      final initialLabel = tester.widget<FilledButton>(publish);
+      expect(initialLabel.onPressed, isNotNull);
+      await tester.tap(publish);
+      // Publish can enter its pending state before a frame is rendered. Pump
+      // explicitly even when the repository receives the call immediately.
+      await tester.pump();
+      for (var i = 0; i < 30 && repository.textCalls == 0; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      expect(repository.textCalls, 1);
+      expect(tester.getSize(publish), before);
+      expect(tester.widget<FilledButton>(publish).onPressed, isNull);
+      expect(find.text('Publish'), findsOneWidget);
+
+      // A second tap while pending cannot call the repository again.
+      await tester.tap(publish, warnIfMissed: false);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(repository.textCalls, 1);
+      expect(tester.getSize(publish), before);
+
+      repository.pendingTextPublication!.complete();
+      await tester.pumpAndSettle();
+      expect(repository.textCalls, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('food list is not reloaded by a parent rebuild', (tester) async {
     final repository = _Repository();
     Widget app() => MaterialApp(

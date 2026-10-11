@@ -1,0 +1,17 @@
+{
+  "head": "944973ed3556ccb9b8cd8a09b451562aea3cf652",
+  "status_unchanged": true,
+  "all_10_code_hashes_unchanged": true,
+  "files": {
+    "lib/app/router/responsive_app_shell.dart": "bd5c6fd1e9924d584e7f6b69f28c4a4844178bed497f70cbbac8a5da3341c71b",
+    "lib/features/daily_log/food_log_actions.dart": "d5c824ec93689ef0d3ffb4086210224e1b364c91a753f795658bb994d6e7082f",
+    "lib/features/daily_log/food_log_page.dart": "44f6b5432360caeaa6e115f584825b68f22ebbf2ff4bbafdd5d152b9808fff4e",
+    "lib/features/dashboard/widgets/dashboard_first_use_experience.dart": "25435fc2b80e3f9e81957206c35db521905baef7bac23f206a4a0d4ad92fe25d",
+    "lib/features/dashboard/widgets/first_meal_celebration.dart": "985c46d31d01de74fcda040f702e270c2c7653d5c8df56b9f1c21e1e1f2545ff",
+    "lib/features/dashboard/widgets/first_use_context_coachmark.dart": "1c1f4a7bf47150835a8afe094133edf51d177232044ffa33ea39192db131a263",
+    "lib/features/dashboard/widgets/first_use_glass_surface.dart": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+    "lib/shared/widgets/bil_reference_bottom_bar.dart": "2a399e040b44b24338eb0002b65ba139d667c40243738af4b2f45dffa9e8d4a5",
+    "lib/shared/widgets/first_use_guide_anchor.dart": "6085b9690a5c2251e8a1089613e96ad4bd23c305b422ee0f44f2c753b12387fd",
+    "test/features/dashboard/first_use_reference_journey_test.dart": "5f7d615d8021b4b4d04e0f51870501d9e0397b14fdb1292861a9b394d6c43d78"
+  }
+}

@@ -198,7 +198,7 @@ void main() {
   );
   for (final locale in const [Locale('en'), Locale('ar')]) {
     for (final width in const [320.0, 390.0, 430.0]) {
-      for (final scale in const [1.0, 1.6]) {
+      for (final scale in const [1.0, 1.6, 2.0]) {
         testWidgets(
           '${locale.languageCode} ${width.toInt()} at ${scale}x retains all content and burned calories',
           (tester) async {
@@ -211,7 +211,16 @@ void main() {
             );
             await container.read(connectedHealthProvider.notifier).refresh();
             await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
+            final layoutException = tester.takeException();
+            if (layoutException != null &&
+                locale.languageCode == 'en' &&
+                width == 320 &&
+                scale == 1) {
+              // Diagnostic only: preserve the failure and print the exact
+              // RenderFlex ancestry once. Never suppress a real overflow.
+              debugDumpRenderTree();
+            }
+            expect(layoutException, isNull);
 
             // Health and budget presentations must retain the verified value.
             expect(
@@ -234,12 +243,23 @@ void main() {
               find.byKey(const Key('dashboard-burn-policy-note')),
               findsOneWidget,
             );
+            // Keep the entire verified burned-calorie explanation inside
+            // its card; swallowing Flutter exceptions cannot pass this check.
+            expect(
+              tester
+                  .getBottomLeft(
+                    find.byKey(const Key('dashboard-burn-policy-note')),
+                  )
+                  .dy,
+              lessThanOrEqualTo(tester.getBottomLeft(calories).dy),
+              reason: 'The full burn-policy note must fit inside the card.',
+            );
             final remaining = tester.widget<Text>(
               find.byKey(
                 const Key('dashboard-reference-calorie-remaining-value'),
               ),
             );
-            expect(remaining.textSpan!.toPlainText(), '1460');
+            expect(remaining.textSpan!.toPlainText(), '1,460');
 
             // Inspect the lower half too; compact tiles and the single-point
             // trend must not overflow when accessibility fonts are enabled.

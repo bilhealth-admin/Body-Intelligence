@@ -43,6 +43,8 @@ import 'runtime_copy_recipe_editor.dart';
 import 'runtime_copy_apple_ai_privacy.dart';
 import 'runtime_copy_food_log.dart';
 import 'runtime_copy_reference_delta.dart';
+import 'runtime_copy_invalid_route.dart';
+import 'runtime_copy_quality_feedback.dart';
 
 /// Reviewed runtime copy used by legacy call-sites that still pass an English
 /// sentence instead of a typed key. Every entry is complete in the five
@@ -70,6 +72,10 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final invalidRoute = InvalidRouteRuntimeCopy.resolve(english, localeTag);
+    if (invalidRoute != null) return invalidRoute;
+    final statusCopy = QualityFeedbackRuntimeCopy.resolve(english, localeTag);
+    if (statusCopy != null) return statusCopy;
     final integrated = IntegrationRuntimeCopy.resolve(english, localeTag);
     if (integrated != null) return integrated;
     final controls = CoachControlsRuntimeCopy.resolve(english, localeTag);

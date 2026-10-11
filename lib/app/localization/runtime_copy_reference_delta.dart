@@ -21,6 +21,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
     "Review today’s nutrition from my saved BIL data. What stands out and what should I focus on next?",
     "Start with your real BIL data",
     "Topics you might like",
+    "over",
   ];
 
   static const rows = <String, List<String>>{
@@ -42,6 +43,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "راجع تغذية اليوم من بيانات BIL المحفوظة. ما الأبرز وما الذي أركز عليه الآن؟",
       "ابدأ من بيانات BIL الحقيقية",
       "مواضيع قد تعجبك",
+      "زيادة",
     ],
     'fr': [
       "D’après le contexte BIL que j’ai sélectionné, quelle est la priorité la plus utile maintenant, et pourquoi ?",
@@ -61,6 +63,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Examine ma nutrition d’aujourd’hui à partir de mes données BIL enregistrées. Que remarques-tu et quelle devrait être ma prochaine priorité ?",
       "Partez de vos données BIL réelles",
       "Des sujets qui pourraient vous plaire",
+      "Dépassement",
     ],
     'es': [
       "Según el contexto de BIL que he seleccionado, ¿cuál es la prioridad más útil ahora y por qué?",
@@ -80,6 +83,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Revisa la nutrición de hoy a partir de mis datos guardados en BIL. ¿Qué destaca y en qué debería centrarme ahora?",
       "Empieza con tus datos reales de BIL",
       "Temas que podrían gustarte",
+      "Exceso",
     ],
     'tr': [
       "Seçtiğim BIL bağlamına göre şimdi odaklanmam gereken en yararlı tek şey nedir ve neden?",
@@ -99,6 +103,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Kayıtlı BIL verilerimden bugünkü beslenmemi incele. Ne dikkat çekiyor ve şimdi neye odaklanmalıyım?",
       "Gerçek BIL verilerinizle başlayın",
       "İlginizi çekebilecek konular",
+      "Aşım",
     ],
     'de': [
       "Was sollte auf Grundlage meines ausgewählten BIL-Kontexts meine nächste wichtigste Priorität sein, und warum?",
@@ -118,6 +123,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Prüfe meine heutige Ernährung anhand meiner gespeicherten BIL-Daten. Was fällt auf und worauf sollte ich mich als Nächstes konzentrieren?",
       "Starte mit deinen tatsächlichen BIL-Daten",
       "Themen, die dir gefallen könnten",
+      "Überschreitung",
     ],
     'it': [
       "In base al contesto BIL che ho selezionato, qual è la singola priorità più utile adesso e perché?",
@@ -137,6 +143,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Esamina l’alimentazione di oggi usando i miei dati BIL salvati. Cosa emerge e su cosa dovrei concentrarmi adesso?",
       "Inizia dai tuoi dati BIL reali",
       "Argomenti che potrebbero piacerti",
+      "Superamento",
     ],
     'pt-BR': [
       "Com base no contexto do BIL que selecionei, qual deve ser minha próxima prioridade mais útil e por quê?",
@@ -156,6 +163,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Revise a alimentação de hoje usando meus dados salvos no BIL. O que se destaca e em que devo focar agora?",
       "Comece com seus dados reais do BIL",
       "Assuntos que podem interessar a você",
+      "Excesso",
     ],
     'pt-PT': [
       "Com base no contexto do BIL que selecionei, qual deve ser a minha próxima prioridade mais útil e porquê?",
@@ -175,6 +183,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Revê a alimentação de hoje usando os meus dados guardados no BIL. O que se destaca e em que me devo concentrar agora?",
       "Começa pelos teus dados reais do BIL",
       "Temas que te podem interessar",
+      "Excesso",
     ],
     'ur': [
       "میرے منتخب کردہ BIL سیاق کی بنیاد پر، اب مجھے کس ایک سب سے مفید چیز پر توجہ دینی چاہیے اور کیوں؟",
@@ -194,6 +203,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "میرے محفوظ BIL ڈیٹا سے آج کی غذائیت کا جائزہ لیں۔ کیا نمایاں ہے اور اب مجھے کس چیز پر توجہ دینی چاہیے؟",
       "اپنے حقیقی BIL ڈیٹا سے شروع کریں",
       "وہ موضوعات جو آپ کو پسند آ سکتے ہیں",
+      "زیادہ",
     ],
     'fa': [
       "بر اساس زمینهٔ BIL که انتخاب کرده‌ام، اکنون مفیدترین اولویت برای تمرکز من چیست و چرا؟",
@@ -213,6 +223,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "تغذیهٔ امروز را بر اساس داده‌های ذخیره‌شدهٔ BIL بررسی کن. چه چیزی برجسته است و اکنون باید روی چه چیزی تمرکز کنم؟",
       "با داده‌های واقعی BIL خود شروع کنید",
       "موضوعاتی که شاید بپسندید",
+      "بیشتر",
     ],
     'hi': [
       "मेरे चुने हुए BIL संदर्भ के आधार पर, अब ध्यान देने के लिए सबसे उपयोगी एक चीज़ क्या है और क्यों?",
@@ -232,6 +243,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "मेरे सहेजे गए BIL डेटा से आज के पोषण की समीक्षा करें। क्या खास दिखता है और अब मुझे किस पर ध्यान देना चाहिए?",
       "अपने वास्तविक BIL डेटा से शुरुआत करें",
       "वे विषय जो आपको पसंद आ सकते हैं",
+      "अधिक",
     ],
     'id': [
       "Berdasarkan konteks BIL yang saya pilih, apa satu hal paling bermanfaat untuk saya fokuskan berikutnya dan mengapa?",
@@ -251,6 +263,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Tinjau nutrisi hari ini dari data BIL yang tersimpan. Apa yang menonjol dan apa yang sebaiknya saya fokuskan berikutnya?",
       "Mulai dari data BIL Anda yang sebenarnya",
       "Topik yang mungkin Anda sukai",
+      "Melebihi",
     ],
     'ms': [
       "Berdasarkan konteks BIL yang saya pilih, apakah satu perkara paling berguna untuk diberi tumpuan seterusnya dan mengapa?",
@@ -270,6 +283,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Semak pemakanan hari ini menggunakan data BIL yang disimpan. Apakah yang menonjol dan apakah yang patut saya tumpukan seterusnya?",
       "Mulakan dengan data BIL anda yang sebenar",
       "Topik yang mungkin anda sukai",
+      "Melebihi",
     ],
     'ja': [
       "選択したBILの情報に基づいて、次に最も優先すべきことを一つ挙げ、その理由を教えてください。",
@@ -289,6 +303,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "保存済みのBILデータから今日の栄養を確認してください。目立つ点と、次に重点を置くべきことは何ですか？",
       "実際のBILデータから始める",
       "おすすめのトピック",
+      "超過",
     ],
     'ko': [
       "제가 선택한 BIL 맥락을 바탕으로 다음에 집중할 가장 유용한 한 가지는 무엇이며, 그 이유는 무엇인가요?",
@@ -308,6 +323,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "저장된 BIL 데이터로 오늘의 영양을 살펴봐 주세요. 무엇이 눈에 띄며 다음에는 어디에 집중해야 할까요?",
       "실제 BIL 데이터로 시작하세요",
       "관심 있을 만한 주제",
+      "초과",
     ],
     'zh-Hans': [
       "根据我选择的 BIL 背景信息，接下来最值得关注的一件事是什么？为什么？",
@@ -327,6 +343,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "请根据我保存的 BIL 数据查看今天的营养。有什么值得注意，接下来应该重点关注什么？",
       "从你的真实 BIL 数据开始",
       "你可能感兴趣的话题",
+      "超出",
     ],
     'zh-Hant': [
       "根據我選擇的 BIL 背景資訊，接下來最值得關注的一件事是什麼？為什麼？",
@@ -346,6 +363,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "請根據我儲存的 BIL 資料查看今天的營養。有什麼值得注意，接下來應該重點關注什麼？",
       "從你的真實 BIL 資料開始",
       "你可能感興趣的話題",
+      "超出",
     ],
     'ru': [
       "На основе выбранного мной контекста BIL, на чём одном полезнее всего сосредоточиться дальше и почему?",
@@ -365,6 +383,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Проанализируй сегодняшнее питание по сохранённым данным BIL. Что выделяется и на чём мне сосредоточиться дальше?",
       "Начните с ваших реальных данных BIL",
       "Темы, которые могут вам понравиться",
+      "Превышение",
     ],
     'bn': [
       "আমার বেছে নেওয়া BIL প্রসঙ্গ অনুযায়ী, এরপর মনোযোগ দেওয়ার জন্য সবচেয়ে উপকারী একটি বিষয় কী এবং কেন?",
@@ -384,6 +403,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "আমার সংরক্ষিত BIL তথ্য থেকে আজকের পুষ্টি পর্যালোচনা করুন। কী লক্ষণীয় এবং এরপর কিসে মনোযোগ দেওয়া উচিত?",
       "আপনার বাস্তব BIL তথ্য দিয়ে শুরু করুন",
       "আপনার পছন্দ হতে পারে এমন বিষয়",
+      "বেশি",
     ],
     'vi': [
       "Dựa trên ngữ cảnh BIL tôi đã chọn, điều hữu ích nhất cần tập trung tiếp theo là gì và vì sao?",
@@ -403,6 +423,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Xem lại dinh dưỡng hôm nay từ dữ liệu BIL đã lưu. Điều gì nổi bật và tôi nên tập trung vào đâu tiếp theo?",
       "Bắt đầu từ dữ liệu BIL thực tế của bạn",
       "Chủ đề bạn có thể thích",
+      "Vượt",
     ],
     'th': [
       "จากบริบท BIL ที่ฉันเลือก สิ่งที่มีประโยชน์ที่สุดเพียงอย่างเดียวที่ควรให้ความสำคัญต่อไปคืออะไร และเพราะเหตุใด?",
@@ -422,6 +443,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "ทบทวนโภชนาการวันนี้จากข้อมูล BIL ที่บันทึกไว้ มีอะไรโดดเด่นและฉันควรให้ความสำคัญกับอะไรต่อไป?",
       "เริ่มจากข้อมูล BIL จริงของคุณ",
       "หัวข้อที่คุณอาจชอบ",
+      "เกิน",
     ],
     'pl': [
       "Na podstawie wybranego przeze mnie kontekstu BIL, na czym jednym najlepiej skupić się teraz i dlaczego?",
@@ -441,6 +463,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Przeanalizuj dzisiejsze odżywianie na podstawie zapisanych danych BIL. Co się wyróżnia i na czym mam się teraz skupić?",
       "Zacznij od swoich rzeczywistych danych BIL",
       "Tematy, które mogą Ci się spodobać",
+      "Przekroczenie",
     ],
     'nl': [
       "Wat is op basis van mijn geselecteerde BIL-context de nuttigste volgende prioriteit, en waarom?",
@@ -460,6 +483,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Bekijk de voeding van vandaag aan de hand van mijn opgeslagen BIL-gegevens. Wat valt op en waarop moet ik me nu richten?",
       "Begin met je echte BIL-gegevens",
       "Onderwerpen die je misschien leuk vindt",
+      "Overschrijding",
     ],
     'uk': [
       "На основі вибраного мною контексту BIL, на чому одному найкорисніше зосередитися далі й чому?",
@@ -479,6 +503,7 @@ abstract final class ReferenceDeltaRuntimeCopy {
       "Переглянь сьогоднішнє харчування за збереженими даними BIL. Що вирізняється і на чому мені зосередитися далі?",
       "Почніть зі своїх справжніх даних BIL",
       "Теми, які можуть вам сподобатися",
+      "Перевищення",
     ],
   };
 

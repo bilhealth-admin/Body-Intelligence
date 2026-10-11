@@ -13,7 +13,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final tileHeight = 108 + (textScale - 1).clamp(0, 2) * 108;
+    final tileHeight = 134 + (textScale - 1).clamp(0, 2) * 108;
     final wideTileHeight = 84 + (textScale - 1).clamp(0, 2) * 88;
     final items = <(String, IconData, String, String, String, bool)>[
       (
@@ -172,28 +172,19 @@ class _DiscoverTile extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Opacity(
-              opacity: .34,
-              child: Image.asset(
-                imageAsset,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Center(
-                  child: Icon(
-                    fallbackIcon,
-                    size: 44,
-                    color: const Color(0xFF69E5F5),
-                  ),
+            // A single full artwork: never cover-crop a face or person's
+            // limbs, and never double the image with a blurred inset.
+            Image.asset(
+              imageAsset,
+              key: Key('dashboard-discover-complete-$imageAsset'),
+              fit: BoxFit.contain,
+              alignment: Alignment.topCenter,
+              errorBuilder: (_, _, _) => Center(
+                child: Icon(
+                  fallbackIcon,
+                  size: 40,
+                  color: const Color(0xFF69E5F5),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 4, 30),
-              child: Image.asset(
-                imageAsset,
-                key: Key('dashboard-discover-complete-$imageAsset'),
-                fit: BoxFit.contain,
-                alignment: Alignment.topCenter,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
             ),
             const DecoratedBox(
@@ -201,8 +192,12 @@ class _DiscoverTile extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0x14020A12), Color(0xF2081624)],
-                  stops: [0.18, 1],
+                  colors: [
+                    Color(0x0007192A),
+                    Color(0x2807192A),
+                    Color(0xF007192A),
+                  ],
+                  stops: [0, .54, 1],
                 ),
               ),
             ),

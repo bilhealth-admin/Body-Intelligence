@@ -3,7 +3,9 @@ part of 'community_people_page.dart';
 extension _CommunityChatRendering on _CommunityChatPageState {
   Widget _buildChat(BuildContext context) => Scaffold(
     appBar: AppBar(
-      leading: const CommunityReturnButton(),
+      leading: const CommunityReturnButton(
+        fallbackLocation: '/community/messages',
+      ),
       title: Row(
         children: [
           const CircleAvatar(

@@ -1,0 +1,27 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":9228,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":2,"time":4,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":1884}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":1885}
+{"test":{"id":3,"name":"first trusted baseline message is localized for an Arabic user","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":12,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart"},"type":"testStart","time":1885}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2152}
+{"test":{"id":4,"name":"composition root exposes the canonical Reality Runtime only","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":49,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/ai_platform/local_intelligence_reality_runtime_test.dart"},"type":"testStart","time":2152}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":2155}
+{"suite":{"id":5,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"suite","time":2181}
+{"test":{"id":6,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart","suiteID":5,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2181}
+{"testID":6,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2887}
+{"group":{"id":7,"suiteID":5,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":2888}
+{"test":{"id":8,"name":"(setUpAll)","suiteID":5,"groupIDs":[7],"metadata":{"skip":false,"skipReason":null},"line":12,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":2888}
+{"testID":8,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2937}
+{"test":{"id":9,"name":"cancel final review returns no selection and no substitute photo","suiteID":5,"groupIDs":[7],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":36,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":2938}
+{"testID":9,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3814}
+{"test":{"id":10,"name":"zoom close remains tappable before original photo decodes","suiteID":5,"groupIDs":[7],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":80,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":3815}
+{"testID":10,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4185}
+{"test":{"id":11,"name":"final edited portion returns the food and exact commit basis","suiteID":5,"groupIDs":[7],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":153,"root_column":3,"root_url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":4185}
+{"testID":11,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5285}
+{"test":{"id":12,"name":"both diary entry points commit final values and route-scoped original photo","suiteID":5,"groupIDs":[7],"metadata":{"skip":false,"skipReason":null},"line":266,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":5286}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5323}
+{"test":{"id":13,"name":"(tearDownAll)","suiteID":5,"groupIDs":[7],"metadata":{"skip":false,"skipReason":null},"line":14,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/features/nutrition/meal_vision_final_portion_test.dart"},"type":"testStart","time":5323}
+{"testID":13,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5326}
+{"success":true,"type":"done","time":5358}

@@ -79,6 +79,7 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(communityText(context, 'Community topics', 'مواضيع المجتمع')),
     ),
     body: RefreshIndicator(
@@ -387,7 +388,10 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
       widget.topic.slug,
     );
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        leading: const CommunityReturnButton(),
+        title: Text(title),
+      ),
       floatingActionButton: widget.onComposeTopic == null
           ? null
           : FloatingActionButton.extended(
