@@ -173,8 +173,14 @@ Future<void> _waitForMediaReview(
   for (var attempt = 0; attempt < 90; attempt++) {
     await tester.pump(const Duration(milliseconds: 50));
     if (confirm.evaluate().isNotEmpty) {
-      if (!requirePreview ||
-          tester.widget<FilledButton>(confirm).onPressed != null) {
+      final route = ModalRoute.of(tester.element(confirm));
+      // Decoding can finish before the sheet has entered the viewport. The
+      // composer keeps animating while selection is pending, so settling the
+      // entire app is not a valid readiness condition for this modal route.
+      final entered = route?.animation?.status == AnimationStatus.completed;
+      if (entered &&
+          (!requirePreview ||
+              tester.widget<FilledButton>(confirm).onPressed != null)) {
         return;
       }
     }
@@ -183,7 +189,7 @@ Future<void> _waitForMediaReview(
     );
     await tester.pump();
   }
-  fail('Photo review did not become ready within a bounded wait.');
+  fail('Photo review did not enter and become ready within a bounded wait.');
 }
 
 Future<void> _tapReviewControl(WidgetTester tester, String key) async {
@@ -191,6 +197,11 @@ Future<void> _tapReviewControl(WidgetTester tester, String key) async {
   expect(target, findsOneWidget);
   await tester.ensureVisible(target);
   await tester.pump();
+  expect(
+    target.hitTestable(),
+    findsOneWidget,
+    reason: 'Photo review actions must be reachable before a real pointer tap.',
+  );
   // Leave missed-tap warnings intact: this must hit the actual button.
   await tester.tap(target);
   await tester.pump();

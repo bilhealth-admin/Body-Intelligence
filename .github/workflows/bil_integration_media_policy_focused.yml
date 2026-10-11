@@ -121,9 +121,27 @@ jobs:
         run: |
           python -m unittest discover -s tool/prebuild -p test_store_policy_source_guard.py -v
           python tool/prebuild/store_policy_source_guard.py --json-out build/store-policy/guard.json
+      - name: Reproduce each previously failing Community case
+        id: isolated
+        if: steps.fmt.outcome == 'success' && steps.analyze.outcome == 'success' && steps.policy.outcome == 'success'
+        run: |
+          for case_name in \
+            'photo draft previews, shows upload progress, and publishes once' \
+            'failed image publish retains both text and photo for retry' \
+            'cancelled photo review leaves the draft without a new image'; do
+            flutter test --no-pub --concurrency=1 --timeout=3m \
+              test/features/community/community_post_image_support_test.dart \
+              --plain-name "$case_name"
+          done
+      - name: Complete Community image support file
+        id: community
+        if: steps.isolated.outcome == 'success'
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout=3m \
+            test/features/community/community_post_image_support_test.dart
       - name: Focused media, account, review and architecture regressions
         id: regressions
-        if: steps.fmt.outcome == 'success' && steps.analyze.outcome == 'success' && steps.policy.outcome == 'success'
+        if: steps.community.outcome == 'success'
         run: |
           flutter test --no-pub --concurrency=1 --timeout=3m \
             test/shared/widgets/bil_media_review_sheet_test.dart \
@@ -151,10 +169,14 @@ jobs:
           FORMAT: ${{ steps.fmt.outcome }}
           ANALYZE: ${{ steps.analyze.outcome }}
           POLICY: ${{ steps.policy.outcome }}
+          ISOLATED: ${{ steps.isolated.outcome }}
+          COMMUNITY: ${{ steps.community.outcome }}
           REGRESSIONS: ${{ steps.regressions.outcome }}
         run: |
-          echo "format=$FORMAT analyze=$ANALYZE policy=$POLICY tests=$REGRESSIONS"
+          echo "format=$FORMAT analyze=$ANALYZE policy=$POLICY isolated=$ISOLATED community=$COMMUNITY tests=$REGRESSIONS"
           test "$FORMAT" = success
           test "$ANALYZE" = success
           test "$POLICY" = success
+          test "$ISOLATED" = success
+          test "$COMMUNITY" = success
           test "$REGRESSIONS" = success
