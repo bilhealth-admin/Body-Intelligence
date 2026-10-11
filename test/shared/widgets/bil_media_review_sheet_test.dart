@@ -13,158 +13,195 @@ Uint8List _photoBytes() {
   return Uint8List.fromList(image.encodePng(photo));
 }
 
+Future<void> _pumpDecodedPreviews(WidgetTester tester) async {
+  for (var attempt = 0; attempt < 100; attempt++) {
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
+    await tester.pump();
+    final button = tester.widget<FilledButton>(find.byKey(const Key('bil-media-review-confirm')));
+    if (button.onPressed != null) return;
+  }
+  fail('The original selected previews did not become ready within the bounded wait.');
+}
+
+Future<void> _tap(WidgetTester tester, String key) async {
+  final finder = find.byKey(Key(key));
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
+Widget _app({
+  required Future<void> Function(BuildContext) open,
+  Locale locale = const Locale('en'),
+  double scale = 1,
+}) => MaterialApp(
+  locale: locale,
+  supportedLocales: const [Locale('en'), Locale('ar')],
+  localizationsDelegates: const [
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  builder: (context, child) => MediaQuery(
+    data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+    child: child!,
+  ),
+  home: Scaffold(
+    body: Builder(builder: (context) => TextButton(
+      onPressed: () => open(context),
+      child: const Text('Open review'),
+    )),
+  ),
+);
+
 void main() {
-  testWidgets('multi-selection is staged, removable and never auto-accepted', (
-    tester,
-  ) async {
+  late bool previousHitTestSetting;
+  setUp(() {
+    previousHitTestSetting = WidgetController.hitTestWarningShouldBeFatal;
+    WidgetController.hitTestWarningShouldBeFatal = true;
+  });
+  tearDown(() => WidgetController.hitTestWarningShouldBeFatal = previousHitTestSetting);
+
+  testWidgets('multi-selection is staged, removable and never auto-accepted', (tester) async {
     List<int>? submitted;
     final bytes = _photoBytes();
-    final entries = [
-      for (var index = 0; index < 3; index++)
-        BilMediaReviewEntry<int>(
-          value: index,
-          preview: MemoryImage(bytes),
-        ),
+    final entries = [for (var i = 0; i < 3; i++)
+      BilMediaReviewEntry<int>(value: i, preview: MemoryImage(bytes)),
     ];
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              child: const Text('Open review'),
-              onPressed: () async => submitted =
-                  await showBilMediaReviewSheet<int>(
-                    context,
-                    entries: entries,
-                    forCommunity: true,
-                  ),
-            ),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(_app(open: (context) async {
+      submitted = await showBilMediaReviewSheet<int>(context, entries: entries, forCommunity: true);
+    }));
     await tester.tap(find.text('Open review'));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('bil-media-review-confirm')), findsOneWidget);
     expect(submitted, isNull);
-    await tester.tap(find.byKey(const Key('bil-media-review-remove-1')));
-    await tester.pumpAndSettle();
+    await _pumpDecodedPreviews(tester);
+    await _tap(tester, 'bil-media-review-remove-1');
     expect(find.text('Selected: 2'), findsOneWidget);
     expect(submitted, isNull);
-    await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
-    await tester.pumpAndSettle();
+    await _tap(tester, 'bil-media-review-confirm');
     expect(submitted, [0, 2]);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('cancel closes review without returning any media', (tester) async {
     List<int>? submitted;
-    final bytes = _photoBytes();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              child: const Text('Review'),
-              onPressed: () async => submitted =
-                  await showBilMediaReviewSheet<int>(
-                    context,
-                    entries: [BilMediaReviewEntry(value: 17, preview: MemoryImage(bytes))],
-                  ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.tap(find.text('Review'));
+    await tester.pumpWidget(_app(open: (context) async {
+      submitted = await showBilMediaReviewSheet<int>(context, entries: [
+        BilMediaReviewEntry(value: 17, preview: MemoryImage(_photoBytes())),
+      ]);
+    }));
+    await tester.tap(find.text('Open review'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('bil-media-review-cancel')));
-    await tester.pumpAndSettle();
+    await _tap(tester, 'bil-media-review-cancel');
     expect(submitted, isNull);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('small Arabic screen uses localized actions without overflow', (
-    tester,
-  ) async {
+  testWidgets('small Arabic screen uses localized actions without overflow', (tester) async {
     await tester.binding.setSurfaceSize(const Size(320, 640));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     List<int>? chosen;
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('ar'),
-        supportedLocales: const [Locale('ar'), Locale('en')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              child: const Text('فتح'),
-              onPressed: () async => chosen =
-                  await showBilMediaReviewSheet<int>(
-                    context,
-                    entries: [
-                      BilMediaReviewEntry(value: 1, preview: MemoryImage(_photoBytes())),
-                    ],
-                  ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.tap(find.text('فتح'));
+    await tester.pumpWidget(_app(locale: const Locale('ar'), open: (context) async {
+      chosen = await showBilMediaReviewSheet<int>(context, entries: [
+        BilMediaReviewEntry(value: 1, preview: MemoryImage(_photoBytes())),
+      ]);
+    }));
+    await tester.tap(find.text('Open review'));
     await tester.pumpAndSettle();
     expect(find.text('مراجعة الصور المحددة'), findsOneWidget);
     expect(find.text('استخدام هذه الصورة'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-    await tester.tap(find.byKey(const Key('bil-media-review-confirm')));
-    await tester.pumpAndSettle();
+    await _pumpDecodedPreviews(tester);
+    await _tap(tester, 'bil-media-review-confirm');
     expect(chosen, [1]);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('profile review has explicit update action and can be cancelled', (
-    tester,
-  ) async {
+  testWidgets('profile review has explicit update action and can be cancelled', (tester) async {
     bool? approved;
-    final bytes = _photoBytes();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () async => approved =
-                  await showBilSingleImageBytesReview(
-                    context,
-                    bytes: bytes,
-                  ),
-              child: const Text('Profile gallery'),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.tap(find.text('Profile gallery'));
+    await tester.pumpWidget(_app(open: (context) async {
+      approved = await showBilSingleImageBytesReview(context, bytes: _photoBytes());
+    }));
+    await tester.tap(find.text('Open review'));
     await tester.pumpAndSettle();
     expect(find.text('Review your profile photo'), findsOneWidget);
     expect(find.text('Update photo'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('bil-media-review-cancel')));
-    await tester.pumpAndSettle();
+    await _tap(tester, 'bil-media-review-cancel');
     expect(approved, isFalse);
     expect(tester.takeException(), isNull);
   });
 
   test('shared camera does not commit the picture at shutter press', () {
-    final code = File(
-      'lib/shared/widgets/bil_camera_capture_page.dart',
-    ).readAsStringSync();
-    expect(code, contains("_capturedForReview = image"));
+    final code = File('lib/shared/widgets/bil_camera_capture_page.dart').readAsStringSync();
+    expect(code, contains('_capturedForReview = image'));
     expect(code, contains("Key('bil-camera-retake')"));
     expect(code, contains("Key('bil-camera-use-photo')"));
-    expect(code, contains('_reviewReady && !_reviewFailed'));
-    expect(code, contains('onPressed: _useCapturedPhoto'));
+    expect(
+      RegExp(r'onPressed:\s*_reviewReady\s*&&\s*!_reviewFailed\s*\?\s*_useCapturedPhoto\s*:\s*null').hasMatch(code),
+      isTrue,
+      reason: 'Camera acceptance must stay disabled until the original frame decoded successfully.',
+    );
+    expect(code, contains('!_reviewReady || _reviewFailed'));
     expect(code, isNot(contains('Navigator.of(context).pop(image)')));
   });
+
+  testWidgets('all four previews become ready without scrolling each into view', (tester) async {
+    List<int>? chosen;
+    final bytes = _photoBytes();
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(_app(open: (context) async {
+      chosen = await showBilMediaReviewSheet<int>(context, entries: [
+        for (var i = 0; i < 4; i++) BilMediaReviewEntry(value: i, preview: MemoryImage(bytes)),
+      ], forCommunity: true);
+    }));
+    await tester.tap(find.text('Open review'));
+    await tester.pumpAndSettle();
+    await _pumpDecodedPreviews(tester);
+    await _tap(tester, 'bil-media-review-confirm');
+    expect(chosen, [0, 1, 2, 3]);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('corrupt preview cannot be approved and can always be cancelled', (tester) async {
+    List<int>? chosen;
+    await tester.pumpWidget(_app(open: (context) async {
+      chosen = await showBilMediaReviewSheet<int>(context, entries: [
+        BilMediaReviewEntry(value: 9, preview: MemoryImage(Uint8List.fromList([1, 2, 3]))),
+      ]);
+    }));
+    await tester.tap(find.text('Open review'));
+    await tester.pumpAndSettle();
+    for (var attempt = 0; attempt < 100; attempt++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
+      await tester.pump();
+      if (find.byKey(const Key('bil-media-review-error')).evaluate().isNotEmpty) break;
+    }
+    expect(find.byKey(const Key('bil-media-review-error')), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byKey(const Key('bil-media-review-confirm'))).onPressed, isNull);
+    expect(chosen, isNull);
+    await _tap(tester, 'bil-media-review-cancel');
+    expect(chosen, isNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final size in const [Size(320, 568), Size(640, 320)]) {
+    testWidgets('Arabic 2x review scrolls to actions at $size', (tester) async {
+      await tester.binding.setSurfaceSize(size);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      List<int>? chosen;
+      await tester.pumpWidget(_app(locale: const Locale('ar'), scale: 2, open: (context) async {
+        chosen = await showBilMediaReviewSheet<int>(context, entries: [
+          BilMediaReviewEntry(value: 5, preview: MemoryImage(_photoBytes())),
+        ]);
+      }));
+      await tester.tap(find.text('Open review'));
+      await tester.pumpAndSettle();
+      await _pumpDecodedPreviews(tester);
+      expect(tester.takeException(), isNull);
+      await _tap(tester, 'bil-media-review-confirm');
+      expect(chosen, [5]);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

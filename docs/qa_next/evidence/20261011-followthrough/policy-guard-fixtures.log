@@ -1,0 +1,16 @@
+Command: python -m unittest discover -s tool/prebuild -p test_store_policy_source_guard.py -v
+Scope: exact repository Python guard and tests, synthetic temporary fixtures only.
+Guard Git blob: 068532f691291387f7b19a9a7d50ab49a7246272
+Test Git blob: 2a589f7d2025cff9d4e2c00f272d6815a1b398d8
+
+test_baseline_passes_static_heuristics_but_requires_human_review (test_store_policy_source_guard.StorePolicySourceGuardTest.test_baseline_passes_static_heuristics_but_requires_human_review) ... ok
+test_custom_rating_prompt_fails_closed (test_store_policy_source_guard.StorePolicySourceGuardTest.test_custom_rating_prompt_fails_closed) ... ok
+test_extra_health_permission_fails_closed (test_store_policy_source_guard.StorePolicySourceGuardTest.test_extra_health_permission_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.005s
+
+OK
+Exit code: 0
+
+No Flutter, native-device, merged-manifest or full-app compliance result is implied.
