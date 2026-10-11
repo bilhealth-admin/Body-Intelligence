@@ -1,0 +1,79 @@
+name: BIL guarded functional source preparation
+# Only the authorized integration branch. No builds, deploy, Full8, or stores.
+on:
+  push:
+    branches: [integration/bil-qa-media-policy-20261011]
+    paths:
+      - .github/workflows/bil_candidate_prepare_20261011.yml
+      - docs/qa_next/candidate_20261011/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-functional-source-prepare
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify complete patch and protected source before apply
+        run: python3 docs/qa_next/candidate_20261011/prepare.py apply
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve pinned dependencies without upgrading
+        run: |
+          flutter --version
+          flutter pub get
+      - name: Format exactly the candidate files
+        run: |
+          mapfile -t files < build/bil-candidate-20261011/paths.txt
+          dart format "${files[@]}"
+          dart format --output=none --set-exit-if-changed "${files[@]}"
+      - name: Analyze complete source strictly
+        id: analyze
+        run: |
+          set -o pipefail
+          flutter analyze --no-pub 2>&1 | tee build/bil-candidate-20261011/analyze.txt
+      - name: Recheck source boundaries and record preparation evidence
+        env:
+          ANALYZE_OUTCOME: ${{ steps.analyze.outcome }}
+        run: python3 docs/qa_next/candidate_20261011/prepare.py finalize
+      - name: Commit prepared source only when branch is unchanged
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: integration/bil-qa-media-policy-20261011
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = bilhealth-admin/Body-Intelligence
+          test "$GITHUB_REF" = "refs/heads/$BRANCH"
+          AUTH=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          REMOTE=$(git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" ls-remote origin "refs/heads/$BRANCH" | cut -f1)
+          test "$REMOTE" = "$GITHUB_SHA" || { echo 'Branch advanced; refusing to overwrite concurrent work.'; exit 1; }
+          mapfile -t files < build/bil-candidate-20261011/paths.txt
+          git add -- "${files[@]}" docs/qa_next/evidence/20261011-functional-integration/preparation.json
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat(bil): integrate local-first media and functional nutrition journeys [skip ci]' -m 'Prepared with strict Dart format and complete Flutter analyze. Independent focused Codex tests remain required; no Full8, build, deployment, or store approval.'
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push origin "HEAD:refs/heads/$BRANCH"
+          git rev-parse HEAD | tee build/bil-candidate-20261011/integrated-head.txt
+          unset AUTH GH_TOKEN
+      - name: Export preparation evidence even on failure
+        if: always()
+        run: |
+          mkdir -p build/bil-candidate-20261011
+          git diff --binary HEAD -- lib test > build/bil-candidate-20261011/current.patch
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bil-functional-preparation-${{ github.run_id }}
+          path: build/bil-candidate-20261011/
+          if-no-files-found: error
+          retention-days: 10
