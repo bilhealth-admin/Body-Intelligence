@@ -42,6 +42,19 @@ def load():
     return original, correction, names
 
 
+def remove_reported_unused_import(names):
+    # Run38134129366 applied all 84 paths and formatted successfully. Its only
+    # remaining analyzer diagnostic was this unused import. Do not suppress
+    # analyzer diagnostics or regenerate the preserved candidate to remove it.
+    name = 'lib/features/dashboard/providers/dashboard_preferences_provider.dart'
+    assert name in names
+    path = Path(name)
+    text = path.read_text()
+    directive = "import 'package:flutter/foundation.dart';\n"
+    assert text.startswith(directive) and text.count(directive) == 1, name
+    path.write_text(text[len(directive):])
+
+
 def check(original, names):
     subprocess.run(['git', 'add', '-N', '--', *names], check=True)
     changed = set(prepare.git('diff', '--name-only').splitlines())
@@ -69,6 +82,7 @@ if __name__ == '__main__':
         subprocess.run(['git', 'apply', str(patch)], check=True)
         for row in correction['files']:
             assert digest(Path(row['path']).read_bytes()) == row['after'], row['path']
+        remove_reported_unused_import(names)
         check(original, names)
         print('84 candidate paths prepared, including exact analyzer fixes and centred Today date.')
     elif sys.argv[1] == 'finalize':
@@ -81,6 +95,8 @@ if __name__ == '__main__':
                   'flutter_tests_run_by_this_workflow': False, 'full8_run': False,
                   'device_visual_performance_verification': 'pending', 'production_deployment': False,
                   'store_ready': False, 'today_date_circle': '36px; selected calendar day centred in seven-day window',
+                  'resumed_from_failed_run': '38134129366',
+                  'last_analyzer_fix': 'Remove unused foundation import only; no diagnostic suppression.',
                   'note': 'Strict formatting and analyzer only. Independent focused Codex tests required.'}
         REPORT.parent.mkdir(parents=True, exist_ok=True)
         REPORT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
