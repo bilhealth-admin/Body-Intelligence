@@ -31,6 +31,7 @@ void main() {
       gateway: gateway,
       now: () => now,
       isSupportedPlatform: () => true,
+      canRequestNow: () => true,
       presentationDelay: Duration.zero,
     );
 
@@ -60,6 +61,7 @@ void main() {
         gateway: gateway,
         now: () => now,
         isSupportedPlatform: () => true,
+        canRequestNow: () => true,
         presentationDelay: Duration.zero,
       );
 
@@ -105,6 +107,7 @@ void main() {
       gateway: gateway,
       now: () => now,
       isSupportedPlatform: () => true,
+      canRequestNow: () => true,
       presentationDelay: Duration.zero,
     );
 
