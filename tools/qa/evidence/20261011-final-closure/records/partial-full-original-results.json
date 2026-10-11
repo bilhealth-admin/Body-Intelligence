@@ -1,0 +1,105 @@
+{
+  "head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+  "fingerprint": "b793543f547a9c1df985b0ba9cee624677e6ebb05f5c240b60307362dfa63f80",
+  "max_simultaneous_shards": 2,
+  "test_concurrency_per_shard": 1,
+  "initial_memory": {
+    "total_bytes": 16895102976,
+    "available_bytes": 9179353088,
+    "load_percent": 45
+  },
+  "shards": {
+    "1": {
+      "status": "FAIL",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard1-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=1",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-1.jsonl",
+      "exit_code": 1,
+      "PASS": 1243,
+      "FAIL": 5,
+      "SKIP": 1,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": false,
+        "type": "done",
+        "time": 2694360
+      }
+    },
+    "0": {
+      "status": "PASS",
+      "root": "G:\\BIL_Project\\worktrees\\bil-qa-final-shard0-20261011",
+      "command": [
+        "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+        "test",
+        "--no-pub",
+        "--total-shards=8",
+        "--shard-index=0",
+        "--concurrency=1",
+        "--timeout=3m",
+        "--reporter=json"
+      ],
+      "log": "build\\qa-final-closure\\full-shard-0.jsonl",
+      "exit_code": 0,
+      "PASS": 1031,
+      "FAIL": 0,
+      "SKIP": 0,
+      "suites_loaded": 1253,
+      "done_event": {
+        "success": true,
+        "type": "done",
+        "time": 2590564
+      }
+    },
+    "2": {
+      "status": "NOT_STARTED",
+      "reason": "Queued launch paused for shared test fixture repair"
+    },
+    "3": {
+      "status": "NOT_STARTED",
+      "reason": "Queued launch paused for shared test fixture repair"
+    },
+    "4": {
+      "status": "NOT_STARTED",
+      "reason": "Queued launch paused for shared test fixture repair"
+    },
+    "5": {
+      "status": "NOT_STARTED",
+      "reason": "Queued launch paused for shared test fixture repair"
+    },
+    "6": {
+      "status": "NOT_STARTED",
+      "reason": "Queued launch paused for shared test fixture repair"
+    },
+    "7": {
+      "status": "NOT_STARTED",
+      "reason": "Queued launch paused for shared test fixture repair"
+    }
+  },
+  "passed": false,
+  "orchestration_handoff": {
+    "reason": "Pause six unstarted shards after shared Vision fixture readiness failure; running test processes are not interrupted.",
+    "terminated_driver_pid": 22076,
+    "running_cmd_handles_retained": {
+      "0": {
+        "ProcessId": 17524,
+        "ParentProcessId": 22076,
+        "CommandLine": "C:\\WINDOWS\\system32\\cmd.exe /c G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT test --no-pub --total-shards=8 --shard-index=0 --concurrency=1 --timeout=3m --reporter=json"
+      },
+      "1": {
+        "ProcessId": 25716,
+        "ParentProcessId": 22076,
+        "CommandLine": "C:\\WINDOWS\\system32\\cmd.exe /c G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT test --no-pub --total-shards=8 --shard-index=1 --concurrency=1 --timeout=3m --reporter=json"
+      }
+    },
+    "time": "2026-10-10T23:21:31.404895+00:00"
+  }
+}

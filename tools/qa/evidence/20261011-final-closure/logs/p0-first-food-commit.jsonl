@@ -1,0 +1,19 @@
+Command: flutter test --no-pub --timeout=3m test/data/repositories/first_food_milestone_commit_test.dart --reporter=json --concurrency=1
+
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":18840,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart"},"type":"suite","time":3}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":7}
+{"count":1,"time":12,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3480}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":3482}
+{"test":{"id":3,"name":"a meal bucket alone is not a first committed food","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":10,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart"},"type":"testStart","time":3483}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3619}
+{"test":{"id":4,"name":"manual food marks ready and edits or later foods cannot rearm","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":25,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart"},"type":"testStart","time":3620}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3684}
+{"test":{"id":5,"name":"a failed atomic first food cannot create a celebration","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":65,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart"},"type":"testStart","time":3684}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3704}
+{"test":{"id":6,"name":"calculated recipe first serving creates milestone atomically","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":83,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart"},"type":"testStart","time":3704}
+{"testID":6,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3721}
+{"test":{"id":7,"name":"legacy deleted food is not classified as a new first food","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":107,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart"},"type":"testStart","time":3721}
+{"testID":7,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":3742}
+{"success":true,"type":"done","time":3779}

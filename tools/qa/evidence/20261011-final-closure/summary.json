@@ -1,0 +1,65 @@
+{
+  "tested_code_head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+  "ladder_fingerprint": "77aee942beb18c9440e06850b50bc9ed2dab7939327d3ec35b2bd2bd209c6f93",
+  "semantic_input_sha256": "29c1d190c4302e9759506b8ea3b0b61b3546b3696e739b3a8672645b43d722b3",
+  "full_totals": {
+    "PASS": 8528,
+    "FAIL": 0,
+    "SKIP": 3
+  },
+  "skips": [
+    {
+      "shard": "1",
+      "file": "test/launch_readiness/visual_reference_evidence_truth_contract_test.dart",
+      "name": "visual evidence check is truthful and read-only",
+      "result": "success",
+      "skip": true,
+      "skip_reason": "Requires the untracked, independently reviewed visual truth matrix."
+    },
+    {
+      "shard": "3",
+      "file": "test/features/wellness/wellness_video_stream_live_test.dart",
+      "name": "live public BIL stream supports pinned native range delivery",
+      "result": "success",
+      "skip": true,
+      "skip_reason": "Explicit BIL_LIVE_WORKOUT_STREAM_CHECK opt-in required."
+    },
+    {
+      "shard": "5",
+      "file": "test/launch_readiness/deferred_ios_google_mobile_ads_plugin_test.dart",
+      "name": "symlinked override parent is rejected",
+      "result": "success",
+      "skip": true,
+      "skip_reason": "Creating symlinks is not reliably permitted on Windows CI."
+    }
+  ],
+  "all_eight_shards_completed": true,
+  "max_simultaneous_shards": 2,
+  "concurrency_per_shard": 1,
+  "collected_test_outcomes": 8531,
+  "executed_full_test_bodies": 8528,
+  "unique_display_keys": 8528,
+  "duplicate_display_labels": [
+    {
+      "shard": 1,
+      "file": "test/features/community/community_entry_flow_test.dart",
+      "name": "invalid name is not sent to repository (1)",
+      "count": 2
+    },
+    {
+      "shard": 3,
+      "file": "test/epic11_localization_accessibility_test.dart",
+      "name": "pt renders translated reachable copy at 200%",
+      "count": 2
+    },
+    {
+      "shard": 5,
+      "file": "test/epic11_localization_accessibility_test.dart",
+      "name": "zh renders translated reachable copy at 200%",
+      "count": 2
+    }
+  ],
+  "supplemental_executed_bodies": 2,
+  "effective_pass_bodies": 8530,
+  "remaining_unexecuted_bodies": 1
+}

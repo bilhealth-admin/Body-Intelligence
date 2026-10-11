@@ -1,0 +1,23 @@
+{
+  "cpu": {
+    "Name": "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
+    "NumberOfCores": 4,
+    "NumberOfLogicalProcessors": 8
+  },
+  "drives": [
+    {
+      "DeviceID": "C:",
+      "Size": 225357852672,
+      "FreeSpace": 74115309568
+    },
+    {
+      "DeviceID": "G:",
+      "Size": 796916707328,
+      "FreeSpace": 336745414656
+    }
+  ],
+  "worker_limit": 2,
+  "test_concurrency": 1,
+  "flutter": "3.44.6",
+  "initial_memory_record": "full-results.json:initial_memory"
+}

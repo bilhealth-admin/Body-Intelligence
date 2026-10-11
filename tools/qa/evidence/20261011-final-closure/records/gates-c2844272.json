@@ -1,0 +1,184 @@
+{
+  "tested_head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+  "fingerprint_before": "b793543f547a9c1df985b0ba9cee624677e6ebb05f5c240b60307362dfa63f80",
+  "flutter": "3.44.6",
+  "stages": {
+    "source": {
+      "format": [
+        {
+          "exit_code": 0,
+          "seconds": 1.7,
+          "log": "build\\bil-codex-qa\\source-format-1-1791671555605771800.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.9,
+          "log": "build\\bil-codex-qa\\source-format-2-1791671557318527400.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.8,
+          "log": "build\\bil-codex-qa\\source-format-3-1791671559239025900.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.7,
+          "log": "build\\bil-codex-qa\\source-format-4-1791671561021105000.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.5,
+          "log": "build\\bil-codex-qa\\source-format-5-1791671562758263600.log"
+        }
+      ],
+      "analyze": {
+        "exit_code": 0,
+        "seconds": 460.0,
+        "log": "build\\bil-codex-qa\\source-analyze-1791671564271061100.log"
+      },
+      "passed": true
+    },
+    "arabic": {
+      "passed": true,
+      "jobs": {
+        "arabic-noto-capture": {
+          "exit_code": 0,
+          "seconds": 21.6,
+          "log": "build\\bil-codex-qa\\arabic-noto-capture-1791672024534865000.log"
+        },
+        "arabic-vision-v2": {
+          "exit_code": 0,
+          "seconds": 48.8,
+          "log": "build\\bil-codex-qa\\arabic-vision-v2-1791672046086054400.log"
+        }
+      }
+    },
+    "p0": {
+      "passed": true,
+      "jobs": {
+        "p0-food-owner-atomic": {
+          "exit_code": 0,
+          "seconds": 8.4,
+          "log": "build\\bil-codex-qa\\p0-food-owner-atomic-1791672095096682200.log"
+        },
+        "p0-meal-owner-atomic": {
+          "exit_code": 0,
+          "seconds": 7.4,
+          "log": "build\\bil-codex-qa\\p0-meal-owner-atomic-1791672103496111500.log"
+        },
+        "p0-first-food-commit": {
+          "exit_code": 0,
+          "seconds": 6.8,
+          "log": "build\\bil-codex-qa\\p0-first-food-commit-1791672110850334500.log"
+        },
+        "p0-vision-review": {
+          "exit_code": 0,
+          "seconds": 9.9,
+          "log": "build\\bil-codex-qa\\p0-vision-review-1791672117645936400.log"
+        },
+        "p0-vision-durable-replay": {
+          "exit_code": 0,
+          "seconds": 6.7,
+          "log": "build\\bil-codex-qa\\p0-vision-durable-replay-1791672127559647000.log"
+        },
+        "p0-vision-quantity-basis": {
+          "exit_code": 0,
+          "seconds": 11.1,
+          "log": "build\\bil-codex-qa\\p0-vision-quantity-basis-1791672134290055100.log"
+        },
+        "p0-vision-capture": {
+          "exit_code": 0,
+          "seconds": 9.5,
+          "log": "build\\bil-codex-qa\\p0-vision-capture-1791672145432301600.log"
+        },
+        "p0-architecture": {
+          "exit_code": 0,
+          "seconds": 7.6,
+          "log": "build\\bil-codex-qa\\p0-architecture-1791672154909651900.log"
+        },
+        "p0-coach-photo-bridge": {
+          "exit_code": 0,
+          "seconds": 20.4,
+          "log": "build\\bil-codex-qa\\p0-coach-photo-bridge-1791672162492895300.log"
+        },
+        "p0-coach-image-source": {
+          "exit_code": 0,
+          "seconds": 11.7,
+          "log": "build\\bil-codex-qa\\p0-coach-image-source-1791672182930878100.log"
+        },
+        "p0-vision-arabic": {
+          "exit_code": 0,
+          "seconds": 8.9,
+          "log": "build\\bil-codex-qa\\p0-vision-arabic-1791672194613105300.log"
+        }
+      }
+    },
+    "focused": {
+      "passed": true,
+      "jobs": {
+        "focused-store-captures": {
+          "exit_code": 0,
+          "seconds": 17.9,
+          "log": "build\\bil-codex-qa\\focused-store-captures-1791672203633732700.log"
+        },
+        "focused-production-goldens": {
+          "exit_code": 0,
+          "seconds": 53.5,
+          "log": "build\\bil-codex-qa\\focused-production-goldens-1791672221505423500.log"
+        },
+        "focused-data-goldens": {
+          "exit_code": 0,
+          "seconds": 21.2,
+          "log": "build\\bil-codex-qa\\focused-data-goldens-1791672275040850000.log"
+        },
+        "focused-splash-golden": {
+          "exit_code": 0,
+          "seconds": 8.5,
+          "log": "build\\bil-codex-qa\\focused-splash-golden-1791672296198005500.log"
+        },
+        "focused-transaction-queue": {
+          "exit_code": 0,
+          "seconds": 8.2,
+          "log": "build\\bil-codex-qa\\focused-transaction-queue-1791672304738396100.log"
+        }
+      }
+    },
+    "broad": {
+      "passed": true,
+      "jobs": {
+        "broad-dashboard-nutrition": {
+          "exit_code": 0,
+          "seconds": 25.4,
+          "log": "build\\bil-codex-qa\\broad-dashboard-nutrition-1791672313060397200.log"
+        },
+        "broad-dashboard-contract-health": {
+          "exit_code": 0,
+          "seconds": 19.9,
+          "log": "build\\bil-codex-qa\\broad-dashboard-contract-health-1791672338509085500.log"
+        },
+        "broad-weekly-onboarding-goldens": {
+          "exit_code": 0,
+          "seconds": 31.5,
+          "log": "build\\bil-codex-qa\\broad-weekly-onboarding-goldens-1791672358372983100.log"
+        },
+        "broad-settings-language-icons": {
+          "exit_code": 0,
+          "seconds": 22.0,
+          "log": "build\\bil-codex-qa\\broad-settings-language-icons-1791672389864033600.log"
+        },
+        "broad-wellness-commerce": {
+          "exit_code": 0,
+          "seconds": 13.2,
+          "log": "build\\bil-codex-qa\\broad-wellness-commerce-1791672411832005100.log"
+        },
+        "broad-community-cold-back": {
+          "exit_code": 0,
+          "seconds": 14.1,
+          "log": "build\\bil-codex-qa\\broad-community-cold-back-1791672425059908600.log"
+        }
+      }
+    }
+  },
+  "full": "NOT_STARTED",
+  "fingerprint_after": "b793543f547a9c1df985b0ba9cee624677e6ebb05f5c240b60307362dfa63f80"
+}

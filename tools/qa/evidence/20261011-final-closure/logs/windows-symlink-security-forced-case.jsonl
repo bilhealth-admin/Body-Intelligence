@@ -1,0 +1,9 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.31.0","pid":6836,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/launch_readiness/deferred_ios_google_mobile_ads_plugin_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/launch_readiness/deferred_ios_google_mobile_ads_plugin_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"count":1,"time":9,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":19506}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":19510}
+{"test":{"id":3,"name":"symlinked override parent is rejected","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":206,"column":3,"url":"file:///G:/BIL_Project/worktrees/bil-qa-final-closure-20261011/test/launch_readiness/deferred_ios_google_mobile_ads_plugin_test.dart"},"type":"testStart","time":19510}
+{"testID":3,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":19597}
+{"success":true,"type":"done","time":19637}

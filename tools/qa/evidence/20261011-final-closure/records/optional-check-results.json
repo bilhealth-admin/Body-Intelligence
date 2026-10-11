@@ -1,0 +1,36 @@
+[
+  {
+    "name": "live-workout-stream-opt-in",
+    "tested_head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "command": [
+      "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--reporter=json",
+      "test/features/wellness/wellness_video_stream_live_test.dart",
+      "--dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true"
+    ],
+    "exit_code": 0,
+    "seconds": 20.8,
+    "log": "build\\qa-final-closure\\live-workout-stream-opt-in.jsonl"
+  },
+  {
+    "name": "windows-symlink-security-forced-case",
+    "tested_head": "c1f1f47a627169fb692763d3a96dc81afcdc7b17",
+    "command": [
+      "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.BAT",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--reporter=json",
+      "test/launch_readiness/deferred_ios_google_mobile_ads_plugin_test.dart",
+      "--plain-name",
+      "symlinked override parent is rejected",
+      "--run-skipped"
+    ],
+    "exit_code": 0,
+    "seconds": 26.2,
+    "log": "build\\qa-final-closure\\windows-symlink-security-forced-case.jsonl"
+  }
+]

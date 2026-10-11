@@ -1,0 +1,65 @@
+{
+  "tested_head": "53f6643b8bcde49cea60cfa0becfb6b9812ecc1a",
+  "fingerprint_before": "159e77990cacdddff4230462d6d82fc7ca84b2a56247f1cddebc7510c52d0ac5",
+  "flutter": "3.44.6",
+  "stages": {
+    "source": {
+      "format": [
+        {
+          "exit_code": 0,
+          "seconds": 1.4,
+          "log": "build\\bil-codex-qa\\source-format-1-1791675188509459100.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.9,
+          "log": "build\\bil-codex-qa\\source-format-2-1791675189896510400.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 2.1,
+          "log": "build\\bil-codex-qa\\source-format-3-1791675191796232700.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.9,
+          "log": "build\\bil-codex-qa\\source-format-4-1791675193897220900.log"
+        },
+        {
+          "exit_code": 0,
+          "seconds": 1.8,
+          "log": "build\\bil-codex-qa\\source-format-5-1791675195819743000.log"
+        }
+      ],
+      "analyze": {
+        "exit_code": 0,
+        "seconds": 491.5,
+        "log": "build\\bil-codex-qa\\source-analyze-1791675197574202400.log"
+      },
+      "passed": true
+    }
+  },
+  "full": "NOT_STARTED",
+  "revalidation": {
+    "from_head": "c2844272be3217df797c946961ccdb7ce165c3a1",
+    "changed_inputs": [
+      "test/features/nutrition/vision_v2_test_fixture.dart",
+      "test/localization/reference_delta_copy_test.dart"
+    ],
+    "fixture_importers": [
+      "test/features/nutrition/meal_vision_final_portion_test.dart",
+      "test/features/nutrition/meal_vision_premium_visual_contract_test.dart",
+      "test/features/nutrition/meal_vision_reference_capture_test.dart",
+      "test/features/nutrition/meal_vision_v2_interaction_test.dart",
+      "test/features/nutrition/meal_vision_v2_matrix_test.dart"
+    ],
+    "additional_full_discovery_narrow_test": "test/localization/reference_delta_copy_test.dart",
+    "rerun_jobs": [
+      "source",
+      "arabic-vision-v2",
+      "p0-vision-quantity-basis"
+    ],
+    "unchanged_groups": "Execution evidence retained only for groups whose test inputs and application/assets/dependencies are unchanged. Full is rerun on the final HEAD."
+  },
+  "fingerprint_after": "4ab7db750c486fe6eadd979297d210e21b37f1bee130e5f290e01d48ab510a41"
+}

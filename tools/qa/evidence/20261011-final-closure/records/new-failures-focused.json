@@ -1,0 +1,26 @@
+[
+  {
+    "name": "cold-original-helper",
+    "exit_code": 0,
+    "seconds": 16.3,
+    "log": "build\\qa-final-closure\\cold-original-helper.jsonl"
+  },
+  {
+    "name": "cold-fixed-helper",
+    "exit_code": 0,
+    "seconds": 13.7,
+    "log": "build\\qa-final-closure\\cold-fixed-helper.jsonl"
+  },
+  {
+    "name": "fixed-matrix-file",
+    "exit_code": 0,
+    "seconds": 41.7,
+    "log": "build\\qa-final-closure\\fixed-matrix-file.jsonl"
+  },
+  {
+    "name": "reference-copy-file",
+    "exit_code": 0,
+    "seconds": 7.4,
+    "log": "build\\qa-final-closure\\reference-copy-file.jsonl"
+  }
+]
