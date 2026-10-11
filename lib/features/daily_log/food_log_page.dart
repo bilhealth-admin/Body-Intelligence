@@ -578,21 +578,40 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
             onTap: _showQuickAdd,
           ),
         ];
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: actions.length,
-      crossAxisSpacing: 8,
-      childAspectRatio: 1.18,
-      children: [
-        for (final action in actions)
-          _buildActionTile(
-            key: Key('food-log-action-${action.keyId}'),
-            icon: action.icon,
-            label: action.label,
-            onTap: action.onTap,
-          ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final tileWidth = (constraints.maxWidth - 24) / 4;
+        var tileHeight = tileWidth / 1.18;
+        final style = DefaultTextStyle.of(context).style.merge(
+          const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+        );
+        for (final action in actions) {
+          final text = TextPainter(
+            text: TextSpan(text: action.label, style: style),
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+          )..layout(maxWidth: tileWidth - 8);
+          final requiredHeight = text.height + 22 + 5 + 16;
+          if (requiredHeight > tileHeight) tileHeight = requiredHeight;
+          text.dispose();
+        }
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: actions.length,
+          crossAxisSpacing: 8,
+          mainAxisExtent: tileHeight.ceilToDouble(),
+          children: [
+            for (final action in actions)
+              _buildActionTile(
+                key: Key('food-log-action-${action.keyId}'),
+                icon: action.icon,
+                label: action.label,
+                onTap: action.onTap,
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -619,8 +638,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               Text(
                 label,
                 textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,

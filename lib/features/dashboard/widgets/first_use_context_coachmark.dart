@@ -19,6 +19,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
     this.compact = false,
     this.step,
     this.stepCount,
+    this.pointerAlignment = AlignmentDirectional.centerStart,
   });
 
   final String title;
@@ -33,6 +34,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
   final bool compact;
   final int? step;
   final int? stepCount;
+  final AlignmentGeometry pointerAlignment;
 
   String _skipLabel(BuildContext context) =>
       switch (Localizations.localeOf(context).languageCode) {
@@ -93,6 +95,21 @@ class FirstUseContextCoachmark extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
+                      TextButton(
+                        key: skipKey,
+                        onPressed: onSkip,
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(48, 48),
+                        ),
+                        child: Text(
+                          _skipLabel(context),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                       if (step != null && stepCount != null)
                         Text(
                           '$step / $stepCount',
@@ -149,7 +166,7 @@ class FirstUseContextCoachmark extends StatelessWidget {
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
+
                       child: FilledButton(
                         key: actionKey,
                         onPressed: onAction,
@@ -171,23 +188,12 @@ class FirstUseContextCoachmark extends StatelessWidget {
               ),
             ),
             Align(
-              alignment: AlignmentDirectional.centerStart,
+              alignment: pointerAlignment,
               child: Padding(
                 padding: const EdgeInsetsDirectional.only(start: 25),
                 child: CustomPaint(
                   size: const Size(25, 11),
                   painter: _GlassGuidePointer(accent),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: TextButton(
-                key: skipKey,
-                onPressed: onSkip,
-                child: Text(
-                  _skipLabel(context),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -210,7 +216,10 @@ class _GlassGuidePointer extends CustomPainter {
       ..lineTo(size.width, 0)
       ..lineTo(size.width / 2, size.height)
       ..close();
-    canvas.drawPath(path, Paint()..color = const Color(0xEC173B4E));
+    canvas.drawPath(
+      path,
+      Paint()..color = Color.lerp(const Color(0xFF102B49), accent, .16)!,
+    );
     canvas.drawLine(
       Offset.zero,
       Offset(size.width / 2, size.height),

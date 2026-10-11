@@ -7,86 +7,113 @@ extension _FoodLogActions on _FoodLogPageState {
       final messenger = ScaffoldMessenger.of(context);
       final addedCopy = _t(context, 'Added to diary');
       final errorCopy = _t(context, 'Could not add food');
-      final controller = TextEditingController(
-        text: food.servingSize.toString(),
-      );
-      final quantity = await (() async {
-        try {
-          var showQuantityGuide = _tourVisible;
-          return await showDialog<double>(
-            context: context,
-            builder: (dialogContext) => StatefulBuilder(
-              builder: (dialogContext, refreshDialog) => AlertDialog(
-                title: Text(_t(dialogContext, 'Choose a serving')),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (showQuantityGuide) ...[
-                        FirstUseContextCoachmark(
-                          key: const Key('food-log-quantity-guide'),
-                          compact: true,
-                          title: _foodTourText(
-                            dialogContext,
-                            en: 'Make it accurate',
-                            ar: 'خلّي الكمية دقيقة',
-                            fr: 'Soyez précis',
-                            es: 'Ajusta la cantidad',
-                            tr: 'Miktarı doğru gir',
-                          ),
-                          message: _foodTourText(
-                            dialogContext,
-                            en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
-                            ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
-                            fr: 'Ajustez la portion et confirmez avec Ajouter.',
-                            es: 'Ajusta la porción y confirma con Añadir.',
-                            tr: 'Porsiyonu ayarla ve Ekle ile onayla.',
-                          ),
-                          icon: Icons.scale_rounded,
-                          accent: const Color(0xFFFFDB95),
-                          onSkip: () {
-                            refreshDialog(() => showQuantityGuide = false);
-                            _dismissFoodTour();
-                          },
-                          skipKey: const Key('food-log-quantity-guide-skip'),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
-                      TextField(
-                        key: const Key('food-log-serving-quantity-field'),
-                        controller: controller,
-                        autofocus: !showQuantityGuide,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: InputDecoration(
-                          labelText:
-                              '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
-                        ),
+      var enteredQuantity = food.servingSize.toString();
+      var showQuantityGuide = _tourVisible;
+      var quantityEdited = false;
+      final quantity = await showDialog<double>(
+        context: context,
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (dialogContext, refreshDialog) => AlertDialog(
+            title: Text(_t(dialogContext, 'Choose a serving')),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showQuantityGuide && !quantityEdited) ...[
+                    FirstUseContextCoachmark(
+                      key: const Key('food-log-quantity-guide'),
+                      compact: true,
+                      title: _foodTourText(
+                        dialogContext,
+                        en: 'Make it accurate',
+                        ar: 'خلّي الكمية دقيقة',
+                        fr: 'Soyez précis',
+                        es: 'Ajusta la cantidad',
+                        tr: 'Miktarı doğru gir',
                       ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext),
-                    child: Text(_t(dialogContext, 'Cancel')),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(
-                      dialogContext,
-                      double.tryParse(controller.text.replaceAll(',', '.')),
+                      message: _foodTourText(
+                        dialogContext,
+                        en: 'Adjust the serving size, then confirm below. No food is saved until you press Add.',
+                        ar: 'عدّل حجم الحصة ثم أكّد بالأسفل. لن نحفظ شيئًا قبل الضغط على إضافة.',
+                        fr: 'Ajustez la portion et confirmez avec Ajouter.',
+                        es: 'Ajusta la porción y confirma con Añadir.',
+                        tr: 'Porsiyonu ayarla ve Ekle ile onayla.',
+                      ),
+                      icon: Icons.scale_rounded,
+                      accent: const Color(0xFFFFDB95),
+                      onSkip: () {
+                        refreshDialog(() => showQuantityGuide = false);
+                        _dismissFoodTour();
+                      },
+                      skipKey: const Key('food-log-quantity-guide-skip'),
                     ),
-                    child: Text(_t(dialogContext, 'Add')),
+                    const SizedBox(height: 10),
+                  ],
+                  TextFormField(
+                    onChanged: (value) {
+                      enteredQuantity = value;
+                      refreshDialog(() => quantityEdited = true);
+                    },
+                    key: const Key('food-log-serving-quantity-field'),
+                    initialValue: enteredQuantity,
+                    autofocus: !showQuantityGuide,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText:
+                          '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+                    ),
                   ),
+                  if (showQuantityGuide && quantityEdited) ...[
+                    const SizedBox(height: 14),
+                    FirstUseContextCoachmark(
+                      key: const Key('food-log-save-guide'),
+                      compact: true,
+                      title: _foodTourText(
+                        dialogContext,
+                        en: 'Ready to save?',
+                        ar: 'جاهز لحفظ وجبتك؟',
+                        fr: 'Prêt à enregistrer ?',
+                        es: '¿Listo para guardar?',
+                        tr: 'Kaydetmeye hazır mısın?',
+                      ),
+                      message: _foodTourText(
+                        dialogContext,
+                        en: 'Review your portion, then tap Add. Your meal is saved only after confirmation.',
+                        ar: 'راجع الكمية ثم اضغط إضافة. نحفظ وجبتك بعد تأكيدك فقط.',
+                        fr: 'Vérifiez la portion, puis appuyez sur Ajouter.',
+                        es: 'Revisa la porción y pulsa Añadir.',
+                        tr: 'Porsiyonu kontrol et ve Ekle’ye dokun.',
+                      ),
+                      icon: Icons.check_circle_outline_rounded,
+                      onSkip: () {
+                        refreshDialog(() => showQuantityGuide = false);
+                        _dismissFoodTour();
+                      },
+                      skipKey: const Key('food-log-save-guide-skip'),
+                    ),
+                  ],
                 ],
               ),
             ),
-          );
-        } finally {
-          controller.dispose();
-        }
-      })();
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(_t(dialogContext, 'Cancel')),
+              ),
+              FilledButton(
+                key: const Key('food-log-serving-confirm'),
+                onPressed: () => Navigator.pop(
+                  dialogContext,
+                  double.tryParse(enteredQuantity.replaceAll(',', '.')),
+                ),
+                child: Text(_t(dialogContext, 'Add')),
+              ),
+            ],
+          ),
+        ),
+      );
       if (!mounted || quantity == null || !quantity.isFinite || quantity <= 0) {
         return;
       }

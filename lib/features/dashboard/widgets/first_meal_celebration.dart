@@ -126,38 +126,49 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
     return Positioned.fill(
       child: IgnorePointer(
         ignoring: true,
-        child: Semantics(
-          key: const Key('dashboard-first-food-celebration'),
-          liveRegion: true,
-          label: '$title $subtitle',
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              final value = _reducedMotion ? .40 : _controller.value;
-              final burst = Curves.easeOutCubic.transform(
-                (value / .76).clamp(0.0, 1.0),
-              );
-              final fade = _reducedMotion
-                  ? 1.0
-                  : (1 - ((value - .80) / .20).clamp(0.0, 1.0));
-              final particleFade = _reducedMotion
-                  ? 0.0
-                  : (1 - ((value - .52) / .48).clamp(0.0, 1.0));
-              final cardScale = _reducedMotion
-                  ? 1.0
-                  : .78 +
-                        .22 *
-                            Curves.easeOutBack.transform(
-                              (value / .32).clamp(0.0, 1.0),
-                            );
-              return Center(
-                child: SizedBox(
-                  width: 340,
-                  height: 380,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Semantics(
+            key: const Key('dashboard-first-food-celebration'),
+            liveRegion: true,
+            label: '$title $subtitle',
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final value = _reducedMotion ? .40 : _controller.value;
+                final burst = Curves.easeOutCubic.transform(
+                  (value / .76).clamp(0.0, 1.0),
+                );
+                final fade = _reducedMotion
+                    ? 1.0
+                    : (1 - ((value - .80) / .20).clamp(0.0, 1.0));
+                final particleFade = _reducedMotion
+                    ? 0.0
+                    : (1 - ((value - .52) / .48).clamp(0.0, 1.0));
+                final cardScale = _reducedMotion
+                    ? 1.0
+                    : .78 +
+                          .22 *
+                              Curves.easeOutBack.transform(
+                                (value / .32).clamp(0.0, 1.0),
+                              );
+                return Opacity(
+                  opacity: fade,
                   child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
                     children: [
+                      Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              radius: .85,
+                              colors: [
+                                const Color(0xFF064B47).withValues(alpha: .26),
+                                const Color(0xFF062038).withValues(alpha: .04),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                       if (!_reducedMotion)
                         Positioned.fill(
                           child: CustomPaint(
@@ -167,77 +178,103 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                             ),
                           ),
                         ),
-                      if (!_reducedMotion)
-                        for (var i = 0; i < 10; i++)
-                          Positioned(
-                            left:
-                                155 +
-                                math.cos(i * math.pi * 2 / 10) *
-                                    (35 + burst * (116 + i % 3 * 14)),
-                            top:
-                                165 +
-                                math.sin(i * math.pi * 2 / 10) *
-                                    (30 + burst * (108 + i % 4 * 12)),
-                            child: Opacity(
-                              opacity: particleFade,
-                              child: Transform.rotate(
-                                angle: burst * (i.isEven ? 1.4 : -1.6),
-                                child: Text(
-                                  const ['🎉', '✨', '🎊', '🥳', '💚'][i % 5],
-                                  style: TextStyle(
-                                    fontSize: 19.0 + (i % 3) * 6,
-                                    fontFamilyFallback: const [
-                                      'Apple Color Emoji',
-                                      'Noto Color Emoji',
-                                      'Segoe UI Emoji',
+                      SafeArea(
+                        child: Center(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(20),
+                            child: Transform.scale(
+                              scale: cardScale,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 340,
+                                ),
+                                child: FirstUseGlassSurface(
+                                  accent: const Color(0xFF66F0C1),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 28,
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 104,
+                                        height: 104,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: const LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              Color(0xFFFFF0BA),
+                                              Color(0xFFFFCC61),
+                                              Color(0xFFC7882F),
+                                            ],
+                                          ),
+                                          border: Border.all(
+                                            color: const Color(0xFFFFF5D2),
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFFFFD76A,
+                                              ).withValues(alpha: .3),
+                                              blurRadius: 36,
+                                              spreadRadius: 4,
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.celebration_rounded,
+                                          size: 48,
+                                          color: Color(0xFF644016),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 22),
+                                      Text(
+                                        title,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 26,
+                                          height: 1.2,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        subtitle,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Color(0xFFE1FFF4),
+                                          fontSize: 16,
+                                          height: 1.45,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle_rounded,
+                                            color: Color(0xFF8BFFD4),
+                                            size: 18,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'BIL',
+                                            style: TextStyle(
+                                              color: Color(0xFFE8FFF7),
+                                              letterSpacing: 3,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      Center(
-                        child: Opacity(
-                          opacity: fade,
-                          child: Transform.scale(
-                            scale: cardScale,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 298),
-                              child: FirstUseGlassSurface(
-                                accent: const Color(0xFFB8FFE6),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 25,
-                                  vertical: 23,
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.celebration_rounded,
-                                      size: 40,
-                                      color: Color(0xFFFFD76A),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      title,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      subtitle,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: Color(0xFFDCEFEF),
-                                        fontSize: 15,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ),
                             ),
@@ -246,9 +283,9 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                       ),
                     ],
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -256,8 +293,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
   }
 }
 
-/// Deterministic vector pieces remain crisp when emoji fonts differ across
-/// devices. The larger emoji layer above adds joyful native OS glyphs.
+/// Deterministic gold ribbons and jewel confetti, independent of emoji fonts.
 class _ConfettiBurstPainter extends CustomPainter {
   const _ConfettiBurstPainter({required this.progress, required this.opacity});
 
@@ -276,13 +312,14 @@ class _ConfettiBurstPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (opacity <= 0) return;
     final origin = Offset(size.width / 2, size.height / 2 - 8);
-    for (var i = 0; i < 72; i++) {
+    for (var i = 0; i < 120; i++) {
       final delay = (i % 7) * .037;
       final local = ((progress - delay) / (1 - delay)).clamp(0.0, 1.0);
       if (local <= 0) continue;
       final eased = Curves.easeOutCubic.transform(local);
       final angle = i * 2.39996;
-      final distance = (62 + (i % 6) * 27) * eased;
+      final distance =
+          math.min(size.width, size.height) * (.28 + (i % 9) * .06) * eased;
       final dx = math.cos(angle) * distance;
       final dy = math.sin(angle) * distance + local * local * (i % 4) * 11;
       final paint = Paint()
@@ -292,7 +329,19 @@ class _ConfettiBurstPainter extends CustomPainter {
       canvas.save();
       canvas.translate(origin.dx + dx, origin.dy + dy);
       canvas.rotate(angle + local * (i.isEven ? 3 : -3));
-      if (i % 3 == 0) {
+      if (i % 11 == 0) {
+        final ribbon = Path()
+          ..moveTo(-4, -20)
+          ..cubicTo(18, -10, -18, 8, 4, 24);
+        canvas.drawPath(
+          ribbon,
+          Paint()
+            ..color = paint.color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.5
+            ..strokeCap = StrokeCap.round,
+        );
+      } else if (i % 3 == 0) {
         canvas.drawCircle(Offset.zero, 2.3 + (i % 3), paint);
       } else {
         canvas.drawRRect(

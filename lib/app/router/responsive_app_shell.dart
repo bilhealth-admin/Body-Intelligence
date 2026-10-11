@@ -11,6 +11,7 @@ import '../theme/bil_navigation_icons.dart';
 import '../../shared/widgets/bil_wordmark.dart';
 import '../../shared/widgets/bil_reference_bottom_bar.dart';
 import 'bil_quick_add_presenter.dart';
+import '../../shared/widgets/first_use_guide_anchor.dart';
 
 part 'responsive_app_shell_top_navigation.dart';
 
@@ -59,9 +60,11 @@ class ResponsiveAppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: GoRouter.of(context).routerDelegate,
-    builder: (context, _) => _buildShell(context),
+  Widget build(BuildContext context) => FirstUseGuideAnchorHost(
+    builder: (context, anchor) => ListenableBuilder(
+      listenable: GoRouter.of(context).routerDelegate,
+      builder: (context, _) => _buildShell(context),
+    ),
   );
 
   Widget _buildShell(BuildContext context) {
@@ -151,8 +154,14 @@ class ResponsiveAppShell extends StatelessWidget {
       context.go(paths[next]);
     }
 
-    Future<void> quickAdd() =>
-        showBilQuickAdd(context, originPath: paths[index]);
+    Future<void> quickAdd() async {
+      final guide = FirstUseGuideAnchor.maybeOf(context)?.startFoodGuide;
+      if (isDashboardRoot && !wide && guide != null) {
+        guide();
+        return;
+      }
+      await showBilQuickAdd(context, originPath: paths[index]);
+    }
 
     final quickButton = _GlassQuickAdd(
       key: const Key('shell-quick-add'),
@@ -199,6 +208,9 @@ class ResponsiveAppShell extends StatelessWidget {
                     label: context.strings.get('primary_navigation'),
                     child: BilReferenceBottomBar(
                       key: const Key('glass-bottom-navigation'),
+                      quickAddLayerLink: FirstUseGuideAnchor.maybeOf(
+                        context,
+                      )?.link,
                       selected: mobileIndex,
                       moreAttentionCount:
                           CommunityAttentionScope.controllerOf(

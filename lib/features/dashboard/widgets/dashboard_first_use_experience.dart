@@ -7,6 +7,7 @@ import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'first_meal_celebration.dart';
 import 'first_use_context_coachmark.dart';
+import '../../../shared/widgets/first_use_guide_anchor.dart';
 
 final _firstFoodMilestoneStatusProvider = StreamProvider<String?>(
   (ref) => ref
@@ -123,6 +124,21 @@ class _DashboardFirstUseExperienceState
     if (!mounted || widget.ownerScope != scope) return;
   }
 
+  String _guideCopy(
+    BuildContext context,
+    String en,
+    String ar,
+    String fr,
+    String es,
+    String tr,
+  ) => switch (Localizations.localeOf(context).languageCode) {
+    'ar' => ar,
+    'fr' => fr,
+    'es' => es,
+    'tr' => tr,
+    _ => en,
+  };
+
   @override
   Widget build(BuildContext context) {
     final meals = ref.watch(allMealsProvider);
@@ -149,9 +165,50 @@ class _DashboardFirstUseExperienceState
         hasLoggedFood &&
         firstFoodStatus.value == 'done' &&
         streakStatus.value == 'ready';
-    // Put the optional walkthrough in the normal Home scroll flow.
-    // A fixed bottom overlay covered calories/weight and could intercept
-    // underlying controls, especially with large text or narrow viewports.
+    final anchor = FirstUseGuideAnchor.maybeOf(context);
+    if (needsGuide &&
+        anchor != null &&
+        MediaQuery.sizeOf(context).width < 900) {
+      return FirstUseAnchoredGuide(
+        anchor: anchor,
+        onStart: () => _finish(openFood: true),
+        guide: FirstUseContextCoachmark(
+          key: const Key('dashboard-food-guide-anchored'),
+          title: _guideCopy(
+            context,
+            'Log your first meal!',
+            'سجّل أول وجبة!',
+            'Enregistrez votre premier repas !',
+            '¡Registra tu primera comida!',
+            'İlk öğününü kaydet!',
+          ),
+          message: _guideCopy(
+            context,
+            'Tap Add to begin. Find your food, choose the portion, then save your meal.',
+            'اضغط زر الإضافة لنبدأ. ابحث عن طعامك، حدّد الكمية ثم احفظ وجبتك.',
+            'Appuyez sur Ajouter. Recherchez votre aliment, choisissez la portion et confirmez.',
+            'Pulsa Añadir. Busca tu alimento, elige la porción y confirma.',
+            'Ekle’ye dokun. Yemeğini ara, porsiyonu seç ve onayla.',
+          ),
+          compact: true,
+          pointerAlignment: Alignment.center,
+          onSkip: () => _finish(openFood: false),
+          skipKey: const Key('dashboard-guide-skip'),
+          onAction: () => _finish(openFood: true),
+          actionLabel: _guideCopy(
+            context,
+            'Let’s begin',
+            'لنبدأ',
+            'Commençons',
+            'Empecemos',
+            'Başlayalım',
+          ),
+          actionKey: const Key('dashboard-guide-next'),
+        ),
+        child: widget.child,
+      );
+    }
+    // Wide layouts and standalone surfaces retain accessible inline guidance.
     return Column(
       key: const Key('dashboard-first-use-inline-region'),
       mainAxisSize: MainAxisSize.min,

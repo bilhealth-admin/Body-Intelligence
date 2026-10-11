@@ -16,6 +16,7 @@ class BilReferenceBottomBar extends StatelessWidget {
     this.dark,
     this.moreAttentionCount = 0,
     this.destinationKeys = const {},
+    this.quickAddLayerLink,
     super.key,
   });
 
@@ -28,6 +29,7 @@ class BilReferenceBottomBar extends StatelessWidget {
   /// Authoritative count supplied by the caller's existing attention scope.
   final int moreAttentionCount;
   final Map<int, Key> destinationKeys;
+  final LayerLink? quickAddLayerLink;
 
   // Index 2 is the shared Quick Add action, never a navigation to this entry.
   static const routes = <String>[
@@ -171,65 +173,68 @@ class BilReferenceBottomBar extends StatelessWidget {
                   top: 0,
                   width: boundaries[i + 1] - boundaries[i],
                   height: contentHeight,
-                  child: KeyedSubtree(
-                    key: destinationKeys[i],
-                    child: Semantics(
-                      label: i == 4 && moreAttentionCount > 0
-                          ? '${labels[i]}, $moreAttentionCount'
-                          : labels[i],
-                      button: true,
-                      selected: i != 2 && selected == i,
-                      onTap: () => onSelected(i),
-                      child: ExcludeSemantics(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            key: Key('bil-reference-nav-$i'),
-                            excludeFromSemantics: true,
-                            onTap: () => onSelected(i),
-                            borderRadius: BorderRadius.circular(14),
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                PositionedDirectional(
-                                  start:
-                                      centres[i] -
-                                      boundaries[i] -
-                                      (i == 2 ? 24 : 16) * opticalScale,
-                                  top: i == 2 ? 0 : rise + 13 * opticalScale,
-                                  width: (i == 2 ? 48 : 32) * opticalScale,
-                                  height: (i == 2 ? 48 : 32) * opticalScale,
-                                  child: _glyph(
-                                    i,
-                                    isDark,
-                                    opticalScale,
-                                    muted,
-                                    active,
-                                  ),
-                                ),
-                                PositionedDirectional(
-                                  start:
-                                      centres[i] -
-                                      boundaries[i] -
-                                      labelWidths[i] / 2,
-                                  top:
-                                      rise +
-                                      labelTop +
-                                      maxLabelAscent -
-                                      labelAscents[i],
-                                  width: labelWidths[i],
-                                  child: Text(
-                                    labels[i],
-                                    key: Key('bil-reference-nav-label-$i'),
-                                    textAlign: TextAlign.center,
-                                    style: labelStyle.copyWith(
-                                      color: selected == i && i != 2
-                                          ? active
-                                          : muted,
+                  child: _anchorQuickAdd(
+                    i,
+                    KeyedSubtree(
+                      key: destinationKeys[i],
+                      child: Semantics(
+                        label: i == 4 && moreAttentionCount > 0
+                            ? '${labels[i]}, $moreAttentionCount'
+                            : labels[i],
+                        button: true,
+                        selected: i != 2 && selected == i,
+                        onTap: () => onSelected(i),
+                        child: ExcludeSemantics(
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              key: Key('bil-reference-nav-$i'),
+                              excludeFromSemantics: true,
+                              onTap: () => onSelected(i),
+                              borderRadius: BorderRadius.circular(14),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  PositionedDirectional(
+                                    start:
+                                        centres[i] -
+                                        boundaries[i] -
+                                        (i == 2 ? 24 : 16) * opticalScale,
+                                    top: i == 2 ? 0 : rise + 13 * opticalScale,
+                                    width: (i == 2 ? 48 : 32) * opticalScale,
+                                    height: (i == 2 ? 48 : 32) * opticalScale,
+                                    child: _glyph(
+                                      i,
+                                      isDark,
+                                      opticalScale,
+                                      muted,
+                                      active,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  PositionedDirectional(
+                                    start:
+                                        centres[i] -
+                                        boundaries[i] -
+                                        labelWidths[i] / 2,
+                                    top:
+                                        rise +
+                                        labelTop +
+                                        maxLabelAscent -
+                                        labelAscents[i],
+                                    width: labelWidths[i],
+                                    child: Text(
+                                      labels[i],
+                                      key: Key('bil-reference-nav-label-$i'),
+                                      textAlign: TextAlign.center,
+                                      style: labelStyle.copyWith(
+                                        color: selected == i && i != 2
+                                            ? active
+                                            : muted,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -242,6 +247,12 @@ class BilReferenceBottomBar extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _anchorQuickAdd(int index, Widget child) {
+    final link = quickAddLayerLink;
+    if (index != 2 || link == null) return child;
+    return CompositedTransformTarget(link: link, child: child);
   }
 
   Widget _glyph(
