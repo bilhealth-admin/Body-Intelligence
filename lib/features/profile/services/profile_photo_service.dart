@@ -124,6 +124,7 @@ class ProfilePhotoService {
 
   Future<ProfilePhotoSaveResult?> chooseAndSave({
     bool recoveredOnly = false,
+    Future<bool> Function(Uint8List bytes)? confirmSelection,
   }) async {
     final authenticatedOwnerAtSelection = _authenticatedOwnerId();
     final storageOwnerAtSelection = _preferences.localOwnerId;
@@ -144,6 +145,9 @@ class ProfilePhotoService {
         : await _photoPicker(const [types]);
     if (file == null) return null;
     final bytes = await file.readAsBytes();
+    if (confirmSelection != null && !await confirmSelection(bytes)) {
+      return null;
+    }
     final contentType = _contentType(file.name);
     return _saveForOwner(
       bytes,

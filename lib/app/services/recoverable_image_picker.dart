@@ -254,6 +254,78 @@ class BilRecoverableImagePicker {
     );
   }
 
+  /// System multi-photo picker, scoped to the current authenticated owner.
+  /// The caller must explicitly review the returned selection before use.
+  Future<List<XFile>> pickMultiImages({
+    required BilImagePickerPurpose purpose,
+    required int maxItems,
+    double? maxWidth,
+    double? maxHeight,
+    int? imageQuality,
+    bool requestFullMetadata = false,
+  }) async {
+    if (maxItems < 1) return const <XFile>[];
+    final owner = _ownerScope();
+    if (_usesAndroidRecovery) {
+      await recoverAtStartup();
+      final recovered = _takeRecoveredImages(purpose, owner);
+      if (recovered.isNotEmpty) {
+        if (recovered.length > maxItems) {
+          throw StateError('Too many recovered photos for this draft');
+        }
+        return recovered;
+      }
+    }
+    SharedPreferences? preferences;
+    String? token;
+    if (_usesAndroidRecovery) {
+      token = _clock().toUtc().microsecondsSinceEpoch.toString() +
+          '-' +
+          purpose.name;
+      try {
+        preferences = await _preferences();
+        await preferences.setString(
+          pendingPurposePreferenceKey,
+          _PendingImagePickerMarker(
+            purpose: purpose,
+            ownerScope: owner,
+            source: ImageSource.gallery,
+            recoveryToken: token,
+            launchedAt: _clock(),
+          ).encode(),
+        );
+      } on Object {
+        // The native picker is still usable without a recovery marker.
+      }
+    }
+    try {
+      final chosen = await _picker.pickMultiImage(
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+        imageQuality: imageQuality,
+        limit: maxItems,
+        requestFullMetadata: requestFullMetadata,
+      );
+      if (owner != _ownerScope()) return const <XFile>[];
+      if (chosen.length > maxItems) {
+        throw StateError('The photo picker exceeded the allowed selection');
+      }
+      return List<XFile>.unmodifiable(chosen);
+    } finally {
+      if (token != null) {
+        try {
+          final saved = preferences?.getString(pendingPurposePreferenceKey);
+          if (_PendingImagePickerMarker.tryDecode(saved)?.recoveryToken ==
+              token) {
+            await preferences?.remove(pendingPurposePreferenceKey);
+          }
+        } on Object {
+          // Stale markers cannot change another owner's media.
+        }
+      }
+    }
+  }
+
   Future<void> _recoverLostDataSafely() async {
     try {
       final preferences = await _preferences();
@@ -270,13 +342,17 @@ class BilRecoverableImagePicker {
         return;
       }
 
-      final files = response.files;
-      final recovered = files != null && files.isNotEmpty
-          ? files.last
-          : response.file;
-      if (recovered == null || !await _isReadable(recovered)) return;
+      final returned = response.files;
+      final files = returned != null && returned.isNotEmpty
+          ? returned
+          : <XFile>[if (response.file != null) response.file!];
+      final readable = <XFile>[];
+      for (final file in files) {
+        if (await _isReadable(file)) readable.add(file);
+      }
+      if (readable.isEmpty) return;
       _recovered = _RecoveredImage(
-        file: recovered,
+        files: readable,
         intent: BilRecoveredImageIntent(
           purpose: pending.purpose,
           ownerScope: pending.ownerScope,
@@ -304,6 +380,21 @@ class BilRecoverableImagePicker {
     return recovered.file;
   }
 
+  List<XFile> _takeRecoveredImages(
+    BilImagePickerPurpose purpose,
+    String ownerScope,
+  ) {
+    final recovered = _recovered;
+    if (recovered == null) return const <XFile>[];
+    if (recovered.intent.ownerScope != ownerScope) {
+      _recovered = null;
+      return const <XFile>[];
+    }
+    if (recovered.intent.purpose != purpose) return const <XFile>[];
+    _recovered = null;
+    return recovered.files;
+  }
+
   bool _isFresh(DateTime launchedAt) {
     final age = _clock().toUtc().difference(launchedAt.toUtc());
     return age.inMicroseconds >= -_maximumFutureClockSkew.inMicroseconds &&
@@ -320,9 +411,11 @@ class BilRecoverableImagePicker {
 }
 
 final class _RecoveredImage {
-  _RecoveredImage({required this.file, required this.intent});
+  _RecoveredImage({required List<XFile> files, required this.intent})
+    : files = List<XFile>.unmodifiable(files);
 
-  final XFile file;
+  final List<XFile> files;
+  XFile get file => files.last;
   final BilRecoveredImageIntent intent;
   bool resumeClaimed = false;
 }

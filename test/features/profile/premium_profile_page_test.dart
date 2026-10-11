@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/services/runtime_permission_policy.dart';
@@ -619,6 +620,7 @@ final class _TrackingProfilePhotoService extends ProfilePhotoService {
   @override
   Future<ProfilePhotoSaveResult?> chooseAndSave({
     bool recoveredOnly = false,
+    Future<bool> Function(Uint8List bytes)? confirmSelection,
   }) async {
     chooseAttempts += 1;
     return null;

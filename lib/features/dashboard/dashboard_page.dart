@@ -13,6 +13,7 @@ import '../profile/providers/user_profile_provider.dart';
 import '../profile/providers/profile_auth_identity_provider.dart';
 import '../profile/services/profile_photo_service.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
+import '../../shared/widgets/bil_media_review_sheet.dart';
 import 'widgets/dashboard_composition.dart';
 import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
@@ -137,7 +138,11 @@ class DashboardPage extends ConsumerWidget {
     }
 
     try {
-      await ref.read(profilePhotoServiceProvider).chooseAndSave();
+      await ref.read(profilePhotoServiceProvider).chooseAndSave(
+        confirmSelection: (bytes) => context.mounted
+            ? showBilSingleImageBytesReview(context, bytes: bytes)
+            : Future<bool>.value(false),
+      );
     } on ProfilePhotoIdentityChangedException {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

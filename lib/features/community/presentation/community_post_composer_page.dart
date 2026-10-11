@@ -497,16 +497,45 @@ class _CommunityPostComposerPageState
     }
     setState(() => _selectingImage = true);
     try {
-      final image = await widget.imagePicker.pick();
-      if (image != null && mounted && _checkComposerOwner()) {
-        setState(() {
-          _selectedImages.add(image);
-          widget.draft.images
-            ..clear()
-            ..addAll(_selectedImages);
-          _submitError = null;
-        });
+      final remaining = 4 - _selectedImages.length;
+      final picker = widget.imagePicker;
+      final List<CommunityPostImageDraft> incoming;
+      if (picker is CommunityPostMultiImagePickerContract) {
+        incoming = await picker.pickMany(maxImages: remaining);
+      } else {
+        // Existing single-pick integrations retain the same API, but still
+        // require an explicit review before the image enters the draft.
+        final item = await picker.pick();
+        incoming = <CommunityPostImageDraft>[if (item != null) item];
       }
+      if (incoming.isEmpty || !mounted || !_checkComposerOwner()) return;
+      final accepted = await showBilMediaReviewSheet<CommunityPostImageDraft>(
+        context,
+        entries: [
+          for (final image in incoming)
+            BilMediaReviewEntry(
+              value: image,
+              preview: MemoryImage(image.bytes),
+            ),
+        ],
+        forCommunity: true,
+      );
+      if (!mounted ||
+          !_checkComposerOwner() ||
+          accepted == null ||
+          accepted.isEmpty) {
+        return;
+      }
+      if (accepted.length > 4 - _selectedImages.length) {
+        throw StateError('The photo selection exceeds draft capacity');
+      }
+      setState(() {
+        _selectedImages.addAll(accepted);
+        widget.draft.images
+          ..clear()
+          ..addAll(_selectedImages);
+        _submitError = null;
+      });
     } on CommunityPostImageException catch (error) {
       if (!mounted || !_checkComposerOwner()) return;
       final (english, arabic) = switch (error.failure) {
@@ -525,6 +554,24 @@ class _CommunityPostComposerPageState
         ),
       };
       setState(() => _submitError = communityText(context, english, arabic));
+    } on StateError catch (error) {
+      if (!mounted || !_checkComposerOwner()) return;
+      final limitExceeded =
+          error.message.toString().contains('photo picker exceeded') ||
+          error.message.toString().contains('Too many recovered photos');
+      setState(
+        () => _submitError = limitExceeded
+            ? communityText(
+                context,
+                'Select at most the remaining photo slots, then try again.',
+                'اختر صورًا بعدد الأماكن المتبقية فقط، ثم حاول مجددًا.',
+              )
+            : communityText(
+                context,
+                'Could not prepare the selected photos. Try again.',
+                'تعذر تجهيز الصور المحددة. حاول مجددًا.',
+              ),
+      );
     } on Object {
       if (!mounted || !_checkComposerOwner()) return;
       setState(

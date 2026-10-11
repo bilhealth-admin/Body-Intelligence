@@ -135,7 +135,12 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
       final service = ref.read(profilePhotoServiceProvider);
       ProfilePhotoSaveResult? result;
       if (recoveredOnly) {
-        result = await service.chooseAndSave(recoveredOnly: recoveredOnly);
+        result = await service.chooseAndSave(
+          recoveredOnly: recoveredOnly,
+          confirmSelection: (bytes) => mounted
+              ? showBilSingleImageBytesReview(context, bytes: bytes)
+              : Future<bool>.value(false),
+        );
       } else {
         final source = await showModalBottomSheet<_ProfilePhotoSource>(
           context: context,
@@ -190,7 +195,11 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
             contentType: 'image/jpeg',
           );
         } else {
-          result = await service.chooseAndSave();
+          result = await service.chooseAndSave(
+            confirmSelection: (bytes) => mounted
+                ? showBilSingleImageBytesReview(context, bytes: bytes)
+                : Future<bool>.value(false),
+          );
         }
       }
       if (!mounted || result == null) return;

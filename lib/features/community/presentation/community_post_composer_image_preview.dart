@@ -98,7 +98,12 @@ extension _CommunityPostComposerImages on _CommunityPostComposerPageState {
                             dimension: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.add_rounded, size: 25),
+                        : Icon(
+                            Theme.of(context).platform == TargetPlatform.iOS
+                                ? CupertinoIcons.photo
+                                : Icons.add_photo_alternate_outlined,
+                            size: 25,
+                          ),
                     const SizedBox(height: 4),
                     Text(label, textAlign: TextAlign.center, style: labelStyle),
                     const SizedBox(height: 2),

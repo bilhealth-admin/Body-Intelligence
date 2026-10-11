@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,9 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
     with WidgetsBindingObserver {
   CameraController? _controller;
   bool _capturing = false;
+  XFile? _capturedForReview;
+  bool _reviewReady = false;
+  bool _reviewFailed = false;
   bool _cameraShouldRun = true;
   bool _disposed = false;
   Future<void>? _cameraOperation;
@@ -115,7 +119,7 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
     if (state == AppLifecycleState.resumed) {
       if (!mounted || _disposed) return;
       _cameraShouldRun = true;
-      unawaited(_initialize());
+      if (_capturedForReview == null) unawaited(_initialize());
       return;
     }
     if (state == AppLifecycleState.hidden ||
@@ -137,7 +141,14 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
     setState(() => _capturing = true);
     try {
       final image = await active.takePicture();
-      if (mounted) Navigator.of(context).pop(image);
+      if (mounted) {
+        setState(() {
+          _capturedForReview = image;
+          _capturing = false;
+          _reviewReady = false;
+          _reviewFailed = false;
+        });
+      }
     } on CameraException catch (error) {
       if (mounted) {
         setState(() {
@@ -153,6 +164,22 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
         });
       }
     }
+  }
+
+  void _retake() {
+    if (_capturedForReview == null || _capturing) return;
+    setState(() {
+      _capturedForReview = null;
+      _reviewReady = false;
+      _reviewFailed = false;
+    });
+    if (_cameraShouldRun) unawaited(_initialize());
+  }
+
+  void _useCapturedPhoto() {
+    final photo = _capturedForReview;
+    if (photo == null || !mounted || !_reviewReady || _reviewFailed) return;
+    Navigator.of(context).pop(photo);
   }
 
   Future<void> _toggleFlash() async {
@@ -192,7 +219,7 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
         foregroundColor: Colors.white,
         title: Text(widget.title),
         actions: [
-          if (ready)
+          if (ready && _capturedForReview == null)
             IconButton(
               tooltip: context.strings.text('Toggle flash'),
               onPressed: _toggleFlash,
@@ -207,7 +234,47 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          if (ready)
+          if (_capturedForReview != null)
+            Center(
+              child: Image.file(
+                File(_capturedForReview!.path),
+                key: const Key('bil-camera-review-photo'),
+                fit: BoxFit.contain,
+                frameBuilder: (context, child, frame, synchronous) {
+                  final pathAtFrame = _capturedForReview?.path;
+                  if ((synchronous || frame != null) && !_reviewReady) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted &&
+                          pathAtFrame != null &&
+                          _capturedForReview?.path == pathAtFrame &&
+                          !_reviewReady) {
+                        setState(() => _reviewReady = true);
+                      }
+                    });
+                  }
+                  if (!synchronous && frame == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    );
+                  }
+                  return child;
+                },
+                errorBuilder: (_, _, _) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && _capturedForReview != null &&
+                        !_reviewFailed) {
+                      setState(() => _reviewFailed = true);
+                    }
+                  });
+                  return const Icon(
+                    Icons.broken_image_outlined,
+                    color: Colors.white,
+                    size: 48,
+                  );
+                },
+              ),
+            )
+          else if (ready)
             Center(child: CameraPreview(active))
           else if (_error != null)
             _CameraErrorPanel(
@@ -218,7 +285,83 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
             )
           else
             const Center(child: CircularProgressIndicator()),
-          if (ready)
+          if (_capturedForReview != null)
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 14,
+              child: SafeArea(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xEF101F29),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: const Color(0x66FFFFFF)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'راجع الصورة قبل المتابعة'
+                            : 'Review your photo before continuing',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              key: const Key('bil-camera-retake'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(0, 52),
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(color: Colors.white60),
+                              ),
+                              onPressed: _retake,
+                              icon: const Icon(Icons.refresh_rounded),
+                              label: Text(
+                                Localizations.localeOf(context).languageCode ==
+                                        'ar'
+                                    ? 'إعادة التصوير'
+                                    : 'Retake',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: FilledButton.icon(
+                              key: const Key('bil-camera-use-photo'),
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(0, 52),
+                                backgroundColor: const Color(0xFF45E7A3),
+                                foregroundColor: const Color(0xFF06261E),
+                              ),
+                              onPressed: _reviewReady && !_reviewFailed
+                                  ? _useCapturedPhoto
+                                  : null,
+                              icon: const Icon(Icons.check_rounded),
+                              label: Text(
+                                Localizations.localeOf(context).languageCode ==
+                                        'ar'
+                                    ? 'استخدام الصورة'
+                                    : 'Use photo',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else if (ready)
             Positioned(
               left: 0,
               right: 0,
@@ -235,12 +378,34 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                       button: true,
                       label: captureLabel,
                       child: IconButton(
+                        key: const Key('bil-camera-shutter'),
                         onPressed: _capturing ? null : _capture,
                         iconSize: 76,
                         color: Colors.white,
                         icon: _capturing
                             ? const CircularProgressIndicator()
-                            : const Icon(Icons.camera_rounded),
+                            : Container(
+                                width: 72,
+                                height: 72,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 4,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: const SizedBox(
+                                  width: 56,
+                                  height: 56,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
                       ),
                     ),
                   ],

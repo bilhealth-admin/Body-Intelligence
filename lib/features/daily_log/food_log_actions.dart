@@ -332,12 +332,20 @@ extension _FoodLogActions on _FoodLogPageState {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.photo_camera_rounded),
+                  leading: Icon(
+                    Theme.of(context).platform == TargetPlatform.iOS
+                        ? CupertinoIcons.camera
+                        : Icons.photo_camera_outlined,
+                  ),
                   title: Text(visionCopy.text('take')),
                   onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.photo_library_rounded),
+                  leading: Icon(
+                    Theme.of(context).platform == TargetPlatform.iOS
+                        ? CupertinoIcons.photo
+                        : Icons.photo_library_outlined,
+                  ),
                   title: Text(visionCopy.text('choose')),
                   onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
                 ),
@@ -365,6 +373,19 @@ extension _FoodLogActions on _FoodLogPageState {
                 imageQuality: 88,
                 maxWidth: 1800,
               );
+        if (source == ImageSource.gallery && image != null && mounted) {
+          final reviewed = await showBilMediaReviewSheet<XFile>(
+            context,
+            entries: [
+              BilMediaReviewEntry(
+                value: image,
+                preview: FileImage(File(image.path)),
+              ),
+            ],
+          );
+          if (!mounted || reviewed == null || reviewed.isEmpty) return;
+          image = reviewed.single;
+        }
       }
       if (image == null || !mounted) return;
       final analysis = await service.analyze(image);
