@@ -23,13 +23,35 @@ def git(*args):
     return subprocess.check_output(['git', *args]).decode().strip()
 
 
+def read_part(name, expected):
+    raw = (ROOT / name).read_text().strip().encode('ascii')
+    if digest(raw) == expected:
+        return raw
+    # Two initial transport strings contained short duplicated sequences.
+    # Accept only an exact match to the ORIGINAL frozen cryptographic hash.
+    # This cannot relax source integrity or guess missing source content.
+    excess = len(raw) - (536 if name == 'part10.b64' else 8000)
+    if name in ('part00.b64', 'part02.b64') and 0 < excess <= 4:
+        for start in range(len(raw) - excess + 1):
+            restored = raw[:start] + raw[start + excess:]
+            if digest(restored) == expected:
+                print(f'Transport restored: {name}, remove {excess} bytes at {start}; original SHA256 matched.')
+                return restored
+    raise AssertionError(f'Part integrity failed: {name}; expected {expected}; actual {digest(raw)}')
+
+
 def bundle():
     manifest = json.loads((ROOT / 'manifest.json').read_text())
     assert manifest['chunks'] == len(manifest['parts']) == 11
+    received = OUT / 'received-parts'
+    received.mkdir(parents=True, exist_ok=True)
+    for i in range(11):
+        name = f'part{i:02}.b64'
+        (received / name).write_bytes((ROOT / name).read_bytes())
     parts = []
     for name, expected in sorted(manifest['parts'].items()):
         assert name in [f'part{i:02}.b64' for i in range(11)]
-        raw = (ROOT / name).read_text().strip().encode('ascii')
+        raw = read_part(name, expected)
         assert digest(raw) == expected, f'Part integrity failed: {name}'
         parts.append(raw)
     encoded = b''.join(parts)
