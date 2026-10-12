@@ -32,7 +32,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('AI Coach'), findsOneWidget);
+    expect(find.text('Premium AI Coach'), findsOneWidget);
     expect(
       find.text('BIL Free + every paid feature + AI Coach'),
       findsOneWidget,
@@ -65,6 +65,12 @@ void main() {
         .where(
           (widget) => (widget.data ?? '').toLowerCase().contains('premium'),
         );
-    expect(visiblePremiumLabels, hasLength(1));
+    expect(
+      visiblePremiumLabels.map((widget) => widget.data),
+      unorderedEquals([
+        'Premium AI Coach',
+        'Everything included in BIL Premium',
+      ]),
+    );
   });
 }

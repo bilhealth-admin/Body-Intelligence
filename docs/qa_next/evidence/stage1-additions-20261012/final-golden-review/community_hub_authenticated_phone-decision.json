@@ -1,0 +1,14 @@
+{
+  "case": "community_hub_authenticated_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Owner authorized original-first translation control and truthful Createpost instead of unimplemented Story; original post/author/actions/dock preserved. No native translation-quality claim.",
+  "previous_master_sha256": "72145d6a99c9c913bf7e93ed3570ae3ebe7fda5b6ed2b0cd1f4f2447a0b25e87",
+  "accepted_actual_sha256": "a9c15a2e84e74a731a18e817df5048820ac4c80fb6dc6e3dc2a4a9410b10b34d",
+  "review_image": "community_hub_authenticated_phone.png",
+  "promotion": {
+    "time": 1791818691.579753,
+    "master_sha256": "a9c15a2e84e74a731a18e817df5048820ac4c80fb6dc6e3dc2a4a9410b10b34d",
+    "method": "one exact named file; visual decision required"
+  }
+}

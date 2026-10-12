@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/localization/app_localizations.dart';
@@ -36,14 +37,21 @@ class PremiumCollectionItemGate extends ConsumerWidget {
           AppLocalizations,
         )?.text('Upgrade') ??
         'Upgrade';
-    return Stack(
-      fit: StackFit.expand,
+    // Reserve the action through layout instead of painting it over a
+    // public name. Wrapped titles and enlarged text must remain separate from
+    // both the pointer target and the paid-value masks inside the preview.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ExcludeFocus(child: AbsorbPointer(child: child)),
+        Expanded(
+          key: const ValueKey('premium-collection-preview'),
+          child: ExcludeFocus(child: AbsorbPointer(child: child)),
+        ),
         Align(
-          alignment: AlignmentDirectional.topEnd,
+          key: const ValueKey('premium-collection-action-region'),
+          alignment: AlignmentDirectional.centerEnd,
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Tooltip(
               message: checking
                   ? context.strings.text('Checking subscription')
@@ -83,8 +91,22 @@ class PremiumCollectionItemGate extends ConsumerWidget {
                                 ),
                               )
                             : unavailable
-                            ? const Icon(Icons.refresh_rounded)
-                            : PremiumLabelBadge(semanticLabel: tier),
+                            ? const BilGlassPressFeedback(
+                                child: Icon(Icons.refresh_rounded),
+                              )
+                            : showLabel
+                            ? PremiumLabelBadge(semanticLabel: tier)
+                            : Text(
+                                upgrade,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
                       ),
                     ),
                   ),

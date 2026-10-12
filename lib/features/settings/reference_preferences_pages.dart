@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -101,7 +102,9 @@ class _PreferenceRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     title: Text(_diaryText(context, label)),
-    trailing: const Icon(Icons.chevron_right_rounded),
+    trailing: const BilGlassPressFeedback(
+      child: Icon(Icons.chevron_right_rounded),
+    ),
     onTap: () => context.push(route),
   );
 }
@@ -288,7 +291,9 @@ class _DiarySearchTabState extends ConsumerState<ReferenceDiarySearchTabPage> {
             body: Center(
               child: FilledButton.icon(
                 onPressed: _load,
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 label: Text(context.strings.text('Retry')),
               ),
             ),
@@ -490,7 +495,9 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
           ? Center(
               child: FilledButton.icon(
                 onPressed: _loadSharing,
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 label: Text(context.strings.text('Retry')),
               ),
             )
@@ -634,7 +641,9 @@ class _MealNamesState extends ConsumerState<ReferenceMealNamesPage> {
           ? Center(
               child: FilledButton.icon(
                 onPressed: _load,
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 label: Text(context.strings.text('Retry')),
               ),
             )

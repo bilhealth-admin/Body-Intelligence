@@ -1,0 +1,93 @@
+[
+  {
+    "case": "dashboard_phone",
+    "before_source": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "before_sha256": "2721c2d4962acea62017fd541141ac271e51cf0817fd14cd12f70d6ec329676f",
+    "after_sha256": "4584eeafda11e75fc788216e792bcfef4d388615ef913262382f85df0e6031c8",
+    "changed_pixels": 180,
+    "bbox": [
+      328,
+      180,
+      356,
+      773
+    ]
+  },
+  {
+    "case": "dashboard_nutrient_goal_card_phone",
+    "before_source": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "before_sha256": "122e9db47924f10bc564b54790222446d83187423608446465a277912680f9ae",
+    "after_sha256": "d4e5118f09ddb6fa748c2a7df092c0880fc1b9d2ed959cf8cb12266884e22405",
+    "changed_pixels": 295,
+    "bbox": [
+      164,
+      290,
+      343,
+      589
+    ]
+  },
+  {
+    "case": "dashboard_phone_5",
+    "before_source": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "before_sha256": "96dbfa35d7052db2568ec69322a1fdba1932f9f0286dff037b8748a9ae8a2258",
+    "after_sha256": "4dc2a3d95a51a14454f4d7108141caacc4eb9fc30b8447393b9dc80c51ee8317",
+    "changed_pixels": 318,
+    "bbox": [
+      164,
+      274,
+      356,
+      761
+    ]
+  },
+  {
+    "case": "nutrition_analytics_calories_phone",
+    "before_source": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "before_sha256": "c3dcfc0c33e40b80c8271e2ad75715b86bdcb1e30e4d4e6da8f1d9bdabd20c7c",
+    "after_sha256": "faaa411cf02c6e18b88b6cdaa94dd4a9d751b6ae91eb027746151689ebbdbd27",
+    "changed_pixels": 876,
+    "bbox": [
+      20,
+      22,
+      370,
+      254
+    ]
+  },
+  {
+    "case": "nutrition_analytics_nutrients_phone",
+    "before_source": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "before_sha256": "01b8449ac3123e14ab8bdc24f30bf4ef02e212a6f14db921476ac7f32d19a3c0",
+    "after_sha256": "23e8e1262b00d8198d22261a90d1d32295e643064aa7ea9b529b69da18d76ea5",
+    "changed_pixels": 80,
+    "bbox": [
+      34,
+      22,
+      47,
+      34
+    ]
+  },
+  {
+    "case": "nutrition_analytics_macros_phone",
+    "before_source": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "before_sha256": "cb9bc2cdcf5eb706378f80b8dbc89cf530ca4302e54151018762bf11508adca3",
+    "after_sha256": "dd53064f9ad94f0792c24a9f12caaa7dfd94b78dd64ee8fcb51a3f22a040fdf3",
+    "changed_pixels": 2304,
+    "bbox": [
+      20,
+      22,
+      189,
+      348
+    ]
+  },
+  {
+    "case": "community_hub_authenticated_phone",
+    "before_source": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "before_sha256": "adbdc7eb61e27aba0c83d695f3f0d787e58eb3c67a8197e0f1fcbeaf86d423b7",
+    "after_sha256": "a9c15a2e84e74a731a18e817df5048820ac4c80fb6dc6e3dc2a4a9410b10b34d",
+    "changed_pixels": 62292,
+    "bbox": [
+      16,
+      7,
+      387,
+      577
+    ]
+  }
+]

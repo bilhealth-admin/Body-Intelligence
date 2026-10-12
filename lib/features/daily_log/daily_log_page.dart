@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import '../dashboard/widgets/first_food_days_guide.dart';
 import 'dart:async';
@@ -385,6 +386,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                     ],
                                   ),
                                 ),
+                                DailyMealPlannerAction(
+                                  mealType: mealType,
+                                  onPressed: mutationBusy
+                                      ? null
+                                      : () => context.push('/meal-planner'),
+                                ),
                               ],
                             ),
                           ),
@@ -392,22 +399,31 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           const SizedBox(height: 12),
                           DailyMealDetailSummary(
                             meal: focusedMeal,
+                            mealGoal: goalSchedule.mealTargets[mealType],
+                            mealCalorieGoal: mealCalorieGoals[mealType],
+                            onEditMealGoal: mutationBusy
+                                ? null
+                                : () => context.push(
+                                    Uri(
+                                      path:
+                                          goalSchedule.mealTargets[mealType] ==
+                                                  null &&
+                                              mealCalorieGoals[mealType] != null
+                                          ? '/settings/nutrition-meal-calorie-goals'
+                                          : '/settings/nutrition-goal-schedule',
+                                      queryParameters: {'meal': mealType},
+                                    ).toString(),
+                                  ),
                             calorieGoal:
                                 goalSchedule.mealTargets[mealType]?.calories ??
-                                mealCalorieGoals[mealType] ??
-                                dailyGoal?.calories,
+                                mealCalorieGoals[mealType],
                             carbsGoal:
-                                (goalSchedule.mealTargets[mealType] ??
-                                        dailyGoal)
-                                    ?.carbsGrams,
-                            proteinGoal:
-                                (goalSchedule.mealTargets[mealType] ??
-                                        dailyGoal)
-                                    ?.proteinGrams,
+                                goalSchedule.mealTargets[mealType]?.carbsGrams,
+                            proteinGoal: goalSchedule
+                                .mealTargets[mealType]
+                                ?.proteinGrams,
                             fatGoal:
-                                (goalSchedule.mealTargets[mealType] ??
-                                        dailyGoal)
-                                    ?.fatGrams,
+                                goalSchedule.mealTargets[mealType]?.fatGrams,
                             macroDisplay: mealMacroDisplay,
                           ),
                           const SizedBox(height: 12),
@@ -558,6 +574,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                               ),
                               DailyMealsList(
                                 arabic: _arabic,
+                                compactRows: true,
                                 // Keep Breakfast/Lunch/Dinner/Snack cards
                                 // mounted while a newly selected date resolves.
                                 // Never reuse the previous date's rows.

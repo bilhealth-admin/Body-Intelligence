@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_controller_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +9,8 @@ import '../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../profile/providers/user_profile_provider.dart';
 
 class NutritionGoalSchedulePage extends ConsumerStatefulWidget {
-  const NutritionGoalSchedulePage({super.key});
+  const NutritionGoalSchedulePage({super.key, this.initialMeal});
+  final String? initialMeal;
 
   @override
   ConsumerState<NutritionGoalSchedulePage> createState() =>
@@ -21,10 +24,21 @@ class _NutritionGoalSchedulePageState
   @override
   Widget build(BuildContext context) {
     final schedule = ref.watch(nutritionGoalScheduleProvider);
+    final mealFocus = const {
+      'breakfast',
+      'lunch',
+      'dinner',
+      'snack',
+    }.contains(widget.initialMeal);
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _text(context, NutritionGoalScheduleRuntimeCopy.scheduledGoals),
+          _text(
+            context,
+            mealFocus
+                ? NutritionGoalScheduleRuntimeCopy.goalsByMeal
+                : NutritionGoalScheduleRuntimeCopy.scheduledGoals,
+          ),
         ),
       ),
       body: schedule.when(
@@ -36,26 +50,28 @@ class _NutritionGoalSchedulePageState
         ),
         data: (value) => ListView(
           children: [
-            _section(
-              context,
-              NutritionGoalScheduleRuntimeCopy.differentGoalsByDay,
-            ),
-            for (var day = 1; day <= 7; day++)
-              _targetTile(
+            if (!mealFocus) ...[
+              _section(
                 context,
-                _weekday(context, day),
-                value.dayTargets[day],
-                _savingTarget == null
-                    ? () => _editAndSave(
-                        operationKey: 'day:$day',
-                        initial: value.dayTargets[day],
-                        save: (target) => ref
-                            .read(nutritionGoalScheduleRepositoryProvider)
-                            .saveDay(day, target),
-                      )
-                    : null,
-                isSaving: _savingTarget == 'day:$day',
+                NutritionGoalScheduleRuntimeCopy.differentGoalsByDay,
               ),
+              for (var day = 1; day <= 7; day++)
+                _targetTile(
+                  context,
+                  _weekday(context, day),
+                  value.dayTargets[day],
+                  _savingTarget == null
+                      ? () => _editAndSave(
+                          operationKey: 'day:$day',
+                          initial: value.dayTargets[day],
+                          save: (target) => ref
+                              .read(nutritionGoalScheduleRepositoryProvider)
+                              .saveDay(day, target),
+                        )
+                      : null,
+                  isSaving: _savingTarget == 'day:$day',
+                ),
+            ],
             _section(context, NutritionGoalScheduleRuntimeCopy.goalsByMeal),
             for (final meal in const <(String, String)>[
               ('breakfast', NutritionGoalScheduleRuntimeCopy.breakfast),
@@ -77,6 +93,8 @@ class _NutritionGoalSchedulePageState
                       )
                     : null,
                 isSaving: _savingTarget == 'meal:${meal.$1}',
+                key: Key('nutrition-meal-goal-${meal.$1}'),
+                selected: mealFocus && widget.initialMeal == meal.$1,
               ),
           ],
         ),
@@ -128,7 +146,11 @@ class _NutritionGoalSchedulePageState
     NutritionGoalTarget? target,
     VoidCallback? onTap, {
     bool isSaving = false,
+    Key? key,
+    bool selected = false,
   }) => ListTile(
+    key: key,
+    selected: selected,
     title: Text(title),
     subtitle: Text(
       target == null
@@ -146,7 +168,7 @@ class _NutritionGoalSchedulePageState
             dimension: 20,
             child: CircularProgressIndicator(strokeWidth: 2),
           )
-        : const Icon(Icons.chevron_right_rounded),
+        : const BilGlassPressFeedback(child: Icon(Icons.chevron_right_rounded)),
     onTap: onTap,
   );
 
@@ -168,12 +190,14 @@ class _NutritionGoalSchedulePageState
         text: _editableGoalNumber(context, initial?.fatGrams ?? 55.56),
       ),
     ];
-    final result = await showDialog<(bool, NutritionGoalTarget?)>(
+    final result = await showBilControllerDialog<(bool, NutritionGoalTarget?)>(
       context: context,
+      controllers: values,
       builder: (dialogContext) {
         String? error;
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) => AlertDialog(
+            scrollable: true,
             title: Text(
               _text(context, NutritionGoalScheduleRuntimeCopy.editGoal),
             ),
@@ -258,9 +282,6 @@ class _NutritionGoalSchedulePageState
         );
       },
     );
-    for (final controller in values) {
-      controller.dispose();
-    }
     return result ?? (false, null);
   }
 }

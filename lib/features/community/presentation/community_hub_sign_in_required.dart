@@ -36,7 +36,9 @@ class _SignInRequired extends StatelessWidget {
               const SizedBox(height: 20),
               FilledButton.icon(
                 onPressed: () => context.push('/login'),
-                icon: const Icon(Icons.login_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.login_rounded),
+                ),
                 label: Text(communityText(context, 'Sign in', 'تسجيل الدخول')),
               ),
               const SizedBox(height: 8),

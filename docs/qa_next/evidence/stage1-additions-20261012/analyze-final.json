@@ -1,0 +1,33 @@
+{
+  "label": "additions-final-full-analyze-accepted",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/flutter.bat",
+    "analyze",
+    "--no-pub"
+  ],
+  "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "started": 1791822392.1424012,
+  "files": {},
+  "fingerprint_version": 3,
+  "source_fingerprint": "d98342f0fd1f5ad0a8baa22b35dade871d5e9f5babef13ffa8440dd46cbf3398",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "analyze",
+    "--no-pub"
+  ],
+  "pid": 1948,
+  "exit_code": 0,
+  "finished": 1791822416.7137332,
+  "end_fingerprint": "d98342f0fd1f5ad0a8baa22b35dade871d5e9f5babef13ffa8440dd46cbf3398",
+  "stable_source": true,
+  "tests": [],
+  "counts": {
+    "success": 0,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

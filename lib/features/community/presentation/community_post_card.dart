@@ -369,18 +369,35 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
               ],
             ),
           ],
-          if (widget.referenceMetadata case final metadata?) ...[
-            const SizedBox(height: 6),
-            _CommunityPostReferenceBlock(
-              metadata: metadata,
-              repository: widget.repository,
-              compact: true,
+          CommunityTranslationContent(
+            contentId: 'post-${widget.post.id}',
+            ownerId: widget.currentUserId,
+            ownerChanges: widget.ownerChanges,
+            ownerIsCurrent: widget.ownerIsCurrent,
+            texts: {
+              'body': widget.post.body,
+              if (widget.referenceMetadata?.title?.trim().isNotEmpty == true)
+                'title': widget.referenceMetadata!.title!,
+            },
+            builder: (texts) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (widget.referenceMetadata case final metadata?) ...[
+                  const SizedBox(height: 6),
+                  _CommunityPostReferenceBlock(
+                    metadata: metadata,
+                    displayTitle: texts['title'],
+                    repository: widget.repository,
+                    compact: true,
+                  ),
+                ],
+                const SizedBox(height: 6),
+                _ExpandableCommunityPostBody(
+                  postId: widget.post.id,
+                  body: texts['body']!,
+                ),
+              ],
             ),
-          ],
-          const SizedBox(height: 6),
-          _ExpandableCommunityPostBody(
-            postId: widget.post.id,
-            body: widget.post.body,
           ),
           if (widget.post.hasImage) ...[
             const SizedBox(height: 10),

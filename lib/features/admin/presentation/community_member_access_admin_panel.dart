@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -206,7 +207,9 @@ class _CommunityMemberAccessAdminPanelState
                   key: const Key('admin-community-suspended-retry'),
                   onPressed: () =>
                       ref.invalidate(communitySuspendedMemberListProvider),
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.refresh_rounded),
+                  ),
                   label: Text(context.strings.text('Try again')),
                 ),
               ),

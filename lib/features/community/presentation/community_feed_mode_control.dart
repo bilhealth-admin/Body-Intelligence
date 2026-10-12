@@ -46,7 +46,9 @@ class _CommunityFeedModeControl extends StatelessWidget {
         contentPadding: const EdgeInsetsDirectional.fromSTEB(20, 4, 16, 4),
         leading: const Icon(Icons.tune_rounded),
         title: Text(_communityFeedModeLabel(context, selectedMode)),
-        trailing: const Icon(Icons.expand_more_rounded),
+        trailing: const BilGlassPressFeedback(
+          child: Icon(Icons.expand_more_rounded),
+        ),
       ),
     ),
   );

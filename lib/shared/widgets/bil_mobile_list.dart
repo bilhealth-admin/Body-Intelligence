@@ -1,3 +1,4 @@
+import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/theme/bil_flagship_tokens.dart';
@@ -26,10 +27,12 @@ class BilMobileSectionHeader extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(11),
               ),
-              child: Icon(
-                icon,
-                size: 19,
-                color: Theme.of(context).colorScheme.primary,
+              child: BilGlassPressFeedback(
+                child: Icon(
+                  icon,
+                  size: 19,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -160,10 +163,12 @@ class BilMobileListRow extends StatelessWidget {
                 trailing!,
               ] else if (onTap != null && showDisclosureIndicator) ...[
                 const SizedBox(width: 4),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 22,
-                  color: colors.outline,
+                BilGlassPressFeedback(
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 22,
+                    color: colors.outline,
+                  ),
                 ),
               ],
             ],

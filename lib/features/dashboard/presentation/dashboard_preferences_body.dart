@@ -19,7 +19,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
         appBar: AppBar(
           leading: IconButton(
             onPressed: _savingLayout ? null : _finishEditing,
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
           ),
           title: Text(
             _sectionCopy(context, 'Customize Today', 'تخصيص شاشة اليوم'),
@@ -167,7 +167,9 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                       onPressed: () => ref.invalidate(
                                         verifiedSubscriptionStateProvider,
                                       ),
-                                      icon: const Icon(Icons.refresh_rounded),
+                                      icon: const BilGlassPressFeedback(
+                                        child: Icon(Icons.refresh_rounded),
+                                      ),
                                     )
                                   : preset.premium && !entitlementResolved
                                   ? const SizedBox.square(
@@ -474,7 +476,9 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                         tr: 'Hedefi düzenle',
                       ),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: const BilGlassPressFeedback(
+                      child: Icon(Icons.chevron_right_rounded),
+                    ),
                     onTap: _savingLayout
                         ? null
                         : () {
@@ -596,7 +600,9 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                           ),
                           onPressed: () =>
                               ref.invalidate(verifiedSubscriptionStateProvider),
-                          icon: const Icon(Icons.refresh_rounded),
+                          icon: const BilGlassPressFeedback(
+                            child: Icon(Icons.refresh_rounded),
+                          ),
                         )
                       : !entitlementResolved
                       ? const SizedBox.square(
@@ -608,7 +614,9 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                           Icons.workspace_premium_rounded,
                           color: Color(0xFFF2B632),
                         )
-                      : const Icon(Icons.chevron_right_rounded),
+                      : const BilGlassPressFeedback(
+                          child: Icon(Icons.chevron_right_rounded),
+                        ),
                   onTap: () {
                     final currentAccess = ref.read(
                       verifiedSubscriptionAccessProvider,
@@ -649,39 +657,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
             ),
             if (ownerId != null) ...[
               const SizedBox(height: 20),
-              Card(
-                clipBehavior: Clip.antiAlias,
-                child: ListTile(
-                  key: const Key('dashboard-preferences-sign-out'),
-                  minTileHeight: 58,
-                  leading: _signingOut || !sessionReady
-                      ? const SizedBox.square(
-                          dimension: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(
-                          Icons.logout_rounded,
-                          color: Color(0xFFD92D3A),
-                        ),
-                  title: Text(
-                    _copy(
-                      context,
-                      en: 'Log out',
-                      ar: 'تسجيل الخروج',
-                      fr: 'Se déconnecter',
-                      es: 'Cerrar sesión',
-                      tr: 'Çıkış yap',
-                    ),
-                    style: const TextStyle(
-                      color: Color(0xFFD92D3A),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  onTap: _savingLayout || _signingOut || !sessionReady
-                      ? null
-                      : () => _logout(ownerId),
-                ),
-              ),
+              _signOutTile(context, ownerId, sessionReady),
             ],
           ],
         ),

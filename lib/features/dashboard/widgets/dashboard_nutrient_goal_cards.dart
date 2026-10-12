@@ -128,22 +128,24 @@ class _DashboardNutrientGoalCards extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ),
-                          LinearProgressIndicator(
-                            value: progress ?? 0,
-                            minHeight: 8,
-                            borderRadius: BorderRadius.circular(999),
-                            color: progress == null
-                                ? Theme.of(context).colorScheme.outlineVariant
-                                : progressState ==
-                                      NutrientProgressState.exceeded
-                                ? const Color(0xFFD64B4B)
-                                : upperLimit
-                                ? const Color(0xFFF2A23A)
-                                : progress >= .8
-                                ? const Color(0xFF2E9D62)
-                                : progress >= .4
-                                ? const Color(0xFFF2A23A)
-                                : const Color(0xFFE57B25),
+                          BilStripedProgress(
+                            child: LinearProgressIndicator(
+                              value: progress ?? 0,
+                              minHeight: 8,
+                              borderRadius: BorderRadius.circular(999),
+                              color: progress == null
+                                  ? Theme.of(context).colorScheme.outlineVariant
+                                  : progressState ==
+                                        NutrientProgressState.exceeded
+                                  ? const Color(0xFFD64B4B)
+                                  : upperLimit
+                                  ? const Color(0xFFF2A23A)
+                                  : progress >= .8
+                                  ? const Color(0xFF2E9D62)
+                                  : progress >= .4
+                                  ? const Color(0xFFF2A23A)
+                                  : const Color(0xFFE57B25),
+                            ),
                           ),
                         ],
                       ),

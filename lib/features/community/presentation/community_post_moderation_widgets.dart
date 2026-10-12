@@ -446,7 +446,9 @@ class _ModerationUnavailable extends StatelessWidget {
           const SizedBox(height: 18),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
           ),
         ],

@@ -25,7 +25,9 @@ class _RecipeChoiceTile extends StatelessWidget {
         padding: const EdgeInsets.only(top: 5),
         child: Text(subtitle),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: const BilGlassPressFeedback(
+        child: Icon(Icons.chevron_right_rounded),
+      ),
       onTap: onTap,
     ),
   );
@@ -131,7 +133,13 @@ class _EmptyState extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 20),
     child: Column(
       children: [
-        Icon(icon, size: 80, color: Theme.of(context).colorScheme.primary),
+        BilGlassPressFeedback(
+          child: Icon(
+            icon,
+            size: 80,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
         const SizedBox(height: 24),
         Text(
           title,

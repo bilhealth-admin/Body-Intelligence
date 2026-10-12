@@ -99,10 +99,12 @@ class _ContextFocusCard extends StatelessWidget {
               key: Key('ai-coach-context-${option.$1.name}'),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.trailing,
-              secondary: Icon(
-                option.$2,
-                size: 22,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              secondary: BilGlassPressFeedback(
+                child: Icon(
+                  option.$2,
+                  size: 22,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               value: focuses.contains(option.$1),
               onChanged: enabled
@@ -287,7 +289,16 @@ class _BoostCard extends StatelessWidget {
         if (boost.errorCode != null) ...[
           const SizedBox(height: 8),
           Text(
-            boost.errorCode == 'store_finish_pending'
+            boost.lastDelivery?.active == false &&
+                    const {
+                      'purchase_inactive',
+                      'store_finish_pending',
+                    }.contains(boost.errorCode)
+                ? BilStoreCopy.text(
+                    Localizations.localeOf(context).toLanguageTag(),
+                    'purchase_inactive',
+                  )
+                : boost.errorCode == 'store_finish_pending'
                 ? t(
                     'Your Boost was verified. Store confirmation is still pending; check the existing transaction before buying again.',
                     'تم التحقق من Boost. تأكيد المتجر ما زال معلقًا؛ تحقق من المعاملة الحالية قبل الشراء مجددًا.',

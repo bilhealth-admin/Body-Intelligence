@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -209,7 +210,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
                     onPressed: _openAppleAccessInstructions,
-                    icon: const Icon(Icons.open_in_new_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.open_in_new_rounded),
+                    ),
                     label: Text(copy.appleAccessLearnMore),
                   ),
                 ),
@@ -270,7 +273,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton.icon(
                   onPressed: _submitting ? null : _openSubscriptionManagement,
-                  icon: const Icon(Icons.open_in_new_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.open_in_new_rounded),
+                  ),
                   label: Text(copy.manageSubscription),
                 ),
               ),

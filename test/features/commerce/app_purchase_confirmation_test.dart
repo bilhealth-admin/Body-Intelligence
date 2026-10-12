@@ -76,9 +76,15 @@ class _QuietSubscriptionLane extends VerifiedStorePurchaseService {
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
-  for (final width in [390.0, 320.0]) {
+  for (final (width, refundAtFinish) in [
+    (390.0, false),
+    (320.0, false),
+    (390.0, true),
+  ]) {
     testWidgets(
-      'Boost confirmation after route exit before native finish at $width',
+      refundAtFinish
+          ? 'trusted Google refund during finish cancels queued confirmation and preserves draft'
+          : 'Boost confirmation after route exit before native finish at $width',
       (tester) async {
         expect(
           AppEnvironment.commerceConfigured,
@@ -94,7 +100,9 @@ void main() {
         debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
         InAppPurchasePlatform.instance = native;
         final sdk = InAppPurchase.instance;
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        debugDefaultTargetPlatformOverride = refundAtFinish
+            ? TargetPlatform.android
+            : TargetPlatform.iOS;
         SharedPreferences.setMockInitialValues({});
         final http = MockClient(
           (request) async =>
@@ -120,7 +128,7 @@ void main() {
         await tester.runAsync(() => db.customSelect('SELECT 1').get());
         final delivery = StoreBenefitDelivery(
           ownerId: 'fixture-A',
-          store: 'app_store',
+          store: refundAtFinish ? 'google_play' : 'app_store',
           environment: 'sandbox',
           eventKey: List.filled(64, 'b').join(),
           productId: StoreCatalogConfiguration.aiBoost,
@@ -129,13 +137,15 @@ void main() {
           isBoost: true,
           quantity: 730,
           creditedNow: true,
-          finishPending: false,
+          finishPending: refundAtFinish,
         );
         final verify = Completer<StoreVerificationOutcome>();
+        final finishProof = Completer<StoreVerificationOutcome>();
         final boost = AiBoostPurchaseService(
           purchase: sdk,
           owner: () => 'fixture-A',
           verifyDelivery: (_, _) => verify.future,
+          finishDelivery: refundAtFinish ? (_, _) => finishProof.future : null,
         );
         final container = ProviderContainer(
           overrides: [
@@ -203,7 +213,7 @@ void main() {
               verificationData: PurchaseVerificationData(
                 localVerificationData: '',
                 serverVerificationData: 'fixture',
-                source: 'app_store',
+                source: refundAtFinish ? 'google_play' : 'app_store',
               ),
               transactionDate: '0',
               status: PurchaseStatus.purchased,
@@ -219,13 +229,65 @@ void main() {
             tester,
             () =>
                 boost.state == AiBoostPurchaseState.verified &&
-                native.finishes == 1,
+                (refundAtFinish || native.finishes == 1),
           );
           expect(native.finish.isCompleted, isFalse);
           expect(
             find.byKey(const Key('store-benefit-confirmation')),
             findsNothing,
           );
+          if (refundAtFinish) {
+            finishProof.complete(
+              StoreVerificationOutcome(
+                true,
+                delivery: StoreBenefitDelivery(
+                  ownerId: delivery.ownerId,
+                  store: delivery.store,
+                  environment: delivery.environment,
+                  eventKey: delivery.eventKey,
+                  productId: delivery.productId,
+                  verifiedAt: delivery.verifiedAt.add(
+                    const Duration(seconds: 1),
+                  ),
+                  active: false,
+                  isBoost: true,
+                  finishPending: false,
+                  quantity: 0,
+                ),
+              ),
+            );
+            await _until(
+              tester,
+              () =>
+                  boost.state == AiBoostPurchaseState.ready &&
+                  boost.canPurchase,
+            );
+            expect(boost.errorCode, 'purchase_inactive');
+            expect(boost.verifiedCreditsRevision, 2);
+            expect(boost.deliveryIsActive(delivery.eventKey), isFalse);
+            release!();
+            release = null;
+            await tester.pump(const Duration(seconds: 1));
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 50)),
+            );
+            await tester.pumpAndSettle();
+            expect(
+              find.byKey(const Key('store-benefit-confirmation')),
+              findsNothing,
+            );
+            expect(draft.text, 'مسودة محفوظة');
+            expect(native.finishes, 0);
+            expect(
+              native.launches,
+              1,
+              reason: 'only the explicit original checkout',
+            );
+            await tester.tap(find.text('إجراء مجاني'));
+            expect(continued, isTrue);
+            expect(tester.takeException(), isNull);
+            return;
+          }
           release!();
           release = null;
           await _until(
@@ -291,7 +353,7 @@ void main() {
               verificationData: PurchaseVerificationData(
                 localVerificationData: '',
                 serverVerificationData: 'rotated-fixture',
-                source: 'app_store',
+                source: refundAtFinish ? 'google_play' : 'app_store',
               ),
               transactionDate: '0',
               status: PurchaseStatus.restored,

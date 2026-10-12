@@ -17,14 +17,20 @@ String cloudLastSuccessfulSyncPreferenceKeyFor(String ownerId) =>
 enum CloudManualSyncPhase { loading, never, idle, syncing, unavailable }
 
 final class CloudManualSyncStatus {
-  const CloudManualSyncStatus({required this.phase, this.lastSuccessfulSyncAt});
+  const CloudManualSyncStatus({
+    required this.phase,
+    this.lastSuccessfulSyncAt,
+    this.reason,
+  });
 
   const CloudManualSyncStatus.loading()
     : phase = CloudManualSyncPhase.loading,
-      lastSuccessfulSyncAt = null;
+      lastSuccessfulSyncAt = null,
+      reason = null;
 
   final CloudManualSyncPhase phase;
   final DateTime? lastSuccessfulSyncAt;
+  final String? reason;
 
   bool get isSyncing => phase == CloudManualSyncPhase.syncing;
 }
@@ -99,12 +105,14 @@ final class CloudManualSyncStatusController
         cloudLastSuccessfulSyncPreferenceKeyFor(ownerId),
       );
       final parsed = raw == null ? null : DateTime.tryParse(raw)?.toUtc();
+      final reason = await _preferences.get('cloud.lastSyncReason.$ownerId');
       if (mounted) {
         state = CloudManualSyncStatus(
           phase: parsed == null
               ? CloudManualSyncPhase.never
               : CloudManualSyncPhase.idle,
           lastSuccessfulSyncAt: parsed,
+          reason: reason,
         );
       }
     } on Object {
@@ -138,6 +146,16 @@ final class CloudManualSyncStatusController
       final result = await _runSync();
       final completedAt = result.completedAt?.toUtc();
       final ownerId = _ownerId;
+      if (ownerId != null && result.ownerId == ownerId) {
+        final reason =
+            result.reason ??
+            (result.completed ? null : result.disposition.name);
+        if (reason == null) {
+          await _preferences.remove('cloud.lastSyncReason.$ownerId');
+        } else {
+          await _preferences.set('cloud.lastSyncReason.$ownerId', reason);
+        }
+      }
       if (result.completed &&
           completedAt != null &&
           ownerId != null &&
@@ -161,6 +179,7 @@ final class CloudManualSyncStatusController
                       : CloudManualSyncPhase.idle
                 : CloudManualSyncPhase.unavailable,
             lastSuccessfulSyncAt: previous,
+            reason: result.reason ?? result.disposition.name,
           );
         }
       }

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -311,7 +312,9 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
             ? Center(
                 child: FilledButton.icon(
                   onPressed: () => context.push('/login'),
-                  icon: const Icon(Icons.login_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.login_rounded),
+                  ),
                   label: Text(
                     communityText(context, 'Sign in', 'تسجيل الدخول'),
                   ),
@@ -338,7 +341,9 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
                       FilledButton.icon(
                         key: const Key('community-entry-retry'),
                         onPressed: _check,
-                        icon: const Icon(Icons.refresh_rounded),
+                        icon: const BilGlassPressFeedback(
+                          child: Icon(Icons.refresh_rounded),
+                        ),
                         label: Text(
                           communityText(context, 'Retry', 'إعادة المحاولة'),
                         ),

@@ -3,8 +3,77 @@ import 'dart:ui' show SemanticsAction;
 import 'package:body_intelligence_log/shared/widgets/wheel_number_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'visual_closure/closure_surface_capture.dart';
 
 void main() {
+  testWidgets(
+    'SmartWeightScale hold changes draft by configured fractional steps only',
+    (tester) async {
+      var draft = 70.05;
+      var callbacks = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RepaintBoundary(
+              key: const Key('scale-capture'),
+              child: StatefulBuilder(
+                builder: (context, setState) => SmartWeightScaleField(
+                  value: draft,
+                  minimum: 20,
+                  maximum: 100,
+                  step: .1,
+                  decimalPlaces: 1,
+                  unit: 'kg',
+                  label: 'Weight',
+                  onChanged: (next) => setState(() {
+                    draft = next;
+                    callbacks++;
+                  }),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final plus = find.byIcon(Icons.add_rounded);
+      await tester.tap(plus);
+      await tester.pump();
+      expect(draft, closeTo(70.15, 1e-9));
+      await captureClosureFrames(
+        tester,
+        find.byKey(const Key('scale-capture')),
+        'weight-repeat-after',
+        step: 'short-tap',
+        frames: 2,
+      );
+      final gesture = await tester.startGesture(tester.getCenter(plus));
+      await tester.pump(const Duration(milliseconds: 340));
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(draft, closeTo(70.45, 1e-9));
+      await captureClosureFrames(
+        tester,
+        find.byKey(const Key('scale-capture')),
+        'weight-repeat-after',
+        step: 'holding',
+        frames: 3,
+      );
+      await gesture.up();
+      await tester.pump();
+      final released = draft;
+      final count = callbacks;
+      await tester.pump(const Duration(seconds: 1));
+      expect(draft, released);
+      expect(callbacks, count);
+      await captureClosureFrames(
+        tester,
+        find.byKey(const Key('scale-capture')),
+        'weight-repeat-after',
+        step: 'released',
+        frames: 3,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
   testWidgets('screen readers can adjust by exactly one configured step', (
     tester,
   ) async {

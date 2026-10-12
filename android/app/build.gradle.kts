@@ -116,4 +116,6 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("androidx.health.connect:connect-client:1.1.0")
     implementation("com.google.android.play:integrity:1.6.0")
+    implementation("com.google.mlkit:translate:17.0.3")
+    implementation("com.google.mlkit:language-id:17.0.6")
 }

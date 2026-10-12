@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/bil_striped_progress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -491,7 +492,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
               context.go('/nutrition-plans');
             }
           },
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const BackButtonIcon(),
         ),
         title: Text(nutritionPathwayTitle(pathway, localeTag)),
         centerTitle: true,

@@ -454,11 +454,15 @@ class AppRouter {
       ),
       GoRoute(
         path: '/settings/nutrition-goal-schedule',
-        builder: (_, _) => const NutritionGoalSchedulePage(),
+        builder: (_, state) => NutritionGoalSchedulePage(
+          initialMeal: state.uri.queryParameters['meal'],
+        ),
       ),
       GoRoute(
         path: '/settings/nutrition-meal-calorie-goals',
-        builder: (_, _) => const MealCalorieGoalsPage(),
+        builder: (_, state) => MealCalorieGoalsPage(
+          initialMeal: state.uri.queryParameters['meal'],
+        ),
       ),
       GoRoute(
         path: '/settings/diary/macro-display',

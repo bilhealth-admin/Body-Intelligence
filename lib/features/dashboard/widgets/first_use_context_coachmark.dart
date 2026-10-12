@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import '../../../shared/widgets/first_use_target_guide.dart';
 import 'package:flutter/material.dart';
 
@@ -115,10 +116,12 @@ class FirstUseContextCoachmark extends StatelessWidget {
                             color: accent.withValues(alpha: .36),
                           ),
                         ),
-                        child: Icon(
-                          icon,
-                          color: accent,
-                          size: compact ? 20 : 25,
+                        child: BilGlassPressFeedback(
+                          child: Icon(
+                            icon,
+                            color: accent,
+                            size: compact ? 20 : 25,
+                          ),
                         ),
                       ),
                       const Spacer(),

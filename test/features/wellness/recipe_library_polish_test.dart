@@ -1,3 +1,7 @@
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -133,6 +137,60 @@ void main() {
     );
   });
 
+  testWidgets(
+    'locked long recipe name stays outside upgrade bounds at 320 2x',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      _setPhoneSize(tester, const Size(320, 1024));
+      await tester.pumpWidget(
+        _app(
+          database,
+          RecipeLibraryPage(
+            initialCatalog: [for (var i = 0; i < 4; i++) _recipe(i)],
+            remoteImageDeliveryEnabled: false,
+          ),
+          textScaler: const TextScaler.linear(2),
+          verifiedFree: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('recipe-search-field')),
+        'Recipe',
+      );
+      await tester.pumpAndSettle();
+      final gate = find.byKey(
+        const ValueKey('recipe-premium-gate-polish-recipe-2'),
+      );
+      await tester.dragUntilVisible(
+        gate,
+        find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            )
+            .first,
+        const Offset(0, -250),
+      );
+      await tester.ensureVisible(gate);
+      await tester.pumpAndSettle();
+      final title = find.descendant(
+        of: gate,
+        matching: find.text('Recipe card 2 with a readable title'),
+      );
+      final action = find.descendant(
+        of: gate,
+        matching: find.byKey(const ValueKey('premium-collection-upgrade')),
+      );
+      expect(tester.getRect(title).overlaps(tester.getRect(action)), isFalse);
+      expect(
+        tester.getRect(title).bottom,
+        lessThanOrEqualTo(tester.getRect(action).top),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('grid adapts from one to two columns at large text scale', (
     tester,
   ) async {
@@ -179,9 +237,36 @@ Widget _app(
   AppDatabase database,
   Widget home, {
   TextScaler textScaler = TextScaler.noScaling,
+  bool verifiedFree = false,
 }) {
   return ProviderScope(
-    overrides: [databaseProvider.overrideWithValue(database)],
+    overrides: [
+      databaseProvider.overrideWithValue(database),
+      if (verifiedFree)
+        verifiedSubscriptionStateProvider.overrideWithValue(
+          AsyncData(
+            SubscriptionState(
+              plan: CommercePlan.free,
+              entitlements: FreePlan.entitlements,
+              authority: EntitlementAuthority.verifiedServer,
+              isPurchasable: true,
+              canRestorePurchases: true,
+            ),
+          ),
+        ),
+      if (verifiedFree)
+        verifiedSubscriptionAccessProvider.overrideWithValue(
+          AsyncData(
+            SubscriptionState(
+              plan: CommercePlan.free,
+              entitlements: FreePlan.entitlements,
+              authority: EntitlementAuthority.verifiedServer,
+              isPurchasable: true,
+              canRestorePurchases: true,
+            ),
+          ),
+        ),
+    ],
     child: MaterialApp(
       locale: const Locale('en'),
       supportedLocales: AppLocalizations.supportedLocales,

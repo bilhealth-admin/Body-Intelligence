@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,7 +40,7 @@ class NutritionPathwaysPage extends ConsumerWidget {
               context.go('/dashboard');
             }
           },
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const BackButtonIcon(),
         ),
         title: Text(
           nutritionText(context, 'Nutrition pathways', 'المسارات الغذائية'),
@@ -85,6 +86,7 @@ class NutritionPathwaysPage extends ConsumerWidget {
               child: PremiumLabelBadge(
                 key: Key('nutrition-pathways-premium-page-label'),
                 semanticLabel: nutritionText(context, 'Premium', 'مميز'),
+                onTap: () => context.push('/plans'),
               ),
             ),
           ),
@@ -256,10 +258,12 @@ class _PlanRow extends StatelessWidget {
               compact: true,
             ),
             const SizedBox(width: 7),
-            Icon(
-              selected
-                  ? Icons.check_circle_rounded
-                  : Icons.chevron_right_rounded,
+            BilGlassPressFeedback(
+              child: Icon(
+                selected
+                    ? Icons.check_circle_rounded
+                    : Icons.chevron_right_rounded,
+              ),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import '../../shared/widgets/first_use_target_guide.dart';
 import 'dart:async';
@@ -288,7 +289,9 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                   key: const Key('food-log-select-meal'),
                   value: mealType,
                   isExpanded: true,
-                  icon: const Icon(Icons.arrow_drop_down_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.arrow_drop_down_rounded),
+                  ),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: scheme.primary,
                     fontWeight: FontWeight.w900,
@@ -319,7 +322,9 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         error: (_, _) => Center(
           child: FilledButton.icon(
             onPressed: () => ref.invalidate(foodsProvider),
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(_t(context, 'Retry')),
           ),
         ),

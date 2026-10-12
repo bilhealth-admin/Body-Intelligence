@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+import 'health_storage_directory_native.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../../data/database/app_database.dart';
@@ -21,7 +21,8 @@ class LocalRecoveryService {
   LocalRecoveryService(
     this.database, {
     RecoveryDirectoryResolver? directoryResolver,
-  }) : _directoryResolver = directoryResolver ?? getApplicationSupportDirectory;
+  }) : _directoryResolver =
+           directoryResolver ?? getProtectedApplicationSupportDirectory;
 
   static const snapshotFormatVersion = 1;
   static const _fileNamePrefix = 'bil_local_recovery_v1';

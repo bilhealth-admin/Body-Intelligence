@@ -196,7 +196,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
       context: context,
       builder: (dialogContext) => visit.guard(
         AlertDialog(
-          icon: Icon(icon),
+          icon: BilGlassPressFeedback(child: Icon(icon)),
           title: Text(title),
           content: Text(body),
           actions: [
@@ -269,11 +269,13 @@ class _CommunityCreatorPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            LinearProgressIndicator(
-              key: const Key('community-level-progress'),
-              value: creator.levelProgress,
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(999),
+            BilStripedProgress(
+              child: LinearProgressIndicator(
+                key: const Key('community-level-progress'),
+                value: creator.levelProgress,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(999),
+              ),
             ),
             const SizedBox(height: 8),
             Text(progressText, style: Theme.of(context).textTheme.bodySmall),
@@ -504,17 +506,21 @@ class _CommunityCreatorRewardsSnapshot extends StatelessWidget {
                   onPressed: () {
                     if (visit.isCurrent()) context.push('/community/rewards');
                   },
-                  icon: const Icon(Icons.chevron_right_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.chevron_right_rounded),
+                  ),
                 ),
               ],
             ),
             if (topQuest case final quest?) ...[
               const SizedBox(height: 10),
-              LinearProgressIndicator(
-                key: const Key('community-creator-quest-progress'),
-                value: quest.completionRatio,
-                minHeight: 7,
-                borderRadius: BorderRadius.circular(999),
+              BilStripedProgress(
+                child: LinearProgressIndicator(
+                  key: const Key('community-creator-quest-progress'),
+                  value: quest.completionRatio,
+                  minHeight: 7,
+                  borderRadius: BorderRadius.circular(999),
+                ),
               ),
               const SizedBox(height: 7),
               Row(
@@ -597,7 +603,7 @@ class _CreatorToolTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20),
+            BilGlassPressFeedback(child: Icon(icon, size: 20)),
             const SizedBox(width: 8),
             Expanded(
               child: Text(label, style: Theme.of(context).textTheme.labelLarge),
@@ -624,7 +630,7 @@ class _CreatorMetricRow extends StatelessWidget {
   Widget build(BuildContext context) => ListTile(
     dense: true,
     contentPadding: EdgeInsets.zero,
-    leading: Icon(icon),
+    leading: BilGlassPressFeedback(child: Icon(icon)),
     title: Text(label),
     trailing: Text(
       value,

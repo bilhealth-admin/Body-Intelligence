@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -497,7 +498,9 @@ class _StartupError extends StatelessWidget {
                     const SizedBox(height: 22),
                     FilledButton.icon(
                       onPressed: onRetry,
-                      icon: const Icon(Icons.refresh),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh),
+                      ),
                       label: Text(
                         authFiveLocaleTextFor(
                           arabicLocaleCode(context, arabic),

@@ -18,7 +18,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
             child: FilledButton.icon(
               key: const Key('community-post-detail-retry'),
               onPressed: _retry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
             ),
           );
@@ -63,6 +65,8 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                       ),
                       onToggleFollow: _toggleAuthorFollow,
                       repository: widget.repository,
+                      ownerIsCurrent: () => _detailOwnerIsCurrent,
+                      ownerChanges: widget.ownerChanges,
                     ),
                     if (widget.post.poll case final poll?) ...[
                       const SizedBox(height: 16),
@@ -95,6 +99,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                         _CommunityCommentTile(
                           key: ValueKey(root.id),
                           comment: root,
+                          ownerId: widget.repository.currentUserId,
+                          ownerIsCurrent: () => _detailOwnerIsCurrent,
+                          ownerChanges: widget.ownerChanges,
                           membershipTier: _membershipTierByUser[root.authorId],
                           mine:
                               root.authorId == widget.repository.currentUserId,
@@ -111,6 +118,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                               _CommunityCommentTile(
                                 key: ValueKey(reply.id),
                                 comment: reply,
+                                ownerId: widget.repository.currentUserId,
+                                ownerIsCurrent: () => _detailOwnerIsCurrent,
+                                ownerChanges: widget.ownerChanges,
                                 membershipTier:
                                     _membershipTierByUser[reply.authorId],
                                 mine:
@@ -148,8 +158,10 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                                 strokeWidth: 2,
                                               ),
                                             )
-                                          : const Icon(
-                                              Icons.expand_more_rounded,
+                                          : const BilGlassPressFeedback(
+                                              child: Icon(
+                                                Icons.expand_more_rounded,
+                                              ),
                                             ),
                                       label: Text(
                                         communityText(
@@ -166,7 +178,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                     onPressed: () => _setDetailState(
                                       () => _expandedThreads.remove(root.id),
                                     ),
-                                    icon: const Icon(Icons.expand_less_rounded),
+                                    icon: const BilGlassPressFeedback(
+                                      child: Icon(Icons.expand_less_rounded),
+                                    ),
                                     label: Text(
                                       communityText(
                                         context,
@@ -212,7 +226,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(Icons.expand_more_rounded),
+                              : const BilGlassPressFeedback(
+                                  child: Icon(Icons.expand_more_rounded),
+                                ),
                           label: Text(
                             communityText(
                               context,
@@ -338,7 +354,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Icon(Icons.send_rounded),
+                                : const BilGlassPressFeedback(
+                                    child: Icon(Icons.send_rounded),
+                                  ),
                           ),
                         ],
                       ),

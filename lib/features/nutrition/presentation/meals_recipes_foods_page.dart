@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,7 +66,9 @@ class _MealsRecipesFoodsPageState extends ConsumerState<MealsRecipesFoodsPage> {
                       ref.read(databaseProvider),
                     ).get('diary.defaultSearchTab'),
                   ),
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.refresh_rounded),
+                  ),
                   label: Text(_c(context, 'Retry')),
                 ),
               ),

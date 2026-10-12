@@ -109,8 +109,12 @@ class _WorkoutSegmentTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+              BilGlassPressFeedback(
+                child: Icon(
+                  rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                ),
               ),
             ],
           ),
@@ -154,7 +158,9 @@ class _SegmentThumbnail extends StatelessWidget {
             child: CircleAvatar(
               radius: 18,
               backgroundColor: Color(0xDFFFFFFF),
-              child: Icon(Icons.play_arrow_rounded, color: Colors.black87),
+              child: BilGlassPressFeedback(
+                child: Icon(Icons.play_arrow_rounded, color: Colors.black87),
+              ),
             ),
           ),
         ],
@@ -616,7 +622,9 @@ class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
                         FilledButton.icon(
                           key: const ValueKey('workout-video-play'),
                           onPressed: _play,
-                          icon: const Icon(Icons.play_arrow_rounded),
+                          icon: const BilGlassPressFeedback(
+                            child: Icon(Icons.play_arrow_rounded),
+                          ),
                           label: Text(
                             wellnessWorkoutVideoAction(context, 'Play video'),
                           ),
@@ -637,7 +645,9 @@ class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
                           FilledButton.tonalIcon(
                             key: const ValueKey('workout-video-download'),
                             onPressed: _download,
-                            icon: const Icon(Icons.download_rounded),
+                            icon: const BilGlassPressFeedback(
+                              child: Icon(Icons.download_rounded),
+                            ),
                             label: Text(
                               wellnessWorkoutVideoAction(context, 'Download'),
                             ),

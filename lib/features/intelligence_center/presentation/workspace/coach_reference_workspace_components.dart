@@ -14,7 +14,7 @@ class _WorkspaceCard extends StatelessWidget {
 Color _workspaceAccent(BuildContext context, Color accent) =>
     Theme.of(context).brightness == Brightness.dark
     ? Color.lerp(accent, Theme.of(context).colorScheme.onSurface, .60)!
-    : HSLColor.fromColor(accent).withLightness(.27).toColor();
+    : HSLColor.fromColor(accent).withLightness(.24).toColor();
 
 class _NutrientTile extends StatelessWidget {
   const _NutrientTile({
@@ -74,13 +74,15 @@ class _NutrientTile extends StatelessWidget {
             const SizedBox(height: 7),
             ClipRRect(
               borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 3,
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                color: _workspaceAccent(context, accent),
+              child: BilStripedProgress(
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 3,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
+                  color: accent,
+                ),
               ),
             ),
           ],
@@ -114,10 +116,12 @@ class _TimelineRow extends StatelessWidget {
               shape: BoxShape.circle,
               color: Theme.of(context).colorScheme.primaryContainer,
             ),
-            child: Icon(
-              icon,
-              size: 17,
-              color: Theme.of(context).colorScheme.primary,
+            child: BilGlassPressFeedback(
+              child: Icon(
+                icon,
+                size: 17,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -144,10 +148,12 @@ class _TimelineRow extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
-            Icons.chevron_right_rounded,
-            size: 15,
-            color: Color(0xFF9DACC0),
+          const BilGlassPressFeedback(
+            child: Icon(
+              Icons.chevron_right_rounded,
+              size: 15,
+              color: Color(0xFF9DACC0),
+            ),
           ),
         ],
       ),

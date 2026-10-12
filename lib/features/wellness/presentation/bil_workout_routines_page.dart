@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -378,7 +379,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
             onPressed: () => context.canPop()
                 ? context.pop()
                 : context.go('/wellness-library'),
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
           ),
           title: Text(
             wellnessWorkoutVideosAndRoutinesTitle(context),
@@ -413,7 +414,9 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                 'إدارة الحزم الموثقة',
               ),
               onPressed: () => context.push('/wellness/content-packs'),
-              icon: const Icon(Icons.download_for_offline_outlined),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.download_for_offline_outlined),
+              ),
             ),
           ],
           bottom: TabBar(

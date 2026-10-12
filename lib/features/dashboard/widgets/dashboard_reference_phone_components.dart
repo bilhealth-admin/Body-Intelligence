@@ -262,7 +262,9 @@ class _ReferenceTrendCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded, size: 18),
+                    const BilGlassPressFeedback(
+                      child: Icon(Icons.arrow_forward_rounded, size: 18),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -303,14 +305,16 @@ class _ReferenceTrendCard extends StatelessWidget {
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Icon(
-                                            weightWentDown
-                                                ? Icons.south_rounded
-                                                : weightWentUp
-                                                ? Icons.north_rounded
-                                                : Icons.remove_rounded,
-                                            size: 16,
-                                            color: deltaColor,
+                                          BilGlassPressFeedback(
+                                            child: Icon(
+                                              weightWentDown
+                                                  ? Icons.south_rounded
+                                                  : weightWentUp
+                                                  ? Icons.north_rounded
+                                                  : Icons.remove_rounded,
+                                              size: 16,
+                                              color: deltaColor,
+                                            ),
                                           ),
                                           const SizedBox(width: 3),
                                           Flexible(

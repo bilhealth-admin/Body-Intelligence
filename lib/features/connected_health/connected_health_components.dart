@@ -342,14 +342,16 @@ class _FitnessDeviceSection extends ConsumerWidget {
                     dimension: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Icon(
-                    accessGranted
-                        ? Icons.bluetooth_searching_rounded
-                        : checking
-                        ? Icons.hourglass_empty_rounded
-                        : verifiedDenied
-                        ? Icons.lock_outline_rounded
-                        : Icons.refresh_rounded,
+                : BilGlassPressFeedback(
+                    child: Icon(
+                      accessGranted
+                          ? Icons.bluetooth_searching_rounded
+                          : checking
+                          ? Icons.hourglass_empty_rounded
+                          : verifiedDenied
+                          ? Icons.lock_outline_rounded
+                          : Icons.refresh_rounded,
+                    ),
                   ),
             label: Text(
               !snapshot.supported

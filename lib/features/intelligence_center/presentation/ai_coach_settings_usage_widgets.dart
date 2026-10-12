@@ -138,11 +138,14 @@ class _TokenHero extends StatelessWidget {
                     width: 225,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(99),
-                      child: LinearProgressIndicator(
-                        value: weeklyLimit <= 0 ? 0 : 1 - spentFraction,
-                        minHeight: 7,
-                        backgroundColor: scheme.outlineVariant,
-                        valueColor: AlwaysStoppedAnimation(light),
+                      child: BilStripedProgress(
+                        tone: BilProgressTone.calories,
+                        child: LinearProgressIndicator(
+                          value: weeklyLimit <= 0 ? 0 : 1 - spentFraction,
+                          minHeight: 7,
+                          backgroundColor: scheme.outlineVariant,
+                          valueColor: AlwaysStoppedAnimation(light),
+                        ),
                       ),
                     ),
                   ),
@@ -217,7 +220,9 @@ class _SectionTitle extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, color: scheme.onSurfaceVariant, size: 22),
+        BilGlassPressFeedback(
+          child: Icon(icon, color: scheme.onSurfaceVariant, size: 22),
+        ),
         const SizedBox(width: 11),
         Expanded(
           child: Text(
@@ -251,7 +256,9 @@ class _CapabilityChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 17, color: scheme.primary),
+          BilGlassPressFeedback(
+            child: Icon(icon, size: 17, color: scheme.primary),
+          ),
           const SizedBox(width: 6),
           Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
@@ -280,10 +287,12 @@ class _ConsentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SwitchListTile.adaptive(
     contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-    secondary: Icon(
-      icon,
-      size: 22,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    secondary: BilGlassPressFeedback(
+      child: Icon(
+        icon,
+        size: 22,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     ),
     title: Text(title),
     subtitle: Text(

@@ -25,6 +25,14 @@ final class _RaceFoodSearchAuthority extends FoodRuntimeSearchAuthority {
 
   final pending = <String, Completer<List<Food>>>{};
 
+  // The live diary consumes the progressive port, not the legacy Future port.
+  @override
+  Stream<List<Food>> searchProgressively(
+    String query, {
+    int limit = 50,
+    Duration remoteDebounce = const Duration(milliseconds: 180),
+  }) => Stream.fromFuture(search(query, limit: limit));
+
   @override
   Future<List<Food>> search(String query, {int limit = 50}) => query.isEmpty
       ? Future<List<Food>>.value(const [])
@@ -40,7 +48,6 @@ void main() {
     addTearDown(tester.view.reset);
 
     final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
     final repository = FoodRepository(database);
     final eggId = await repository.addFood(
       name: 'Eggs, Grade A, Large',
@@ -66,6 +73,14 @@ void main() {
     final egg = foods.singleWhere((food) => food.id == eggId);
     final apple = foods.singleWhere((food) => food.id == appleId);
     final authority = _RaceFoodSearchAuthority(repository);
+    addTearDown(() async {
+      for (final pending in authority.pending.values) {
+        if (!pending.isCompleted) pending.complete(const []);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      await tester.runAsync(database.close);
+    });
     final selectedDate = DateTime(2026, 8, 24);
 
     await tester.pumpWidget(

@@ -1,3 +1,4 @@
+import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../app/theme/bil_pearl_finish.dart';
 
@@ -81,7 +82,9 @@ class BilPremiumTrustSurface extends StatelessWidget {
                       ),
                     ),
                     alignment: Alignment.center,
-                    child: Icon(icon, color: Colors.white, size: 23),
+                    child: BilGlassPressFeedback(
+                      child: Icon(icon, color: Colors.white, size: 23),
+                    ),
                   ),
                 ),
                 if (eyebrow?.trim().isNotEmpty == true) ...[
@@ -130,10 +133,12 @@ class BilPremiumTrustSurface extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
-                            child: Icon(
-                              point.icon,
-                              size: 15,
-                              color: scheme.primary,
+                            child: BilGlassPressFeedback(
+                              child: Icon(
+                                point.icon,
+                                size: 15,
+                                color: scheme.primary,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -244,7 +249,9 @@ class BilPremiumConsentToggle extends StatelessWidget {
                         color: Colors.white,
                       ),
                     )
-                  : Icon(icon, color: Colors.white, size: 22),
+                  : BilGlassPressFeedback(
+                      child: Icon(icon, color: Colors.white, size: 22),
+                    ),
             ),
             title: Text(
               title,
@@ -563,10 +570,12 @@ class _BilPremiumAiConsentRow extends StatelessWidget {
               ),
             ),
             alignment: Alignment.center,
-            child: Icon(
-              point.icon,
-              size: 21,
-              color: dark ? const Color(0xFFC8F3FF) : const Color(0xFF125B91),
+            child: BilGlassPressFeedback(
+              child: Icon(
+                point.icon,
+                size: 21,
+                color: dark ? const Color(0xFFC8F3FF) : const Color(0xFF125B91),
+              ),
             ),
           ),
           const SizedBox(width: 12),

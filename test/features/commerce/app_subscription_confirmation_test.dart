@@ -10,11 +10,13 @@ import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_experience_presentation.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_term.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/app_purchase_coordinator.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/app_purchase_presentation_routes.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/premium_nutrition_glass.dart';
 import 'package:body_intelligence_log/features/commerce/providers/app_purchase_providers.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
@@ -48,28 +50,36 @@ class _SubscriptionNative extends InAppPurchasePlatform {
   Future<ProductDetailsResponse> queryProductDetails(Set<String> ids) async =>
       ProductDetailsResponse(
         productDetails: [
-          AppStoreProduct2Details.fromSK2Product(
-            SK2Product(
-              id: StoreCatalogConfiguration.premiumMonthly,
-              displayName: 'Premium',
-              description: 'Isolated store boundary',
-              displayPrice: '2.49',
-              price: 2.49,
-              type: SK2ProductType.autoRenewable,
-              priceLocale: SK2PriceLocale(
-                currencyCode: 'USD',
-                currencySymbol: r'$',
-              ),
-              subscription: SK2SubscriptionInfo(
-                subscriptionGroupID: 'fixture-premium',
-                promotionalOffers: const [],
-                subscriptionPeriod: const SK2SubscriptionPeriod(
-                  value: 1,
-                  unit: SK2SubscriptionPeriodUnit.month,
+          for (final productId in [
+            StoreCatalogConfiguration.premiumMonthly,
+            StoreCatalogConfiguration.premiumAiCoachMonthly,
+            StoreCatalogConfiguration.premiumAnnual,
+            StoreCatalogConfiguration.premiumAiCoachAnnual,
+          ])
+            AppStoreProduct2Details.fromSK2Product(
+              SK2Product(
+                id: productId,
+                displayName: 'Premium',
+                description: 'Isolated store boundary',
+                displayPrice: '2.49',
+                price: 2.49,
+                type: SK2ProductType.autoRenewable,
+                priceLocale: SK2PriceLocale(
+                  currencyCode: 'USD',
+                  currencySymbol: r'$',
+                ),
+                subscription: SK2SubscriptionInfo(
+                  subscriptionGroupID: 'fixture-premium',
+                  promotionalOffers: const [],
+                  subscriptionPeriod: SK2SubscriptionPeriod(
+                    value: 1,
+                    unit: productId.endsWith('annual')
+                        ? SK2SubscriptionPeriodUnit.year
+                        : SK2SubscriptionPeriodUnit.month,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
         notFoundIDs: const [],
       );
@@ -88,9 +98,27 @@ class _SubscriptionNative extends InAppPurchasePlatform {
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
-  for (final lifecycle in ['active', 'trial']) {
+  for (final scenario in [
+    for (final plan in [CommercePlan.premium, CommercePlan.premiumAiCoach])
+      for (final lifecycle in ['active', 'trial'])
+        for (final term in [
+          SubscriptionTerm.oneMonth,
+          SubscriptionTerm.oneYear,
+        ])
+          (plan, lifecycle, term),
+  ]) {
+    final plan = scenario.$1;
+    final lifecycle = scenario.$2;
+    final term = scenario.$3;
+    final productId = plan == CommercePlan.premium
+        ? term == SubscriptionTerm.oneYear
+              ? StoreCatalogConfiguration.premiumAnnual
+              : StoreCatalogConfiguration.premiumMonthly
+        : term == SubscriptionTerm.oneYear
+        ? StoreCatalogConfiguration.premiumAiCoachAnnual
+        : StoreCatalogConfiguration.premiumAiCoachMonthly;
     testWidgets(
-      'root subscription $lifecycle proof unlocks before native finish after route exit',
+      'root subscription ${plan.id} ${term.name} $lifecycle proof unlocks before native finish after route exit',
       (tester) async {
         expect(AppEnvironment.commerceConfigured, isTrue);
         final width = lifecycle == 'trial' ? 320.0 : 390.0;
@@ -135,10 +163,7 @@ void main() {
               if (request.url.path == '/functions/v1/verify-store-purchase') {
                 final body = jsonDecode(request.body) as Map;
                 expect(body['delivery_version'], 2);
-                expect(
-                  body['product_id'],
-                  StoreCatalogConfiguration.premiumMonthly,
-                );
+                expect(body['product_id'], productId);
                 verifies++;
                 return verification.future;
               }
@@ -197,6 +222,7 @@ void main() {
           ],
         );
         final draft = TextEditingController(text: 'مسودة لا تُمحى');
+        var paidActions = 0;
         try {
           await tester.pumpWidget(
             UncontrolledProviderScope(
@@ -221,7 +247,20 @@ void main() {
                     child: AppPurchaseCoordinator(child: child!),
                   ),
                 ),
-                home: Scaffold(body: TextField(controller: draft)),
+                home: Scaffold(
+                  body: Column(
+                    children: [
+                      TextField(controller: draft),
+                      PremiumNutritionGlass(
+                        child: TextButton(
+                          key: const Key('verified-purchased-feature-action'),
+                          onPressed: () => paidActions++,
+                          child: const Text('Verified paid feature action'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
@@ -235,17 +274,12 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          await tester.runAsync(
-            () => service.purchasePlan(
-              CommercePlan.premium,
-              term: SubscriptionTerm.oneMonth,
-            ),
-          );
+          await tester.runAsync(() => service.purchasePlan(plan, term: term));
           expect(native.launches, 1);
           native.updates.add([
             PurchaseDetails(
               purchaseID: 'subscription-fixture-transaction',
-              productID: StoreCatalogConfiguration.premiumMonthly,
+              productID: productId,
               verificationData: PurchaseVerificationData(
                 localVerificationData: '',
                 serverVerificationData: 'fixture',
@@ -256,6 +290,12 @@ void main() {
             )..pendingCompletePurchase = true,
           ]);
           await _until(tester, () => verifies == 1);
+          expect(
+            find
+                .byKey(const Key('verified-purchased-feature-action'))
+                .hitTestable(),
+            findsNothing,
+          );
           expect(
             find.byKey(const Key('store-benefit-confirmation')),
             findsNothing,
@@ -269,7 +309,7 @@ void main() {
           rows = [
             {
               'provider': 'apple',
-              'plan_id': 'premium',
+              'plan_id': plan.id,
               'lifecycle': lifecycle,
               'verified_at': at.toIso8601String(),
               'started_at': at.toIso8601String(),
@@ -287,7 +327,7 @@ void main() {
                   'owner_id': owner,
                   'store': 'app_store',
                   'environment': 'sandbox',
-                  'product_id': StoreCatalogConfiguration.premiumMonthly,
+                  'product_id': productId,
                   'event_key': List.filled(
                     64,
                     lifecycle == 'trial' ? 'd' : 'c',
@@ -321,17 +361,29 @@ void main() {
           expect(native.finishes, 1);
           expect(
             container.read(verifiedSubscriptionAccessProvider).value?.plan,
-            CommercePlan.premium,
+            plan,
+          );
+          expect(
+            container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue
+                .entitlements,
+            equals(PaidPlanCatalog.composedEntitlementsFor(plan)),
           );
           expect(draft.text, 'مسودة لا تُمحى');
           await captureClosureFrames(
             tester,
             find.byKey(const Key('subscription-root-capture')),
-            'subscription-$lifecycle-ar-$width-reduced',
+            'subscription-${plan.id}-${term.name}-$lifecycle-ar-$width-reduced',
             step: 'canonical-active-before-held-native-finish',
             frames: 20,
           );
-          expect(find.text('أهلًا بك في BIL Premium'), findsOneWidget);
+          expect(
+            find.text(
+              'أهلًا بك في ${plan == CommercePlan.premiumAiCoach ? 'Premium AI Coach' : 'BIL Premium'}',
+            ),
+            findsOneWidget,
+          );
           expect(
             find.text(
               lifecycle == 'trial'
@@ -344,16 +396,31 @@ void main() {
           await captureClosureSurface(
             tester,
             find.byKey(const Key('subscription-root-capture')),
-            'purchase-subscription-$lifecycle-ar-$width',
+            'purchase-subscription-${plan.id}-${term.name}-$lifecycle-ar-$width',
           );
           await tester.tap(
             find.byKey(const Key('store-confirmation-continue')),
           );
           await tester.pumpAndSettle();
+          expect(
+            find.byKey(const Key('premium-nutrition-glass')),
+            findsNothing,
+          );
+          expect(
+            find
+                .byKey(const Key('verified-purchased-feature-action'))
+                .hitTestable(),
+            findsOneWidget,
+          );
+          await tester.tap(
+            find.byKey(const Key('verified-purchased-feature-action')),
+          );
+          expect(paidActions, 1);
+          expect(native.finish.isCompleted, isFalse);
           await captureClosureFrames(
             tester,
             find.byKey(const Key('subscription-root-capture')),
-            'subscription-$lifecycle-ar-$width-reduced',
+            'subscription-${plan.id}-${term.name}-$lifecycle-ar-$width-reduced',
             step: 'real-continue-keeps-draft',
           );
           native.finish.complete();

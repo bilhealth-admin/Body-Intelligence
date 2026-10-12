@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
 import '../domain/community_models.dart';
@@ -57,7 +57,7 @@ class CommunityFeedCache {
     if (wait) await _clearing;
     return _directory ??
         Directory(
-          '${(await getApplicationSupportDirectory()).path}/bil_feed_v1',
+          '${(await getProtectedApplicationSupportDirectory()).path}/bil_feed_v1',
         );
   }
 

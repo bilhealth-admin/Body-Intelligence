@@ -1,0 +1,21 @@
+{
+  "case": "dashboard_nutrient_goal_card_phone",
+  "previous_master_sha256": "d4e5118f09ddb6fa748c2a7df092c0880fc1b9d2ed959cf8cb12266884e22405",
+  "accepted_actual_sha256": "bf85b0d9b211cfd6206404d1607dceb596be2a67c07a61167bb71690f5ccca49",
+  "diff_bounds": [
+    324,
+    571,
+    351,
+    596
+  ],
+  "pixels_changed": 529,
+  "review_image": "dashboard_nutrient_goal_card_phone.png",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+  "reason": "Owner explicitly removed the gold Community arrow because Community is Free. 529 pixels only in that arrow; all other surfaces, nutrient data and geometry are unchanged.",
+  "promotion": {
+    "time": 1791821907.3164158,
+    "master_sha256": "bf85b0d9b211cfd6206404d1607dceb596be2a67c07a61167bb71690f5ccca49",
+    "method": "one exact named file; visual decision required"
+  }
+}

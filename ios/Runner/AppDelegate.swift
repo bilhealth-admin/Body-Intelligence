@@ -5,11 +5,13 @@ import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, CNContactPickerDelegate {
+  private var communityTranslationBridge: BILCommunityTranslationBridge?
   private var speechBridge: BILSpeechBridge?
   private var textToSpeechBridge: BILTextToSpeechBridge?
   private var micSoundBridge: BILMicSoundBridge?
   private var appleSignInLifecycleBridge: BILAppleSignInLifecycleBridge?
   private var appAttestBridge: BILAppAttestBridge?
+  private var healthStoragePrivacyChannel: FlutterMethodChannel?
   private var pushResult: FlutterResult?
   private var pushToken: String?
   private var pushChannel: FlutterMethodChannel?
@@ -20,6 +22,9 @@ import UserNotifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Reapply to existing/restored files before Flutter can open health data.
+    // Dart verifies again and blocks file access if protection cannot be set.
+    do { try BILHealthStoragePrivacy.protect() } catch { }
     // FlutterAppDelegate forwards local-notification callbacks to registered
     // plugins. Making it the UNUserNotificationCenter delegate also gives BIL
     // one lifecycle-safe seam for remote APNs presentation and tap routing.
@@ -33,6 +38,22 @@ import UserNotifications
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    let privacyRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILHealthStoragePrivacy")!
+    let privacyChannel = FlutterMethodChannel(name: "bil/health_storage_privacy", binaryMessenger: privacyRegistrar.messenger())
+    healthStoragePrivacyChannel = privacyChannel
+    privacyChannel.setMethodCallHandler { call, result in
+      guard call.method == "protectHealthStorage" else {
+        result(FlutterMethodNotImplemented); return
+      }
+      do {
+        try BILHealthStoragePrivacy.protect()
+        result(["scopeVersion": 1, "applicationSupportExcluded": true,
+                "documentsExcluded": true, "preferencesExcluded": true])
+      } catch {
+        result(FlutterError(code: "health_backup_exclusion_failed",
+                           message: "Health storage privacy could not be verified.", details: nil))
+      }
+    }
     BILGlobalHealthBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILGlobalHealthBridge")!)
     BILFitnessBleBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILFitnessBleBridge")!)
     BILSystemCryptoBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILSystemCryptoBridge")!)
@@ -43,6 +64,7 @@ import UserNotifications
     appAttestBridge = BILAppAttestBridge(messenger: appAttestRegistrar.messenger())
     let speechRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILSpeechBridge")!
     speechBridge = BILSpeechBridge(messenger: speechRegistrar.messenger())
+    communityTranslationBridge = BILCommunityTranslationBridge(messenger: speechRegistrar.messenger())
     textToSpeechBridge = BILTextToSpeechBridge(messenger: speechRegistrar.messenger())
     micSoundBridge = BILMicSoundBridge(messenger: speechRegistrar.messenger())
     let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILPushBridge")!
@@ -311,6 +333,30 @@ import UserNotifications
       if result as? Bool == true, self.pendingRemotePushDeepLinks.first == payload {
         self.pendingRemotePushDeepLinks.removeFirst()
         self.deliverNextRemotePushTap()
+      }
+    }
+  }
+}
+
+// Only fixed locations inside this application's sandbox are accepted; Dart
+// cannot supply an arbitrary path. Excluding each parent covers SQLite sidecars,
+// recovery snapshots, private images and app-domain preference files.
+private enum BILHealthStoragePrivacy {
+  static func protect() throws {
+    let manager = FileManager.default
+    var locations = [
+      try manager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true),
+      try manager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    ]
+    let library = try manager.url(for: .libraryDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    locations.append(library.appendingPathComponent("Preferences", isDirectory: true))
+    for var location in locations {
+      try manager.createDirectory(at: location, withIntermediateDirectories: true)
+      var values = URLResourceValues()
+      values.isExcludedFromBackup = true
+      try location.setResourceValues(values)
+      guard try location.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup == true else {
+        throw NSError(domain: "BILHealthStoragePrivacy", code: 1)
       }
     }
   }

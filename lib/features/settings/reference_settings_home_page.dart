@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -312,12 +313,14 @@ class _SettingsRow extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      trailing: Icon(
-        Directionality.of(context) == TextDirection.rtl
-            ? CupertinoIcons.chevron_back
-            : CupertinoIcons.chevron_forward,
-        size: 18,
-        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+      trailing: BilGlassPressFeedback(
+        child: Icon(
+          Directionality.of(context) == TextDirection.rtl
+              ? CupertinoIcons.chevron_back
+              : CupertinoIcons.chevron_forward,
+          size: 18,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
       ),
       onTap: () => context.push(route),
     );

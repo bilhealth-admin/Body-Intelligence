@@ -61,7 +61,7 @@ class _MealsTab extends ConsumerWidget {
         if (history.hasError)
           TextButton.icon(
             onPressed: () => ref.invalidate(myMealHistoryProvider),
-            icon: const Icon(Icons.refresh),
+            icon: const BilGlassPressFeedback(child: Icon(Icons.refresh)),
             label: Text(
               t(
                 'Could not load meals. Retry',

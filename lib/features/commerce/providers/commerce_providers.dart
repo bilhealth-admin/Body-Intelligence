@@ -275,21 +275,19 @@ final verifiedSubscriptionAccessProvider =
       return AsyncValue.data(state);
     });
 
-double _positiveFiniteNumber(Object? value) {
-  if (value is! num) return 0;
-  final number = value.toDouble();
-  return number.isFinite && number > 0 ? number : 0;
-}
-
 /// Pure fail-closed mapping from the server quota snapshot to AI Coach route
 /// access. Subscription allowances and paid Boost credits unlock the coach;
 /// neither source is converted into a Premium entitlement.
-bool aiCoachAccessFromUsageStatus(Object? value) {
-  if (value is! Map) return false;
+bool aiCoachAccessFromUsageStatus(Object? value) =>
+    verifiedAiCoachAccessFromUsageStatus(value) == true;
+
+/// Null is an unavailable authority response; it never means a verified zero.
+bool? verifiedAiCoachAccessFromUsageStatus(Object? value) {
+  if (value is! Map) return null;
   try {
     final status = Map<String, Object?>.from(value);
     final rawCredits = status['credits'];
-    if (rawCredits is! Map) return false;
+    if (rawCredits is! Map) return null;
     final credits = Map<String, Object?>.from(rawCredits);
     // The server computes total_remaining from reserved-aware included and paid
     // balances in one transaction. Treat that single field as the access
@@ -297,11 +295,13 @@ bool aiCoachAccessFromUsageStatus(Object? value) {
     // allowance or a paid Boost. Reconstructing it (or gating it on the plan
     // label) can race an in-flight reserve and can incorrectly reject a Boost
     // owned by someone who also has ordinary Premium.
-    return _positiveFiniteNumber(credits['total_remaining']) > 0;
+    final remaining = credits['total_remaining'];
+    if (remaining is! num || !remaining.isFinite || remaining < 0) return null;
+    return remaining > 0;
   } on Object {
     // Maps with non-string keys or malformed nested structures also fail
-    // closed instead of surfacing a parsing exception into the route gate.
-    return false;
+    // closed without incorrectly turning unavailable authority into an upsell.
+    return null;
   }
 }
 
@@ -359,6 +359,7 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
 final class AiCoachAccessSnapshotStore {
   bool? verifiedAccess;
+  int generation = 0;
 }
 
 /// A new store for every owner transition, including sign-out. Pending work
@@ -375,6 +376,10 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   final snapshot = ref.watch(aiCoachAccessSnapshotStoreProvider);
   ref.watch(aiCoachUsageRefreshProvider);
   if (ownerId == null) return false;
+  final generation = ++snapshot.generation;
+  var active = true;
+  ref.onDispose(() => active = false);
+  bool current() => active && generation == snapshot.generation;
   final loaded = _observedAuthorityReload(
     ref,
     () {
@@ -387,17 +392,22 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
     resumeReload: ref.invalidateSelf,
   );
   // Only a successful server response creates access. Retain the same owner's
-  // last verified result on transient failure; zero/malformed results revoke it.
+  // last verified positive result on transient failure; a previous zero is not
+  // evidence of a fresh denial after a failed check.
   try {
     final value = await ref
         .read(aiCoachUsageStatusLoaderProvider)()
         .timeout(const Duration(seconds: 10));
-    final access = aiCoachAccessFromUsageStatus(value);
+    if (!current()) throw StateError('ai_usage_status_superseded');
+    final access = verifiedAiCoachAccessFromUsageStatus(value);
+    if (access == null) throw StateError('ai_usage_status_unavailable');
     snapshot.verifiedAccess = access;
     return access;
   } on Object {
+    // A disposed/older load cannot borrow continuity from a later generation.
+    if (!current()) rethrow;
     final retained = snapshot.verifiedAccess;
-    if (retained != null) return retained;
+    if (retained == true) return true;
     rethrow;
   } finally {
     loaded();
@@ -445,6 +455,7 @@ final aiVisionCreditStateProvider = FutureProvider<AiVisionCreditState>((
 }, retry: (_, _) => null);
 
 final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
+  ref.watch(verifiedEntitlementOwnerIdProvider);
   return await ref.watch(aiVisionCreditStateProvider.future) ==
       AiVisionCreditState.available;
 });

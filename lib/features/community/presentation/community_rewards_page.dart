@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -578,7 +580,9 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
                         dimension: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.expand_more_rounded),
+                    : const BilGlassPressFeedback(
+                        child: Icon(Icons.expand_more_rounded),
+                      ),
                 label: Text(
                   communityText(context, 'Load more', 'تحميل المزيد'),
                 ),

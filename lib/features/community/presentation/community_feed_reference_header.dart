@@ -3,6 +3,9 @@ part of 'community_hub_page.dart';
 class _CommunityFeedReferenceHeader extends StatefulWidget {
   const _CommunityFeedReferenceHeader({
     required this.repository,
+    this.profile,
+    this.initialProfile,
+    this.initialTopics,
     required this.posts,
     required this.topics,
     required this.enabled,
@@ -13,6 +16,9 @@ class _CommunityFeedReferenceHeader extends StatefulWidget {
   });
 
   final CommunityRepository repository;
+  final Future<CommunityProfileOverview?>? profile;
+  final CommunityProfileOverview? initialProfile;
+  final List<CommunityTopic>? initialTopics;
   final List<CommunityPost> posts;
   final Future<List<CommunityTopic>> topics;
   final bool enabled;
@@ -33,14 +39,15 @@ class _CommunityFeedReferenceHeaderState
   @override
   void initState() {
     super.initState();
-    _profile = widget.repository.loadMyProfileOverview();
+    _profile = widget.profile ?? widget.repository.loadMyProfileOverview();
   }
 
   @override
   void didUpdateWidget(covariant _CommunityFeedReferenceHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.repository, widget.repository)) {
-      _profile = widget.repository.loadMyProfileOverview();
+    if (!identical(oldWidget.repository, widget.repository) ||
+        !identical(oldWidget.profile, widget.profile)) {
+      _profile = widget.profile ?? widget.repository.loadMyProfileOverview();
     }
   }
 
@@ -69,8 +76,9 @@ class _CommunityFeedReferenceHeaderState
             children: [
               FutureBuilder<CommunityProfileOverview?>(
                 future: _profile,
+                initialData: widget.initialProfile,
                 builder: (context, snapshot) => _CommunityStoryBubble(
-                  label: communityText(context, 'Your story', 'قصتك'),
+                  label: communityText(context, 'Create post', 'إنشاء منشور'),
                   avatarUrl: snapshot.data?.avatarUrl,
                   accent: false,
                   add: true,
@@ -119,6 +127,7 @@ class _CommunityFeedReferenceHeaderState
                   children: [
                     FutureBuilder<CommunityProfileOverview?>(
                       future: _profile,
+                      initialData: widget.initialProfile,
                       builder: (context, snapshot) => BilAccountAvatar(
                         radius: 18,
                         networkUrl: snapshot.data?.avatarUrl,
@@ -201,6 +210,7 @@ class _CommunityFeedReferenceHeaderState
         ),
         FutureBuilder<List<CommunityTopic>>(
           future: widget.topics,
+          initialData: widget.initialTopics,
           builder: (context, snapshot) {
             final topics = snapshot.data ?? const <CommunityTopic>[];
             // The selected chips are projections of actual server topics.
@@ -390,7 +400,13 @@ class _CommunityComposeAction extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary),
+            BilGlassPressFeedback(
+              child: Icon(
+                icon,
+                size: 19,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
             const SizedBox(width: 5),
             Flexible(
               child: Text(

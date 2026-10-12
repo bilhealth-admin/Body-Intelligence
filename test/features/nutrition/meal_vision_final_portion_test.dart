@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'vision_v2_test_fixture.dart';
+import '../../visual_closure/closure_surface_capture.dart';
 
 void main() {
   setUpAll(prepareVisionV2Fixture);
@@ -33,6 +34,80 @@ void main() {
     fail('The original TEST file did not decode on the visible photo surface.');
   }
 
+  testWidgets(
+    'portion repeat respects kg precision and unit changes without committing food',
+    (tester) async {
+      await setVisionV2Viewport(tester, const Size(390, 844));
+      TrustedVisionFoodSelection? result;
+      await tester.pumpWidget(
+        visionV2App(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await showReviewedVisionFoodMatchDialog(
+                  context,
+                  recognizedName: 'TEST',
+                  foods: [visionV2Food()],
+                  reviewedAmount: .08,
+                  reviewedUnit: 'kg',
+                  imagePath: visionV2PhotoPath,
+                );
+              },
+              child: const Text('OPEN'),
+            ),
+          ),
+          brightness: Brightness.light,
+        ),
+      );
+      await tester.tap(find.text('OPEN'));
+      await tester.pumpAndSettle();
+      final minus = find.byKey(const Key('premium-vision-final-minus'));
+      await tester.ensureVisible(minus);
+      await tester.pumpAndSettle();
+      await tester.tap(minus);
+      await tester.pump();
+      TextField amount() =>
+          tester.widget(find.byKey(const Key('premium-vision-final-amount')));
+      expect(double.parse(amount().controller!.text), .075);
+      final plus = find.byKey(const Key('premium-vision-final-plus'));
+      final gesture = await tester.startGesture(tester.getCenter(plus));
+      await tester.pump(const Duration(milliseconds: 340));
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(double.parse(amount().controller!.text), .09);
+      final unit = tester
+          .widget<TextField>(find.byKey(const Key('premium-vision-final-unit')))
+          .controller!;
+      unit.text = 'g';
+      await tester.pump();
+      final stopped = amount().controller!.text;
+      await tester.pump(const Duration(milliseconds: 300));
+      await gesture.up();
+      await tester.pump();
+      expect(amount().controller!.text, stopped);
+      expect(result, isNull);
+      await tester.enterText(
+        find.byKey(const Key('premium-vision-final-amount')),
+        '60',
+      );
+      tester.testTextInput.hide();
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(plus);
+      await tester.pumpAndSettle();
+      final g = await tester.startGesture(tester.getCenter(plus));
+      await tester.pump(const Duration(milliseconds: 340));
+      await tester.pump(const Duration(milliseconds: 150));
+      await g.up();
+      await tester.pump();
+      expect(amount().controller!.text, '75');
+      expect(result, isNull);
+      await captureClosureSurface(
+        tester,
+        find.byKey(const Key('v2-test-screen')),
+        'vision-repeated-portion-ar-light',
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
   testWidgets(
     'cancel final review returns no selection and no substitute photo',
     (tester) async {

@@ -52,6 +52,88 @@ Widget _dashboard({bool discoverOnly = false}) => SingleChildScrollView(
 );
 
 void main() {
+  for (final checking in [false, true]) {
+    testWidgets(
+      'Community is free and tappable while premium checking=$checking',
+      (tester) async {
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, _) => Scaffold(
+                body: SingleChildScrollView(
+                  child: PremiumDashboardBenchmark(
+                    arabic: false,
+                    actionTitle: '',
+                    actionReason: '',
+                    actionEvidence: '',
+                    confidence: '',
+                    onAction: null,
+                    dailyIntelligence: const SizedBox.shrink(),
+                    bodyTwinSummary: '',
+                    bodyTwinEvidence: '',
+                    nutritionSummary: '',
+                    nutritionEvidence: '',
+                    trendSummary: '',
+                    trendEvidence: '',
+                    loggingItems: const [],
+                    visibleSections: const {DashboardSectionIds.discover},
+                    premiumUnlocked: false,
+                    premiumAccessResolved: !checking,
+                    premiumAccessChecking: checking,
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              path: '/community',
+              builder: (_, _) =>
+                  const Scaffold(body: Text('Free Community destination')),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp.router(
+              routerConfig: router,
+              locale: const Locale('en'),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+            ),
+          ),
+        );
+        await tester.pump();
+        final tile = find.byKey(const Key('dashboard-community-free-tile'));
+        await tester.ensureVisible(tile);
+        await tester.pump();
+        expect(
+          find.descendant(
+            of: tile,
+            matching: find.byIcon(Icons.arrow_forward_rounded),
+          ),
+          findsNothing,
+        );
+        expect(
+          find.descendant(
+            of: tile,
+            matching: find.byType(CircularProgressIndicator),
+          ),
+          findsNothing,
+        );
+        expect(tile.hitTestable(), findsOneWidget);
+        await tester.tap(tile);
+        await tester.pumpAndSettle();
+        expect(find.text('Free Community destination'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   for (final locale in AppLocalizations.supportedLocales) {
     testWidgets(
       '${locale.toLanguageTag()} workout tile opens videos and routines at 1.6x',
@@ -215,6 +297,17 @@ void main() {
         if (locale.languageCode == 'en') {
           expect(find.text('Calories'), findsOneWidget);
           expect(find.text('Today'), findsOneWidget);
+          final todayText = tester.widget<Text>(find.text('Today'));
+          expect(
+            todayText.style?.fontFamily,
+            Theme.of(
+              tester.element(find.text('Today')),
+            ).textTheme.labelLarge?.fontFamily,
+          );
+          expect(
+            todayText.style?.color,
+            Theme.of(tester.element(find.text('Today'))).colorScheme.primary,
+          );
           final caloriesTitle = tester.widget<Text>(
             find.descendant(of: calories, matching: find.text('Calories')),
           );

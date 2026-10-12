@@ -49,7 +49,7 @@ class _WorkoutLibraryError extends StatelessWidget {
     ),
     action: FilledButton.icon(
       onPressed: onRetry,
-      icon: const Icon(Icons.refresh_rounded),
+      icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
       label: Text(_copy(context, 'Retry', 'إعادة المحاولة')),
     ),
   );
@@ -116,7 +116,9 @@ class _WorkoutLibraryEmpty extends StatelessWidget {
           ? null
           : FilledButton.icon(
               onPressed: onManagePacks,
-              icon: const Icon(Icons.download_for_offline_outlined),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.download_for_offline_outlined),
+              ),
               label: Text(_copy(context, 'Manage packs', 'إدارة الحزم')),
             ),
     );
@@ -253,7 +255,7 @@ class _CenteredLibraryState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 58),
+          BilGlassPressFeedback(child: Icon(icon, size: 58)),
           const SizedBox(height: 15),
           Text(
             title,

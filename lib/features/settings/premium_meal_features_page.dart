@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_controller_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -91,7 +93,9 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
         body: Center(
           child: FilledButton.icon(
             onPressed: () => ref.invalidate(verifiedSubscriptionStateProvider),
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(_copy(context, 'Retry subscription check')),
           ),
         ),
@@ -107,7 +111,9 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
                 key: const Key('premium-feature-entitlement-retry'),
                 onPressed: () =>
                     ref.invalidate(verifiedSubscriptionStateProvider),
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 label: Text(_copy(context, 'Retry subscription check')),
               ),
             ),
@@ -141,7 +147,8 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
 }
 
 class MealCalorieGoalsPage extends ConsumerWidget {
-  const MealCalorieGoalsPage({super.key});
+  const MealCalorieGoalsPage({super.key, this.initialMeal});
+  final String? initialMeal;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -157,7 +164,9 @@ class MealCalorieGoalsPage extends ConsumerWidget {
               error: (_, _) => Center(
                 child: TextButton.icon(
                   onPressed: () => ref.invalidate(mealCalorieGoalsProvider),
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.refresh_rounded),
+                  ),
                   label: Text(_copy(context, 'Retry')),
                 ),
               ),
@@ -179,13 +188,17 @@ class MealCalorieGoalsPage extends ConsumerWidget {
                     'snack',
                   ])
                     ListTile(
+                      key: Key('meal-calorie-goal-$meal'),
+                      selected: initialMeal == meal,
                       title: Text(_copy(context, meal)),
                       subtitle: Text(
                         goals[meal] == null
                             ? _copy(context, 'No meal goal')
                             : '${goals[meal]!.toStringAsFixed(0)} kcal',
                       ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      trailing: const BilGlassPressFeedback(
+                        child: Icon(Icons.chevron_right_rounded),
+                      ),
                       onTap: () =>
                           _editMealGoal(context, ref, meal, goals[meal]),
                     ),
@@ -215,8 +228,9 @@ class MealCalorieGoalsPage extends ConsumerWidget {
     );
     var saving = false;
     String? error;
-    await showDialog<void>(
+    await showBilControllerDialog<void>(
       context: context,
+      controllers: [controller],
       barrierDismissible: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) {
@@ -306,8 +320,6 @@ class MealCalorieGoalsPage extends ConsumerWidget {
         },
       ),
     );
-    await WidgetsBinding.instance.endOfFrame;
-    controller.dispose();
   }
 }
 
@@ -339,7 +351,9 @@ class _MealMacroDisplayPageState extends ConsumerState<MealMacroDisplayPage> {
                 error: (_, _) => Center(
                   child: TextButton.icon(
                     onPressed: () => ref.invalidate(mealMacroDisplayProvider),
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(_copy(context, 'Retry')),
                   ),
                 ),

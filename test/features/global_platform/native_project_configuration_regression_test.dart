@@ -53,7 +53,15 @@ void main() {
       'lib/features/global_platform/runtime/global_product_composition_root.dart',
     ).readAsStringSync();
     expect(source, isNot(contains('SqliteGlobalPlatformStore.memory()')));
-    expect(source, contains('getApplicationSupportDirectory'));
+    expect(source, contains('getProtectedApplicationSupportDirectory'));
+    expect(source, isNot(contains('getApplicationSupportDirectory(')));
+    final protectedDirectory = File(
+      'lib/app/services/health_storage_directory_native.dart',
+    ).readAsStringSync();
+    final guard = protectedDirectory.indexOf('ensureProtected()');
+    final resolver = protectedDirectory.indexOf('return (directoryResolver');
+    expect(guard, greaterThanOrEqualTo(0));
+    expect(resolver, greaterThan(guard));
     expect(source, contains('bil_global_platform.sqlite3'));
   });
 }

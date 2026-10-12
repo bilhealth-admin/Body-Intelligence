@@ -58,7 +58,9 @@ class _HealthSourceCard extends ConsumerWidget {
                       dimension: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.sync_rounded),
+                  : const BilGlassPressFeedback(
+                      child: Icon(Icons.sync_rounded),
+                    ),
               label: Text(
                 snapshot.isBusy
                     ? tr('Synchronizing…', 'تتم المزامنة…')

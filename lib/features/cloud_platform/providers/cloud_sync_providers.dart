@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
@@ -24,6 +24,7 @@ import '../services/local_data_account_boundary.dart';
 import '../services/app_database_cloud_inbox_applier.dart';
 import '../services/startup_cloud_profile_restore_service.dart';
 import '../services/supabase_startup_cloud_profile_reader.dart';
+import 'cloud_restore_providers.dart';
 
 /// Bootstrap input deliberately excludes credentials. Supabase owns its
 /// ephemeral session and the payload cipher owns its key material.
@@ -169,6 +170,7 @@ final cloudManualSyncServiceProvider = Provider<CloudManualSyncService>((ref) {
     client: Supabase.instance.client,
     database: ref.watch(databaseProvider),
     accountBoundary: ref.watch(localDataAccountBoundaryProvider),
+    restoreConsent: ref.watch(cloudRestoreConsentRepositoryProvider),
   );
 });
 
@@ -261,7 +263,8 @@ final cloudRuntimePreparationProvider =
           client: client,
         ).resolve(ownerId);
         final device = await CloudDeviceIdentityRepository().resolve(ownerId);
-        final supportDirectory = await getApplicationSupportDirectory();
+        final supportDirectory =
+            await getProtectedApplicationSupportDirectory();
         final ledgerPath = p.join(
           supportDirectory.path,
           'bil_cloud_ledger_v1.sqlite',

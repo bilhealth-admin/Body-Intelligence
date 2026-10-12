@@ -155,10 +155,12 @@ class _CommunityProfileConnectionsSheetState
                                 : communityText(context, 'Follow', 'متابعة'),
                           ),
                   ),
-                Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
+                BilGlassPressFeedback(
+                  child: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.chevron_left_rounded
+                        : Icons.chevron_right_rounded,
+                  ),
                 ),
               ],
             ),

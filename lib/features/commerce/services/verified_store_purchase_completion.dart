@@ -24,9 +24,10 @@ extension _VerifiedNativeStoreCompletion on VerifiedStorePurchaseService {
       if (purchase.pendingCompletePurchase) {
         trace?.mark(StorePurchaseStage.finishStarted);
         if (!boost || defaultTargetPlatform != TargetPlatform.android) {
-          await _purchase
-              .completePurchase(purchase)
-              .timeout(const Duration(seconds: 12));
+          await completeVerifiedNativePurchase(
+            _purchase,
+            purchase,
+          ).timeout(const Duration(seconds: 12));
         }
       }
       if (current()) {

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -277,7 +278,9 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                             const SizedBox(height: 16),
                             FilledButton.icon(
                               onPressed: _retryLoad,
-                              icon: const Icon(Icons.refresh_rounded),
+                              icon: const BilGlassPressFeedback(
+                                child: Icon(Icons.refresh_rounded),
+                              ),
                               label: Text(copy.retry),
                             ),
                           ],

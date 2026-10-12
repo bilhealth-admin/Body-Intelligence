@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,8 @@ import '../../../app/localization/runtime_copy_admin_notifications.dart';
 import '../services/admin_operation_error.dart';
 import '../services/ai_coach_admin_service.dart';
 import 'admin_notification_presets.dart';
+
+part 'admin_notification_request.dart';
 
 /// Admin-only notification controls.
 ///
@@ -194,7 +197,7 @@ class _AdminNotificationControlsState
           FilledButton.icon(
             key: const Key('admin-notification-confirm-send'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            icon: const Icon(Icons.send_rounded),
+            icon: const BilGlassPressFeedback(child: Icon(Icons.send_rounded)),
             label: Text(
               _copy(
                 'Send now',
@@ -356,7 +359,7 @@ class _NotificationActionButton extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10),
-                child: Icon(icon, color: color),
+                child: BilGlassPressFeedback(child: Icon(icon, color: color)),
               ),
             ),
             const SizedBox(width: 12),
@@ -374,7 +377,9 @@ class _NotificationActionButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded),
+            const BilGlassPressFeedback(
+              child: Icon(Icons.chevron_right_rounded),
+            ),
           ],
         ),
       ),
@@ -680,20 +685,4 @@ class _AdminNotificationComposerState
     _messageController.dispose();
     super.dispose();
   }
-}
-
-class _AdminNotificationRequest {
-  const _AdminNotificationRequest({
-    required this.kind,
-    required this.audience,
-    required this.email,
-    required this.message,
-    required this.previewMessage,
-  });
-
-  final AiCoachAdminNotificationKind kind;
-  final AiCoachAdminNotificationAudience audience;
-  final String? email;
-  final String? message;
-  final String previewMessage;
 }

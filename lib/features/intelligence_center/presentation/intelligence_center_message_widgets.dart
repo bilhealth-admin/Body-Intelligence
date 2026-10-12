@@ -198,7 +198,9 @@ class _MessageBubble extends StatelessWidget {
                     child: TextButton.icon(
                       key: const Key('ai-coach-retry'),
                       onPressed: onRetry,
-                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh_rounded, size: 18),
+                      ),
                       label: Text(
                         intelligenceText(context, 'Retry', 'إعادة المحاولة'),
                       ),
@@ -217,7 +219,9 @@ class _MessageBubble extends StatelessWidget {
                               dimension: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.undo_rounded, size: 18),
+                          : const BilGlassPressFeedback(
+                              child: Icon(Icons.undo_rounded, size: 18),
+                            ),
                       label: Text(intelligenceText(context, 'Undo', 'تراجع')),
                     ),
                   ),
@@ -309,7 +313,9 @@ class _CoachMessageActionControl extends StatelessWidget {
                     dimension: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Icon(_iconForAction(action.type), size: 18),
+                : BilGlassPressFeedback(
+                    child: Icon(_iconForAction(action.type), size: 18),
+                  ),
             label: Text(
               running
                   ? AiCoachChatCopy.resolve(locale, AiCoachChatCopy.opening)
@@ -337,7 +343,9 @@ class _CoachMessageActionControl extends StatelessWidget {
                 'ai-coach-action-retry-${action.type.name}-${action.id}',
               ),
               onPressed: onPressed,
-              icon: const Icon(Icons.refresh_rounded, size: 17),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded, size: 17),
+              ),
               label: Text(
                 AiCoachChatCopy.resolve(locale, AiCoachChatCopy.retry),
               ),
@@ -573,7 +581,9 @@ class _ActionSheet extends StatelessWidget {
                   iconOverride: _iconForAction(action.type),
                   appleIconOverride: _iconForAction(action.type),
                 ),
-                null => Icon(_iconForAction(action.type)),
+                null => BilGlassPressFeedback(
+                  child: Icon(_iconForAction(action.type)),
+                ),
               },
               title: Text(action.label),
               subtitle: Text(

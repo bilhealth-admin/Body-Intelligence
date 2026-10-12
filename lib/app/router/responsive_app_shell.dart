@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../../features/community/presentation/community_attention_scope.dart';
 import 'dart:ui';
 
@@ -356,11 +357,13 @@ class _GlassQuickAdd extends StatelessWidget {
           IconButton(
             tooltip: context.strings.text('Quick Add'),
             onPressed: onTap,
-            icon: Icon(
-              BilNavigationIcons.quickAdd(Theme.of(context).platform),
-              key: const Key('shell-quick-add-icon'),
-              color: Colors.white,
-              size: size >= 60 ? 31 : 28,
+            icon: BilGlassPressFeedback(
+              child: Icon(
+                BilNavigationIcons.quickAdd(Theme.of(context).platform),
+                key: const Key('shell-quick-add-icon'),
+                color: Colors.white,
+                size: size >= 60 ? 31 : 28,
+              ),
             ),
           ),
           Positioned(

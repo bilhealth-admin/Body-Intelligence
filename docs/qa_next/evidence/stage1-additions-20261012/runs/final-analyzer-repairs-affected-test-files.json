@@ -1,0 +1,489 @@
+{
+  "label": "final-analyzer-repairs-affected-test-files",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+    "test/features/commerce/premium_label_badge_test.dart",
+    "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+    "test/features/commerce/premium_nutrition_glass_test.dart",
+    "test/features/analytics/nutrition_goal_schedule_state_test.dart",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+  ],
+  "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "started": 1791822322.7906406,
+  "files": {
+    "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart": "77c1741c542b33ed2dbec2d556b50f09eb415869a53f10c2522c17a99fd702d6",
+    "test/features/commerce/premium_label_badge_test.dart": "033ec91f17af57f6e9ef91f64258ab63089bb73c4d236c4312634b228e5d7f33",
+    "test/features/commerce/bil_store_plans_dynamic_contract_test.dart": "7e0f6793248a399c15097e8f0a7f0fcd6f6e19098dcde24162e005adf0804f97",
+    "test/features/commerce/premium_nutrition_glass_test.dart": "6520898ff235585c96b24914578641ffcce891de2e0f12bbb4707240de1a117d",
+    "test/features/analytics/nutrition_goal_schedule_state_test.dart": "141f0b863f89da14083b858b14ebd5ac07707b0b21675c6b6fe2f551d03474d1"
+  },
+  "fingerprint_version": 3,
+  "source_fingerprint": "d98342f0fd1f5ad0a8baa22b35dade871d5e9f5babef13ffa8440dd46cbf3398",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+    "test/features/commerce/premium_label_badge_test.dart",
+    "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+    "test/features/commerce/premium_nutrition_glass_test.dart",
+    "test/features/analytics/nutrition_goal_schedule_state_test.dart",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+  ],
+  "pid": 17284,
+  "exit_code": 0,
+  "finished": 1791822348.3624885,
+  "end_fingerprint": "d98342f0fd1f5ad0a8baa22b35dade871d5e9f5babef13ffa8440dd46cbf3398",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "Community is free and tappable while premium checking=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Community is free and tappable while premium checking=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fr workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fr uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "es workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "es uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "tr workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "tr uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "de workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "de uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "it workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "it uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pt-BR workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pt-BR uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pt-PT workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pt-PT uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ur workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ur uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fa workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fa uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hi workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hi uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "id workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "id uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ms workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ms uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ja workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ja uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ko workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ko uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zh-Hans workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zh-Hans uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zh-Hant workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zh-Hant uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ru workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ru uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "bn workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "bn uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "vi workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "vi uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "th workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "th uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pl workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pl uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nl workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nl uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "uk workout tile opens videos and routines at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "uk uses reference calorie and macro rows at 1.6x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "uses a compact gold Premium word without lock icon",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_label_badge_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "gold Premium actual Plans action ar dark=false at 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_label_badge_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "gold Premium actual Plans action ar dark=true at 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_label_badge_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "gold Premium actual Plans action en dark=false at 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_label_badge_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "gold Premium actual Plans action en dark=true at 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_label_badge_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "extended AI plan summary includes every paid feature above Free",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ownership conflict is scoped to the authenticated BIL owner",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "changed Play offer reloads the screen without a second purchase",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "settled inactive restore immediately refreshes mounted access without purchasing",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unconfirmed receipt shows calm recovery guidance, not loss of access",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "thrown purchase request resolves localized feedback, never raw code",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore verification failure never claims that purchase history was checked",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore ownership rejection is not shown as an empty history",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ownership conflict survives plans route recreation and blocks repurchase",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "plan route is fail-closed when owner store IDs are absent",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "plan route respects dark interface and 200% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy glass paywall is not imported by the production plan route",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unavailable price is tappable and reloads the store catalog",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "empty catalog reloads after returning to the foreground",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "malformed catalog remains reloadable after app resume",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "resume does not duplicate an in-flight store query",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Continue dispatches exactly one selected store offer",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a cancelled native sheet clears feedback and permits a lower term",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "changing term clears retryable purchase feedback without reopening the route",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "group gold action requires current verified denial, not stale data",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verified Free hides nutrition semantics and routes to plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "only server-verified premium removes the glass",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "only server-verified premium_ai_coach removes the glass",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "subscription loading never flashes an upgrade action",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "subscription error stays protected with retry and no false Premium offer",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "local Free fallback requires retry, never a paid upsell",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "schedule delay never becomes another daily target",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/nutrition_goal_schedule_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "schedule failure never becomes another daily target",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/nutrition_goal_schedule_state_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 85,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": [],
+  "delta_to_final": [],
+  "original_record_sha256": "e6f5225712b784dbc649a0f5f551fe9e93bd0e4e68625fbba003fda61fdb298a"
+}

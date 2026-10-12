@@ -1,0 +1,30 @@
+{
+  "source_backup": "G:/BIL_Project/qa-preserved/closure-line-endings-20261012/last-four-source-crlf",
+  "all_four_are_CRLF_to_LF_only": true,
+  "checks": [
+    {
+      "file": "lib/features/commerce/presentation/premium_collection_item_gate.dart",
+      "before_sha256": "352228c15fade2e274765f44e1b43adef5d9d07f76b842c011b7ca319d16b65c",
+      "after_sha256": "6c2b88d7d8049f7e7972292a739d1c2f8ea429e39a57ce629c65854f16dbf557",
+      "normalized_bytes_equal": true
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_helpers.dart",
+      "before_sha256": "d7e6c555ccc355a155d91702306b887b78e6188c0aaab8c054bbfbb893d597d9",
+      "after_sha256": "66749efeb2a380665f8c4cb9087376d6ca05f1d33f70dd579cd1b957b14975e5",
+      "normalized_bytes_equal": true
+    },
+    {
+      "file": "test/features/wellness/recipe_library_polish_test.dart",
+      "before_sha256": "d02e0977cc6a16dd8e6909c127d08cf1cf12ff22d6bce047a65236ce833b637e",
+      "after_sha256": "ef403ece0b5a9bd2ebcfa274f56d0c4afa245e5f2de91d92643c2c87a637d2ba",
+      "normalized_bytes_equal": true
+    },
+    {
+      "file": "test/visual_closure/actual_data_pages_golden_test.dart",
+      "before_sha256": "eb8ab68d47851c700105c619d31c36b8ec75c9b157d85943c2ed1b0612e426d1",
+      "after_sha256": "0a43812748b02b2b43a828ac92c798e754737abb9133f7b433eb8a3300729c0e",
+      "normalized_bytes_equal": true
+    }
+  ]
+}

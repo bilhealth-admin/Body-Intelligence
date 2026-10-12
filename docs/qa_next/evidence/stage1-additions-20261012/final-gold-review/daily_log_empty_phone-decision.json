@@ -1,0 +1,21 @@
+{
+  "case": "daily_log_empty_phone",
+  "previous_master_sha256": "b2de22d79333b229d48810b919d6202971ec65a5529e5a7ffb09ba30237a02a3",
+  "accepted_actual_sha256": "42878b485bb199c52241728bc32b7a2967e95fb513cedb7aa83d579c34757237",
+  "diff_bounds": [
+    16,
+    310,
+    374,
+    844
+  ],
+  "pixels_changed": 93392,
+  "review_image": "daily_log_empty_phone.png",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+  "reason": "Metallic gold upgrade marker with readable dark ink and a real 48px touch target replaces the stretched old status pill. Free-only group shifts 15px to accommodate safe touch; paid calorie/macro rendering and goals are unchanged. Actual image inspected, no clipping or concealed public heading.",
+  "promotion": {
+    "time": 1791821908.3839686,
+    "master_sha256": "42878b485bb199c52241728bc32b7a2967e95fb513cedb7aa83d579c34757237",
+    "method": "one exact named file; visual decision required"
+  }
+}

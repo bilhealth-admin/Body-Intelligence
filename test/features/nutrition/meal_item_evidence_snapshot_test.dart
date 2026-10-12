@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:drift/native.dart';
@@ -103,7 +104,14 @@ void main() {
 
     final item = await database.select(database.mealItems).getSingle();
 
-    expect(item.foodSourceSnapshot, 'local');
+    // The declared-unit snapshot carries a versioned source marker so the
+    // nineteen-nutrient evidence cannot fall back to legacy zero projections.
+    expect(item.foodSourceSnapshot, 'unit_food_v1:local');
+    final evidence = MealFoodEvidence.read(item);
+    expect(evidence.isValid, isTrue);
+    expect(evidence.unit!.source, 'local');
+    expect(evidence.unit!.unit, 'piece');
+    expect(evidence.unit!.quantity, 1);
     expect(item.foodVerifiedSnapshot, isFalse);
     expect(item.servingSizeSnapshot, 1);
     expect(item.servingUnitSnapshot, 'piece');

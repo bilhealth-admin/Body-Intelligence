@@ -76,7 +76,9 @@ class _CodeUnavailable extends StatelessWidget {
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
             ),
           ],
@@ -158,7 +160,9 @@ class _CodeScannerFailure extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(
               communityText(context, 'Retry camera', 'إعادة محاولة الكاميرا'),
             ),

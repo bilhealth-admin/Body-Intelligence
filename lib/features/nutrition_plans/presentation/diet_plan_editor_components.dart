@@ -347,7 +347,11 @@ class _MacroEnergyRing extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             CustomPaint(
-              painter: _MacroRingPainter(target: target, progress: progress),
+              painter: _MacroRingPainter(
+                target: target,
+                progress: progress,
+                brightness: Theme.of(context).brightness,
+              ),
             ),
             Center(
               child: Padding(
@@ -384,9 +388,14 @@ class _MacroEnergyRing extends StatelessWidget {
 }
 
 class _MacroRingPainter extends CustomPainter {
-  const _MacroRingPainter({required this.target, required this.progress});
+  const _MacroRingPainter({
+    required this.target,
+    required this.progress,
+    required this.brightness,
+  });
   final DietMacroTarget target;
   final double progress;
+  final Brightness brightness;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -400,25 +409,31 @@ class _MacroRingPainter extends CustomPainter {
     canvas.drawCircle(center, radius, background);
 
     final energy = <(double, Color)>[
-      (target.carbsGrams * 4, const Color(0xFF0BA5EC)),
-      (target.proteinGrams * 4, const Color(0xFF7F56D9)),
-      (target.fatGrams * 9, const Color(0xFFF79009)),
+      (
+        target.carbsGrams * 4,
+        BilProgressPalette.color(BilProgressTone.carbs, brightness),
+      ),
+      (
+        target.proteinGrams * 4,
+        BilProgressPalette.color(BilProgressTone.protein, brightness),
+      ),
+      (
+        target.fatGrams * 9,
+        BilProgressPalette.color(BilProgressTone.fat, brightness),
+      ),
     ];
     const gap = .055;
     var start = -math.pi / 2;
     for (final segment in energy) {
       final sweep = math.pi * 2 * segment.$1 / target.calories;
-      final paint = Paint()
-        ..color = segment.$2
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 11
-        ..strokeCap = StrokeCap.round;
-      canvas.drawArc(
+      BilStripedProgressPaint.arc(
+        canvas,
         bounds,
         start + gap / 2,
         math.max(0, sweep - gap) * progress,
-        false,
-        paint,
+        11,
+        segment.$2,
+        cap: StrokeCap.round,
       );
       start += sweep;
     }
@@ -426,7 +441,9 @@ class _MacroRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _MacroRingPainter oldDelegate) =>
-      oldDelegate.target != target || oldDelegate.progress != progress;
+      oldDelegate.target != target ||
+      oldDelegate.progress != progress ||
+      oldDelegate.brightness != brightness;
 }
 
 class _MacroLegend extends StatelessWidget {

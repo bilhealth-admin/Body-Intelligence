@@ -91,9 +91,11 @@ class _FoodAddActionSheet extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (verifiedDenied)
-                      const Align(
+                      Align(
                         alignment: AlignmentDirectional.centerStart,
-                        child: PremiumLabelBadge(),
+                        child: PremiumLabelBadge(
+                          onTap: () => context.push('/plans'),
+                        ),
                       ),
                     _FoodAddActionTile(
                       actionKey: const Key('food-add-scan-barcode'),
@@ -178,7 +180,9 @@ class _FoodAddActionTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded),
+        trailing: const BilGlassPressFeedback(
+          child: Icon(Icons.chevron_right_rounded),
+        ),
         onTap: onTap,
       ),
     );
@@ -450,7 +454,7 @@ class _RuntimeSearchStatus extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               else
-                Icon(icon, size: 18),
+                BilGlassPressFeedback(child: Icon(icon, size: 18)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

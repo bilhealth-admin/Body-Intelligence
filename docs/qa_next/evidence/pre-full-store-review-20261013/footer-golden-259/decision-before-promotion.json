@@ -1,0 +1,15 @@
+{
+  "id": "259",
+  "case": "store plans production page lower actions capture",
+  "file": "test/visual_closure/actual_production_pages_golden_test.dart",
+  "reference": "test/visual_closure/goldens/visual_closure_store_plans_phone_2.png",
+  "master_sha256": "55194b895797a5cf43c4dc9ccc12c051c889a09b8d7c2f814f4ef1190be16e55",
+  "actual_sha256": "81c84b6f96e6e78322a0354f57c2bc476b9888f08fac8e9078aca271b9d7ca97",
+  "before_sha256": "55194b895797a5cf43c4dc9ccc12c051c889a09b8d7c2f814f4ef1190be16e55",
+  "before_proof": "Actual Flutter zero-tolerance comparison passed in golden-and-affected-layout-final-validation on dirty source fingerprint v3 c8948f7747d85a42d603434dbf93c51df3e7916a65159f4789c3555c4a6d46f3; prior master is that validated raster. This is the prior validated candidate, not a claimed new 2c runtime capture.",
+  "log": "build/stage1-closure/review-final-all-goldens-and-layout.log",
+  "diff_reported": "35.73%, 117624px",
+  "reviewed": true,
+  "decision": "accept-new-legal-footer",
+  "review_reason": "Individually inspected full Master and Actual. Terms of Use and Privacy Policy are now visible separate 48px actions under Manage; Restore and Manage remain reachable and readable; free Friends/messages remain visible and unchanged. The footer adds vertical space and changes the bottom scroll position without overlapping content or changing prices/plan benefits. Functional footer tests cover real taps, narrow 2x RTL/LTR and both themes."
+}

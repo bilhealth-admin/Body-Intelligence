@@ -139,12 +139,12 @@ class _CommunityCircleDiscoveryHeader extends StatelessWidget {
               tooltip: label,
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               onPressed: onPressed,
-              icon: Icon(icon),
+              icon: BilGlassPressFeedback(child: Icon(icon)),
             )
           : TextButton.icon(
               key: Key(key),
               onPressed: onPressed,
-              icon: Icon(icon),
+              icon: BilGlassPressFeedback(child: Icon(icon)),
               label: Text(label),
             );
       return Wrap(

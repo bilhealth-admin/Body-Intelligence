@@ -14,6 +14,9 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
+import 'package:in_app_purchase_platform_interface/in_app_purchase_platform_interface.dart';
+import 'store_native_purchase_completion_test.dart' as billing;
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -311,6 +314,64 @@ void main() {
       expect(native.completionCalls, 0);
     },
   );
+  test(
+    'Android non-OK acknowledgement keeps committed benefit and retries same receipt',
+    () async {
+      await ready();
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'google',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+        },
+      ];
+      verificationResponse = (_) => _verifiedSubscriptionResponse();
+      final previousPlatform = billing.existingOrIsolatedPurchasePlatform();
+      final nativeResult = Completer<BillingResultWrapper>();
+      final ackStarted = Completer<void>();
+      final api = billing.NativeBillingClient()
+        ..acknowledge = () {
+          if (!ackStarted.isCompleted) ackStarted.complete();
+          return nativeResult.future;
+        };
+      final platform = billing.realAndroidPlatform(api);
+      InAppPurchasePlatform.instance = platform;
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() {
+        platform.billingClientManager.dispose();
+        InAppPurchasePlatform.instance = previousPlatform;
+      });
+      native.updates.add([billing.googleSubscription()]);
+      await ackStarted.future;
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      expect(store.verifiedBenefitRevision, 1);
+      expect(verificationCalls, 1);
+      nativeResult.complete(
+        BillingResultWrapper(responseCode: BillingResponse.serviceUnavailable),
+      );
+      await drain();
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.messageCode, 'store_finish_pending');
+      expect(store.hasPendingVerifiedFinish, isTrue);
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      api.acknowledge = null;
+      api.response = BillingResponse.ok;
+      await store.continueVerification();
+      expect(store.hasPendingVerifiedFinish, isFalse);
+      expect(api.acknowledgements, 2);
+      expect(verificationCalls, 1, reason: 'finish retry must not recredit');
+      expect(native.launches, 0);
+      expect(store.verifiedBenefitRevision, 1);
+    },
+  );
+
   test(
     'durable active subscription is published before slow native finish',
     () async {

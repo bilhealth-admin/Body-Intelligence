@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_summary_widgets.dart';
+import 'features/daily_log/daily_log_nutrition_fixtures.dart';
 
 void main() {
   test('Daily Log links to a focused body context page after exercise', () {
@@ -235,20 +238,42 @@ void main() {
     expect(router, contains('DailyWaterPage('));
   });
 
-  test('localized nutrient labels are not translated a second time', () {
-    final summary = <String>[
-      'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-      'lib/features/daily_log/presentation/daily_log_summary_metrics.dart',
-    ].map((path) => File(path).readAsStringSync()).join('\n');
-
-    expect(summary, isNot(contains('context.strings.text(label)')));
-    expect(
-      summary,
-      contains("'\$label: \${context.strings.text('Unavailable')}'"),
-    );
-    expect(
-      summary,
-      contains("'\$label \${value!.toStringAsFixed(1)} \$localizedUnit'"),
-    );
-  });
+  testWidgets(
+    'localized nutrient labels and unknown values render without a second translation',
+    (tester) async {
+      for (final language in ['en', 'ar']) {
+        await pumpDiaryEvidence(
+          tester,
+          DailyLogSnapshot(
+            arabic: language == 'ar',
+            meals: [
+              diaryMeal([calorieOnlyDiaryItem()]),
+            ],
+            water: const [],
+            calorieGoal: 2000,
+            carbsGoal: 250,
+            proteinGoal: 100,
+            fatGoal: 70,
+          ),
+          language: language,
+        );
+        for (final label
+            in language == 'ar'
+                ? ['كربوهيدرات', 'دهون', 'بروتين']
+                : ['Carbs', 'Fat', 'Protein']) {
+          expect(find.text('$label · g'), findsOneWidget);
+        }
+        expect(diaryText(tester, 'daily-summary-protein-grams'), '— / 100');
+        expect(
+          tester
+              .widget<Semantics>(
+                find.byKey(const Key('daily-summary-protein-percent')),
+              )
+              .properties
+              .value,
+          '—',
+        );
+      }
+    },
+  );
 }

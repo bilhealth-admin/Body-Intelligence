@@ -18,6 +18,7 @@ import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../../community/services/community_owner_operation.dart';
 import 'store_account_visit.dart';
 import 'store_purchase_trace.dart';
+import 'store_native_purchase_completion.dart';
 import '../domain/store_benefit_delivery.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';

@@ -85,28 +85,8 @@ Future<void> _capture(WidgetTester tester, String name) async {
   if (Platform.environment['BIL_CAPTURE_DASHBOARD_POLISH'] != '1') return;
   await settleVisualAssetImages(tester);
   await tester.pumpAndSettle();
-  // The Today button deliberately uses a platform-default font. Flutter's
-  // headless engine substitutes its block-shaped test font when no family is
-  // specified, even after loading the normal theme fonts. Supply the same
-  // evidence face here without changing production widgets, labels, or sizes.
-  final today = find.descendant(
-    of: find.byKey(const Key('dashboard-reference-calories-edit')),
-    matching: find.byType(RichText),
-  );
-  final paragraph = tester.renderObject<RenderParagraph>(today);
-  final span = paragraph.text as TextSpan;
-  paragraph.text = TextSpan(
-    text: span.text,
-    children: span.children,
-    style: (span.style ?? const TextStyle()).copyWith(
-      fontFamily: name.endsWith('-ar')
-          ? 'NotoArabicEvidence'
-          : 'RobotoEvidence',
-    ),
-    locale: span.locale,
-    semanticsLabel: span.semanticsLabel,
-  );
-  await tester.pump();
+  // Capture the actual widget tree. Today now inherits its real theme
+  // family; do not mutate RenderParagraph to conceal a missing font.
   final boundary = tester.renderObject<RenderRepaintBoundary>(
     find.byKey(const Key('dashboard-current-capture')),
   );

@@ -6,6 +6,7 @@ import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import 'bil_reference_navigation_glyph.dart';
+import 'bil_glass_press_feedback.dart';
 
 /// The five primary destinations in the approved Coach reference. Quick Add
 /// is an action: the caller opens the shared presenter after saving its state.
@@ -205,12 +206,15 @@ class BilReferenceBottomBar extends StatelessWidget {
                                     top: i == 2 ? 0 : rise + 13 * opticalScale,
                                     width: (i == 2 ? 48 : 32) * opticalScale,
                                     height: (i == 2 ? 48 : 32) * opticalScale,
-                                    child: _glyph(
-                                      i,
-                                      isDark,
-                                      opticalScale,
-                                      muted,
-                                      active,
+                                    child: BilGlassPressFeedback(
+                                      always: true,
+                                      child: _glyph(
+                                        i,
+                                        isDark,
+                                        opticalScale,
+                                        muted,
+                                        active,
+                                      ),
                                     ),
                                   ),
                                   PositionedDirectional(

@@ -9,6 +9,7 @@ import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
+import 'package:body_intelligence_log/features/analytics/widgets/analytics_range_selector.dart';
 import 'package:body_intelligence_log/features/auth/account_gateway_page.dart';
 import 'package:body_intelligence_log/features/auth/auth_language_selector.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
@@ -243,7 +244,16 @@ void main() {
       );
       addTearDown(router.dispose);
 
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            verifiedSubscriptionAccessProvider.overrideWithValue(
+              AsyncData(_verifiedFreeState()),
+            ),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
       await tester.pumpAndSettle();
 
       _expectAtMostOneVisiblePremium(tester);
@@ -309,11 +319,19 @@ void main() {
         );
         await tester.pump();
         for (var attempt = 0; attempt < 20; attempt++) {
-          if (find.byKey(readyKey).evaluate().isNotEmpty) break;
+          if ((page is AnalyticsPage
+                  ? find.byType(AnalyticsRangeSelector)
+                  : find.byKey(readyKey))
+              .evaluate()
+              .isNotEmpty) {
+            break;
+          }
           await tester.pump(const Duration(milliseconds: 100));
         }
         expect(
-          find.byKey(readyKey),
+          page is AnalyticsPage
+              ? find.byType(AnalyticsRangeSelector)
+              : find.byKey(readyKey),
           findsOneWidget,
           reason:
               'Route ${page.runtimeType} did not reach ready state. '
@@ -458,18 +476,26 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 400));
       await tester.scrollUntilVisible(
-        find.byKey(const Key('fitness-devices-premium-gate')),
+        find.byKey(const Key('fitness-bluetooth-section')),
         360,
       );
       _expectAtMostOneVisiblePremium(tester);
       expect(
         find.descendant(
-          of: find.byKey(const Key('fitness-devices-premium-gate')),
+          of: find.byKey(const Key('fitness-bluetooth-section')),
           matching: find.byKey(const Key('dashboard-premium-label')),
         ),
         findsNothing,
         reason:
             'The BLE status and action must not sit under a floating badge.',
+      );
+      expect(
+        find.byKey(const Key('fitness-devices-premium-gate')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('scan-fitness-devices-button')),
+        findsOneWidget,
       );
 
       await tester.pumpWidget(const SizedBox.shrink());
@@ -736,9 +762,14 @@ void main() {
     expect(RegExp('PremiumNutritionGlass\\(').allMatches(mealList).length, 1);
     expect(dashboard, isNot(contains("tr('Premium nutrient goals'")));
     expect(dashboard, isNot(contains("tr('Premium heart health'")));
-    expect(dashboard, contains("Key('dashboard-premium-page-label')"));
+    expect(dashboard, isNot(contains("Key('dashboard-premium-page-label')")));
+    expect(dashboard, contains("Key('dashboard-macros-premium-lock')"));
+    expect(dashboard, contains("Key('dashboard-heart-premium-lock')"));
     expect(RegExp('showLabel: false').allMatches(dashboard).length, 0);
-    expect(RegExp('showLabel: true').allMatches(dashboard).length, 2);
+    expect(
+      RegExp('_ReferenceLockedValuesCard\\(').allMatches(dashboard).length,
+      2,
+    );
     expect(dashboardLock, contains('this.showLabel = true'));
     expect(dashboardLock, isNot(contains('Icons.lock_rounded')));
     expect(
@@ -771,22 +802,11 @@ void main() {
       ).allMatches(profileSummary).length,
       1,
     );
-    expect(
-      RegExp(
-        'PremiumDashboardCardLock\\(',
-      ).allMatches(connectedHealthPage).length,
-      1,
-    );
+    expect(connectedHealthPage, isNot(contains('PremiumDashboardCardLock(')));
     expect(routeGlass, isNot(contains("title: t('Premium")));
     expect(routeGlass, isNot(contains("body: t('Premium")));
-    expect(
-      analytics,
-      matches(
-        RegExp(
-          r"Key\('analytics-daily-nutrition-premium-glass'\),\s*showLabel: false",
-        ),
-      ),
-    );
+    expect(analytics, contains("Key('open-nutrition-analytics')"));
+    expect(analytics, contains("context.push('/analytics/nutrition')"));
     expect(connectedHealth, contains('var premiumLabelAvailable = true'));
     expect(connectedHealth, contains('showLabel: showPremiumLabel'));
     expect(

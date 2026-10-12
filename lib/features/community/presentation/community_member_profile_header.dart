@@ -65,7 +65,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
         if (visit.isCurrent()) onPressed();
       },
       color: Theme.of(context).colorScheme.primary,
-      icon: Icon(icon),
+      icon: BilGlassPressFeedback(child: Icon(icon)),
     ),
   );
 
@@ -366,9 +366,8 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                             ),
                           if (profile.followsViewer)
                             Chip(
-                              avatar: const Icon(
-                                Icons.swap_horiz_rounded,
-                                size: 17,
+                              avatar: const BilGlassPressFeedback(
+                                child: Icon(Icons.swap_horiz_rounded, size: 17),
                               ),
                               label: Text(
                                 communityText(context, 'Follows you', 'يتابعك'),
@@ -598,7 +597,9 @@ class _CommunitySelfQuickAction extends StatelessWidget {
                 Badge(
                   isLabelVisible: badge != null,
                   label: badge == null ? null : Text(badge!),
-                  child: Icon(icon, color: scheme.primary, size: 22),
+                  child: BilGlassPressFeedback(
+                    child: Icon(icon, color: scheme.primary, size: 22),
+                  ),
                 ),
                 const SizedBox(height: 7),
                 Text(

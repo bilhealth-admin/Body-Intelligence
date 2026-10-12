@@ -3,9 +3,11 @@ part of 'recipe_library_page.dart';
 double _recipeCardExtent(BuildContext context, {bool needsValueMasks = false}) {
   final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 3.0);
   // Give text-enlarged cards adequate room for labels and nutrition facts.
-  // Public labels and the independent paid-value regions need real room.
+  // Public labels, independent paid-value regions and the separate 48px
+  // collection action need their own room. Retain the preview height when
+  // moving that action out of its former overlay.
   // Increase layout height; never shrink the user's text or touch target.
-  return 306 + ((scale - 1) * 140) + (needsValueMasks ? 66 : 0);
+  return 306 + ((scale - 1) * 140) + (needsValueMasks ? 114 : 0);
 }
 
 double _recipePreviewWidth(BuildContext context) =>
@@ -74,6 +76,7 @@ class _RecipeDiscoveryHeader extends StatelessWidget {
     required this.onClearSearch,
     required this.onChooseCuisine,
     required this.onCategorySelected,
+    required this.onUpgrade,
   });
 
   final TextEditingController searchController;
@@ -87,6 +90,7 @@ class _RecipeDiscoveryHeader extends StatelessWidget {
   final VoidCallback onClearSearch;
   final VoidCallback onChooseCuisine;
   final ValueChanged<String> onCategorySelected;
+  final VoidCallback onUpgrade;
 
   @override
   Widget build(BuildContext context) {
@@ -195,6 +199,7 @@ class _RecipeDiscoveryHeader extends StatelessWidget {
               PremiumLabelBadge(
                 key: const Key('recipe-premium-page-label'),
                 semanticLabel: premiumSemanticLabel,
+                onTap: onUpgrade,
               ),
             ],
           ],
@@ -341,7 +346,6 @@ extension _RecipePremiumOffer on _RecipeLibraryPageState {
   void _openRecipePremiumOffer(
     AsyncValue<SubscriptionState> rights,
     bool verifiedRights,
-    CommercePlan? storefrontPlan,
   ) {
     if (!verifiedRights) {
       if (!rights.isLoading) {
@@ -360,10 +364,8 @@ extension _RecipePremiumOffer on _RecipeLibraryPageState {
       );
       return;
     }
-    context.push(
-      storefrontPlan == CommercePlan.premiumAiCoach
-          ? '/plans?focus=boost'
-          : '/plans?focus=subscription',
-    );
+    // A library membership lock needs a subscription. A token top-up does not
+    // unlock the library, including in the Premium AI Coach storefront market.
+    context.push('/plans?focus=subscription');
   }
 }

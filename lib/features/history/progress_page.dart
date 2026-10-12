@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -613,7 +614,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           const SizedBox(height: 14),
           FilledButton.tonalIcon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(copy.retry),
           ),
         ],

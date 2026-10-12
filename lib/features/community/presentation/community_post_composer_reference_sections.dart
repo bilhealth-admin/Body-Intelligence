@@ -55,7 +55,7 @@ extension _CommunityPostComposerReferenceSections
         collapsedShape: const Border(),
         iconColor: const Color(0xFF0872FF),
         collapsedIconColor: const Color(0xFF0872FF),
-        leading: Icon(icon, size: 22),
+        leading: BilGlassPressFeedback(child: Icon(icon, size: 22)),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -93,12 +93,14 @@ extension _CommunityPostComposerReferenceSections
               selected,
               const SizedBox(width: 5),
             ],
-            Icon(
-              controller.isExpanded
-                  ? Icons.expand_more_rounded
-                  : Icons.chevron_right_rounded,
-              size: 20,
-              color: CommunitySapphire.muted(context),
+            BilGlassPressFeedback(
+              child: Icon(
+                controller.isExpanded
+                    ? Icons.expand_more_rounded
+                    : Icons.chevron_right_rounded,
+                size: 20,
+                color: CommunitySapphire.muted(context),
+              ),
             ),
           ],
         ),

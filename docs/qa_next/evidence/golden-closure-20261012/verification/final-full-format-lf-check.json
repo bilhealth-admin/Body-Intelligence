@@ -1,0 +1,27 @@
+{
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "--output=none",
+    "--set-exit-if-changed",
+    "integration_test",
+    "lib",
+    "test",
+    "test_driver",
+    "tool",
+    "tools"
+  ],
+  "exit_code": 0,
+  "dart_files": 3159,
+  "folders": [
+    "integration_test",
+    "lib",
+    "test",
+    "test_driver",
+    "tool",
+    "tools"
+  ],
+  "elapsed_seconds": 13.26,
+  "output": "Formatted 3159 files (0 changed) in 12.69 seconds.\n",
+  "writes_source": false
+}

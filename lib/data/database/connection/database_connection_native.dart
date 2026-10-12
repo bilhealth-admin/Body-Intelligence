@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../database_scope.dart';
@@ -14,7 +14,7 @@ const _ownerPreferenceKey = 'cloud.localDataOwner.v1';
 
 QueryExecutor createDatabaseConnection({String? localOwnerId}) {
   return LazyDatabase(() async {
-    final directory = await getApplicationSupportDirectory();
+    final directory = await getProtectedApplicationSupportDirectory();
     if (!directory.existsSync()) directory.createSync(recursive: true);
 
     final target = File(

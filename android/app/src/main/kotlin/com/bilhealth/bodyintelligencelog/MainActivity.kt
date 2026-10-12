@@ -15,6 +15,7 @@ import io.flutter.plugin.common.MethodChannel
 import java.util.ArrayDeque
 
 class MainActivity : FlutterFragmentActivity() {
+    private var communityTranslationBridge: BILCommunityTranslationBridge? = null
     private var speechBridge: BILSpeechBridge? = null
     private var textToSpeechBridge: BILTextToSpeechBridge? = null
     private var micSoundBridge: BILMicSoundBridge? = null
@@ -95,6 +96,11 @@ class MainActivity : FlutterFragmentActivity() {
             }
         }
 
+    override fun onStop() {
+        communityTranslationBridge?.stopForBackground()
+        super.onStop()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         BILSettingsSymbolsBridge.register(this, flutterEngine.dartExecutor.binaryMessenger)
@@ -116,6 +122,7 @@ class MainActivity : FlutterFragmentActivity() {
         healthBridge = BILGlobalHealthBridge(this, flutterEngine.dartExecutor.binaryMessenger, healthPermissionLauncher)
         playIntegrityBridge = BILPlayIntegrityBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         BILSystemCryptoBridge(flutterEngine.dartExecutor.binaryMessenger)
+        communityTranslationBridge = BILCommunityTranslationBridge(flutterEngine.dartExecutor.binaryMessenger)
         captureRemotePushIntent(intent)
         pushChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -256,6 +263,8 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        communityTranslationBridge?.dispose()
+        communityTranslationBridge = null
         speechBridge?.dispose()
         speechBridge = null
         textToSpeechBridge?.dispose()

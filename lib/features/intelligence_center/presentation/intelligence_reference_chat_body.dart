@@ -205,7 +205,9 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                       .withValues(alpha: .58),
                                   minimumSize: const Size.square(48),
                                 ),
-                                icon: const Icon(Icons.arrow_upward_rounded),
+                                icon: const BilGlassPressFeedback(
+                                  child: Icon(Icons.arrow_upward_rounded),
+                                ),
                               )
                             else if (question.text.trim().isEmpty || listening)
                               IconButton.filled(
@@ -240,7 +242,9 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                   foregroundColor: scheme.onPrimary,
                                   minimumSize: const Size.square(48),
                                 ),
-                                icon: const Icon(Icons.arrow_upward_rounded),
+                                icon: const BilGlassPressFeedback(
+                                  child: Icon(Icons.arrow_upward_rounded),
+                                ),
                               ),
                             const SizedBox(width: 2),
                             IconButton(

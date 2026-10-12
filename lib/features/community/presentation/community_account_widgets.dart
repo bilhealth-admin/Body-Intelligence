@@ -145,7 +145,9 @@ class _CommunityProfileHeader extends StatelessWidget {
                   TextButton.icon(
                     key: const Key('community-account-profile-retry'),
                     onPressed: onRefresh,
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(
                       communityText(context, 'Retry', 'إعادة المحاولة'),
                     ),
@@ -220,7 +222,9 @@ class _CommunityProfileMetric extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: scheme.primary),
+            BilGlassPressFeedback(
+              child: Icon(icon, size: 18, color: scheme.primary),
+            ),
             const SizedBox(height: 4),
             Text(
               value,

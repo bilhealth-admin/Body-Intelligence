@@ -387,7 +387,9 @@ class _FoodSignalCard extends StatelessWidget {
                 color: signal.color,
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: Icon(signal.icon, color: Colors.white, size: 20),
+              child: BilGlassPressFeedback(
+                child: Icon(signal.icon, color: Colors.white, size: 20),
+              ),
             ),
             const Spacer(),
             Container(
@@ -432,11 +434,13 @@ class _FoodSignalCard extends StatelessWidget {
         const SizedBox(height: 13),
         ClipRRect(
           borderRadius: BorderRadius.circular(99),
-          child: LinearProgressIndicator(
-            minHeight: 5,
-            value: strength.clamp(0, 1),
-            color: signal.color,
-            backgroundColor: signal.color.withValues(alpha: .12),
+          child: BilStripedProgress(
+            child: LinearProgressIndicator(
+              minHeight: 5,
+              value: strength.clamp(0, 1),
+              color: signal.color,
+              backgroundColor: signal.color.withValues(alpha: .12),
+            ),
           ),
         ),
       ],

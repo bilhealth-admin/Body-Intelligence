@@ -55,7 +55,30 @@ void main() {
       await tester.pumpAndSettle();
       final circle = find.byKey(const Key('daily-log-selected-date-circle'));
       final strip = find.byKey(const Key('daily-log-week-strip'));
+      void expectNeighbours() {
+        final previous = DateTime(date.year, date.month, date.day - 1);
+        final next = DateTime(date.year, date.month, date.day + 1);
+        final previousButton = find.byKey(
+          ValueKey('daily-log-week-${previous.toIso8601String()}'),
+        );
+        final nextButton = find.byKey(
+          ValueKey('daily-log-week-${next.toIso8601String()}'),
+        );
+        final centre = tester.getCenter(circle).dx;
+        final columnWidth = tester.getSize(strip).width / 7;
+        final logicalDirection = locale.languageCode == 'ar' ? -1 : 1;
+        expect(
+          tester.getCenter(previousButton).dx,
+          closeTo(centre - logicalDirection * columnWidth, .1),
+        );
+        expect(
+          tester.getCenter(nextButton).dx,
+          closeTo(centre + logicalDirection * columnWidth, .1),
+        );
+      }
+
       expect(tester.getSize(circle), const Size(36, 36));
+      expectNeighbours();
       expect(
         tester.getCenter(circle).dx,
         closeTo(tester.getCenter(strip).dx, 0.1),
@@ -74,6 +97,18 @@ void main() {
         find.descendant(of: circle, matching: find.text('12')),
         findsOneWidget,
       );
+      expectNeighbours();
+      final previous = DateTime(2026, 10, 11);
+      await tester.tap(
+        find.byKey(ValueKey('daily-log-week-${previous.toIso8601String()}')),
+      );
+      await tester.pumpAndSettle();
+      expect(date, previous);
+      expect(
+        tester.getCenter(circle).dx,
+        closeTo(tester.getCenter(strip).dx, .1),
+      );
+      expectNeighbours();
       expect(tester.takeException(), isNull);
     });
   }
@@ -106,7 +141,7 @@ void main() {
           )
           .first,
     );
-    expect(gradient.colors.last, const Color(0xFFEBECF1));
+    expect(gradient.colors.last, const Color(0xFFE0ECF6));
     expect(card.color, isNot(gradient.colors.last));
     expect(tester.takeException(), isNull);
   });

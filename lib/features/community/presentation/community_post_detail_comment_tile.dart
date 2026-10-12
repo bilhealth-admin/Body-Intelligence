@@ -7,11 +7,17 @@ class _CommunityCommentTile extends StatelessWidget {
     required this.busy,
     required this.onLike,
     required this.onAction,
+    required this.ownerId,
+    required this.ownerIsCurrent,
+    this.ownerChanges,
     this.membershipTier,
     this.parent,
     super.key,
   });
 
+  final String ownerId;
+  final ValueGetter<bool> ownerIsCurrent;
+  final Listenable? ownerChanges;
   final CommunityComment comment;
   final CommunityComment? parent;
   final String? membershipTier;
@@ -132,12 +138,19 @@ class _CommunityCommentTile extends StatelessWidget {
                   ),
                 ),
               ),
-            SelectableText(
-              comment.body,
-              key: Key('community-comment-body-${comment.id}'),
-              textDirection: BilWrittenLanguageResolver.directionFor(
-                comment.body,
-                fallback: Directionality.of(context),
+            CommunityTranslationContent(
+              contentId: 'comment-${comment.id}',
+              ownerId: ownerId,
+              ownerIsCurrent: ownerIsCurrent,
+              ownerChanges: ownerChanges,
+              texts: {'body': comment.body},
+              builder: (texts) => SelectableText(
+                texts['body']!,
+                key: Key('community-comment-body-${comment.id}'),
+                textDirection: BilWrittenLanguageResolver.directionFor(
+                  texts['body']!,
+                  fallback: Directionality.of(context),
+                ),
               ),
             ),
             const SizedBox(height: 6),
@@ -152,7 +165,9 @@ class _CommunityCommentTile extends StatelessWidget {
                 TextButton.icon(
                   key: Key('community-comment-reply-${comment.id}'),
                   onPressed: busy ? null : () => onAction('reply'),
-                  icon: const Icon(Icons.reply_rounded, size: 18),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.reply_rounded, size: 18),
+                  ),
                   label: Text(communityText(context, 'Reply', 'رد')),
                 ),
                 TextButton.icon(

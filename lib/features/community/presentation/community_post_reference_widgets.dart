@@ -5,11 +5,13 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
     required this.metadata,
     required this.repository,
     this.compact = false,
+    this.displayTitle,
   });
 
   final CommunityPostReferenceMetadata metadata;
   final CommunityRepository repository;
   final bool compact;
+  final String? displayTitle;
 
   String _collaboratorLabel(
     BuildContext context,
@@ -30,7 +32,7 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = metadata.title?.trim();
+    final title = (displayTitle ?? metadata.title)?.trim();
     final collaborators = metadata.collaborators;
     if (title?.isNotEmpty != true &&
         metadata.hashtags.isEmpty &&

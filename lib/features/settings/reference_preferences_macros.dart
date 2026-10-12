@@ -48,7 +48,9 @@ class _DerivedMacroGramsState extends ConsumerState<_DerivedMacroGrams> {
             title: Text(context.strings.text('Unavailable')),
             trailing: TextButton.icon(
               onPressed: () => setState(() => generation += 1),
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(context.strings.text('Retry')),
             ),
           );

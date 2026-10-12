@@ -1,3 +1,5 @@
+import '../../../../shared/widgets/bil_striped_progress.dart';
+import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,28 +94,28 @@ class CoachReferenceWorkspace extends ConsumerWidget {
         t('Calories', 'السعرات'),
         value(today?.calories, 'caloriesKcal'),
         target('caloriesKcal'),
-        const Color(0xFF2DCEBB),
+        BilProgressPalette.color(BilProgressTone.calories, scheme.brightness),
         progress(today?.calories, 'caloriesKcal'),
       ),
       (
         t('Protein', 'البروتين'),
         value(today?.protein, 'proteinG'),
         '${target('proteinG')} g',
-        const Color(0xFF59A5FF),
+        BilProgressPalette.color(BilProgressTone.protein, scheme.brightness),
         progress(today?.protein, 'proteinG'),
       ),
       (
         t('Carbs', 'الكربوهيدرات'),
         value(today?.carbs, 'carbsG'),
         '${target('carbsG')} g',
-        const Color(0xFFEFBB60),
+        BilProgressPalette.color(BilProgressTone.carbs, scheme.brightness),
         progress(today?.carbs, 'carbsG'),
       ),
       (
         t('Fat', 'الدهون'),
         value(today?.fat, 'fatG'),
         '${target('fatG')} g',
-        const Color(0xFFAE9AF2),
+        BilProgressPalette.color(BilProgressTone.fat, scheme.brightness),
         progress(today?.fat, 'fatG'),
       ),
     ];
@@ -367,10 +369,12 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    tool.$1,
-                                    color: _workspaceAccent(context, tool.$4),
-                                    size: 25,
+                                  BilGlassPressFeedback(
+                                    child: Icon(
+                                      tool.$1,
+                                      color: _workspaceAccent(context, tool.$4),
+                                      size: 25,
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(

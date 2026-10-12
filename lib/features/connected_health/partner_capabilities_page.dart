@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr/qr.dart' as qr;
@@ -184,7 +185,9 @@ class _CapabilityTile extends StatelessWidget {
                     OutlinedButton.icon(
                       key: Key('partner-official-setup-${entry.id}'),
                       onPressed: () => launcher(verifiedSetupUri),
-                      icon: const Icon(Icons.open_in_new_rounded),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.open_in_new_rounded),
+                      ),
                       label: Text(setupCopy.text(PartnerSetupCopy.openGuide)),
                     ),
                     IconButton.outlined(

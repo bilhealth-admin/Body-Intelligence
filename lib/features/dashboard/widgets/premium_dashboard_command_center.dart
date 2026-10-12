@@ -217,7 +217,9 @@ class _MobileCommandCenter extends StatelessWidget {
               FilledButton.icon(
                 key: const Key('dashboard-mobile-command-action'),
                 onPressed: onAction,
-                icon: const Icon(Icons.arrow_forward_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.arrow_forward_rounded),
+                ),
                 label: Text(
                   dashboardFiveLocaleText(
                     'Take action now',
@@ -271,7 +273,9 @@ class _TruthExplanationSurface extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 18, color: scheme.primary),
+            BilGlassPressFeedback(
+              child: Icon(icon, size: 18, color: scheme.primary),
+            ),
             const SizedBox(width: PremiumDesignTokens.spaceXs),
             Expanded(
               child: Text.rich(

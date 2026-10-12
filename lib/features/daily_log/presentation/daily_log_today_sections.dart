@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -216,7 +217,7 @@ class DailyLogStepsShortcut extends ConsumerWidget {
             : MaterialLocalizations.of(context).formatDecimal(steps.round()),
         key: const Key('daily-log-steps-value'),
       ),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: const BilGlassPressFeedback(child: Icon(Icons.chevron_right)),
       onTap: () => context.push('/connected-health/steps/history'),
     );
   }
@@ -263,7 +264,9 @@ class DailyLogWeightShortcut extends ConsumerWidget {
                       context,
                     ).formatMediumDate(weight.date.toLocal()),
                   ),
-            trailing: const Icon(Icons.chevron_right),
+            trailing: const BilGlassPressFeedback(
+              child: Icon(Icons.chevron_right),
+            ),
             onTap: () => context.push('/weight-history'),
           ),
         ),
@@ -321,10 +324,12 @@ class DailyLogNotesShortcut extends ConsumerWidget {
                 // this shortcut. A fixed fallback sentence could remain in
                 // English for an incomplete locale and made the card look
                 // editable even though editing belongs on the focused page.
-                trailing: Icon(
-                  direction == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
+                trailing: BilGlassPressFeedback(
+                  child: Icon(
+                    direction == TextDirection.rtl
+                        ? Icons.chevron_left_rounded
+                        : Icons.chevron_right_rounded,
+                  ),
                 ),
                 onTap: () => context.push('/daily-log/body-context'),
               ),

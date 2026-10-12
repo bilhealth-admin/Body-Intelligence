@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -111,7 +112,9 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
                   dimension: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.file_download_outlined),
+              : const BilGlassPressFeedback(
+                  child: Icon(Icons.file_download_outlined),
+                ),
           label: Text(_copy(context, 'Create CSV export')),
         ),
         if (prepared case final ready?) ...[

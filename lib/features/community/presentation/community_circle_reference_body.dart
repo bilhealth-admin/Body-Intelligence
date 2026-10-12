@@ -99,7 +99,9 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
                     child: FilledButton.icon(
                       key: const Key('community-circles-retry'),
                       onPressed: onRefresh,
-                      icon: const Icon(Icons.refresh_rounded),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh_rounded),
+                      ),
                       label: Text(
                         communityText(context, 'Retry', 'إعادة المحاولة'),
                       ),
@@ -130,7 +132,9 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
                           dimension: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.expand_more_rounded),
+                      : const BilGlassPressFeedback(
+                          child: Icon(Icons.expand_more_rounded),
+                        ),
                   label: Text(
                     communityText(context, 'Load more', 'تحميل المزيد'),
                   ),
@@ -157,7 +161,7 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
         TextButton.icon(
           key: const Key('bil06-server-search-retry'),
           onPressed: serverLoading ? null : onRefresh,
-          icon: const Icon(Icons.refresh_rounded),
+          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
         ),
       ],

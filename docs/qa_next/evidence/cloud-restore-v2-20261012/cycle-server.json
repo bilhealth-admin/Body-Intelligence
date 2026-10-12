@@ -1,0 +1,19 @@
+{
+  "url": "http://127.0.0.1:64527",
+  "pid": 9744,
+  "database": "bil_qa_restore_20261012095841805214",
+  "postgres_host": "127.0.0.1",
+  "postgres_port": 55432,
+  "owner_a": "51000000-0000-4000-8000-000000000001",
+  "owner_b": "51000000-0000-4000-8000-000000000002",
+  "protocol_version": 2,
+  "started_at": "2026-10-12T06:58:43.853990+00:00",
+  "sources": {
+    "supabase/tests/fixtures/cloud_ledger_baseline/schema.sql": "3f516d0ca6845a322760462cb31a9a63192f2f29b403a13e5d4f87db2098606c",
+    "supabase/tests/fixtures/cloud_ledger_baseline/function.sql": "3342dc46c64284a8fe82cb74284f180ab74ae6e45f5cfc853301102f4884126f",
+    "supabase/migrations/20261004173646_ai_consent_receipt_completion_order_v1.sql": "9aafd1639db0c531f1d7f520014546c98182b2219416c148c01603c1365fa955",
+    "supabase/migrations/20261012052335_cloud_nutrition_goals_restore_v2.sql": "ccacdcef47bf2ff0e3d438826da6fc285015c4554e157834bdea052b5ee73966"
+  },
+  "scope": "synthetic test only; not Supabase Auth or Production",
+  "stopped_at": "2026-10-12T07:00:07.905398+00:00"
+}

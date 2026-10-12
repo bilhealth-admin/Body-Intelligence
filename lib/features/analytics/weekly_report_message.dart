@@ -24,7 +24,9 @@ class _Message extends StatelessWidget {
               FilledButton.tonalIcon(
                 key: const Key('weekly-report-retry'),
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 // A production MaterialApp always installs the BIL delegate,
                 // but an error state must remain renderable in minimal hosts
                 // (tests, previews, and defensive embedding) as well.

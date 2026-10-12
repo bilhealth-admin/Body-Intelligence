@@ -285,7 +285,8 @@ void main() {
           connectedHealthGatewayProvider.overrideWithValue(
             const _StoreHealthGateway(),
           ),
-          if (page is DailyLogPage ||
+          if (page is DashboardPage ||
+              page is DailyLogPage ||
               page is FoodPage ||
               page is SettingsPage ||
               page is AnalyticsPage) ...[

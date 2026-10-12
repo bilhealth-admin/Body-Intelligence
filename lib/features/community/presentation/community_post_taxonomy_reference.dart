@@ -81,7 +81,12 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(CommunityTaxonomySheet.iconForSlug(topic.slug), size: 20),
+          BilGlassPressFeedback(
+            child: Icon(
+              CommunityTaxonomySheet.iconForSlug(topic.slug),
+              size: 20,
+            ),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -98,11 +103,13 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
             style: Theme.of(context).textTheme.labelMedium,
           ),
           const SizedBox(width: 4),
-          Icon(
-            Directionality.of(context) == TextDirection.rtl
-                ? Icons.chevron_left_rounded
-                : Icons.chevron_right_rounded,
-            size: 20,
+          BilGlassPressFeedback(
+            child: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
+              size: 20,
+            ),
           ),
         ],
       ),
@@ -140,11 +147,13 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
             style: Theme.of(context).textTheme.labelMedium,
           ),
           const SizedBox(width: 4),
-          Icon(
-            Directionality.of(context) == TextDirection.rtl
-                ? Icons.chevron_left_rounded
-                : Icons.chevron_right_rounded,
-            size: 20,
+          BilGlassPressFeedback(
+            child: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
+              size: 20,
+            ),
           ),
         ],
       ),

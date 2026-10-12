@@ -1,0 +1,14 @@
+{
+  "case": "daily_log_sections_middle_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Old master predates2c pearl surfaces; approved date header arrows with existing middle-section actions and unknown values preserved.",
+  "previous_master_sha256": "f67fea115c21e44b72a955f8a774f3449ca6fb755531363b8c1c3d0731276723",
+  "accepted_actual_sha256": "72cb38d558f08c7a62bc2120b91a1f61dafb41f1c951cbc578a76bcb2355392a",
+  "review_image": "daily_log_sections_middle_phone.png",
+  "promotion": {
+    "time": 1791818689.0295036,
+    "master_sha256": "72cb38d558f08c7a62bc2120b91a1f61dafb41f1c951cbc578a76bcb2355392a",
+    "method": "one exact named file; visual decision required"
+  }
+}

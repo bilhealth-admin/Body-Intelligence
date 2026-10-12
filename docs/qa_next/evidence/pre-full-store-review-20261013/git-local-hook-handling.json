@@ -1,0 +1,32 @@
+{
+  "checked_utc": "2026-10-12T23:05:20.359155+00:00",
+  "branch_registered_successfully": true,
+  "source_head_unchanged": true,
+  "post_checkout_shell_failed": "MSYS fork Resource temporarily unavailable / 0xC0000142",
+  "active_hooks": [
+    "post-checkout",
+    "post-commit",
+    "post-merge",
+    "pre-push",
+    "pre-push.ps1"
+  ],
+  "all_commit_hooks_only_git_lfs": true,
+  "tracked_lfs_files": 0,
+  "git_lfs_ls_files_exit": 0,
+  "planned_commit_only_hook_override": "Owned empty build directory; no .git hook/config modified. Native git lfs post-commit will run explicitly. No push and no pre-push bypass.",
+  "application_tests_or_analysis_bypassed": false,
+  "literal_git_index_matches_source_files": true,
+  "default_diff_check_crlf_diagnostics_preserved_in_build": "staged-whitespace-before.log",
+  "crlf_aware_whitespace_check": {
+    "command": [
+      "git",
+      "-c",
+      "core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol",
+      "diff",
+      "--cached",
+      "--check"
+    ],
+    "exit_code": 0,
+    "scope": "CR is recognized as a Windows line terminator; trailing spaces, blank EOF and space-before-tab still checked. No bytes normalized, no core config changed, no application analyze/test notes suppressed."
+  }
+}

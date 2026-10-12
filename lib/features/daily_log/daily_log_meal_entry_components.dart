@@ -28,10 +28,12 @@ class _DiaryActionButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  BilSemanticIcons.spec(kind).icon,
-                  size: 20,
-                  color: scheme.primary,
+                BilGlassPressFeedback(
+                  child: Icon(
+                    BilSemanticIcons.spec(kind).icon,
+                    size: 20,
+                    color: scheme.primary,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Flexible(

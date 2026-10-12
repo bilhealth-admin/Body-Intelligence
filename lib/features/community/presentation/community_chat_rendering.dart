@@ -92,7 +92,9 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                       return Center(
                         child: FilledButton.tonalIcon(
                           onPressed: () => _setChatState(_reload),
-                          icon: const Icon(Icons.refresh_rounded),
+                          icon: const BilGlassPressFeedback(
+                            child: Icon(Icons.refresh_rounded),
+                          ),
                           label: Text(
                             _copy(
                               context,
@@ -281,7 +283,9 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                           TextButton.icon(
                             key: const Key('community-chat-refresh-retry'),
                             onPressed: () => _setChatState(_reload),
-                            icon: const Icon(Icons.refresh_rounded),
+                            icon: const BilGlassPressFeedback(
+                              child: Icon(Icons.refresh_rounded),
+                            ),
                             label: Text(
                               _copy(
                                 context,
@@ -404,7 +408,9 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.send_rounded),
+                            : const BilGlassPressFeedback(
+                                child: Icon(Icons.send_rounded),
+                              ),
                       ),
                     ],
                   ),

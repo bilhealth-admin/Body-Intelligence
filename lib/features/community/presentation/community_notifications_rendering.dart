@@ -58,7 +58,9 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             ),
             action: FilledButton.icon(
               onPressed: _retry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
             ),
           );
@@ -88,7 +90,9 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             ),
             action: FilledButton.icon(
               onPressed: () => context.push('/login'),
-              icon: const Icon(Icons.login_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.login_rounded),
+              ),
               label: Text(communityText(context, 'Sign in', 'تسجيل الدخول')),
             ),
           );
@@ -254,7 +258,9 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.expand_more_rounded),
+                            : const BilGlassPressFeedback(
+                                child: Icon(Icons.expand_more_rounded),
+                              ),
                         label: Text(
                           communityText(context, 'Load more', 'تحميل المزيد'),
                         ),
@@ -290,7 +296,13 @@ class _CenteredUpdatesState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 52, color: Theme.of(context).colorScheme.secondary),
+          BilGlassPressFeedback(
+            child: Icon(
+              icon,
+              size: 52,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+          ),
           const SizedBox(height: 14),
           Text(
             title,

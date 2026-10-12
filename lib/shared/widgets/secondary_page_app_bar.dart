@@ -57,7 +57,7 @@ class SecondaryPageAppBar extends StatelessWidget
             backgroundColor: Theme.of(context).colorScheme.surface,
             foregroundColor: Theme.of(context).colorScheme.onSurface,
           ),
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const BackButtonIcon(),
         ),
       ),
       actions: [

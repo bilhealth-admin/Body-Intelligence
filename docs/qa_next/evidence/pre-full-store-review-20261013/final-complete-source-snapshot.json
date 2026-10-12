@@ -1,0 +1,16 @@
+{
+  "source_head": "fea9f56b9baabb0990a60f11f5869a9d6dcb269a",
+  "authorized_branch": "integration/bil-qa-media-policy-20261011",
+  "source_worktree": "G:\\BIL_Project\\worktrees\\bil-stage1-closure-20261011",
+  "snapshot": "G:\\BIL_Project\\qa-preserved\\store-review-pre-full-20261013-2d016a6d67df",
+  "tested_input_fingerprint_v4": "2d016a6d67df3199d13ccd613d2eb039b6f9eeb7d1ff0f39bdeffd26ebafb4ed",
+  "tested_input_files": 5894,
+  "file_count": 9973,
+  "complete_tracked_and_nonignored_untracked_copy": true,
+  "includes_uncommitted_changes": true,
+  "read_only_files": true,
+  "hardlinked_only_unchanged_immutable_previous_snapshot_files": 9595,
+  "created_utc": "2026-10-12T23:14:32.915234+00:00",
+  "elapsed_seconds": 96.11,
+  "documentation_finalized_after_capture": "Only reports/evidence changed after capture; runtime inputs remain frozen."
+}

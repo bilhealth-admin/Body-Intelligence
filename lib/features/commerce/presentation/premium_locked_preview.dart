@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -125,10 +126,12 @@ class PremiumLockedPreview extends StatelessWidget {
                                           ),
                                     ),
                                     const SizedBox(width: 8),
-                                    const Icon(
-                                      Icons.arrow_forward_rounded,
-                                      color: Color(0xFF07121E),
-                                      size: 20,
+                                    const BilGlassPressFeedback(
+                                      child: Icon(
+                                        Icons.arrow_forward_rounded,
+                                        color: Color(0xFF07121E),
+                                        size: 20,
+                                      ),
                                     ),
                                   ],
                                 ),

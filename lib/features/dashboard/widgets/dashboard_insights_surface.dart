@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
@@ -84,7 +85,9 @@ class _DashboardInsightsSurfaceState extends State<DashboardInsightsSurface> {
                           AnimatedRotation(
                             turns: expanded ? .5 : 0,
                             duration: const Duration(milliseconds: 180),
-                            child: const Icon(Icons.expand_more_rounded),
+                            child: const BilGlassPressFeedback(
+                              child: Icon(Icons.expand_more_rounded),
+                            ),
                           ),
                       ],
                     ),

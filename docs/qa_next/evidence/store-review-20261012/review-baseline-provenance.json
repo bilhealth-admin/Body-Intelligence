@@ -1,0 +1,18 @@
+{
+  "source_head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "authorized_branch": "integration/bil-qa-media-policy-20261011",
+  "source_worktree": "G:\\BIL_Project\\worktrees\\bil-stage1-closure-20261011",
+  "snapshot": "G:\\BIL_Project\\qa-preserved\\store-review-final-20261012-d47f536bf052",
+  "tested_input_fingerprint_v4": "d47f536bf052cd139f94aa6da0295f1a74dcd70e82ef29fd2029370773c75b36",
+  "tested_input_files": 5680,
+  "file_count": 9656,
+  "complete_tracked_and_nonignored_untracked_copy": true,
+  "includes_uncommitted_changes": true,
+  "read_only_files": true,
+  "hardlinked_only_unchanged_immutable_previous_snapshot_files": 9655,
+  "changed_since_previous_snapshot": [
+    "test/features/commerce/premium_ai_market_gate_widget_test.dart"
+  ],
+  "created_utc": "2026-10-12T19:57:25.342548+00:00",
+  "elapsed_seconds": 158.68
+}

@@ -273,12 +273,24 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                 SizedBox(
                   width: 38,
                   height: 48,
-                  child: IconButton(
-                    key: Key('premium-vision-minus-$index'),
-                    tooltip: _word(context, 'Decrease amount', 'تقليل الكمية'),
-                    padding: EdgeInsets.zero,
-                    onPressed: () => _adjust(index, -5),
-                    icon: Icon(Icons.remove_rounded, color: _accent(context)),
+                  child: RepeatingStepAction(
+                    cancelScope: (_units[index].text, _amountMeaning[index]),
+                    cancelSignal: _units[index],
+                    canStep: () => _canAdjust(index, -1),
+                    onPressed: _canAdjust(index, -1)
+                        ? () => _adjust(index, -1)
+                        : null,
+                    builder: (_, action, _) => IconButton(
+                      key: Key('premium-vision-minus-$index'),
+                      tooltip: _word(
+                        context,
+                        'Decrease amount',
+                        'تقليل الكمية',
+                      ),
+                      padding: EdgeInsets.zero,
+                      onPressed: action,
+                      icon: Icon(Icons.remove_rounded, color: _accent(context)),
+                    ),
                   ),
                 ),
                 Expanded(
@@ -312,12 +324,24 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                 SizedBox(
                   height: 48,
                   width: 38,
-                  child: IconButton(
-                    key: Key('premium-vision-plus-$index'),
-                    tooltip: _word(context, 'Increase amount', 'زيادة الكمية'),
-                    padding: EdgeInsets.zero,
-                    onPressed: () => _adjust(index, 5),
-                    icon: Icon(Icons.add_rounded, color: _accent(context)),
+                  child: RepeatingStepAction(
+                    cancelScope: (_units[index].text, _amountMeaning[index]),
+                    cancelSignal: _units[index],
+                    canStep: () => _canAdjust(index, 1),
+                    onPressed: _canAdjust(index, 1)
+                        ? () => _adjust(index, 1)
+                        : null,
+                    builder: (_, action, _) => IconButton(
+                      key: Key('premium-vision-plus-$index'),
+                      tooltip: _word(
+                        context,
+                        'Increase amount',
+                        'زيادة الكمية',
+                      ),
+                      padding: EdgeInsets.zero,
+                      onPressed: action,
+                      icon: Icon(Icons.add_rounded, color: _accent(context)),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -359,7 +383,9 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                           ])
                             PopupMenuItem(value: unit, child: Text(unit)),
                         ],
-                        icon: const Icon(Icons.arrow_drop_down_rounded),
+                        icon: const BilGlassPressFeedback(
+                          child: Icon(Icons.arrow_drop_down_rounded),
+                        ),
                       ),
                     ),
                   ),

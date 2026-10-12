@@ -161,6 +161,7 @@ class _WorkoutCategorySection extends StatelessWidget {
         PremiumLabelBadge(
           key: ValueKey('workout-section-premium-$title'),
           semanticLabel: premiumTier,
+          onTap: onUpgrade,
         ),
       TextButton(
         onPressed: totalCount > 5 ? onToggleExpanded : null,
@@ -658,7 +659,7 @@ class _MetaLabel extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 17),
+        BilGlassPressFeedback(child: Icon(icon, size: 17)),
         const SizedBox(width: 4),
         Flexible(
           child: Text(

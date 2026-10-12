@@ -1,0 +1,1240 @@
+{
+  "applied": true,
+  "changed_files": [
+    "lib/app/router/bil_quick_add_sheet.dart",
+    "lib/app/router/responsive_app_shell.dart",
+    "lib/app/theme/bil_flat_icon.dart",
+    "lib/features/admin/presentation/admin_notification_controls.dart",
+    "lib/features/admin/presentation/ai_coach_admin_page.dart",
+    "lib/features/analytics/nutrition_analytics_components.dart",
+    "lib/features/analytics/weekly_report_components.dart",
+    "lib/features/analytics/weekly_report_food.dart",
+    "lib/features/analytics/weekly_report_page.dart",
+    "lib/features/auth/login_page.dart",
+    "lib/features/auth/premium_account_gateway_page.dart",
+    "lib/features/auth/premium_login_page.dart",
+    "lib/features/auth/register_page.dart",
+    "lib/features/auth/verify_email_page.dart",
+    "lib/features/cloud_platform/presentation/cloud_sync_consent_summary.dart",
+    "lib/features/commerce/presentation/bil_dynamic_store_components.dart",
+    "lib/features/commerce/presentation/bil_dynamic_store_plan_components.dart",
+    "lib/features/commerce/presentation/premium_logging_intro_page.dart",
+    "lib/features/commerce/presentation/premium_value_mask.dart",
+    "lib/features/community/channels/presentation/community_channels_directory.dart",
+    "lib/features/community/home_profile/community_profile_activity_media.dart",
+    "lib/features/community/presentation/community_account_widgets.dart",
+    "lib/features/community/presentation/community_circle_discovery_header.dart",
+    "lib/features/community/presentation/community_circles_page.dart",
+    "lib/features/community/presentation/community_drafts_rendering.dart",
+    "lib/features/community/presentation/community_feed_reference_header.dart",
+    "lib/features/community/presentation/community_invite_landing_page.dart",
+    "lib/features/community/presentation/community_member_profile_connections.dart",
+    "lib/features/community/presentation/community_member_profile_creator_widgets.dart",
+    "lib/features/community/presentation/community_member_profile_header.dart",
+    "lib/features/community/presentation/community_navigation_sheet.dart",
+    "lib/features/community/presentation/community_notifications_page.dart",
+    "lib/features/community/presentation/community_notifications_reference_widgets.dart",
+    "lib/features/community/presentation/community_notifications_rendering.dart",
+    "lib/features/community/presentation/community_people_widgets.dart",
+    "lib/features/community/presentation/community_policy_notice.dart",
+    "lib/features/community/presentation/community_post_composer_option_fields.dart",
+    "lib/features/community/presentation/community_post_composer_reference_sections.dart",
+    "lib/features/community/presentation/community_post_detail_header.dart",
+    "lib/features/community/presentation/community_post_taxonomy_reference.dart",
+    "lib/features/community/presentation/community_post_widgets.dart",
+    "lib/features/community/presentation/community_rewards_cards.dart",
+    "lib/features/community/presentation/community_safety_page.dart",
+    "lib/features/community/presentation/community_taxonomy_sheet.dart",
+    "lib/features/community/presentation/community_topics_page.dart",
+    "lib/features/connected_health/connected_health_components.dart",
+    "lib/features/connected_health/connected_health_page.dart",
+    "lib/features/connected_health/steps_settings_page.dart",
+    "lib/features/connected_health/widgets/connected_health_primitives.dart",
+    "lib/features/connected_health/widgets/live_health_watch.dart",
+    "lib/features/daily_check_in/daily_check_in_page.dart",
+    "lib/features/daily_log/daily_log_meal_entry.dart",
+    "lib/features/daily_log/daily_log_meal_entry_components.dart",
+    "lib/features/daily_log/food_log_action_tile.dart",
+    "lib/features/daily_log/presentation/daily_log_compact_meal_row.dart",
+    "lib/features/daily_log/presentation/daily_log_input_sections.dart",
+    "lib/features/daily_log/presentation/daily_log_meals_list.dart",
+    "lib/features/daily_log/presentation/daily_log_today_sections.dart",
+    "lib/features/dashboard/presentation/dashboard_decision_explanation_page.dart",
+    "lib/features/dashboard/widgets/daily_return_card.dart",
+    "lib/features/dashboard/widgets/dashboard_carousel.dart",
+    "lib/features/dashboard/widgets/dashboard_compact_insight_card.dart",
+    "lib/features/dashboard/widgets/dashboard_daily_summary.dart",
+    "lib/features/dashboard/widgets/dashboard_guide_orb.dart",
+    "lib/features/dashboard/widgets/dashboard_metric_grid.dart",
+    "lib/features/dashboard/widgets/dashboard_mobile_body_twin_snapshot.dart",
+    "lib/features/dashboard/widgets/dashboard_nutrition_details.dart",
+    "lib/features/dashboard/widgets/dashboard_profile_required_card.dart",
+    "lib/features/dashboard/widgets/dashboard_reference_goal_components.dart",
+    "lib/features/dashboard/widgets/dashboard_reference_phone_components.dart",
+    "lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart",
+    "lib/features/dashboard/widgets/dashboard_signal_orb.dart",
+    "lib/features/dashboard/widgets/first_use_context_coachmark.dart",
+    "lib/features/dashboard/widgets/nutrition_progress_card.dart",
+    "lib/features/dashboard/widgets/personal_health_ai_panel.dart",
+    "lib/features/dashboard/widgets/premium_dashboard_command_center.dart",
+    "lib/features/dashboard/widgets/stat_card.dart",
+    "lib/features/experiments/experiments_components.dart",
+    "lib/features/experiments/experiments_page.dart",
+    "lib/features/history/history_page.dart",
+    "lib/features/history/progress_page_components.dart",
+    "lib/features/history/widgets/history_page_components.dart",
+    "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+    "lib/features/intelligence_center/presentation/ai_coach_settings_components.dart",
+    "lib/features/intelligence_center/presentation/ai_coach_settings_page.dart",
+    "lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart",
+    "lib/features/intelligence_center/presentation/intelligence_action_confirmation.dart",
+    "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+    "lib/features/intelligence_center/presentation/intelligence_center_widgets.dart",
+    "lib/features/intelligence_center/presentation/intelligence_coach_menu.dart",
+    "lib/features/intelligence_center/presentation/intelligence_coach_reference_header.dart",
+    "lib/features/intelligence_center/presentation/workspace/coach_food_card_components.dart",
+    "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart",
+    "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace_components.dart",
+    "lib/features/life_context/decision_memory_page.dart",
+    "lib/features/notifications/presentation/ai_coach_reset_notice_coordinator.dart",
+    "lib/features/nutrition/presentation/bil_meal_voice_capture_dialog.dart",
+    "lib/features/nutrition/presentation/food_catalog_overview.dart",
+    "lib/features/nutrition/presentation/meal_image_guide_page.dart",
+    "lib/features/nutrition/presentation/meal_image_guide_widgets.dart",
+    "lib/features/nutrition/presentation/meal_vision_premium_match.dart",
+    "lib/features/nutrition/presentation/meal_vision_premium_reference.dart",
+    "lib/features/nutrition/presentation/meals_recipes_components.dart",
+    "lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart",
+    "lib/features/onboarding/onboarding_components.dart",
+    "lib/features/onboarding/widgets/modern_onboarding_scaffold.dart",
+    "lib/features/settings/help_center_page.dart",
+    "lib/features/settings/reference_goals_components.dart",
+    "lib/features/settings/reference_preferences_controls.dart",
+    "lib/features/settings/reference_settings_home_page.dart",
+    "lib/features/settings/settings_page.dart",
+    "lib/features/settings/settings_page_polish.dart",
+    "lib/features/share_studio/share_studio_page.dart",
+    "lib/features/wellness/presentation/bil_workout_routine_media.dart",
+    "lib/features/wellness/presentation/bil_workout_routine_visuals.dart",
+    "lib/features/wellness/presentation/bil_workout_routines_list.dart",
+    "lib/features/wellness/presentation/bil_workout_routines_states.dart",
+    "lib/features/wellness/presentation/fasting_timer_components.dart",
+    "lib/features/wellness/presentation/recipe_library_card.dart",
+    "lib/features/wellness/presentation/sleep_tracker_experience.dart",
+    "lib/features/wellness/presentation/wellness_content_packs_page.dart",
+    "lib/features/wellness/presentation/wellness_tool_components.dart",
+    "lib/features/wellness/presentation/workout_entry_chooser_page.dart",
+    "lib/features/wellness/presentation/workout_library_selection.dart",
+    "lib/shared/widgets/actionable_empty_state.dart",
+    "lib/shared/widgets/actionable_error_state.dart",
+    "lib/shared/widgets/bil_clinical_note.dart",
+    "lib/shared/widgets/bil_flagship_components.dart",
+    "lib/shared/widgets/bil_metric_card.dart",
+    "lib/shared/widgets/bil_mobile_list.dart",
+    "lib/shared/widgets/bil_native_symbols.dart",
+    "lib/shared/widgets/bil_premium_trust_surface.dart",
+    "lib/shared/widgets/dashboard_card.dart"
+  ],
+  "arrow_names": [
+    "CupertinoIcons.arrow_2_circlepath",
+    "CupertinoIcons.arrow_down_doc",
+    "CupertinoIcons.arrow_up_arrow_down",
+    "CupertinoIcons.chevron_back",
+    "CupertinoIcons.chevron_forward",
+    "Icons.arrow_back",
+    "Icons.arrow_back_ios_new_rounded",
+    "Icons.arrow_back_rounded",
+    "Icons.arrow_downward_rounded",
+    "Icons.arrow_drop_down_rounded",
+    "Icons.arrow_forward",
+    "Icons.arrow_forward_ios_rounded",
+    "Icons.arrow_forward_rounded",
+    "Icons.arrow_upward_rounded",
+    "Icons.chevron_left_rounded",
+    "Icons.chevron_right",
+    "Icons.chevron_right_rounded",
+    "Icons.expand_less_rounded",
+    "Icons.expand_more_rounded",
+    "Icons.keyboard_arrow_down_rounded",
+    "Icons.keyboard_arrow_up_rounded",
+    "Icons.north_east_rounded",
+    "Icons.north_rounded",
+    "Icons.refresh",
+    "Icons.refresh_rounded",
+    "Icons.reply_all_outlined",
+    "Icons.reply_rounded",
+    "Icons.south_east_rounded",
+    "Icons.south_rounded",
+    "Icons.undo_rounded"
+  ],
+  "wrappers": [
+    {
+      "file": "lib/app/router/bil_quick_add_sheet.dart",
+      "line": 425,
+      "original": "Icon(\n              Directionality.of(context) == TextDirection.rtl\n                  ? Icons.chevron_left_rounded\n                  : Icons.chevron_right_rounded,\n              color: Theme.of(context).colorScheme.onSurfaceVariant,\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              Directionality.of(context) == TextDirection.rtl\n                  ? Icons.chevron_left_rounded\n                  : Icons.chevron_right_rounded,\n              color: Theme.of(context).colorScheme.onSurfaceVariant,\n            ))"
+    },
+    {
+      "file": "lib/app/router/bil_quick_add_sheet.dart",
+      "line": 411,
+      "original": "Icon(key: iconKey, icon, color: color, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(key: iconKey, icon, color: color, size: 20))"
+    },
+    {
+      "file": "lib/app/router/bil_quick_add_sheet.dart",
+      "line": 347,
+      "original": "Icon(icon, key: iconKey, color: foregroundColor, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, key: iconKey, color: foregroundColor, size: 20))"
+    },
+    {
+      "file": "lib/app/router/responsive_app_shell.dart",
+      "line": 359,
+      "original": "Icon(\n              BilNavigationIcons.quickAdd(Theme.of(context).platform),\n              key: const Key('shell-quick-add-icon'),\n              color: Colors.white,\n              size: size >= 60 ? 31 : 28,\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              BilNavigationIcons.quickAdd(Theme.of(context).platform),\n              key: const Key('shell-quick-add-icon'),\n              color: Colors.white,\n              size: size >= 60 ? 31 : 28,\n            ))"
+    },
+    {
+      "file": "lib/app/theme/bil_flat_icon.dart",
+      "line": 43,
+      "original": "Icon(\n            glyph,\n            size: iconSize,\n            color: color ?? spec.accent(theme.brightness),\n          )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n            glyph,\n            size: iconSize,\n            color: color ?? spec.accent(theme.brightness),\n          ))"
+    },
+    {
+      "file": "lib/features/admin/presentation/admin_notification_controls.dart",
+      "line": 360,
+      "original": "Icon(icon, color: color)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: color))"
+    },
+    {
+      "file": "lib/features/admin/presentation/ai_coach_admin_page.dart",
+      "line": 39,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_components.dart",
+      "line": 72,
+      "original": "Icon(\n              Directionality.of(context) == TextDirection.rtl\n                  ? Icons.chevron_left_rounded\n                  : Icons.chevron_right_rounded,\n              textDirection: TextDirection.ltr,\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              Directionality.of(context) == TextDirection.rtl\n                  ? Icons.chevron_left_rounded\n                  : Icons.chevron_right_rounded,\n              textDirection: TextDirection.ltr,\n            ))"
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_components.dart",
+      "line": 27,
+      "original": "Icon(\n              Directionality.of(context) == TextDirection.rtl\n                  ? Icons.chevron_right_rounded\n                  : Icons.chevron_left_rounded,\n              textDirection: TextDirection.ltr,\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              Directionality.of(context) == TextDirection.rtl\n                  ? Icons.chevron_right_rounded\n                  : Icons.chevron_left_rounded,\n              textDirection: TextDirection.ltr,\n            ))"
+    },
+    {
+      "file": "lib/features/analytics/weekly_report_components.dart",
+      "line": 417,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/analytics/weekly_report_components.dart",
+      "line": 346,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/analytics/weekly_report_components.dart",
+      "line": 295,
+      "original": "Icon(icon, color: color, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: color, size: 20))"
+    },
+    {
+      "file": "lib/features/analytics/weekly_report_food.dart",
+      "line": 390,
+      "original": "Icon(signal.icon, color: Colors.white, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(signal.icon, color: Colors.white, size: 20))"
+    },
+    {
+      "file": "lib/features/analytics/weekly_report_page.dart",
+      "line": 544,
+      "original": "Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_left_rounded\n                    : Icons.chevron_right_rounded,\n                textDirection: TextDirection.ltr,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_left_rounded\n                    : Icons.chevron_right_rounded,\n                textDirection: TextDirection.ltr,\n              ))"
+    },
+    {
+      "file": "lib/features/analytics/weekly_report_page.dart",
+      "line": 519,
+      "original": "Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_right_rounded\n                    : Icons.chevron_left_rounded,\n                textDirection: TextDirection.ltr,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_right_rounded\n                    : Icons.chevron_left_rounded,\n                textDirection: TextDirection.ltr,\n              ))"
+    },
+    {
+      "file": "lib/features/auth/login_page.dart",
+      "line": 309,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/auth/premium_account_gateway_page.dart",
+      "line": 527,
+      "original": "Icon(icon, color: const Color(0xFF0877F9), size: 19)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: const Color(0xFF0877F9), size: 19))"
+    },
+    {
+      "file": "lib/features/auth/premium_login_page.dart",
+      "line": 675,
+      "original": "Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.arrow_forward_ios_rounded\n                        : Icons.arrow_back_ios_new_rounded,\n                    size: 19,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.arrow_forward_ios_rounded\n                        : Icons.arrow_back_ios_new_rounded,\n                    size: 19,\n                  ))"
+    },
+    {
+      "file": "lib/features/auth/register_page.dart",
+      "line": 393,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/auth/verify_email_page.dart",
+      "line": 486,
+      "original": "Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.arrow_forward_ios_rounded\n                        : Icons.arrow_back_ios_new_rounded,\n                    size: 19,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.arrow_forward_ios_rounded\n                        : Icons.arrow_back_ios_new_rounded,\n                    size: 19,\n                  ))"
+    },
+    {
+      "file": "lib/features/cloud_platform/presentation/cloud_sync_consent_summary.dart",
+      "line": 89,
+      "original": "Icon(icon, size: 19, color: colors.onPrimaryContainer)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 19, color: colors.onPrimaryContainer))"
+    },
+    {
+      "file": "lib/features/commerce/presentation/bil_dynamic_store_components.dart",
+      "line": 382,
+      "original": "Icon(\n                                Icons.refresh_rounded,\n                                size: 18,\n                                color: Color(0xFF727984),\n                              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                                Icons.refresh_rounded,\n                                size: 18,\n                                color: Color(0xFF727984),\n                              ))"
+    },
+    {
+      "file": "lib/features/commerce/presentation/bil_dynamic_store_plan_components.dart",
+      "line": 98,
+      "original": "Icon(\n                _expanded\n                    ? Icons.keyboard_arrow_up_rounded\n                    : Icons.keyboard_arrow_down_rounded,\n                size: 19,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                _expanded\n                    ? Icons.keyboard_arrow_up_rounded\n                    : Icons.keyboard_arrow_down_rounded,\n                size: 19,\n              ))"
+    },
+    {
+      "file": "lib/features/commerce/presentation/premium_logging_intro_page.dart",
+      "line": 127,
+      "original": "Icon(icon, color: Colors.white, size: 34)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: Colors.white, size: 34))"
+    },
+    {
+      "file": "lib/features/commerce/presentation/premium_value_mask.dart",
+      "line": 114,
+      "original": "Icon(\n                                          onRetry != null\n                                              ? Icons.refresh_rounded\n                                              : Icons.lock_outline_rounded,\n                                          size: 20,\n                                          color: scheme.onSurfaceVariant,\n                                        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                                          onRetry != null\n                                              ? Icons.refresh_rounded\n                                              : Icons.lock_outline_rounded,\n                                          size: 20,\n                                          color: scheme.onSurfaceVariant,\n                                        ))"
+    },
+    {
+      "file": "lib/features/community/channels/presentation/community_channels_directory.dart",
+      "line": 129,
+      "original": "Icon(Icons.chevron_right_rounded)",
+      "replacement": "BilGlassPressFeedback(child: Icon(Icons.chevron_right_rounded))"
+    },
+    {
+      "file": "lib/features/community/home_profile/community_profile_activity_media.dart",
+      "line": 349,
+      "original": "Icon(icon, size: 48)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 48))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_account_widgets.dart",
+      "line": 225,
+      "original": "Icon(icon, size: 18, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_circles_page.dart",
+      "line": 498,
+      "original": "Icon(icon, size: 16)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 16))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+      "line": 147,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+      "line": 142,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_drafts_rendering.dart",
+      "line": 364,
+      "original": "Icon(\n                                      _loadMoreFailed\n                                          ? Icons.refresh_rounded\n                                          : Icons.expand_more_rounded,\n                                    )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                                      _loadMoreFailed\n                                          ? Icons.refresh_rounded\n                                          : Icons.expand_more_rounded,\n                                    ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_feed_reference_header.dart",
+      "line": 403,
+      "original": "Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_invite_landing_page.dart",
+      "line": 336,
+      "original": "Icon(icon, size: 52)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 52))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_member_profile_connections.dart",
+      "line": 158,
+      "original": "Icon(\n                  Directionality.of(context) == TextDirection.rtl\n                      ? Icons.chevron_left_rounded\n                      : Icons.chevron_right_rounded,\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  Directionality.of(context) == TextDirection.rtl\n                      ? Icons.chevron_left_rounded\n                      : Icons.chevron_right_rounded,\n                ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_member_profile_creator_widgets.dart",
+      "line": 629,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_member_profile_creator_widgets.dart",
+      "line": 602,
+      "original": "Icon(icon, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 20))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_member_profile_creator_widgets.dart",
+      "line": 199,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_member_profile_header.dart",
+      "line": 601,
+      "original": "Icon(icon, color: scheme.primary, size: 22)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: scheme.primary, size: 22))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_member_profile_header.dart",
+      "line": 68,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_navigation_sheet.dart",
+      "line": 182,
+      "original": "Icon(\n        Directionality.of(context) == TextDirection.rtl\n            ? Icons.chevron_left_rounded\n            : Icons.chevron_right_rounded,\n        size: 20,\n      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n        Directionality.of(context) == TextDirection.rtl\n            ? Icons.chevron_left_rounded\n            : Icons.chevron_right_rounded,\n        size: 20,\n      ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_notifications_page.dart",
+      "line": 498,
+      "original": "Icon(\n        Directionality.of(context) == TextDirection.rtl\n            ? Icons.chevron_left_rounded\n            : Icons.chevron_right_rounded,\n      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n        Directionality.of(context) == TextDirection.rtl\n            ? Icons.chevron_left_rounded\n            : Icons.chevron_right_rounded,\n      ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_notifications_reference_widgets.dart",
+      "line": 135,
+      "original": "Icon(palette.$2, size: 21, color: palette.$3)",
+      "replacement": "BilGlassPressFeedback(child: Icon(palette.$2, size: 21, color: palette.$3))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_notifications_reference_widgets.dart",
+      "line": 46,
+      "original": "Icon(icon, size: 18, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_notifications_rendering.dart",
+      "line": 297,
+      "original": "Icon(icon, size: 52, color: Theme.of(context).colorScheme.secondary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 52, color: Theme.of(context).colorScheme.secondary))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_people_widgets.dart",
+      "line": 19,
+      "original": "Icon(icon, color: Colors.white, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: Colors.white, size: 20))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_policy_notice.dart",
+      "line": 151,
+      "original": "Icon(icon, size: 24)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 24))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_composer_option_fields.dart",
+      "line": 118,
+      "original": "Icon(_circleIcon(circle.slug), size: 16)",
+      "replacement": "BilGlassPressFeedback(child: Icon(_circleIcon(circle.slug), size: 16))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_composer_option_fields.dart",
+      "line": 42,
+      "original": "Icon(\n                  CommunityTaxonomySheet.iconForSlug(topic.slug),\n                  size: 16,\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  CommunityTaxonomySheet.iconForSlug(topic.slug),\n                  size: 16,\n                ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_composer_reference_sections.dart",
+      "line": 96,
+      "original": "Icon(\n              controller.isExpanded\n                  ? Icons.expand_more_rounded\n                  : Icons.chevron_right_rounded,\n              size: 20,\n              color: CommunitySapphire.muted(context),\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              controller.isExpanded\n                  ? Icons.expand_more_rounded\n                  : Icons.chevron_right_rounded,\n              size: 20,\n              color: CommunitySapphire.muted(context),\n            ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_composer_reference_sections.dart",
+      "line": 58,
+      "original": "Icon(icon, size: 22)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 22))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_detail_header.dart",
+      "line": 274,
+      "original": "Icon(\n          icon,\n          size: 19,\n          color: Theme.of(context).colorScheme.onSurfaceVariant,\n        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n          icon,\n          size: 19,\n          color: Theme.of(context).colorScheme.onSurfaceVariant,\n        ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_taxonomy_reference.dart",
+      "line": 143,
+      "original": "Icon(\n            Directionality.of(context) == TextDirection.rtl\n                ? Icons.chevron_left_rounded\n                : Icons.chevron_right_rounded,\n            size: 20,\n          )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n            Directionality.of(context) == TextDirection.rtl\n                ? Icons.chevron_left_rounded\n                : Icons.chevron_right_rounded,\n            size: 20,\n          ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_taxonomy_reference.dart",
+      "line": 101,
+      "original": "Icon(\n            Directionality.of(context) == TextDirection.rtl\n                ? Icons.chevron_left_rounded\n                : Icons.chevron_right_rounded,\n            size: 20,\n          )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n            Directionality.of(context) == TextDirection.rtl\n                ? Icons.chevron_left_rounded\n                : Icons.chevron_right_rounded,\n            size: 20,\n          ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_taxonomy_reference.dart",
+      "line": 84,
+      "original": "Icon(CommunityTaxonomySheet.iconForSlug(topic.slug), size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(CommunityTaxonomySheet.iconForSlug(topic.slug), size: 20))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_widgets.dart",
+      "line": 239,
+      "original": "Icon(icon, size: 16)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 16))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_widgets.dart",
+      "line": 142,
+      "original": "Icon(icon, size: 15)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 15))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_rewards_cards.dart",
+      "line": 334,
+      "original": "Icon(icon, size: 52)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 52))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_safety_page.dart",
+      "line": 513,
+      "original": "Icon(icon, size: 52)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 52))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_taxonomy_sheet.dart",
+      "line": 292,
+      "original": "Icon(icon, size: 18)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_topics_page.dart",
+      "line": 533,
+      "original": "Icon(icon, size: 16)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 16))"
+    },
+    {
+      "file": "lib/features/connected_health/connected_health_components.dart",
+      "line": 345,
+      "original": "Icon(\n                    accessGranted\n                        ? Icons.bluetooth_searching_rounded\n                        : checking\n                        ? Icons.hourglass_empty_rounded\n                        : verifiedDenied\n                        ? Icons.lock_outline_rounded\n                        : Icons.refresh_rounded,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    accessGranted\n                        ? Icons.bluetooth_searching_rounded\n                        : checking\n                        ? Icons.hourglass_empty_rounded\n                        : verifiedDenied\n                        ? Icons.lock_outline_rounded\n                        : Icons.refresh_rounded,\n                  ))"
+    },
+    {
+      "file": "lib/features/connected_health/steps_settings_page.dart",
+      "line": 392,
+      "original": "Icon(\n                            Directionality.of(context) == TextDirection.rtl\n                                ? Icons.chevron_left_rounded\n                                : Icons.chevron_right_rounded,\n                            key: const Key('steps-goal-chevron'),\n                            textDirection: TextDirection.ltr,\n                          )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                            Directionality.of(context) == TextDirection.rtl\n                                ? Icons.chevron_left_rounded\n                                : Icons.chevron_right_rounded,\n                            key: const Key('steps-goal-chevron'),\n                            textDirection: TextDirection.ltr,\n                          ))"
+    },
+    {
+      "file": "lib/features/connected_health/steps_settings_page.dart",
+      "line": 368,
+      "original": "Icon(\n                        Directionality.of(context) == TextDirection.rtl\n                            ? Icons.chevron_left_rounded\n                            : Icons.chevron_right_rounded,\n                        key: const Key('steps-history-chevron'),\n                        textDirection: TextDirection.ltr,\n                      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                        Directionality.of(context) == TextDirection.rtl\n                            ? Icons.chevron_left_rounded\n                            : Icons.chevron_right_rounded,\n                        key: const Key('steps-history-chevron'),\n                        textDirection: TextDirection.ltr,\n                      ))"
+    },
+    {
+      "file": "lib/features/connected_health/widgets/connected_health_primitives.dart",
+      "line": 61,
+      "original": "Icon(icon, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 20))"
+    },
+    {
+      "file": "lib/features/connected_health/widgets/live_health_watch.dart",
+      "line": 622,
+      "original": "Icon(icon, color: color, size: (compact ? 10 : 16) * scale)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: color, size: (compact ? 10 : 16) * scale))"
+    },
+    {
+      "file": "lib/features/daily_check_in/daily_check_in_page.dart",
+      "line": 564,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/features/daily_check_in/daily_check_in_page.dart",
+      "line": 355,
+      "original": "Icon(option.$3, size: 18)",
+      "replacement": "BilGlassPressFeedback(child: Icon(option.$3, size: 18))"
+    },
+    {
+      "file": "lib/features/daily_log/daily_log_meal_entry.dart",
+      "line": 409,
+      "original": "Icon(\n                        nutritionFactsExpanded\n                            ? Icons.keyboard_arrow_up_rounded\n                            : Icons.keyboard_arrow_down_rounded,\n                      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                        nutritionFactsExpanded\n                            ? Icons.keyboard_arrow_up_rounded\n                            : Icons.keyboard_arrow_down_rounded,\n                      ))"
+    },
+    {
+      "file": "lib/features/daily_log/daily_log_meal_entry_components.dart",
+      "line": 31,
+      "original": "Icon(\n                  BilSemanticIcons.spec(kind).icon,\n                  size: 20,\n                  color: scheme.primary,\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  BilSemanticIcons.spec(kind).icon,\n                  size: 20,\n                  color: scheme.primary,\n                ))"
+    },
+    {
+      "file": "lib/features/daily_log/food_log_action_tile.dart",
+      "line": 22,
+      "original": "Icon(icon, size: 22, color: const Color(0xFF1677D2))",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 22, color: const Color(0xFF1677D2)))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_compact_meal_row.dart",
+      "line": 113,
+      "original": "Icon(\n                        Icons.chevron_right_rounded,\n                        size: 20,\n                        color: theme.colorScheme.onSurfaceVariant,\n                      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                        Icons.chevron_right_rounded,\n                        size: 20,\n                        color: theme.colorScheme.onSurfaceVariant,\n                      ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_compact_meal_row.dart",
+      "line": 87,
+      "original": "Icon(\n                        BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,\n                        size: 24,\n                        color: theme.colorScheme.primary,\n                      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                        BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,\n                        size: 24,\n                        color: theme.colorScheme.primary,\n                      ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_input_sections.dart",
+      "line": 563,
+      "original": "Icon(\n                  bodyContextIcon(option),\n                  size: 34,\n                  color: scheme.primary,\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  bodyContextIcon(option),\n                  size: 34,\n                  color: scheme.primary,\n                ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_input_sections.dart",
+      "line": 554,
+      "original": "Icon(\n                    bodyContextIcon(option),\n                    size: 34,\n                    color: scheme.primary,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    bodyContextIcon(option),\n                    size: 34,\n                    color: scheme.primary,\n                  ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_input_sections.dart",
+      "line": 252,
+      "original": "Icon(\n                    BilSemanticIcons.spec(\n                      BilSemanticIconKind.water,\n                    ).iconFor(Theme.of(context).platform),\n                    size: 18,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    BilSemanticIcons.spec(\n                      BilSemanticIconKind.water,\n                    ).iconFor(Theme.of(context).platform),\n                    size: 18,\n                  ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_input_sections.dart",
+      "line": 211,
+      "original": "Icon(\n              BilSemanticIcons.spec(\n                BilSemanticIconKind.water,\n              ).iconFor(Theme.of(context).platform),\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              BilSemanticIcons.spec(\n                BilSemanticIconKind.water,\n              ).iconFor(Theme.of(context).platform),\n            ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_meals_list.dart",
+      "line": 391,
+      "original": "Icon(\n                        BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,\n                        color: scheme.primary,\n                        size: 28,\n                      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                        BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,\n                        color: scheme.primary,\n                        size: 28,\n                      ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_meals_list.dart",
+      "line": 331,
+      "original": "Icon(\n                          BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,\n                          color: scheme.primary,\n                          size: 28,\n                        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                          BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,\n                          color: scheme.primary,\n                          size: 28,\n                        ))"
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_today_sections.dart",
+      "line": 327,
+      "original": "Icon(\n                  direction == TextDirection.rtl\n                      ? Icons.chevron_left_rounded\n                      : Icons.chevron_right_rounded,\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  direction == TextDirection.rtl\n                      ? Icons.chevron_left_rounded\n                      : Icons.chevron_right_rounded,\n                ))"
+    },
+    {
+      "file": "lib/features/dashboard/presentation/dashboard_decision_explanation_page.dart",
+      "line": 156,
+      "original": "Icon(icon, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/daily_return_card.dart",
+      "line": 278,
+      "original": "Icon(icon, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/daily_return_card.dart",
+      "line": 212,
+      "original": "Icon(icon, size: 18, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_carousel.dart",
+      "line": 355,
+      "original": "Icon(icon, size: iconSize)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: iconSize))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_compact_insight_card.dart",
+      "line": 114,
+      "original": "Icon(icon, size: 18, color: accent)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18, color: accent))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_daily_summary.dart",
+      "line": 241,
+      "original": "Icon(icons[index], size: 15, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icons[index], size: 15, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_daily_summary.dart",
+      "line": 184,
+      "original": "Icon(item.icon, size: 16, color: item.accent)",
+      "replacement": "BilGlassPressFeedback(child: Icon(item.icon, size: 16, color: item.accent))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_guide_orb.dart",
+      "line": 183,
+      "original": "Icon(Icons.arrow_forward_rounded, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(Icons.arrow_forward_rounded, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_metric_grid.dart",
+      "line": 177,
+      "original": "Icon(icon, size: compact ? 13 : 18, color: accent)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: compact ? 13 : 18, color: accent))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_metric_grid.dart",
+      "line": 98,
+      "original": "Icon(metric.icon, size: 20, color: metric.accent)",
+      "replacement": "BilGlassPressFeedback(child: Icon(metric.icon, size: 20, color: metric.accent))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_mobile_body_twin_snapshot.dart",
+      "line": 133,
+      "original": "Icon(icon, size: 18, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_nutrition_details.dart",
+      "line": 39,
+      "original": "Icon(icon, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 20))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_profile_required_card.dart",
+      "line": 123,
+      "original": "Icon(icon, color: Theme.of(context).colorScheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: Theme.of(context).colorScheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_goal_components.dart",
+      "line": 679,
+      "original": "Icon(\n                Icons.arrow_forward_rounded,\n                color: Theme.of(context).colorScheme.primary,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                Icons.arrow_forward_rounded,\n                color: Theme.of(context).colorScheme.primary,\n              ))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_phone_components.dart",
+      "line": 308,
+      "original": "Icon(\n                                            weightWentDown\n                                                ? Icons.south_rounded\n                                                : weightWentUp\n                                                ? Icons.north_rounded\n                                                : Icons.remove_rounded,\n                                            size: 16,\n                                            color: deltaColor,\n                                          )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                                            weightWentDown\n                                                ? Icons.south_rounded\n                                                : weightWentUp\n                                                ? Icons.north_rounded\n                                                : Icons.remove_rounded,\n                                            size: 16,\n                                            color: deltaColor,\n                                          ))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart",
+      "line": 183,
+      "original": "Icon(\n                  fallbackIcon,\n                  size: 40,\n                  color: const Color(0xFF69E5F5),\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  fallbackIcon,\n                  size: 40,\n                  color: const Color(0xFF69E5F5),\n                ))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_signal_orb.dart",
+      "line": 300,
+      "original": "Icon(icon, color: iconColor)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: iconColor))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/first_use_context_coachmark.dart",
+      "line": 118,
+      "original": "Icon(\n                          icon,\n                          color: accent,\n                          size: compact ? 20 : 25,\n                        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                          icon,\n                          color: accent,\n                          size: compact ? 20 : 25,\n                        ))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/nutrition_progress_card.dart",
+      "line": 46,
+      "original": "Icon(icon, color: color, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: color, size: 20))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/personal_health_ai_panel.dart",
+      "line": 551,
+      "original": "Icon(icon, size: 20, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 20, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/personal_health_ai_panel.dart",
+      "line": 357,
+      "original": "Icon(icons[index], size: 15, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icons[index], size: 15, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/premium_dashboard_command_center.dart",
+      "line": 276,
+      "original": "Icon(icon, size: 18, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/stat_card.dart",
+      "line": 30,
+      "original": "Icon(icon, color: color)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: color))"
+    },
+    {
+      "file": "lib/features/experiments/experiments_components.dart",
+      "line": 276,
+      "original": "Icon(icon, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 20))"
+    },
+    {
+      "file": "lib/features/experiments/experiments_components.dart",
+      "line": 198,
+      "original": "Icon(preset.icon, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(preset.icon, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/experiments/experiments_page.dart",
+      "line": 141,
+      "original": "Icon(preset.icon, size: 27)",
+      "replacement": "BilGlassPressFeedback(child: Icon(preset.icon, size: 27))"
+    },
+    {
+      "file": "lib/features/history/progress_page_components.dart",
+      "line": 55,
+      "original": "Icon(\n              Icons.keyboard_arrow_down_rounded,\n              size: 18,\n              color: Theme.of(context).colorScheme.onSurfaceVariant,\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              Icons.keyboard_arrow_down_rounded,\n              size: 18,\n              color: Theme.of(context).colorScheme.onSurfaceVariant,\n            ))"
+    },
+    {
+      "file": "lib/features/history/widgets/history_page_components.dart",
+      "line": 94,
+      "original": "Icon(icon, color: Theme.of(context).colorScheme.error)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: Theme.of(context).colorScheme.error))"
+    },
+    {
+      "file": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+      "line": 111,
+      "original": "Icon(_iconForAction(action.type))",
+      "replacement": "BilGlassPressFeedback(child: Icon(_iconForAction(action.type)))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/ai_coach_settings_components.dart",
+      "line": 102,
+      "original": "Icon(\n                option.$2,\n                size: 22,\n                color: Theme.of(context).colorScheme.onSurfaceVariant,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                option.$2,\n                size: 22,\n                color: Theme.of(context).colorScheme.onSurfaceVariant,\n              ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/ai_coach_settings_page.dart",
+      "line": 490,
+      "original": "Icon(\n                authenticationRequired\n                    ? Icons.login_rounded\n                    : Icons.refresh_rounded,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                authenticationRequired\n                    ? Icons.login_rounded\n                    : Icons.refresh_rounded,\n              ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart",
+      "line": 283,
+      "original": "Icon(\n      icon,\n      size: 22,\n      color: Theme.of(context).colorScheme.onSurfaceVariant,\n    )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n      icon,\n      size: 22,\n      color: Theme.of(context).colorScheme.onSurfaceVariant,\n    ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart",
+      "line": 254,
+      "original": "Icon(icon, size: 17, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 17, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart",
+      "line": 220,
+      "original": "Icon(icon, color: scheme.onSurfaceVariant, size: 22)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: scheme.onSurfaceVariant, size: 22))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_action_confirmation.dart",
+      "line": 78,
+      "original": "Icon(\n                BilSemanticIcons.deleteAccount,\n                color: Theme.of(context).colorScheme.error,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                BilSemanticIcons.deleteAccount,\n                color: Theme.of(context).colorScheme.error,\n              ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_action_confirmation.dart",
+      "line": 24,
+      "original": "Icon(\n          action.destructive\n              ? BilSemanticIcons.deleteAccount\n              : _iconForAction(action.type),\n          color: action.destructive\n              ? Theme.of(context).colorScheme.error\n              : Theme.of(context).colorScheme.primary,\n        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n          action.destructive\n              ? BilSemanticIcons.deleteAccount\n              : _iconForAction(action.type),\n          color: action.destructive\n              ? Theme.of(context).colorScheme.error\n              : Theme.of(context).colorScheme.primary,\n        ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "line": 582,
+      "original": "Icon(_iconForAction(action.type))",
+      "replacement": "BilGlassPressFeedback(child: Icon(_iconForAction(action.type)))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "line": 316,
+      "original": "Icon(_iconForAction(action.type), size: 18)",
+      "replacement": "BilGlassPressFeedback(child: Icon(_iconForAction(action.type), size: 18))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_center_widgets.dart",
+      "line": 461,
+      "original": "Icon(item.icon, size: 17)",
+      "replacement": "BilGlassPressFeedback(child: Icon(item.icon, size: 17))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_coach_menu.dart",
+      "line": 187,
+      "original": "Icon(\n        Icons.chevron_right_rounded,\n        color: scheme.outline,\n        size: 20,\n      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n        Icons.chevron_right_rounded,\n        color: scheme.outline,\n        size: 20,\n      ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_coach_menu.dart",
+      "line": 169,
+      "original": "Icon(\n        icon,\n        color: destructive ? scheme.error : scheme.onSurfaceVariant,\n        size: 22,\n      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n        icon,\n        color: destructive ? scheme.error : scheme.onSurfaceVariant,\n        size: 22,\n      ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_coach_reference_header.dart",
+      "line": 168,
+      "original": "Icon(\n        icon,\n        size: 19,\n        color: Theme.of(context).colorScheme.onSurfaceVariant,\n      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n        icon,\n        size: 19,\n        color: Theme.of(context).colorScheme.onSurfaceVariant,\n      ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_coach_reference_header.dart",
+      "line": 72,
+      "original": "Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.chevron_right_rounded\n                        : Icons.chevron_left_rounded,\n                    color: scheme.onSurfaceVariant,\n                    size: 24,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.chevron_right_rounded\n                        : Icons.chevron_left_rounded,\n                    color: scheme.onSurfaceVariant,\n                    size: 24,\n                  ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/workspace/coach_food_card_components.dart",
+      "line": 234,
+      "original": "Icon(icon, color: color, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: color, size: 20))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart",
+      "line": 371,
+      "original": "Icon(\n                                    tool.$1,\n                                    color: _workspaceAccent(context, tool.$4),\n                                    size: 25,\n                                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                                    tool.$1,\n                                    color: _workspaceAccent(context, tool.$4),\n                                    size: 25,\n                                  ))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace_components.dart",
+      "line": 117,
+      "original": "Icon(\n              icon,\n              size: 17,\n              color: Theme.of(context).colorScheme.primary,\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              icon,\n              size: 17,\n              color: Theme.of(context).colorScheme.primary,\n            ))"
+    },
+    {
+      "file": "lib/features/life_context/decision_memory_page.dart",
+      "line": 92,
+      "original": "Icon(_memoryKindIcon(row['kind']))",
+      "replacement": "BilGlassPressFeedback(child: Icon(_memoryKindIcon(row['kind'])))"
+    },
+    {
+      "file": "lib/features/notifications/presentation/ai_coach_reset_notice_coordinator.dart",
+      "line": 310,
+      "original": "Icon(\n                                            presentation.icon,\n                                            color: Colors.white,\n                                            size: 36,\n                                          )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                                            presentation.icon,\n                                            color: Colors.white,\n                                            size: 36,\n                                          ))"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/bil_meal_voice_capture_dialog.dart",
+      "line": 217,
+      "original": "Icon(useIcon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(useIcon))"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/food_catalog_overview.dart",
+      "line": 455,
+      "original": "Icon(icon, size: 18)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 18))"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/meals_recipes_components.dart",
+      "line": 136,
+      "original": "Icon(icon, size: 80, color: Theme.of(context).colorScheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 80, color: Theme.of(context).colorScheme.primary))"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/meal_image_guide_widgets.dart",
+      "line": 239,
+      "original": "Icon(step.icon, color: colors.primary, size: 30)",
+      "replacement": "BilGlassPressFeedback(child: Icon(step.icon, color: colors.primary, size: 30))"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/meal_vision_premium_match.dart",
+      "line": 649,
+      "original": "Icon(symbol, color: tint, size: 19)",
+      "replacement": "BilGlassPressFeedback(child: Icon(symbol, color: tint, size: 19))"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/meal_vision_premium_reference.dart",
+      "line": 412,
+      "original": "Icon(fact.$1, color: fact.$3, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(fact.$1, color: fact.$3, size: 20))"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/meal_vision_premium_reference.dart",
+      "line": 282,
+      "original": "Icon(icon, color: _accent(context), size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: _accent(context), size: 20))"
+    },
+    {
+      "file": "lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart",
+      "line": 259,
+      "original": "Icon(\n              selected\n                  ? Icons.check_circle_rounded\n                  : Icons.chevron_right_rounded,\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              selected\n                  ? Icons.check_circle_rounded\n                  : Icons.chevron_right_rounded,\n            ))"
+    },
+    {
+      "file": "lib/features/onboarding/onboarding_components.dart",
+      "line": 146,
+      "original": "Icon(icon, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/onboarding/widgets/modern_onboarding_scaffold.dart",
+      "line": 498,
+      "original": "Icon(icon, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: scheme.primary))"
+    },
+    {
+      "file": "lib/features/onboarding/widgets/modern_onboarding_scaffold.dart",
+      "line": 413,
+      "original": "Icon(\n                    icon,\n                    color: enabled\n                        ? (selected ? scheme.primary : scheme.onSurfaceVariant)\n                        : scheme.outline,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    icon,\n                    color: enabled\n                        ? (selected ? scheme.primary : scheme.onSurfaceVariant)\n                        : scheme.outline,\n                  ))"
+    },
+    {
+      "file": "lib/features/settings/help_center_page.dart",
+      "line": 271,
+      "original": "Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_left_rounded\n                    : Icons.chevron_right_rounded,\n                size: 16,\n                color: Theme.of(context).colorScheme.onSurfaceVariant,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_left_rounded\n                    : Icons.chevron_right_rounded,\n                size: 16,\n                color: Theme.of(context).colorScheme.onSurfaceVariant,\n              ))"
+    },
+    {
+      "file": "lib/features/settings/reference_goals_components.dart",
+      "line": 112,
+      "original": "Icon(\n          Icons.chevron_right_rounded,\n          color: Theme.of(context).colorScheme.onSurfaceVariant,\n        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n          Icons.chevron_right_rounded,\n          color: Theme.of(context).colorScheme.onSurfaceVariant,\n        ))"
+    },
+    {
+      "file": "lib/features/settings/reference_preferences_controls.dart",
+      "line": 201,
+      "original": "Icon(\n          Icons.chevron_right_rounded,\n          key: const Key('diary-premium-feature-chevron'),\n          color: Theme.of(context).colorScheme.onSurfaceVariant,\n        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n          Icons.chevron_right_rounded,\n          key: const Key('diary-premium-feature-chevron'),\n          color: Theme.of(context).colorScheme.onSurfaceVariant,\n        ))"
+    },
+    {
+      "file": "lib/features/settings/reference_settings_home_page.dart",
+      "line": 315,
+      "original": "Icon(\n        Directionality.of(context) == TextDirection.rtl\n            ? CupertinoIcons.chevron_back\n            : CupertinoIcons.chevron_forward,\n        size: 18,\n        color: CupertinoColors.secondaryLabel.resolveFrom(context),\n      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n        Directionality.of(context) == TextDirection.rtl\n            ? CupertinoIcons.chevron_back\n            : CupertinoIcons.chevron_forward,\n        size: 18,\n        color: CupertinoColors.secondaryLabel.resolveFrom(context),\n      ))"
+    },
+    {
+      "file": "lib/features/settings/settings_page.dart",
+      "line": 612,
+      "original": "Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_left_rounded\n                    : Icons.chevron_right_rounded,\n                size: 22,\n                color: const Color(0xFF61738D),\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                Directionality.of(context) == TextDirection.rtl\n                    ? Icons.chevron_left_rounded\n                    : Icons.chevron_right_rounded,\n                size: 22,\n                color: const Color(0xFF61738D),\n              ))"
+    },
+    {
+      "file": "lib/features/settings/settings_page.dart",
+      "line": 490,
+      "original": "Icon(\n                  Directionality.of(context) == TextDirection.rtl\n                      ? Icons.chevron_left_rounded\n                      : Icons.chevron_right_rounded,\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  Directionality.of(context) == TextDirection.rtl\n                      ? Icons.chevron_left_rounded\n                      : Icons.chevron_right_rounded,\n                ))"
+    },
+    {
+      "file": "lib/features/settings/settings_page.dart",
+      "line": 336,
+      "original": "Icon(\n                    isRetry ? Icons.refresh_rounded : directionalIcon,\n                    size: 18,\n                    color: gold,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    isRetry ? Icons.refresh_rounded : directionalIcon,\n                    size: 18,\n                    color: gold,\n                  ))"
+    },
+    {
+      "file": "lib/features/settings/settings_page_polish.dart",
+      "line": 114,
+      "original": "Icon(\n          Directionality.of(context) == TextDirection.rtl\n              ? Icons.chevron_left_rounded\n              : Icons.chevron_right_rounded,\n          size: 22,\n          color: const Color(0xFF61738D),\n        )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n          Directionality.of(context) == TextDirection.rtl\n              ? Icons.chevron_left_rounded\n              : Icons.chevron_right_rounded,\n          size: 22,\n          color: const Color(0xFF61738D),\n        ))"
+    },
+    {
+      "file": "lib/features/share_studio/share_studio_page.dart",
+      "line": 274,
+      "original": "Icon(icon, color: Colors.white)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: Colors.white))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routines_list.dart",
+      "line": 661,
+      "original": "Icon(icon, size: 17)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 17))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routines_states.dart",
+      "line": 256,
+      "original": "Icon(icon, size: 58)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 58))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_media.dart",
+      "line": 112,
+      "original": "Icon(\n                rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,\n              ))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_visuals.dart",
+      "line": 42,
+      "original": "Icon(\n        _categoryIcon(category),\n        size: 74,\n        color: colors.onPrimaryContainer.withValues(alpha: 0.72),\n      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n        _categoryIcon(category),\n        size: 74,\n        color: colors.onPrimaryContainer.withValues(alpha: 0.72),\n      ))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/fasting_timer_components.dart",
+      "line": 56,
+      "original": "Icon(icon, color: const Color(0xFF071829))",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: const Color(0xFF071829)))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_card.dart",
+      "line": 600,
+      "original": "Icon(icon, color: palette.$1, size: 29)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: palette.$1, size: 29))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_card.dart",
+      "line": 458,
+      "original": "Icon(icon, size: 16, color: scheme.onPrimaryContainer)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 16, color: scheme.onPrimaryContainer))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_card.dart",
+      "line": 322,
+      "original": "Icon(icon, size: 14, color: scheme.onSurfaceVariant)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 14, color: scheme.onSurfaceVariant))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_card.dart",
+      "line": 289,
+      "original": "Icon(icon, size: 14, color: scheme.onSurfaceVariant)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 14, color: scheme.onSurfaceVariant))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/sleep_tracker_experience.dart",
+      "line": 780,
+      "original": "Icon(icon, size: 48)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 48))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/wellness_content_packs_page.dart",
+      "line": 250,
+      "original": "Icon(icon, size: 52)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 52))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/wellness_content_packs_page.dart",
+      "line": 157,
+      "original": "Icon(_icon(pack.type))",
+      "replacement": "BilGlassPressFeedback(child: Icon(_icon(pack.type)))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/wellness_tool_components.dart",
+      "line": 73,
+      "original": "Icon(icon, color: const Color(0xFF071829))",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: const Color(0xFF071829)))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/workout_entry_chooser_page.dart",
+      "line": 227,
+      "original": "Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.chevron_left_rounded\n                        : Icons.chevron_right_rounded,\n                    color: colors.onSurfaceVariant,\n                  )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                    Directionality.of(context) == TextDirection.rtl\n                        ? Icons.chevron_left_rounded\n                        : Icons.chevron_right_rounded,\n                    color: colors.onSurfaceVariant,\n                  ))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/workout_library_selection.dart",
+      "line": 220,
+      "original": "Icon(workout.icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(workout.icon))"
+    },
+    {
+      "file": "lib/shared/widgets/actionable_empty_state.dart",
+      "line": 32,
+      "original": "Icon(\n                icon,\n                size: compact ? 36 : 48,\n                color: Theme.of(context).colorScheme.primary,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                icon,\n                size: compact ? 36 : 48,\n                color: Theme.of(context).colorScheme.primary,\n              ))"
+    },
+    {
+      "file": "lib/shared/widgets/actionable_error_state.dart",
+      "line": 32,
+      "original": "Icon(icon, size: 48, color: Theme.of(context).colorScheme.error)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 48, color: Theme.of(context).colorScheme.error))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_clinical_note.dart",
+      "line": 46,
+      "original": "Icon(icon, size: 20, color: scheme.primary)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, size: 20, color: scheme.primary))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_flagship_components.dart",
+      "line": 121,
+      "original": "Icon(icon, color: selected ? scheme.primary : null)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: selected ? scheme.primary : null))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_flagship_components.dart",
+      "line": 69,
+      "original": "Icon(icon)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_metric_card.dart",
+      "line": 76,
+      "original": "Icon(_trendIcon, color: _accent, size: 20)",
+      "replacement": "BilGlassPressFeedback(child: Icon(_trendIcon, color: _accent, size: 20))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_metric_card.dart",
+      "line": 68,
+      "original": "Icon(icon, color: _accent, size: 22)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: _accent, size: 22))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_mobile_list.dart",
+      "line": 163,
+      "original": "Icon(\n                  Icons.chevron_right_rounded,\n                  size: 22,\n                  color: colors.outline,\n                )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                  Icons.chevron_right_rounded,\n                  size: 22,\n                  color: colors.outline,\n                ))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_mobile_list.dart",
+      "line": 29,
+      "original": "Icon(\n                icon,\n                size: 19,\n                color: Theme.of(context).colorScheme.primary,\n              )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                icon,\n                size: 19,\n                color: Theme.of(context).colorScheme.primary,\n              ))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_native_symbols.dart",
+      "line": 144,
+      "original": "Icon(\n      fallback,\n      size: size,\n      color: color,\n      key: const Key('settings-symbol-preview-fallback'),\n    )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n      fallback,\n      size: size,\n      color: color,\n      key: const Key('settings-symbol-preview-fallback'),\n    ))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_premium_trust_surface.dart",
+      "line": 566,
+      "original": "Icon(\n              point.icon,\n              size: 21,\n              color: dark ? const Color(0xFFC8F3FF) : const Color(0xFF125B91),\n            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n              point.icon,\n              size: 21,\n              color: dark ? const Color(0xFFC8F3FF) : const Color(0xFF125B91),\n            ))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_premium_trust_surface.dart",
+      "line": 247,
+      "original": "Icon(icon, color: Colors.white, size: 22)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: Colors.white, size: 22))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_premium_trust_surface.dart",
+      "line": 133,
+      "original": "Icon(\n                              point.icon,\n                              size: 15,\n                              color: scheme.primary,\n                            )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                              point.icon,\n                              size: 15,\n                              color: scheme.primary,\n                            ))"
+    },
+    {
+      "file": "lib/shared/widgets/bil_premium_trust_surface.dart",
+      "line": 84,
+      "original": "Icon(icon, color: Colors.white, size: 23)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: Colors.white, size: 23))"
+    },
+    {
+      "file": "lib/shared/widgets/dashboard_card.dart",
+      "line": 35,
+      "original": "Icon(icon, color: color)",
+      "replacement": "BilGlassPressFeedback(child: Icon(icon, color: color))"
+    }
+  ]
+}

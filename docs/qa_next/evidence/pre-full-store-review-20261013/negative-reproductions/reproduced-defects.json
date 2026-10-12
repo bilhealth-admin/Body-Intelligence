@@ -1,0 +1,20 @@
+{
+  "scope": "Narrow reproduction of pre-fix rejection/ancestor-context expressions within the current library. Complete originals restored afterward; not an old binary or device.",
+  "cases": [
+    [
+      "review-boost-finish-refund-before-case",
+      "test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "Google Boost refund during finish retires exact receipt and invalidates delivery"
+    ],
+    [
+      "review-bootstrap-real-retry-before-case",
+      "test/app/bootstrap_health_storage_retry_test.dart",
+      "real bootstrap en nativeFailure exposes usable retry and resumes only after verified protection"
+    ]
+  ],
+  "exit_codes": [
+    1,
+    1
+  ],
+  "expected_failures": true
+}

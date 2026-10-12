@@ -1,3 +1,4 @@
+import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../data/repositories/meal_repository.dart';
@@ -250,7 +251,9 @@ class _CoachFoodReceiptCardState extends State<CoachFoodReceiptCard> {
                 spacing: 6,
                 children: [
                   Text(copy.dailyLog),
-                  const Icon(Icons.arrow_forward, size: 16),
+                  const BilGlassPressFeedback(
+                    child: Icon(Icons.arrow_forward, size: 16),
+                  ),
                 ],
               ),
             ),

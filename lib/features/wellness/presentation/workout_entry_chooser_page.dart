@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -224,11 +225,13 @@ class _ExercisePathCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.chevron_left_rounded
-                        : Icons.chevron_right_rounded,
-                    color: colors.onSurfaceVariant,
+                  BilGlassPressFeedback(
+                    child: Icon(
+                      Directionality.of(context) == TextDirection.rtl
+                          ? Icons.chevron_left_rounded
+                          : Icons.chevron_right_rounded,
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),

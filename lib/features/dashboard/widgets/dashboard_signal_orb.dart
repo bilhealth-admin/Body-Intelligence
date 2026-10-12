@@ -297,7 +297,7 @@ class _InsightGlass extends StatelessWidget {
                     : const [Color(0xFFBBD9E2), Color(0xFFC8E1E8)],
               ),
             ),
-            child: Icon(icon, color: iconColor),
+            child: BilGlassPressFeedback(child: Icon(icon, color: iconColor)),
           ),
           const SizedBox(width: 13),
           Expanded(
@@ -430,7 +430,9 @@ class _Error extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(dashboardFiveLocaleText('Retry', 'إعادة المحاولة')),
           ),
         ),

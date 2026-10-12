@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -204,7 +205,9 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     onPressed: _retry,
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(
                       communityText(context, 'Retry', 'إعادة المحاولة'),
                     ),

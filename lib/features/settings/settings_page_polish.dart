@@ -111,12 +111,14 @@ class _MoreActionRow extends StatelessWidget {
           label,
           style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w400),
         ),
-        trailing: Icon(
-          Directionality.of(context) == TextDirection.rtl
-              ? Icons.chevron_left_rounded
-              : Icons.chevron_right_rounded,
-          size: 22,
-          color: const Color(0xFF61738D),
+        trailing: BilGlassPressFeedback(
+          child: Icon(
+            Directionality.of(context) == TextDirection.rtl
+                ? Icons.chevron_left_rounded
+                : Icons.chevron_right_rounded,
+            size: 22,
+            color: const Color(0xFF61738D),
+          ),
         ),
         onTap: onTap,
       ),

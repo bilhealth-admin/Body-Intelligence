@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -34,6 +35,7 @@ part 'recipe_library_helpers.dart';
 part 'recipe_library_card.dart';
 part 'recipe_image_request_cache.dart';
 part 'recipe_library_details.dart';
+part 'recipe_library_detail_visit.dart';
 
 class RecipeLibraryPage extends ConsumerStatefulWidget {
   const RecipeLibraryPage({
@@ -176,7 +178,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/dashboard'),
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
           ),
           title: Text(wellnessCopy(context, 'BIL recipes', 'وصفات BIL')),
           actions: [
@@ -244,8 +246,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
     final premiumTier = storefrontPlan == CommercePlan.premiumAiCoach
         ? 'BIL PREMIUM AI COACH'
         : 'BIL PREMIUM';
-    void openPremium() =>
-        _openRecipePremiumOffer(rights, verifiedRights, storefrontPlan);
+    void openPremium() => _openRecipePremiumOffer(rights, verifiedRights);
     final availableCuisines = recipeCuisineOrder
         .where(
           (key) =>
@@ -355,6 +356,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
           sliver: SliverToBoxAdapter(
             child: _RecipeDiscoveryHeader(
+              onUpgrade: openPremium,
               searchController: _search,
               category: _category,
               cuisine: _cuisine,
@@ -423,7 +425,9 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
                               _cuisine = section.key;
                               _visibleLimit = _filteredPageSize;
                             }),
-                            icon: const Icon(Icons.arrow_forward_rounded),
+                            icon: const BilGlassPressFeedback(
+                              child: Icon(Icons.arrow_forward_rounded),
+                            ),
                           ),
                         ],
                       ),
@@ -495,7 +499,9 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
                   key: const Key('recipe-show-more'),
                   onPressed: () =>
                       setState(() => _visibleLimit += _filteredPageSize),
-                  icon: const Icon(Icons.expand_more_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.expand_more_rounded),
+                  ),
                   label: Text(wellnessCopy(context, 'More', 'المزيد')),
                 ),
               ),
@@ -600,34 +606,9 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
       builder: (context) => PremiumRouteGlassGate(
         key: const ValueKey('recipe-detail-access-gate'),
         feature: PremiumGateFeature.recipeLibrary,
-        child: FutureBuilder<RecipeCatalogDetail>(
-          future: _repository.loadDetail(summary),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const SizedBox(
-                height: 320,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            if (snapshot.hasError || !snapshot.hasData) {
-              return SizedBox(
-                height: 320,
-                child: Center(
-                  child: Text(
-                    wellnessCopy(
-                      context,
-                      'Recipe details are unavailable.',
-                      'تفاصيل الوصفة غير متاحة.',
-                    ),
-                  ),
-                ),
-              );
-            }
-            return _RecipeDetails(
-              detail: snapshot.requireData,
-              imageResult: _detailImageResultFor(summary),
-            );
-          },
+        child: _RecipeLibraryDetailVisit(
+          load: () => _repository.loadDetail(summary),
+          image: () => _detailImageResultFor(summary),
         ),
       ),
     );

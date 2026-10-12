@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import '../../../app/localization/bil_written_language_resolver.dart';
 import 'community_attention_scope.dart';
 import 'dart:async';
@@ -417,7 +418,7 @@ class _MessagesSignIn extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => context.push('/login'),
-            icon: const Icon(Icons.login_rounded),
+            icon: const BilGlassPressFeedback(child: Icon(Icons.login_rounded)),
             label: Text(copy.signIn),
           ),
         ],
@@ -444,7 +445,9 @@ class _MessagesLoadError extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => onRetry(),
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(copy.retry),
           ),
         ],
@@ -491,7 +494,7 @@ class _PeopleSearchError extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: TextButton.icon(
       onPressed: onRetry,
-      icon: const Icon(Icons.refresh_rounded),
+      icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
       label: Text(copy.retry),
     ),
   );

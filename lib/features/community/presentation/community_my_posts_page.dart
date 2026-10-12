@@ -240,7 +240,9 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
                 child: FilledButton.icon(
                   key: const Key('community-my-posts-retry'),
                   onPressed: _refresh,
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.refresh_rounded),
+                  ),
                   label: Text(
                     communityText(context, 'Retry', 'إعادة المحاولة'),
                   ),
@@ -296,7 +298,9 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(Icons.expand_more_rounded),
+                              : const BilGlassPressFeedback(
+                                  child: Icon(Icons.expand_more_rounded),
+                                ),
                           label: Text(
                             communityText(context, 'Load more', 'تحميل المزيد'),
                           ),

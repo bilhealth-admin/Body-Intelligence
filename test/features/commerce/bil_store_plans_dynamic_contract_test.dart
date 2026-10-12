@@ -8,6 +8,8 @@ import 'package:body_intelligence_log/features/commerce/domain/store_catalog_con
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('extended AI plan summary includes every paid feature above Free', () {
+    for (final locale in AppLocalizations.supportedLocales) {
+      final code = locale.toLanguageTag();
+      if (const {'en', 'ar', 'fr', 'es', 'tr'}.contains(locale.languageCode)) {
+        continue;
+      }
+      final expected = RuntimeCopy.resolve(
+        'BIL Free + every paid feature + AI Coach',
+        code,
+      );
+      expect(expected, isNotNull, reason: code);
+      expect(
+        BilStoreCopy.text(code, 'premium_ai_detail'),
+        expected,
+        reason: code,
+      );
+    }
+  });
   test('ownership conflict is scoped to the authenticated BIL owner', () {
     final container = ProviderContainer(
       overrides: [

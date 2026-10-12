@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/dart_library_source.dart';
+
 void main() {
   test('Android release remains Android-native and policy-minimal', () {
     final gradle = File('android/app/build.gradle.kts').readAsStringSync();
@@ -134,8 +136,11 @@ void main() {
       final restore = File(
         'lib/features/commerce/services/verified_store_purchase_restore.dart',
       ).readAsStringSync();
-      final processing = File(
-        'lib/features/commerce/services/verified_store_purchase_processing.dart',
+      final processing = readDartLibrarySource(
+        'lib/features/commerce/services/verified_store_purchase_service.dart',
+      );
+      final nativeCompletion = File(
+        'lib/features/commerce/services/store_native_purchase_completion.dart',
       ).readAsStringSync();
 
       expect(restore, contains('Future<void> restore()'));
@@ -146,7 +151,15 @@ void main() {
       expect(processing, contains('_verifyOnServer'));
       expect(processing, contains('_verifyBoostOnServer'));
       expect(processing, contains('purchase.pendingCompletePurchase'));
-      expect(processing, contains('.completePurchase(purchase)'));
+      expect(processing, contains('_finishVerifiedNativeReceipt('));
+      expect(processing, contains('completeVerifiedNativePurchase('));
+      expect(nativeCompletion, contains('.completePurchase(purchase)'));
+      expect(nativeCompletion, contains('InAppPurchaseAndroidPlatform'));
+      expect(
+        nativeCompletion,
+        contains('result.responseCode != BillingResponse.ok'),
+      );
+      expect(nativeCompletion, contains("StateError('store_finish_pending')"));
       expect(processing, contains('queryPastPurchases()'));
     },
   );

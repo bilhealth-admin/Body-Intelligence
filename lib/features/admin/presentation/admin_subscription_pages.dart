@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -309,7 +310,7 @@ class _ListState extends ConsumerState<AdminSubscriptionList> {
               onPressed: _busyId != null
                   ? null
                   : () => ref.invalidate(adminSubscriptionListProvider),
-              icon: const Icon(Icons.refresh),
+              icon: const BilGlassPressFeedback(child: Icon(Icons.refresh)),
               label: Text(copy('refresh')),
             ),
           ),

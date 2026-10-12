@@ -217,7 +217,9 @@ extension _WorkoutLibrarySelection on _WorkoutLibraryPageState {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(child: Icon(workout.icon)),
+                    CircleAvatar(
+                      child: BilGlassPressFeedback(child: Icon(workout.icon)),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

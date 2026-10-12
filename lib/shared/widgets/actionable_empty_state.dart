@@ -1,3 +1,4 @@
+import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 class ActionableEmptyState extends StatelessWidget {
@@ -29,10 +30,12 @@ class ActionableEmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: compact ? 36 : 48,
-                color: Theme.of(context).colorScheme.primary,
+              BilGlassPressFeedback(
+                child: Icon(
+                  icon,
+                  size: compact ? 36 : 48,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
               SizedBox(height: compact ? 8 : 16),
               Semantics(

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -483,11 +484,13 @@ class _VerifyTopBar extends StatelessWidget {
                   key: const Key('verify-email-back'),
                   tooltip: authEntryText(context, AuthEntryCopyKey.back),
                   onPressed: onBack,
-                  icon: Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.arrow_forward_ios_rounded
-                        : Icons.arrow_back_ios_new_rounded,
-                    size: 19,
+                  icon: BilGlassPressFeedback(
+                    child: Icon(
+                      Directionality.of(context) == TextDirection.rtl
+                          ? Icons.arrow_forward_ios_rounded
+                          : Icons.arrow_back_ios_new_rounded,
+                      size: 19,
+                    ),
                   ),
                   color: scheme.onSurface,
                 ),

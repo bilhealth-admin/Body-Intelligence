@@ -35,11 +35,13 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
             builder: (_, value, _) => Stack(
               fit: StackFit.expand,
               children: [
-                CircularProgressIndicator(
-                  value: value,
-                  strokeWidth: 5,
-                  backgroundColor: const Color(0x334B8F80),
-                  color: tint,
+                BilStripedProgress(
+                  child: CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 5,
+                    backgroundColor: const Color(0x334B8F80),
+                    color: tint,
+                  ),
                 ),
                 Center(
                   child: Column(
@@ -279,7 +281,9 @@ Widget _contextTile(
   decoration: _glassDecoration(context),
   child: Column(
     children: [
-      Icon(icon, color: _accent(context), size: 20),
+      BilGlassPressFeedback(
+        child: Icon(icon, color: _accent(context), size: 20),
+      ),
       const SizedBox(height: 4),
       Text(
         label,
@@ -409,7 +413,9 @@ Widget _unverifiedNutrition(BuildContext context) => Container(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(fact.$1, color: fact.$3, size: 20),
+                        BilGlassPressFeedback(
+                          child: Icon(fact.$1, color: fact.$3, size: 20),
+                        ),
                         const SizedBox(height: 4),
                         Text(
                           fact.$2,

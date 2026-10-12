@@ -1,0 +1,14 @@
+{
+  "case": "nutrition_analytics_nutrients_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Old master predates2c published reference targets/19fields. Current versus2c only80 Back-arrow pixels; nutritional values and targets preserved.",
+  "previous_master_sha256": "0c0bc115280bfabf74da868af5d4a20f770f7816009e0f95941f89a853e37a5f",
+  "accepted_actual_sha256": "23e8e1262b00d8198d22261a90d1d32295e643064aa7ea9b529b69da18d76ea5",
+  "review_image": "nutrition_analytics_nutrients_phone.png",
+  "promotion": {
+    "time": 1791818690.5320363,
+    "master_sha256": "23e8e1262b00d8198d22261a90d1d32295e643064aa7ea9b529b69da18d76ea5",
+    "method": "one exact named file; visual decision required"
+  }
+}

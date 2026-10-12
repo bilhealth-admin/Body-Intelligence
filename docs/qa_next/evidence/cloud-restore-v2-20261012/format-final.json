@@ -1,0 +1,15 @@
+{
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "--output=none",
+    "--set-exit-if-changed",
+    "lib",
+    "test",
+    "tools/qa",
+    "tool"
+  ],
+  "exit_code": 0,
+  "seconds": 29.356144905090332,
+  "output": "Formatted 3118 files (0 changed) in 28.54 seconds.\n"
+}

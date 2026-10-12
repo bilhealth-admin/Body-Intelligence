@@ -1,0 +1,10 @@
+{
+  "protocol": 1,
+  "version_name": "1.0.0",
+  "ios_build_number": 36,
+  "android_version_code": 33,
+  "source_branch": "integration/bil-qa-media-policy-20261011",
+  "store_approved": false,
+  "artifact_built": false,
+  "note": "Owner corrected Android candidate to33 after32; iOS candidate36. Native Flutter build-number overrides are required; historical pubspec and frozen release workflows are preserved. Source candidate only; no artifacts or store approval."
+}

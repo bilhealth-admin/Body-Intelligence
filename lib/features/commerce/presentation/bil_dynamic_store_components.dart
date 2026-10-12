@@ -379,10 +379,12 @@ class _StoreTierCard extends StatelessWidget {
                           else
                             const Padding(
                               padding: EdgeInsetsDirectional.only(end: 9),
-                              child: Icon(
-                                Icons.refresh_rounded,
-                                size: 18,
-                                color: Color(0xFF727984),
+                              child: BilGlassPressFeedback(
+                                child: Icon(
+                                  Icons.refresh_rounded,
+                                  size: 18,
+                                  color: Color(0xFF727984),
+                                ),
                               ),
                             ),
                           Expanded(
@@ -621,10 +623,12 @@ class _StickyPurchaseBar extends StatelessWidget {
                                           ),
                                         ),
                                         const SizedBox(width: 9),
-                                        const Icon(
-                                          Icons.arrow_forward_rounded,
-                                          color: Color(0xFF06121D),
-                                          size: 20,
+                                        const BilGlassPressFeedback(
+                                          child: Icon(
+                                            Icons.arrow_forward_rounded,
+                                            color: Color(0xFF06121D),
+                                            size: 20,
+                                          ),
                                         ),
                                       ],
                                     ),

@@ -307,16 +307,36 @@ GooglePlayOfferMetadata? googlePlayOfferMetadata(ProductDetails product) {
 /// Adapts the existing verified store transport to provider-neutral UI
 /// metadata. It cannot grant access; receipt verification remains server-side.
 final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
-  VerifiedStoreCatalogAdapter(this.store, {this.boostCheckout});
+  VerifiedStoreCatalogAdapter(
+    this.store, {
+    this.boostCheckout,
+    this.loadBoostCatalog,
+    this.boostProduct,
+  });
 
   final VerifiedStorePurchaseService store;
   final Future<void> Function(BilStoreOfferMetadata)? boostCheckout;
+  final Future<void> Function()? loadBoostCatalog;
+  final ProductDetails? Function()? boostProduct;
 
   @override
   Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) async {
-    if (store.products.isEmpty) await store.initialize();
+    await Future.wait<void>([
+      if (store.products.isEmpty) store.initialize(),
+      if (loadBoostCatalog != null) loadBoostCatalog!(),
+    ]);
+    // The exclusive Boost lane owns its freshly queried product. A subscription
+    // service catalog may still contain the earlier pack price or offer token.
+    final boost = boostProduct?.call();
+    final products = [
+      for (final product in store.products.values)
+        if (boostProduct == null ||
+            product.id != StoreCatalogConfiguration.aiBoost)
+          product,
+      ?boost,
+    ];
     final offers = <BilStoreOfferMetadata>[];
-    for (final product in store.products.values.where(
+    for (final product in products.where(
       (product) => productIds.contains(product.id),
     )) {
       // Keep the adapter independently fail-closed. The production purchase

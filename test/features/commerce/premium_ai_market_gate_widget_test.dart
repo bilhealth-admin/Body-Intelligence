@@ -50,6 +50,9 @@ void main() {
       ProviderScope(
         key: ValueKey('gate-${storefrontPlan.name}-${feature.name}'),
         overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            "golden-gate-synthetic-member",
+          ),
           verifiedSubscriptionStateProvider.overrideWith(
             (_) async => subscriptionState,
           ),
@@ -102,6 +105,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            "golden-gate-synthetic-member",
+          ),
           verifiedSubscriptionStateProvider.overrideWith(
             (_) => subscription.future,
           ),
@@ -139,7 +145,7 @@ void main() {
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
     expect(find.text('Continue'), findsNothing);
@@ -166,10 +172,156 @@ void main() {
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
   });
+
+  testWidgets(
+    'malformed actual quota shows retry, then valid server proof opens Coach',
+    (tester) async {
+      Object? value = {
+        'credits': {'total_remaining': '2500'},
+      };
+      var protectedTaps = 0;
+      var loads = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              'quota-fixture',
+            ),
+            aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
+              loads++;
+              return value;
+            }),
+          ],
+          child: MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: PremiumRouteGlassGate(
+              feature: PremiumGateFeature.aiCoach,
+              child: Scaffold(
+                body: FilledButton(
+                  key: const Key('actual-quota-protected-action'),
+                  onPressed: () => protectedTaps++,
+                  child: const Text('Coach action'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('premium-route-access-unavailable')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('premium-route-upgrade-cta')), findsNothing);
+      expect(
+        find.byKey(const Key('actual-quota-protected-action')).hitTestable(),
+        findsNothing,
+      );
+      value = {
+        'credits': {'total_remaining': 100},
+      };
+      await tester.tap(find.byKey(const Key('premium-route-access-retry')));
+      await tester.pumpAndSettle();
+      expect(loads, 2);
+      await tester.tap(find.byKey(const Key('actual-quota-protected-action')));
+      expect(protectedTaps, 1);
+      expect(find.byKey(const Key('premium-route-upgrade-cta')), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'verified zero then malformed or failed quota shows neutral actual gate',
+    (tester) async {
+      Object? value = {
+        'credits': {'total_remaining': 0},
+      };
+      var fail = false;
+      var protectedTaps = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              'quota-zero-fixture',
+            ),
+            aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
+              if (fail) throw StateError('temporary quota outage');
+              return value;
+            }),
+          ],
+          child: MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: PremiumRouteGlassGate(
+              feature: PremiumGateFeature.aiCoach,
+              child: Scaffold(
+                body: FilledButton(
+                  key: const Key('quota-zero-protected-action'),
+                  onPressed: () => protectedTaps++,
+                  child: const Text('Coach action'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(PremiumRouteGlassGate)),
+      );
+      expect(
+        find.byKey(const Key('premium-route-upgrade-cta')),
+        findsOneWidget,
+      );
+      value = {
+        'credits': {'total_remaining': '2500'},
+      };
+      container.invalidate(aiCoachCreditAccessProvider);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('premium-route-access-unavailable')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('premium-route-upgrade-cta')), findsNothing);
+      expect(
+        find.byKey(const Key('quota-zero-protected-action')).hitTestable(),
+        findsNothing,
+      );
+      fail = true;
+      await tester.tap(find.byKey(const Key('premium-route-access-retry')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('premium-route-access-unavailable')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('premium-route-upgrade-cta')), findsNothing);
+      expect(protectedTaps, 0);
+      fail = false;
+      value = {
+        'credits': {'total_remaining': 100},
+      };
+      await tester.tap(find.byKey(const Key('premium-route-access-retry')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quota-zero-protected-action')));
+      expect(protectedTaps, 1);
+    },
+  );
 
   testWidgets(
     'AI credit lookup error shows neutral retry and never a purchase CTA',
@@ -191,6 +343,9 @@ void main() {
         ProviderScope(
           retry: (_, _) => null,
           overrides: [
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              "golden-gate-synthetic-member",
+            ),
             verifiedSubscriptionStateProvider.overrideWith(
               (_) async => activeSubscription,
             ),
@@ -236,16 +391,20 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsNothing,
       );
       expect(find.text('Continue'), findsNothing);
       expect(find.text('Get AI Boost'), findsNothing);
       expect(creditLookupAttempts, 1);
-      await tester.tap(
+      // Failed verification must not even mount the private action. The
+      // retry below then proves that the actual action works after authority
+      // returns, without suppressing hit-test failures.
+      expect(
         find.byKey(const ValueKey('credit-error-protected-content')),
-        warnIfMissed: false,
+        findsNothing,
       );
+      expect(find.text('PROTECTED AI COACH ACTION'), findsNothing);
       expect(protectedTaps, 0);
 
       creditLookupFails = false;
@@ -264,7 +423,7 @@ void main() {
         findsNothing,
       );
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsNothing,
       );
       await tester.tap(
@@ -282,6 +441,9 @@ void main() {
       ProviderScope(
         retry: (_, _) => null,
         overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            "golden-gate-synthetic-member",
+          ),
           verifiedSubscriptionStateProvider.overrideWith((_) async {
             subscriptionLookupAttempts += 1;
             throw StateError('subscription unavailable');
@@ -321,7 +483,7 @@ void main() {
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
     expect(find.text('Get AI Boost'), findsNothing);
@@ -364,6 +526,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            "golden-gate-synthetic-member",
+          ),
           verifiedSubscriptionStateProvider.overrideWith(
             (_) async => FreePlan.createState(),
           ),
@@ -462,7 +627,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('unlocked-ai-coach')), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
   });
@@ -485,7 +650,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
     expect(find.text('Friends and requests'), findsNothing);
@@ -503,6 +668,9 @@ void main() {
       await pumpGate(tester, storefrontPlan: storefrontPlan, feature: feature);
       final labels = tester
           .widgetList<Text>(find.byType(Text))
+          .where(
+            (widget) => widget.key != const Key('premium-route-public-title'),
+          )
           .where(
             (widget) => (widget.data ?? '').toLowerCase().contains('premium'),
           );
@@ -539,10 +707,10 @@ void main() {
 
     expect(
       find.byKey(const ValueKey('boost-cannot-unlock-weekly-report')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsOneWidget,
     );
   });
@@ -564,7 +732,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
   });
@@ -593,7 +761,7 @@ void main() {
     );
 
     expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsOneWidget,
     );
     expect(find.text('Get AI Boost'), findsOneWidget);
@@ -623,6 +791,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              "golden-gate-synthetic-member",
+            ),
             verifiedSubscriptionStateProvider.overrideWith((ref) async {
               final plan = ref.watch(planState);
               return plan == CommercePlan.free
@@ -669,21 +840,21 @@ void main() {
       );
 
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsOneWidget,
       );
 
       container.read(accessState.notifier).state = true;
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsNothing,
       );
 
       container.read(accessState.notifier).state = false;
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsOneWidget,
       );
 
@@ -691,7 +862,7 @@ void main() {
       container.read(accessState.notifier).state = true;
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsNothing,
       );
 
@@ -699,45 +870,49 @@ void main() {
       container.read(accessState.notifier).state = false;
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsOneWidget,
       );
     },
   );
 
-  testWidgets('locked route stays built and painted but cannot be used', (
-    tester,
-  ) async {
-    var protectedTaps = 0;
-    await pumpGate(
-      tester,
-      storefrontPlan: CommercePlan.premium,
-      feature: PremiumGateFeature.weeklyReport,
-      child: Scaffold(
-        body: Center(
-          child: FilledButton(
-            key: const ValueKey('protected-action'),
-            onPressed: () => protectedTaps += 1,
-            child: const Text('PROTECTED DASHBOARD ACTION'),
+  testWidgets(
+    'locked route exposes its title without mounting private content',
+    (tester) async {
+      var protectedTaps = 0;
+      await pumpGate(
+        tester,
+        storefrontPlan: CommercePlan.premium,
+        feature: PremiumGateFeature.weeklyReport,
+        child: Scaffold(
+          body: Center(
+            child: FilledButton(
+              key: const ValueKey('protected-action'),
+              onPressed: () => protectedTaps += 1,
+              child: const Text('PROTECTED DASHBOARD ACTION'),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.text('PROTECTED DASHBOARD ACTION'), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
-      findsOneWidget,
-    );
-    expect(find.byType(Opacity), findsNothing);
-
-    await tester.tap(
-      find.byKey(const ValueKey('protected-action')),
-      warnIfMissed: false,
-    );
-    await tester.pump();
-    expect(protectedTaps, 0);
-  });
+      expect(find.text('PROTECTED DASHBOARD ACTION'), findsNothing);
+      expect(find.text('Weekly report'), findsOneWidget);
+      expect(find.byKey(const ValueKey('protected-action')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
+        findsOneWidget,
+      );
+      final semantics = tester.ensureSemantics();
+      expect(
+        tester.getSemantics(find.byType(PremiumRouteGlassGate)),
+        isNot(isSemantics(label: 'PROTECTED DASHBOARD ACTION')),
+      );
+      await tester.tap(find.byKey(const Key('premium-route-public-title')));
+      semantics.dispose();
+      await tester.pump();
+      expect(protectedTaps, 0);
+    },
+  );
 
   testWidgets('premium route glass visual proof', (tester) async {
     await tester.binding.setSurfaceSize(const Size(430, 932));

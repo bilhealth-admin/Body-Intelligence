@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:ui';
 
@@ -524,7 +525,9 @@ class _StoryGlassSignal extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Icon(icon, color: const Color(0xFF0877F9), size: 19),
+              BilGlassPressFeedback(
+                child: Icon(icon, color: const Color(0xFF0877F9), size: 19),
+              ),
               const SizedBox(width: 9),
               Expanded(
                 child: Row(

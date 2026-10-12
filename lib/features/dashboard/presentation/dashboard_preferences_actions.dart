@@ -441,10 +441,11 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
-                const Align(
+                Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: PremiumLabelBadge(
                     key: Key('dashboard-nutrient-premium-page-label'),
+                    onTap: () => Navigator.of(sheetContext).pop(true),
                   ),
                 ),
                 const SizedBox(height: 12),

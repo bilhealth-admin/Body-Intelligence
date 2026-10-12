@@ -17,11 +17,10 @@ void main() {
     expect(
       RegExp(
         r'goalSchedule\s*\.mealTargets\[mealType\]\s*\?\.calories'
-        r'\s*\?\?\s*mealCalorieGoals\[mealType\]'
-        r'\s*\?\?\s*dailyGoal\?\.calories',
+        r'\s*\?\?\s*mealCalorieGoals\[mealType\]\s*,',
       ).hasMatch(source),
       isTrue,
-      reason: 'Scheduled meal goal must precede override and default fallback',
+      reason: 'The focused meal must use its own goal, never the whole day.',
     );
   });
 

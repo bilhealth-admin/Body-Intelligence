@@ -1,0 +1,14 @@
+{
+  "case": "daily_log_empty_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Owner approved compact meal rows and outer Back/day spacing; calorie/macro region verified unchanged against exact2c. Selected day and calendar neighbors are centered.",
+  "previous_master_sha256": "d7f2dc0a2e99fc98e6ca0a731a11edc3e90c318bd4b9a6d1392757c2bb1056ab",
+  "accepted_actual_sha256": "b2de22d79333b229d48810b919d6202971ec65a5529e5a7ffb09ba30237a02a3",
+  "review_image": "daily_log_empty_phone.png",
+  "promotion": {
+    "time": 1791818688.0819502,
+    "master_sha256": "b2de22d79333b229d48810b919d6202971ec65a5529e5a7ffb09ba30237a02a3",
+    "method": "one exact named file; visual decision required"
+  }
+}

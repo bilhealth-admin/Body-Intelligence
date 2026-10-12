@@ -1,0 +1,74 @@
+{
+  "reviewed_after_fix_files": {
+    "lib/main.dart": "4c1907319140a104da2898cc579fc8965faf5b67440198f4ccacfd2f72ea8190",
+    "test/app/bootstrap_health_storage_retry_test.dart": "489232617b95f05f7b0d800fd5739fb2e8f29b10435181aaa95413f41ee1f668",
+    "lib/features/intelligence_center/services/ai_boost_purchase_service.dart": "3afc22922a5b1ab3de973a4b1d1fab8af86827cb876ec71b57fc6f1fe6969530",
+    "lib/features/intelligence_center/services/ai_boost_purchase_processing.dart": "dbbe06e2170bff82db8f58f72fe9be854de805c5440621cb999dff6b2a76b69d",
+    "lib/features/commerce/services/store_native_purchase_completion.dart": "e5a342e64c5d302bd4ee53f80985c89622f6d6893ed5d2ed8b49778cff3c00f0",
+    "pubspec.yaml": "8bd8a347e44f0c47c67e73d7d63ed632b1e439f580d87ce8e5a49fc7ed5d289d",
+    "pubspec.lock": "e0e877216c7cde92607ee71859e87949a5ec1edd90808dc7b54a120567f723fc"
+  },
+  "billing_reviewer": "/root/final_billing_review",
+  "apple_reviewer": "/root/final_apple_privacy_review",
+  "billing_scope": "Finish-refund closed, public SDK, same pinned interface, no new confirmed defect.",
+  "apple_scope": "Actual bootstrap null-check closed; 10 raw starts/dones verified; no native/device claim.",
+  "evidence_labels": [
+    "review-final-boost-refund-complete-file",
+    "review-final-native-public-sdk-complete-file",
+    "review-final-refund-confirmation-complete-file",
+    "review-final-billing-affected-group",
+    "review-final-bootstrap-retry-complete-file",
+    "review-final-bootstrap-privacy-cloud-affected-group"
+  ],
+  "no_reviewer_mutation_or_test_execution_in_followup": true,
+  "final_confirmed_utc": "2026-10-12T23:02:02.152940+00:00",
+  "independent_final_read_only_confirmations": [
+    {
+      "reviewer": "/root/final_billing_review",
+      "scope": "199 billing and test files match accepted group and final snapshot; no remaining confirmed defect; public SDK and finish-refund repair preserved."
+    },
+    {
+      "reviewer": "/root/final_apple_privacy_review",
+      "scope": "main/bootstrap/native privacy exact hashes preserved; actual 10/101/12/422/8 results; 367 active masters unchanged; no native/device/reviewer account proof."
+    },
+    {
+      "reviewer": "/root/final_review_decision_draft",
+      "scope": "Google original enforcement evidence and policy decision preserved; final report edited for actual numbers; no appeal submitted, no Console current-state assertion."
+    },
+    {
+      "reviewer": "/root/admin_final_snapshot_confirmation",
+      "prior_independent_review": "/root/fourth_admin_cloud_independent_final",
+      "scope": "15 admin,201 community,53 cloud,343 Supabase files and associated tests match final snapshot; KEEP admin; actual local SQL9/V2SQL23/refundSQL7/Deno76/realcycle1 read; no new confirmed defect."
+    }
+  ],
+  "reviewed_snapshot_before_final_runner_fix": {
+    "snapshot": "G:\\BIL_Project\\qa-preserved\\store-review-pre-full-20261013-71f8fa7a2593",
+    "tested_input_fingerprint_v4": "71f8fa7a2593ccfb7890b3e317dfbaf55c841acd20c10bbbdab9cc53ef4c3eb3",
+    "tested_input_files": 5894,
+    "file_count": 9968
+  },
+  "final_runner_delta_evidence": "final-runner-status-prefix-regression.json",
+  "application_components_unchanged_after_independent_reviews": true,
+  "scope_final_confirmation": "The final runtime differs only in two owner-runner Python files; native/app/assets/goldens/migrations/SDK match all four reviewed components.",
+  "previous_analyze_before_final_runner_fix": {
+    "exit_code": 0,
+    "accepted": true,
+    "stable_source": true,
+    "wall_seconds": 270.17,
+    "no_issues": true,
+    "fatal_infos": true,
+    "fatal_warnings": true,
+    "evidence": "verification/review-final-analyze-closure-frozen.json"
+  },
+  "final_analyze": {
+    "exit_code": 0,
+    "accepted": true,
+    "stable_source": true,
+    "wall_seconds": 276.83,
+    "source_fingerprint_v4": "2d016a6d67df3199d13ccd613d2eb039b6f9eeb7d1ff0f39bdeffd26ebafb4ed",
+    "no_issues": true,
+    "fatal_infos": true,
+    "fatal_warnings": true,
+    "evidence": "verification/review-final-analyze-status-prefix-frozen.json"
+  }
+}

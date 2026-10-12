@@ -1,3 +1,4 @@
+import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 /// Premium explanatory note for medical/wellness boundaries.
@@ -43,7 +44,9 @@ class BilClinicalNote extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
-              child: Icon(icon, size: 20, color: scheme.primary),
+              child: BilGlassPressFeedback(
+                child: Icon(icon, size: 20, color: scheme.primary),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(

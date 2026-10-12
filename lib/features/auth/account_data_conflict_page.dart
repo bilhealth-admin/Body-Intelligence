@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -131,7 +132,9 @@ class _AccountDataConflictPageState extends State<AccountDataConflictPage> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Icon(Icons.logout_rounded),
+                              : const BilGlassPressFeedback(
+                                  child: Icon(Icons.logout_rounded),
+                                ),
                           label: Text(
                             authFiveLocaleTextOf(
                               context,

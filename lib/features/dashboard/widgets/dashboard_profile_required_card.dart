@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -120,7 +121,9 @@ class _EmptyMetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary),
+            BilGlassPressFeedback(
+              child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+            ),
             const SizedBox(height: 12),
             Text(label, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 4),

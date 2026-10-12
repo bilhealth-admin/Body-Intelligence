@@ -1,3 +1,4 @@
+import 'shared/widgets/bil_glass_press_feedback.dart';
 import 'features/community/presentation/community_attention_scope.dart';
 import 'features/commerce/presentation/app_purchase_coordinator.dart';
 import 'dart:async';
@@ -23,6 +24,7 @@ import 'app/services/app_resume_dashboard_coordinator.dart';
 import 'app/services/app_switcher_privacy_shield.dart';
 import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
+import 'app/services/health_storage_privacy.dart';
 import 'app/services/recoverable_image_picker.dart';
 import 'features/ads/presentation/ad_runtime_bootstrap.dart';
 import 'features/commerce/providers/commerce_providers.dart';
@@ -106,21 +108,35 @@ Future<void> _predecodeLaunchWordmark() async {
 }
 
 class _BILBootstrap extends StatefulWidget {
-  const _BILBootstrap();
+  const _BILBootstrap({
+    this.healthStoragePrivacy,
+    this.cloudConfigured,
+    this.readyChild,
+  });
+
+  final BilHealthStoragePrivacy? healthStoragePrivacy;
+  final bool? cloudConfigured;
+  final Widget? readyChild;
 
   @override
   State<_BILBootstrap> createState() => _BILBootstrapState();
 }
 
 class _BILBootstrapState extends State<_BILBootstrap> {
-  bool ready = !AppEnvironment.cloudConfigured;
+  late bool ready;
+  BilHealthStoragePrivacy get _healthStoragePrivacy =>
+      widget.healthStoragePrivacy ?? BilHealthStoragePrivacy.instance;
+  bool get _cloudConfigured =>
+      widget.cloudConfigured ?? AppEnvironment.cloudConfigured;
   Object? failure;
+  bool _healthStorageFailure = false;
   bool nativeLaunchDismissed = false;
   Future<void>? _cloudInitializationFuture;
 
   @override
   void initState() {
     super.initState();
+    ready = !_cloudConfigured && !_healthStoragePrivacy.requiresProtection;
     // Never initialize platform plugins before Flutter submits its first
     // frame. On a standalone Android install SharedPreferences/AppLinks setup
     // can be substantially slower than it is under `flutter run`; invoking it
@@ -136,7 +152,29 @@ class _BILBootstrapState extends State<_BILBootstrap> {
   }
 
   Future<void> _initializeCloud() async {
-    setState(() => failure = null);
+    setState(() {
+      failure = null;
+      _healthStorageFailure = false;
+    });
+    if (_healthStoragePrivacy.requiresProtection) {
+      try {
+        await _healthStoragePrivacy.ensureProtected();
+      } catch (error, stack) {
+        AppObservability.crashes.record(error, stack);
+        if (mounted) {
+          setState(() {
+            failure = error;
+            _healthStorageFailure = true;
+          });
+        }
+        return; // Do not mount writers, auth/preferences or health UI yet.
+      }
+      if (!mounted) return;
+    }
+    if (!_cloudConfigured) {
+      if (mounted) setState(() => ready = true);
+      return;
+    }
     // Supabase creates its client synchronously before its first await, while
     // restoring SharedPreferences/auth can take much longer on a freshly
     // installed APK. Let the local-first router run as soon as that client
@@ -180,6 +218,7 @@ class _BILBootstrapState extends State<_BILBootstrap> {
   @override
   Widget build(BuildContext context) {
     if (ready) {
+      if (widget.readyChild != null) return widget.readyChild!;
       return BilMobileUmpBootstrap(
         child: _BILLinkBootstrap(
           cloudInitialization: _cloudInitializationFuture,
@@ -189,6 +228,13 @@ class _BILBootstrapState extends State<_BILBootstrap> {
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -198,42 +244,69 @@ class _BILBootstrapState extends State<_BILBootstrap> {
         ),
         scaffoldBackgroundColor: bilLaunchBlue,
       ),
-      home: Scaffold(
-        backgroundColor: bilLaunchBlue,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            const BilStartupLoadingSurface(),
-            if (failure != null)
-              SafeArea(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'تعذر الاتصال الآمن بالخدمة السحابية. لم تتغير بياناتك.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton.icon(
-                          onPressed: _initializeCloud,
-                          icon: const Icon(Icons.refresh_rounded),
-                          label: Text(context.strings.text('Try again')),
-                        ),
-                      ],
+      home: Builder(
+        // Bootstrap itself sits above this temporary MaterialApp. Read the
+        // reviewed retry copy from the app's localized descendant instead.
+        builder: (localizedContext) => Scaffold(
+          backgroundColor: bilLaunchBlue,
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              const BilStartupLoadingSurface(),
+              if (failure != null)
+                SafeArea(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _healthStorageFailure
+                                ? (Localizations.localeOf(
+                                            localizedContext,
+                                          ).languageCode ==
+                                          'ar'
+                                      ? 'تعذر تأكيد حماية بيانات الصحة من النسخ الاحتياطي. لم تتغير بياناتك. أعد المحاولة.'
+                                      : 'Health data backup protection could not be verified. Your data has not changed. Please retry.')
+                                : 'تعذر الاتصال الآمن بالخدمة السحابية. لم تتغير بياناتك.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          const SizedBox(height: 16),
+                          FilledButton.icon(
+                            onPressed: _initializeCloud,
+                            icon: const BilGlassPressFeedback(
+                              child: Icon(Icons.refresh_rounded),
+                            ),
+                            label: Text(
+                              localizedContext.strings.text('Try again'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+/// Exercises the real bootstrap state and native privacy gate without starting
+/// Supabase, ads, or the application writers during a widget test.
+@visibleForTesting
+Widget bilBootstrapForTesting({
+  required BilHealthStoragePrivacy healthStoragePrivacy,
+  required Widget readyChild,
+}) => _BILBootstrap(
+  healthStoragePrivacy: healthStoragePrivacy,
+  cloudConfigured: false,
+  readyChild: readyChild,
+);
 
 class _BILLinkBootstrap extends StatefulWidget {
   const _BILLinkBootstrap({required this.child, this.cloudInitialization});

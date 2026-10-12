@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import 'bil_semantic_icons.dart';
@@ -40,10 +41,12 @@ class BilFlatIcon extends StatelessWidget {
       dimension: size,
       child: Center(
         child: ExcludeSemantics(
-          child: Icon(
-            glyph,
-            size: iconSize,
-            color: color ?? spec.accent(theme.brightness),
+          child: BilGlassPressFeedback(
+            child: Icon(
+              glyph,
+              size: iconSize,
+              color: color ?? spec.accent(theme.brightness),
+            ),
           ),
         ),
       ),

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -78,13 +79,15 @@ class _ProfessionalContentLibraryPageState
           onPressed: () => context.canPop()
               ? context.pop()
               : context.go('/wellness-library'),
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const BackButtonIcon(),
         ),
         actions: [
           IconButton(
             tooltip: FeatureStrings.of(context).get('content_library'),
             onPressed: () => context.push('/wellness/content-packs'),
-            icon: const Icon(Icons.download_for_offline_outlined),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.download_for_offline_outlined),
+            ),
           ),
         ],
       ),
@@ -197,7 +200,9 @@ class _LibraryError extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(
               _localized(
                 context,
@@ -293,7 +298,9 @@ class _EmptyLibrary extends StatelessWidget {
         const SizedBox(height: 18),
         FilledButton.icon(
           onPressed: () => context.push('/wellness/content-packs'),
-          icon: const Icon(Icons.download_rounded),
+          icon: const BilGlassPressFeedback(
+            child: Icon(Icons.download_rounded),
+          ),
           label: Text(
             _localized(
               context,
@@ -491,7 +498,9 @@ class _ContentDetailsPage extends StatelessWidget {
           leading: const Icon(Icons.verified_rounded),
           title: Text(item.publisher),
           subtitle: Text('${item.licenseName}\n${item.sourceUrl}'),
-          trailing: const Icon(Icons.open_in_new_rounded),
+          trailing: const BilGlassPressFeedback(
+            child: Icon(Icons.open_in_new_rounded),
+          ),
           onTap: item.sourceUrl.scheme == 'https'
               ? () => _openOriginalSource(context)
               : null,

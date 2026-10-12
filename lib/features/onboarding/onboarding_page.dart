@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:country_picker/country_picker.dart';
@@ -571,7 +572,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               });
               unawaited(_load());
             },
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(t('Try again')),
           ),
         ),

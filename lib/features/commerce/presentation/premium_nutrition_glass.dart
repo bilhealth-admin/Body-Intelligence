@@ -8,20 +8,23 @@ import '../providers/commerce_providers.dart';
 import 'premium_value_mask.dart';
 import 'premium_label_badge.dart';
 
-/// One non-interactive marker per public group, only after verified denial.
+/// One optional upgrade action per public group, only after verified denial.
 class PremiumNutritionGroupLabel extends ConsumerWidget {
   const PremiumNutritionGroupLabel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
-    if (state?.authority != EntitlementAuthority.verifiedServer ||
+    final access = ref.watch(verifiedSubscriptionAccessProvider);
+    final state = access.asData?.value;
+    if (access.isLoading ||
+        access.hasError ||
+        state?.authority != EntitlementAuthority.verifiedServer ||
         state!.grants(CommerceEntitlement.advancedIntelligence)) {
       return const SizedBox.shrink();
     }
-    return const Padding(
-      padding: EdgeInsets.only(bottom: 8),
-      child: PremiumLabelBadge(),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: PremiumLabelBadge(onTap: () => context.push('/plans')),
     );
   }
 }

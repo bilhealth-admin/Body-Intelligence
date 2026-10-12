@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'repeating_step_action.dart';
 
 /// A fast horizontal scale for measurements with a wide range.
 ///
@@ -37,20 +38,32 @@ class SmartWeightScaleField extends StatelessWidget {
     return minimum + index * step;
   }
 
-  void _adjust(int direction) => onChanged(_stepped(value + step * direction));
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final formatted = value.toStringAsFixed(decimalPlaces);
+    var draft = value;
+    double next(int direction) => decimalStep(
+      value: draft,
+      step: step,
+      direction: direction,
+      decimalPlaces: decimalPlaces,
+      minimum: minimum,
+      maximum: maximum,
+    );
+    void adjust(int direction) {
+      draft = next(direction);
+      onChanged(draft);
+    }
+
     return Semantics(
       key: const Key('smart-weight-scale-field'),
       label: '$label, $formatted $unit',
       value: formatted,
-      increasedValue: _stepped(value + step).toStringAsFixed(decimalPlaces),
-      decreasedValue: _stepped(value - step).toStringAsFixed(decimalPlaces),
-      onIncrease: () => _adjust(1),
-      onDecrease: () => _adjust(-1),
+      increasedValue: next(1).toStringAsFixed(decimalPlaces),
+      decreasedValue: next(-1).toStringAsFixed(decimalPlaces),
+      onIncrease: () => adjust(1),
+      onDecrease: () => adjust(-1),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -91,11 +104,16 @@ class SmartWeightScaleField extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              IconButton.outlined(
-                key: const Key('smart-weight-scale-decrease'),
-                tooltip: '-${step.toStringAsFixed(decimalPlaces)} $unit',
-                onPressed: value <= minimum ? null : () => _adjust(-1),
-                icon: const Icon(Icons.remove_rounded),
+              RepeatingStepAction(
+                cancelScope: (unit, step, decimalPlaces, minimum, maximum),
+                canStep: () => draft > minimum,
+                onPressed: value <= minimum ? null : () => adjust(-1),
+                builder: (_, action, _) => IconButton.outlined(
+                  key: const Key('smart-weight-scale-decrease'),
+                  tooltip: '-${step.toStringAsFixed(decimalPlaces)} $unit',
+                  onPressed: action,
+                  icon: const Icon(Icons.remove_rounded),
+                ),
               ),
               Expanded(
                 child: SliderTheme(
@@ -119,11 +137,16 @@ class SmartWeightScaleField extends StatelessWidget {
                   ),
                 ),
               ),
-              IconButton.outlined(
-                key: const Key('smart-weight-scale-increase'),
-                tooltip: '+${step.toStringAsFixed(decimalPlaces)} $unit',
-                onPressed: value >= maximum ? null : () => _adjust(1),
-                icon: const Icon(Icons.add_rounded),
+              RepeatingStepAction(
+                cancelScope: (unit, step, decimalPlaces, minimum, maximum),
+                canStep: () => draft < maximum,
+                onPressed: value >= maximum ? null : () => adjust(1),
+                builder: (_, action, _) => IconButton.outlined(
+                  key: const Key('smart-weight-scale-increase'),
+                  tooltip: '+${step.toStringAsFixed(decimalPlaces)} $unit',
+                  onPressed: action,
+                  icon: const Icon(Icons.add_rounded),
+                ),
               ),
             ],
           ),

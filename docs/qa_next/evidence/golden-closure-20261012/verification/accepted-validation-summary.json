@@ -1,0 +1,66 @@
+{
+  "recorded_at_utc": "2026-10-12T19:32:37.751863+00:00",
+  "Full_launched": false,
+  "Analyze_result": "pending",
+  "do_not_sum_overlapping_test_runs": true,
+  "runs": {
+    "golden-and-affected-layout-final-validation": {
+      "exit_code": 0,
+      "counts": {
+        "success": 420,
+        "failure": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "file_count": 22,
+      "stable_source": true,
+      "source_fingerprint": "c8948f7747d85a42d603434dbf93c51df3e7916a65159f4789c3555c4a6d46f3",
+      "elapsed_seconds": 154.17
+    },
+    "eight-existing-ipad-final-lf-validation": {
+      "exit_code": 0,
+      "counts": {
+        "success": 8,
+        "failure": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "file_count": 2,
+      "stable_source": true,
+      "source_fingerprint": "3dd10b9495a72be6abb7a3c7c3f11d1ef35089b840d00905ecb82566828afc7d",
+      "elapsed_seconds": 16.8
+    },
+    "canonical-lf-affected-files-final": {
+      "exit_code": 0,
+      "counts": {
+        "success": 70,
+        "failure": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "file_count": 3,
+      "stable_source": true,
+      "source_fingerprint": "3dd10b9495a72be6abb7a3c7c3f11d1ef35089b840d00905ecb82566828afc7d",
+      "elapsed_seconds": 37.32
+    },
+    "final-full-format-lf-check": {
+      "exit_code": 0,
+      "counts": null,
+      "file_count": 3159,
+      "stable_source": null,
+      "source_fingerprint": null,
+      "elapsed_seconds": 13.26
+    },
+    "owner-full-runner-nine-unit-final": {
+      "exit_code": 0,
+      "counts": null,
+      "file_count": 2,
+      "stable_source": null,
+      "source_fingerprint": null,
+      "elapsed_seconds": 1.48,
+      "unit_tests": 9,
+      "framework_seconds": 0.964,
+      "purpose": "runner tool unit validation; not Flutter Full"
+    }
+  }
+}

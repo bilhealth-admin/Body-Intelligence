@@ -262,7 +262,9 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
             suffixIcon: IconButton(
               tooltip: t('Country or region'),
               onPressed: _pickCountry,
-              icon: const Icon(Icons.arrow_drop_down_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.arrow_drop_down_rounded),
+              ),
             ),
             border: const OutlineInputBorder(),
           ),

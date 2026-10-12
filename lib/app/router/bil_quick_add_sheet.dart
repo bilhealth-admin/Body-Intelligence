@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/widgets/bil_wordmark.dart';
@@ -344,7 +345,9 @@ class _PrimaryQuickAction extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Icon(icon, key: iconKey, color: foregroundColor, size: 20),
+            child: BilGlassPressFeedback(
+              child: Icon(icon, key: iconKey, color: foregroundColor, size: 20),
+            ),
           ),
           const SizedBox(height: 4),
           Flexible(
@@ -408,7 +411,9 @@ class _QuickActionTile extends StatelessWidget {
                 ),
                 shape: BoxShape.circle,
               ),
-              child: Icon(key: iconKey, icon, color: color, size: 20),
+              child: BilGlassPressFeedback(
+                child: Icon(key: iconKey, icon, color: color, size: 20),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -422,11 +427,13 @@ class _QuickActionTile extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_left_rounded
-                  : Icons.chevron_right_rounded,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            BilGlassPressFeedback(
+              child: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

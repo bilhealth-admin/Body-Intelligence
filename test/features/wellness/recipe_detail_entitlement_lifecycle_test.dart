@@ -112,16 +112,32 @@ void main() {
       expect(
         find.descendant(
           of: sheet,
-          matching: find.byKey(
-            const ValueKey('premium-route-protected-content'),
-          ),
+          matching: find.text(recipe.resolveTitle('en').text),
         ),
+        findsNothing,
+      );
+      // Revoked content is unmounted, rather than keeping ingredients, source
+      // facts or focusable controls behind a visual-only mask.
+      expect(
+        find.descendant(
+          of: sheet,
+          matching: find.byType(DraggableScrollableSheet),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: sheet, matching: find.text('Ingredients')),
+        findsNothing,
+      );
+      expect(
+        find
+            .descendant(
+              of: sheet,
+              matching: find.byKey(const ValueKey('premium-route-upgrade-cta')),
+            )
+            .hitTestable(),
         findsOneWidget,
       );
-      final blockers = tester.widgetList<AbsorbPointer>(
-        find.descendant(of: sheet, matching: find.byType(AbsorbPointer)),
-      );
-      expect(blockers.any((widget) => widget.absorbing), isTrue);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();

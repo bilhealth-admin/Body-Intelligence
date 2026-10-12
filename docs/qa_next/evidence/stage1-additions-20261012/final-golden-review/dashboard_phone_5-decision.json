@@ -1,0 +1,14 @@
+{
+  "case": "dashboard_phone_5",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Master incorrectly hides the public title and labels; 2c already separated locks. Current versus2c only318 arrow pixels; paid values and layouts unchanged.",
+  "previous_master_sha256": "c0a00c5394e63e3cccb615c7c4da81fceb7aa59626f521f310c5f4d4377eea89",
+  "accepted_actual_sha256": "4dc2a3d95a51a14454f4d7108141caacc4eb9fc30b8447393b9dc80c51ee8317",
+  "review_image": "dashboard_phone_5.png",
+  "promotion": {
+    "time": 1791818687.613761,
+    "master_sha256": "4dc2a3d95a51a14454f4d7108141caacc4eb9fc30b8447393b9dc80c51ee8317",
+    "method": "one exact named file; visual decision required"
+  }
+}

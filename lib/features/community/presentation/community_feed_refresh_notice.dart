@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_voice_status.dart';
@@ -56,7 +57,9 @@ class CommunityFeedRefreshNotice extends StatelessWidget {
           title: Text(messages[locale] ?? messages['en']!),
           trailing: IconButton(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             tooltip: VoiceStatusRuntimeCopy.resolve(
               VoiceStatusCopyKey.retry,
               locale,

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -194,7 +195,9 @@ class TrustSupportPage extends StatelessWidget {
                   'راجع الأذونات وحالة الاتصال والقراءات المستوردة.',
                 ),
               ),
-              trailing: const Icon(Icons.chevron_right_rounded),
+              trailing: const BilGlassPressFeedback(
+                child: Icon(Icons.chevron_right_rounded),
+              ),
               onTap: () => context.push('/connected-health'),
             ),
             ListTile(
@@ -213,7 +216,9 @@ class TrustSupportPage extends StatelessWidget {
                   'أنشئ تصديرًا محليًا لنطاق زمني تختاره.',
                 ),
               ),
-              trailing: const Icon(Icons.chevron_right_rounded),
+              trailing: const BilGlassPressFeedback(
+                child: Icon(Icons.chevron_right_rounded),
+              ),
               onTap: () => context.push('/settings/local-export'),
             ),
             ListTile(
@@ -234,7 +239,9 @@ class TrustSupportPage extends StatelessWidget {
                   'افتح مسار طلب الحذف الموثق. تبقى السجلات المحلية منفصلة.',
                 ),
               ),
-              trailing: const Icon(Icons.chevron_right_rounded),
+              trailing: const BilGlassPressFeedback(
+                child: Icon(Icons.chevron_right_rounded),
+              ),
               onTap: () => context.push('/help/delete-account'),
             ),
             ListTile(
@@ -247,7 +254,9 @@ class TrustSupportPage extends StatelessWidget {
                 shape: BoxShape.rectangle,
               ),
               title: Text(tr('Privacy Policy', 'سياسة الخصوصية')),
-              trailing: const Icon(Icons.chevron_right_rounded),
+              trailing: const BilGlassPressFeedback(
+                child: Icon(Icons.chevron_right_rounded),
+              ),
               onTap: () => context.push('/legal/privacy'),
             ),
             ListTile(
@@ -260,7 +269,9 @@ class TrustSupportPage extends StatelessWidget {
                 shape: BoxShape.rectangle,
               ),
               title: Text(tr('Terms of Service', 'شروط الخدمة')),
-              trailing: const Icon(Icons.chevron_right_rounded),
+              trailing: const BilGlassPressFeedback(
+                child: Icon(Icons.chevron_right_rounded),
+              ),
               onTap: () => context.push('/legal/terms'),
             ),
             const SizedBox(height: 20),

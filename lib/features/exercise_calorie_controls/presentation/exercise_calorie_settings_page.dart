@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,7 +24,9 @@ class ExerciseCalorieSettingsPage extends ConsumerWidget {
         error: (_, _) => Center(
           child: FilledButton.icon(
             onPressed: () => ref.invalidate(exerciseCaloriePreferencesProvider),
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(_retryLabel(locale)),
           ),
         ),
@@ -32,7 +35,9 @@ class ExerciseCalorieSettingsPage extends ConsumerWidget {
           error: (_, _) => Center(
             child: FilledButton.icon(
               onPressed: () => ref.invalidate(connectedHealthProvider),
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(_retryLabel(locale)),
             ),
           ),

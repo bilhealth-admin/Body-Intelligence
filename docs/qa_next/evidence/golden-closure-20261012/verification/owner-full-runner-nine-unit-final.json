@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:\\Users\\HP 1040 G8\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+    "-X",
+    "utf8",
+    "-m",
+    "unittest",
+    "tools/qa/test_bil_owner_full_test_runner.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 1.48,
+  "files": {
+    "tools/qa/bil_owner_full_test_runner.py": "0419102ed362e9865d3235597a2b65f0cbe47d6b410aa6f619c51a88a4ed3be6",
+    "tools/qa/test_bil_owner_full_test_runner.py": "38aebea0d1975394a5b7304b3b11252c2eba15b820a8abafc7de832df35ce34b"
+  },
+  "purpose": "final owner-readable evidence of9 Python tool tests; no Flutter/Full launched"
+}

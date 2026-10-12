@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -86,7 +87,9 @@ class _ConsentBenefitRow extends StatelessWidget {
               color: colors.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 19, color: colors.onPrimaryContainer),
+            child: BilGlassPressFeedback(
+              child: Icon(icon, size: 19, color: colors.onPrimaryContainer),
+            ),
           ),
         ),
         const SizedBox(width: 12),

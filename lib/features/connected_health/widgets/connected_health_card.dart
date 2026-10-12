@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -259,7 +260,9 @@ class _ConnectedHealthContent extends StatelessWidget {
                   snapshot.status == ConnectedHealthStatus.degraded)
                 OutlinedButton.icon(
                   onPressed: onSync,
-                  icon: const Icon(Icons.sync_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.sync_rounded),
+                  ),
                   label: Text(tr('Sync now', 'تحديث الساعة')),
                 ),
               FilledButton.tonalIcon(
@@ -661,7 +664,9 @@ class _DashboardSyncReading extends StatelessWidget {
             dimension: 17,
             child: CircularProgressIndicator(strokeWidth: 2),
           )
-        : Icon(Icons.sync_rounded, size: compact ? 14 : 17),
+        : BilGlassPressFeedback(
+            child: Icon(Icons.sync_rounded, size: compact ? 14 : 17),
+          ),
     label: Text(
       syncing
           ? connectedHealthTextForLanguage(

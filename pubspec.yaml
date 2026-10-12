@@ -74,6 +74,8 @@ dependencies:
   timezone: ^0.11.1
   in_app_purchase: ^3.3.0
   in_app_purchase_android: ^0.5.2
+  # Keep the native BillingResult; exact already-locked public SDK interface.
+  in_app_purchase_platform_interface: 1.4.1
   in_app_purchase_storekit: ^0.4.11
   in_app_review: ^2.0.12
   app_links: ^7.0.0
@@ -89,8 +91,6 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  # Public purchase-stream seam; exact already-locked version, host tests only.
-  in_app_purchase_platform_interface: 1.4.1
   path_provider_platform_interface: ^2.0.0
   # Exercise actual durable preference failures independently of the UI cache.
   # This is the exact already-locked transitive version, not a runtime upgrade.
@@ -142,6 +142,8 @@ flutter:
     - assets/branding/bil_splash_identity.png
     - assets/branding/bil_splash_motion.mp4
     - assets/branding/google_g.svg
+    - assets/branding/google_translate_color.png
+    - assets/branding/google_translate_white.png
     # Ship only recipe art consumed by the app. The generated source-image
     # archive remains in the repository but must not inflate the APK/AAB.
     - assets/images/professional/mediterranean_protein_bowl.png

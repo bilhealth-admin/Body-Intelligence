@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:body_intelligence_log/features/intelligence_center/services/ai_boost_purchase_service.dart';
+import 'package:body_intelligence_log/features/commerce/domain/store_benefit_delivery.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 
 class _Native extends Fake implements InAppPurchase {
   final updates = StreamController<List<PurchaseDetails>>.broadcast(sync: true);
@@ -103,6 +106,360 @@ void main() {
     expect(service.canPurchase, isTrue);
     return service;
   }
+
+  StoreBenefitDelivery inactiveDelivery(
+    String owner, {
+    String store = 'app_store',
+  }) => StoreBenefitDelivery(
+    ownerId: owner,
+    store: store,
+    environment: 'sandbox',
+    eventKey: 'a' * 64,
+    productId: AiBoostPurchaseService.productId,
+    verifiedAt: DateTime.now().toUtc(),
+    active: false,
+    isBoost: true,
+    finishPending: false,
+    quantity: 0,
+  );
+
+  StoreBenefitDelivery finishProof({
+    bool active = true,
+    bool pending = true,
+    String owner = 'owner-a',
+    String event = 'a',
+    String environment = 'sandbox',
+    DateTime? at,
+  }) => StoreBenefitDelivery(
+    ownerId: owner,
+    store: 'google_play',
+    environment: environment,
+    eventKey: event * 64,
+    productId: AiBoostPurchaseService.productId,
+    verifiedAt: at ?? DateTime.utc(2026, 10, 12, 12),
+    active: active,
+    isBoost: true,
+    finishPending: pending,
+    quantity: active ? 2500 : 0,
+  );
+
+  PurchaseDetails googleFinishReceipt(String id) => PurchaseDetails(
+    purchaseID: id,
+    productID: AiBoostPurchaseService.productId,
+    status: PurchaseStatus.purchased,
+    transactionDate: '1',
+    verificationData: PurchaseVerificationData(
+      localVerificationData: '',
+      serverVerificationData: 'fixture-$id',
+      source: 'google_play',
+    ),
+  )..pendingCompletePurchase = true;
+
+  for (final retry in [false, true]) {
+    test(
+      'Google Boost refund during ${retry ? 'finish retry' : 'finish'} retires exact receipt and invalidates delivery',
+      () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        final native = _Native();
+        var verifyCalls = 0, finishCalls = 0;
+        final finish = Completer<StoreVerificationOutcome>();
+        final service = AiBoostPurchaseService(
+          purchase: native,
+          owner: () => 'owner-a',
+          ownerChanges: const Stream.empty(),
+          verifyDelivery: (_, _) async {
+            verifyCalls++;
+            return StoreVerificationOutcome(true, delivery: finishProof());
+          },
+          finishDelivery: (_, _) {
+            finishCalls++;
+            if (retry && finishCalls == 1) throw StateError('transient finish');
+            return finish.future;
+          },
+        );
+        addTearDown(() async {
+          service.dispose();
+          await native.updates.close();
+        });
+        await service.initialize();
+        native.updates.add([googleFinishReceipt('refund-at-finish')]);
+        await _settle();
+        expect(service.verifiedCreditsRevision, 1);
+        expect(service.deliveryIsActive('a' * 64), isTrue);
+        expect(service.canPurchase, isFalse);
+        final retried = retry
+            ? service.retryPendingTransaction()
+            : Future<void>.value();
+        await _settle();
+        finish.complete(
+          StoreVerificationOutcome(
+            true,
+            delivery: finishProof(
+              active: false,
+              pending: false,
+              at: DateTime.utc(2026, 10, 12, 12, 1),
+            ),
+          ),
+        );
+        await retried;
+        await _settle();
+        expect(service.state, AiBoostPurchaseState.ready);
+        expect(service.errorCode, 'purchase_inactive');
+        expect(service.lastDelivery!.active, isFalse);
+        expect(service.lastDelivery!.quantity, 0);
+        expect(service.deliveryIsActive('a' * 64), isFalse);
+        expect(
+          service.verifiedCreditsRevision,
+          2,
+          reason:
+              'trusted delivery then invalidation; no local credit or refund',
+        );
+        expect(service.canRetry, isFalse);
+        expect(service.canPurchase, isTrue);
+        expect(verifyCalls, 1);
+        expect(finishCalls, retry ? 2 : 1);
+        expect(native.launches, 0);
+        expect(native.finishes, 0);
+        // Replayed old callback must not restore its already-revoked confirmation.
+        native.updates.add([googleFinishReceipt('refund-at-finish')]);
+        await _settle();
+        expect(service.state, AiBoostPurchaseState.ready);
+        expect(service.deliveryIsActive('a' * 64), isFalse);
+        expect(service.verifiedCreditsRevision, 2);
+        expect(finishCalls, retry ? 2 : 1);
+      },
+    );
+  }
+  test(
+    'Google Boost finish refund from earlier A visit cannot affect A to B to A',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      final native = _Native();
+      final owners = StreamController<String?>.broadcast(sync: true);
+      var owner = 'owner-a';
+      final finish = Completer<StoreVerificationOutcome>();
+      final service = AiBoostPurchaseService(
+        purchase: native,
+        owner: () => owner,
+        ownerChanges: owners.stream,
+        verifyDelivery: (_, _) async =>
+            StoreVerificationOutcome(true, delivery: finishProof()),
+        finishDelivery: (_, _) => finish.future,
+      );
+      addTearDown(() async {
+        service.dispose();
+        await owners.close();
+        await native.updates.close();
+      });
+      await service.initialize();
+      native.updates.add([googleFinishReceipt('old-visit-finish')]);
+      await _settle();
+      expect(service.verifiedCreditsRevision, 1);
+      owner = 'owner-b';
+      owners.add(owner);
+      owner = 'owner-a';
+      owners.add(owner);
+      finish.complete(
+        StoreVerificationOutcome(
+          true,
+          delivery: finishProof(active: false, pending: false),
+        ),
+      );
+      await _settle();
+      expect(service.lastDelivery, isNull);
+      expect(service.deliveryIsActive('a' * 64), isFalse);
+      expect(service.state, AiBoostPurchaseState.unavailable);
+      expect(
+        service.verifiedCreditsRevision,
+        1,
+        reason: 'old visit cannot publish a new revision',
+      );
+      expect(native.launches, 0);
+      expect(native.finishes, 0);
+    },
+  );
+  for (final mismatch in ['owner', 'event', 'environment', 'older']) {
+    test(
+      'Google Boost foreign or stale finish proof $mismatch keeps exact retry',
+      () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        final native = _Native();
+        final service = AiBoostPurchaseService(
+          purchase: native,
+          owner: () => 'owner-a',
+          ownerChanges: const Stream.empty(),
+          verifyDelivery: (_, _) async =>
+              StoreVerificationOutcome(true, delivery: finishProof()),
+          finishDelivery: (_, _) async => StoreVerificationOutcome(
+            true,
+            delivery: finishProof(
+              active: false,
+              pending: false,
+              owner: mismatch == 'owner' ? 'owner-b' : 'owner-a',
+              event: mismatch == 'event' ? 'b' : 'a',
+              environment: mismatch == 'environment' ? 'production' : 'sandbox',
+              at: mismatch == 'older' ? DateTime.utc(2026, 10, 11) : null,
+            ),
+          ),
+        );
+        addTearDown(() async {
+          service.dispose();
+          await native.updates.close();
+        });
+        await service.initialize();
+        native.updates.add([googleFinishReceipt('bad-finish')]);
+        await _settle();
+        expect(service.errorCode, 'store_finish_pending');
+        expect(service.canRetry, isTrue);
+        expect(service.deliveryIsActive('a' * 64), isTrue);
+        expect(service.verifiedCreditsRevision, 1);
+        expect(native.launches, 0);
+        expect(native.finishes, 0);
+      },
+    );
+  }
+
+  test(
+    'cold Google canceled canonical receipt clears the old retry with no credit or native consume',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      final native = _Native();
+      var verifications = 0;
+      final service = AiBoostPurchaseService(
+        purchase: native,
+        owner: () => 'owner-a',
+        ownerChanges: const Stream.empty(),
+        verifyDelivery: (_, owner) async {
+          verifications++;
+          return StoreVerificationOutcome(
+            true,
+            delivery: inactiveDelivery(owner, store: 'google_play'),
+          );
+        },
+        reconcile: () async => [],
+      );
+      addTearDown(() async {
+        service.dispose();
+        await native.updates.close();
+      });
+      await service.initialize();
+      final receipt = GooglePlayPurchaseDetails.fromPurchase(
+        const PurchaseWrapper(
+          orderId: 'fixture-canceled-order',
+          packageName: 'com.bilhealth.bodyintelligencelog',
+          purchaseTime: 1,
+          signature: 'fixture-only',
+          products: ['bil_ai_boost'],
+          purchaseToken: 'fixture-canceled-token',
+          isAutoRenewing: false,
+          originalJson: '',
+          developerPayload: '',
+          isAcknowledged: false,
+          purchaseState: PurchaseStateWrapper.purchased,
+        ),
+      ).single;
+      // The old SDK receipt can replay while the authenticated canonical server
+      // has already observed canceled. Its status alone never authorizes credit.
+      native.updates.add([receipt]);
+      await _settle();
+      expect(verifications, 1);
+      expect(service.state, AiBoostPurchaseState.ready);
+      expect(service.errorCode, 'purchase_inactive');
+      expect(service.lastDelivery!.active, isFalse);
+      expect(service.lastDelivery!.quantity, 0);
+      expect(native.finishes, 0);
+      expect(native.launches, 0);
+      expect(service.canRetry, isFalse);
+      expect(service.canPurchase, isTrue);
+      expect(service.verifiedCreditsRevision, 1);
+    },
+  );
+
+  test(
+    'canonical inactive Boost finishes without success or credit; finish failure retries',
+    () async {
+      final native = _Native()..finishFails = true;
+      var verifications = 0;
+      final service = AiBoostPurchaseService(
+        purchase: native,
+        owner: () => 'owner-a',
+        ownerChanges: const Stream.empty(),
+        verifyDelivery: (_, owner) async {
+          verifications++;
+          return StoreVerificationOutcome(
+            true,
+            delivery: inactiveDelivery(owner),
+          );
+        },
+        reconcile: () async => [],
+      );
+      addTearDown(() async {
+        service.dispose();
+        await native.updates.close();
+      });
+      await service.initialize();
+      native.updates.add([_receipt('refunded-canonical')]);
+      await _settle();
+      expect(service.state, AiBoostPurchaseState.ready);
+      expect(service.errorCode, 'store_finish_pending');
+      expect(service.lastDelivery!.active, isFalse);
+      expect(service.lastDelivery!.quantity, 0);
+      expect(service.deliveryIsActive('a' * 64), isFalse);
+      expect(
+        service.verifiedCreditsRevision,
+        1,
+        reason: 'reload authoritative balance only',
+      );
+      expect(service.canPurchase, isFalse);
+      expect(service.canRetry, isTrue);
+      native.finishFails = false;
+      await service.retryPendingTransaction();
+      expect(service.errorCode, 'purchase_inactive');
+      expect(service.state, AiBoostPurchaseState.ready);
+      expect(service.canPurchase, isTrue);
+      expect(native.finishes, 2);
+      expect(native.launches, 0);
+      expect(verifications, 2);
+      expect(service.verifiedCreditsRevision, 1);
+    },
+  );
+
+  test(
+    'inactive Boost response from earlier A visit cannot settle after A to B to A',
+    () async {
+      final native = _Native();
+      final owners = StreamController<String?>.broadcast(sync: true);
+      var owner = 'owner-a';
+      final verification = Completer<StoreVerificationOutcome>();
+      final service = AiBoostPurchaseService(
+        purchase: native,
+        owner: () => owner,
+        ownerChanges: owners.stream,
+        verifyDelivery: (_, _) => verification.future,
+        reconcile: () async => [],
+      );
+      addTearDown(() async {
+        service.dispose();
+        await owners.close();
+        await native.updates.close();
+      });
+      await service.initialize();
+      native.updates.add([_receipt('old-a-inactive')]);
+      await _settle();
+      owner = 'owner-b';
+      owners.add(owner);
+      owner = 'owner-a';
+      owners.add(owner);
+      verification.complete(
+        StoreVerificationOutcome(true, delivery: inactiveDelivery('owner-a')),
+      );
+      await _settle();
+      expect(native.finishes, 0);
+      expect(service.lastDelivery, isNull);
+      expect(service.verifiedCreditsRevision, 0);
+      expect(service.state, AiBoostPurchaseState.unavailable);
+    },
+  );
 
   test(
     'native launch exception is bounded and reconciles without new charge',

@@ -680,6 +680,12 @@ async function assertGoogleConsumableOwnership(
   const legacyOwnerId = resolved
     ? String(resolved.owner_id ?? "") || null
     : null;
+  // A signed current-account hash cannot transfer a transaction already
+  // credited to another BIL owner. Refund RPCs resolve their financial owner
+  // from this durable ledger, so reject the conflict before any event write.
+  if (legacyOwnerId && legacyOwnerId !== ownerId) {
+    throw new Error("purchase_owned_by_another_account");
+  }
   assertGoogleExternalAccountBinding(
     await digest(ownerId),
     purchase.googleObfuscatedAccountId,
@@ -1303,6 +1309,60 @@ async function verifyPurchase(
   });
 }
 
+// A verified terminal store read must agree with the durable owner/environment
+// tombstone. A stale event cannot settle while a newer refund reversal is saved.
+async function hasVerifiedBoostRefundTombstone(
+  admin: ReturnType<typeof clients>["admin"],
+  ownerId: string,
+  purchase: VerifiedConsumable,
+) {
+  const store = purchase.provider === "google" ? "google_play" : "app_store";
+  const { data, error } = await admin.from("bil_ai_boost_store_state")
+    .select(
+      "store,transaction_id,product_id,environment,owner_id,purchase_credited,state",
+    )
+    .eq("store", store)
+    .eq("transaction_id", purchase.transactionId)
+    .eq("product_id", purchase.productId)
+    .eq("environment", purchase.environment)
+    .maybeSingle();
+  if (error) throw new Error("boost_refund_check_unavailable");
+  if (!isRecord(data)) return false;
+  if (data.owner_id != null && data.owner_id !== ownerId) {
+    throw new Error("purchase_owned_by_another_account");
+  }
+  return data.store === store &&
+    data.transaction_id === purchase.transactionId &&
+    data.product_id === purchase.productId &&
+    data.environment === purchase.environment && data.state === "refunded" &&
+    (data.owner_id === ownerId ||
+      (data.owner_id == null && data.purchase_credited === false));
+}
+
+async function inactiveBoostResponse(
+  ownerId: string,
+  purchase: VerifiedConsumable,
+) {
+  return json({
+    verified: true,
+    product_id: purchase.productId,
+    credited: false,
+    delivery: await deliveryReceipt({
+      ownerId,
+      store: purchase.provider === "google" ? "google_play" : "app_store",
+      environment: purchase.environment,
+      transactionId: purchase.transactionId,
+      productId: purchase.productId,
+      verifiedAt: purchase.verifiedAt,
+      kind: "boost",
+      active: false,
+      quantity: 0,
+      creditedNow: false,
+      finishPending: false,
+    }),
+  });
+}
+
 async function verifyAiBoost(
   request: Request,
   body: Record<string, unknown>,
@@ -1331,14 +1391,79 @@ async function verifyAiBoost(
   if (!verification) throw new Error("invalid_receipt_payload");
   let purchase: VerifiedConsumable;
   if (source === "google_play") {
-    const googlePurchase =
-      await (dependencies.verifyGoogleConsumable ?? verifyGoogleConsumable)(
-        dependencies.readEnvironment?.("GOOGLE_PLAY_PACKAGE_NAME") ??
-          env("GOOGLE_PLAY_PACKAGE_NAME"),
-        productId,
-        verification,
-      );
+    const packageName =
+      dependencies.readEnvironment?.("GOOGLE_PLAY_PACKAGE_NAME") ??
+        env("GOOGLE_PLAY_PACKAGE_NAME");
+    const readPurchase = body.delivery_version === 2
+      ? dependencies.readGoogleConsumable ??
+        dependencies.verifyGoogleConsumable ??
+        readGoogleConsumable
+      : dependencies.verifyGoogleConsumable ?? verifyGoogleConsumable;
+    const googlePurchase = await readPurchase(
+      packageName,
+      productId,
+      verification,
+    );
+    if (
+      googlePurchase.provider !== "google" ||
+      googlePurchase.packageOrBundleId !== packageName ||
+      googlePurchase.productId !== productId ||
+      googlePurchase.transactionId !== verification ||
+      !["sandbox", "production"].includes(googlePurchase.environment)
+    ) {
+      throw new Error("google_transaction_mismatch");
+    }
+    if (
+      googlePurchase.purchaseState !== 0 &&
+      (body.delivery_version !== 2 || googlePurchase.purchaseState !== 1)
+    ) {
+      // 2 is pending, not a canceled/voided transaction. Unknown states and old
+      // clients retain the completed-purchase contract without credit/consume.
+      throw new Error("purchase_not_completed");
+    }
     await assertGoogleConsumableOwnership(admin, user.id, googlePurchase);
+    if (googlePurchase.purchaseState === 1) {
+      if (
+        !await hasVerifiedBoostRefundTombstone(admin, user.id, googlePurchase)
+      ) {
+        // ProductPurchase exposes purchase time, not cancellation time. Use the
+        // exact voided order's server event time; never invent a refund ordering
+        // timestamp from this device/request or this read's wall clock.
+        const voided =
+          await (dependencies.googleVoidedPurchases ?? googleVoidedPurchases)();
+        const event = voided.filter((item) =>
+          item.purchaseToken === googlePurchase.transactionId &&
+          googlePurchase.orderId && item.orderId === googlePurchase.orderId &&
+          Number.isFinite(Date.parse(item.voidedAt))
+        )
+          .sort((a, b) =>
+            Date.parse(b.voidedAt) - Date.parse(a.voidedAt)
+          )[0];
+        if (!event) {
+          throw new Error("google_canceled_reconciliation_unavailable");
+        }
+        const { data: settled, error } = await admin.rpc(
+          "bil_apply_ai_boost_store_event",
+          {
+            p_store: "google_play",
+            p_transaction_id: googlePurchase.transactionId,
+            p_product_id: productId,
+            p_environment: googlePurchase.environment,
+            p_event_id: `voided:${event.orderId}:${event.voidedAt}`,
+            p_event_type: "refunded",
+            p_event_at: event.voidedAt,
+            p_raw_receipt_hash: await digest(verification),
+          },
+        );
+        if (
+          error || !isRecord(settled) || typeof settled.applied !== "boolean" ||
+          !await hasVerifiedBoostRefundTombstone(admin, user.id, googlePurchase)
+        ) {
+          throw new Error("boost_refund_persistence_failed");
+        }
+      }
+      return inactiveBoostResponse(user.id, googlePurchase);
+    }
     purchase = googlePurchase;
   } else if (source === "app_store") {
     const proof = await (dependencies.verifyAppleTransaction ?? verifyApple)(
@@ -1351,7 +1476,15 @@ async function verifyAiBoost(
         proof.environment,
       );
     assertExactAppleTransaction(proof, apple);
-    if (apple.productId !== productId || apple.lifecycle !== "active") {
+    if (apple.productId !== productId) throw new Error("wrong_product");
+    const inactive = apple.lifecycle === "refunded" ||
+      apple.lifecycle === "revoked";
+    // Older clients keep their completed-consumable response and retry contract.
+    // V2 can settle a canonical terminal transaction without ever crediting it.
+    if (
+      apple.lifecycle !== "active" &&
+      (body.delivery_version !== 2 || !inactive)
+    ) {
       throw new Error("purchase_not_completed");
     }
     // Consumable credits have no subscription-owner row to establish a legacy
@@ -1362,6 +1495,47 @@ async function verifyAiBoost(
       null,
       apple.environment,
     );
+    if (inactive) {
+      if (!apple.signedAt || !Number.isFinite(Date.parse(apple.signedAt))) {
+        throw new Error("invalid_apple_store_event");
+      }
+      // Reconcile the verified canonical refund with the existing idempotent
+      // ledger. This is neither a new grant nor a client-supplied refund event.
+      const { data: settled, error } = await admin.rpc(
+        "bil_apply_ai_boost_store_event",
+        {
+          p_store: "app_store",
+          p_transaction_id: apple.transactionId,
+          p_product_id: productId,
+          p_environment: apple.environment,
+          p_event_id: `canonical:${await digest(JSON.stringify([
+            apple.transactionId,
+            apple.environment,
+            apple.signedAt,
+          ]))}`,
+          p_event_type: "refunded",
+          p_event_at: apple.signedAt,
+          p_raw_receipt_hash: await digest(verification),
+        },
+      );
+      if (error || !isRecord(settled) || typeof settled.applied !== "boolean") {
+        throw new Error("boost_refund_persistence_failed");
+      }
+      const terminalPurchase: VerifiedConsumable = {
+        provider: "apple",
+        productId,
+        transactionId: apple.transactionId,
+        packageOrBundleId: apple.packageOrBundleId,
+        environment: apple.environment,
+        verifiedAt: new Date().toISOString(),
+      };
+      if (
+        !await hasVerifiedBoostRefundTombstone(admin, user.id, terminalPurchase)
+      ) {
+        throw new Error("boost_refund_persistence_failed");
+      }
+      return inactiveBoostResponse(user.id, terminalPurchase);
+    }
     purchase = {
       provider: "apple",
       productId,

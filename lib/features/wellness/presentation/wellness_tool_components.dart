@@ -70,7 +70,9 @@ class _HeroPanel extends StatelessWidget {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: const Color(0xFF19C6DF),
-                child: Icon(icon, color: const Color(0xFF071829)),
+                child: BilGlassPressFeedback(
+                  child: Icon(icon, color: const Color(0xFF071829)),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

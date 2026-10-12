@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/premium_design_tokens.dart';
+import '../../../shared/widgets/bil_striped_progress.dart';
 
 /// Hydration summary and quick-add controls for the dashboard.
 class DashboardWaterCard extends StatefulWidget {
@@ -91,7 +92,10 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
                     painter: _WaterWavePainter(
                       progress: progress,
                       phase: phase,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: BilProgressPalette.color(
+                        BilProgressTone.calories,
+                        Theme.of(context).brightness,
+                      ),
                       backgroundColor: Theme.of(
                         context,
                       ).colorScheme.primaryContainer,
@@ -165,7 +169,12 @@ class _WaterWavePainter extends CustomPainter {
       ..lineTo(size.width, size.height)
       ..lineTo(size.width, 0)
       ..close();
-    canvas.drawPath(path, Paint()..color = color.withValues(alpha: 0.78));
+    BilStripedProgressPaint.fill(
+      canvas,
+      path,
+      bounds,
+      color.withValues(alpha: 0.78),
+    );
     canvas.restore();
   }
 

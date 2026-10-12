@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -196,7 +197,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         elevation: 0,
         leading: IconButton(
           onPressed: () => context.go('/login'),
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const BackButtonIcon(),
         ),
       ),
       body: SafeArea(
@@ -268,7 +269,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                     onPressed: retryingRecovery
                                         ? null
                                         : _retryRecovery,
-                                    icon: const Icon(Icons.refresh_rounded),
+                                    icon: const BilGlassPressFeedback(
+                                      child: Icon(Icons.refresh_rounded),
+                                    ),
                                     label: Text(
                                       tr('Try again', 'حاول مرة أخرى'),
                                     ),

@@ -1,0 +1,8 @@
+{
+  "file": "lib/features/cloud_platform/services/cloud_nutrition_snapshot_codec.dart",
+  "before_sha256": "e155f81266eb6906785f39f5607a0348c7f9786a8ddf1b50c4f935d356ce20bf",
+  "after_sha256": "ca09eee748502d59fc05a1160ca785aaf77aa4659fbad4c25b578306254341a2",
+  "non_whitespace_characters_identical": false,
+  "diff": "--- before\n\n+++ formatted\n\n@@ -253,9 +253,9 @@\n\n         // A fresh device may receive the deletion before any food definition.\n         // Keep that identity durable without inventing a zero-valued catalog\n         // row. Historical dependencies may supply evidence later, not revive it.\n-        final markers = await (database.select(database.preferences)\n-              ..where((row) => row.key.like('$_foodDeletionPrefix%')))\n-            .get();\n+        final markers = await (database.select(\n+          database.preferences,\n+        )..where((row) => row.key.like('$_foodDeletionPrefix%'))).get();\n         final capturedFoodIds = output\n             .where((row) => row.type == 'food')\n             .map((row) => row.id)",
+  "formatter": "Dart3.12.2 installed with Flutter3.44.6"
+}

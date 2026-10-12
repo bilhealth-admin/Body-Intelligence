@@ -64,7 +64,9 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                   strokeWidth: 2,
                   color: Colors.white,
                 )
-              : const Icon(Icons.arrow_upward_rounded, size: 20),
+              : const BilGlassPressFeedback(
+                  child: Icon(Icons.arrow_upward_rounded, size: 20),
+                ),
         ),
         label: Text(
           communityText(context, 'Publish', 'نشر'),

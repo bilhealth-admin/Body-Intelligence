@@ -3,9 +3,11 @@ import 'bil_store_recovery_copy.dart';
 
 abstract final class BilStoreCopy {
   static const _runtimeFallbackSource = <String, String>{
+    'legal_terms': 'Terms of Use',
+    'legal_privacy': 'Privacy Policy',
     'premium_store_title': 'Know your body. Progress intelligently.',
     'premium_detail': 'No ads',
-    'premium_ai_detail': 'Everything included in BIL Free',
+    'premium_ai_detail': 'BIL Free + every paid feature + AI Coach',
     'premium_benefit_workouts': '300+ home workout videos',
     'premium_benefit_community': 'Friends and requests',
     'premium_benefit_messages': 'Messages',
@@ -80,6 +82,8 @@ abstract final class BilStoreCopy {
 
   static const catalogs = <String, Map<String, String>>{
     'en': {
+      'legal_terms': 'Terms of Use',
+      'legal_privacy': 'Privacy Policy',
       'free': 'Free',
       'plans': 'Plans',
       'premium_store_title': 'Know your body. Go further.',

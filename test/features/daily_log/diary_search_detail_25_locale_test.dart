@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/premium_label_badge.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
@@ -37,7 +38,11 @@ void main() {
       addTearDown(tester.view.reset);
 
       final database = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(database.close);
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.runAsync(database.close);
+      });
       final foods = FoodRepository(database);
       final foodId = await foods.addFood(
         name: 'Chicken breast',
@@ -149,7 +154,22 @@ void main() {
       expect(tester.takeException(), isNull, reason: '$tag diary');
 
       final logFood = find.byKey(const Key('daily-meal-log-breakfast'));
-      await tester.ensureVisible(logFood);
+      if (logFood.evaluate().isEmpty) {
+        await tester.scrollUntilVisible(
+          logFood,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+      }
+      await Scrollable.ensureVisible(tester.element(logFood), alignment: .5);
+      await tester.pumpAndSettle();
+      expect(
+        (Offset.zero & const Size(390, 844)).contains(
+          tester.getCenter(logFood),
+        ),
+        isTrue,
+        reason: '$tag the meal row must be on-screen before its real tap',
+      );
       await tester.tap(logFood);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
@@ -315,8 +335,16 @@ void main() {
       );
       expect(
         find.byKey(const Key('premium-nutrition-glass')),
+        findsNWidgets(3),
+        reason: '$tag masks each paid macro value without masking its name',
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('daily-log-food-premium-group')),
+          matching: find.byType(PremiumLabelBadge),
+        ),
         findsOneWidget,
-        reason: '$tag has one Premium glass group without repeated badges',
+        reason: '$tag has one group badge, not one badge per value',
       );
       final nutritionFacts = find.byKey(const Key('daily-log-nutrition-facts'));
       await tester.ensureVisible(nutritionFacts);

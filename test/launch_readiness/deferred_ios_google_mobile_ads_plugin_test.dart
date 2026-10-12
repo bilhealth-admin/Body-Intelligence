@@ -203,29 +203,67 @@ void main() {
     expect(sentinel.readAsStringSync(), 'preserve-me');
   });
 
-  test(
-    'symlinked override parent is rejected',
-    () {
-      final fixture = _Fixture.create();
-      addTearDown(fixture.dispose);
-      final outside = Directory.systemTemp.createTempSync(
-        'bil-ios-ads-outside-',
-      );
-      addTearDown(() => outside.deleteSync(recursive: true));
-      Link(
-        '${fixture.root.path}${Platform.pathSeparator}.dart_tool'
-        '${Platform.pathSeparator}bil_release_plugin_overrides',
-      ).createSync(outside.path);
+  test('symlinked override parent is rejected', () {
+    final fixture = _Fixture.create();
+    final fixtureOwnedPath = fixture.root.resolveSymbolicLinksSync();
+    final outside = Directory.systemTemp.createTempSync('bil-ios-ads-outside-');
+    final outsideOwnedPath = outside.resolveSymbolicLinksSync();
+    final link = Link(
+      '${fixture.root.path}${Platform.pathSeparator}.dart_tool'
+      '${Platform.pathSeparator}bil_release_plugin_overrides',
+    );
+    addTearDown(() {
+      // Remove the link itself first. Never recursively traverse it while
+      // cleaning either test-owned temporary directory.
+      final kind = FileSystemEntity.typeSync(link.path, followLinks: false);
+      if (kind == FileSystemEntityType.link) {
+        link.deleteSync();
+      } else if (kind != FileSystemEntityType.notFound) {
+        throw StateError('Refusing cleanup of a replaced override link.');
+      }
+      if (outside.existsSync()) {
+        if (outside.resolveSymbolicLinksSync() != outsideOwnedPath) {
+          throw StateError(
+            'Refusing cleanup outside the owned temp directory.',
+          );
+        }
+        outside.deleteSync(recursive: true);
+      }
+      if (fixture.root.existsSync()) {
+        if (fixture.root.resolveSymbolicLinksSync() != fixtureOwnedPath) {
+          throw StateError('Refusing cleanup outside the owned fixture.');
+        }
+        fixture.dispose();
+      }
+    });
+    final sentinel = File(
+      '${outside.path}${Platform.pathSeparator}owner-sentinel.txt',
+    )..writeAsStringSync('outside target must remain unchanged');
+    final sourceBefore = fixture.sourcePubspec.readAsStringSync();
+    final packageConfigBefore = fixture.packageConfig.readAsStringSync();
+    link.createSync(outside.path);
+    expect(
+      FileSystemEntity.typeSync(link.path, followLinks: false),
+      FileSystemEntityType.link,
+    );
 
-      expect(
-        () => prepareDeferredIosGoogleMobileAdsPackage(fixture.root),
-        throwsStateError,
-      );
-    },
-    skip: Platform.isWindows
-        ? 'Creating symlinks is not reliably permitted on Windows CI.'
-        : false,
-  );
+    expect(
+      () => prepareDeferredIosGoogleMobileAdsPackage(fixture.root),
+      throwsStateError,
+    );
+    expect(
+      FileSystemEntity.typeSync(link.path, followLinks: false),
+      FileSystemEntityType.link,
+    );
+    expect(link.resolveSymbolicLinksSync(), outsideOwnedPath);
+    expect(sentinel.readAsStringSync(), 'outside target must remain unchanged');
+    expect(
+      outside.listSync(followLinks: false).map((entry) => entry.path),
+      <String>[sentinel.path],
+    );
+    expect(fixture.sourcePubspec.readAsStringSync(), sourceBefore);
+    expect(fixture.packageConfig.readAsStringSync(), packageConfigBefore);
+  });
 
   test('ads-enabled iOS path rejects a stale deferred override', () {
     final fixture = _Fixture.create();

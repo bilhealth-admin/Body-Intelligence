@@ -45,18 +45,29 @@ void main() {
           quantitiesInGrams: false,
         );
         final item = await db.select(db.mealItems).getSingle();
-        expect(item.quantity, row.amount);
+        final massScale = row.unit == 'kg' ? 1000.0 : 1.0;
+        final snapshotUnit = row.unit == 'kg' ? 'g' : row.unit;
+        // Known mass is stored as an immutable gram basis; the editable Food
+        // still retains its declared kg label. Volume/count never invent grams.
+        final food = await (db.select(
+          db.foods,
+        )..where((f) => f.id.equals(foodId))).getSingle();
+        expect(food.servingUnit, row.unit);
+        expect(food.servingSize, row.basis);
+        expect(item.quantity, row.amount * massScale);
         expect(item.calories, row.calories);
-        expect(item.servingSizeSnapshot, row.basis);
-        expect(item.servingUnitSnapshot, row.unit);
+        expect(item.servingSizeSnapshot, row.basis * massScale);
+        expect(item.servingUnitSnapshot, snapshotUnit);
         final evidence = MealFoodEvidence.read(item);
+        expect(evidence.isValid, isTrue);
         expect(evidence.value(TrackedNutrient.sodium), 0);
         expect(evidence.value(TrackedNutrient.fiber), isNull);
-        await meals.updateMealItem(id: item.id, quantity: row.amount / 2);
+        await meals.updateMealItem(id: item.id, quantity: item.quantity / 2);
         final changed = await db.select(db.mealItems).getSingle();
         expect(changed.calories, row.calories / 2);
-        expect(changed.servingUnitSnapshot, row.unit);
-        expect(changed.servingSizeSnapshot, row.basis);
+        expect(changed.servingUnitSnapshot, snapshotUnit);
+        expect(changed.servingSizeSnapshot, row.basis * massScale);
+        expect(MealFoodEvidence.read(changed).isValid, isTrue);
       },
     );
   }

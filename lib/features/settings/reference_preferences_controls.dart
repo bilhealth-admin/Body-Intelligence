@@ -198,10 +198,12 @@ class _PremiumFeature extends ConsumerWidget {
       subtitle: Text(_diaryText(context, subtitle)),
       trailing: Semantics(
         label: status,
-        child: Icon(
-          Icons.chevron_right_rounded,
-          key: const Key('diary-premium-feature-chevron'),
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        child: BilGlassPressFeedback(
+          child: Icon(
+            Icons.chevron_right_rounded,
+            key: const Key('diary-premium-feature-chevron'),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
       enabled: entitlement.hasValue,

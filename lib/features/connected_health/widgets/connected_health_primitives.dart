@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
@@ -57,7 +58,7 @@ class HealthSlide extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 20),
+                BilGlassPressFeedback(child: Icon(icon, size: 20)),
                 const SizedBox(width: PremiumDesignTokens.spaceXs),
                 Expanded(
                   child: Text(
@@ -189,7 +190,7 @@ class ConnectedHealthErrorContent extends StatelessWidget {
         alignment: AlignmentDirectional.centerEnd,
         child: OutlinedButton.icon(
           onPressed: onRetry,
-          icon: const Icon(Icons.refresh_rounded),
+          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(
             connectedHealthTextForLanguage(
               languageCode,

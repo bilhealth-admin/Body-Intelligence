@@ -1,3 +1,4 @@
+import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -318,7 +319,9 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
                 onPressed: controller.isCurrent
                     ? () => _refresh(controller)
                     : null,
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
               ),
             ],
           ),
@@ -377,7 +380,9 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
                 : TextButton.icon(
                     key: const Key('bil07-empty-retry'),
                     onPressed: onRetry,
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(_copy(CommunityChannelsCopyKey.retry)),
                   ),
           ),

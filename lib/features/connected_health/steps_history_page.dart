@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show NumberFormat;
@@ -127,7 +128,9 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
                         onPressed: () => ref
                             .read(connectedHealthProvider.notifier)
                             .refresh(),
-                        icon: const Icon(Icons.sync_rounded),
+                        icon: const BilGlassPressFeedback(
+                          child: Icon(Icons.sync_rounded),
+                        ),
                       ),
               ),
               const SizedBox(height: 8),

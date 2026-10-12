@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 class StatCard extends StatelessWidget {
@@ -27,7 +28,7 @@ class StatCard extends StatelessWidget {
             CircleAvatar(
               radius: 22,
               backgroundColor: color.withValues(alpha: 0.15),
-              child: Icon(icon, color: color),
+              child: BilGlassPressFeedback(child: Icon(icon, color: color)),
             ),
             const Spacer(),
             Text(

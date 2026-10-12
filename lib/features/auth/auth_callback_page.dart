@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -180,7 +181,9 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
                     FilledButton.icon(
                       key: const Key('auth-callback-retry'),
                       onPressed: _retrying ? null : _retry,
-                      icon: const Icon(Icons.refresh_rounded),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh_rounded),
+                      ),
                       label: Text(tr('Try again', 'حاول مرة أخرى')),
                     ),
                     TextButton(

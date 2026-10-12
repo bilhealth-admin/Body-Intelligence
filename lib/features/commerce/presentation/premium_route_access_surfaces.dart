@@ -39,10 +39,12 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.sync_problem_rounded,
-                      size: 42,
-                      color: scheme.onSurfaceVariant,
+                    BilGlassPressFeedback(
+                      child: Icon(
+                        Icons.sync_problem_rounded,
+                        size: 42,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -62,7 +64,9 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
                     FilledButton.tonalIcon(
                       key: const ValueKey('premium-route-access-retry'),
                       onPressed: onRetry,
-                      icon: const Icon(Icons.refresh_rounded),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh_rounded),
+                      ),
                       label: Text(context.strings.text('Try again')),
                     ),
                   ],

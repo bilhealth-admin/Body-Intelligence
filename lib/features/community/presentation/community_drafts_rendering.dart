@@ -279,7 +279,9 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                 IconButton(
                   tooltip: communityText(context, 'Refresh', 'تحديث'),
                   onPressed: _refresh,
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.refresh_rounded),
+                  ),
                 ),
               ],
             ),
@@ -295,7 +297,9 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                 return Center(
                   child: FilledButton.icon(
                     onPressed: _refresh,
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(
                       communityText(context, 'Retry', 'إعادة المحاولة'),
                     ),
@@ -357,10 +361,12 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                                         strokeWidth: 2,
                                       ),
                                     )
-                                  : Icon(
-                                      _loadMoreFailed
-                                          ? Icons.refresh_rounded
-                                          : Icons.expand_more_rounded,
+                                  : BilGlassPressFeedback(
+                                      child: Icon(
+                                        _loadMoreFailed
+                                            ? Icons.refresh_rounded
+                                            : Icons.expand_more_rounded,
+                                      ),
                                     ),
                               label: Text(
                                 _loadMoreFailed

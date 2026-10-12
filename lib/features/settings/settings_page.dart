@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../community/presentation/community_attention_scope.dart';
 import 'dart:async';
 import 'dart:typed_data';
@@ -333,10 +334,12 @@ class _PremiumMembershipLink extends StatelessWidget {
                     ),
                   )
                 else
-                  Icon(
-                    isRetry ? Icons.refresh_rounded : directionalIcon,
-                    size: 18,
-                    color: gold,
+                  BilGlassPressFeedback(
+                    child: Icon(
+                      isRetry ? Icons.refresh_rounded : directionalIcon,
+                      size: 18,
+                      color: gold,
+                    ),
                   ),
               ],
             ),
@@ -487,10 +490,12 @@ class _ProfileSummary extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
+                BilGlassPressFeedback(
+                  child: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.chevron_left_rounded
+                        : Icons.chevron_right_rounded,
+                  ),
                 ),
               ],
             ),
@@ -609,12 +614,14 @@ class _MoreRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
               ],
-              Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
-                size: 22,
-                color: const Color(0xFF61738D),
+              BilGlassPressFeedback(
+                child: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                  size: 22,
+                  color: const Color(0xFF61738D),
+                ),
               ),
             ],
           ),

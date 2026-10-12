@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -484,7 +485,9 @@ class _AdvertisingPrivacyPageState
                         dimension: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.chevron_right_rounded),
+                    : const BilGlassPressFeedback(
+                        child: Icon(Icons.chevron_right_rounded),
+                      ),
                 onTap: _umpBusy ? null : _showUmpPrivacyOptions,
               ),
             ),

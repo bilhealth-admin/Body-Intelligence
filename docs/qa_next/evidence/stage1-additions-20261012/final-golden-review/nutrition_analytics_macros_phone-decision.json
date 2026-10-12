@@ -1,0 +1,14 @@
+{
+  "case": "nutrition_analytics_macros_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Owner requested palette/diagonal stripes: same48/29/23 percent and284/171/136 kcal, same71/19/34g; exact2c change only fill, matching legend and Back.",
+  "previous_master_sha256": "1ac91b1de25ba41225ef155033272aa191801b18aaa3877bc83ac72cf4b47144",
+  "accepted_actual_sha256": "dd53064f9ad94f0792c24a9f12caaa7dfd94b78dd64ee8fcb51a3f22a040fdf3",
+  "review_image": "nutrition_analytics_macros_phone.png",
+  "promotion": {
+    "time": 1791818690.9876106,
+    "master_sha256": "dd53064f9ad94f0792c24a9f12caaa7dfd94b78dd64ee8fcb51a3f22a040fdf3",
+    "method": "one exact named file; visual decision required"
+  }
+}

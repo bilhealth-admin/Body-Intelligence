@@ -29,6 +29,33 @@ abstract final class LegalStatusRuntimeCopy {
   };
 
   static const values = <String, Map<String, String>>{
+    'Privacy Policy': {
+      'en': 'Privacy Policy',
+      'ar': 'سياسة الخصوصية',
+      'fr': 'Politique de confidentialité',
+      'es': 'Política de privacidad',
+      'tr': 'Gizlilik Politikası',
+      'de': 'Datenschutzrichtlinie',
+      'it': 'Informativa sulla privacy',
+      'pt-BR': 'Política de Privacidade',
+      'pt-PT': 'Política de Privacidade',
+      'ur': 'رازداری کی پالیسی',
+      'fa': 'سیاست حفظ حریم خصوصی',
+      'hi': 'गोपनीयता नीति',
+      'id': 'Kebijakan Privasi',
+      'ms': 'Dasar Privasi',
+      'ja': 'プライバシーポリシー',
+      'ko': '개인 정보 보호 정책',
+      'zh-Hans': '隐私政策',
+      'zh-Hant': '隱私權政策',
+      'ru': 'Политика конфиденциальности',
+      'bn': 'গোপনীয়তা নীতি',
+      'vi': 'Chính sách bảo mật',
+      'th': 'นโยบายความเป็นส่วนตัว',
+      'pl': 'Polityka prywatności',
+      'nl': 'Privacybeleid',
+      'uk': 'Політика конфіденційності',
+    },
     'Terms of Use': {
       'en': 'Terms of Use',
       'ar': 'شروط الاستخدام',

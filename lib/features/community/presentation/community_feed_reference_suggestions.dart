@@ -3,15 +3,18 @@ part of 'community_hub_page.dart';
 class _CommunityFeedTopicSuggestions extends StatelessWidget {
   const _CommunityFeedTopicSuggestions({
     required this.topics,
+    this.initialTopics,
     required this.onOpen,
   });
 
   final Future<List<CommunityTopic>> topics;
+  final List<CommunityTopic>? initialTopics;
   final ValueChanged<CommunityTopic> onOpen;
 
   @override
   Widget build(BuildContext context) => FutureBuilder<List<CommunityTopic>>(
     future: topics,
+    initialData: initialTopics,
     builder: (context, snapshot) {
       final visible = (snapshot.data ?? const <CommunityTopic>[])
           .where((topic) => topic.featured)

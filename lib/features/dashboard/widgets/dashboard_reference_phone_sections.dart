@@ -75,7 +75,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
             'إلهام غذائي ورياضي',
           ),
           '/community',
-          true,
+          false,
         ),
       ],
     ];
@@ -123,6 +123,9 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
               key: const Key('dashboard-discover-balanced-final-tile'),
               height: wideTileHeight.toDouble(),
               child: _DiscoverTile(
+                key: items.last.$5 == '/community'
+                    ? const Key('dashboard-community-free-tile')
+                    : null,
                 imageAsset: items.last.$1,
                 fallbackIcon: items.last.$2,
                 label: items.last.$3,
@@ -149,6 +152,7 @@ class _DiscoverTile extends StatelessWidget {
     required this.route,
     required this.premium,
     required this.checking,
+    super.key,
   });
 
   final String imageAsset;
@@ -180,10 +184,12 @@ class _DiscoverTile extends StatelessWidget {
               fit: BoxFit.contain,
               alignment: Alignment.topCenter,
               errorBuilder: (_, _, _) => Center(
-                child: Icon(
-                  fallbackIcon,
-                  size: 40,
-                  color: const Color(0xFF69E5F5),
+                child: BilGlassPressFeedback(
+                  child: Icon(
+                    fallbackIcon,
+                    size: 40,
+                    color: const Color(0xFF69E5F5),
+                  ),
                 ),
               ),
             ),
@@ -232,40 +238,43 @@ class _DiscoverTile extends StatelessWidget {
                 ],
               ),
             ),
-            PositionedDirectional(
-              top: 8,
-              end: 8,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: premium
-                      ? const Color(0xD99A6500)
-                      : const Color(0xB3071928),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
+            if (route != '/community')
+              PositionedDirectional(
+                top: 8,
+                end: 8,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
                     color: premium
-                        ? const Color(0x99FFE7A0)
-                        : const Color(0x33FFFFFF),
+                        ? const Color(0xD99A6500)
+                        : const Color(0xB3071928),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: premium
+                          ? const Color(0x99FFE7A0)
+                          : const Color(0x33FFFFFF),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: checking
+                        ? const SizedBox.square(
+                            key: Key('dashboard-discover-access-checking'),
+                            dimension: 15,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.8,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const BilGlassPressFeedback(
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 15,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: checking
-                      ? const SizedBox.square(
-                          key: Key('dashboard-discover-access-checking'),
-                          dimension: 15,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.8,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 15,
-                          color: Colors.white,
-                        ),
-                ),
               ),
-            ),
           ],
         ),
       ),
@@ -350,7 +359,12 @@ class _ReferenceAiCoachCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const Icon(Icons.arrow_forward_rounded, color: Color(0xFFC8F3FF)),
+              const BilGlassPressFeedback(
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Color(0xFFC8F3FF),
+                ),
+              ),
             ],
           ),
         ),
@@ -425,7 +439,9 @@ class _CompactIntelligenceCard extends StatelessWidget {
               icon: const Icon(Icons.info_outline_rounded),
             )
           else
-            const Icon(Icons.chevron_right_rounded),
+            const BilGlassPressFeedback(
+              child: Icon(Icons.chevron_right_rounded),
+            ),
         ],
       ),
     ),

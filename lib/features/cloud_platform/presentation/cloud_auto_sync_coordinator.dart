@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,6 +64,28 @@ class _CloudAutoSyncCoordinatorState
     _watch(database.select(database.userProfile).watch());
     _watch(database.select(database.weightEntries).watch());
     _watch(database.select(database.waterEntries).watch());
+    _watch(database.select(database.foods).watch());
+    _watch(database.select(database.meals).watch());
+    _watch(database.select(database.mealItems).watch());
+    // Distinct content avoids a restore/status preference writing a perpetual
+    // sync loop. New scopes remain gated by explicit consent in the service.
+    _watch(
+      database
+          .select(database.preferences)
+          .watch()
+          .map(
+            (rows) => {
+              for (final row in rows.where(
+                (r) =>
+                    r.key.startsWith('goal.') ||
+                    r.key == 'goals.nutritionSchedule.v1' ||
+                    r.key == 'nutrition.trustedRecipes.v1',
+              ))
+                row.key: row.value,
+            },
+          )
+          .distinct(mapEquals),
+    );
     _connectivity = Connectivity().onConnectivityChanged.listen((results) {
       if (results.any((value) => value != ConnectivityResult.none)) _schedule();
     });

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -319,14 +319,14 @@ class RegionalBarcodeNetworkResolver {
   }
 
   Future<File> _cacheFile(String barcode) async {
-    final root = await getApplicationSupportDirectory();
+    final root = await getProtectedApplicationSupportDirectory();
     final directory = Directory(p.join(root.path, 'regional_barcode_cache'));
     if (!await directory.exists()) await directory.create(recursive: true);
     return File(p.join(directory.path, '$barcode.json'));
   }
 
   Future<File> _productCacheFile(String barcode) async {
-    final root = await getApplicationSupportDirectory();
+    final root = await getProtectedApplicationSupportDirectory();
     final directory = Directory(p.join(root.path, 'regional_product_cache'));
     if (!await directory.exists()) await directory.create(recursive: true);
     return File(p.join(directory.path, '$barcode.json'));

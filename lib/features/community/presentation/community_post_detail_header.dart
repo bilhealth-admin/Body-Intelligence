@@ -20,6 +20,8 @@ class _CommunityPostDetailHeader extends StatelessWidget {
     required this.onPostAction,
     required this.onToggleFollow,
     required this.repository,
+    required this.ownerIsCurrent,
+    this.ownerChanges,
   });
 
   final CommunityPost post;
@@ -40,6 +42,8 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   final ValueChanged<String> onPostAction;
   final VoidCallback onToggleFollow;
   final CommunityRepository repository;
+  final ValueGetter<bool> ownerIsCurrent;
+  final Listenable? ownerChanges;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -143,23 +147,40 @@ class _CommunityPostDetailHeader extends StatelessWidget {
               ],
             ),
           ],
-          if (referenceMetadata case final metadata?) ...[
-            const SizedBox(height: 12),
-            _CommunityPostReferenceBlock(
-              metadata: metadata,
-              repository: repository,
-            ),
-          ],
           if (post.hasImage) ...[
             const SizedBox(height: 14),
             _CommunityFeedImage(post: post),
           ],
           const SizedBox(height: 14),
-          SelectableText(
-            post.body,
-            textDirection: BilWrittenLanguageResolver.directionFor(
-              post.body,
-              fallback: Directionality.of(context),
+          CommunityTranslationContent(
+            contentId: 'post-${post.id}',
+            ownerId: repository.currentUserId,
+            ownerIsCurrent: ownerIsCurrent,
+            ownerChanges: ownerChanges,
+            texts: {
+              'body': post.body,
+              if (referenceMetadata?.title?.trim().isNotEmpty == true)
+                'title': referenceMetadata!.title!,
+            },
+            builder: (texts) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (referenceMetadata case final metadata?) ...[
+                  _CommunityPostReferenceBlock(
+                    metadata: metadata,
+                    displayTitle: texts['title'],
+                    repository: repository,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                SelectableText(
+                  texts['body']!,
+                  textDirection: BilWrittenLanguageResolver.directionFor(
+                    texts['body']!,
+                    fallback: Directionality.of(context),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 10),
@@ -250,10 +271,12 @@ class _CommunityPostDetailMetric extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 19,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        BilGlassPressFeedback(
+          child: Icon(
+            icon,
+            size: 19,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(width: 5),
         Text(value),

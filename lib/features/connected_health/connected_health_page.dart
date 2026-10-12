@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -182,7 +183,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/dashboard'),
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           ),
           title: Text(
@@ -306,7 +307,9 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                                           .notifier,
                                                     )
                                                     .synchronize(),
-                                          icon: const Icon(Icons.sync_rounded),
+                                          icon: const BilGlassPressFeedback(
+                                            child: Icon(Icons.sync_rounded),
+                                          ),
                                         ),
                                       ],
                                     ),

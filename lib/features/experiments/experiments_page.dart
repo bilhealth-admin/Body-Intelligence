@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_striped_progress.dart';
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -137,7 +139,12 @@ class ExperimentsPage extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(radius: 27, child: Icon(preset.icon, size: 27)),
+                CircleAvatar(
+                  radius: 27,
+                  child: BilGlassPressFeedback(
+                    child: Icon(preset.icon, size: 27),
+                  ),
+                ),
                 const SizedBox(height: 14),
                 Text(
                   preset.title,
@@ -173,7 +180,9 @@ class ExperimentsPage extends ConsumerWidget {
                   width: double.infinity,
                   child: FilledButton.icon(
                     onPressed: () => Navigator.pop(sheetContext, true),
-                    icon: const Icon(Icons.play_arrow_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.play_arrow_rounded),
+                    ),
                     label: Text(t('Start my experiment')),
                   ),
                 ),

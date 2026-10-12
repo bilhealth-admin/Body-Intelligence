@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -307,10 +308,12 @@ class _AiCoachResetNoticeCoordinatorState
                                               ),
                                             ],
                                           ),
-                                          child: Icon(
-                                            presentation.icon,
-                                            color: Colors.white,
-                                            size: 36,
+                                          child: BilGlassPressFeedback(
+                                            child: Icon(
+                                              presentation.icon,
+                                              color: Colors.white,
+                                              size: 36,
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 22),

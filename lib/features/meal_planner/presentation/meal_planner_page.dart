@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -173,7 +174,9 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 subtitle: Text(
                   '${copy.day(meal.day)} • ${recipe.minutes} ${copy.text('minutes')} • ${recipe.meal}',
                 ),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const BilGlassPressFeedback(
+                  child: Icon(Icons.chevron_right),
+                ),
                 onTap: () => _showRecipe(copy, recipe),
               ),
             );

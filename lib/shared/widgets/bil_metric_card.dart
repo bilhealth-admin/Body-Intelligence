@@ -1,3 +1,4 @@
+import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/theme/bil_flagship_tokens.dart';
@@ -65,7 +66,10 @@ class BilMetricCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (icon != null) Icon(icon, color: _accent, size: 22),
+              if (icon != null)
+                BilGlassPressFeedback(
+                  child: Icon(icon, color: _accent, size: 22),
+                ),
               if (icon != null) const SizedBox(width: BilSpacing.sm),
               Expanded(
                 child: Text(
@@ -73,7 +77,9 @@ class BilMetricCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              Icon(_trendIcon, color: _accent, size: 20),
+              BilGlassPressFeedback(
+                child: Icon(_trendIcon, color: _accent, size: 20),
+              ),
             ],
           ),
           const SizedBox(height: BilSpacing.lg),

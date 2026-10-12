@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -209,7 +210,9 @@ class _FollowDayCard extends StatelessWidget {
                       color: scheme.primary.withValues(alpha: .1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, size: 18, color: scheme.primary),
+                    child: BilGlassPressFeedback(
+                      child: Icon(icon, size: 18, color: scheme.primary),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -275,7 +278,9 @@ class _FollowDayCard extends StatelessWidget {
                     color: scheme.primary.withValues(alpha: .28),
                   ),
                 ),
-                child: Icon(icon, color: scheme.primary),
+                child: BilGlassPressFeedback(
+                  child: Icon(icon, color: scheme.primary),
+                ),
               ),
               const SizedBox(height: 6),
               Text(

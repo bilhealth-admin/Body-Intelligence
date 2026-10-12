@@ -33,9 +33,10 @@ extension VerifiedStorePurchasePending on VerifiedStorePurchaseService {
     final visit = _storeVisit.capture();
     for (final entry in _pendingVerifiedFinishes.entries.toList()) {
       try {
-        await _purchase
-            .completePurchase(entry.value)
-            .timeout(const Duration(seconds: 12));
+        await completeVerifiedNativePurchase(
+          _purchase,
+          entry.value,
+        ).timeout(const Duration(seconds: 12));
         if (!_storeVisit.isCurrent(visit)) return;
         _pendingVerifiedFinishes.remove(entry.key);
       } on Object {

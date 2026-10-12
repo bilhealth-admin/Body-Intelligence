@@ -69,12 +69,14 @@ class _CoachHero extends StatelessWidget {
                     width: 48,
                     height: 48,
                   ),
-                  icon: Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.chevron_right_rounded
-                        : Icons.chevron_left_rounded,
-                    color: scheme.onSurfaceVariant,
-                    size: 24,
+                  icon: BilGlassPressFeedback(
+                    child: Icon(
+                      Directionality.of(context) == TextDirection.rtl
+                          ? Icons.chevron_right_rounded
+                          : Icons.chevron_left_rounded,
+                      color: scheme.onSurfaceVariant,
+                      size: 24,
+                    ),
                   ),
                 ),
               ),
@@ -165,10 +167,12 @@ class _CoachHeaderAction extends StatelessWidget {
       onPressed: onPressed,
       padding: const EdgeInsets.all(5),
       constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-      icon: Icon(
-        icon,
-        size: 19,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      icon: BilGlassPressFeedback(
+        child: Icon(
+          icon,
+          size: 19,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
     ),
   );

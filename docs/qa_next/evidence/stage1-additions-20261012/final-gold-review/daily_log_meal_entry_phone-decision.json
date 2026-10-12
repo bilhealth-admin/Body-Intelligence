@@ -1,0 +1,21 @@
+{
+  "case": "daily_log_meal_entry_phone",
+  "previous_master_sha256": "983e6a6d543de31d9f57afebe108ed6d659947953a53c83e7f12e5ae766f92f3",
+  "accepted_actual_sha256": "1537ce1b1f599093a78cc19dda03c8e2d0daa68d7becec28abfddcfb41b22513",
+  "diff_bounds": [
+    16,
+    331,
+    374,
+    844
+  ],
+  "pixels_changed": 64888,
+  "review_image": "daily_log_meal_entry_phone.png",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+  "reason": "Same owner-requested gold upgrade action and 48px hit area in verified-Free meal view. Consumed calorie ring, macro circles, meal title and real meal-sourced electrolyte/goal rows retained; 15px lower group shift reflects the touch target, not data or font changes.",
+  "promotion": {
+    "time": 1791821908.8806987,
+    "master_sha256": "1537ce1b1f599093a78cc19dda03c8e2d0daa68d7becec28abfddcfb41b22513",
+    "method": "one exact named file; visual decision required"
+  }
+}

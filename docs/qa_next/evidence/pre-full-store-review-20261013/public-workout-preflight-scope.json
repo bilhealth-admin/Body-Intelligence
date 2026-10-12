@@ -1,0 +1,12 @@
+{
+  "public_url": "https://workouts.bilhealth.com/v2/objects/workouts/v1/gym-six-month/movements/mobility-flexibility-adductor-rock-back-gentle-flow.mp4",
+  "auth": false,
+  "method_scope": "HEAD then GET Range bytes=0-31 with entity If-Match",
+  "expected_status": 206,
+  "range_bytes": 32,
+  "live_flutter_passed_label": "review-live-public-workout-range-case",
+  "no_ledger_auth_storage_or_service_mutation": true,
+  "python_default_user_agent_probe_was_403": true,
+  "identified_read_only_probe_and_actual_Dart_test_passed": true,
+  "not_native_decoder_or_device_or_general_production_audit": true
+}

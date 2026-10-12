@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'community_attention_scope.dart';
@@ -494,10 +495,12 @@ class _CommunityNotificationsPageState
 
   Widget _notificationTrailing(CommunityNotification notification) {
     if (notification.kind != CommunityNotificationKind.collaborationInvite) {
-      return Icon(
-        Directionality.of(context) == TextDirection.rtl
-            ? Icons.chevron_left_rounded
-            : Icons.chevron_right_rounded,
+      return BilGlassPressFeedback(
+        child: Icon(
+          Directionality.of(context) == TextDirection.rtl
+              ? Icons.chevron_left_rounded
+              : Icons.chevron_right_rounded,
+        ),
       );
     }
     final busy = _respondingCollaboration.contains(notification.id);

@@ -1,0 +1,718 @@
+{
+  "label": "striped-final-meal-coach-navigation-group",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+    "test/qa_next/coach_reference_workspace_capture_test.dart",
+    "test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+    "test/features/daily_log/meal_goal_edit_round_trip_test.dart",
+    "test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+    "test/bil_navigation_press_style_test.dart",
+    "test/visual_closure/visual_defect_regression_test.dart",
+    "test/architecture_source_file_size_guard_test.dart"
+  ],
+  "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "started": 1791818071.3534157,
+  "files": {
+    "test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart": "b4e20b36718a55e2beecc218796cf23fa1fc2ebf9788cdbf3eb0ecdcab91f90e",
+    "test/qa_next/coach_reference_workspace_capture_test.dart": "84763d87e44e8e1a262e4f0a05fb0498fff92ece695391b5ed4662e99bea9edd",
+    "test/features/daily_log/meal_goal_and_navigation_polish_test.dart": "871559945e096616d54b3c593f40d0925d36a9bc9e8be634cba6b7e47f72a335",
+    "test/features/daily_log/meal_goal_edit_round_trip_test.dart": "2d20cffae4b823133ff81fd754b4fc96652a314ede1b08186dfd8efab5935bad",
+    "test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart": "fd26ff6bae4238e710f77384814fc923191d024229c2e75f44e6381c7c1e3873",
+    "test/bil_navigation_press_style_test.dart": "06b48a8b4900984349fd35c3423c02dc4b7c16191dd70cf8a156a95c245f2097",
+    "test/visual_closure/visual_defect_regression_test.dart": "8c681fa03b6c7ec9df93347337b9e1015a15a71452f9011566c278f2a542710b",
+    "test/architecture_source_file_size_guard_test.dart": "da9e08f1e3324ae063538e1c86bd60c89686be6b2441b60453658a9754508aee"
+  },
+  "fingerprint_version": 3,
+  "source_fingerprint": "886b0d18576796dea811c685d689b9f39745baeaf86fc809fe23ad4f5eb0699e",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+    "test/qa_next/coach_reference_workspace_capture_test.dart",
+    "test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+    "test/features/daily_log/meal_goal_edit_round_trip_test.dart",
+    "test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+    "test/bil_navigation_press_style_test.dart",
+    "test/visual_closure/visual_defect_regression_test.dart",
+    "test/architecture_source_file_size_guard_test.dart"
+  ],
+  "pid": 13156,
+  "exit_code": 0,
+  "finished": 1791818120.397613,
+  "end_fingerprint": "886b0d18576796dea811c685d689b9f39745baeaf86fc809fe23ad4f5eb0699e",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "dashboard technical guards do not approve an unusual dietary goal",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "dashboard nutrient cards have direct extended-locale copy",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 1.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 2.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 1.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 2.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 1.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 2.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 1.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 2.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace preserves a known zero target separately from missing intake",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "locked nutrition preserves labels but hides values and targets",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "real conversation restores SQLite transcript and preserves draft on overview return",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared dock keeps five accessible destinations",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=false 320.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=false 320.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=false 390.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=false 390.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=false 430.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=false 430.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=true 320.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=true 320.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=true 390.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=true 390.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=true 430.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals en dark=true 430.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=false 320.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=false 320.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=false 390.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=false 390.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=false 430.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=false 430.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=true 320.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=true 320.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=true 390.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=true 390.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=true 430.0 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact meal minerals and goals ar dark=true 430.0 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "known zero is not the missing dash; partial evidence remains unknown",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "missing meal target does not relabel the daily goal as a meal goal",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SQLite meal goal real external SQLite goal save updates the displayed meal target",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today back edge and separated day arrows en 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today back edge and separated day arrows en 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today back edge and separated day arrows ar 1.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today back edge and separated day arrows ar 2.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_and_navigation_polish_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual meal goal edit returns to same lunch and date en legacy=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_edit_round_trip_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual meal goal edit returns to same lunch and date en legacy=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_edit_round_trip_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual meal goal edit returns to same lunch and date ar legacy=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_edit_round_trip_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual meal goal edit returns to same lunch and date ar legacy=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_goal_edit_round_trip_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en Brightness.dark calorie-only keeps 1905 and unknown macros at 200%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en Brightness.light calorie-only keeps 1905 and unknown macros at 200%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar Brightness.dark calorie-only keeps 1905 and unknown macros at 200%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar Brightness.light calorie-only keeps 1905 and unknown macros at 200%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one unknown row makes a partial total and remaining unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "the meal detail ring and macro dials do not invent unknown nutrients",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "meal cards show unavailable total and percentages for missing rows",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "modern row names and nutrient values come from the immutable item",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a valid immutable name survives a missing catalog row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a malformed snapshot hides catalog name and misleading zeros",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner mismatch makes a fixed snapshot unavailable in totals and row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a missing modern envelope is unavailable in the real row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "explicit modern known zeros stay visible zeros",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "net carbohydrate rows need both carbohydrate and fiber evidence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_nutrition_evidence_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "arrow glass keeps geometry and original tap dark=false rtl=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "arrow glass keeps geometry and original tap dark=false rtl=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "arrow glass keeps geometry and original tap dark=true rtl=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "arrow glass keeps geometry and original tap dark=true rtl=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "disabled/blocked arrow cannot claim an interactive glass state",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "move/cancel/dispose retire the bubble without a tap",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "keyboard Enter activates original action once",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "glass works inside intrinsic dialogs and high contrast disables blur",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all five dock controls glass and callbacks 320.0 rtl=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all five dock controls glass and callbacks 320.0 rtl=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all five dock controls glass and callbacks 390.0 rtl=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all five dock controls glass and callbacks 390.0 rtl=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all five dock controls glass and callbacks 430.0 rtl=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all five dock controls glass and callbacks 430.0 rtl=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Flutter SDK Calendar arrows get the same temporary feedback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Flutter SDK default dropdown arrow stays functional with glass",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "disabled SDK dropdown never gives active arrow feedback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_navigation_press_style_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "auth language selector reflects the saved Arabic locale",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Arabic account gateway actions inherit a real Arabic family",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one page-level glass group renders at most one Premium label",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a paid collection route keeps one page label over all locked previews",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "real daily log, meal, food, analytics and dashboard routes never show more than one Premium word",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "connected health route renders one glass group without repeated Premium",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "quick add, profile, pathways, meal settings and route glass each render at most one visible Premium word",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "confirmed visual defects stay closed in production source",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AI Coach product copy does not promise unsupported languages",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/visual_defect_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hand-maintained Dart sources stay below the architecture ceiling",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/architecture_source_file_size_guard_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 90,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": [],
+  "original_record_sha256": "823b9058a786e02683efcbb9bf38dbbae317eb407793c81d1baff99c65a82894",
+  "delta_to_final": [
+    {
+      "file": "lib/features/analytics/nutrition_analytics_components.dart",
+      "tested_sha256": "5c4b454b69128899a3965fcd835a6da48cfe93273df8d79df8f5efaacef51c23",
+      "final_sha256": "3d769829b38bacec241aaf3cc8cc3abb2a4dadd7c6ae81d3839f31893527e74f"
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_macros.dart",
+      "tested_sha256": "587fc68338d7d46b52362bdf5a877aa8eb354dcf689c6da0a79d85c1d0c8e4f6",
+      "final_sha256": "d34d9ed164f850547c2ccf9be412fecc5688ebabe3350be9a0718f265c7e009f"
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_page.dart",
+      "tested_sha256": "e597619fee81475730e9bd55c23fe67f2746a4c595d33bba4d6cdfc21ee1c70b",
+      "final_sha256": "ae6526c01feae1febdb3bced1c8de9aa64049d6c12fc5ce270e72afcaa58921b"
+    },
+    {
+      "file": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "tested_sha256": "8fcb8df23c04fdbce7f43f475ee2993a6bd706c30cb25bf98d897ced039498b6",
+      "final_sha256": "36639cd68db63fca9d3c76911989685ea48f85ff0093a5561448e87b211bae7b"
+    },
+    {
+      "file": "lib/features/commerce/presentation/premium_label_badge.dart",
+      "tested_sha256": "354f92ef1dd17c11975273d0b564b2dbc2eede604bc7b1efc3dcb53cbd07b3c6",
+      "final_sha256": "eee39f31039c2957dc90d2716e0733ce88c9d355f3bf37d0664312f2b1cf32b8"
+    },
+    {
+      "file": "lib/features/commerce/presentation/premium_nutrition_glass.dart",
+      "tested_sha256": "dcfb300f56439148e4f4d432ca8849e0aca4257bf76905087539b7dfaea6138a",
+      "final_sha256": "081629cd218afe2a51546d812e723cccdafb5c0d1fef1b330a200de542806664"
+    },
+    {
+      "file": "lib/features/daily_log/daily_log_navigation_actions.dart",
+      "tested_sha256": "2786ec6223a0bae61187cb1fd804ca98f4cc0173cd6ed94aa2e399418f4f9dff",
+      "final_sha256": "b9c0bb750f3150eae859f7730433a43ca2ffba89d24c170f183749bc6203a929"
+    },
+    {
+      "file": "lib/features/dashboard/presentation/dashboard_preferences_actions.dart",
+      "tested_sha256": "712c988e147e6b99e6f5366a89d1806f2769d38cf8fc23936c419331065d4f49",
+      "final_sha256": "e4b6811180cc98d82bcd5c5898b72becaf54f0338e1a6192dc7e16f4722ec395"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart",
+      "tested_sha256": "cefd9b8f4f016db451a9afba5324ddab85cc98c8c552651a02930e24e8628d8a",
+      "final_sha256": "2cdfd755aa7f744cd65c7d699c6cbe519437f0c28c25e36caac4edc8ab15eaa1"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/food_catalog_overview.dart",
+      "tested_sha256": "71aa596124d5dfec10c75d6572c98af0dddbad16db37a7179b1474dd3438318c",
+      "final_sha256": "69480763349c2fb46c307fa659ce6c92d2fe6e55756a341c4f36ab7670b6c867"
+    },
+    {
+      "file": "lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart",
+      "tested_sha256": "69d6c0e9bc4c388e874f9bee81835c4da154b89632e2ed408375252213aa6ee1",
+      "final_sha256": "29d3ed696fc3630a0cac4c48b6ce939766849fc894ff2eba7272bc1a76585a3f"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_details.dart",
+      "tested_sha256": "8f52c4beec8517714d035d24cef844973350aef1c934d88743faa3b5a3f586ee",
+      "final_sha256": "88a4c57c87a56d608e2ab240dd852db74af318649c8b49351d8b1d5018fddc51"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routines_list.dart",
+      "tested_sha256": "a6ea1d4cd00d4f84a170fbc0b3440877f48d0a4c218ebf47f0364697b1ff7320",
+      "final_sha256": "150a5c05897257a1971fc098f23f4ce255a031e1f3c3aeb05b540826fdcebc62"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_helpers.dart",
+      "tested_sha256": "b4aacd18886518dcd177633e0c1908eb7344d7df6aded21f8ce5f66e5e623627",
+      "final_sha256": "19120c65b19446645c913d2eb0bb0373fc29df1304e1d703db370904f2f2177e"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_page.dart",
+      "tested_sha256": "2d1d6e00a7c3a0841c7bd6e38b9aa4253cf6d1e01c7ca915b76b6745169b15b7",
+      "final_sha256": "b9ee6ada7197e27794289b87a62be4b1defbd429108a6c6c58f562304619010d"
+    },
+    {
+      "file": "test/bil_striped_progress_test.dart",
+      "tested_sha256": "3248a4da00a2205f55a37b541e7ca17dab599c15c7d7befd25484e344c5ce3e8",
+      "final_sha256": "6478baf5d0018ac633ca80b0f602d4c58128015766c45bd2798226c4b989c08f"
+    },
+    {
+      "file": "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "tested_sha256": "6cf013d73e1d7f0f714fbb30dee945397bc5e28a1277d16557400cb174e2dbd3",
+      "final_sha256": "77c1741c542b33ed2dbec2d556b50f09eb415869a53f10c2522c17a99fd702d6"
+    },
+    {
+      "file": "test/features/analytics/nutrition_goal_schedule_state_test.dart",
+      "tested_sha256": null,
+      "final_sha256": "141f0b863f89da14083b858b14ebd5ac07707b0b21675c6b6fe2f551d03474d1"
+    },
+    {
+      "file": "test/features/commerce/app_subscription_confirmation_test.dart",
+      "tested_sha256": "e8ff2d353ca85216bde929175b55091a55f72fd55afd00748c9091f0ee37de6b",
+      "final_sha256": "ad77317f46e2045f9fa03a8761dc094021bfec4791bad6fcef1e1cd1c164392a"
+    },
+    {
+      "file": "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "tested_sha256": "78877b1162c20436102bc42639b21791dea91bebf021c37e8102161a40138462",
+      "final_sha256": "7e0f6793248a399c15097e8f0a7f0fcd6f6e19098dcde24162e005adf0804f97"
+    },
+    {
+      "file": "test/features/commerce/paywall_ai_market_benefits_test.dart",
+      "tested_sha256": "9d621eca3fb2b56b60ffe0d8a3a2a1ac779a977afc600d1318ba9ca096bb080f",
+      "final_sha256": "69c606ac35ff5f5427a3afd4efa31e90bc5ad899fbf0075a5ff6e9896e734ccc"
+    },
+    {
+      "file": "test/features/commerce/premium_label_badge_test.dart",
+      "tested_sha256": "e144c66b4643425d1969998067db150807d392da6ee2455c7107e35aa4db37bd",
+      "final_sha256": "033ec91f17af57f6e9ef91f64258ab63089bb73c4d236c4312634b228e5d7f33"
+    },
+    {
+      "file": "test/features/commerce/premium_nutrition_glass_test.dart",
+      "tested_sha256": "94bb2706f4b841fc882becdf4c6e49314dbec2da4b710db29ce37384b2db13fa",
+      "final_sha256": "6520898ff235585c96b24914578641ffcce891de2e0f12bbb4707240de1a117d"
+    },
+    {
+      "file": "test/features/wellness/bil_workout_routines_page_test.dart",
+      "tested_sha256": "23d826660e4a91bea72dda4acd239e90408be335714a3760b9b0a141f06ddcf1",
+      "final_sha256": "787ee06c8b23b44e118d515b76bd4842ed89b459d3a69eaca2f644847bcedb3a"
+    },
+    {
+      "file": "test/features/wellness/recipe_detail_entitlement_lifecycle_test.dart",
+      "tested_sha256": "e50180f14ae15fd3f0da56555143cc6b1f3920df3860c0f836a5316ef6f4892b",
+      "final_sha256": "cda208eb85ab6ba0fa061d4e1c370071c744aad2caa95b703ba5cf86f9a873b1"
+    },
+    {
+      "file": "test/visual_closure/actual_data_pages_golden_test.dart",
+      "tested_sha256": "d0a82f5efcedafc4d2441222949ce601095d6709592d0480e7da5ad43dd3ec99",
+      "final_sha256": "5c0f53128db738b7cf4c34da05ef7629ed9c8fc2cf0eb5ed4b291003f5390131"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
+      "tested_sha256": "72145d6a99c9c913bf7e93ed3570ae3ebe7fda5b6ed2b0cd1f4f2447a0b25e87",
+      "final_sha256": "a9c15a2e84e74a731a18e817df5048820ac4c80fb6dc6e3dc2a4a9410b10b34d"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+      "tested_sha256": "d7f2dc0a2e99fc98e6ca0a731a11edc3e90c318bd4b9a6d1392757c2bb1056ab",
+      "final_sha256": "42878b485bb199c52241728bc32b7a2967e95fb513cedb7aa83d579c34757237"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
+      "tested_sha256": "27c00996e95b9f0d002901047e9b595536bd2712be2cb682e333a6a3787978b2",
+      "final_sha256": "1537ce1b1f599093a78cc19dda03c8e2d0daa68d7becec28abfddcfb41b22513"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_reference_premium_phone.png",
+      "tested_sha256": "d330b4e27b5a50fb719baee0af09666d1cf7a9e6139493e5e2c43c3e87f5fe6d",
+      "final_sha256": "3a1b0062535b0fa8553f8d64c5ae8ce3c88efe5850396ece1a41df93351ed5c5"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png",
+      "tested_sha256": "1f7db03e413290e4a13be9e4de7848aad01175a2b8e34a2b5eb9aca08126d621",
+      "final_sha256": "5bc081c1bca801c079dc422fe702007ae332578f590396f48caa51e43c04a857"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
+      "tested_sha256": "f67fea115c21e44b72a955f8a774f3449ca6fb755531363b8c1c3d0731276723",
+      "final_sha256": "72cb38d558f08c7a62bc2120b91a1f61dafb41f1c951cbc578a76bcb2355392a"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_nutrient_goal_card_phone.png",
+      "tested_sha256": "61118b6ed07d4f3919c1f45fc0ed359bcbe83e20341e6decc4eca02e213f79b1",
+      "final_sha256": "bf85b0d9b211cfd6206404d1607dceb596be2a67c07a61167bb71690f5ccca49"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
+      "tested_sha256": "7cbc48ed77f8a7e19a2b4634955280248a86cebbe2ee9aa3852a6aec8c86e56e",
+      "final_sha256": "4584eeafda11e75fc788216e792bcfef4d388615ef913262382f85df0e6031c8"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
+      "tested_sha256": "c0a00c5394e63e3cccb615c7c4da81fceb7aa59626f521f310c5f4d4377eea89",
+      "final_sha256": "1948089cfd282c9a7da6d4ae4cb3e7bc7e488520f8c363b620da3e71ab297bb7"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png",
+      "tested_sha256": "f6476a3249f7fa473a9864667613e983c856b841c61f8d5629a8ccd700c86aa3",
+      "final_sha256": "faaa411cf02c6e18b88b6cdaa94dd4a9d751b6ae91eb027746151689ebbdbd27"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png",
+      "tested_sha256": "1ac91b1de25ba41225ef155033272aa191801b18aaa3877bc83ac72cf4b47144",
+      "final_sha256": "dd53064f9ad94f0792c24a9f12caaa7dfd94b78dd64ee8fcb51a3f22a040fdf3"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_saved_goals_phone.png",
+      "tested_sha256": null,
+      "final_sha256": "02e546396d2b6cdfbc27e85bc637b3b7a7c1d02efab19bb8d11986fcc9ed54e4"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png",
+      "tested_sha256": "0c0bc115280bfabf74da868af5d4a20f770f7816009e0f95941f89a853e37a5f",
+      "final_sha256": "23e8e1262b00d8198d22261a90d1d32295e643064aa7ea9b529b69da18d76ea5"
+    },
+    {
+      "file": "test/visual_closure/visual_defect_regression_test.dart",
+      "tested_sha256": "8c681fa03b6c7ec9df93347337b9e1015a15a71452f9011566c278f2a542710b",
+      "final_sha256": "e857e33b79ee4c0732741ff79291f5bda10a713a6e66e95c5ccb23a4fca96d16"
+    }
+  ]
+}

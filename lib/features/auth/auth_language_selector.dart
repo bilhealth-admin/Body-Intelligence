@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,11 +73,13 @@ class AuthLanguageSelector extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 7),
-                  const Icon(
-                    key: Key('auth-language-selector-arrow'),
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 17,
-                    color: Color(0xFF8E8E93),
+                  const BilGlassPressFeedback(
+                    child: Icon(
+                      key: Key('auth-language-selector-arrow'),
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 17,
+                      color: Color(0xFF8E8E93),
+                    ),
                   ),
                 ],
               ),
@@ -200,11 +203,13 @@ class AuthLanguageSelector extends ConsumerWidget {
                                   ),
                                 ),
                                 if (isSelected)
-                                  const Icon(
-                                    key: Key('auth-language-option-check'),
-                                    Icons.check_rounded,
-                                    size: 20,
-                                    color: Color(0xFF007AFF),
+                                  const BilGlassPressFeedback(
+                                    child: Icon(
+                                      key: Key('auth-language-option-check'),
+                                      Icons.check_rounded,
+                                      size: 20,
+                                      color: Color(0xFF007AFF),
+                                    ),
                                   ),
                               ],
                             ),

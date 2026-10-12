@@ -97,11 +97,17 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
         ),
         Row(
           children: [
-            IconButton(
-              key: const Key('premium-vision-final-minus'),
-              tooltip: _word(context, 'Decrease amount', 'تقليل الكمية'),
-              onPressed: () => _stepAmount(-5),
-              icon: Icon(Icons.remove, color: _accent(context)),
+            RepeatingStepAction(
+              cancelScope: (_currentUnit, _selected?.uuid),
+              cancelSignal: _unit,
+              canStep: () => _canStepAmount(-1),
+              onPressed: _canStepAmount(-1) ? () => _stepAmount(-1) : null,
+              builder: (_, action, _) => IconButton(
+                key: const Key('premium-vision-final-minus'),
+                tooltip: _word(context, 'Decrease amount', 'تقليل الكمية'),
+                onPressed: action,
+                icon: Icon(Icons.remove, color: _accent(context)),
+              ),
             ),
             Expanded(
               child: TextField(
@@ -115,11 +121,17 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
                 onChanged: (_) => _portionUpdate(() {}),
               ),
             ),
-            IconButton(
-              key: const Key('premium-vision-final-plus'),
-              tooltip: _word(context, 'Increase amount', 'زيادة الكمية'),
-              onPressed: () => _stepAmount(5),
-              icon: Icon(Icons.add, color: _accent(context)),
+            RepeatingStepAction(
+              cancelScope: (_currentUnit, _selected?.uuid),
+              cancelSignal: _unit,
+              canStep: () => _canStepAmount(1),
+              onPressed: _canStepAmount(1) ? () => _stepAmount(1) : null,
+              builder: (_, action, _) => IconButton(
+                key: const Key('premium-vision-final-plus'),
+                tooltip: _word(context, 'Increase amount', 'زيادة الكمية'),
+                onPressed: action,
+                icon: Icon(Icons.add, color: _accent(context)),
+              ),
             ),
           ],
         ),

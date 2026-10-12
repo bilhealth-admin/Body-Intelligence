@@ -161,11 +161,20 @@ void main() {
 Future<void> _settleFeed(WidgetTester tester, String body) async {
   // Supabase dispatches authentication events and decodes JSON on a real
   // isolate. A single fake-clock jump can precede the new route's splash timer.
-  // Wait for the actual loaded feed header, not an off-screen lazy post, while
-  // allowing both the real isolate and the product-owned 2.2s timer to advance.
+  // The header is available before the cold feed request completes. Wait for
+  // that request's loading surface as well as the header before revealing an
+  // off-screen lazy post. Allow the real isolate and the welcome timer to run.
   final ready = find.byKey(const Key('community-create-post'));
+  final coldLoading = find.descendant(
+    of: find.byKey(const Key('community-public-feed')),
+    matching: find.byType(CircularProgressIndicator),
+  );
   await tester.pump();
-  for (var i = 0; i < 80 && ready.evaluate().isEmpty; i++) {
+  for (
+    var i = 0;
+    i < 80 && (ready.evaluate().isEmpty || coldLoading.evaluate().isNotEmpty);
+    i++
+  ) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
@@ -176,6 +185,7 @@ Future<void> _settleFeed(WidgetTester tester, String body) async {
     findsOneWidget,
     reason: 'The authenticated feed must finish loading.',
   );
+  expect(coldLoading, findsNothing);
   await revealCommunityControl(tester, find.text(body));
   expect(find.text(body), findsOneWidget);
 }

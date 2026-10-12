@@ -11,6 +11,7 @@ String _summaryText(BuildContext context, String key) {
 
 const _dailySummaryCopy = <String, Map<String, String>>{
   'en': {
+    'mealGoal': 'Meal goal',
     'today': 'Today',
     'previous': 'Previous day',
     'next': 'Next day',
@@ -33,6 +34,7 @@ const _dailySummaryCopy = <String, Map<String, String>>{
     'mg': 'mg',
   },
   'ar': {
+    'mealGoal': 'هدف الوجبة',
     'today': 'اليوم',
     'previous': 'اليوم السابق',
     'next': 'اليوم التالي',
@@ -54,6 +56,7 @@ const _dailySummaryCopy = <String, Map<String, String>>{
     'mg': 'مجم',
   },
   'fr': {
+    'mealGoal': 'Objectif du repas',
     'today': 'Aujourd’hui',
     'previous': 'Jour précédent',
     'next': 'Jour suivant',
@@ -72,6 +75,7 @@ const _dailySummaryCopy = <String, Map<String, String>>{
     'mg': 'mg',
   },
   'es': {
+    'mealGoal': 'Objetivo de la comida',
     'today': 'Hoy',
     'previous': 'Día anterior',
     'next': 'Día siguiente',
@@ -90,6 +94,7 @@ const _dailySummaryCopy = <String, Map<String, String>>{
     'mg': 'mg',
   },
   'tr': {
+    'mealGoal': 'Öğün hedefi',
     'today': 'Bugün',
     'previous': 'Önceki gün',
     'next': 'Sonraki gün',

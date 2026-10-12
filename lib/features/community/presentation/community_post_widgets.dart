@@ -139,7 +139,7 @@ class _CommunityAuthorRelationshipActionState
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15),
+        BilGlassPressFeedback(child: Icon(icon, size: 15)),
         const SizedBox(width: 4),
         Flexible(
           child: Text(
@@ -236,7 +236,7 @@ class _CommunityPostStatusChip extends StatelessWidget {
       label: statusLabel,
       child: Chip(
         key: Key('community-post-status-${post.id}'),
-        avatar: Icon(icon, size: 16),
+        avatar: BilGlassPressFeedback(child: Icon(icon, size: 16)),
         visualDensity: VisualDensity.compact,
         label: Text(localizedStatus),
       ),

@@ -31,7 +31,9 @@ class _ManagementNotice extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: TextButton.icon(
               onPressed: action,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(
                 circleManagementText(context, 'Retry', 'إعادة المحاولة'),
               ),
@@ -183,7 +185,9 @@ class _OperationNoticeState extends State<_OperationNotice> {
             onPressed: _running
                 ? null
                 : () => _run(() => controller.retryReadback(operationKey)),
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(
               circleManagementText(
                 context,
@@ -199,7 +203,9 @@ class _OperationNoticeState extends State<_OperationNotice> {
             onPressed: _running
                 ? null
                 : () => _run(() => controller.resumeMedia(operationKey)),
-            icon: const Icon(Icons.upload_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.upload_rounded),
+            ),
             label: Text(
               circleManagementText(context, 'Continue upload', 'متابعة الرفع'),
             ),
@@ -210,7 +216,9 @@ class _OperationNoticeState extends State<_OperationNotice> {
             onPressed: _running
                 ? null
                 : () => _run(() => controller.retryReadback(operationKey)),
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(
               circleManagementText(
                 context,

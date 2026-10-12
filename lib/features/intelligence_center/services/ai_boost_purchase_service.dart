@@ -67,15 +67,20 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   _finishVerification;
   StoreBenefitDelivery? lastDelivery;
   final _deliveries = <String, StoreBenefitDelivery>{};
+  final _receiptDeliveries = <String, StoreBenefitDelivery>{};
   bool deliveryIsActive(String key) =>
       !_disposed &&
       _owner() == _catalogOwner &&
       _deliveries[key]?.active == true;
-  void _acceptDelivery(StoreBenefitDelivery? event) {
+  void _acceptDelivery(StoreBenefitDelivery? event, String receiptKey) {
     lastDelivery = event;
     if (event == null) return;
     if (_deliveries.length >= 128) _deliveries.remove(_deliveries.keys.first);
     _deliveries[event.eventKey] = event;
+    if (_receiptDeliveries.length >= 128) {
+      _receiptDeliveries.remove(_receiptDeliveries.keys.first);
+    }
+    _receiptDeliveries[receiptKey] = event;
   }
 
   bool lastDeliveryIsUserPurchase = false;
@@ -97,6 +102,7 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   String? _catalogOwner;
   PurchaseDetails? _unresolved;
   final Set<String> _credited = <String>{};
+  final Set<String> _verifiedInactive = <String>{};
   int _generation = 0;
   int _queued = 0;
   bool _reconciling = false;
@@ -144,6 +150,7 @@ final class AiBoostPurchaseService extends ChangeNotifier {
       _catalogOwner = owner;
       _unresolved = null;
       _credited.clear();
+      _verifiedInactive.clear();
       product = null;
       _watchdog?.cancel();
       _generation++;
@@ -309,12 +316,14 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   void _retireAccount() {
     lastDelivery = null;
     _deliveries.clear();
+    _receiptDeliveries.clear();
     checkoutTrace = null;
     _userInitiatedProduct = null;
     _generation++;
     _catalogOwner = null;
     _unresolved = null;
     _credited.clear();
+    _verifiedInactive.clear();
     product = null;
     displayPrice = null;
     _watchdog?.cancel();

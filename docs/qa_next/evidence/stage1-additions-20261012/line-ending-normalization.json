@@ -1,0 +1,184 @@
+{
+  "reason": "Git canonical source uses LF and core.autocrlf=false. diff-check found CRLF introduced by Windows text writes. Preserve original tested bytes and normalize only modified/new task source, never historical fixture or unmodified file.",
+  "before_source_fingerprint": "d98342f0fd1f5ad0a8baa22b35dade871d5e9f5babef13ffa8440dd46cbf3398",
+  "after_source_fingerprint": "abea383001728f2bedd2ae7c2827e2ce405328baa0c75724cab321d59ca45782",
+  "files": [
+    {
+      "file": "lib/features/analytics/nutrition_analytics_components.dart",
+      "before_sha256": "3d769829b38bacec241aaf3cc8cc3abb2a4dadd7c6ae81d3839f31893527e74f",
+      "after_sha256": "c864b9851edbdae5e55a993c4408a353844e1bde4c83ad6fa16a5f1939ab7635",
+      "only_crlf_to_lf": true,
+      "crlf_count": 532,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_food.dart",
+      "before_sha256": "9023eb0560dd0aaf889a1109a4d32d8027674a25372301c0d8c500446620ac3c",
+      "after_sha256": "04a567fbb664d73c575c894d06d95ebed76f18522f9e8da2ae75a4bbb555bb63",
+      "only_crlf_to_lf": true,
+      "crlf_count": 195,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_nutrients.dart",
+      "before_sha256": "757f36a1a89f38c6ef0f23f42c436929e923a5b1f857a7edd7a4e3f2b881901a",
+      "after_sha256": "07b806e849b603ae095546ebec875fda9a5289bc1a2855d759de115bc1a4fb5f",
+      "only_crlf_to_lf": true,
+      "crlf_count": 184,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/analytics/weekly_report_food.dart",
+      "before_sha256": "cf91259766a77f9889f2ca4492863cc77dd732acbc808af3ed2a4e663c8a1e45",
+      "after_sha256": "33e4e0711ce2d17ca42f0db30351fc1413bb7d7db095c51cc19ef7f2c6eaf10b",
+      "only_crlf_to_lf": true,
+      "crlf_count": 535,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/analytics/widgets/analytics_page_primitives.dart",
+      "before_sha256": "19e986c093230eb61cb90703bb5c0cfe15555cfc00229fd3ab3602e62871ae22",
+      "after_sha256": "c123944632ac55d43208c8f5663d2e4916f882b8150fabe13ec986493194000c",
+      "only_crlf_to_lf": true,
+      "crlf_count": 250,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/cloud_platform/providers/cloud_restore_conflict_provider.dart",
+      "before_sha256": "4449fa66f7ebd329d4e03cb3ad6810e28009f76346716b52da4b518045b2def2",
+      "after_sha256": "4f2a2f2a22bf60fbd28ebac0ada32857605555ebb3bf1917d5691c11d7cdf08e",
+      "only_crlf_to_lf": true,
+      "crlf_count": 54,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/cloud_platform/services/cloud_restore_conflict_service.dart",
+      "before_sha256": "7549550262f094c60454cd8b2de24e32e1cf7162e896040b26a3507ff95ec170",
+      "after_sha256": "6176a9403e1e9012c79ea242c18467a491b27502727c4e59ab1c336850ed81e5",
+      "only_crlf_to_lf": true,
+      "crlf_count": 57,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/cloud_platform/services/cloud_restore_v2_transport.dart",
+      "before_sha256": "351aa3b7528dfdc498a3729fa8e469122c439ab945aa947e6e93e6fb826aa804",
+      "after_sha256": "56d38f65f79b57b22cddba47de387c68812243c1baa83b2a951a913d01aaa32c",
+      "only_crlf_to_lf": true,
+      "crlf_count": 12,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/cloud_platform/services/supabase_cloud_restore_v2_transport.dart",
+      "before_sha256": "80687cca9345c2e849d304b46e4d566c5f3a12c2da994040f59e8c30e832f01a",
+      "after_sha256": "a25065d0d9f86e3c15b98b916b3afbfc18e43843f508b3790abeb9ab5df97802",
+      "only_crlf_to_lf": true,
+      "crlf_count": 55,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/daily_log/presentation/daily_log_meal_summary.dart",
+      "before_sha256": "33656e33a2d4a7ab45a4fe22c476f84a45a4bdbf58b24520a89fec8b931520ad",
+      "after_sha256": "5ecb5d502491c5feb95cbaea91a318963e46ed8bd1072f31210d366a2f8624a4",
+      "only_crlf_to_lf": true,
+      "crlf_count": 423,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_goal_components.dart",
+      "before_sha256": "8c46d4b96cd23aab38ad8473ac314781b572e15cad79cdc6022983324e5b2e7c",
+      "after_sha256": "450fcc7f90a7e581b03be582e2145f793d64fed8431963a4def2a6dde1c25c2b",
+      "only_crlf_to_lf": true,
+      "crlf_count": 685,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "lib/shared/widgets/wheel_number_field.dart",
+      "before_sha256": "df31d82a6dcdd62770cce863902f42c18bbccf15d6ab2ed6aa3b7ff7614f0c88",
+      "after_sha256": "986bc3516489e4164ec119f09b637346eb06abe705792c48a352d9c1f626d509",
+      "only_crlf_to_lf": true,
+      "crlf_count": 494,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "before_sha256": "77c1741c542b33ed2dbec2d556b50f09eb415869a53f10c2522c17a99fd702d6",
+      "after_sha256": "17953b02d300fe68e6f2e54a3c7673a89762eac424e946daee98c1b1b3062afb",
+      "only_crlf_to_lf": true,
+      "crlf_count": 404,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/features/cloud_platform/cloud_platform_contract_regression_test.dart",
+      "before_sha256": "8aad4efff8e505531e241590813b7ea6489701ba68ffd9466888e2338ee09fd2",
+      "after_sha256": "6b7cd9e1d16434b37bce617293755156ee5b9e730b3bdee6dd4ce6621959e56c",
+      "only_crlf_to_lf": true,
+      "crlf_count": 129,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/features/cloud_platform/cloud_restore_v2_engine_test.dart",
+      "before_sha256": "a448f21cad7e516d0a58b42e22159606bf6442c8d4a088651fd1a00947fae302",
+      "after_sha256": "8ac14d31a840a6806df0c5750a87ef264b0aaac7433a13ffe445b2aab1c9ed2c",
+      "only_crlf_to_lf": true,
+      "crlf_count": 583,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/features/commerce/app_subscription_confirmation_test.dart",
+      "before_sha256": "ad77317f46e2045f9fa03a8761dc094021bfec4791bad6fcef1e1cd1c164392a",
+      "after_sha256": "3f721a71d560ae7a3da0580754b300bf04d64ccae73b1a6504d493567f007995",
+      "only_crlf_to_lf": true,
+      "crlf_count": 466,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "before_sha256": "7e0f6793248a399c15097e8f0a7f0fcd6f6e19098dcde24162e005adf0804f97",
+      "after_sha256": "d668b6d3e971298708415b611f5c322f1cb40c4619be72f16db12a070d33bcad",
+      "only_crlf_to_lf": true,
+      "crlf_count": 868,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/features/commerce/premium_label_badge_test.dart",
+      "before_sha256": "033ec91f17af57f6e9ef91f64258ab63089bb73c4d236c4312634b228e5d7f33",
+      "after_sha256": "85bcc9b8c5c73e48fde1001ee104f0eb9b72ba413d54af77985ae1843ae7b789",
+      "only_crlf_to_lf": true,
+      "crlf_count": 132,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/features/commerce/premium_nutrition_glass_test.dart",
+      "before_sha256": "6520898ff235585c96b24914578641ffcce891de2e0f12bbb4707240de1a117d",
+      "after_sha256": "1679c5a28046b20a849f3e62f56953f4aa399d58c6a204e59bdba4ca108467b7",
+      "only_crlf_to_lf": true,
+      "crlf_count": 233,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "test/features/community/community_translation_content_test.dart",
+      "before_sha256": "ecbb3fc377463da6b7becaf8add97659072d354c0f623df4b7e75362a2b2fbae",
+      "after_sha256": "45507018a07f953de581bd26d87641fa5b2d84c93c6d4e8144a71fcdbce7a6a8",
+      "only_crlf_to_lf": true,
+      "crlf_count": 326,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "tools/qa/flutter/cloud_restore_postgres_cycle_test.dart",
+      "before_sha256": "484c5dd52887886cd1031e283c6551a1a45e2a7c062ca56f86e9aa67fbe718d8",
+      "after_sha256": "0432964e71fb7b2be6df1b80218aade5d450d9d905f9cb54330ed295b3dee03f",
+      "only_crlf_to_lf": true,
+      "crlf_count": 377,
+      "normalized_hash_equal": true
+    },
+    {
+      "file": "tools/qa/navigation_arrow_audit/pubspec.yaml",
+      "before_sha256": "9da23f2c1d735f97d89c497dd99063a302a90cd06805e20cf6d541895ada9d74",
+      "after_sha256": "9f178eb4edc43a28ba8e657576d7321605ae02f315c9c41553f35a7bb222a1bd",
+      "only_crlf_to_lf": true,
+      "crlf_count": 1,
+      "normalized_hash_equal": true
+    }
+  ],
+  "preserved_archive": "G:\\BIL_Project\\qa-preserved\\closure-line-endings-20261012\\tested-crlf-source.zip"
+}

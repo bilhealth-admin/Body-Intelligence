@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -111,12 +112,14 @@ class PremiumValueMask extends StatelessWidget {
                                 child: onRetry != null || !showLabel
                                     ? SizedBox.square(
                                         dimension: 36,
-                                        child: Icon(
-                                          onRetry != null
-                                              ? Icons.refresh_rounded
-                                              : Icons.lock_outline_rounded,
-                                          size: 20,
-                                          color: scheme.onSurfaceVariant,
+                                        child: BilGlassPressFeedback(
+                                          child: Icon(
+                                            onRetry != null
+                                                ? Icons.refresh_rounded
+                                                : Icons.lock_outline_rounded,
+                                            size: 20,
+                                            color: scheme.onSurfaceVariant,
+                                          ),
                                         ),
                                       )
                                     : PremiumLabelBadge(

@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../test/visual_closure/closure_surface_capture.dart';
 
 void main() {
   testWidgets(
@@ -72,6 +73,81 @@ void main() {
     },
   );
 
+  testWidgets(
+    'range changes retain a single analytics scroll element at every intermediate frame',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          measurementSystemProvider.overrideWith(
+            (ref) => Stream.value(MeasurementSystem.metric),
+          ),
+          userProfileProvider.overrideWith((ref) => Stream.value(null)),
+          weightHistoryProvider.overrideWith((ref) => Stream.value(const [])),
+          allMealsProvider.overrideWith((ref) => Stream.value(const [])),
+          allWaterProvider.overrideWith((ref) => Stream.value(const [])),
+          dashboardDailyLogsProvider.overrideWith(
+            (ref) => Stream.value(const []),
+          ),
+          insightLifeContextProvider.overrideWith(
+            (ref) => Stream.value(const []),
+          ),
+        ],
+      );
+      try {
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              home: const RepaintBoundary(
+                key: Key('analytics-capture'),
+                child: AnalyticsPage(),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final list = find.byType(ListView);
+        final element = tester.element(list);
+        final scroll = tester.state<ScrollableState>(
+          find.descendant(of: list, matching: find.byType(Scrollable)).first,
+        );
+        scroll.position.jumpTo(24);
+        await tester.pump();
+        for (final range in ['7 days', '90 days', 'All', '30 days']) {
+          await tester.tap(find.text(range));
+          await tester.pump();
+          expect(find.byType(ListView), findsOneWidget);
+          expect(tester.element(list), same(element));
+          expect(scroll.position.pixels, 24);
+          expect(find.text('Analytics overview'), findsOneWidget);
+          await tester.pump(const Duration(milliseconds: 80));
+          expect(find.byType(ListView), findsOneWidget);
+          expect(scroll.position.pixels, 24);
+        }
+        await captureClosureFrames(
+          tester,
+          find.byKey(const Key('analytics-capture')),
+          'analytics-range-after',
+          step: 'stable-range',
+          frames: 3,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      } finally {
+        container.dispose();
+        await tester.runAsync(database.close);
+      }
+    },
+  );
   testWidgets(
     'AnalyticsPage keeps its resolved shell visible while a provider refreshes',
     (tester) async {

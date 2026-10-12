@@ -99,7 +99,9 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
                 Center(
                   child: FilledButton.icon(
                     onPressed: _refresh,
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(
                       communityText(context, 'Retry', 'إعادة المحاولة'),
                     ),
@@ -410,7 +412,9 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
             return Center(
               child: FilledButton.icon(
                 onPressed: _refresh,
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
               ),
             );
@@ -493,7 +497,9 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(Icons.expand_more_rounded),
+                              : const BilGlassPressFeedback(
+                                  child: Icon(Icons.expand_more_rounded),
+                                ),
                           label: Text(
                             communityText(context, 'Load more', 'تحميل المزيد'),
                           ),
@@ -523,6 +529,8 @@ class _TopicMetric extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) =>
-      Chip(avatar: Icon(icon, size: 16), label: Text('$value $label'));
+  Widget build(BuildContext context) => Chip(
+    avatar: BilGlassPressFeedback(child: Icon(icon, size: 16)),
+    label: Text('$value $label'),
+  );
 }

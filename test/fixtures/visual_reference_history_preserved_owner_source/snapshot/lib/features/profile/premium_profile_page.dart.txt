@@ -1,0 +1,461 @@
+import 'dart:typed_data';
+
+import 'package:camera/camera.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../app/environment/app_environment.dart';
+import '../../app/services/runtime_permission_policy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
+import '../../data/database/app_database.dart';
+import '../../data/database/database_provider.dart';
+import '../../shared/widgets/bil_camera_capture_page.dart';
+import '../../shared/widgets/secondary_page_app_bar.dart';
+import '../../shared/widgets/bil_mobile_list.dart';
+import '../../shared/widgets/bil_account_avatar.dart';
+import '../nutrition/domain/dietary_preferences.dart';
+import '../nutrition_plans/domain/nutrition_pathway_catalog.dart';
+import '../onboarding/domain/adult_eligibility.dart';
+import '../weight/domain/weight_goal_progress.dart';
+import '../weight/providers/weight_provider.dart';
+import 'dietary_system_labels.dart';
+import 'domain/goal_timeline_estimator.dart';
+import 'goal_timeline_card.dart';
+import 'providers/user_profile_provider.dart';
+import 'providers/profile_auth_identity_provider.dart';
+import 'profile_locale_copy.dart';
+import 'services/profile_photo_service.dart';
+
+part 'premium_profile_components.dart';
+part 'premium_profile_actions.dart';
+part 'premium_profile_editors.dart';
+
+/// Clock boundary for date-sensitive profile projections.
+///
+/// Production continues to use the device clock while visual evidence can
+/// freeze the projection date without changing runtime behavior.
+final premiumProfileClockProvider = Provider<DateTime Function()>(
+  (ref) => DateTime.now,
+);
+
+typedef ProfileCameraLauncher =
+    Future<XFile?> Function(
+      BuildContext context, {
+      required String title,
+      required String captureLabel,
+    });
+
+/// Native boundaries for the explicit Profile > Add photo camera action.
+///
+/// The route uses BIL's own camera surface, so capturing a profile photo does
+/// not hand the member to another app. Tests can replace these platform
+/// boundaries while still exercising the real profile dispatch.
+final profileRuntimePermissionPolicyProvider =
+    Provider<BilRuntimePermissionPolicy>(
+      (ref) => const BilRuntimePermissionPolicy(),
+    );
+
+final profileCameraLauncherProvider = Provider<ProfileCameraLauncher>(
+  (ref) =>
+      (context, {required title, required captureLabel}) =>
+          Navigator.of(context).push<XFile>(
+            MaterialPageRoute<XFile>(
+              builder: (_) => BilCameraCapturePage(
+                title: title,
+                captureLabel: captureLabel,
+              ),
+            ),
+          ),
+);
+
+class PremiumProfilePage extends ConsumerStatefulWidget {
+  const PremiumProfilePage({super.key, this.resumeRecoveredPhoto = false});
+
+  /// Set only by StartupPage after Android returned a lost picker result for
+  /// the currently settled profile owner.
+  final bool resumeRecoveredPhoto;
+
+  @override
+  ConsumerState<PremiumProfilePage> createState() => _PremiumProfilePageState();
+}
+
+class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
+  bool loaded = false;
+  bool hydrating = false;
+  Object? hydrateError;
+  bool saving = false;
+  String name = 'BIL';
+  String gender = 'male';
+  String activity = 'moderate';
+  String location = '';
+  String postalCode = '';
+  String timeZone = '';
+  String email = '';
+  String units = 'metric';
+  DateTime? dateOfBirth;
+  int age = 30;
+  double height = 170;
+  bool _heightEditorOpen = false;
+  double weight = 70;
+  double target = 70;
+  bool exercises = true;
+  String? hydrationIdentityKey;
+  bool recoveredPhotoResumeScheduled = false;
+
+  void _updateState(VoidCallback update) => setState(update);
+
+  String tr(String english, String arabic) =>
+      profileLocaleText(context, english, arabic);
+
+  @override
+  void didUpdateWidget(covariant PremiumProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.resumeRecoveredPhoto && widget.resumeRecoveredPhoto) {
+      recoveredPhotoResumeScheduled = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final profileAsync = ref.watch(userProfileProvider);
+    final goalAsync = ref.watch(activeGoalProvider);
+    final dietaryAsync = ref.watch(dietaryPreferencesProvider);
+    final effectiveCurrentWeight = ref.watch(effectiveCurrentWeightProvider);
+    final activePathwayId = ref.watch(activeNutritionPathwayProvider).value;
+    final photoAsync = ref.watch(profilePhotoProvider);
+    final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+    final authIdentityAsync = ref.watch(profileAuthIdentityProvider);
+    return PopScope(
+      canPop: !saving,
+      child: Scaffold(
+        appBar: SecondaryPageAppBar(
+          title: Text(tr('Profile', 'الملف الشخصي')),
+          showDashboardAction: false,
+        ),
+        body: profileAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => Center(
+            child: FilledButton(
+              onPressed: () => ref.invalidate(userProfileProvider),
+              child: Text(tr('Try again', 'إعادة المحاولة')),
+            ),
+          ),
+          data: (profile) {
+            final authIdentity = authIdentityAsync.value;
+            if (authIdentity == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (profile == null) {
+              return Center(
+                child: Text(
+                  tr('Complete your profile first.', 'أكمل إعداد ملفك أولًا.'),
+                ),
+              );
+            }
+            if (goalAsync.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (goalAsync.hasError) {
+              return Center(
+                child: FilledButton(
+                  onPressed: () => ref.invalidate(activeGoalProvider),
+                  child: Text(tr('Try again', 'إعادة المحاولة')),
+                ),
+              );
+            }
+            if (photoAsync.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (photoAsync.hasError) {
+              return Center(
+                child: FilledButton(
+                  onPressed: () => ref.invalidate(profilePhotoProvider),
+                  child: Text(tr('Try again', 'إعادة المحاولة')),
+                ),
+              );
+            }
+            if (hydrateError != null) {
+              return Center(
+                child: FilledButton(
+                  onPressed: () => hydrate(
+                    profile,
+                    effectiveCurrentWeight ?? profile.currentWeight,
+                    authIdentity,
+                  ),
+                  child: Text(tr('Try again', 'إعادة المحاولة')),
+                ),
+              );
+            }
+            final expectedHydrationKey = authIdentity.hydrationKey(
+              profile.uuid,
+            );
+            if (!loaded || hydrationIdentityKey != expectedHydrationKey) {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => hydrate(
+                  profile,
+                  effectiveCurrentWeight ?? profile.currentWeight,
+                  authIdentity,
+                ),
+              );
+              return const Center(child: CircularProgressIndicator());
+            }
+            final photo = photoAsync.value;
+            final dietaryPreferences =
+                dietaryAsync.value ?? const DietaryPreferences();
+            final activePathway = nutritionPathways
+                .where((pathway) => pathway.id == activePathwayId)
+                .firstOrNull;
+            final timelineGoalType = resolveWeightGoalDirection(
+              currentWeightKg: weight,
+              targetWeightKg: target,
+              profileBaselineWeightKg: profile.currentWeight,
+              storedGoalType: goalAsync.value?.type,
+              storedTargetWeightKg: goalAsync.value?.targetWeight,
+            ).name;
+            final goalTimeline = GoalTimelineEstimator.estimate(
+              currentWeightKg: weight,
+              targetWeightKg: target,
+              goalType: timelineGoalType,
+              asOf: ref.watch(premiumProfileClockProvider)(),
+            );
+            final goalTimelinePresentation =
+                GoalTimelinePresentation.forContext(context, goalTimeline);
+            Future<void> persistProfile() =>
+                save(profile, goalAsync.value, showSuccess: false);
+            if (widget.resumeRecoveredPhoto && !recoveredPhotoResumeScheduled) {
+              recoveredPhotoResumeScheduled = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) pickPhoto(recoveredOnly: true);
+              });
+            }
+            return AbsorbPointer(
+              absorbing: saving,
+              child: ListView(
+                key: const Key('premium-profile-list'),
+                padding: const EdgeInsets.only(bottom: 128),
+                children: [
+                  _Section(tr('Personal details', 'البيانات الشخصية')),
+                  _Row(
+                    key: const Key('profile-display-name-row'),
+                    icon: Icons.badge_outlined,
+                    label: tr('Display name', 'الاسم الظاهر'),
+                    value: name,
+                    onTap: () async {
+                      final value = await edit(
+                        tr('Display name', 'الاسم الظاهر'),
+                        name,
+                      );
+                      if (value?.isNotEmpty == true) {
+                        setState(() => name = value!);
+                        await persistProfile();
+                      }
+                    },
+                  ),
+                  _Row(
+                    key: const Key('profile-photo-row'),
+                    icon: Icons.photo_camera_outlined,
+                    label: tr('Profile photo', 'الصورة الشخصية'),
+                    value: photo == null && (photoUrl?.trim().isEmpty ?? true)
+                        ? tr('Add photo', 'إضافة صورة')
+                        : tr('Change photo', 'تغيير الصورة'),
+                    onTap: pickPhoto,
+                  ),
+                  _Row(
+                    key: const Key('profile-email-row'),
+                    icon: Icons.alternate_email_rounded,
+                    label: tr('Email address', 'البريد الإلكتروني'),
+                    value: email.isEmpty ? tr('Not added', 'غير مضاف') : email,
+                    onTap: () =>
+                        openSettingsRoute('/settings/account-email', profile),
+                  ),
+                  _Section(tr('Body details', 'بيانات الجسم')),
+                  _Row(
+                    key: const Key('profile-height-row'),
+                    icon: Icons.height_rounded,
+                    label: tr('Height', 'الطول'),
+                    value: heightLabel,
+                    onTap: () async {
+                      if (await editHeight()) await persistProfile();
+                    },
+                  ),
+                  _Row(
+                    key: const Key('profile-sex-row'),
+                    icon: Icons.wc_rounded,
+                    label: tr('Sex', 'الجنس'),
+                    value: gender == 'female'
+                        ? tr('Female', 'أنثى')
+                        : tr('Male', 'ذكر'),
+                    onTap: () async {
+                      final value = await choose(tr('Sex', 'الجنس'), {
+                        'male': tr('Male', 'ذكر'),
+                        'female': tr('Female', 'أنثى'),
+                      });
+                      if (value != null) {
+                        setState(() => gender = value);
+                        await persistProfile();
+                      }
+                    },
+                  ),
+                  _Row(
+                    key: const Key('profile-date-of-birth-row'),
+                    icon: Icons.cake_outlined,
+                    label: tr('Date of birth', 'تاريخ الميلاد'),
+                    value: birthDateLabel,
+                    onTap: () async {
+                      if (await editDateOfBirth()) await persistProfile();
+                    },
+                  ),
+                  _Section(tr('Location & preferences', 'الموقع والتفضيلات')),
+                  _Row(
+                    key: const Key('profile-location-row'),
+                    icon: Icons.location_on_outlined,
+                    label: tr('Location', 'الموقع'),
+                    value: location.isEmpty
+                        ? tr('Not set', 'غير محدد')
+                        : location,
+                    onTap: () =>
+                        openSettingsRoute('/location-settings', profile),
+                  ),
+                  textRow(
+                    Icons.markunread_mailbox_outlined,
+                    tr('Postal code', 'الرمز البريدي'),
+                    postalCode,
+                    tr('Postal code', 'الرمز البريدي'),
+                    (v) => postalCode = v,
+                    persistProfile,
+                  ),
+                  _Row(
+                    key: const Key('profile-timezone-row'),
+                    icon: Icons.schedule_rounded,
+                    label: tr('Time zone', 'المنطقة الزمنية'),
+                    value: timeZone,
+                    onTap: () =>
+                        openSettingsRoute('/location-settings', profile),
+                  ),
+                  _Row(
+                    key: const Key('profile-units-row'),
+                    icon: Icons.straighten_rounded,
+                    label: tr('Units', 'الوحدات'),
+                    value: units == 'metric'
+                        ? tr('Metric · kg, cm, ml', 'متري · كغ، سم، مل')
+                        : tr('Imperial · lb, ft', 'إمبراطوري · رطل، قدم'),
+                    onTap: () => openSettingsRoute('/settings/units', profile),
+                  ),
+                  _Row(
+                    key: const Key('profile-dietary-system-row'),
+                    icon: Icons.restaurant_menu_rounded,
+                    label: tr('Dietary system', 'النظام الغذائي'),
+                    value: dietaryAsync.isLoading
+                        ? tr('Loading…', 'جارٍ التحميل…')
+                        : dietaryAsync.hasError
+                        ? tr('Unavailable', 'غير متاح')
+                        : activePathway == null
+                        ? dietarySystemSummary(context, dietaryPreferences)
+                        : tr(activePathway.enTitle, activePathway.arTitle),
+                    onTap: () => context.push('/plan?origin=profile'),
+                  ),
+                  _Row(
+                    key: const Key('profile-goals-row'),
+                    icon: Icons.flag_outlined,
+                    label: tr('Goals', 'الأهداف'),
+                    value: tr(
+                      'Update weight, nutrition, and fitness goals',
+                      'حدّث أهداف الوزن والتغذية واللياقة',
+                    ),
+                    onTap: () => openSettingsRoute('/goals', profile),
+                  ),
+                  _Section(tr('Health goals', 'الأهداف الصحية')),
+                  _Row(
+                    key: const Key('profile-health-goal-row'),
+                    icon: Icons.track_changes_rounded,
+                    label: goalTimelinePresentation.title,
+                    value: goalTimelinePresentation.value,
+                    onTap: () => showHealthGoalDetails(goalTimeline),
+                  ),
+                  _Row(
+                    key: const Key('profile-current-weight-row'),
+                    icon: Icons.monitor_weight_outlined,
+                    label: tr('Current weight', 'الوزن الحالي'),
+                    value: '${weight.toStringAsFixed(1)} kg',
+                    onTap: () async {
+                      final changed = await editNumber(
+                        tr('Current weight', 'الوزن الحالي'),
+                        weight,
+                        20,
+                        500,
+                        (v) => weight = v,
+                      );
+                      if (changed) await persistProfile();
+                    },
+                  ),
+                  _Row(
+                    key: const Key('profile-goal-weight-row'),
+                    icon: Icons.flag_outlined,
+                    label: tr('Goal weight', 'الوزن المستهدف'),
+                    value: '${target.toStringAsFixed(1)} kg',
+                    onTap: () async {
+                      final changed = await editNumber(
+                        tr('Goal weight', 'الوزن المستهدف'),
+                        target,
+                        20,
+                        500,
+                        (v) => target = v,
+                      );
+                      if (changed) await persistProfile();
+                    },
+                  ),
+                  _Row(
+                    icon: Icons.directions_run_rounded,
+                    label: tr('Activity level', 'مستوى النشاط'),
+                    value: activityLabel,
+                    onTap: () async {
+                      final value =
+                          await choose(tr('Activity level', 'مستوى النشاط'), {
+                            'sedentary': tr('Sedentary', 'حركة محدودة'),
+                            'light': tr('Lightly active', 'نشاط خفيف'),
+                            'moderate': tr('Moderately active', 'نشاط متوسط'),
+                            'active': tr('Active', 'نشاط مرتفع'),
+                            'very_active': tr('Very active', 'نشاط مكثف'),
+                          });
+                      if (value != null) {
+                        setState(() => activity = value);
+                        await persistProfile();
+                      }
+                    },
+                  ),
+                  _Row(
+                    icon: Icons.tune_rounded,
+                    label: tr('Calories & macro plan', 'خطة السعرات والماكروز'),
+                    value: tr(
+                      'Plan details & recommendations',
+                      'تفاصيل الخطة والتوصيات',
+                    ),
+                    onTap: () => context.push('/plan?origin=profile'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                    child: OutlinedButton.icon(
+                      key: const Key('advanced-body-measurements-action'),
+                      onPressed: () =>
+                          context.push('/advanced-body-measurements'),
+                      icon: const Icon(Icons.straighten_rounded),
+                      label: Text(
+                        tr(
+                          'Advanced body measurements',
+                          'قياسات الجسم المتقدمة',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

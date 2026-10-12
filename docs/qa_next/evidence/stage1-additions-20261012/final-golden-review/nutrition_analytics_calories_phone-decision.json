@@ -1,0 +1,14 @@
+{
+  "case": "nutrition_analytics_calories_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Exact2c comparison changes only Back and data stripes;620 calories, percentages and existing meal-series labels unchanged.",
+  "previous_master_sha256": "f6476a3249f7fa473a9864667613e983c856b841c61f8d5629a8ccd700c86aa3",
+  "accepted_actual_sha256": "faaa411cf02c6e18b88b6cdaa94dd4a9d751b6ae91eb027746151689ebbdbd27",
+  "review_image": "nutrition_analytics_calories_phone.png",
+  "promotion": {
+    "time": 1791818690.07327,
+    "master_sha256": "faaa411cf02c6e18b88b6cdaa94dd4a9d751b6ae91eb027746151689ebbdbd27",
+    "method": "one exact named file; visual decision required"
+  }
+}

@@ -166,10 +166,12 @@ class _CoachMenuTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       minLeadingWidth: 24,
-      leading: Icon(
-        icon,
-        color: destructive ? scheme.error : scheme.onSurfaceVariant,
-        size: 22,
+      leading: BilGlassPressFeedback(
+        child: Icon(
+          icon,
+          color: destructive ? scheme.error : scheme.onSurfaceVariant,
+          size: 22,
+        ),
       ),
       title: Text(
         title,
@@ -184,10 +186,12 @@ class _CoachMenuTile extends StatelessWidget {
           context,
         ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
       ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: scheme.outline,
-        size: 20,
+      trailing: BilGlassPressFeedback(
+        child: Icon(
+          Icons.chevron_right_rounded,
+          color: scheme.outline,
+          size: 20,
+        ),
       ),
       onTap: onTap,
     );

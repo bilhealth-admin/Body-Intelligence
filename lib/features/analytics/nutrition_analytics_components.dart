@@ -24,11 +24,13 @@ class _DayHeader extends ConsumerWidget {
           IconButton(
             tooltip: _t(context, 'Previous day'),
             onPressed: () => select(day.subtract(const Duration(days: 1))),
-            icon: Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_right_rounded
-                  : Icons.chevron_left_rounded,
-              textDirection: TextDirection.ltr,
+            icon: BilGlassPressFeedback(
+              child: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_right_rounded
+                    : Icons.chevron_left_rounded,
+                textDirection: TextDirection.ltr,
+              ),
             ),
           ),
           Expanded(
@@ -69,11 +71,13 @@ class _DayHeader extends ConsumerWidget {
             onPressed: isToday
                 ? null
                 : () => select(day.add(const Duration(days: 1))),
-            icon: Icon(
-              Directionality.of(context) == TextDirection.rtl
-                  ? Icons.chevron_left_rounded
-                  : Icons.chevron_right_rounded,
-              textDirection: TextDirection.ltr,
+            icon: BilGlassPressFeedback(
+              child: Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                textDirection: TextDirection.ltr,
+              ),
             ),
           ),
         ],
@@ -109,6 +113,7 @@ class _NutrientRow extends StatelessWidget {
     required this.total,
     required this.goal,
     required this.unit,
+    super.key,
   });
   final String label, unit;
   final double? total;
@@ -116,7 +121,12 @@ class _NutrientRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double? left = goal == null || total == null ? null : goal! - total!;
-    String f(double? v) => v == null ? '—' : '${v.round()} $unit';
+    String f(double? v) {
+      if (v == null) return '—';
+      final value = v.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '');
+      return '$value $unit';
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
@@ -165,7 +175,9 @@ class _DistributionRow extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            LinearProgressIndicator(value: share, color: color),
+            BilStripedProgress(
+              child: LinearProgressIndicator(value: share, color: color),
+            ),
           ],
         ),
       ),

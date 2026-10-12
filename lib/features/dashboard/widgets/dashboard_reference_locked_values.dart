@@ -66,7 +66,9 @@ class _ReferenceLockedValuesCard extends StatelessWidget {
                       'تعديل الهدف',
                     ),
                     onPressed: edit,
-                    icon: const Icon(Icons.swap_horiz_rounded, size: 20),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.swap_horiz_rounded, size: 20),
+                    ),
                   ),
               ],
             ),

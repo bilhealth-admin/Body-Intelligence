@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -207,10 +208,12 @@ class DailyWaterSection extends StatelessWidget {
               dimension: 18,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : Icon(
-              BilSemanticIcons.spec(
-                BilSemanticIconKind.water,
-              ).iconFor(Theme.of(context).platform),
+          : BilGlassPressFeedback(
+              child: Icon(
+                BilSemanticIcons.spec(
+                  BilSemanticIconKind.water,
+                ).iconFor(Theme.of(context).platform),
+              ),
             ),
       label: Text(tr('Add water', 'إضافة ماء')),
     );
@@ -248,11 +251,13 @@ class DailyWaterSection extends StatelessWidget {
                   side: BorderSide(
                     color: Theme.of(context).colorScheme.outlineVariant,
                   ),
-                  avatar: Icon(
-                    BilSemanticIcons.spec(
-                      BilSemanticIconKind.water,
-                    ).iconFor(Theme.of(context).platform),
-                    size: 18,
+                  avatar: BilGlassPressFeedback(
+                    child: Icon(
+                      BilSemanticIcons.spec(
+                        BilSemanticIconKind.water,
+                      ).iconFor(Theme.of(context).platform),
+                      size: 18,
+                    ),
                   ),
                   label: Text('+$amount $unit'),
                   onPressed: saving ? null : () => onAdd(amount),
@@ -351,7 +356,9 @@ class DailyWaterShortcut extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: const BilGlassPressFeedback(
+        child: Icon(Icons.chevron_right_rounded),
+      ),
       onTap: onTap,
     );
     return embedded
@@ -548,19 +555,23 @@ class _BodyContextTile extends StatelessWidget {
                 fit: BoxFit.cover,
                 semanticLabel: label,
                 errorBuilder: (_, _, _) => Center(
-                  child: Icon(
-                    bodyContextIcon(option),
-                    size: 34,
-                    color: scheme.primary,
+                  child: BilGlassPressFeedback(
+                    child: Icon(
+                      bodyContextIcon(option),
+                      size: 34,
+                      color: scheme.primary,
+                    ),
                   ),
                 ),
               )
             else
               Center(
-                child: Icon(
-                  bodyContextIcon(option),
-                  size: 34,
-                  color: scheme.primary,
+                child: BilGlassPressFeedback(
+                  child: Icon(
+                    bodyContextIcon(option),
+                    size: 34,
+                    color: scheme.primary,
+                  ),
                 ),
               ),
             if (imageAsset != null)

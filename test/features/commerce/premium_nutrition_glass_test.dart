@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/premium_nutrition_glass.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/premium_label_badge.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,6 +14,72 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
+  testWidgets(
+    'group gold action requires current verified denial, not stale data',
+    (tester) async {
+      var lookup = Future<SubscriptionState>.value(_state(CommercePlan.free));
+      final container = ProviderContainer(
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWith((_) => lookup),
+          // Exercise retained AsyncValue from Riverpod's real refresh, rather
+          // than constructing internal copyWithPrevious test objects.
+          verifiedSubscriptionAccessProvider.overrideWith(
+            (ref) => ref.watch(verifiedSubscriptionStateProvider),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => const Scaffold(
+              body: PremiumNutritionFieldsGroup(child: SizedBox(height: 80)),
+            ),
+          ),
+          GoRoute(
+            path: '/plans',
+            builder: (_, _) => const Scaffold(body: Text('plans destination')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(PremiumLabelBadge), findsOneWidget);
+      final pending = Completer<SubscriptionState>();
+      lookup = pending.future;
+      container.invalidate(verifiedSubscriptionStateProvider);
+      await tester.pump();
+      final refreshing = container.read(verifiedSubscriptionStateProvider);
+      expect(refreshing.isLoading, isTrue);
+      expect(refreshing.hasValue, isTrue);
+      expect(find.byType(PremiumLabelBadge), findsNothing);
+      final observed = container
+          .read(verifiedSubscriptionStateProvider.future)
+          .then<Object?>((_) => null, onError: (Object error) => error);
+      pending.completeError(StateError('offline'));
+      expect(await observed, isA<StateError>());
+      await tester.pumpAndSettle();
+      final failed = container.read(verifiedSubscriptionStateProvider);
+      expect(failed.hasError, isTrue);
+      expect(failed.hasValue, isTrue);
+      expect(find.byType(PremiumLabelBadge), findsNothing);
+      lookup = Future.value(_state(CommercePlan.free));
+      container.invalidate(verifiedSubscriptionStateProvider);
+      await tester.pumpAndSettle();
+      expect(find.byType(PremiumLabelBadge), findsOneWidget);
+      await tester.tap(find.byType(PremiumLabelBadge));
+      await tester.pumpAndSettle();
+      expect(find.text('plans destination'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('verified Free hides nutrition semantics and routes to plans', (
     tester,
   ) async {
@@ -27,22 +96,26 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('only server-verified Premium removes the glass', (tester) async {
-    final semantics = tester.ensureSemantics();
-    await tester.pumpWidget(_app(_state(CommercePlan.premium)));
-    await tester.pumpAndSettle();
+  for (final plan in [CommercePlan.premium, CommercePlan.premiumAiCoach]) {
+    testWidgets('only server-verified ${plan.id} removes the glass', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(_app(_state(plan)));
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is Semantics &&
-            widget.properties.label == 'private macro values',
-      ),
-      findsOneWidget,
-    );
-    semantics.dispose();
-  });
+      expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              widget.properties.label == 'private macro values',
+        ),
+        findsOneWidget,
+      );
+      semantics.dispose();
+    });
+  }
 
   testWidgets('subscription loading never flashes an upgrade action', (
     tester,
@@ -148,7 +221,8 @@ Widget _appWithSubscription(AsyncValue<SubscriptionState> subscription) {
 SubscriptionState _state(CommercePlan plan) {
   return SubscriptionState(
     plan: plan,
-    entitlements: plan == CommercePlan.premium
+    entitlements:
+        const {CommercePlan.premium, CommercePlan.premiumAiCoach}.contains(plan)
         ? const {CommerceEntitlement.advancedIntelligence}
         : const <CommerceEntitlement>{},
     authority: EntitlementAuthority.verifiedServer,

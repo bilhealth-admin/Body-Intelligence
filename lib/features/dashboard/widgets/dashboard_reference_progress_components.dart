@@ -50,12 +50,15 @@ class _MacroProgress extends StatelessWidget {
               children: [
                 SizedBox.square(
                   dimension: 56,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 6,
-                    strokeCap: StrokeCap.round,
-                    color: color,
-                    backgroundColor: scheme.surfaceContainerHighest,
+                  child: BilStripedProgress(
+                    nutritionColors: true,
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 6,
+                      strokeCap: StrokeCap.round,
+                      color: color,
+                      backgroundColor: scheme.surfaceContainerHighest,
+                    ),
                   ),
                 ),
                 Padding(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -280,7 +281,9 @@ class BilFitnessMonitor extends ConsumerWidget {
                       onPressed: () => ref
                           .read(fitnessDeviceProvider.notifier)
                           .refreshMeasurements(),
-                      icon: const Icon(Icons.refresh_rounded),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh_rounded),
+                      ),
                       color: const Color(0xFF63DFF2),
                       iconSize: 20,
                     ),

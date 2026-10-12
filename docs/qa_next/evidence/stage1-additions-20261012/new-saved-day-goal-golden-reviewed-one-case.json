@@ -1,0 +1,30 @@
+{
+  "label": "new-saved-day-goal-golden-reviewed-one-case",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "--plain-name",
+    "nutrition macros read saved day goal and recalculate remaining",
+    "--update-goldens"
+  ],
+  "pid": 19300,
+  "started": 1791821676.7997017,
+  "finished": 1791821689.7439785,
+  "exit_code": 0,
+  "case": "nutrition macros read saved day goal and recalculate remaining",
+  "reviewed_image": "build/stage1-closure/images/latest-linked-goal-nutrition-macros-actual-saved-goals.png",
+  "reviewed_image_sha256": "c96607fb936d5623ef483731ef15e46d4f9f6242bc6af3b0b708d87b1caaef10",
+  "decision": "Actual Flutter screen individually viewed; real SQLite day override and totals, no pending fallback, correct goal-minus-total at one decimal. New master for this exact case only.",
+  "source_fingerprint": "e2f89678cf1675550ca99e3a2f38c842d0c2fb8d675c66e20bed74e27da92491",
+  "end_fingerprint": "aade2f1faee5930d0f2970016a602daca2810a590474b75ab037f2d8a594b387",
+  "changes": [
+    "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_saved_goals_phone.png"
+  ],
+  "master_sha256": "02e546396d2b6cdfbc27e85bc637b3b7a7c1d02efab19bb8d11986fcc9ed54e4"
+}

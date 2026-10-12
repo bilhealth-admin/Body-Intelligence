@@ -43,6 +43,26 @@ class CloudSyncStatusLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (status.reason != null && !status.isSyncing)
+          Text(
+            _tr(
+              context,
+              status.reason == 'conflict_review_required'
+                  ? 'Review backup conflicts to finish synchronization.'
+                  : status.reason == 'server_unsupported' ||
+                        status.reason == 'server_or_consent_unavailable'
+                  ? 'This server cannot currently restore the selected data.'
+                  : 'Some data is still pending. Retry synchronization.',
+              status.reason == 'conflict_review_required'
+                  ? 'راجع تعارضات النسخة الاحتياطية لإكمال المزامنة.'
+                  : status.reason == 'server_unsupported' ||
+                        status.reason == 'server_or_consent_unavailable'
+                  ? 'الخادم لا يتيح حاليًا استعادة البيانات المختارة.'
+                  : 'بعض البيانات ما زالت معلقة. أعد محاولة المزامنة.',
+            ),
+            key: const Key('cloud-sync-partial-reason'),
+            style: style,
+          ),
         if (phaseText != null)
           Text(
             phaseText,

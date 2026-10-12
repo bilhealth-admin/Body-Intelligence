@@ -1,0 +1,14 @@
+{
+  "case": "daily_log_reference_premium_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Master predates2c style/nutrient-label fixes. Approved compact meals, centered rolling calendar and isolated header arrow changes; exact daily calorie/macros crop checked.",
+  "previous_master_sha256": "d330b4e27b5a50fb719baee0af09666d1cf7a9e6139493e5e2c43c3e87f5fe6d",
+  "accepted_actual_sha256": "3a1b0062535b0fa8553f8d64c5ae8ce3c88efe5850396ece1a41df93351ed5c5",
+  "review_image": "daily_log_reference_premium_phone.png",
+  "promotion": {
+    "time": 1791818688.5516958,
+    "master_sha256": "3a1b0062535b0fa8553f8d64c5ae8ce3c88efe5850396ece1a41df93351ed5c5",
+    "method": "one exact named file; visual decision required"
+  }
+}

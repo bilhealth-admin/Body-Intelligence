@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../repositories/active_catalog_registry.dart';
@@ -20,7 +20,7 @@ class ActiveMobileCatalogResolver {
   ActiveMobileCatalogResolver({
     CatalogRootResolver? rootResolver,
     this._installer = const BundledCoreCatalogInstaller(),
-  }) : _rootResolver = rootResolver ?? getApplicationSupportDirectory;
+  }) : _rootResolver = rootResolver ?? getProtectedApplicationSupportDirectory;
 
   Future<UnifiedFoodRepository?> openIfAvailable() async {
     try {

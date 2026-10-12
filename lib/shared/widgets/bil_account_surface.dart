@@ -52,7 +52,7 @@ class BilAccountSurface extends StatelessWidget {
                             ? null
                             : IconButton.filledTonal(
                                 onPressed: onBack,
-                                icon: const Icon(Icons.arrow_back_rounded),
+                                icon: const BackButtonIcon(),
                               ),
                       ),
                       const SizedBox(width: 8),

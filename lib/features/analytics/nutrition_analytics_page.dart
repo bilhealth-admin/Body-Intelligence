@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_striped_progress.dart';
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../nutrition/domain/unified_food.dart';
 import '../../data/database/meal_food_evidence.dart';
 import 'package:flutter/material.dart';
@@ -133,9 +135,16 @@ class NutritionAnalyticsPage extends ConsumerWidget {
             fats: plan?.overrideFats,
             fiber: plan?.overrideFiber,
           );
-    final goalSchedule =
-        ref.watch(nutritionGoalScheduleProvider).value ??
-        const NutritionGoalSchedule();
+    final scheduleState = ref.watch(nutritionGoalScheduleProvider);
+    if (scheduleState.isLoading && !scheduleState.hasValue) {
+      return _NutritionAnalyticsLoadingShell(initialTab: initialTab);
+    }
+    if (scheduleState.hasError) {
+      return _NutritionDependencyError(
+        onRetry: () => ref.invalidate(nutritionGoalScheduleProvider),
+      );
+    }
+    final goalSchedule = scheduleState.value ?? const NutritionGoalSchedule();
     final selectedDayTarget = goalSchedule.targetFor(
       ref.watch(selectedLogDateProvider),
     );
@@ -383,7 +392,9 @@ class _NutritionDependencyError extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.sync_problem_rounded, size: 44),
+            const BilGlassPressFeedback(
+              child: Icon(Icons.sync_problem_rounded, size: 44),
+            ),
             const SizedBox(height: 12),
             Text(
               _t(context, 'Nutrition goals could not be loaded.'),
@@ -392,7 +403,9 @@ class _NutritionDependencyError extends StatelessWidget {
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(_t(context, 'Try again')),
             ),
           ],

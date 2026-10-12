@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,9 +36,9 @@ class AiCoachAdminPage extends ConsumerWidget {
           horizontal: 20,
           vertical: 12,
         ),
-        leading: Icon(icon),
+        leading: BilGlassPressFeedback(child: Icon(icon)),
         title: Text(copy(key)),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const BilGlassPressFeedback(child: Icon(Icons.chevron_right)),
         onTap: () => Navigator.of(
           context,
         ).push(MaterialPageRoute<void>(builder: (_) => page())),
@@ -93,7 +94,9 @@ class AiCoachAdminPage extends ConsumerWidget {
                   ),
                   leading: const Icon(Icons.fact_check_outlined),
                   title: Text(copy('approvals')),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const BilGlassPressFeedback(
+                    child: Icon(Icons.chevron_right),
+                  ),
                   onTap: () => context.push('/community/moderation'),
                 ),
               ),

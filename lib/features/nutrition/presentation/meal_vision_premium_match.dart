@@ -74,8 +74,51 @@ class _PremiumTrustedMatchDialogState
 
   void _stepAmount(double delta) {
     final amount = _currentAmount;
-    if (amount == null || !amount.isFinite || amount + delta <= 0) return;
-    setState(() => _amount.text = '${amount + delta}');
+    if (amount == null ||
+        !amount.isFinite ||
+        !_canStepAmount(delta < 0 ? -1 : 1)) {
+      return;
+    }
+    final step = mealPortionDraftStep(_currentUnit);
+    if (step == null) return;
+    final next = decimalStep(
+      value: amount,
+      step: step.step,
+      direction: delta < 0 ? -1 : 1,
+      decimalPlaces: step.decimals,
+      minimum: 0,
+      maximum: double.maxFinite,
+    );
+    if (next > 0) {
+      setState(() => _amount.text = '${next % 1 == 0 ? next.toInt() : next}');
+    }
+  }
+
+  bool _canStepAmount(int direction) {
+    final amount = _currentAmount;
+    final step = mealPortionDraftStep(_currentUnit);
+    return amount != null &&
+        amount.isFinite &&
+        amount >= 0 &&
+        step != null &&
+        decimalStep(
+              value: amount,
+              step: step.step,
+              direction: direction,
+              decimalPlaces: step.decimals,
+              minimum: 0,
+              maximum: double.maxFinite,
+            ) >
+            0 &&
+        decimalStep(
+              value: amount,
+              step: step.step,
+              direction: direction,
+              decimalPlaces: step.decimals,
+              minimum: 0,
+              maximum: double.maxFinite,
+            ) !=
+            amount;
   }
 
   void _portionUpdate(VoidCallback change) => setState(change);
@@ -603,7 +646,7 @@ class _PremiumTrustedMatchDialogState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(symbol, color: tint, size: 19),
+          BilGlassPressFeedback(child: Icon(symbol, color: tint, size: 19)),
           const SizedBox(height: 3),
           Text(
             label,

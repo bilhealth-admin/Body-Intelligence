@@ -86,7 +86,9 @@ class _MetricBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     title: Text(label),
-    subtitle: LinearProgressIndicator(value: (value / maximum).clamp(0, 1)),
+    subtitle: BilStripedProgress(
+      child: LinearProgressIndicator(value: (value / maximum).clamp(0, 1)),
+    ),
     trailing: Text('${value.toStringAsFixed(1)} $suffix'),
   );
 }

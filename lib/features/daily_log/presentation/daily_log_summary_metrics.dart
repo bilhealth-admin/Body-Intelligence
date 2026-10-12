@@ -78,13 +78,16 @@ class _MacroMetric extends StatelessWidget {
                   borderRadius: BorderRadius.circular(99),
                   child: ExcludeSemantics(
                     excluding: loading || grams == null || percent == null,
-                    child: LinearProgressIndicator(
-                      minHeight: 6,
-                      value: loading ? 0 : progress,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      color: color,
+                    child: BilStripedProgress(
+                      nutritionColors: true,
+                      child: LinearProgressIndicator(
+                        minHeight: 6,
+                        value: loading ? 0 : progress,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        color: color,
+                      ),
                     ),
                   ),
                 ),
@@ -103,11 +106,15 @@ class NutrientMetric extends StatelessWidget {
     required this.label,
     required this.value,
     required this.unit,
+    this.compact = false,
+    this.unknownAsDash = false,
   });
 
   final String label;
   final double? value;
   final String unit;
+  final bool compact;
+  final bool unknownAsDash;
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +123,10 @@ class NutrientMetric extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 220),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 6 : 11,
+          vertical: compact ? 5 : 7,
+        ),
         decoration: BoxDecoration(
           color: scheme.surface,
           borderRadius: BorderRadius.circular(16),
@@ -126,10 +136,58 @@ class NutrientMetric extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$label · $localizedUnit'),
+            Text(
+              compact ? label : '$label · $localizedUnit',
+              style: compact
+                  ? Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurface,
+                    )
+                  : null,
+            ),
             const SizedBox(height: 4),
-            if (value == null)
-              Text(context.strings.text('Unavailable'))
+            if (compact)
+              Wrap(
+                spacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (value == null)
+                    Semantics(
+                      label: context.strings.text('Unavailable'),
+                      child: const ExcludeSemantics(child: Text('—')),
+                    )
+                  else
+                    PremiumNutritionGlass(
+                      compact: true,
+                      showLabel: false,
+                      child: Text(
+                        value!.toStringAsFixed(1),
+                        textDirection: TextDirection.ltr,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: scheme.onSurface,
+                            ),
+                      ),
+                    ),
+                  Text(
+                    localizedUnit,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              )
+            else if (value == null)
+              Semantics(
+                label: context.strings.text('Unavailable'),
+                child: ExcludeSemantics(
+                  child: Text(
+                    unknownAsDash ? '—' : context.strings.text('Unavailable'),
+                  ),
+                ),
+              )
             else
               PremiumNutritionGlass(
                 compact: true,

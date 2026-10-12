@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 class DashboardIntelligenceCenterCard extends StatelessWidget {
@@ -56,7 +57,9 @@ class DashboardIntelligenceCenterCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+              const BilGlassPressFeedback(
+                child: Icon(Icons.arrow_forward_ios_rounded, size: 18),
+              ),
             ],
           ),
         ),

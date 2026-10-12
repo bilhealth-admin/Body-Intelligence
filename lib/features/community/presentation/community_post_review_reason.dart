@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -109,7 +110,9 @@ class _PostReviewReasonState extends State<CommunityPostReviewReason> {
           return TextButton.icon(
             key: const Key('community-review-reason-retry'),
             onPressed: _retry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
           );
         }

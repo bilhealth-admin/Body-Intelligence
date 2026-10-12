@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/bil_wordmark.dart';
@@ -164,7 +165,9 @@ class ModernOnboardingScaffold extends StatelessWidget {
                                 key: const Key('onboarding-back'),
                                 tooltip: _copy(context, 'Back'),
                                 onPressed: busy ? null : onBack,
-                                icon: const Icon(Icons.arrow_back_rounded),
+                                icon: const BilGlassPressFeedback(
+                                  child: Icon(Icons.arrow_back_rounded),
+                                ),
                               ),
                             );
                             final skip = onSkip == null
@@ -407,11 +410,15 @@ class OnboardingChoiceCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (icon case final icon?) ...[
-                  Icon(
-                    icon,
-                    color: enabled
-                        ? (selected ? scheme.primary : scheme.onSurfaceVariant)
-                        : scheme.outline,
+                  BilGlassPressFeedback(
+                    child: Icon(
+                      icon,
+                      color: enabled
+                          ? (selected
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant)
+                          : scheme.outline,
+                    ),
                   ),
                   const SizedBox(width: 13),
                 ],
@@ -492,7 +499,7 @@ class OnboardingStatusCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: scheme.primary),
+                BilGlassPressFeedback(child: Icon(icon, color: scheme.primary)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/database/meal_food_evidence.dart';
 import '../../../data/database/nutrient_evidence.dart';
@@ -19,6 +21,7 @@ import 'daily_log_nutrition_evidence.dart';
 import 'macro_value_formatter.dart';
 
 part 'daily_log_meal_detail_items.dart';
+part 'daily_log_compact_meal_row.dart';
 
 class DailyMealsList extends ConsumerWidget {
   const DailyMealsList({
@@ -33,6 +36,7 @@ class DailyMealsList extends ConsumerWidget {
     this.mealGoals = const {},
     this.mealCalorieGoals = const {},
     this.mealMacroDisplay,
+    this.compactRows = false,
     required this.onAdd,
     required this.onEdit,
     required this.onActions,
@@ -48,6 +52,7 @@ class DailyMealsList extends ConsumerWidget {
   final Map<String, NutritionGoalTarget> mealGoals;
   final Map<String, double> mealCalorieGoals;
   final MealMacroDisplay? mealMacroDisplay;
+  final bool compactRows;
   final ValueChanged<String> onAdd;
   final Future<void> Function(MealItem item, Food food) onEdit;
   final Future<void> Function(MealItem item, Food? food) onActions;
@@ -107,23 +112,32 @@ class DailyMealsList extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final slot in slots) ...[
-          _DiaryMealCard(
-            key: Key('daily-meal-card-${slot.type}'),
-            type: slot.type,
-            title: _resolvedMealName(context, mealNames, slot.type),
-            meal: slot.meal,
-            showFoodInsights: showFoodInsights,
-            showFoodTimestamps: showFoodTimestamps,
-            useNetCarbs: useNetCarbs,
-            dailyGoal: dailyGoal,
-            mealGoal: mealGoals[slot.type],
-            calorieGoal:
-                mealGoals[slot.type]?.calories ?? mealCalorieGoals[slot.type],
-            macroDisplay: mealMacroDisplay,
-            onAdd: () => onAdd(slot.type),
-            onEdit: onEdit,
-            onActions: onActions,
-          ),
+          if (compactRows)
+            _DiaryCompactMealRow(
+              key: Key('daily-meal-card-${slot.type}'),
+              type: slot.type,
+              title: _resolvedMealName(context, mealNames, slot.type),
+              meal: slot.meal,
+              onOpen: () => onAdd(slot.type),
+            )
+          else
+            _DiaryMealCard(
+              key: Key('daily-meal-card-${slot.type}'),
+              type: slot.type,
+              title: _resolvedMealName(context, mealNames, slot.type),
+              meal: slot.meal,
+              showFoodInsights: showFoodInsights,
+              showFoodTimestamps: showFoodTimestamps,
+              useNetCarbs: useNetCarbs,
+              dailyGoal: dailyGoal,
+              mealGoal: mealGoals[slot.type],
+              calorieGoal:
+                  mealGoals[slot.type]?.calories ?? mealCalorieGoals[slot.type],
+              macroDisplay: mealMacroDisplay,
+              onAdd: () => onAdd(slot.type),
+              onEdit: onEdit,
+              onActions: onActions,
+            ),
           const SizedBox(height: 8),
         ],
       ],
@@ -315,10 +329,12 @@ class _DiaryMealCard extends StatelessWidget {
                     Row(
                       key: Key('daily-meal-header-$type'),
                       children: [
-                        Icon(
-                          BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,
-                          color: scheme.primary,
-                          size: 28,
+                        BilGlassPressFeedback(
+                          child: Icon(
+                            BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,
+                            color: scheme.primary,
+                            size: 28,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -375,10 +391,12 @@ class _DiaryMealCard extends StatelessWidget {
                     key: Key('daily-meal-header-$type'),
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,
-                        color: scheme.primary,
-                        size: 28,
+                      BilGlassPressFeedback(
+                        child: Icon(
+                          BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,
+                          color: scheme.primary,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(

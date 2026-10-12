@@ -1,0 +1,14 @@
+{
+  "case": "daily_log_sections_lower_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Old master predates2c pearl surfaces; current Save/body/weight actions unchanged with approved header arrows.",
+  "previous_master_sha256": "1f7db03e413290e4a13be9e4de7848aad01175a2b8e34a2b5eb9aca08126d621",
+  "accepted_actual_sha256": "5bc081c1bca801c079dc422fe702007ae332578f590396f48caa51e43c04a857",
+  "review_image": "daily_log_sections_lower_phone.png",
+  "promotion": {
+    "time": 1791818689.6287994,
+    "master_sha256": "5bc081c1bca801c079dc422fe702007ae332578f590396f48caa51e43c04a857",
+    "method": "one exact named file; visual decision required"
+  }
+}

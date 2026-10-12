@@ -73,7 +73,9 @@ extension _CommunityMemberProfileActivityMedia
                         dimension: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.expand_more_rounded),
+                    : const BilGlassPressFeedback(
+                        child: Icon(Icons.expand_more_rounded),
+                      ),
                 label: Text(
                   communityText(context, 'Load more media', 'تحميل وسائط أكثر'),
                 ),
@@ -171,7 +173,9 @@ extension _CommunityMemberProfileActivityMedia
                         dimension: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.expand_more_rounded),
+                    : const BilGlassPressFeedback(
+                        child: Icon(Icons.expand_more_rounded),
+                      ),
                 label: Text(
                   communityText(
                     context,
@@ -294,7 +298,9 @@ extension _CommunityMemberProfileActivityMedia
                         dimension: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.expand_more_rounded),
+                    : const BilGlassPressFeedback(
+                        child: Icon(Icons.expand_more_rounded),
+                      ),
                 label: Text(
                   communityText(
                     context,
@@ -321,7 +327,9 @@ extension _CommunityMemberProfileActivityMedia
                   dimension: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.expand_more_rounded),
+              : const BilGlassPressFeedback(
+                  child: Icon(Icons.expand_more_rounded),
+                ),
           label: Text(communityText(context, 'Load more', 'تحميل المزيد')),
         ),
       ),
@@ -338,7 +346,7 @@ extension _CommunityMemberProfileActivityMedia
       padding: const EdgeInsets.all(40),
       child: Column(
         children: [
-          Icon(icon, size: 48),
+          BilGlassPressFeedback(child: Icon(icon, size: 48)),
           const SizedBox(height: 12),
           Text(text, textAlign: TextAlign.center),
         ],
@@ -356,7 +364,7 @@ extension _CommunityMemberProfileActivityMedia
         child: FilledButton.icon(
           key: key,
           onPressed: onRetry,
-          icon: const Icon(Icons.refresh_rounded),
+          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
         ),
       ),

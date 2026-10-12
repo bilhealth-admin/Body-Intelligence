@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -284,7 +285,9 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                                         strokeWidth: 2,
                                       ),
                                     )
-                                  : const Icon(Icons.open_in_new_rounded),
+                                  : const BilGlassPressFeedback(
+                                      child: Icon(Icons.open_in_new_rounded),
+                                    ),
                               label: Text(_t('Read policy', 'قراءة السياسة')),
                             ),
                           ),
@@ -509,7 +512,7 @@ class _PolicyStatusMessage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 52),
+          BilGlassPressFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 14),
           Text(
             title,
@@ -527,7 +530,9 @@ class _PolicyStatusMessage extends StatelessWidget {
             FilledButton.icon(
               key: const Key('community-policy-retry'),
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(retryLabel!),
             ),
           ],

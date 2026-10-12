@@ -221,7 +221,9 @@ extension _AiCoachSettingsBody on _AiCoachSettingsPageState {
         if (received != null)
           TextButton.icon(
             onPressed: _manageSubscription,
-            icon: const Icon(Icons.open_in_new_rounded, size: 18),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.open_in_new_rounded, size: 18),
+            ),
             label: Text(
               t(
                 'Manage subscription in store',

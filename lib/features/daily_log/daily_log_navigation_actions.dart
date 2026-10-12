@@ -65,8 +65,18 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
   }
 
   void _focusMealEntry() {
+    if (!mounted) return;
+    if (widget.focusMealEntry) {
+      // This route is already the meal page. Scrolling its search card to the
+      // viewport top hides the preceding title/back row on taller summaries.
+      // The ordinary diary still focuses its entry card below.
+      if (!scrollController.hasClients) return;
+      mealFocusApplied = true;
+      scrollController.jumpTo(0);
+      return;
+    }
     final mealContext = mealEntryKey.currentContext;
-    if (!mounted || mealContext == null) return;
+    if (mealContext == null) return;
     mealFocusApplied = true;
     Scrollable.ensureVisible(
       mealContext,

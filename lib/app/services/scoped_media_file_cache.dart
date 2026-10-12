@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
+import 'health_storage_directory_native.dart';
 
 import '../environment/app_environment.dart';
 
@@ -62,7 +62,7 @@ class ScopedMediaFileCache extends ChangeNotifier {
     final root =
         _root ??
         Directory(
-          '${(await getApplicationSupportDirectory()).path}/bil_scoped_photos_v1',
+          '${(await getProtectedApplicationSupportDirectory()).path}/bil_scoped_photos_v1',
         );
     await root.create(recursive: true);
     return root;
@@ -475,7 +475,7 @@ class ScopedMediaFileCache extends ChangeNotifier {
       final root =
           _root ??
           Directory(
-            '${(await getApplicationSupportDirectory()).path}/bil_scoped_photos_v1',
+            '${(await getProtectedApplicationSupportDirectory()).path}/bil_scoped_photos_v1',
           );
       if (await root.exists()) await root.delete(recursive: true);
     }().catchError((Object _) {});

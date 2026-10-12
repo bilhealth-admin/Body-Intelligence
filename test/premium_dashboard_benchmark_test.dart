@@ -4,18 +4,12 @@ import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/premium_dashboard_benchmark.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
 
 void main() {
-  setUpAll(() async {
-    await loadVisualEvidenceFont();
-    final font = FontLoader('NotoNaskhArabic')
-      ..addFont(rootBundle.load('assets/fonts/NotoNaskhArabic-Bold.ttf'));
-    await font.load();
-  });
+  setUpAll(loadVisualEvidenceFont);
 
   testWidgets('legacy insight deck is removed from the unified dashboard', (
     tester,
@@ -227,26 +221,13 @@ class _Harness extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         locale: locale,
         themeMode: light ? ThemeMode.light : ThemeMode.dark,
-        theme:
-            BilFlagshipTheme.light(
-              highContrast: highContrast,
-              isArabic: arabic,
-            ).copyWith(
-              textTheme: BilFlagshipTheme.light(
-                highContrast: highContrast,
-                isArabic: arabic,
-              ).textTheme.apply(fontFamily: 'NotoNaskhArabic'),
-            ),
-        darkTheme:
-            BilFlagshipTheme.dark(
-              highContrast: highContrast,
-              isArabic: arabic,
-            ).copyWith(
-              textTheme: BilFlagshipTheme.dark(
-                highContrast: highContrast,
-                isArabic: arabic,
-              ).textTheme.apply(fontFamily: 'NotoNaskhArabic'),
-            ),
+        theme: visualEvidenceTheme(
+          BilFlagshipTheme.light(highContrast: highContrast, isArabic: arabic),
+        ),
+        darkTheme: visualEvidenceTheme(
+          BilFlagshipTheme.dark(highContrast: highContrast, isArabic: arabic),
+        ),
+        builder: (context, child) => visualEvidenceTextSurface(child),
         home: Builder(
           builder: (context) => MediaQuery(
             data: MediaQuery.of(context).copyWith(

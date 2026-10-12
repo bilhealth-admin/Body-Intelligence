@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ import '../../../app/theme/bil_flat_icon.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../../shared/widgets/bil_clinical_note.dart';
 import '../../commerce/presentation/ai_boost_coach_artwork.dart';
+import '../../commerce/presentation/bil_store_copy.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../commerce/providers/app_purchase_providers.dart';
 import '../../onboarding/onboarding_runtime_copy.dart';
@@ -416,7 +419,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
                         onPressed: () => setState(() {
                           usage = _startUsageLoad();
                         }),
-                        icon: const Icon(Icons.refresh_rounded),
+                        icon: const BilGlassPressFeedback(
+                          child: Icon(Icons.refresh_rounded),
+                        ),
                       ),
                     ),
                   ),
@@ -484,10 +489,12 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
                   : () => setState(() {
                       usage = _startUsageLoad();
                     }),
-              icon: Icon(
-                authenticationRequired
-                    ? Icons.login_rounded
-                    : Icons.refresh_rounded,
+              icon: BilGlassPressFeedback(
+                child: Icon(
+                  authenticationRequired
+                      ? Icons.login_rounded
+                      : Icons.refresh_rounded,
+                ),
               ),
               label: Text(
                 authenticationRequired

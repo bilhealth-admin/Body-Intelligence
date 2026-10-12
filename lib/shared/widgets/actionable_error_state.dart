@@ -1,3 +1,4 @@
+import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../app/localization/app_localizations.dart';
 
@@ -28,7 +29,13 @@ class ActionableErrorState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 48, color: Theme.of(context).colorScheme.error),
+              BilGlassPressFeedback(
+                child: Icon(
+                  icon,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
               const SizedBox(height: 16),
               Semantics(
                 header: true,
@@ -43,7 +50,7 @@ class ActionableErrorState extends StatelessWidget {
               const SizedBox(height: 20),
               FilledButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
+                icon: const BilGlassPressFeedback(child: Icon(Icons.refresh)),
                 label: Text(context.strings.text('Try again')),
               ),
             ],

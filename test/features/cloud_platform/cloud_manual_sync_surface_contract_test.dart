@@ -4,9 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('manual live sync is explicit, gated, selective and not startup-driven', () {
-    final settings = File(
+    final settings = [
       'lib/features/settings/sharing_privacy_settings_page.dart',
-    ).readAsStringSync();
+      'lib/features/settings/sharing_privacy_cloud_sync_tile.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final more = [
       'lib/features/settings/settings_page.dart',
       'lib/features/settings/settings_page_polish.dart',

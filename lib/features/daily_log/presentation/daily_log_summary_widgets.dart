@@ -1,3 +1,6 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -81,15 +84,18 @@ class DiaryDateNavigator extends StatelessWidget {
               ),
             ),
           ),
-          const Icon(Icons.arrow_drop_down_rounded, size: 24),
+          const BilGlassPressFeedback(
+            child: Icon(Icons.arrow_drop_down_rounded, size: 24),
+          ),
         ],
       ),
     );
     final back = onBack != null
         ? IconButton(
+            key: const Key('daily-log-back'),
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
           )
         : const SizedBox(width: 48);
     final previous = IconButton(
@@ -99,38 +105,82 @@ class DiaryDateNavigator extends StatelessWidget {
       // Material chevrons mirror themselves with Directionality. Selecting an
       // RTL-specific glyph here mirrored it a second time, so the Arabic
       // previous/next controls appeared to move in the opposite direction.
-      icon: const Icon(Icons.chevron_left_rounded),
+      icon: const BilGlassPressFeedback(
+        child: Icon(Icons.chevron_left_rounded),
+      ),
     );
     final next = IconButton(
       key: const Key('daily-log-next'),
       tooltip: _summaryText(context, 'next'),
       onPressed: onNext,
-      icon: const Icon(Icons.chevron_right_rounded),
+      icon: const BilGlassPressFeedback(
+        child: Icon(Icons.chevron_right_rounded),
+      ),
     );
     return RepaintBoundary(
       key: const Key('daily-log-date-bar'),
-      child: SizedBox(
-        height: 64,
-        child: Semantics(
-          container: true,
-          label: semanticLabel,
-          child: Row(
-            children: todayHeader
-                ? [
-                    Expanded(child: dateButton),
-                    if (onBack != null) SizedBox(width: 48, child: back),
-                    SizedBox(width: 48, child: previous),
-                    SizedBox(width: 48, child: next),
-                  ]
-                : [
-                    SizedBox(width: 48, child: back),
-                    SizedBox(width: 48, child: previous),
-                    Expanded(child: dateButton),
-                    SizedBox(width: 48, child: next),
-                    const SizedBox(width: 48),
-                  ],
-          ),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final large =
+              todayHeader && MediaQuery.textScalerOf(context).scale(1) > 1.4;
+          final navigation = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 48, child: previous),
+              const SizedBox(width: 16),
+              SizedBox(width: 48, child: next),
+            ],
+          );
+          return Semantics(
+            container: true,
+            label: semanticLabel,
+            child: SizedBox(
+              height: large ? 120 : 64,
+              child: todayHeader
+                  ? (large
+                        ? Column(
+                            children: [
+                              SizedBox(
+                                height: 64,
+                                child: Row(
+                                  children: [
+                                    if (onBack != null) ...[
+                                      SizedBox(width: 48, child: back),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Expanded(child: dateButton),
+                                  ],
+                                ),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: navigation,
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              if (onBack != null) ...[
+                                SizedBox(width: 48, child: back),
+                                const SizedBox(width: 8),
+                              ],
+                              Expanded(child: dateButton),
+                              const SizedBox(width: 8),
+                              navigation,
+                            ],
+                          ))
+                  : Row(
+                      children: [
+                        SizedBox(width: 48, child: back),
+                        SizedBox(width: 48, child: previous),
+                        Expanded(child: dateButton),
+                        SizedBox(width: 48, child: next),
+                        const SizedBox(width: 48),
+                      ],
+                    ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -417,16 +467,19 @@ class _CalorieSummary extends StatelessWidget {
           borderRadius: BorderRadius.circular(99),
           child: ExcludeSemantics(
             excluding: loading || calories == null || !goal,
-            child: LinearProgressIndicator(
-              key: const Key('daily-summary-calories-progress'),
-              minHeight: 7,
-              value: loading || !goal || calories == null
-                  ? 0
-                  : (calories! / calorieGoal!).clamp(0.0, 1.0).toDouble(),
-              backgroundColor: scheme.surfaceContainerHighest,
-              color: goal && remaining != null && remaining! < 0
-                  ? scheme.error
-                  : scheme.primary,
+            child: BilStripedProgress(
+              tone: BilProgressTone.calories,
+              child: LinearProgressIndicator(
+                key: const Key('daily-summary-calories-progress'),
+                minHeight: 7,
+                value: loading || !goal || calories == null
+                    ? 0
+                    : (calories! / calorieGoal!).clamp(0.0, 1.0).toDouble(),
+                backgroundColor: scheme.surfaceContainerHighest,
+                color: goal && remaining != null && remaining! < 0
+                    ? scheme.error
+                    : scheme.primary,
+              ),
             ),
           ),
         ),
@@ -444,6 +497,8 @@ class DailyLogCalorieMacroRing extends ConsumerWidget {
     required this.fat,
     required this.protein,
     this.dimension = 126,
+    this.mealDetailStyle = false,
+    this.showGoal = true,
   });
 
   final double? calories;
@@ -452,6 +507,8 @@ class DailyLogCalorieMacroRing extends ConsumerWidget {
   final double? fat;
   final double? protein;
   final double dimension;
+  final bool mealDetailStyle;
+  final bool showGoal;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -462,7 +519,7 @@ class DailyLogCalorieMacroRing extends ConsumerWidget {
     return Semantics(
       label: calories == null
           ? '${_summaryText(context, 'calories')}: ${context.strings.text('Unavailable')}'
-          : '${calories!.round()} ${_summaryText(context, 'kcal')}${calorieGoal == null ? '' : ' / ${calorieGoal!.round()}'}',
+          : '${calories!.round()} ${_summaryText(context, 'kcal')}${!showGoal || calorieGoal == null ? '' : ' / ${calorieGoal!.round()}'}',
       child: SizedBox.square(
         dimension: dimension,
         child: Stack(
@@ -475,6 +532,16 @@ class DailyLogCalorieMacroRing extends ConsumerWidget {
                 fat: macrosAllowed ? fat : null,
                 protein: macrosAllowed ? protein : null,
                 track: Theme.of(context).colorScheme.surfaceContainerHighest,
+                colors: mealDetailStyle
+                    ? DailyMealMacroPalette.forBrightness(
+                        Theme.of(context).brightness,
+                      )
+                    : const [
+                        Color(0xFF0A8F88),
+                        Color(0xFF6F1096),
+                        Color(0xFFFFAB32),
+                      ],
+                brightness: Theme.of(context).brightness,
               ),
             ),
             Padding(
@@ -498,7 +565,7 @@ class DailyLogCalorieMacroRing extends ConsumerWidget {
                       textDirection: TextDirection.ltr,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    if (calorieGoal != null)
+                    if (showGoal && calorieGoal != null)
                       Text(
                         '/ ${calorieGoal!.round()}',
                         textDirection: TextDirection.ltr,
@@ -523,16 +590,19 @@ class _MacroRingPainter extends CustomPainter {
     required this.fat,
     required this.protein,
     required this.track,
+    required this.colors,
+    required this.brightness,
   });
 
   final double? carbs;
   final double? fat;
   final double? protein;
   final Color track;
+  final List<Color> colors;
+  final Brightness brightness;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const colors = [Color(0xFF0A8F88), Color(0xFF6F1096), Color(0xFFFFAB32)];
     final center = size.center(Offset.zero);
     final radius = (size.shortestSide - 12) / 2;
     final paint = Paint()
@@ -547,12 +617,13 @@ class _MacroRingPainter extends CustomPainter {
     var start = -1.5707963267948966;
     for (var i = 0; i < energies.length; i++) {
       final sweep = 6.283185307179586 * energies[i] / total;
-      canvas.drawArc(
+      BilStripedProgressPaint.arc(
+        canvas,
         Rect.fromCircle(center: center, radius: radius),
         start,
         sweep,
-        false,
-        paint..color = colors[i],
+        12,
+        BilProgressPalette.resolve(colors[i], brightness),
       );
       start += sweep;
     }
@@ -563,5 +634,7 @@ class _MacroRingPainter extends CustomPainter {
       carbs != oldDelegate.carbs ||
       fat != oldDelegate.fat ||
       protein != oldDelegate.protein ||
-      track != oldDelegate.track;
+      track != oldDelegate.track ||
+      colors != oldDelegate.colors ||
+      brightness != oldDelegate.brightness;
 }

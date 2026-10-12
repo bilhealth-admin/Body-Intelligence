@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/bil_persistent_network_image.dart';
 
@@ -130,7 +131,9 @@ class _CommunityPostGalleryPageState extends State<CommunityPostGalleryPage> {
                   onPressed: _index + 1 < _media.length
                       ? () => _select(_index + 1)
                       : null,
-                  icon: const Icon(Icons.arrow_forward_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.arrow_forward_rounded),
+                  ),
                   color: Colors.white,
                   disabledColor: Colors.white38,
                   constraints: const BoxConstraints(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -477,7 +478,9 @@ class _ConnectionsUnavailable extends StatelessWidget {
               FilledButton.icon(
                 key: const Key('community-connections-add-friends'),
                 onPressed: () => context.push('/login'),
-                icon: const Icon(Icons.login_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.login_rounded),
+                ),
                 label: Text(copy.signIn),
               ),
               const SizedBox(height: 18),
@@ -509,7 +512,9 @@ class _ConnectionsLoadError extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(copy.retry),
           ),
         ],

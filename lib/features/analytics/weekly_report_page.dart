@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_striped_progress.dart';
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -494,7 +496,7 @@ class WeeklyReportPage extends ConsumerWidget {
             child: Text(_t(context, 'title')),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/settings'),
           ),
@@ -515,11 +517,13 @@ class WeeklyReportPage extends ConsumerWidget {
                 ref.read(selectedWeeklyReportDateProvider.notifier).state =
                     selected.subtract(const Duration(days: 7));
               },
-              icon: Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_right_rounded
-                    : Icons.chevron_left_rounded,
-                textDirection: TextDirection.ltr,
+              icon: BilGlassPressFeedback(
+                child: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_right_rounded
+                      : Icons.chevron_left_rounded,
+                  textDirection: TextDirection.ltr,
+                ),
               ),
             ),
             IconButton(
@@ -540,11 +544,13 @@ class WeeklyReportPage extends ConsumerWidget {
                           : candidate;
                     }
                   : null,
-              icon: Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
-                textDirection: TextDirection.ltr,
+              icon: BilGlassPressFeedback(
+                child: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                  textDirection: TextDirection.ltr,
+                ),
               ),
             ),
           ],

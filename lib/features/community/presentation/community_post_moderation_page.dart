@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -536,7 +537,7 @@ class _CommunityPostModerationPageState
         IconButton(
           onPressed: _busyTargets.isEmpty ? _refresh : null,
           tooltip: communityText(context, 'Refresh', 'تحديث'),
-          icon: const Icon(Icons.refresh_rounded),
+          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
         ),
       ],
     ),

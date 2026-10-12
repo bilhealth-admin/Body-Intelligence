@@ -1,0 +1,1601 @@
+{
+  "method": "source candidates, not device evidence or proof of defects",
+  "routes": [
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 7,
+      "source": "path: '/community',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 12,
+      "source": "child: CommunityHubPage(entryWelcomeHandled: true),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 17,
+      "source": "path: '/community/people',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 21,
+      "source": "child: CommunitySurface(child: CommunityPeoplePage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 26,
+      "source": "path: '/community/code',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 30,
+      "source": "child: CommunitySurface(child: CommunityBilCodePage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 35,
+      "source": "path: '/community/code/scan',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 39,
+      "source": "child: CommunitySurface(child: CommunityCodeScannerPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 44,
+      "source": "path: '/community/member/:code',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 49,
+      "source": "child: CommunityMemberCodePage("
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 57,
+      "source": "path: '/community/notifications',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 61,
+      "source": "child: CommunitySurface(child: CommunityNotificationsPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 66,
+      "source": "path: '/community/post/:postId',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 71,
+      "source": "child: CommunityPostReceiptPage("
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 81,
+      "source": "path: '/community/invite/:token',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 83,
+      "source": "child: CommunityInviteLandingPage("
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 89,
+      "source": "path: '/community/drafts',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 94,
+      "source": "child: CommunitySurface(child: CommunityDraftsPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 98,
+      "source": "path: '/community/compose',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 103,
+      "source": "child: CommunityComposePage("
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 111,
+      "source": "path: '/community/rewards',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 115,
+      "source": "child: CommunitySurface(child: CommunityRewardsPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 122,
+      "source": "path: '/community/moderation',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 124,
+      "source": "const CommunitySurface(child: CommunityPostModerationPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 127,
+      "source": "path: '/community/connections',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 131,
+      "source": "child: CommunitySurface(child: CommunityConnectionsPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 136,
+      "source": "path: '/community/food-review',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 140,
+      "source": "child: CommunitySurface(child: CommunityFoodReviewPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 145,
+      "source": "path: '/community/profile',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 148,
+      "source": "child: CommunitySurface(child: CommunityProfilePage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 152,
+      "source": "path: '/community/profile/:userId',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 157,
+      "source": "child: CommunityMemberProfilePage("
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 165,
+      "source": "path: '/community/safety',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 168,
+      "source": "child: CommunitySurface(child: CommunitySafetyPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 172,
+      "source": "path: '/community/chat/:userId',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 177,
+      "source": "child: CommunityChatPage("
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 188,
+      "source": "path: '/community/messages',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 192,
+      "source": "child: CommunitySurface(child: CommunityMessagesPage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 197,
+      "source": "path: '/community/messages/new',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 201,
+      "source": "child: CommunitySurface(child: NewCommunityMessagePage()),"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 206,
+      "source": "path: '/community/channels',"
+    },
+    {
+      "file": "lib/app/router/app_community_routes.dart",
+      "line": 215,
+      "source": "path: '/community/channels/:channelId',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 134,
+      "source": "errorBuilder: (_, _) => const InvalidRoutePage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 144,
+      "source": "path: '/startup',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 145,
+      "source": "pageBuilder: (_, state) => NoTransitionPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 146,
+      "source": "child: StartupPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 153,
+      "source": "GoRoute(path: '/login', builder: (_, _) => const LoginPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 155,
+      "source": "path: '/reviewer-login',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 156,
+      "source": "builder: (_, _) => const StoreReviewerLoginPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 159,
+      "source": "path: '/auth-callback',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 160,
+      "source": "builder: (_, state) => AuthCallbackPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 166,
+      "source": "path: '/reset-password',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 167,
+      "source": "builder: (_, state) => ResetPasswordPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 173,
+      "source": "GoRoute(path: '/register', builder: (_, _) => const RegisterPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 175,
+      "source": "path: '/verify-email',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 176,
+      "source": "builder: (_, state) => VerifyEmailPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 181,
+      "source": "path: '/account-gateway',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 182,
+      "source": "builder: (_, _) => const AccountGatewayPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 185,
+      "source": "path: '/account-data-conflict',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 186,
+      "source": "builder: (_, _) => const AccountDataConflictPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 189,
+      "source": "path: '/onboarding',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 190,
+      "source": "builder: (_, state) => OnboardingPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 195,
+      "source": "path: '/daily-check-in',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 196,
+      "source": "builder: (_, _) => const DailyCheckInPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 198,
+      "source": "GoRoute(path: '/context', builder: (_, _) => const LifeContextPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 200,
+      "source": "path: '/decision-memory',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 203,
+      "source": "child: DecisionMemoryPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 207,
+      "source": "path: '/plan',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 210,
+      "source": "child: PlanPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 219,
+      "source": "path: '/experiments',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 222,
+      "source": "child: ExperimentsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 226,
+      "source": "path: '/share-studio',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 227,
+      "source": "builder: (_, _) => const ShareStudioPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 229,
+      "source": "GoRoute(path: '/challenges', builder: (_, _) => const ChallengesPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 231,
+      "source": "path: '/profile-summary',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 232,
+      "source": "builder: (_, _) => const ProfileSummaryPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 235,
+      "source": "path: '/profile-settings',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 236,
+      "source": "builder: (_, state) => PremiumProfilePage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 242,
+      "source": "path: '/advanced-body-measurements',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 245,
+      "source": "child: ProfileSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 249,
+      "source": "path: '/connected-health',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 250,
+      "source": "builder: (_, _) => const ConnectedHealthPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 253,
+      "source": "path: '/connected-health/steps',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 254,
+      "source": "builder: (_, _) => const StepsSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 257,
+      "source": "path: '/connected-health/steps/history',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 258,
+      "source": "builder: (_, _) => const StepsHistoryPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 261,
+      "source": "path: '/connected-health/heart',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 262,
+      "source": "builder: (_, _) => const ConnectedHealthSignalDetailPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 269,
+      "source": "path: '/connected-health/sleep',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 270,
+      "source": "builder: (_, _) => const ConnectedHealthSignalDetailPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 277,
+      "source": "path: '/connected-health/active-energy',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 278,
+      "source": "builder: (_, _) => const ConnectedHealthSignalDetailPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 285,
+      "source": "path: '/connected-health/capabilities',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 286,
+      "source": "builder: (_, _) => const PartnerCapabilitiesPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 289,
+      "source": "path: '/plans',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 291,
+      "source": "BilStorePlansPage(initialFocus: state.uri.queryParameters['focus']),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 294,
+      "source": "path: '/premium-logging-intro',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 295,
+      "source": "builder: (_, _) => const PremiumLoggingIntroPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 298,
+      "source": "path: '/nutrition-plans',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 299,
+      "source": "builder: (_, _) => const NutritionPathwaysPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 302,
+      "source": "path: '/nutrition-plans/:pathwayId',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 307,
+      "source": "child: DietPlanEditorPage(pathwayId: pathwayId),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 312,
+      "source": "path: '/weekly-report',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 315,
+      "source": "child: WeeklyReportPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 319,
+      "source": "path: '/analytics/nutrition',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 322,
+      "source": "child: NutritionAnalyticsPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 333,
+      "source": "path: '/food-libraries',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 334,
+      "source": "builder: (_, _) => const CatalogPacksPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 337,
+      "source": "path: '/meal-image-guide',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 338,
+      "source": "builder: (_, state) => MealImageGuidePage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 344,
+      "source": "path: '/notification-settings',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 345,
+      "source": "builder: (_, _) => const NotificationSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 348,
+      "source": "path: '/advertising-privacy',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 349,
+      "source": "builder: (_, _) => const AdvertisingPrivacyPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 352,
+      "source": "path: '/legal/privacy',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 354,
+      "source": "const LegalDocumentPage(document: BilLegalDocument.privacy),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 357,
+      "source": "path: '/legal/terms',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 359,
+      "source": "const LegalDocumentPage(document: BilLegalDocument.terms),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 362,
+      "source": "path: '/legal/health-disclaimer',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 363,
+      "source": "builder: (_, _) => const LegalDocumentPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 369,
+      "source": "path: '/location-settings',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 370,
+      "source": "builder: (_, _) => const LocationSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 373,
+      "source": "path: '/trust-support',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 374,
+      "source": "builder: (_, _) => const TrustSupportPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 377,
+      "source": "path: '/health-information-sources',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 378,
+      "source": "builder: (_, state) => HealthInformationSourcesPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 388,
+      "source": "GoRoute(path: '/help', builder: (_, _) => const HelpCenterPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 389,
+      "source": "GoRoute(path: '/help/faq', builder: (_, _) => const HelpFaqPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 391,
+      "source": "path: '/help/delete-account',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 392,
+      "source": "builder: (_, _) => const AccountDeletionPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 395,
+      "source": "path: '/settings/analytics',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 396,
+      "source": "builder: (_, _) => const AnalyticsPage(showSettingsBack: true),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 399,
+      "source": "path: '/settings/diary',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 400,
+      "source": "builder: (_, _) => const ReferenceDiarySettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 403,
+      "source": "path: '/settings/diary/search-tab',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 404,
+      "source": "builder: (_, _) => const ReferenceDiarySearchTabPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 407,
+      "source": "path: '/settings/diary/sharing',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 408,
+      "source": "builder: (_, _) => const ReferenceDiarySharingPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 411,
+      "source": "path: '/settings/diary/meal-names',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 412,
+      "source": "builder: (_, _) => const ReferenceMealNamesPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 415,
+      "source": "path: '/settings/email',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 416,
+      "source": "builder: (_, _) => const ReferenceEmailSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 419,
+      "source": "path: '/settings/account-email',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 420,
+      "source": "builder: (_, _) => const AccountEmailPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 423,
+      "source": "path: '/settings/account-password',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 424,
+      "source": "builder: (_, _) => const AccountPasswordPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 428,
+      "source": "path: '/settings/account-connections/facebook',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 429,
+      "source": "builder: (_, _) => const AccountConnectionSettingsPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 434,
+      "source": "path: '/settings/account-connections/google',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 435,
+      "source": "builder: (_, _) => const AccountConnectionSettingsPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 440,
+      "source": "path: '/settings/units',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 441,
+      "source": "builder: (_, _) => const ReferenceUnitPreferencesPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 444,
+      "source": "path: '/settings/appearance',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 445,
+      "source": "builder: (_, _) => const ReferenceAppearancePage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 447,
+      "source": "GoRoute(path: '/goals', builder: (_, _) => const ReferenceGoalsPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 449,
+      "source": "path: '/settings/nutrition-goals',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 452,
+      "source": "child: ReferenceNutritionGoalsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 456,
+      "source": "path: '/settings/nutrition-goal-schedule',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 457,
+      "source": "builder: (_, _) => const NutritionGoalSchedulePage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 460,
+      "source": "path: '/settings/nutrition-meal-calorie-goals',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 461,
+      "source": "builder: (_, _) => const MealCalorieGoalsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 464,
+      "source": "path: '/settings/diary/macro-display',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 465,
+      "source": "builder: (_, _) => const MealMacroDisplayPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 468,
+      "source": "path: '/settings/exercise-calories',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 471,
+      "source": "child: ExerciseCalorieSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 475,
+      "source": "path: '/settings/preferences',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 476,
+      "source": "builder: (_, _) => const ReferenceSettingsHomePage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 479,
+      "source": "path: '/settings/language',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 480,
+      "source": "builder: (_, _) => const LanguageSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 483,
+      "source": "path: '/settings/sharing-privacy',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 484,
+      "source": "builder: (_, _) => const SharingPrivacySettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 487,
+      "source": "path: '/settings/local-export',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 499,
+      "source": "return LocalExportRangePage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 507,
+      "source": "path: '/admin/ai-coach',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 508,
+      "source": "builder: (_, _) => const AiCoachAdminPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 514,
+      "source": "pageBuilder: (_, state, child) => NoTransitionPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 519,
+      "source": "path: '/dashboard',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 521,
+      "source": "const NoTransitionPage(child: DashboardPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 524,
+      "source": "path: '/dashboard/decision-explanation',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 525,
+      "source": "builder: (_, state) => DashboardDecisionExplanationPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 532,
+      "source": "path: '/daily-log',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 539,
+      "source": "return FoodLogPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 551,
+      "source": "return DailyLogPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 562,
+      "source": "path: '/quick-add/meal-camera',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 563,
+      "source": "builder: (_, state) => QuickAddMealCameraPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 570,
+      "source": "path: '/daily-log/body-context',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 571,
+      "source": "builder: (_, state) => DailyBodyContextPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 578,
+      "source": "path: '/daily-log/water',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 579,
+      "source": "builder: (_, state) => DailyWaterPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 586,
+      "source": "path: '/intelligence-center',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 589,
+      "source": "child: IntelligenceCenterPage("
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 597,
+      "source": "path: '/settings/ai-coach',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 598,
+      "source": "builder: (_, _) => const AiCoachSettingsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 601,
+      "source": "path: '/nutrition',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 602,
+      "source": "builder: (_, _) => const MealsRecipesFoodsPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 604,
+      "source": "GoRoute(path: '/foods', builder: (_, _) => const FoodPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 605,
+      "source": "GoRoute(path: '/history', builder: (_, _) => const ProgressPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 607,
+      "source": "path: '/weight-history',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 608,
+      "source": "builder: (_, _) => const HistoryPage(),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 611,
+      "source": "path: '/analytics',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 612,
+      "source": "builder: (_, _) => const AnalyticsPage(showDashboardBack: true),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 614,
+      "source": "GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 618,
+      "source": "path: '/dashboard/preferences',"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "line": 619,
+      "source": "builder: (_, _) => const DashboardPreferencesPage(),"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 5,
+      "source": "path: '/wellness-library',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 6,
+      "source": "builder: (_, _) => const WellnessLibraryPage(),"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 9,
+      "source": "path: '/wellness/sleep',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 14,
+      "source": "child: SleepTrackerPage(),"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 19,
+      "source": "path: '/wellness/workouts',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 22,
+      "source": "child: BilWorkoutRoutinesPage("
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 28,
+      "source": "path: '/wellness/workouts/routines',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 31,
+      "source": "child: BilWorkoutRoutinesPage("
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 37,
+      "source": "path: '/wellness/workouts/log',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 38,
+      "source": "builder: (_, state) => WorkoutLibraryPage("
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 43,
+      "source": "path: '/wellness/fasting',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 46,
+      "source": "child: FastingTimerPage(),"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 50,
+      "source": "path: '/wellness/recipes',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 51,
+      "source": "pageBuilder: (_, state) => NoTransitionPage("
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 54,
+      "source": "child: RecipeLibraryPage("
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 61,
+      "source": "path: '/nutrition/recipes/import',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 64,
+      "source": "child: TrustedRecipeImportPage("
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 70,
+      "source": "path: '/meal-planner',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 73,
+      "source": "child: MealPlannerPage(),"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 77,
+      "source": "path: '/wellness/content-packs',"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "line": 80,
+      "source": "child: WellnessContentPacksPage(),"
+    },
+    {
+      "file": "lib/app/router/invalid_route_page.dart",
+      "line": 7,
+      "source": "const InvalidRoutePage({super.key});"
+    }
+  ],
+  "candidates": {
+    "lib/features/analytics/analytics_page.dart": [
+      {
+        "line": 366,
+        "source": "key: const PageStorageKey<String>('analytics-content'),"
+      }
+    ],
+    "lib/features/community/activity_rewards/community_post_receipt_page.dart": [
+      {
+        "line": 181,
+        "source": "body: FutureBuilder<CommunityPost>("
+      }
+    ],
+    "lib/features/community/presentation/community_account_widgets.dart": [
+      {
+        "line": 24,
+        "source": ") => FutureBuilder<CommunityProfileOverview?>("
+      },
+      {
+        "line": 260,
+        "source": "Widget build(BuildContext context) => FutureBuilder<bool>("
+      }
+    ],
+    "lib/features/community/presentation/community_bil_code_page.dart": [
+      {
+        "line": 151,
+        "source": ": FutureBuilder<CommunityPublicCode>("
+      },
+      {
+        "line": 450,
+        "source": ": FutureBuilder<CommunityResolvedMember?>("
+      }
+    ],
+    "lib/features/community/presentation/community_chat_rendering.dart": [
+      {
+        "line": 82,
+        "source": "child: FutureBuilder<List<CommunityMessage>>("
+      }
+    ],
+    "lib/features/community/presentation/community_circle_detail_page.dart": [
+      {
+        "line": 227,
+        "source": "// FutureBuilder renders retry state."
+      },
+      {
+        "line": 332,
+        "source": "body: FutureBuilder<void>("
+      }
+    ],
+    "lib/features/community/presentation/community_circle_reference_body.dart": [
+      {
+        "line": 85,
+        "source": "FutureBuilder<List<CommunityCircle>>("
+      }
+    ],
+    "lib/features/community/presentation/community_circles_page.dart": [
+      {
+        "line": 252,
+        "source": "// FutureBuilder renders the retry state."
+      }
+    ],
+    "lib/features/community/presentation/community_connections_page.dart": [
+      {
+        "line": 183,
+        "source": ": FutureBuilder<List<Map<String, dynamic>>>("
+      }
+    ],
+    "lib/features/community/presentation/community_drafts_rendering.dart": [
+      {
+        "line": 66,
+        "source": "return FutureBuilder<_CommunityDraftMosaicPreview>("
+      },
+      {
+        "line": 288,
+        "source": "child: FutureBuilder<List<CommunityDraftSummary>>("
+      }
+    ],
+    "lib/features/community/presentation/community_feed_reference_header.dart": [
+      {
+        "line": 74,
+        "source": "FutureBuilder<CommunityProfileOverview?>("
+      },
+      {
+        "line": 124,
+        "source": "FutureBuilder<CommunityProfileOverview?>("
+      },
+      {
+        "line": 206,
+        "source": "FutureBuilder<List<CommunityTopic>>("
+      }
+    ],
+    "lib/features/community/presentation/community_feed_reference_suggestions.dart": [
+      {
+        "line": 15,
+        "source": "Widget build(BuildContext context) => FutureBuilder<List<CommunityTopic>>("
+      }
+    ],
+    "lib/features/community/presentation/community_feed_tab.dart": [
+      {
+        "line": 462,
+        "source": "// FutureBuilder presents mode-specific load errors."
+      },
+      {
+        "line": 508,
+        "source": "// FutureBuilder presents the load error; the refresh gesture must not"
+      },
+      {
+        "line": 521,
+        "source": "FutureBuilder<List<CommunityPost>>("
+      },
+      {
+        "line": 549,
+        "source": "key: PageStorageKey("
+      }
+    ],
+    "lib/features/community/presentation/community_food_review_page.dart": [
+      {
+        "line": 81,
+        "source": "body: FutureBuilder<List<Map<String, dynamic>>>("
+      }
+    ],
+    "lib/features/community/presentation/community_food_tab.dart": [
+      {
+        "line": 59,
+        "source": ") => FutureBuilder<List<Map<String, dynamic>>>("
+      }
+    ],
+    "lib/features/community/presentation/community_friends_tab.dart": [
+      {
+        "line": 49,
+        "source": "// The FutureBuilder retains an explicit retry state."
+      },
+      {
+        "line": 92,
+        "source": "child: FutureBuilder<List<Map<String, dynamic>>>("
+      }
+    ],
+    "lib/features/community/presentation/community_gold_balance_action.dart": [
+      {
+        "line": 67,
+        "source": "return FutureBuilder<CommunityGoldBalance?>("
+      }
+    ],
+    "lib/features/community/presentation/community_hub_page.dart": [
+      {
+        "line": 293,
+        "source": "FutureBuilder<CommunityProfileOverview?>("
+      }
+    ],
+    "lib/features/community/presentation/community_invite_landing_page.dart": [
+      {
+        "line": 138,
+        "source": "body: FutureBuilder<CommunityInvitePreview>("
+      }
+    ],
+    "lib/features/community/presentation/community_member_profile_connections.dart": [
+      {
+        "line": 96,
+        "source": ") => FutureBuilder<List<CommunityProfileConnection>>("
+      }
+    ],
+    "lib/features/community/presentation/community_member_profile_drafts.dart": [
+      {
+        "line": 483,
+        "source": "// FutureBuilder renders the stable failure state."
+      }
+    ],
+    "lib/features/community/presentation/community_member_profile_page.dart": [
+      {
+        "line": 256,
+        "source": "// FutureBuilder renders the retry state."
+      },
+      {
+        "line": 435,
+        "source": ": FutureBuilder<void>("
+      }
+    ],
+    "lib/features/community/presentation/community_messages_page.dart": [
+      {
+        "line": 118,
+        "source": "// A not-yet-opened tab may not have a FutureBuilder attached. Observe its"
+      },
+      {
+        "line": 257,
+        "source": ") => FutureBuilder<List<Map<String, dynamic>>>("
+      }
+    ],
+    "lib/features/community/presentation/community_my_posts_page.dart": [
+      {
+        "line": 218,
+        "source": "body: FutureBuilder<void>("
+      }
+    ],
+    "lib/features/community/presentation/community_navigation_sheet.dart": [
+      {
+        "line": 27,
+        "source": "child: FutureBuilder<bool>("
+      }
+    ],
+    "lib/features/community/presentation/community_notifications_rendering.dart": [
+      {
+        "line": 39,
+        "source": "body: FutureBuilder<_CommunityUpdates>("
+      },
+      {
+        "line": 125,
+        "source": "// The FutureBuilder presents the retry state."
+      },
+      {
+        "line": 129,
+        "source": "key: const PageStorageKey('community-activity-list'),"
+      }
+    ],
+    "lib/features/community/presentation/community_people_page.dart": [
+      {
+        "line": 510,
+        "source": "child: FutureBuilder<List<Map<String, dynamic>>>("
+      }
+    ],
+    "lib/features/community/presentation/community_policy_notice.dart": [
+      {
+        "line": 24,
+        "source": "Widget build(BuildContext context) => FutureBuilder<CommunityPolicyState>("
+      }
+    ],
+    "lib/features/community/presentation/community_post_card.dart": [
+      {
+        "line": 301,
+        "source": "FutureBuilder<bool>("
+      }
+    ],
+    "lib/features/community/presentation/community_post_composer_option_fields.dart": [
+      {
+        "line": 17,
+        "source": "FutureBuilder<List<CommunityTopic>>("
+      },
+      {
+        "line": 81,
+        "source": "FutureBuilder<List<CommunityCircle>>("
+      }
+    ],
+    "lib/features/community/presentation/community_post_detail_page.dart": [
+      {
+        "line": 239,
+        "source": "// The mounted FutureBuilder presents a stable retry state."
+      }
+    ],
+    "lib/features/community/presentation/community_post_detail_rendering.dart": [
+      {
+        "line": 9,
+        "source": "body: FutureBuilder<void>("
+      }
+    ],
+    "lib/features/community/presentation/community_post_moderation_page.dart": [
+      {
+        "line": 194,
+        "source": "// FutureBuilder keeps and displays this failed _queue with Retry."
+      },
+      {
+        "line": 543,
+        "source": "body: FutureBuilder<_CommunityModerationQueue>("
+      }
+    ],
+    "lib/features/community/presentation/community_post_review_reason.dart": [
+      {
+        "line": 102,
+        "source": "return FutureBuilder<String?>("
+      }
+    ],
+    "lib/features/community/presentation/community_profile_page.dart": [
+      {
+        "line": 263,
+        "source": ": FutureBuilder<void>("
+      }
+    ],
+    "lib/features/community/presentation/community_rewards_page.dart": [
+      {
+        "line": 359,
+        "source": "body: FutureBuilder<_RewardsSnapshot>("
+      }
+    ],
+    "lib/features/community/presentation/community_safety_page.dart": [
+      {
+        "line": 216,
+        "source": ": FutureBuilder<CommunityPolicyState>("
+      }
+    ],
+    "lib/features/community/presentation/community_saved_posts_page.dart": [
+      {
+        "line": 52,
+        "source": "// FutureBuilder keeps the error and retry action visible."
+      },
+      {
+        "line": 133,
+        "source": "body: FutureBuilder<void>("
+      }
+    ],
+    "lib/features/community/presentation/community_topics_page.dart": [
+      {
+        "line": 28,
+        "source": "// FutureBuilder owns the retry presentation."
+      },
+      {
+        "line": 87,
+        "source": "child: FutureBuilder<List<CommunityTopic>>("
+      },
+      {
+        "line": 328,
+        "source": "// FutureBuilder owns the retry state."
+      },
+      {
+        "line": 402,
+        "source": "body: FutureBuilder<void>("
+      }
+    ],
+    "lib/features/community/presentation/new_community_message_page.dart": [
+      {
+        "line": 361,
+        "source": "child: FutureBuilder<List<Map<String, dynamic>>>("
+      }
+    ],
+    "lib/features/connected_health/widgets/food_name_health_sync_card.dart": [
+      {
+        "line": 18,
+        "source": "return StreamBuilder<FoodNameHealthSyncStatus>("
+      }
+    ],
+    "lib/features/daily_log/daily_log_meal_entry.dart": [
+      {
+        "line": 87,
+        "source": "FutureBuilder<bool>("
+      }
+    ],
+    "lib/features/daily_log/daily_log_meal_search.dart": [
+      {
+        "line": 17,
+        "source": "StreamBuilder<List<Food>>("
+      }
+    ],
+    "lib/features/dashboard/widgets/dashboard_first_use_experience.dart": [
+      {
+        "line": 363,
+        "source": "child: AnimatedSwitcher("
+      }
+    ],
+    "lib/features/intelligence_center/presentation/ai_coach_settings_page.dart": [
+      {
+        "line": 120,
+        "source": "// A fast I/O failure can precede the next frame's FutureBuilder listener."
+      },
+      {
+        "line": 357,
+        "source": "child: FutureBuilder<Map<String, Object?>>("
+      }
+    ],
+    "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart": [
+      {
+        "line": 512,
+        "source": "child: AnimatedSwitcher("
+      }
+    ],
+    "lib/features/nutrition/presentation/meals_recipes_foods_page.dart": [
+      {
+        "line": 50,
+        "source": "return FutureBuilder<String?>("
+      }
+    ],
+    "lib/features/nutrition/presentation/nutrition_food_picker.dart": [
+      {
+        "line": 85,
+        "source": "child: StreamBuilder<List<Food>>("
+      }
+    ],
+    "lib/features/onboarding/onboarding_components.dart": [
+      {
+        "line": 85,
+        "source": "AnimatedSwitcher("
+      }
+    ],
+    "lib/features/onboarding/onboarding_page.dart": [
+      {
+        "line": 598,
+        "source": "body: AnimatedSwitcher("
+      }
+    ],
+    "lib/features/settings/reference_preferences_macros.dart": [
+      {
+        "line": 16,
+        "source": "return StreamBuilder<List<String?>>("
+      }
+    ],
+    "lib/features/settings/sharing_privacy_settings_page.dart": [
+      {
+        "line": 430,
+        "source": "Widget build(BuildContext context) => FutureBuilder<bool>("
+      }
+    ],
+    "lib/features/wellness/presentation/bil_workout_routine_media.dart": [
+      {
+        "line": 251,
+        "source": "Widget build(BuildContext context) => FutureBuilder<WellnessMediaCacheResult>("
+      }
+    ],
+    "lib/features/wellness/presentation/bil_workout_routines_page.dart": [
+      {
+        "line": 431,
+        "source": ": FutureBuilder<List<WellnessContentItem>>("
+      },
+      {
+        "line": 445,
+        "source": "return FutureBuilder<GymSixMonthPlan>("
+      }
+    ],
+    "lib/features/wellness/presentation/professional_content_library_page.dart": [
+      {
+        "line": 91,
+        "source": "body: FutureBuilder<List<WellnessContentItem>>("
+      }
+    ],
+    "lib/features/wellness/presentation/recipe_library_card.dart": [
+      {
+        "line": 170,
+        "source": "return FutureBuilder<RecipeCatalogCardFacts>("
+      },
+      {
+        "line": 505,
+        "source": "return FutureBuilder<WellnessMediaCacheResult>("
+      }
+    ],
+    "lib/features/wellness/presentation/recipe_library_detail_visit.dart": [
+      {
+        "line": 30,
+        "source": "return FutureBuilder<RecipeCatalogDetail>("
+      }
+    ],
+    "lib/features/wellness/presentation/recipe_library_page.dart": [
+      {
+        "line": 204,
+        "source": "body: FutureBuilder<List<RecipeCatalogSummary>>("
+      }
+    ],
+    "lib/features/wellness/presentation/sleep_tracker_experience.dart": [
+      {
+        "line": 317,
+        "source": "Widget _insightsTab() => StreamBuilder<List<DailyLog>>("
+      }
+    ],
+    "lib/features/wellness/presentation/sleep_tracker_page.dart": [
+      {
+        "line": 42,
+        "source": "StreamBuilder<DailyLog?>("
+      }
+    ],
+    "lib/features/wellness/presentation/wellness_content_packs_page.dart": [
+      {
+        "line": 33,
+        "source": "body: FutureBuilder<_PackState>("
+      }
+    ],
+    "lib/shared/widgets/bil_native_symbols.dart": [
+      {
+        "line": 151,
+        "source": "return FutureBuilder<Uint8List?>("
+      }
+    ]
+  }
+}

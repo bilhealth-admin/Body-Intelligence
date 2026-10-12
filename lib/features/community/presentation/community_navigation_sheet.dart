@@ -179,11 +179,13 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
       leading: _CommunityNavigationGlyph(icon: icon, value: value),
       title: Text(communityText(context, english, arabic)),
       subtitle: subtitle == null ? null : Text(subtitle),
-      trailing: Icon(
-        Directionality.of(context) == TextDirection.rtl
-            ? Icons.chevron_left_rounded
-            : Icons.chevron_right_rounded,
-        size: 20,
+      trailing: BilGlassPressFeedback(
+        child: Icon(
+          Directionality.of(context) == TextDirection.rtl
+              ? Icons.chevron_left_rounded
+              : Icons.chevron_right_rounded,
+          size: 20,
+        ),
       ),
       onTap: () => Navigator.pop(context, value),
     ),

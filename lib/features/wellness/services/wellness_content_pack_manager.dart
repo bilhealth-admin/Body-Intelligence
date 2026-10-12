@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/repositories/server_entitlement_repository.dart';
@@ -541,7 +541,7 @@ class WellnessContentPackManager {
         _injectedPacksDirectory ??
         Directory(
           p.join(
-            (await getApplicationSupportDirectory()).path,
+            (await getProtectedApplicationSupportDirectory()).path,
             'wellness_packs',
           ),
         );

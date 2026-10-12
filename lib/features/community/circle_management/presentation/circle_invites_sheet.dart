@@ -330,7 +330,9 @@ class _CircleInvitesFormState extends State<_CircleInvitesForm> {
             onPressed: controller.invitesLoading
                 ? null
                 : controller.loadMoreInvites,
-            icon: const Icon(Icons.expand_more_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.expand_more_rounded),
+            ),
             label: Text(
               circleManagementText(
                 context,
@@ -344,7 +346,7 @@ class _CircleInvitesFormState extends State<_CircleInvitesForm> {
           onPressed: controller.invitesLoading || !canRead
               ? null
               : () => controller.loadInvites(circleSlug: slug),
-          icon: const Icon(Icons.refresh_rounded),
+          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(
             circleManagementText(
               context,

@@ -38,11 +38,13 @@ class _DailyGoalStrip extends StatelessWidget {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(99),
-                  child: LinearProgressIndicator(
-                    minHeight: 8,
-                    value: progress,
-                    color: const Color(0xFF78C82F),
-                    backgroundColor: Colors.white,
+                  child: BilStripedProgress(
+                    child: LinearProgressIndicator(
+                      minHeight: 8,
+                      value: progress,
+                      color: const Color(0xFF78C82F),
+                      backgroundColor: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -100,7 +102,9 @@ class _MissingDailyGoalCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded),
+            const BilGlassPressFeedback(
+              child: Icon(Icons.chevron_right_rounded),
+            ),
           ],
         ),
       ),
@@ -219,18 +223,21 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                         minimumSize: const Size(0, 34),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        textStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -.25,
-                        ),
+                        textStyle: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -.25,
+                              color: scheme.primary,
+                            ),
                       ),
                       child: Text(
                         _referenceText(context, 'Today', 'اليوم'),
-                        style: const TextStyle(
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -.25,
+                          color: scheme.primary,
                         ),
                       ),
                     ),
@@ -282,24 +289,21 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                     children: [
                       ExcludeSemantics(
                         excluding: consumed == null,
-                        child: LinearProgressIndicator(
-                          key: const Key(
-                            'dashboard-reference-calories-progress',
+                        child: BilStripedProgress(
+                          tone: BilProgressTone.calories,
+                          child: LinearProgressIndicator(
+                            key: const Key(
+                              'dashboard-reference-calories-progress',
+                            ),
+                            minHeight: 9,
+                            value: progress,
+                            color: remaining != null && remaining < 0
+                                ? const Color(0xFF1D448B)
+                                : const Color(0xFF2768DA),
+                            backgroundColor: scheme.surfaceContainerHighest,
                           ),
-                          minHeight: 9,
-                          value: progress,
-                          color: remaining != null && remaining < 0
-                              ? const Color(0xFF1D448B)
-                              : const Color(0xFF2768DA),
-                          backgroundColor: scheme.surfaceContainerHighest,
                         ),
                       ),
-                      if (remaining != null && remaining < 0)
-                        const IgnorePointer(
-                          child: CustomPaint(
-                            painter: _BilCalorieOverTargetStripes(),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -357,30 +361,6 @@ class _ReferenceCaloriesCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Fixed, non-animated reference stripes: shown only for a real over-goal
-/// state. A zero goal or unavailable intake never displays fake progress.
-class _BilCalorieOverTargetStripes extends CustomPainter {
-  const _BilCalorieOverTargetStripes();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stripe = Paint()
-      ..color = Colors.white.withValues(alpha: .92)
-      ..strokeWidth = 2;
-    for (var x = -size.height; x < size.width + size.height; x += 8) {
-      canvas.drawLine(
-        Offset(x, size.height),
-        Offset(x + size.height, 0),
-        stripe,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _BilCalorieOverTargetStripes oldDelegate) =>
-      false;
 }
 
 String _formatBilCalories(int amount) {
@@ -552,7 +532,9 @@ class _ReferenceMacrosCard extends StatelessWidget {
                   height: 34,
                 ),
                 padding: EdgeInsets.zero,
-                icon: const Icon(Icons.swap_horiz_rounded, size: 20),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.swap_horiz_rounded, size: 20),
+                ),
               ),
             ],
           ),
@@ -629,11 +611,14 @@ class _ReferenceMacroColumn extends StatelessWidget {
             borderRadius: BorderRadius.circular(99),
             child: ExcludeSemantics(
               excluding: value == null,
-              child: LinearProgressIndicator(
-                minHeight: 7,
-                value: progress,
-                color: macro.color,
-                backgroundColor: scheme.surfaceContainerHighest,
+              child: BilStripedProgress(
+                nutritionColors: true,
+                child: LinearProgressIndicator(
+                  minHeight: 7,
+                  value: progress,
+                  color: macro.color,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                ),
               ),
             ),
           ),
@@ -674,9 +659,11 @@ class _CircularNutrientCard extends StatelessWidget {
               ),
             ),
             if (onTap != null)
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: Theme.of(context).colorScheme.primary,
+              BilGlassPressFeedback(
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
           ],
         ),

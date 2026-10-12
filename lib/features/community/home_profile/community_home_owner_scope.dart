@@ -57,6 +57,7 @@ extension _CommunityHomeOwnerScope on _CommunityHubPageState {
 
   void _invalidateHomeVisit() {
     _homeVisitEpoch++;
+    _feedPreview = null;
     _notifyHomeVisitChanged();
   }
 
@@ -101,6 +102,7 @@ extension _CommunityHomeOwnerScope on _CommunityHubPageState {
           // This is deliberately epoch-based so queued A -> B -> A can never
           // reactivate callbacks captured by the first A visit.
           _feedKey = GlobalKey<_FeedTabState>();
+          _prepareFeedPreview();
         });
       },
       onError: (Object _, StackTrace _) {

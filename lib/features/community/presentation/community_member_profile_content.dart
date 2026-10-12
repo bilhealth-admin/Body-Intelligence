@@ -102,7 +102,9 @@ extension _CommunityMemberProfileContentSlivers
                           dimension: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.expand_more_rounded),
+                      : const BilGlassPressFeedback(
+                          child: Icon(Icons.expand_more_rounded),
+                        ),
                   label: Text(
                     communityText(context, 'Load more', 'تحميل المزيد'),
                   ),

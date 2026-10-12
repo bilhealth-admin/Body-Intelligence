@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -224,7 +225,9 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
                             dimension: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.refresh_rounded),
+                        : const BilGlassPressFeedback(
+                            child: Icon(Icons.refresh_rounded),
+                          ),
                     label: Text(
                       communityText(
                         context,

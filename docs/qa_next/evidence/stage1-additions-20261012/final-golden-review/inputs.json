@@ -1,0 +1,218 @@
+[
+  {
+    "case": "dashboard_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
+        "sha256": "7cbc48ed77f8a7e19a2b4634955280248a86cebbe2ee9aa3852a6aec8c86e56e"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_dashboard_phone_testImage.png",
+        "sha256": "4584eeafda11e75fc788216e792bcfef4d388615ef913262382f85df0e6031c8"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_dashboard_phone_isolatedDiff.png",
+        "sha256": "70c060af5cb65f7c243cf33c19d3f7a0e3d621e4f1fe932e0836f16243038b0e"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\dashboard_phone.png"
+  },
+  {
+    "case": "dashboard_nutrient_goal_card_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_dashboard_nutrient_goal_card_phone.png",
+        "sha256": "61118b6ed07d4f3919c1f45fc0ed359bcbe83e20341e6decc4eca02e213f79b1"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_dashboard_nutrient_goal_card_phone_testImage.png",
+        "sha256": "d4e5118f09ddb6fa748c2a7df092c0880fc1b9d2ed959cf8cb12266884e22405"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_dashboard_nutrient_goal_card_phone_isolatedDiff.png",
+        "sha256": "47246304cd375f098ffeb77ac6aa3c2894102384e92b0b8e433367bda78899e0"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\dashboard_nutrient_goal_card_phone.png"
+  },
+  {
+    "case": "dashboard_phone_5",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
+        "sha256": "c0a00c5394e63e3cccb615c7c4da81fceb7aa59626f521f310c5f4d4377eea89"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_dashboard_phone_5_testImage.png",
+        "sha256": "4dc2a3d95a51a14454f4d7108141caacc4eb9fc30b8447393b9dc80c51ee8317"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_dashboard_phone_5_isolatedDiff.png",
+        "sha256": "c7bd1f3c9a5a9f393dfbdd8bd1ff07b08b4f76a8b23c55cc8fda4e7117b9f48c"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\dashboard_phone_5.png"
+  },
+  {
+    "case": "daily_log_empty_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+        "sha256": "d7f2dc0a2e99fc98e6ca0a731a11edc3e90c318bd4b9a6d1392757c2bb1056ab"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_empty_phone_testImage.png",
+        "sha256": "b2de22d79333b229d48810b919d6202971ec65a5529e5a7ffb09ba30237a02a3"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_empty_phone_isolatedDiff.png",
+        "sha256": "3e2f54c39ac930cb64c033d2ba8ef1ae9ecb0f8d1fd4a713f40ee08fcffbe5c4"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\daily_log_empty_phone.png"
+  },
+  {
+    "case": "daily_log_reference_premium_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_daily_log_reference_premium_phone.png",
+        "sha256": "d330b4e27b5a50fb719baee0af09666d1cf7a9e6139493e5e2c43c3e87f5fe6d"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_reference_premium_phone_testImage.png",
+        "sha256": "3a1b0062535b0fa8553f8d64c5ae8ce3c88efe5850396ece1a41df93351ed5c5"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_reference_premium_phone_isolatedDiff.png",
+        "sha256": "3210b087ec27402123301e929905abeab4787cb21926a50af4233ef61da2a58d"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\daily_log_reference_premium_phone.png"
+  },
+  {
+    "case": "daily_log_sections_middle_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
+        "sha256": "f67fea115c21e44b72a955f8a774f3449ca6fb755531363b8c1c3d0731276723"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_sections_middle_phone_testImage.png",
+        "sha256": "72cb38d558f08c7a62bc2120b91a1f61dafb41f1c951cbc578a76bcb2355392a"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_sections_middle_phone_isolatedDiff.png",
+        "sha256": "e02d2d8c5600c595c36e1facff4630ef23c685d9b9de0edd88eaff7a87b9e24c"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\daily_log_sections_middle_phone.png"
+  },
+  {
+    "case": "daily_log_sections_lower_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png",
+        "sha256": "1f7db03e413290e4a13be9e4de7848aad01175a2b8e34a2b5eb9aca08126d621"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_sections_lower_phone_testImage.png",
+        "sha256": "5bc081c1bca801c079dc422fe702007ae332578f590396f48caa51e43c04a857"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_sections_lower_phone_isolatedDiff.png",
+        "sha256": "9014108a1b975363c7a72140539f74b6dee34bee8973767e6c777070a722e6b6"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\daily_log_sections_lower_phone.png"
+  },
+  {
+    "case": "daily_log_meal_entry_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
+        "sha256": "27c00996e95b9f0d002901047e9b595536bd2712be2cb682e333a6a3787978b2"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_meal_entry_phone_testImage.png",
+        "sha256": "d7ea817f4b589d8db378143a105a69b7be4d8ff57b9e82f17623c860d6dc8b93"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_daily_log_meal_entry_phone_isolatedDiff.png",
+        "sha256": "0b2fd33e8e0e3de4af696a7a9f021bf8b79d2ba276b751deab947fb3a4fa5a8e"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\daily_log_meal_entry_phone.png"
+  },
+  {
+    "case": "nutrition_analytics_calories_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png",
+        "sha256": "f6476a3249f7fa473a9864667613e983c856b841c61f8d5629a8ccd700c86aa3"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_nutrition_analytics_calories_phone_testImage.png",
+        "sha256": "faaa411cf02c6e18b88b6cdaa94dd4a9d751b6ae91eb027746151689ebbdbd27"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_nutrition_analytics_calories_phone_isolatedDiff.png",
+        "sha256": "d1983f96d0f8c3cc8ca3b3699b60b097407d42ed836f469352809267322e57ad"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\nutrition_analytics_calories_phone.png"
+  },
+  {
+    "case": "nutrition_analytics_nutrients_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png",
+        "sha256": "0c0bc115280bfabf74da868af5d4a20f770f7816009e0f95941f89a853e37a5f"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_nutrition_analytics_nutrients_phone_testImage.png",
+        "sha256": "23e8e1262b00d8198d22261a90d1d32295e643064aa7ea9b529b69da18d76ea5"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_nutrition_analytics_nutrients_phone_isolatedDiff.png",
+        "sha256": "3f8c5e3908c5cc44ba633f94c1d2b081ad64b4baf1ec5119996b30c63e351d5c"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\nutrition_analytics_nutrients_phone.png"
+  },
+  {
+    "case": "nutrition_analytics_macros_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png",
+        "sha256": "1ac91b1de25ba41225ef155033272aa191801b18aaa3877bc83ac72cf4b47144"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_nutrition_analytics_macros_phone_testImage.png",
+        "sha256": "dd53064f9ad94f0792c24a9f12caaa7dfd94b78dd64ee8fcb51a3f22a040fdf3"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_nutrition_analytics_macros_phone_isolatedDiff.png",
+        "sha256": "070d6285769b240b993a00585dd0ad20553d5e45ae79a05d07bd944121fff52a"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\nutrition_analytics_macros_phone.png"
+  },
+  {
+    "case": "community_hub_authenticated_phone",
+    "inputs": [
+      {
+        "path": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
+        "sha256": "72145d6a99c9c913bf7e93ed3570ae3ebe7fda5b6ed2b0cd1f4f2447a0b25e87"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_community_hub_authenticated_phone_testImage.png",
+        "sha256": "a9c15a2e84e74a731a18e817df5048820ac4c80fb6dc6e3dc2a4a9410b10b34d"
+      },
+      {
+        "path": "test/visual_closure/failures/visual_closure_community_hub_authenticated_phone_isolatedDiff.png",
+        "sha256": "272b0232bad59887b352d36ee4e0b631b86e60c7f85f41e503ce76d7863ef825"
+      }
+    ],
+    "review": "build\\stage1-closure\\final-golden-review\\community_hub_authenticated_phone.png"
+  }
+]

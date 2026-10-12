@@ -1,0 +1,14 @@
+{
+  "case": "daily_log_meal_entry_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Owner approved larger original circles, meal-only targets below electrolytes and edit. Unknown salts are dashes. Actual opening-header clipping was repaired before this image; bounds/tappable Back checks pass.",
+  "previous_master_sha256": "27c00996e95b9f0d002901047e9b595536bd2712be2cb682e333a6a3787978b2",
+  "accepted_actual_sha256": "983e6a6d543de31d9f57afebe108ed6d659947953a53c83e7f12e5ae766f92f3",
+  "review_image": "daily_log_meal_entry_phone-fixed.png",
+  "promotion": {
+    "time": 1791818654.6186488,
+    "master_sha256": "983e6a6d543de31d9f57afebe108ed6d659947953a53c83e7f12e5ae766f92f3",
+    "method": "one exact named file; visual decision required"
+  }
+}

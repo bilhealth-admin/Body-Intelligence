@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,6 +25,7 @@ class BilStorePlansPage extends ConsumerStatefulWidget {
     this.connectToDeviceStore = true,
     this.productIds,
     this.initialFocus,
+    this.openLegalUrl,
   });
 
   final VerifiedStorePurchaseService? store;
@@ -31,6 +33,7 @@ class BilStorePlansPage extends ConsumerStatefulWidget {
   final bool connectToDeviceStore;
   final Set<String>? productIds;
   final String? initialFocus;
+  final Future<bool> Function(Uri)? openLegalUrl;
 
   @override
   ConsumerState<BilStorePlansPage> createState() => _BilStorePlansPageState();
@@ -66,6 +69,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       _sharedBoost = boost;
       _catalog = VerifiedStoreCatalogAdapter(
         _ownedStore!,
+        loadBoostCatalog: boost.initialize,
+        boostProduct: () => boost.product,
         boostCheckout: (offer) async {
           await _sharedBoost!.initialize();
           await _sharedBoost!.purchaseBoost(
@@ -90,7 +95,11 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         'purchase_status_unknown' ||
         'verification_failed' => 'purchase_verification_unavailable',
         'store_catalog_changed' => 'purchase_catalog_changed',
-        'store_finish_pending' => 'purchase_verified',
+        'purchase_inactive' => 'purchase_inactive',
+        'store_finish_pending' =>
+          boost.lastDelivery?.active == false
+              ? 'purchase_inactive'
+              : 'purchase_verified',
         _ => switch (boost.state) {
           AiBoostPurchaseState.pending => 'purchase_in_progress',
           AiBoostPurchaseState.verified => 'purchase_verified',
@@ -100,6 +109,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       };
       _purchaseFeedbackIsError = _purchaseFeedbackKey == 'purchase_error';
     });
+    if (boost.errorCode == 'store_catalog_changed' && !_loadInFlight) {
+      unawaited(_load());
+    }
   }
 
   @override
@@ -200,7 +212,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
       'verification_failed' ||
       'purchase_status_unknown' => 'purchase_verification_unavailable',
-      'store_finish_pending' => 'purchase_verified',
+      'store_finish_pending' =>
+        store.verifiedInactiveAt != null
+            ? 'purchase_inactive'
+            : 'purchase_verified',
       'restore_verification_failed' => 'restore_verification_failed',
       'purchase_owned_by_another_account' =>
         'purchase_owned_by_another_account',
@@ -354,6 +369,29 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     }
   }
 
+  Future<void> _openLegalLink(String value) async {
+    final uri = Uri.tryParse(value);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return;
+    try {
+      final opened =
+          await (widget.openLegalUrl?.call(uri) ??
+              launchUrl(uri, mode: LaunchMode.externalApplication));
+      if (opened || !mounted) return;
+    } on Object {
+      if (!mounted) return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          BilStoreCopy.text(
+            Localizations.localeOf(context).toLanguageTag(),
+            'purchase_error',
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -469,6 +507,15 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
             ? null
             : () => _catalog.openManageSubscriptions(),
         onRetry: _catalog == null || _loading ? null : _load,
+        onTerms: StoreCatalogConfiguration.legalLinksConfigured
+            ? () =>
+                  unawaited(_openLegalLink(StoreCatalogConfiguration.termsUrl))
+            : null,
+        onPrivacy: StoreCatalogConfiguration.legalLinksConfigured
+            ? () => unawaited(
+                _openLegalLink(StoreCatalogConfiguration.privacyUrl),
+              )
+            : null,
       ),
     );
   }

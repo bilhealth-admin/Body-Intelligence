@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -271,7 +272,7 @@ class _ShareCard extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(
       children: [
-        Icon(icon, color: Colors.white),
+        BilGlassPressFeedback(child: Icon(icon, color: Colors.white)),
         const SizedBox(width: 10),
         Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
       ],

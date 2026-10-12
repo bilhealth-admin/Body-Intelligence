@@ -236,7 +236,9 @@ class _GuideStepView extends StatelessWidget {
           const SizedBox(height: 14),
           _MealImagePhonePreview(type: step.preview),
           const SizedBox(height: 26),
-          Icon(step.icon, color: colors.primary, size: 30),
+          BilGlassPressFeedback(
+            child: Icon(step.icon, color: colors.primary, size: 30),
+          ),
           const SizedBox(height: 12),
           Text(
             _mealGuideText(context, step.title),

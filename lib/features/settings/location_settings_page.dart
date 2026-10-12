@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:ui';
 
 import 'package:country_picker/country_picker.dart';
@@ -427,7 +428,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                             ),
                             title: Text(l('country')),
                             subtitle: Text(countryName ?? l('chooseCountry')),
-                            trailing: const Icon(Icons.expand_more_rounded),
+                            trailing: const BilGlassPressFeedback(
+                              child: Icon(Icons.expand_more_rounded),
+                            ),
                             onTap: _pickCountry,
                           ),
                           const Divider(),
@@ -458,7 +461,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                             onTap: _pickTimezone,
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.schedule_rounded),
-                              suffixIcon: const Icon(Icons.expand_more_rounded),
+                              suffixIcon: const BilGlassPressFeedback(
+                                child: Icon(Icons.expand_more_rounded),
+                              ),
                               labelText: l('timezone'),
                             ),
                           ),

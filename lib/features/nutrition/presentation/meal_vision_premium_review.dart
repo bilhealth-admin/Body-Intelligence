@@ -1,7 +1,11 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/repeating_step_action.dart';
+import 'meal_portion_step_policy.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../data/database/app_database.dart';
@@ -182,13 +186,32 @@ class _PremiumVisionReviewDialogState
 
   void _adjust(int index, double delta) {
     final amount = double.tryParse(_digits(_amounts[index].text)) ?? 0;
-    final next = amount + delta;
+    final step = mealPortionDraftStep(_units[index].text);
+    if (step == null || !amount.isFinite) return;
+    final next = decimalStep(
+      value: amount,
+      step: step.step,
+      direction: delta < 0 ? -1 : 1,
+      decimalPlaces: step.decimals,
+      minimum: 0,
+      maximum: 100000,
+    );
     if (next > 0 && next <= 100000) {
       setState(
-        () =>
-            _amounts[index].text = next.toStringAsFixed(next % 1 == 0 ? 0 : 1),
+        () => _amounts[index].text = next % 1 == 0
+            ? next.toInt().toString()
+            : next.toString(),
       );
     }
+  }
+
+  bool _canAdjust(int index, int direction) {
+    final amount = double.tryParse(_digits(_amounts[index].text)) ?? 0;
+    final step = mealPortionDraftStep(_units[index].text);
+    return step != null &&
+        amount.isFinite &&
+        amount >= 0 &&
+        (direction < 0 ? amount > step.step : amount + step.step <= 100000);
   }
 
   MealImageCandidate _reviewedCandidate(int index) {

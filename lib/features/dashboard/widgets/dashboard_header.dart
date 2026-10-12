@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:ui';
 import 'dart:math' as math;
 
@@ -197,7 +198,9 @@ class _CoachConversationEntry extends StatelessWidget {
                   suffixIcon: IconButton(
                     tooltip: _dashboardHeaderText(locale, 'open'),
                     onPressed: () => context.push('/intelligence-center'),
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.arrow_forward_rounded, size: 20),
+                    ),
                   ),
                   filled: true,
                   fillColor: const Color(0xEDF7F9FA),

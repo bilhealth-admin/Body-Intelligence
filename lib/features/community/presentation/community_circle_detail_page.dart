@@ -342,7 +342,9 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
                 onPressed: () {
                   if (visit.isCurrent()) _refresh();
                 },
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
               ),
             );
@@ -454,7 +456,9 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(Icons.expand_more_rounded),
+                              : const BilGlassPressFeedback(
+                                  child: Icon(Icons.expand_more_rounded),
+                                ),
                           label: Text(
                             communityText(context, 'Load more', 'تحميل المزيد'),
                           ),

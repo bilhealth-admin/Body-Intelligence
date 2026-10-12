@@ -406,10 +406,12 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                               overflow: TextOverflow.ellipsis,
                             )
                           : null,
-                      trailing: Icon(
-                        nutritionFactsExpanded
-                            ? Icons.keyboard_arrow_up_rounded
-                            : Icons.keyboard_arrow_down_rounded,
+                      trailing: BilGlassPressFeedback(
+                        child: Icon(
+                          nutritionFactsExpanded
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded,
+                        ),
                       ),
                       onTap: nutritionFacts.isEmpty
                           ? null

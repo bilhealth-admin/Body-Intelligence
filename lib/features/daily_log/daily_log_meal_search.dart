@@ -89,7 +89,9 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             kind: BilSemanticIconKind.foodSearch,
           ),
           title: Text(_mealCopy('openFoodLibrary')),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          trailing: const BilGlassPressFeedback(
+            child: Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          ),
           onTap: () {
             controller.closeView(effectiveQuery);
             context.push('/foods');
@@ -125,7 +127,9 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             kind: BilSemanticIconKind.foodSearch,
           ),
           title: Text(_mealCopy('openFoodLibrary')),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          trailing: const BilGlassPressFeedback(
+            child: Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          ),
           onTap: () {
             controller.closeView(effectiveQuery);
             context.push('/foods');

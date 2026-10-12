@@ -1,0 +1,1281 @@
+{
+  "label": "striped-data-counters-affected-group",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/bil_striped_progress_test.dart",
+    "test/nutrition_progress_card_test.dart",
+    "test/confidence_ring_test.dart",
+    "test/dashboard_water_card_test.dart",
+    "test/features/dashboard/widgets/dashboard_nutrition_details_test.dart",
+    "test/features/dashboard/premium_nutrition_cards_test.dart",
+    "test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+    "test/features/wellness/fasting_timer_responsive_layout_test.dart",
+    "test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+    "test/features/analytics/weekly_report_truth_fixes_test.dart",
+    "test/features/analytics/weekly_report_history_navigation_test.dart",
+    "test/features/analytics/nutrition_analytics_locale_contract_test.dart",
+    "test/features/community/community_rewards_center_test.dart",
+    "test/features/community/community_rewards_owner_test.dart",
+    "test/features/community/community_rewards_accessibility_test.dart",
+    "test/features/community/community_creator_privacy_test.dart",
+    "test/features/community/community_polls_v1_contract_test.dart",
+    "test/challenges_state_visual_contract_test.dart",
+    "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+    "test/qa_next/coach_reference_workspace_capture_test.dart",
+    "test/architecture_source_file_size_guard_test.dart",
+    "test/features/cloud_platform/cloud_manual_sync_surface_contract_test.dart"
+  ],
+  "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "started": 1791817760.7439566,
+  "files": {
+    "test/bil_striped_progress_test.dart": "3248a4da00a2205f55a37b541e7ca17dab599c15c7d7befd25484e344c5ce3e8",
+    "test/nutrition_progress_card_test.dart": "5e40338c7f324979bdc81308ef9e7839c0f10b9a050ab62ce2a8911fae444f5e",
+    "test/confidence_ring_test.dart": "337859dd84d7889fcd0f18205cb6803dc4cf6b3e415a48b4315ac487c3dec4df",
+    "test/dashboard_water_card_test.dart": "a7deb4729936b475f27092807cfa4a3069ca6e2935e509a3ee93c975836ea5b7",
+    "test/features/dashboard/widgets/dashboard_nutrition_details_test.dart": "7545b338d85707465fe1f2e0453a11641de220bc7903a4ab07959d83b4594329",
+    "test/features/dashboard/premium_nutrition_cards_test.dart": "e394fdfb210f05c6bf4a52896cfa8fa90ca4116bfd12bd5f218042b9ace44a54",
+    "test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart": "ad6c5ad78004ced2cf826dbd8bf2bef70b341510ae065a2a0a1442f42f64b791",
+    "test/features/wellness/fasting_timer_responsive_layout_test.dart": "db184665bf579096ca9371e63d555e46122ab35f006b1c126f09c821b3c1a501",
+    "test/features/nutrition_plans/diet_25_locale_widget_test.dart": "7b3a11a9846478e3d501effa6229ed06fbd0c3685b2bb53ec51faf6192f26010",
+    "test/features/analytics/weekly_report_truth_fixes_test.dart": "11bbdcf46cb673991e68f7d135e584e2551f1192191d93816e722aa7271b93a2",
+    "test/features/analytics/weekly_report_history_navigation_test.dart": "2ccf507abc3e28cea5d0f09b05076912a3b3e376a5dfe8296e7275bcbc0c234f",
+    "test/features/analytics/nutrition_analytics_locale_contract_test.dart": "258b7c1c7af0c76927099929a62bb64c80cce7a4b8113ee1befc8ce69bc04111",
+    "test/features/community/community_rewards_center_test.dart": "544b7cddf060000340e6713edb19e039ad6f9bf2d579d6413bd0936236493a1b",
+    "test/features/community/community_rewards_owner_test.dart": "7fae15bc9fdb63e8fcdf7f4c66a226314ce6b547ce77bc5ea5e7a619a0182779",
+    "test/features/community/community_rewards_accessibility_test.dart": "2d658f15837e6d1e46e95d4d56cdc017a13dee0d3aee00bca8779221bf5bbed7",
+    "test/features/community/community_creator_privacy_test.dart": "04dad7b4315d14f917a24ebac2b3bc77e24023b8b4d7665ee4632c986d92d7ce",
+    "test/features/community/community_polls_v1_contract_test.dart": "131b3e1dc3deb1a7a1112cca0466f7a2366bbe4d8ae4a5bf16ba91c4260d20b7",
+    "test/challenges_state_visual_contract_test.dart": "92e27a648c160f7eb86fbef8b377d0f9e5f095e180e011639a3a0bca6fa025a5",
+    "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart": "c87f264031a300dce0be943973f262a1e8be8ccdeef3c187a83f48dc60e66fd0",
+    "test/qa_next/coach_reference_workspace_capture_test.dart": "84763d87e44e8e1a262e4f0a05fb0498fff92ece695391b5ed4662e99bea9edd",
+    "test/architecture_source_file_size_guard_test.dart": "da9e08f1e3324ae063538e1c86bd60c89686be6b2441b60453658a9754508aee",
+    "test/features/cloud_platform/cloud_manual_sync_surface_contract_test.dart": "c1b8a7dd24015081fb6c5d79c4f8b3f9f3fb1963fe7c3a3f8c49157420f261bd"
+  },
+  "fingerprint_version": 3,
+  "source_fingerprint": "a5981b31bb330c8e924af3fe7a237f25d2d61df980d6b11df388514710ab8828",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/bil_striped_progress_test.dart",
+    "test/nutrition_progress_card_test.dart",
+    "test/confidence_ring_test.dart",
+    "test/dashboard_water_card_test.dart",
+    "test/features/dashboard/widgets/dashboard_nutrition_details_test.dart",
+    "test/features/dashboard/premium_nutrition_cards_test.dart",
+    "test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+    "test/features/wellness/fasting_timer_responsive_layout_test.dart",
+    "test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+    "test/features/analytics/weekly_report_truth_fixes_test.dart",
+    "test/features/analytics/weekly_report_history_navigation_test.dart",
+    "test/features/analytics/nutrition_analytics_locale_contract_test.dart",
+    "test/features/community/community_rewards_center_test.dart",
+    "test/features/community/community_rewards_owner_test.dart",
+    "test/features/community/community_rewards_accessibility_test.dart",
+    "test/features/community/community_creator_privacy_test.dart",
+    "test/features/community/community_polls_v1_contract_test.dart",
+    "test/challenges_state_visual_contract_test.dart",
+    "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+    "test/qa_next/coach_reference_workspace_capture_test.dart",
+    "test/architecture_source_file_size_guard_test.dart",
+    "test/features/cloud_platform/cloud_manual_sync_surface_contract_test.dart"
+  ],
+  "pid": 11496,
+  "exit_code": 1,
+  "finished": 1791817924.4220448,
+  "end_fingerprint": "a5981b31bb330c8e924af3fe7a237f25d2d61df980d6b11df388514710ab8828",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "stripe fill preserves quarter value and direction rtl=false dark=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "stripe fill preserves quarter value and direction rtl=false dark=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "stripe fill preserves quarter value and direction rtl=true dark=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "stripe fill preserves quarter value and direction rtl=true dark=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "circular half retains its Material value, room and accessible label",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "loading retains the native indicator without a data texture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition tones and explicit safety colors remain distinct",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reference data tones paint from actual linear and circular widgets",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/bil_striped_progress_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition card shows consumed target and remaining accessibly",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/nutrition_progress_card_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "confidence ring exposes score and reliability to assistive tech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/confidence_ring_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today water card adds quick and custom persisted amounts",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_water_card_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "custom water rejects unsafe amounts in Arabic",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/dashboard_water_card_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "preserves detail panel heading and child order",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/widgets/dashboard_nutrition_details_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "preserves target total, progress, and partial evidence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/widgets/dashboard_nutrition_details_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "preserves unavailable evidence instead of inventing a total",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/widgets/dashboard_nutrition_details_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "preserves informational-only and partial evidence copy",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/widgets/dashboard_nutrition_details_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "heart health reuses the three macro ring colors",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "free users see Premium labels on macros and heart health locks",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x en light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x en dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x ar light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x ar dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home normal glass public heading ar light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home normal glass public heading ar dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home access error retries without Premium or Plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "dashboard nutrient goals reject corrupt persisted domains",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+      "result": "failure"
+    },
+    {
+      "name": "dashboard nutrient cards have direct extended-locale copy",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en fasting title and timer do not overlap at narrow 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/fasting_timer_responsive_layout_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar fasting title and timer do not overlap at narrow 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/fasting_timer_responsive_layout_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "diet copy and all pathways resolve across 25 locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fr diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "es diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "tr diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "de diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "it diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pt-BR diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pt-PT diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ur diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fa diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hi diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "id diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ms diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ja diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ko diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zh-Hans diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zh-Hant diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ru diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "bn diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "vi diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "th diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "pl diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nl diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "uk diet catalog and editors render at 160% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an applied pathway remains editable and exposes reset",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reset replaces stale pathway fields and active plans remain editable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fixed calories rebalance editable carbs protein and fat",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "diet editor rounds gram fields while preserving exact plan doubles",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition_plans/diet_25_locale_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly goals use exact day goals and synthetic imports stay out",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workout estimate parser accepts only explicit bounded JSON values",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly evidence uses the same verified activity source as Today and Coach",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "My Nutrition preserves the More navigation entry context",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "active Premium is a verified status, not a disabled CTA",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest uses the original BIL pulse and signal hierarchy",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ar at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits en at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits fr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits es at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits tr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits de at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits it at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits pt-BR at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits pt-PT at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ur at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits fa at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits hi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits id at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ms at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ja at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ko at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits zh-Hans at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits zh-Hant at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ru at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits bn at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits vi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits th at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits pl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits nl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits uk at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly report cold-open recovery is bounded and backs off",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_history_navigation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "historical weekly report selection starts today and persists a week",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_history_navigation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "previous-week action changes the report repository window",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_history_navigation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly report arrows keep chronological direction in RTL",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_history_navigation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "first opening moves from loading to the digest without reopen",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_history_navigation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed first load exposes a retry that renders the digest",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_history_navigation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition analytics surface has direct copy in 20 extended locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/nutrition_analytics_locale_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reward domain parses Gold and quest states strictly",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_center_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards Center claims once and refreshes authoritative balance",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_center_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "loaded Rewards retire on owner transition ABA=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late Rewards balance ABA=false failure=false never renders old data",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late Rewards balance ABA=false failure=true never renders old data",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late claim ABA=false cannot toast or reload another visit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "loaded Rewards retire on owner transition ABA=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late Rewards balance ABA=true failure=false never renders old data",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late Rewards balance ABA=true failure=true never renders old data",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late claim ABA=true cannot toast or reload another visit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same owner refresh preserves the in-flight claim and authoritative readback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repository replacement and removal cannot revive an old reward visit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late pagination cannot restore retired history or issue another page",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closing Rewards while claim is pending cannot show an unrelated toast",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "stale Earn and Go callbacks cannot navigate for a later account",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same account signing out and back in still retires the old visit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a fresh signed-out visit cannot read rewards or expose a claim",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same-owner repository replacement requires a fresh page",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repository fences late bil_gold_balance_v1 response across A-B-A",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repository fences late bil_gold_history_v1 response across A-B-A",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repository fences late bil_list_community_quests_v1 response across A-B-A",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repository fences late bil_claim_community_quest_v1 response across A-B-A",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_owner_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards source respects the unchanged 700-line ceiling",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/false/1.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/false/1.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/false/1.6/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/false/1.6/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/false/2.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/false/2.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/true/1.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/true/1.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/true/1.6/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/true/1.6/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/true/2.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: false/true/2.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/false/1.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/false/1.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/false/1.6/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/false/1.6/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/false/2.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/false/2.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/true/1.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/true/1.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/true/1.6/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/true/1.6/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/true/2.0/320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Rewards contrast/layout: true/true/2.0/414.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_rewards_accessibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "creator privacy retains hidden nullable values posts=false followers=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "creator privacy retains hidden nullable values posts=false followers=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "creator privacy retains hidden nullable values posts=true followers=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "creator privacy retains hidden nullable values posts=true followers=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "creator projection fails closed without posts_visible",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "creator projection fails closed without followers_visible",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden post field approved_posts cannot expose a fabricated value",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden post field likes_received cannot expose a fabricated value",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden post field comments_received cannot expose a fabricated value",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden post field contributor cannot expose a fabricated value",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden follower field cannot expose zero",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden derived badge first_moment is rejected even if not earned",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden derived badge contributor is rejected even if not earned",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden derived badge conversation_starter is rejected even if not earned",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden derived badge appreciated is rejected even if not earned",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hidden derived badge connector is rejected even if not earned",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_creator_privacy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "poll backend is owner-created, visible-post voted, and RLS isolated",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_polls_v1_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "poll models reject malformed choices and preserve poll on post copies",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_polls_v1_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "composer and feed use server poll receipts rather than fake UI state",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_polls_v1_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared challenge locks expose state and all supported audience copy",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/challenges_state_visual_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared audiences are one explanatory state, not locked tiles",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/challenges_state_visual_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit nativeFinishPending",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit rejectedVerification",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit repeatedConsumable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit contextAndUsageFailure",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit contextStorageFailure",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 1.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "error"
+    },
+    {
+      "name": "workspace actual Flutter en text 2.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "error"
+    },
+    {
+      "name": "workspace actual Flutter ar text 1.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "error"
+    },
+    {
+      "name": "workspace actual Flutter ar text 2.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "error"
+    },
+    {
+      "name": "workspace actual Flutter en text 1.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 2.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 1.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 2.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace preserves a known zero target separately from missing intake",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "locked nutrition preserves labels but hides values and targets",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "real conversation restores SQLite transcript and preserves draft on overview return",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared dock keeps five accessible destinations",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hand-maintained Dart sources stay below the architecture ceiling",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/architecture_source_file_size_guard_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "manual live sync is explicit, gated, selective and not startup-driven",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_manual_sync_surface_contract_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 179,
+    "failure": 1,
+    "error": 4,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 48,
+      "error": "Expected: false\n  Actual: <true>\n",
+      "stackTrace": "package:matcher                                                               expect\npackage:flutter_test/src/widget_tester.dart 473:18                            expect\ntest\\features\\dashboard\\dashboard_nutrient_goal_cards_contract_test.dart 7:5  main.<fn>\n",
+      "isFailure": true,
+      "type": "error",
+      "time": 31186
+    },
+    {
+      "testID": 235,
+      "error": "Test failed. See exception logs above.\nThe test description was: workspace actual Flutter en text 1.0 light",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 144717
+    },
+    {
+      "testID": 236,
+      "error": "Test failed. See exception logs above.\nThe test description was: workspace actual Flutter en text 2.0 light",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 145483
+    },
+    {
+      "testID": 237,
+      "error": "Test failed. See exception logs above.\nThe test description was: workspace actual Flutter ar text 1.0 light",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 146174
+    },
+    {
+      "testID": 238,
+      "error": "Test failed. See exception logs above.\nThe test description was: workspace actual Flutter ar text 2.0 light",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 146821
+    }
+  ],
+  "incomplete_tests": [],
+  "original_record_sha256": "5f705827a20fbd3b9996b4caa8e5f88f2e05924bb079c0cb434ebb4a15731dca",
+  "delta_to_final": [
+    {
+      "file": "lib/features/analytics/nutrition_analytics_components.dart",
+      "tested_sha256": "5c4b454b69128899a3965fcd835a6da48cfe93273df8d79df8f5efaacef51c23",
+      "final_sha256": "3d769829b38bacec241aaf3cc8cc3abb2a4dadd7c6ae81d3839f31893527e74f"
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_macros.dart",
+      "tested_sha256": "587fc68338d7d46b52362bdf5a877aa8eb354dcf689c6da0a79d85c1d0c8e4f6",
+      "final_sha256": "d34d9ed164f850547c2ccf9be412fecc5688ebabe3350be9a0718f265c7e009f"
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_page.dart",
+      "tested_sha256": "e597619fee81475730e9bd55c23fe67f2746a4c595d33bba4d6cdfc21ee1c70b",
+      "final_sha256": "ae6526c01feae1febdb3bced1c8de9aa64049d6c12fc5ce270e72afcaa58921b"
+    },
+    {
+      "file": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "tested_sha256": "8fcb8df23c04fdbce7f43f475ee2993a6bd706c30cb25bf98d897ced039498b6",
+      "final_sha256": "36639cd68db63fca9d3c76911989685ea48f85ff0093a5561448e87b211bae7b"
+    },
+    {
+      "file": "lib/features/commerce/presentation/premium_label_badge.dart",
+      "tested_sha256": "354f92ef1dd17c11975273d0b564b2dbc2eede604bc7b1efc3dcb53cbd07b3c6",
+      "final_sha256": "eee39f31039c2957dc90d2716e0733ce88c9d355f3bf37d0664312f2b1cf32b8"
+    },
+    {
+      "file": "lib/features/commerce/presentation/premium_nutrition_glass.dart",
+      "tested_sha256": "dcfb300f56439148e4f4d432ca8849e0aca4257bf76905087539b7dfaea6138a",
+      "final_sha256": "081629cd218afe2a51546d812e723cccdafb5c0d1fef1b330a200de542806664"
+    },
+    {
+      "file": "lib/features/daily_log/daily_log_navigation_actions.dart",
+      "tested_sha256": "2786ec6223a0bae61187cb1fd804ca98f4cc0173cd6ed94aa2e399418f4f9dff",
+      "final_sha256": "b9c0bb750f3150eae859f7730433a43ca2ffba89d24c170f183749bc6203a929"
+    },
+    {
+      "file": "lib/features/dashboard/presentation/dashboard_preferences_actions.dart",
+      "tested_sha256": "712c988e147e6b99e6f5366a89d1806f2769d38cf8fc23936c419331065d4f49",
+      "final_sha256": "e4b6811180cc98d82bcd5c5898b72becaf54f0338e1a6192dc7e16f4722ec395"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart",
+      "tested_sha256": "cefd9b8f4f016db451a9afba5324ddab85cc98c8c552651a02930e24e8628d8a",
+      "final_sha256": "2cdfd755aa7f744cd65c7d699c6cbe519437f0c28c25e36caac4edc8ab15eaa1"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace_components.dart",
+      "tested_sha256": "b59324b5bded4dd0910582563743e783fecb553da29b907120fbeb7d89eca30f",
+      "final_sha256": "78999f90e3a5c80aa6701d44982bdb8170596a8baf8b01641674f415f9bd4011"
+    },
+    {
+      "file": "lib/features/nutrition/presentation/food_catalog_overview.dart",
+      "tested_sha256": "71aa596124d5dfec10c75d6572c98af0dddbad16db37a7179b1474dd3438318c",
+      "final_sha256": "69480763349c2fb46c307fa659ce6c92d2fe6e55756a341c4f36ab7670b6c867"
+    },
+    {
+      "file": "lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart",
+      "tested_sha256": "69d6c0e9bc4c388e874f9bee81835c4da154b89632e2ed408375252213aa6ee1",
+      "final_sha256": "29d3ed696fc3630a0cac4c48b6ce939766849fc894ff2eba7272bc1a76585a3f"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_details.dart",
+      "tested_sha256": "8f52c4beec8517714d035d24cef844973350aef1c934d88743faa3b5a3f586ee",
+      "final_sha256": "88a4c57c87a56d608e2ab240dd852db74af318649c8b49351d8b1d5018fddc51"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routines_list.dart",
+      "tested_sha256": "a6ea1d4cd00d4f84a170fbc0b3440877f48d0a4c218ebf47f0364697b1ff7320",
+      "final_sha256": "150a5c05897257a1971fc098f23f4ce255a031e1f3c3aeb05b540826fdcebc62"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_helpers.dart",
+      "tested_sha256": "b4aacd18886518dcd177633e0c1908eb7344d7df6aded21f8ce5f66e5e623627",
+      "final_sha256": "19120c65b19446645c913d2eb0bb0373fc29df1304e1d703db370904f2f2177e"
+    },
+    {
+      "file": "lib/features/wellness/presentation/recipe_library_page.dart",
+      "tested_sha256": "2d1d6e00a7c3a0841c7bd6e38b9aa4253cf6d1e01c7ca915b76b6745169b15b7",
+      "final_sha256": "b9ee6ada7197e27794289b87a62be4b1defbd429108a6c6c58f562304619010d"
+    },
+    {
+      "file": "test/bil_striped_progress_test.dart",
+      "tested_sha256": "3248a4da00a2205f55a37b541e7ca17dab599c15c7d7befd25484e344c5ce3e8",
+      "final_sha256": "6478baf5d0018ac633ca80b0f602d4c58128015766c45bd2798226c4b989c08f"
+    },
+    {
+      "file": "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "tested_sha256": "6cf013d73e1d7f0f714fbb30dee945397bc5e28a1277d16557400cb174e2dbd3",
+      "final_sha256": "77c1741c542b33ed2dbec2d556b50f09eb415869a53f10c2522c17a99fd702d6"
+    },
+    {
+      "file": "test/features/analytics/nutrition_goal_schedule_state_test.dart",
+      "tested_sha256": null,
+      "final_sha256": "141f0b863f89da14083b858b14ebd5ac07707b0b21675c6b6fe2f551d03474d1"
+    },
+    {
+      "file": "test/features/commerce/app_subscription_confirmation_test.dart",
+      "tested_sha256": "e8ff2d353ca85216bde929175b55091a55f72fd55afd00748c9091f0ee37de6b",
+      "final_sha256": "ad77317f46e2045f9fa03a8761dc094021bfec4791bad6fcef1e1cd1c164392a"
+    },
+    {
+      "file": "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "tested_sha256": "78877b1162c20436102bc42639b21791dea91bebf021c37e8102161a40138462",
+      "final_sha256": "7e0f6793248a399c15097e8f0a7f0fcd6f6e19098dcde24162e005adf0804f97"
+    },
+    {
+      "file": "test/features/commerce/paywall_ai_market_benefits_test.dart",
+      "tested_sha256": "9d621eca3fb2b56b60ffe0d8a3a2a1ac779a977afc600d1318ba9ca096bb080f",
+      "final_sha256": "69c606ac35ff5f5427a3afd4efa31e90bc5ad899fbf0075a5ff6e9896e734ccc"
+    },
+    {
+      "file": "test/features/commerce/premium_label_badge_test.dart",
+      "tested_sha256": "e144c66b4643425d1969998067db150807d392da6ee2455c7107e35aa4db37bd",
+      "final_sha256": "033ec91f17af57f6e9ef91f64258ab63089bb73c4d236c4312634b228e5d7f33"
+    },
+    {
+      "file": "test/features/commerce/premium_nutrition_glass_test.dart",
+      "tested_sha256": "94bb2706f4b841fc882becdf4c6e49314dbec2da4b710db29ce37384b2db13fa",
+      "final_sha256": "6520898ff235585c96b24914578641ffcce891de2e0f12bbb4707240de1a117d"
+    },
+    {
+      "file": "test/features/dashboard/dashboard_nutrient_goal_cards_contract_test.dart",
+      "tested_sha256": "ad6c5ad78004ced2cf826dbd8bf2bef70b341510ae065a2a0a1442f42f64b791",
+      "final_sha256": "b4e20b36718a55e2beecc218796cf23fa1fc2ebf9788cdbf3eb0ecdcab91f90e"
+    },
+    {
+      "file": "test/features/wellness/bil_workout_routines_page_test.dart",
+      "tested_sha256": "23d826660e4a91bea72dda4acd239e90408be335714a3760b9b0a141f06ddcf1",
+      "final_sha256": "787ee06c8b23b44e118d515b76bd4842ed89b459d3a69eaca2f644847bcedb3a"
+    },
+    {
+      "file": "test/features/wellness/recipe_detail_entitlement_lifecycle_test.dart",
+      "tested_sha256": "e50180f14ae15fd3f0da56555143cc6b1f3920df3860c0f836a5316ef6f4892b",
+      "final_sha256": "cda208eb85ab6ba0fa061d4e1c370071c744aad2caa95b703ba5cf86f9a873b1"
+    },
+    {
+      "file": "test/visual_closure/actual_data_pages_golden_test.dart",
+      "tested_sha256": "d0a82f5efcedafc4d2441222949ce601095d6709592d0480e7da5ad43dd3ec99",
+      "final_sha256": "5c0f53128db738b7cf4c34da05ef7629ed9c8fc2cf0eb5ed4b291003f5390131"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
+      "tested_sha256": "72145d6a99c9c913bf7e93ed3570ae3ebe7fda5b6ed2b0cd1f4f2447a0b25e87",
+      "final_sha256": "a9c15a2e84e74a731a18e817df5048820ac4c80fb6dc6e3dc2a4a9410b10b34d"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+      "tested_sha256": "d7f2dc0a2e99fc98e6ca0a731a11edc3e90c318bd4b9a6d1392757c2bb1056ab",
+      "final_sha256": "42878b485bb199c52241728bc32b7a2967e95fb513cedb7aa83d579c34757237"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
+      "tested_sha256": "27c00996e95b9f0d002901047e9b595536bd2712be2cb682e333a6a3787978b2",
+      "final_sha256": "1537ce1b1f599093a78cc19dda03c8e2d0daa68d7becec28abfddcfb41b22513"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_reference_premium_phone.png",
+      "tested_sha256": "d330b4e27b5a50fb719baee0af09666d1cf7a9e6139493e5e2c43c3e87f5fe6d",
+      "final_sha256": "3a1b0062535b0fa8553f8d64c5ae8ce3c88efe5850396ece1a41df93351ed5c5"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png",
+      "tested_sha256": "1f7db03e413290e4a13be9e4de7848aad01175a2b8e34a2b5eb9aca08126d621",
+      "final_sha256": "5bc081c1bca801c079dc422fe702007ae332578f590396f48caa51e43c04a857"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
+      "tested_sha256": "f67fea115c21e44b72a955f8a774f3449ca6fb755531363b8c1c3d0731276723",
+      "final_sha256": "72cb38d558f08c7a62bc2120b91a1f61dafb41f1c951cbc578a76bcb2355392a"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_nutrient_goal_card_phone.png",
+      "tested_sha256": "61118b6ed07d4f3919c1f45fc0ed359bcbe83e20341e6decc4eca02e213f79b1",
+      "final_sha256": "bf85b0d9b211cfd6206404d1607dceb596be2a67c07a61167bb71690f5ccca49"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
+      "tested_sha256": "7cbc48ed77f8a7e19a2b4634955280248a86cebbe2ee9aa3852a6aec8c86e56e",
+      "final_sha256": "4584eeafda11e75fc788216e792bcfef4d388615ef913262382f85df0e6031c8"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
+      "tested_sha256": "c0a00c5394e63e3cccb615c7c4da81fceb7aa59626f521f310c5f4d4377eea89",
+      "final_sha256": "1948089cfd282c9a7da6d4ae4cb3e7bc7e488520f8c363b620da3e71ab297bb7"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png",
+      "tested_sha256": "f6476a3249f7fa473a9864667613e983c856b841c61f8d5629a8ccd700c86aa3",
+      "final_sha256": "faaa411cf02c6e18b88b6cdaa94dd4a9d751b6ae91eb027746151689ebbdbd27"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png",
+      "tested_sha256": "1ac91b1de25ba41225ef155033272aa191801b18aaa3877bc83ac72cf4b47144",
+      "final_sha256": "dd53064f9ad94f0792c24a9f12caaa7dfd94b78dd64ee8fcb51a3f22a040fdf3"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_saved_goals_phone.png",
+      "tested_sha256": null,
+      "final_sha256": "02e546396d2b6cdfbc27e85bc637b3b7a7c1d02efab19bb8d11986fcc9ed54e4"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png",
+      "tested_sha256": "0c0bc115280bfabf74da868af5d4a20f770f7816009e0f95941f89a853e37a5f",
+      "final_sha256": "23e8e1262b00d8198d22261a90d1d32295e643064aa7ea9b529b69da18d76ea5"
+    },
+    {
+      "file": "test/visual_closure/visual_defect_regression_test.dart",
+      "tested_sha256": "8c681fa03b6c7ec9df93347337b9e1015a15a71452f9011566c278f2a542710b",
+      "final_sha256": "e857e33b79ee4c0732741ff79291f5bda10a713a6e66e95c5ccb23a4fca96d16"
+    }
+  ]
+}

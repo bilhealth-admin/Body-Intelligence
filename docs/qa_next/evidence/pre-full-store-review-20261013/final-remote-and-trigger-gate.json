@@ -1,0 +1,43 @@
+{
+  "checked_utc": "2026-10-12T23:18:23.978211+00:00",
+  "local_head": "fea9f56b9baabb0990a60f11f5869a9d6dcb269a",
+  "remote_head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "authenticated_latest_ci": {
+    "id": 38136049208,
+    "name": "BIL focused source finalization without tests",
+    "head_sha": "ebd0ffd19d649ace383a4364daf2b0dadefc1e58",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38136049208"
+  },
+  "open_prs": [],
+  "matching_workflow_events": [
+    {
+      "file": ".github\\workflows\\android_debug_build.yml",
+      "event_definition": "name: android-debug-build\n\non:\n  push:\n    branches:\n      - phase-3-product-excellence\n  pull_request:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: android-debug-${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true\n"
+    },
+    {
+      "file": ".github\\workflows\\bil_candidate_prepare_20261011.yml",
+      "event_definition": "name: BIL guarded functional source preparation\n# Only the authorized integration branch. No builds, deploy, Full8, or stores.\non:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_candidate_prepare_20261011.yml\n      - docs/qa_next/candidate_20261011/**\n  workflow_dispatch:\npermissions:\n  contents: read\nconcurrency:\n  group: bil-functional-source-prepare\n  cancel-in-progress: false"
+    },
+    {
+      "file": ".github\\workflows\\bil_functional_finish_20261011.yml",
+      "event_definition": "name: BIL focused source finalization without tests\n# Authorized source preparation only; no Full8, behavioral tests, builds or deployment.\non:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_functional_finish_20261011.yml\n      - docs/qa_next/functional_finish_20261011/**\n  workflow_dispatch:\npermissions:\n  contents: read\nconcurrency:\n  group: bil-functional-source-prepare\n  cancel-in-progress: false"
+    },
+    {
+      "file": ".github\\workflows\\bil_instant_experience_qa.yml",
+      "event_definition": "name: BIL instant experience isolated QA\n\n# Inspection artifact only. No builds, deployment, secrets or source writeback.\non:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_instant_experience_qa.yml\n  workflow_dispatch:\n\npermissions:\n  contents: read\n"
+    },
+    {
+      "file": ".github\\workflows\\bil_integration_media_policy_focused.yml",
+      "event_definition": "name: BIL isolated integration focused QA\n\n# Scope is restricted to the post-Codex media+policy integration only.\n# No full 8-shard run, builds, secrets, deployment, or source writeback.\non:\n  push:\n    branches:\n      - integration/bil-qa-media-policy-20261011\n    paths:\n      - .github/workflows/bil_integration_media_policy_focused.yml\n      - lib/**\n      - test/**\n      - tool/prebuild/**\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: bil-integration-focused-${{ github.ref }}\n  cancel-in-progress: false\n"
+    },
+    {
+      "file": ".github\\workflows\\verify.yml",
+      "event_definition": "name: verify\n\non:\n  push:\n    branches:\n      - phase-3-product-excellence\n      - fix/admob-clean-production-2026-10-02\n  pull_request:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: verify-${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true\n"
+    }
+  ],
+  "changed_workflows": [],
+  "no_push_or_pr_created": true,
+  "local_branch": "integration/bil-qa-media-policy-20261011"
+}

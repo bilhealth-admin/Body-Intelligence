@@ -60,6 +60,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'visual_evidence_font.dart';
+import 'recording_golden_comparator.dart';
 
 const _skipVisualPixelComparison = bool.fromEnvironment(
   'BIL_SKIP_VISUAL_PIXELS',
@@ -74,6 +75,17 @@ final _recipeGoldenVerifiedFree = SubscriptionState(
   plan: CommercePlan.free,
   entitlements: FreePlan.entitlements,
   authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
+
+// Full-detail fixtures carry a verified, unexpired paid lease. The Free
+// catalog fixtures above continue to exercise the locked preview separately.
+final _recipeGoldenVerifiedPremium = SubscriptionState(
+  plan: CommercePlan.premium,
+  entitlements: const {CommerceEntitlement.advancedIntelligence},
+  authority: EntitlementAuthority.verifiedServer,
+  currentPeriodEndsAt: _visualNow.toUtc().add(const Duration(days: 30)),
   isPurchasable: true,
   canRestorePurchases: true,
 );
@@ -421,6 +433,16 @@ final class _VisualStoreCatalog implements BilStoreCatalogGateway {
 }
 
 void main() {
+  late GoldenFileComparator originalComparator;
+  setUp(() {
+    originalComparator = goldenFileComparator;
+    goldenFileComparator = RecordingGoldenComparator(
+      originalComparator,
+      'test/visual_closure/actual_production_pages_golden_test.dart',
+    );
+  });
+  tearDown(() => goldenFileComparator = originalComparator);
+
   setUpAll(loadVisualEvidenceFont);
 
   Future<void> capture(
@@ -1119,6 +1141,7 @@ void main() {
       page: const RecipeLibraryPage(),
       name: 'recipe_detail_phone',
       captureOverlay: true,
+      verifiedSubscriptionFixture: _recipeGoldenVerifiedPremium,
       interact: (tester) async {
         await tester.enterText(
           find.byType(TextField).first,
@@ -1217,6 +1240,7 @@ void main() {
         page: const RecipeLibraryPage(),
         name: 'recipe_detail_${detail.$1}_phone',
         captureOverlay: true,
+        verifiedSubscriptionFixture: _recipeGoldenVerifiedPremium,
         interact: (tester) async {
           await tester.enterText(find.byType(TextField).first, detail.$2);
           await tester.pumpAndSettle();

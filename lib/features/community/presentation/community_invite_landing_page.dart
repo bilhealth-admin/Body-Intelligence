@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -157,7 +158,9 @@ class _CommunityInviteLandingPageState
             ),
             action: FilledButton.icon(
               onPressed: _retry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
             ),
           );
@@ -330,7 +333,7 @@ class _InviteState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 52),
+          BilGlassPressFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 14),
           Text(
             title,

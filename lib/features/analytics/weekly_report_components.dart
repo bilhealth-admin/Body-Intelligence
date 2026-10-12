@@ -292,7 +292,9 @@ class _WeeklyEvidenceTile extends StatelessWidget {
             color: color.withValues(alpha: .13),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, color: color, size: 20),
+          child: BilGlassPressFeedback(
+            child: Icon(icon, color: color, size: 20),
+          ),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -343,7 +345,7 @@ class _Section extends StatelessWidget {
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Row(
             children: [
-              Icon(icon),
+              BilGlassPressFeedback(child: Icon(icon)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -414,7 +416,7 @@ class _ResponsiveAction extends StatelessWidget {
     final content = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon),
+        BilGlassPressFeedback(child: Icon(icon)),
         const SizedBox(width: 10),
         Flexible(
           child: Text(
@@ -505,14 +507,15 @@ class _Bars extends StatelessWidget {
                                 0.0,
                                 1.0,
                               ),
-                              child: Container(
-                                width: 18,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF006D77),
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(4),
-                                  ),
+                              child: BilStripedFill(
+                                color: BilProgressPalette.color(
+                                  BilProgressTone.calories,
+                                  Theme.of(context).brightness,
                                 ),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(4),
+                                ),
+                                child: const SizedBox(width: 18),
                               ),
                             ),
                           ),
@@ -742,10 +745,10 @@ class _MacroDistributionState extends State<_MacroDistribution> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            for (final value in [
-                              report.totalProteinG,
-                              report.totalCarbsG,
-                              report.totalFatG,
+                            for (final metric in [
+                              (report.totalProteinG, BilProgressTone.protein),
+                              (report.totalCarbsG, BilProgressTone.carbs),
+                              (report.totalFatG, BilProgressTone.fat),
                             ])
                               Expanded(
                                 child: Padding(
@@ -754,12 +757,14 @@ class _MacroDistributionState extends State<_MacroDistribution> {
                                   ),
                                   child: FractionallySizedBox(
                                     alignment: Alignment.bottomCenter,
-                                    heightFactor: value / total,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF006D77),
-                                        borderRadius: BorderRadius.circular(6),
+                                    heightFactor: metric.$1 / total,
+                                    child: BilStripedFill(
+                                      color: BilProgressPalette.color(
+                                        metric.$2,
+                                        Theme.of(context).brightness,
                                       ),
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: const SizedBox.expand(),
                                     ),
                                   ),
                                 ),
@@ -874,11 +879,13 @@ class _ActivityChart extends StatelessWidget {
                           child: FractionallySizedBox(
                             heightFactor: (day.steps ?? 0) / maximum,
                             alignment: Alignment.bottomCenter,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF90CAF9),
-                                borderRadius: BorderRadius.circular(5),
+                            child: BilStripedFill(
+                              color: BilProgressPalette.color(
+                                BilProgressTone.calories,
+                                Theme.of(context).brightness,
                               ),
+                              borderRadius: BorderRadius.circular(5),
+                              child: const SizedBox.expand(),
                             ),
                           ),
                         ),

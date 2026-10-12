@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -283,7 +284,9 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                       const SizedBox(height: 12),
                       FilledButton.icon(
                         onPressed: _load,
-                        icon: const Icon(Icons.refresh),
+                        icon: const BilGlassPressFeedback(
+                          child: Icon(Icons.refresh),
+                        ),
                         label: Text(t('Retry')),
                       ),
                     ],
@@ -316,7 +319,9 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                           ),
                           if (health.hasError)
                             ListTile(
-                              leading: const Icon(Icons.refresh),
+                              leading: const BilGlassPressFeedback(
+                                child: Icon(Icons.refresh),
+                              ),
                               title: Text(t('Retry connected sources')),
                               onTap: saving
                                   ? null
@@ -360,12 +365,14 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                         kind: BilSemanticIconKind.progress,
                       ),
                       title: Text(t('View step history')),
-                      trailing: Icon(
-                        Directionality.of(context) == TextDirection.rtl
-                            ? Icons.chevron_left_rounded
-                            : Icons.chevron_right_rounded,
-                        key: const Key('steps-history-chevron'),
-                        textDirection: TextDirection.ltr,
+                      trailing: BilGlassPressFeedback(
+                        child: Icon(
+                          Directionality.of(context) == TextDirection.rtl
+                              ? Icons.chevron_left_rounded
+                              : Icons.chevron_right_rounded,
+                          key: const Key('steps-history-chevron'),
+                          textDirection: TextDirection.ltr,
+                        ),
                       ),
                       onTap: saving
                           ? null
@@ -384,12 +391,14 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                             child: Text(goal?.toString() ?? '—'),
                           ),
                           const SizedBox(width: 8),
-                          Icon(
-                            Directionality.of(context) == TextDirection.rtl
-                                ? Icons.chevron_left_rounded
-                                : Icons.chevron_right_rounded,
-                            key: const Key('steps-goal-chevron'),
-                            textDirection: TextDirection.ltr,
+                          BilGlassPressFeedback(
+                            child: Icon(
+                              Directionality.of(context) == TextDirection.rtl
+                                  ? Icons.chevron_left_rounded
+                                  : Icons.chevron_right_rounded,
+                              key: const Key('steps-goal-chevron'),
+                              textDirection: TextDirection.ltr,
+                            ),
                           ),
                         ],
                       ),

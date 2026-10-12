@@ -21,13 +21,15 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
       context: context,
       builder: (dialogContext) => AlertDialog(
         scrollable: true,
-        icon: Icon(
-          action.destructive
-              ? BilSemanticIcons.deleteAccount
-              : _iconForAction(action.type),
-          color: action.destructive
-              ? Theme.of(context).colorScheme.error
-              : Theme.of(context).colorScheme.primary,
+        icon: BilGlassPressFeedback(
+          child: Icon(
+            action.destructive
+                ? BilSemanticIcons.deleteAccount
+                : _iconForAction(action.type),
+            color: action.destructive
+                ? Theme.of(context).colorScheme.error
+                : Theme.of(context).colorScheme.primary,
+          ),
         ),
         title: Text(tr('Confirm action', 'تأكيد الإجراء')),
         content: Text(_coachActionConfirmationText(action)),
@@ -75,9 +77,11 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
             barrierDismissible: false,
             builder: (dialogContext) => AlertDialog(
               scrollable: true,
-              icon: Icon(
-                BilSemanticIcons.deleteAccount,
-                color: Theme.of(context).colorScheme.error,
+              icon: BilGlassPressFeedback(
+                child: Icon(
+                  BilSemanticIcons.deleteAccount,
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
               title: Text(tr('Final confirmation', 'التأكيد النهائي')),
               content: Column(

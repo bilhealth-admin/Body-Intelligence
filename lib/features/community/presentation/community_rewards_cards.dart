@@ -115,10 +115,12 @@ class _QuestCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            LinearProgressIndicator(
-              value: quest.completionRatio,
-              minHeight: 7,
-              borderRadius: BorderRadius.circular(99),
+            BilStripedProgress(
+              child: LinearProgressIndicator(
+                value: quest.completionRatio,
+                minHeight: 7,
+                borderRadius: BorderRadius.circular(99),
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -331,7 +333,7 @@ class _RewardsMessageState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 52),
+          BilGlassPressFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 14),
           Text(
             title,
@@ -344,7 +346,9 @@ class _RewardsMessageState extends StatelessWidget {
             const SizedBox(height: 18),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
             ),
           ],

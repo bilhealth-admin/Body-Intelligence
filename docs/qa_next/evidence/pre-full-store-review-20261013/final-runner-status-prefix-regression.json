@@ -1,0 +1,32 @@
+{
+  "checked_utc": "2026-10-12T23:15:12.655966+00:00",
+  "before_v4": "71f8fa7a2593ccfb7890b3e317dfbaf55c841acd20c10bbbdab9cc53ef4c3eb3",
+  "after_v4": "2d016a6d67df3199d13ccd613d2eb039b6f9eeb7d1ff0f39bdeffd26ebafb4ed",
+  "changed_declared_inputs": [
+    "tools/qa/bil_owner_full_test_runner.py",
+    "tools/qa/test_bil_owner_full_test_runner.py"
+  ],
+  "application_native_assets_goldens_sql_deno_inputs_unchanged": true,
+  "independent_reviews_remain_valid_for_app_components": true,
+  "real_git_regression_before": {
+    "exit_code": 1,
+    "tests": 1,
+    "expected_failure": true,
+    "seconds": 3.41
+  },
+  "after_case": {
+    "exit_code": 0,
+    "tests": 1,
+    "seconds": 3.64
+  },
+  "complete_file": {
+    "exit_code": 0,
+    "tests": 11,
+    "seconds": 4.41
+  },
+  "full_never_started": true,
+  "provisional_own_unpushed_commit": "fea9f56b9baabb0990a60f11f5869a9d6dcb269a",
+  "will_amend_only_own_unpushed_closure_commit": true,
+  "published_parent_unchanged": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "new_manifest_sha256": "db1d5bfc024768f0fbd4ee960a40d08c674e7dfa390889197807e1b82db2564f"
+}

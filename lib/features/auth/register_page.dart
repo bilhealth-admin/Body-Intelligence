@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_striped_progress.dart';
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:go_router/go_router.dart';
@@ -310,7 +312,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     const SizedBox(width: 3),
-                    const Icon(Icons.arrow_drop_down_rounded, size: 20),
+                    const BilGlassPressFeedback(
+                      child: Icon(Icons.arrow_drop_down_rounded, size: 20),
+                    ),
                   ],
                 ),
               ),
@@ -386,8 +390,10 @@ class _RegisterPageState extends State<RegisterPage> {
           );
   }
 
-  InputDecoration _decoration(String label, IconData icon) =>
-      InputDecoration(labelText: label, prefixIcon: Icon(icon));
+  InputDecoration _decoration(String label, IconData icon) => InputDecoration(
+    labelText: label,
+    prefixIcon: BilGlassPressFeedback(child: Icon(icon)),
+  );
 }
 
 class _PasswordStrength extends StatelessWidget {
@@ -415,13 +421,15 @@ class _PasswordStrength extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: LinearProgressIndicator(
-            value: score / 3,
-            minHeight: 4,
-            color: color,
-            backgroundColor: Theme.of(
-              context,
-            ).colorScheme.surfaceContainerHighest,
+          child: BilStripedProgress(
+            child: LinearProgressIndicator(
+              value: score / 3,
+              minHeight: 4,
+              color: color,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+            ),
           ),
         ),
         const SizedBox(width: 10),

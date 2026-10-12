@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -44,11 +45,13 @@ class ConfidenceRing extends StatelessWidget {
           children: [
             SizedBox.square(
               dimension: size,
-              child: CircularProgressIndicator(
-                value: score.clamp(0, 100) / 100,
-                strokeWidth: 5,
-                color: ringColor,
-                backgroundColor: ringColor.withValues(alpha: 0.16),
+              child: BilStripedProgress(
+                child: CircularProgressIndicator(
+                  value: score.clamp(0, 100) / 100,
+                  strokeWidth: 5,
+                  color: ringColor,
+                  backgroundColor: ringColor.withValues(alpha: 0.16),
+                ),
               ),
             ),
             Text(

@@ -62,7 +62,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                         context.go('/wellness-library');
                       }
                     },
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const BackButtonIcon(),
             ),
             title: Text(tr('Sleep', 'النوم')),
             bottom: TabBar(
@@ -444,7 +444,9 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                     // blank child/white shell seen after returning via the
                     // bottom navigation.
                     onTap: () => context.go('/daily-log'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: const BilGlassPressFeedback(
+                      child: Icon(Icons.chevron_right_rounded),
+                    ),
                   ),
                 ],
               ),
@@ -775,7 +777,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48),
+          BilGlassPressFeedback(child: Icon(icon, size: 48)),
           const SizedBox(height: 14),
           Text(title, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
@@ -784,7 +786,9 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
             const SizedBox(height: 14),
             OutlinedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.refresh_rounded),
+              ),
               label: Text(tr('Retry', 'إعادة المحاولة')),
             ),
           ],

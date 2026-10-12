@@ -1,3 +1,4 @@
+import 'bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -141,11 +142,13 @@ class BilNativeSymbolGlyph extends StatelessWidget {
         !kIsWeb &&
         ((Platform.isIOS && platform == TargetPlatform.iOS) ||
             (Platform.isAndroid && platform == TargetPlatform.android));
-    final preview = Icon(
-      fallback,
-      size: size,
-      color: color,
-      key: const Key('settings-symbol-preview-fallback'),
+    final preview = BilGlassPressFeedback(
+      child: Icon(
+        fallback,
+        size: size,
+        color: color,
+        key: const Key('settings-symbol-preview-fallback'),
+      ),
     );
     if (!native) return preview;
     return FutureBuilder<Uint8List?>(
@@ -156,15 +159,18 @@ class BilNativeSymbolGlyph extends StatelessWidget {
       ),
       builder: (context, snapshot) => snapshot.data == null
           ? preview
-          : Image.memory(
-              snapshot.data!,
-              width: size,
-              height: size,
-              color: color,
-              colorBlendMode: BlendMode.srcIn,
-              key: ValueKey('native-settings-symbol-${symbol.name}'),
-              gaplessPlayback: true,
-              filterQuality: FilterQuality.medium,
+          : BilGlassPressFeedback(
+              always: BilArrowGlyph.isArrow(fallback),
+              child: Image.memory(
+                snapshot.data!,
+                width: size,
+                height: size,
+                color: color,
+                colorBlendMode: BlendMode.srcIn,
+                key: ValueKey('native-settings-symbol-${symbol.name}'),
+                gaplessPlayback: true,
+                filterQuality: FilterQuality.medium,
+              ),
             ),
     );
   }

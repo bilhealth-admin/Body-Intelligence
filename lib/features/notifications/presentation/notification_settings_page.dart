@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -194,7 +195,7 @@ class _NotificationSettingsPageState
                   : () => context.canPop()
                         ? context.pop()
                         : context.go('/settings'),
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const BackButtonIcon(),
             ),
             title: Text(_copy.title),
             actions: [
@@ -234,7 +235,9 @@ class _NotificationSettingsPageState
                         const SizedBox(height: 12),
                         FilledButton.tonalIcon(
                           onPressed: _load,
-                          icon: const Icon(Icons.refresh_rounded),
+                          icon: const BilGlassPressFeedback(
+                            child: Icon(Icons.refresh_rounded),
+                          ),
                           label: Text(
                             _ui(
                               'Retry',

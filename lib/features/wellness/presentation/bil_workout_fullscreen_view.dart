@@ -267,10 +267,12 @@ extension _FullscreenWorkoutVideoView on _FullscreenWorkoutVideoPageState {
                     tooltip: playLabel,
                     color: Colors.white,
                     onPressed: () => unawaited(_togglePlayback()),
-                    icon: Icon(
-                      value.isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
+                    icon: BilGlassPressFeedback(
+                      child: Icon(
+                        value.isPlaying
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                      ),
                     ),
                   ),
                 ),
@@ -397,7 +399,9 @@ class _WorkoutVideoError extends StatelessWidget {
                     child: FilledButton.icon(
                       key: const ValueKey('workout-video-fullscreen-retry'),
                       onPressed: () => unawaited(onRetry()),
-                      icon: const Icon(Icons.refresh_rounded),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh_rounded),
+                      ),
                       label: Text(retryLabel),
                     ),
                   ),

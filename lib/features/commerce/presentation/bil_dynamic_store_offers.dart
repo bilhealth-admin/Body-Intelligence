@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -31,6 +32,8 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onManage,
     this.onOfferSelected,
     this.onRetry,
+    this.onTerms,
+    this.onPrivacy,
     this.loading = false,
     this.purchaseInProgress = false,
     this.restoreInProgress = false,
@@ -58,6 +61,8 @@ class BilDynamicStoreOffers extends StatefulWidget {
   /// the verified store outcome or re-enabling an unverified transaction.
   final ValueChanged<BilStoreOfferMetadata>? onOfferSelected;
   final VoidCallback? onRetry;
+  final VoidCallback? onTerms;
+  final VoidCallback? onPrivacy;
   final bool loading;
   final bool purchaseInProgress;
   final bool restoreInProgress;
@@ -102,10 +107,14 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
       return;
     }
     final available = MarketOfferPolicy.visibleOffers(widget.offers);
-    final selectionStillAvailable = available.any(
+    final selectedIndex = available.indexWhere(
       (offer) => _offerIdentity(offer) == _offerIdentity(_selectedOffer),
     );
-    if (!selectionStillAvailable) _selectedOffer = _preferredOffer(available);
+    // Preserve the selected product, but replace its stale price/terms/token
+    // snapshot with the actual refreshed offer shown by the card and CTA.
+    _selectedOffer = selectedIndex < 0
+        ? _preferredOffer(available)
+        : available[selectedIndex];
   }
 
   BilStoreOfferMetadata? _preferredOffer(List<BilStoreOfferMetadata> source) {
@@ -318,7 +327,9 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                         TextButton.icon(
                           key: const Key('store-continue-verification'),
                           onPressed: widget.onContinueVerification,
-                          icon: const Icon(Icons.refresh_rounded),
+                          icon: const BilGlassPressFeedback(
+                            child: Icon(Icons.refresh_rounded),
+                          ),
                           label: Text(widget.continueVerificationLabel!),
                         ),
                       TextButton(
@@ -330,6 +341,24 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                         ),
                         child: Text(_copy('manage')),
                       ),
+                      if (widget.onTerms != null || widget.onPrivacy != null)
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          children: [
+                            if (widget.onTerms != null)
+                              TextButton(
+                                key: const Key('store-terms-link'),
+                                onPressed: widget.onTerms,
+                                child: Text(_copy('legal_terms')),
+                              ),
+                            if (widget.onPrivacy != null)
+                              TextButton(
+                                key: const Key('store-privacy-link'),
+                                onPressed: widget.onPrivacy,
+                                child: Text(_copy('legal_privacy')),
+                              ),
+                          ],
+                        ),
                     ],
                   ),
                 ),

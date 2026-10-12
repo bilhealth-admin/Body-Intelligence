@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -177,7 +178,9 @@ class ProfileSummaryPage extends ConsumerWidget {
                       ref.invalidate(displayNameProvider);
                       ref.invalidate(profilePhotoProvider);
                     },
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(_copy(context, 'Retry')),
                   ),
                 ],
@@ -294,7 +297,9 @@ class ProfileSummaryPage extends ConsumerWidget {
                 child: TextButton.icon(
                   onPressed: () =>
                       ref.invalidate(verifiedSubscriptionStateProvider),
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.refresh_rounded),
+                  ),
                   label: Text(context.strings.text('Retry subscription check')),
                 ),
               ),
@@ -307,7 +312,9 @@ class ProfileSummaryPage extends ConsumerWidget {
                       child: TextButton.icon(
                         onPressed: () =>
                             ref.invalidate(verifiedSubscriptionStateProvider),
-                        icon: const Icon(Icons.refresh_rounded),
+                        icon: const BilGlassPressFeedback(
+                          child: Icon(Icons.refresh_rounded),
+                        ),
                         label: Text(
                           context.strings.text('Retry subscription check'),
                         ),

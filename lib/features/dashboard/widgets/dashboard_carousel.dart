@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -352,7 +353,7 @@ class _CarouselArrow extends StatelessWidget {
       dimension: dimension,
       child: IconButton.filledTonal(
         onPressed: enabled ? onPressed : null,
-        icon: Icon(icon, size: iconSize),
+        icon: BilGlassPressFeedback(child: Icon(icon, size: iconSize)),
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
         constraints: BoxConstraints.tightFor(

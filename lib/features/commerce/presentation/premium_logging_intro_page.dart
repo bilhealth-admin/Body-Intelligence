@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -124,7 +125,9 @@ class _HeroIcon extends StatelessWidget {
     ),
     child: Padding(
       padding: const EdgeInsets.all(18),
-      child: Icon(icon, color: Colors.white, size: 34),
+      child: BilGlassPressFeedback(
+        child: Icon(icon, color: Colors.white, size: 34),
+      ),
     ),
   );
 }

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -150,7 +151,9 @@ class _CommunityModeratorAdminPanelState
                   key: const Key('admin-community-moderator-retry'),
                   onPressed: () =>
                       ref.invalidate(communityModeratorAdminListProvider),
-                  icon: const Icon(Icons.refresh_rounded),
+                  icon: const BilGlassPressFeedback(
+                    child: Icon(Icons.refresh_rounded),
+                  ),
                   label: Text(context.strings.text('Try again')),
                 ),
               ),

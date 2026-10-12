@@ -244,7 +244,11 @@ class _CommunityPollOptionTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            LinearProgressIndicator(value: progress.clamp(0.0, 1.0).toDouble()),
+            BilStripedProgress(
+              child: LinearProgressIndicator(
+                value: progress.clamp(0.0, 1.0).toDouble(),
+              ),
+            ),
           ],
         ),
       ),

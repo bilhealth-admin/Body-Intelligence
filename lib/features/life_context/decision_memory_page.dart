@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -89,7 +90,9 @@ class DecisionMemoryPage extends ConsumerWidget {
                         .map(
                           (row) => Card(
                             child: ListTile(
-                              leading: Icon(_memoryKindIcon(row['kind'])),
+                              leading: BilGlassPressFeedback(
+                                child: Icon(_memoryKindIcon(row['kind'])),
+                              ),
                               title: Text(row['text']?.toString() ?? ''),
                               subtitle: Text(
                                 '${t(_memoryKindLabel(row['kind']))} · ${t('Confirmed')}',

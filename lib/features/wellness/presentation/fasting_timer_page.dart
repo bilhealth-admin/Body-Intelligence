@@ -184,7 +184,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                   : () => context.canPop()
                         ? context.pop()
                         : context.go('/dashboard'),
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const BackButtonIcon(),
             ),
             title: Text(
               tr('Intermittent fasting', 'الصيام المتقطع'),
@@ -199,7 +199,9 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
               ? Center(
                   child: FilledButton.icon(
                     onPressed: _load,
-                    icon: const Icon(Icons.refresh_rounded),
+                    icon: const BilGlassPressFeedback(
+                      child: Icon(Icons.refresh_rounded),
+                    ),
                     label: Text(tr('Retry', 'إعادة المحاولة')),
                   ),
                 )
@@ -317,12 +319,14 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                                       alignment: Alignment.center,
                                       children: [
                                         SizedBox.expand(
-                                          child: CircularProgressIndicator(
-                                            value: progress,
-                                            strokeWidth: 14,
-                                            backgroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainerHighest,
+                                          child: BilStripedProgress(
+                                            child: CircularProgressIndicator(
+                                              value: progress,
+                                              strokeWidth: 14,
+                                              backgroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                            ),
                                           ),
                                         ),
                                         Padding(
@@ -464,10 +468,12 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : Icon(
-                                        active
-                                            ? Icons.stop_rounded
-                                            : Icons.play_arrow_rounded,
+                                    : BilGlassPressFeedback(
+                                        child: Icon(
+                                          active
+                                              ? Icons.stop_rounded
+                                              : Icons.play_arrow_rounded,
+                                        ),
                                       ),
                                 label: Text(
                                   active

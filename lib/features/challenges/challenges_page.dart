@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_striped_progress.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/database/meal_food_evidence.dart';
 import '../../data/database/nutrient_evidence.dart';
@@ -420,7 +421,9 @@ class _ChallengeTile extends ConsumerWidget {
                     icon: const Icon(Icons.delete_outline),
                   ),
                 ),
-                LinearProgressIndicator(value: value.fraction),
+                BilStripedProgress(
+                  child: LinearProgressIndicator(value: value.fraction),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   t('Progress is calculated only from actual local records.'),

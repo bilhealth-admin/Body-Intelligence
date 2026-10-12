@@ -409,7 +409,7 @@ void main() {
         ),
       );
 
-      expect(find.text('AI Coach'), findsOneWidget);
+      expect(find.text('Premium AI Coach'), findsOneWidget);
       expect(find.text('Everything included in BIL Premium'), findsOneWidget);
       expect(find.text('Advanced personalized AI Coach'), findsOneWidget);
       expect(
@@ -432,8 +432,6 @@ void main() {
         '300+ home workout videos',
         '100+ video-guided weight-training plans',
         'Connected health',
-        'Friends and requests',
-        'Private messages',
       ]) {
         expect(find.text(inherited), findsOneWidget, reason: inherited);
       }
@@ -443,7 +441,23 @@ void main() {
             widget is Text &&
             (widget.data ?? '').toLowerCase().contains('premium'),
       );
-      expect(premiumLabels, findsOneWidget);
+      // The owner explicitly names this plan Premium AI Coach; its inheritance
+      // sentence separately identifies the included Premium tier.
+      expect(premiumLabels, findsNWidgets(2));
+      final free = find.byKey(const ValueKey('store-free-tier-card'));
+      final paid = find.byKey(
+        const ValueKey('store-tier-premiumAiCoachSubscription'),
+      );
+      for (final label in const ['Friends and requests', 'Private messages']) {
+        expect(
+          find.descendant(of: free, matching: find.text(label)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: paid, matching: find.text(label)),
+          findsNothing,
+        );
+      }
       expect(tester.takeException(), isNull);
     },
   );

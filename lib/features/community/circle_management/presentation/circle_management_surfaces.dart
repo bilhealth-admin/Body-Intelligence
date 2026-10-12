@@ -1,3 +1,4 @@
+import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -136,7 +137,7 @@ class _CircleManagementPanelState extends State<CircleManagementPanel> {
                             'العودة إلى إدارة الدوائر',
                           ),
                           onPressed: () => _show(_ManagementView.menu),
-                          icon: const Icon(Icons.arrow_back_rounded),
+                          icon: const BackButtonIcon(),
                         ),
                       Expanded(
                         child: Text(
@@ -300,7 +301,9 @@ class _CircleManagementPanelState extends State<CircleManagementPanel> {
                                 onPressed: controller.capabilitiesLoading
                                     ? null
                                     : controller.loadCapabilities,
-                                icon: const Icon(Icons.refresh_rounded),
+                                icon: const BilGlassPressFeedback(
+                                  child: Icon(Icons.refresh_rounded),
+                                ),
                                 label: Text(
                                   circleManagementText(
                                     context,

@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'community_attention_scope.dart';
 import 'bil_gold_coin.dart';
 import 'dart:async';
@@ -45,6 +47,7 @@ import '../services/community_entry_coordinator.dart';
 import '../services/community_owner_operation.dart';
 import '../services/community_publish_operation_service.dart';
 import 'community_copy.dart';
+import 'community_translation_content.dart';
 import 'community_ai_reward_notice.dart';
 import 'community_body_counter.dart';
 import 'community_entry_gate.dart';
@@ -67,6 +70,10 @@ part '../home_profile/community_feed_owner_scope.dart';
 part '../home_profile/community_profile_activity_slivers.dart';
 part '../home_profile/community_profile_activity_media.dart';
 part 'community_feed_tab.dart';
+part 'community_feed_rendering.dart';
+part 'community_feed_visit_preview.dart';
+part 'community_hub_top_tabs.dart';
+part 'community_feed_copy.dart';
 part 'community_feed_reference_suggestions.dart';
 part 'community_feed_reference_header.dart';
 part 'community_feed_mode_control.dart';
@@ -155,6 +162,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   final _homeOwnerChanges = ValueNotifier<int>(0);
   bool _homeSignalDisposed = false;
   Future<CommunityProfileOverview?>? _profilePreview;
+  _CommunityFeedVisitPreview? _feedPreview;
 
   @override
   void initState() {
@@ -179,6 +187,25 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       _profilePreview = _repository?.loadMyProfileOverview();
       _feedKey = GlobalKey<_FeedTabState>();
       _watchProductionSession();
+      _prepareFeedPreview();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _prepareFeedPreview();
+  }
+
+  void _prepareFeedPreview() {
+    final repository = _repository;
+    final visit = repository == null ? null : _captureHomeVisit(repository);
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    if (visit != null &&
+        (_feedPreview == null ||
+            _feedPreview!.visit.epoch != visit.epoch ||
+            _feedPreview!.locale != locale)) {
+      _feedPreview = _CommunityFeedVisitPreview(visit, locale, _profilePreview);
     }
   }
 
@@ -225,6 +252,71 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   Widget _buildHub(BuildContext context, double width) {
     final repository = _repository;
     final visit = repository == null ? null : _captureHomeVisit(repository);
+    final back = Navigator.of(context).canPop();
+    final title = communityText(context, 'BIL Community', 'مجتمع BIL');
+    final titleStyle = Theme.of(context).textTheme.titleMedium!.copyWith(
+      fontSize: 21,
+      fontWeight: FontWeight.w900,
+    );
+    final titleMeasure = TextPainter(
+      text: TextSpan(text: title, style: titleStyle),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: (width - 32 - (back ? 56 : 0) - 144).clamp(1, width));
+    final stackedTitle = titleMeasure.computeLineMetrics().length > 1;
+    if (stackedTitle) {
+      titleMeasure.layout(
+        maxWidth: (width - 32 - (back ? 56 : 0)).clamp(1, width),
+      );
+    }
+    final titleHeight = titleMeasure.height;
+    titleMeasure.dispose();
+    final actions = <Widget>[
+      IconButton(
+        key: const Key('community-search'),
+        tooltip: communityText(context, 'Find people', 'البحث عن أشخاص'),
+        onPressed: visit == null
+            ? null
+            : () {
+                if (visit.isCurrent()) context.push('/community/people');
+              },
+        icon: const Icon(Icons.search_rounded, size: 32),
+      ),
+      IconButton(
+        key: const Key('community-updates'),
+        tooltip: communityText(context, 'Community updates', 'تحديثات المجتمع'),
+        onPressed: visit == null
+            ? null
+            : () {
+                if (visit.isCurrent()) {
+                  context.push('/community/notifications');
+                }
+              },
+        icon: const CommunityUnreadBadge(
+          child: Icon(Icons.notifications_none_rounded, size: 32),
+        ),
+      ),
+      FutureBuilder<CommunityProfileOverview?>(
+        key: ValueKey(_homeVisitEpoch),
+        future: _profilePreview,
+        builder: (context, snapshot) => IconButton(
+          key: const Key('community-settings'),
+          tooltip: communityText(
+            context,
+            'Community profile and actions',
+            'ملف المجتمع وإجراءاته',
+          ),
+          onPressed: visit == null
+              ? null
+              : () => _openNavigation(context, visit),
+          padding: const EdgeInsets.all(3.5),
+          icon: BilAccountAvatar(
+            radius: 20.5,
+            networkUrl: snapshot.data?.avatarUrl,
+          ),
+        ),
+      ),
+    ].map((action) => SizedBox(width: 48, height: 48, child: action)).toList();
     final topTabsHeight = _communityHubTopTabsHeight(context, width);
     return Scaffold(
       bottomNavigationBar: visit == null
@@ -250,63 +342,32 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             : null,
         centerTitle: false,
         titleSpacing: 16,
-        title: Text(
-          communityText(context, 'BIL Community', 'مجتمع BIL'),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontSize: 21 * (width / 414).clamp(.85, 1.0),
-            fontWeight: FontWeight.w900,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          IconButton(
-            key: const Key('community-search'),
-            tooltip: communityText(context, 'Find people', 'البحث عن أشخاص'),
-            onPressed: visit == null
-                ? null
-                : () {
-                    if (visit.isCurrent()) context.push('/community/people');
-                  },
-            icon: const Icon(Icons.search_rounded, size: 32),
-          ),
-          IconButton(
-            key: const Key('community-updates'),
-            tooltip: communityText(
-              context,
-              'Community updates',
-              'تحديثات المجتمع',
-            ),
-            onPressed: visit == null
-                ? null
-                : () {
-                    if (visit.isCurrent()) {
-                      context.push('/community/notifications');
-                    }
-                  },
-            icon: const CommunityUnreadBadge(
-              child: Icon(Icons.notifications_none_rounded, size: 32),
-            ),
-          ),
-          FutureBuilder<CommunityProfileOverview?>(
-            future: _profilePreview,
-            builder: (context, snapshot) => IconButton(
-              key: const Key('community-settings'),
-              tooltip: communityText(
-                context,
-                'Community profile and actions',
-                'ملف المجتمع وإجراءاته',
+        toolbarHeight: stackedTitle ? titleHeight + 64 : 56,
+        title: stackedTitle
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    key: const Key('community-full-title'),
+                    maxLines: 10,
+                    softWrap: true,
+                    style: titleStyle,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: actions,
+                  ),
+                ],
+              )
+            : Text(
+                title,
+                key: const Key('community-full-title'),
+                maxLines: 10,
+                softWrap: true,
+                style: titleStyle,
               ),
-              onPressed: visit == null
-                  ? null
-                  : () => _openNavigation(context, visit),
-              icon: BilAccountAvatar(
-                radius: 20.5,
-                networkUrl: snapshot.data?.avatarUrl,
-              ),
-            ),
-          ),
-        ],
+        actions: stackedTitle ? const [] : actions,
         bottom: visit == null
             ? null
             : PreferredSize(
@@ -352,9 +413,10 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                           selected: _section == _CommunityHubSection.circles,
                           onTap: () {
                             if (visit.isCurrent()) {
-                              setState(
-                                () => _section = _CommunityHubSection.circles,
-                              );
+                              setState(() {
+                                _feedPreview?.refreshIfExpired();
+                                _section = _CommunityHubSection.circles;
+                              });
                             }
                           },
                         ),
@@ -379,6 +441,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 suspendAfterOwnerChange: _suspendReboundFeed,
                 ownerIsCurrent: visit.isCurrent,
                 ownerChanges: visit.changes,
+                preview: _feedPreview!,
                 onOpenCircles: () {
                   if (visit.isCurrent()) {
                     setState(() => _section = _CommunityHubSection.circles);
@@ -395,6 +458,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 suspendAfterOwnerChange: _suspendReboundFeed,
                 ownerIsCurrent: visit.isCurrent,
                 ownerChanges: visit.changes,
+                preview: _feedPreview!,
                 onOpenCircles: () {
                   if (visit.isCurrent()) {
                     setState(() => _section = _CommunityHubSection.circles);
@@ -416,6 +480,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   void _showFeedMode(CommunityFeedMode mode) {
     final feed = _feedKey.currentState;
     if (feed != null && (feed._openingComposer || feed._managingPost)) return;
+    _feedPreview?.refreshIfExpired();
     setState(() {
       _feedMode = mode;
       _section = mode == CommunityFeedMode.following
@@ -445,6 +510,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     if (_openingNavigation || !visit.isCurrent()) return;
     final repository = visit.repository;
     _openingNavigation = true;
+    var refreshProfile = false;
     FocusManager.instance.primaryFocus?.unfocus();
     try {
       final destination = await showModalBottomSheet<String>(
@@ -469,6 +535,8 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
           return;
         }
       }
+      refreshProfile =
+          destination == 'account' || destination == '/community/profile/edit';
       switch (destination) {
         case '/community/connections':
           await pushCommunityPage<void>(
@@ -551,85 +619,14 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       // A menu captured by an old owner never becomes a route for a later one.
     } finally {
       _openingNavigation = false;
-      if (mounted && visit.isCurrent()) {
+      if (mounted && visit.isCurrent() && refreshProfile) {
         setState(() {
           _profilePreview = repository.loadMyProfileOverview();
+          _feedPreview?.profile = _profilePreview;
         });
       }
     }
   }
-}
-
-double _communityHubTopTabsHeight(BuildContext context, double width) {
-  var height = 48.0;
-  // Reserve the actual localized line height. A fixed three-line allowance
-  // left a large empty band above single-line Arabic/English tabs at 200%.
-  for (final label in [
-    communityText(context, 'Explore', 'استكشاف'),
-    communityText(context, 'Following', 'المتابَعون'),
-    communityText(context, 'Circles', 'الدوائر'),
-  ]) {
-    final painter = TextPainter(
-      text: TextSpan(
-        text: label,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-      ),
-      textScaler: MediaQuery.textScalerOf(context),
-      textDirection: Directionality.of(context),
-      locale: Localizations.maybeLocaleOf(context),
-    )..layout(maxWidth: width / 3);
-    if (painter.height + 20 > height) height = painter.height + 20;
-    painter.dispose();
-  }
-  return height;
-}
-
-class _CommunityHubTopTab extends StatelessWidget {
-  const _CommunityHubTopTab({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    super.key,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        const SizedBox(height: 9),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 8),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          height: 3,
-          width: 56,
-          decoration: BoxDecoration(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(999),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 PopupMenuItem<String> _communityAction(

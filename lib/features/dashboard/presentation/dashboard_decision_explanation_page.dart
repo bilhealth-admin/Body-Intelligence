@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -153,7 +154,7 @@ class _ExplanationSection extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: scheme.primary),
+                BilGlassPressFeedback(child: Icon(icon, color: scheme.primary)),
                 const SizedBox(width: PremiumDesignTokens.spaceSm),
                 Expanded(
                   child: Text(

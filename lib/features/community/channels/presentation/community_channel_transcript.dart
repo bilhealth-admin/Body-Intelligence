@@ -79,7 +79,9 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
           action: TextButton.icon(
             key: const Key('bil07-reconnect'),
             onPressed: controller.reconnect,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
+            ),
             label: Text(_copy(CommunityChannelsCopyKey.reconnect)),
           ),
         ),

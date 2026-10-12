@@ -1,0 +1,229 @@
+{
+  "label": "final-upgrade-goal-and-reviewed-visual-files",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/premium_nutrition_glass_test.dart",
+    "test/features/commerce/app_subscription_confirmation_test.dart",
+    "test/features/analytics/nutrition_goal_schedule_state_test.dart",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+    "--name",
+    "^(group gold.*|verified Free hides.*|only server-verified.*|subscription loading.*|subscription error.*|local Free fallback.*|root subscription.*|nutrition.*schedule.*|daily log (production (empty day|middle sections|lower sections)|reference premium goal|meal-entry production) capture|dashboard production (populated phone|Macros overview) capture|dashboard persisted nutrient goal card capture|nutrition analytics (calories|nutrients|macros) capture|community authenticated hub feed capture|nutrition macros read saved day goal and recalculate remaining)$"
+  ],
+  "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "started": 1791821909.4295073,
+  "files": {
+    "test/features/commerce/premium_nutrition_glass_test.dart": "9b5aeafb6bddd670cf358b4992da191cbf0fbe6cb20a239a5c0f3b38c6356baa",
+    "test/features/commerce/app_subscription_confirmation_test.dart": "ad77317f46e2045f9fa03a8761dc094021bfec4791bad6fcef1e1cd1c164392a",
+    "test/features/analytics/nutrition_goal_schedule_state_test.dart": "141f0b863f89da14083b858b14ebd5ac07707b0b21675c6b6fe2f551d03474d1",
+    "test/visual_closure/actual_data_pages_golden_test.dart": "5c0f53128db738b7cf4c34da05ef7629ed9c8fc2cf0eb5ed4b291003f5390131",
+    "test/visual_closure/actual_production_pages_golden_test.dart": "6fc268430b2a9a56d4fd861271a2a4aea3d43f802c5710a1ccb6af5d9f285461"
+  },
+  "fingerprint_version": 3,
+  "source_fingerprint": "33fb9b19751c20b9714ef60401802653105852319815c1f593f40e94425e7049",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/premium_nutrition_glass_test.dart",
+    "test/features/commerce/app_subscription_confirmation_test.dart",
+    "test/features/analytics/nutrition_goal_schedule_state_test.dart",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+    "--name",
+    "^(group gold.*|verified Free hides.*|only server-verified.*|subscription loading.*|subscription error.*|local Free fallback.*|root subscription.*|nutrition.*schedule.*|daily log (production (empty day|middle sections|lower sections)|reference premium goal|meal-entry production) capture|dashboard production (populated phone|Macros overview) capture|dashboard persisted nutrient goal card capture|nutrition analytics (calories|nutrients|macros) capture|community authenticated hub feed capture|nutrition macros read saved day goal and recalculate remaining)$"
+  ],
+  "pid": 2272,
+  "exit_code": 0,
+  "finished": 1791821943.5707898,
+  "end_fingerprint": "33fb9b19751c20b9714ef60401802653105852319815c1f593f40e94425e7049",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "group gold action requires current verified denial, not stale data",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verified Free hides nutrition semantics and routes to plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "only server-verified premium removes the glass",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "only server-verified premium_ai_coach removes the glass",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "subscription loading never flashes an upgrade action",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "subscription error stays protected with retry and no false Premium offer",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "local Free fallback requires retry, never a paid upsell",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium oneMonth active proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium oneYear active proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium oneMonth trial proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium oneYear trial proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium_ai_coach oneMonth active proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium_ai_coach oneYear active proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium_ai_coach oneMonth trial proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription premium_ai_coach oneYear trial proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "dashboard production populated phone capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "dashboard persisted nutrient goal card capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "dashboard production Macros overview capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "daily log production empty day capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "daily log reference premium goal capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "daily log production middle sections capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "daily log production lower sections capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "daily log meal-entry production capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition analytics calories capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition analytics nutrients capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition analytics macros capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition macros read saved day goal and recalculate remaining",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "community authenticated hub feed capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_production_pages_golden_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 28,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": [],
+  "original_record_sha256": "d20d70bb238e2a92826e3a23ce3b03c8af98450d137c0f4240cb5e3532e7e792",
+  "delta_to_final": [
+    {
+      "file": "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "tested_sha256": "2f0fee727ee41ea95f056d54efd18c612e637f5584d350a57fd326020be82ffe",
+      "final_sha256": "77c1741c542b33ed2dbec2d556b50f09eb415869a53f10c2522c17a99fd702d6"
+    },
+    {
+      "file": "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "tested_sha256": "a1e032fa7806c79de4652f9fe5bfc287e657ac50ef4418ef25bcd00a72208707",
+      "final_sha256": "7e0f6793248a399c15097e8f0a7f0fcd6f6e19098dcde24162e005adf0804f97"
+    },
+    {
+      "file": "test/features/commerce/premium_label_badge_test.dart",
+      "tested_sha256": "c6008e02d4e790a867481acbaed2c8d0345a4e0a4212e2a01c47cd3d1737b90f",
+      "final_sha256": "033ec91f17af57f6e9ef91f64258ab63089bb73c4d236c4312634b228e5d7f33"
+    },
+    {
+      "file": "test/features/commerce/premium_nutrition_glass_test.dart",
+      "tested_sha256": "9b5aeafb6bddd670cf358b4992da191cbf0fbe6cb20a239a5c0f3b38c6356baa",
+      "final_sha256": "6520898ff235585c96b24914578641ffcce891de2e0f12bbb4707240de1a117d"
+    }
+  ]
+}

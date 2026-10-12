@@ -127,7 +127,9 @@ class _FoodAnalysisTabState extends State<_FoodAnalysisTab> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    LinearProgressIndicator(value: contributor.share),
+                    BilStripedProgress(
+                      child: LinearProgressIndicator(value: contributor.share),
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       '${_t(context, 'Logged entries')}: '

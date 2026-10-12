@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 
 import '../domain/catalog_pack.dart';
 import 'catalog_file_safety.dart';
@@ -19,7 +19,7 @@ class CatalogPackManager {
     String? manifestUrlOverride,
     this.allowLoopbackHttpForTesting = false,
     this.transferTimeout = const Duration(minutes: 2),
-  }) : _rootResolver = rootResolver ?? getApplicationSupportDirectory,
+  }) : _rootResolver = rootResolver ?? getProtectedApplicationSupportDirectory,
        _manifestUrl = manifestUrlOverride ?? manifestUrl;
 
   final CatalogSupportRootResolver _rootResolver;

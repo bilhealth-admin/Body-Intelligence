@@ -175,7 +175,9 @@ class _EvidenceProgressRow extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        LinearProgressIndicator(value: progress, color: color),
+        BilStripedProgress(
+          child: LinearProgressIndicator(value: progress, color: color),
+        ),
       ],
     );
   }

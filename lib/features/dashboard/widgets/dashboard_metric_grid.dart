@@ -95,7 +95,9 @@ class _EmbeddedMetricRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(metric.icon, size: 20, color: metric.accent),
+          BilGlassPressFeedback(
+            child: Icon(metric.icon, size: 20, color: metric.accent),
+          ),
           const SizedBox(width: PremiumDesignTokens.spaceSm),
           Expanded(
             child: Column(
@@ -174,7 +176,9 @@ class _CompactMetricTile extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: compact ? 13 : 18, color: accent),
+                BilGlassPressFeedback(
+                  child: Icon(icon, size: compact ? 13 : 18, color: accent),
+                ),
                 const SizedBox(width: PremiumDesignTokens.spaceXs),
                 Expanded(
                   child: Text(

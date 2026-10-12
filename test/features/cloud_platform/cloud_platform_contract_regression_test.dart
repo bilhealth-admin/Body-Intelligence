@@ -41,6 +41,12 @@ void main() {
     // engine must remain provider-neutral.
     const providerBoundaryFiles = <String>{
       'lib/features/cloud_platform/providers/cloud_sync_providers.dart',
+      // New V2 adapters/assembly are explicit integration boundaries. The V2
+      // ports, engine, SQLite journal, codecs and conflict service stay neutral.
+      'lib/features/cloud_platform/providers/cloud_restore_providers.dart',
+      'lib/features/cloud_platform/providers/cloud_restore_conflict_provider.dart',
+      'lib/features/cloud_platform/services/cloud_restore_consent_repository.dart',
+      'lib/features/cloud_platform/services/supabase_cloud_restore_v2_transport.dart',
       'lib/features/cloud_platform/providers/cloud_manual_sync_status_provider.dart',
       'lib/features/cloud_platform/services/cloud_platform_composition_root.dart',
       'lib/features/cloud_platform/services/cloud_account_key_repository.dart',

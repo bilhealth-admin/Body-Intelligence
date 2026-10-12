@@ -37,6 +37,7 @@ void main() {
             CloudRecordEnvelope(
               ownerId: 'synthetic-owner',
               entityKind: CloudEntityKind.nutrition,
+              schemaVersion: 99,
               recordId: 'meal:legacy-test',
               revision: CloudRevision(deviceId: 'remote-device', sequence: 1),
               updatedAt: now,

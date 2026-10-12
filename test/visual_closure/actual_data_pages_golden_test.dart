@@ -57,6 +57,7 @@ import 'package:body_intelligence_log/features/settings/account_password_page.da
 import 'package:body_intelligence_log/features/settings/account_connection_settings_page.dart';
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -65,6 +66,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_evidence_font.dart';
+import 'recording_golden_comparator.dart';
+import 'closure_surface_capture.dart';
 
 const _skipVisualPixelComparison = bool.fromEnvironment(
   'BIL_SKIP_VISUAL_PIXELS',
@@ -133,6 +136,16 @@ final class _VisualRouteStack extends StatelessWidget {
 }
 
 void main() {
+  late GoldenFileComparator originalComparator;
+  setUp(() {
+    originalComparator = goldenFileComparator;
+    goldenFileComparator = RecordingGoldenComparator(
+      originalComparator,
+      'test/visual_closure/actual_data_pages_golden_test.dart',
+    );
+  });
+  tearDown(() => goldenFileComparator = originalComparator);
+
   const ttsChannel = MethodChannel('bil/tts');
   setUpAll(() async {
     await loadVisualEvidenceFont();
@@ -260,6 +273,7 @@ void main() {
     SubscriptionState? subscriptionOverride,
     NutritionGoalTarget? dailyGoalOverride,
     List<MealWithItems>? dailyMealsOverride,
+    DateTime? dateOverride,
   }) async {
     // These Home Goldens capture a RETURNING member's settled dashboard.
     // Keep the optional first-use tour tested in its dedicated widget suite,
@@ -275,180 +289,192 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          databaseProvider.overrideWithValue(db),
-          dashboardClockProvider.overrideWithValue(
-            () => DateTime(2026, 8, 5, 9, 41, 12),
-          ),
-          premiumProfileClockProvider.overrideWithValue(
-            () => DateTime.utc(2026, 8, 30, 9, 41, 12),
-          ),
-          connectedHealthGatewayProvider.overrideWithValue(
-            const _UnavailableHealthGateway(),
-          ),
-          mealVisionUsageProvider.overrideWithValue(
-            const AsyncData(MealVisionUsageSnapshot.unavailable()),
-          ),
-          // Golden captures default to a deterministic, server-verified
-          // Free fixture (Premium cases supply their own dated fixture).
-          // Falling through to the live verifier turns every
-          // protected preview into a transient Retry state and records an
-          // infrastructure failure as the product's intended UI.
-          verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(subscriptionOverride ?? _visualVerifiedFreeSubscription),
-          ),
-          if (subscriptionOverride != null)
-            verifiedEntitlementClockProvider.overrideWithValue(
-              () => DateTime.utc(2026, 8, 14),
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(db),
+            dashboardClockProvider.overrideWithValue(
+              () => DateTime(2026, 8, 5, 9, 41, 12),
             ),
-          liveHealthNowProvider.overrideWithValue(
-            () => DateTime(2026, 8, 5, 9, 41, 12),
-          ),
-          progressClockProvider.overrideWithValue(
-            () => DateTime(2026, 8, 14, 9, 41, 12),
-          ),
-          if (seedEmptyCatalog || stableDailyLog)
-            seedCatalogProvider.overrideWith((ref) async {}),
-          if (foodOverride != null)
-            foodsProvider.overrideWithValue(AsyncData(<Food>[foodOverride])),
-          if (foodOverride != null)
-            foodRuntimeSearchAuthorityProvider.overrideWithValue(
-              FoodRuntimeSearchAuthority(
-                FoodRepository(db),
-                catalogResolver: () async => null,
+            premiumProfileClockProvider.overrideWithValue(
+              () => DateTime.utc(2026, 8, 30, 9, 41, 12),
+            ),
+            connectedHealthGatewayProvider.overrideWithValue(
+              const _UnavailableHealthGateway(),
+            ),
+            mealVisionUsageProvider.overrideWithValue(
+              const AsyncData(MealVisionUsageSnapshot.unavailable()),
+            ),
+            // Golden captures default to a deterministic, server-verified
+            // Free fixture (Premium cases supply their own dated fixture).
+            // Falling through to the live verifier turns every
+            // protected preview into a transient Retry state and records an
+            // infrastructure failure as the product's intended UI.
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(
+                subscriptionOverride ?? _visualVerifiedFreeSubscription,
               ),
             ),
-          if (stableDailyLog) ...[
-            mealCalorieGoalsProvider.overrideWithValue(const AsyncData({})),
-            mealMacroDisplayProvider.overrideWithValue(
-              const AsyncData(
-                MealMacroDisplay(
-                  enabled: false,
-                  mode: MealMacroDisplayMode.grams,
+            if (subscriptionOverride != null)
+              verifiedEntitlementClockProvider.overrideWithValue(
+                () => DateTime.utc(2026, 8, 14),
+              ),
+            liveHealthNowProvider.overrideWithValue(
+              () => DateTime(2026, 8, 5, 9, 41, 12),
+            ),
+            progressClockProvider.overrideWithValue(
+              () => DateTime(2026, 8, 14, 9, 41, 12),
+            ),
+            if (seedEmptyCatalog || stableDailyLog)
+              seedCatalogProvider.overrideWith((ref) async {}),
+            if (foodOverride != null)
+              foodsProvider.overrideWithValue(AsyncData(<Food>[foodOverride])),
+            if (foodOverride != null)
+              foodRuntimeSearchAuthorityProvider.overrideWithValue(
+                FoodRuntimeSearchAuthority(
+                  FoodRepository(db),
+                  catalogResolver: () async => null,
                 ),
               ),
-            ),
-            weightHistoryProvider.overrideWithValue(const AsyncData([])),
-            selectedLogDateProvider.overrideWith(
-              (ref) => DateTime(2026, 8, 14),
-            ),
-            dailyMealsProvider.overrideWithValue(
-              const AsyncData(<MealWithItems>[]),
-            ),
-            dailyWaterProvider.overrideWithValue(
-              const AsyncData(<WaterEntry>[]),
-            ),
-            usualMealsProvider(
-              'breakfast',
-            ).overrideWithValue(const AsyncData(<UsualMealCandidate>[])),
-            selectedDailyLogProvider.overrideWithValue(const AsyncData(null)),
-            diaryMealNamesProvider.overrideWithValue(
-              const AsyncData(<String?>[null, null, null, null]),
-            ),
-            for (final key in const <String>[
-              'diary.foodInsights',
-              'diary.showAllMeals',
-              'diary.showFoodTimestamps',
-              'diary.useNetCarbs',
-              'diary.alwaysShowWater',
-            ])
-              dailyLogPreferenceProvider(key).overrideWithValue(
-                AsyncData(
-                  const {
-                    'diary.foodInsights',
-                    'diary.showAllMeals',
-                    'diary.alwaysShowWater',
-                  }.contains(key),
+            if (stableDailyLog) ...[
+              mealCalorieGoalsProvider.overrideWithValue(const AsyncData({})),
+              mealMacroDisplayProvider.overrideWithValue(
+                const AsyncData(
+                  MealMacroDisplay(
+                    enabled: false,
+                    mode: MealMacroDisplayMode.grams,
+                  ),
                 ),
               ),
-            nutritionGoalScheduleProvider.overrideWithValue(
-              const AsyncData(NutritionGoalSchedule()),
-            ),
-            userProfileProvider.overrideWithValue(const AsyncData(null)),
-            waterRepositoryProvider.overrideWithValue(WaterRepository(db)),
-            measurementSystemProvider.overrideWithValue(
-              const AsyncData(MeasurementSystem.metric),
-            ),
+              weightHistoryProvider.overrideWithValue(const AsyncData([])),
+              selectedLogDateProvider.overrideWith(
+                (ref) => DateTime(2026, 8, 14),
+              ),
+              dailyMealsProvider.overrideWithValue(
+                const AsyncData(<MealWithItems>[]),
+              ),
+              dailyWaterProvider.overrideWithValue(
+                const AsyncData(<WaterEntry>[]),
+              ),
+              usualMealsProvider(
+                'breakfast',
+              ).overrideWithValue(const AsyncData(<UsualMealCandidate>[])),
+              selectedDailyLogProvider.overrideWithValue(const AsyncData(null)),
+              diaryMealNamesProvider.overrideWithValue(
+                const AsyncData(<String?>[null, null, null, null]),
+              ),
+              for (final key in const <String>[
+                'diary.foodInsights',
+                'diary.showAllMeals',
+                'diary.showFoodTimestamps',
+                'diary.useNetCarbs',
+                'diary.alwaysShowWater',
+              ])
+                dailyLogPreferenceProvider(key).overrideWithValue(
+                  AsyncData(
+                    const {
+                      'diary.foodInsights',
+                      'diary.showAllMeals',
+                      'diary.alwaysShowWater',
+                    }.contains(key),
+                  ),
+                ),
+              nutritionGoalScheduleProvider.overrideWithValue(
+                const AsyncData(NutritionGoalSchedule()),
+              ),
+              userProfileProvider.overrideWithValue(const AsyncData(null)),
+              waterRepositoryProvider.overrideWithValue(WaterRepository(db)),
+              measurementSystemProvider.overrideWithValue(
+                const AsyncData(MeasurementSystem.metric),
+              ),
+            ],
+            if (dailyMealsOverride != null) ...[
+              selectedLogDateProvider.overrideWith(
+                (ref) => DateTime(2026, 8, 14),
+              ),
+              dailyMealsProvider.overrideWithValue(
+                AsyncData(dailyMealsOverride),
+              ),
+              userProfileProvider.overrideWithValue(const AsyncData(null)),
+            ],
+            if (dailyGoalOverride != null)
+              defaultNutritionGoalTargetProvider.overrideWithValue(
+                dailyGoalOverride,
+              ),
+            if (dateOverride != null)
+              selectedLogDateProvider.overrideWith((ref) => dateOverride),
           ],
-          if (dailyMealsOverride != null) ...[
-            selectedLogDateProvider.overrideWith(
-              (ref) => DateTime(2026, 8, 14),
-            ),
-            dailyMealsProvider.overrideWithValue(AsyncData(dailyMealsOverride)),
-            userProfileProvider.overrideWithValue(const AsyncData(null)),
-          ],
-          if (dailyGoalOverride != null)
-            defaultNutritionGoalTargetProvider.overrideWithValue(
-              dailyGoalOverride,
-            ),
-        ],
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          locale: const Locale('en'),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          theme: visualEvidenceTheme(BilFlagshipTheme.light()),
-          builder: (context, child) => visualEvidenceTextSurface(child),
-          home: page,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            locale: const Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            theme: visualEvidenceTheme(BilFlagshipTheme.light()),
+            builder: (context, child) => visualEvidenceTextSurface(child),
+            home: page,
+          ),
         ),
-      ),
-    );
-    if (finiteSettle) {
-      await tester.pump(const Duration(milliseconds: 600));
-    } else {
-      await tester.pumpAndSettle();
-    }
-    if (prepare != null) {
-      await prepare(tester);
+      );
+      if (finiteSettle) {
+        await tester.pump(const Duration(milliseconds: 600));
+      } else {
+        await tester.pumpAndSettle();
+      }
+      if (prepare != null) {
+        await prepare(tester);
+        if (finiteSettle) {
+          await tester.pump(const Duration(milliseconds: 300));
+        } else {
+          await tester.pumpAndSettle();
+        }
+      }
+      await settleVisualAssetImages(tester);
       if (finiteSettle) {
         await tester.pump(const Duration(milliseconds: 300));
       } else {
         await tester.pumpAndSettle();
       }
+      if (name == 'ai_coach_conversation_phone') {
+        expect(
+          find.byKey(const Key('ai-coach-question-field')),
+          findsOneWidget,
+        );
+        expect(_coachOpeningSurface(), findsOneWidget);
+      }
+      expect(tester.takeException(), isNull);
+      if (page is DashboardPage) {
+        expect(
+          find.byKey(const Key('dashboard-guide-skip')),
+          findsNothing,
+          reason: 'Returning Home screenshot must not include onboarding.',
+        );
+      }
+      final captureTarget = captureOverlay
+          ? find.byType(Overlay).first
+          : captureTopmostScaffold
+          ? find.byType(Scaffold).last
+          : find.byType(Scaffold).first;
+      if (_skipVisualPixelComparison) {
+        expect(captureTarget, findsOneWidget);
+      } else {
+        await expectLater(
+          captureTarget,
+          matchesGoldenFile(
+            'goldens/visual_closure_${_captureIpad ? name.replaceFirst('_phone', '_ipad') : name}.png',
+          ),
+        );
+      }
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump();
     }
-    await settleVisualAssetImages(tester);
-    if (finiteSettle) {
-      await tester.pump(const Duration(milliseconds: 300));
-    } else {
-      await tester.pumpAndSettle();
-    }
-    if (name == 'ai_coach_conversation_phone') {
-      expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
-      expect(_coachOpeningSurface(), findsOneWidget);
-    }
-    expect(tester.takeException(), isNull);
-    if (page is DashboardPage) {
-      expect(
-        find.byKey(const Key('dashboard-guide-skip')),
-        findsNothing,
-        reason: 'Returning Home screenshot must not include onboarding.',
-      );
-    }
-    final captureTarget = captureOverlay
-        ? find.byType(Overlay).first
-        : captureTopmostScaffold
-        ? find.byType(Scaffold).last
-        : find.byType(Scaffold).first;
-    if (_skipVisualPixelComparison) {
-      expect(captureTarget, findsOneWidget);
-    } else {
-      await expectLater(
-        captureTarget,
-        matchesGoldenFile(
-          'goldens/visual_closure_${_captureIpad ? name.replaceFirst('_phone', '_ipad') : name}.png',
-        ),
-      );
-    }
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump();
   }
 
   testWidgets('food catalog production empty state capture', (tester) async {
@@ -691,8 +717,16 @@ void main() {
         final decision = _coachOpeningSurface();
         expect(field, findsOneWidget);
         expect(decision, findsOneWidget);
-        expect(tester.getRect(field).top, lessThan(844));
-        expect(tester.getRect(decision).top, lessThan(844));
+        final viewport =
+            tester.view.physicalSize / tester.view.devicePixelRatio;
+        for (final target in [field, decision]) {
+          final rect = tester.getRect(target);
+          expect(rect.top, greaterThanOrEqualTo(0));
+          expect(rect.left, greaterThanOrEqualTo(0));
+          expect(rect.bottom, lessThanOrEqualTo(viewport.height));
+          expect(rect.right, lessThanOrEqualTo(viewport.width));
+          expect(target.hitTestable(), findsOneWidget);
+        }
       },
     );
   });
@@ -911,6 +945,12 @@ void main() {
       db: db,
       name: 'daily_log_meal_entry_phone',
       stableDailyLog: true,
+      prepare: (tester) async {
+        final title = find.byKey(const Key('daily-meal-detail-title'));
+        final back = find.byKey(const Key('daily-meal-detail-back'));
+        expect(tester.getRect(title).top, greaterThanOrEqualTo(0));
+        expect(back.hitTestable(), findsOneWidget);
+      },
     );
   });
 
@@ -1419,6 +1459,127 @@ void main() {
       );
     });
   }
+
+  testWidgets(
+    'nutrition macros read saved day goal and recalculate remaining',
+    (tester) async {
+      final db = await database(tester);
+      final date = DateTime(2026, 8, 14);
+      final preferences = PreferencesRepository(db);
+      await preferences.setMany({
+        'goal.calories': '2000',
+        'goal.carbsPercent': '45',
+        'goal.proteinPercent': '20',
+        'goal.fatPercent': '35',
+      });
+      final schedule = NutritionGoalScheduleRepository(preferences);
+      const target = NutritionGoalTarget(
+        calories: 1000,
+        carbsPercent: 45,
+        proteinPercent: 20,
+        fatPercent: 35,
+      );
+      await schedule.saveDay(date.weekday, target);
+      final foodId = await db
+          .into(db.foods)
+          .insert(
+            FoodsCompanion.insert(
+              name: 'Synthetic saved-goal evidence food',
+              calories: 620,
+              protein: 34,
+              carbs: 71,
+              fats: 19,
+              servingSize: const Value(100),
+              servingUnit: const Value('g'),
+              isCustom: const Value(true),
+              source: const Value('custom'),
+              nutrientEvidenceMask: Value(
+                NutrientEvidenceMask.fromValues(
+                  calories: 620,
+                  protein: 34,
+                  carbohydrates: 71,
+                  fat: 19,
+                ),
+              ),
+            ),
+          );
+      final repository = MealRepository(db);
+      final id = await repository.createMeal(
+        date: date,
+        name: 'breakfast',
+        type: 'breakfast',
+      );
+      await repository.addMealItem(
+        mealId: id,
+        foodId: foodId,
+        quantity: 100,
+        quantityInGrams: true,
+      );
+      await capture(
+        tester,
+        page: const NutritionAnalyticsPage(initialTab: 2),
+        db: db,
+        name: 'nutrition_analytics_macros_saved_goals_phone',
+        dateOverride: date,
+        prepare: (tester) async {
+          Finder row(String name) => find.byKey(Key('nutrition-goal-$name'));
+          void values(String name, List<String> values) {
+            for (final value in values) {
+              expect(
+                find.descendant(of: row(name), matching: find.text(value)),
+                findsOneWidget,
+              );
+            }
+          }
+
+          values('carbohydrates', ['71 g', '112.5 g', '41.5 g']);
+          values('fat', ['19 g', '38.9 g', '19.9 g']);
+          values('protein', ['34 g', '50 g', '16 g']);
+          await tester.runAsync(
+            () => schedule.saveDay(
+              date.weekday,
+              const NutritionGoalTarget(
+                calories: 800,
+                carbsPercent: 45,
+                proteinPercent: 20,
+                fatPercent: 35,
+              ),
+            ),
+          );
+          for (var i = 0; i < 30 && find.text('90 g').evaluate().isEmpty; i++) {
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 10)),
+            );
+            await tester.pump();
+          }
+          values('carbohydrates', ['71 g', '90 g', '19 g']);
+          values('fat', ['19 g', '31.1 g', '12.1 g']);
+          values('protein', ['34 g', '40 g', '6 g']);
+          expect(
+            await tester.runAsync(() => preferences.get('goal.calories')),
+            '2000',
+          );
+          await tester.runAsync(() => schedule.saveDay(date.weekday, target));
+          for (
+            var i = 0;
+            i < 30 && find.text('112.5 g').evaluate().isEmpty;
+            i++
+          ) {
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 10)),
+            );
+            await tester.pump();
+          }
+          values('carbohydrates', ['71 g', '112.5 g', '41.5 g']);
+          await captureClosureSurface(
+            tester,
+            find.byType(NutritionAnalyticsPage),
+            'nutrition-macros-actual-saved-goals',
+          );
+        },
+      );
+    },
+  );
 
   testWidgets('local export selected-day capture', (tester) async {
     final db = await database(tester);

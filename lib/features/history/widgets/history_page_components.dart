@@ -91,7 +91,9 @@ class _HistoryContextBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Theme.of(context).colorScheme.error),
+          BilGlassPressFeedback(
+            child: Icon(icon, color: Theme.of(context).colorScheme.error),
+          ),
           const SizedBox(width: PremiumDesignTokens.spaceSm),
           Expanded(
             child: Column(

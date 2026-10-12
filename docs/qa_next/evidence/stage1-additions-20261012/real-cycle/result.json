@@ -1,0 +1,50 @@
+{
+  "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "started": 1791821977.7047918,
+  "source_fingerprint": "33fb9b19751c20b9714ef60401802653105852319815c1f593f40e94425e7049",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=5m",
+    "--reporter=json",
+    "tools/qa/flutter/cloud_restore_postgres_cycle_test.dart"
+  ],
+  "pid": 14724,
+  "exit_code": 0,
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": [],
+  "finished": 1791822032.8004887,
+  "end_fingerprint": "33fb9b19751c20b9714ef60401802653105852319815c1f593f40e94425e7049",
+  "stable_source": true,
+  "delta_to_final": [
+    {
+      "file": "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "tested_sha256": "2f0fee727ee41ea95f056d54efd18c612e637f5584d350a57fd326020be82ffe",
+      "final_sha256": "77c1741c542b33ed2dbec2d556b50f09eb415869a53f10c2522c17a99fd702d6"
+    },
+    {
+      "file": "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "tested_sha256": "a1e032fa7806c79de4652f9fe5bfc287e657ac50ef4418ef25bcd00a72208707",
+      "final_sha256": "7e0f6793248a399c15097e8f0a7f0fcd6f6e19098dcde24162e005adf0804f97"
+    },
+    {
+      "file": "test/features/commerce/premium_label_badge_test.dart",
+      "tested_sha256": "c6008e02d4e790a867481acbaed2c8d0345a4e0a4212e2a01c47cd3d1737b90f",
+      "final_sha256": "033ec91f17af57f6e9ef91f64258ab63089bb73c4d236c4312634b228e5d7f33"
+    },
+    {
+      "file": "test/features/commerce/premium_nutrition_glass_test.dart",
+      "tested_sha256": "9b5aeafb6bddd670cf358b4992da191cbf0fbe6cb20a239a5c0f3b38c6356baa",
+      "final_sha256": "6520898ff235585c96b24914578641ffcce891de2e0f12bbb4707240de1a117d"
+    }
+  ]
+}

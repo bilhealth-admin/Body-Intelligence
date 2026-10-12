@@ -101,7 +101,7 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
             key: const Key('profile-settings-back'),
             tooltip: t('Back to settings', 'العودة إلى الإعدادات'),
             onPressed: saving ? null : leave,
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
           ),
         ),
         body: profileAsync.when(

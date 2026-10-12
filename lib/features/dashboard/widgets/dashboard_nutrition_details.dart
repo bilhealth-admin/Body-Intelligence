@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../dashboard_five_locale_copy.dart';
@@ -36,7 +38,7 @@ class DashboardDetailPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 20),
+              BilGlassPressFeedback(child: Icon(icon, size: 20)),
               const SizedBox(width: PremiumDesignTokens.spaceSm),
               Expanded(
                 child: Text(
@@ -104,7 +106,9 @@ class DashboardTargetRow extends StatelessWidget {
                 if (evidence.state == NutrientEvidenceState.partial)
                   NutrientEvidenceStatusText(state: evidence.state),
                 const SizedBox(height: 4),
-                LinearProgressIndicator(value: ratio),
+                BilStripedProgress(
+                  child: LinearProgressIndicator(value: ratio),
+                ),
                 Text(
                   exceeded
                       ? '${difference.abs().toStringAsFixed(0)} $unit ${dashboardFiveLocaleText('above the reference target', 'أعلى من الهدف المرجعي')}'

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -138,7 +139,9 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
           appBarTitle: context.strings.text('Scan food barcode'),
           centerTitle: true,
           enableBackButton: true,
-          backButtonIcon: const Icon(Icons.arrow_back),
+          // The installed SDK accepts Icon here. Shared SDK arrow feedback
+          // decorates the enabled button without changing that contract.
+          backButtonIcon: const Icon(Icons.chevron_left_rounded),
         ),
         isShowFlashIcon: false,
         delayMillis: 350,
@@ -630,7 +633,7 @@ class _ScannerError extends StatelessWidget {
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
+                icon: const BilGlassPressFeedback(child: Icon(Icons.refresh)),
                 label: Text(context.strings.text('Try again')),
               ),
             ],

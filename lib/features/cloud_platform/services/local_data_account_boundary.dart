@@ -113,8 +113,9 @@ final class LocalDataAccountBoundary {
   }
 
   Future<bool> _hasSubstantiveLocalData() async {
-    // Deliberately excludes seeded foods and generic preferences. Those are not
-    // sufficient reason to bind a health data set to one account.
+    // Seeded foods and generic UI preferences are not personal data. Custom
+    // nutrition and goal/recipe preferences are: a store containing only those
+    // records must not be silently rebound to another account.
     final row = await _database.customSelect('''
       SELECT CASE WHEN
         EXISTS(SELECT 1 FROM user_profile LIMIT 1) OR
@@ -133,6 +134,10 @@ final class LocalDataAccountBoundary {
         EXISTS(SELECT 1 FROM personal_experiments LIMIT 1) OR
         EXISTS(SELECT 1 FROM challenges LIMIT 1) OR
         EXISTS(SELECT 1 FROM body_measurement_entries LIMIT 1)
+        OR EXISTS(SELECT 1 FROM foods WHERE is_custom = 1 LIMIT 1)
+        OR EXISTS(SELECT 1 FROM preferences WHERE
+          key LIKE 'goal.%' OR key = 'goals.nutritionSchedule.v1'
+          OR key = 'nutrition.trustedRecipes.v1' LIMIT 1)
       THEN 1 ELSE 0 END AS has_data
     ''').getSingle();
     return row.read<int>('has_data') == 1;

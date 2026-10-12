@@ -108,7 +108,7 @@ extension _CoachHealthFlow on _IntelligenceCenterPageState {
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
           scrollable: true,
-          icon: Icon(_iconForAction(action.type)),
+          icon: BilGlassPressFeedback(child: Icon(_iconForAction(action.type))),
           title: Text(tr('Confirm action', 'تأكيد الإجراء')),
           content: Column(
             mainAxisSize: MainAxisSize.min,

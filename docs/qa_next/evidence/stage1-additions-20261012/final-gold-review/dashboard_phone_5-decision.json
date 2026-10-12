@@ -1,0 +1,21 @@
+{
+  "case": "dashboard_phone_5",
+  "previous_master_sha256": "4dc2a3d95a51a14454f4d7108141caacc4eb9fc30b8447393b9dc80c51ee8317",
+  "accepted_actual_sha256": "1948089cfd282c9a7da6d4ae4cb3e7bc7e488520f8c363b620da3e71ab297bb7",
+  "diff_bounds": [
+    145,
+    119,
+    245,
+    155
+  ],
+  "pixels_changed": 3352,
+  "review_image": "dashboard_phone_5.png",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+  "reason": "Owner explicitly requested metallic gold Premium. Changed 3352 pixels solely inside the existing marker; public labels, locked values and layout are unchanged.",
+  "promotion": {
+    "time": 1791821907.8901236,
+    "master_sha256": "1948089cfd282c9a7da6d4ae4cb3e7bc7e488520f8c363b620da3e71ab297bb7",
+    "method": "one exact named file; visual decision required"
+  }
+}

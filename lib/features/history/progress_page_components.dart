@@ -52,10 +52,12 @@ class _ProgressSelector extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 18,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            BilGlassPressFeedback(
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

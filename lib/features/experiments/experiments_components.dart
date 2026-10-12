@@ -97,10 +97,12 @@ class _ActiveExperimentCard extends StatelessWidget {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 14),
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 7,
-              borderRadius: BorderRadius.circular(9),
+            BilStripedProgress(
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 7,
+                borderRadius: BorderRadius.circular(9),
+              ),
             ),
             const SizedBox(height: 7),
             Text(
@@ -195,7 +197,9 @@ class _PresetCard extends StatelessWidget {
                   color: scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(preset.icon, color: scheme.primary),
+                child: BilGlassPressFeedback(
+                  child: Icon(preset.icon, color: scheme.primary),
+                ),
               ),
               const SizedBox(width: 13),
               Expanded(
@@ -224,7 +228,9 @@ class _PresetCard extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_rounded),
+                  const BilGlassPressFeedback(
+                    child: Icon(Icons.arrow_forward_rounded),
+                  ),
                 ],
               ),
             ],
@@ -271,7 +277,7 @@ class _ExperimentDetail extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20),
+        BilGlassPressFeedback(child: Icon(icon, size: 20)),
         const SizedBox(width: 9),
         Expanded(child: Text('$title: $value')),
       ],

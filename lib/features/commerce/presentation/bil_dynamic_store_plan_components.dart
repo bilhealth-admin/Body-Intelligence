@@ -95,11 +95,13 @@ class _PlanBenefitListState extends State<_PlanBenefitList> {
                   context,
                 ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
-              icon: Icon(
-                _expanded
-                    ? Icons.keyboard_arrow_up_rounded
-                    : Icons.keyboard_arrow_down_rounded,
-                size: 19,
+              icon: BilGlassPressFeedback(
+                child: Icon(
+                  _expanded
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                  size: 19,
+                ),
               ),
               label: Text(
                 _expanded

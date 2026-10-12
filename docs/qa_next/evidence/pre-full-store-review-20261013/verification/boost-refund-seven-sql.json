@@ -1,0 +1,69 @@
+{
+  "environment": "isolated loopback PostgreSQL, synthetic accounts",
+  "production_tested": false,
+  "cases": [
+    {
+      "name": "baseline missing tombstone read is reproduced",
+      "result": "PASS",
+      "detail": {
+        "baseline_missing_explicit_service_select": true
+      }
+    },
+    {
+      "name": "service read and client denial preserve RLS and RPC contracts",
+      "result": "PASS",
+      "detail": {
+        "service_select_only": true,
+        "client_select_and_rpc_denied": true,
+        "rls_enabled": true,
+        "rpc_contracts_preserved": true,
+        "migration_repeatable": true
+      }
+    },
+    {
+      "name": "credited refund replay is idempotent and owner bound",
+      "result": "PASS",
+      "detail": {
+        "duplicate_debit": 0,
+        "replay_credit": 0,
+        "other_owner_unchanged": true
+      }
+    },
+    {
+      "name": "refund before credit cannot grant later replay",
+      "result": "PASS",
+      "detail": {
+        "credit_after_canonical_refund": 0,
+        "missing_owner_not_invented": true
+      }
+    },
+    {
+      "name": "foreign owner and environment fail without financial writes",
+      "result": "PASS",
+      "detail": {
+        "foreign_owner_and_environment_rejected_atomically": true
+      }
+    },
+    {
+      "name": "stale refunds cannot erase a newer reversal or debit twice",
+      "result": "PASS",
+      "detail": {
+        "stale_event_preserves_newer_state": true,
+        "newer_refund_debited_once": true
+      }
+    },
+    {
+      "name": "privileged RPC body rejects a non-service JWT",
+      "result": "PASS",
+      "detail": {
+        "security_definer_checks_jwt_role": true
+      }
+    }
+  ],
+  "source_sha256": {
+    "supabase/tests/fixtures/boost_refund_baseline/schema.sql": "4874ee9b53eb1531b17ccb65af414cf0eca8f41510b59eeb1d0eb542885c4d38",
+    "supabase/migrations/20260916104000_verified_boost_refund_ledger.sql": "d6f142350ba890f7e551f45052cc10f2920c9fe24c5b82ec83c1160593c81896",
+    "supabase/migrations/20261012204610_boost_refund_tombstone_service_read.sql": "045a80617915ddc4f6b36a460925bedca36c1c950f96b721d835bd5af369a267"
+  },
+  "failed": 0
+}

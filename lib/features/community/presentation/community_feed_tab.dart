@@ -4,6 +4,7 @@ class _FeedTab extends StatefulWidget {
   const _FeedTab({
     required this.repository,
     required this.imagePicker,
+    required this.preview,
     this.initialMode = CommunityFeedMode.explore,
     this.onOpenCircles,
     this.ownerIsCurrent,
@@ -14,6 +15,7 @@ class _FeedTab extends StatefulWidget {
   });
   final CommunityRepository repository;
   final CommunityPostImagePickerContract imagePicker;
+  final _CommunityFeedVisitPreview preview;
   final CommunityFeedMode initialMode;
   final VoidCallback? onOpenCircles;
   final ValueGetter<bool>? ownerIsCurrent;
@@ -27,14 +29,27 @@ class _FeedTab extends StatefulWidget {
 class _FeedTabState extends State<_FeedTab>
     with
         AutomaticKeepAliveClientMixin<_FeedTab>,
-        _CommunityFeedPaginationMixin {
+        _CommunityFeedPaginationMixin,
+        WidgetsBindingObserver {
   static const _pageSize = 40;
   @override
-  late Future<List<CommunityPost>> _feed = Future<List<CommunityPost>>.sync(
-    _loadFirst,
-  );
+  late Future<List<CommunityPost>> _feed;
   Future<CommunityPolicyState>? _policyState;
   String? _policyLocale;
+  final _postModes = Expando<CommunityFeedMode>();
+  @override
+  List<CommunityPost> _tagPosts(
+    List<CommunityPost> posts,
+    CommunityFeedMode mode,
+  ) {
+    final scoped = List<CommunityPost>.unmodifiable(posts);
+    _postModes[scoped] = mode;
+    return scoped;
+  }
+
+  final _scroll = ScrollController(keepScrollOffset: false);
+  bool _restoreOffset = false;
+  double _targetOffset = 0;
   final _draft = _CommunityComposerDraft();
   @override
   final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
@@ -46,8 +61,7 @@ class _FeedTabState extends State<_FeedTab>
       <String, CommunityComment>{};
   @override
   final Map<String, String> _membershipTierByAuthor = <String, String>{};
-  late Future<List<CommunityTopic>> _suggestedTopics = widget.repository
-      .loadCommunityTopics();
+  late Future<List<CommunityTopic>> _suggestedTopics = widget.preview.topics;
   bool _managingPost = false;
   bool _openingComposer = false;
   bool _entryWelcomeVisible = true;
@@ -55,7 +69,10 @@ class _FeedTabState extends State<_FeedTab>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _selectedFeedMode = widget.initialMode;
+    _targetOffset = widget.preview.scrollOffsets[_selectedFeedMode] ?? 0;
+    _restoreOffset = _targetOffset > 0;
     // Never hold a ready feed behind an artificial welcome timer.
     _entryWelcomeVisible = false;
   }
@@ -63,6 +80,9 @@ class _FeedTabState extends State<_FeedTab>
   @override
   void didUpdateWidget(covariant _FeedTab oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.preview.policy, _policyState)) {
+      _policyState = widget.preview.policy;
+    }
     if (oldWidget.initialMode != widget.initialMode &&
         _selectedFeedMode != widget.initialMode) {
       unawaited(_selectFeedMode(widget.initialMode));
@@ -71,8 +91,17 @@ class _FeedTabState extends State<_FeedTab>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _rememberOffset();
+    _scroll.dispose();
     super.dispose();
   }
+
+  void _setFeedState(VoidCallback action) => setState(action);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) =>
+      _resumeFeed(state);
 
   @override
   bool _hasMore = false;
@@ -107,21 +136,11 @@ class _FeedTabState extends State<_FeedTab>
     super.didChangeDependencies();
     final locale = Localizations.localeOf(context).toLanguageTag();
     if (_policyState == null || _policyLocale != locale) {
+      if (_policyLocale == null || _policyLocale != locale) {
+        _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+      }
       _policyLocale = locale;
-      _policyState = _loadInitialPolicyState(locale);
-    }
-  }
-
-  Future<CommunityPolicyState> _loadInitialPolicyState(String locale) async {
-    try {
-      return await widget.repository.loadCommunityPolicyState(
-        localeCode: locale,
-      );
-    } on Object {
-      // Entry splash can temporarily cover the feed while this request
-      // finishes. Keep the policy boundary fail-closed without allowing a
-      // rejected Future to escape before CommunityPolicyNotice can observe it.
-      return const CommunityPolicyState.unavailable();
+      _policyState = widget.preview.policy;
     }
   }
 
@@ -131,9 +150,7 @@ class _FeedTabState extends State<_FeedTab>
     final visit = capturedVisit ?? _captureFeedVisit();
     if (visit == null) return null;
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final future = visit.repository.loadCommunityPolicyState(
-      localeCode: locale,
-    );
+    final future = widget.preview.refreshPolicy();
     if (!visit.isCurrent()) return null;
     setState(() {
       _policyLocale = locale;
@@ -142,6 +159,7 @@ class _FeedTabState extends State<_FeedTab>
     try {
       final state = await visit.run(() => future);
       visit.check();
+      if (!identical(_policyState, future)) return null;
       return state;
     } on CommunityOwnerOperationCancelled {
       return null;
@@ -435,8 +453,11 @@ class _FeedTabState extends State<_FeedTab>
         _managingPost) {
       return;
     }
+    _rememberOffset();
     setState(() {
       _selectedFeedMode = mode;
+      _targetOffset = widget.preview.scrollOffsets[mode] ?? 0;
+      _restoreOffset = true;
       _feed = Future<List<CommunityPost>>.sync(_loadFirst);
     });
     try {
@@ -448,32 +469,6 @@ class _FeedTabState extends State<_FeedTab>
       // FutureBuilder presents mode-specific load errors.
     }
   }
-
-  String _feedModeLabel(CommunityFeedMode mode) =>
-      _communityFeedModeLabel(context, mode);
-
-  String _emptyFeedMessage() => switch (_selectedFeedMode) {
-    CommunityFeedMode.following => communityText(
-      context,
-      'Follow members to see their approved posts here.',
-      'تابع أعضاءً لتظهر منشوراتهم المعتمدة هنا.',
-    ),
-    CommunityFeedMode.friends => communityText(
-      context,
-      'Accepted friends will appear here when they publish.',
-      'ستظهر منشورات أصدقائك المقبولين هنا عند النشر.',
-    ),
-    CommunityFeedMode.forYou => communityText(
-      context,
-      'Nothing personalized yet. Follow people, topics, or Circles to shape this feed.',
-      'لا توجد توصيات مخصصة بعد. تابع أشخاصًا أو مواضيع أو دوائر لتخصيص هذا الموجز.',
-    ),
-    CommunityFeedMode.explore => communityText(
-      context,
-      'No approved posts yet. Start the first conversation.',
-      'لا توجد منشورات معتمدة بعد. ابدأ أول محادثة.',
-    ),
-  };
 
   Future<void> _refresh() async {
     if (_openingComposer || _managingPost) return;
@@ -499,173 +494,6 @@ class _FeedTabState extends State<_FeedTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (_entryWelcomeVisible) {
-      return const CommunityWelcome();
-    }
-    return Stack(
-      children: [
-        FutureBuilder<List<CommunityPost>>(
-          future: _feed,
-          builder: (context, snapshot) {
-            final visit = _captureFeedVisit();
-            if (visit == null) {
-              return const _CommunityProfileOwnerChangedBody();
-            }
-            final posts = widget.suspendAfterOwnerChange
-                ? const <CommunityPost>[]
-                : snapshot.data ?? const <CommunityPost>[];
-            final loading = snapshot.connectionState != ConnectionState.done;
-            return RefreshIndicator(
-              onRefresh: _refresh,
-              child: Semantics(
-                key: const Key('community-public-feed'),
-                value: _feedModeLabel(_selectedFeedMode),
-                label: communityText(
-                  context,
-                  'Shared with BIL members',
-                  'مشاركات أعضاء BIL',
-                ),
-                child: CustomScrollView(
-                  key: PageStorageKey(
-                    'community-feed-scroll-${_selectedFeedMode.wireValue}',
-                  ),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: CommunityPolicyNotice(
-                        state: _policyState!,
-                        onReview: () => _reviewPolicy(visit),
-                        onRetry: () => _refreshPolicyState(visit),
-                      ),
-                    ),
-                    if (!loading || snapshot.hasData)
-                      SliverToBoxAdapter(
-                        child: _CommunityFeedReferenceHeader(
-                          repository: visit.repository,
-                          posts: posts,
-                          topics: _suggestedTopics,
-                          enabled:
-                              !_openingComposer &&
-                              !_managingPost &&
-                              !widget.suspendAfterOwnerChange,
-                          ownerIsCurrent: visit.isCurrent,
-                          onCompose: _openComposer,
-                          onOpenTopic: _openTopic,
-                          onOpenCircles: widget.onOpenCircles,
-                        ),
-                      ),
-                    if (!loading &&
-                        posts.isEmpty &&
-                        _selectedFeedMode == CommunityFeedMode.explore)
-                      SliverToBoxAdapter(
-                        child: _CommunityFeedTopicSuggestions(
-                          topics: _suggestedTopics,
-                          onOpen: _openTopic,
-                        ),
-                      ),
-                    if ((loading && snapshot.hasData) || _cacheRefreshing)
-                      const SliverToBoxAdapter(
-                        child: LinearProgressIndicator(),
-                      ),
-                    if (_cacheRefreshFailed)
-                      SliverToBoxAdapter(
-                        child: CommunityFeedRefreshNotice(onRetry: _refresh),
-                      ),
-                    if (snapshot.hasError)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: _InlineError(onRetry: _refresh),
-                      )
-                    else if (loading && !snapshot.hasData)
-                      const SliverToBoxAdapter(child: CommunityWelcome())
-                    else if (posts.isEmpty)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 96),
-                          child: Center(
-                            child: Text(
-                              _emptyFeedMessage(),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      SliverPadding(
-                        padding: EdgeInsets.fromLTRB(
-                          16,
-                          8,
-                          16,
-                          _hasMore ? 12 : 100,
-                        ),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final post = posts[index];
-                            return Padding(
-                              key: ValueKey(post.id),
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _CommunityPostCard(
-                                post: post,
-                                repository: visit.repository,
-                                ownerIsCurrent: visit.isCurrent,
-                                ownerChanges: visit.changes,
-                                currentUserId: visit.ownerId,
-                                referenceMetadata: _referenceByPost[post.id],
-                                viewCount: _viewCountByPost[post.id],
-                                commentPreview: _commentPreviewByPost[post.id],
-                                authorMembershipTier:
-                                    _membershipTierByAuthor[post.authorId],
-                                actionsEnabled:
-                                    !_openingComposer && !_managingPost,
-                                onAction: (value) => _managePost(post, value),
-                              ),
-                            );
-                          }, childCount: posts.length),
-                        ),
-                      ),
-                    if (!snapshot.hasError && posts.isNotEmpty && _hasMore)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                          child: Center(
-                            child: TextButton.icon(
-                              key: const Key('community-feed-load-more'),
-                              onPressed:
-                                  _loadingMore ||
-                                      _feedRefreshing ||
-                                      _cacheRefreshing
-                                  ? null
-                                  : () => _loadMore(posts),
-                              icon: _loadingMore
-                                  ? const SizedBox.square(
-                                      dimension: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.expand_more_rounded),
-                              label: Text(
-                                communityText(
-                                  context,
-                                  'Load older posts',
-                                  'تحميل منشورات أقدم',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
+    return _renderFeed(context);
   }
 }

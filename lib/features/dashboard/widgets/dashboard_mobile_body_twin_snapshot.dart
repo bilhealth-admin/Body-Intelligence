@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../dashboard_five_locale_copy.dart';
@@ -130,7 +131,9 @@ class _TwinSignalRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: scheme.primary),
+          BilGlassPressFeedback(
+            child: Icon(icon, size: 18, color: scheme.primary),
+          ),
           const SizedBox(width: PremiumDesignTokens.spaceSm),
           Expanded(
             child: Text.rich(

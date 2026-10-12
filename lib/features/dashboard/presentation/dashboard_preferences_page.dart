@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,6 +19,7 @@ part 'dashboard_preferences_actions.dart';
 part 'dashboard_preferences_catalog.dart';
 part 'dashboard_preferences_polish.dart';
 part 'dashboard_preferences_body.dart';
+part 'dashboard_preferences_sign_out.dart';
 
 @visibleForTesting
 String dashboardPremiumFeatureDestination(bool paid, String featureRoute) =>

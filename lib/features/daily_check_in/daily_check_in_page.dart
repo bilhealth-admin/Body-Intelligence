@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../../app/theme/bil_semantic_icons.dart';
 import '../../core/units/measurement_units.dart';
 import '../../data/database/date_keys.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../../shared/widgets/repeating_step_action.dart';
 import '../nutrition/services/bil_speech_to_text.dart';
 import '../intelligence_center/services/coach_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
@@ -290,17 +292,35 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                             display: display,
                             system: system,
                             busy: saving || skipping,
-                            onDecrease: weightKg == null
+                            canDecrease: () =>
+                                weightKg != null && weightKg! > 20,
+                            canIncrease: () =>
+                                weightKg != null && weightKg! < 500,
+                            onDecrease: weightKg == null || weightKg! <= 20
                                 ? null
                                 : () => setState(() {
                                     weightEdited = true;
-                                    weightKg = (weightKg! - 0.1).clamp(20, 500);
+                                    weightKg = decimalStep(
+                                      value: weightKg!,
+                                      step: .1,
+                                      direction: -1,
+                                      decimalPlaces: 1,
+                                      minimum: 20,
+                                      maximum: 500,
+                                    );
                                   }),
-                            onIncrease: weightKg == null
+                            onIncrease: weightKg == null || weightKg! >= 500
                                 ? null
                                 : () => setState(() {
                                     weightEdited = true;
-                                    weightKg = (weightKg! + 0.1).clamp(20, 500);
+                                    weightKg = decimalStep(
+                                      value: weightKg!,
+                                      step: .1,
+                                      direction: 1,
+                                      decimalPlaces: 1,
+                                      minimum: 20,
+                                      maximum: 500,
+                                    );
                                   }),
                             onEnter: () => enterWeight(system),
                             onVoice: () => enterWeightByVoice(system),
@@ -333,7 +353,9 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                                   ),
                                   showCheckmark: false,
                                   selected: measurementContext == option.$1,
-                                  avatar: Icon(option.$3, size: 18),
+                                  avatar: BilGlassPressFeedback(
+                                    child: Icon(option.$3, size: 18),
+                                  ),
                                   label: Text(
                                     dailyCheckInText(context, option.$2),
                                   ),
@@ -390,6 +412,8 @@ class _WeightEntryCard extends StatelessWidget {
     required this.display,
     required this.system,
     required this.busy,
+    required this.canDecrease,
+    required this.canIncrease,
     required this.onDecrease,
     required this.onIncrease,
     required this.onEnter,
@@ -399,6 +423,8 @@ class _WeightEntryCard extends StatelessWidget {
   final double? display;
   final MeasurementSystem system;
   final bool busy;
+  final ValueGetter<bool> canDecrease;
+  final ValueGetter<bool> canIncrease;
   final VoidCallback? onDecrease;
   final VoidCallback? onIncrease;
   final VoidCallback onEnter;
@@ -426,7 +452,10 @@ class _WeightEntryCard extends StatelessWidget {
           children: [
             _RepeatWeightButton(
               key: const Key('daily-check-in-weight-decrease'),
-              tooltip: '− 0.1 ${UnitConverter.weightUnit(system)}',
+              tooltip:
+                  '− ${UnitConverter.weightStep(system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
+              cancelScope: system,
+              canStep: canDecrease,
               onPressed: busy ? null : onDecrease,
               icon: Icons.remove_rounded,
             ),
@@ -457,7 +486,10 @@ class _WeightEntryCard extends StatelessWidget {
             ),
             _RepeatWeightButton(
               key: const Key('daily-check-in-weight-increase'),
-              tooltip: '+ 0.1 ${UnitConverter.weightUnit(system)}',
+              tooltip:
+                  '+ ${UnitConverter.weightStep(system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
+              cancelScope: system,
+              canStep: canIncrease,
               onPressed: busy ? null : onIncrease,
               icon: Icons.add_rounded,
             ),
@@ -488,101 +520,51 @@ class _WeightEntryCard extends StatelessWidget {
   );
 }
 
-/// A 100 g stepper that behaves like a real scale control: one short press is
-/// one step, while holding continues at a bounded repeat rate until release.
-class _RepeatWeightButton extends StatefulWidget {
+/// Uses the shared press lifecycle, retaining the approved circular controls.
+class _RepeatWeightButton extends StatelessWidget {
   const _RepeatWeightButton({
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    required this.cancelScope,
+    required this.canStep,
     super.key,
   });
-
   final IconData icon;
   final String tooltip;
   final VoidCallback? onPressed;
-
-  @override
-  State<_RepeatWeightButton> createState() => _RepeatWeightButtonState();
-}
-
-class _RepeatWeightButtonState extends State<_RepeatWeightButton> {
-  Timer? _repeatDelay;
-  Timer? _repeatTimer;
-  bool _pressed = false;
-
-  void _begin() {
-    final action = widget.onPressed;
-    if (action == null) return;
-    _stop();
-    setState(() => _pressed = true);
-    action();
-    _repeatDelay = Timer(const Duration(milliseconds: 340), () {
-      if (!mounted || !_pressed || widget.onPressed == null) return;
-      _repeatTimer = Timer.periodic(const Duration(milliseconds: 75), (_) {
-        if (mounted && _pressed) widget.onPressed?.call();
-      });
-    });
-  }
-
-  void _stop() {
-    _repeatDelay?.cancel();
-    _repeatTimer?.cancel();
-    _repeatDelay = null;
-    _repeatTimer = null;
-    if (_pressed && mounted) setState(() => _pressed = false);
-  }
-
-  @override
-  void didUpdateWidget(covariant _RepeatWeightButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.onPressed == null) _stop();
-  }
-
-  @override
-  void dispose() {
-    _repeatDelay?.cancel();
-    _repeatTimer?.cancel();
-    super.dispose();
-  }
+  final Object cancelScope;
+  final ValueGetter<bool> canStep;
 
   @override
   Widget build(BuildContext context) {
-    final enabled = widget.onPressed != null;
     final scheme = Theme.of(context).colorScheme;
-    return Tooltip(
-      message: widget.tooltip,
-      child: Semantics(
-        button: true,
-        enabled: enabled,
-        label: widget.tooltip,
-        onTap: enabled ? widget.onPressed : null,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: enabled ? (_) => _begin() : null,
-          onTapUp: enabled ? (_) => _stop() : null,
-          onTapCancel: enabled ? _stop : null,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 90),
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _pressed
-                  ? scheme.primaryContainer
-                  : scheme.surfaceContainerLowest,
-              border: Border.all(
-                color: enabled
+    return RepeatingStepAction(
+      cancelScope: cancelScope,
+      canStep: canStep,
+      onPressed: onPressed,
+      builder: (_, action, pressed) => Tooltip(
+        message: tooltip,
+        child: IconButton(
+          onPressed: action,
+          tooltip: tooltip,
+          style: IconButton.styleFrom(
+            minimumSize: const Size(52, 52),
+            maximumSize: const Size(52, 52),
+            backgroundColor: pressed
+                ? scheme.primaryContainer
+                : scheme.surfaceContainerLowest,
+            foregroundColor: scheme.onSurface,
+            disabledForegroundColor: scheme.onSurfaceVariant,
+            shape: CircleBorder(
+              side: BorderSide(
+                color: onPressed != null
                     ? scheme.outlineVariant
                     : scheme.outlineVariant.withValues(alpha: .45),
               ),
             ),
-            alignment: Alignment.center,
-            child: Icon(
-              widget.icon,
-              color: enabled ? scheme.onSurface : scheme.onSurfaceVariant,
-            ),
           ),
+          icon: BilGlassPressFeedback(child: Icon(icon)),
         ),
       ),
     );

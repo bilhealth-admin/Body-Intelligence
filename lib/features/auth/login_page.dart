@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -116,9 +117,11 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                       AuthEntryCopyKey.back,
                                     ),
                                     onPressed: () => context.go('/login'),
-                                    icon: const Icon(
-                                      Icons.arrow_back_rounded,
-                                      color: Colors.white,
+                                    icon: const BilGlassPressFeedback(
+                                      child: Icon(
+                                        Icons.arrow_back_rounded,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -256,7 +259,11 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Icon(Icons.arrow_forward_rounded),
+                                    : const BilGlassPressFeedback(
+                                        child: Icon(
+                                          Icons.arrow_forward_rounded,
+                                        ),
+                                      ),
                                 label: Text(
                                   authEntryText(
                                     context,
@@ -299,7 +306,7 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
 
   InputDecoration _decoration(String label, IconData icon) => InputDecoration(
     labelText: label,
-    prefixIcon: Icon(icon),
+    prefixIcon: BilGlassPressFeedback(child: Icon(icon)),
     filled: true,
     fillColor: const Color(0xFF102337),
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),

@@ -31,7 +31,9 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
               CommunityChannelsCopyKey.directoryUnavailable,
               action: TextButton.icon(
                 onPressed: () => controller.loadDirectory(),
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
                 label: Text(_copy(CommunityChannelsCopyKey.retry)),
               ),
             ),
@@ -124,7 +126,9 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                       const SizedBox(width: 4),
                       const ExcludeSemantics(
                         // This Material icon already mirrors in RTL.
-                        child: Icon(Icons.chevron_right_rounded),
+                        child: BilGlassPressFeedback(
+                          child: Icon(Icons.chevron_right_rounded),
+                        ),
                       ),
                     ],
                   ),
@@ -137,7 +141,9 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
               onPressed: controller.loadingDirectory
                   ? null
                   : () => controller.loadDirectory(more: true),
-              icon: const Icon(Icons.expand_more_rounded),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.expand_more_rounded),
+              ),
               label: Text(_copy(CommunityChannelsCopyKey.loadMoreChannels)),
             ),
         ],

@@ -18,6 +18,9 @@ void main() {
       'lib/features/intelligence_center/presentation/'
       'ai_coach_settings_page.dart',
     ).readAsStringSync();
+    final appPurchases = File(
+      'lib/features/commerce/providers/app_purchase_providers.dart',
+    ).readAsStringSync();
     final resetNotices = File(
       'lib/features/notifications/presentation/'
       'ai_coach_reset_notice_coordinator.dart',
@@ -43,29 +46,50 @@ void main() {
     expect(query, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
     expect(plans, contains('store.state == VerifiedStoreState.verified'));
     expect(plans, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
-    // The actual Settings runtime regression proves verified credits refresh
-    // even when native finish is pending; display state is not that authority.
+    // The owner-scoped app service now refreshes every reader even after
+    // Settings/Plans closes. Do not demand a second page-owned receipt listener.
     expect(
       settings,
-      contains('AiBoostPurchaseService()..addListener(_boostChanged)'),
+      contains(
+        'ref.read(appBoostPurchaseProvider)..addListener(_boostChanged)',
+      ),
+    );
+    expect(settings, isNot(contains('AiBoostPurchaseService()')));
+    expect(settings, contains('boost.removeListener(_boostChanged)'));
+    expect(settings, isNot(contains('boost.dispose()')));
+    expect(plans, contains('ref.read(appBoostPurchaseProvider)'));
+    expect(
+      appPurchases,
+      contains('ref.watch(verifiedEntitlementOwnerIdProvider)'),
     );
     expect(
-      settings,
-      contains('boost.verifiedCreditsRevision != _lastBoostCreditsRevision'),
+      appPurchases,
+      contains('revision == service.verifiedCreditsRevision'),
     );
     expect(
-      settings,
-      contains('_lastBoostCreditsRevision = boost.verifiedCreditsRevision;'),
+      appPurchases,
+      contains('revision = service.verifiedCreditsRevision;'),
     );
-    expect(settings, contains('ref.invalidate(aiBoostVisionAccessProvider);'));
-    expect(settings, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
+    expect(
+      appPurchases,
+      contains('ref.read(verifiedEntitlementOwnerIdProvider) != owner'),
+    );
+    expect(
+      appPurchases,
+      contains('ref.invalidate(aiVisionCreditStateProvider);'),
+    );
+    expect(
+      appPurchases,
+      contains('ref.invalidate(aiCoachCreditAccessProvider);'),
+    );
+    expect(appPurchases, contains('.requestAuthoritativeReload();'));
     expect(
       resetNotices,
       contains('ref.invalidate(aiCoachCreditAccessProvider);'),
     );
     expect(resetNotices, contains('.requestAuthoritativeReload();'));
     expect(settings, contains('ref.listen<int>(aiCoachUsageRefreshProvider'));
-    expect(settings, contains('usage = _loadUsage();'));
+    expect(settings, contains('usage = _startUsageLoad();'));
   });
 
   test('exhaustion routes stay scoped to AI Coach and Boost', () {

@@ -1,0 +1,66 @@
+[
+  {
+    "case": "dashboard_nutrient_goal_card_phone",
+    "previous_master_sha256": "d4e5118f09ddb6fa748c2a7df092c0880fc1b9d2ed959cf8cb12266884e22405",
+    "accepted_actual_sha256": "bf85b0d9b211cfd6206404d1607dceb596be2a67c07a61167bb71690f5ccca49",
+    "diff_bounds": [
+      324,
+      571,
+      351,
+      596
+    ],
+    "pixels_changed": 529,
+    "review_image": "dashboard_nutrient_goal_card_phone.png",
+    "visually_reviewed": true,
+    "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+    "reason": "Owner explicitly removed the gold Community arrow because Community is Free. 529 pixels only in that arrow; all other surfaces, nutrient data and geometry are unchanged."
+  },
+  {
+    "case": "dashboard_phone_5",
+    "previous_master_sha256": "4dc2a3d95a51a14454f4d7108141caacc4eb9fc30b8447393b9dc80c51ee8317",
+    "accepted_actual_sha256": "1948089cfd282c9a7da6d4ae4cb3e7bc7e488520f8c363b620da3e71ab297bb7",
+    "diff_bounds": [
+      145,
+      119,
+      245,
+      155
+    ],
+    "pixels_changed": 3352,
+    "review_image": "dashboard_phone_5.png",
+    "visually_reviewed": true,
+    "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+    "reason": "Owner explicitly requested metallic gold Premium. Changed 3352 pixels solely inside the existing marker; public labels, locked values and layout are unchanged."
+  },
+  {
+    "case": "daily_log_empty_phone",
+    "previous_master_sha256": "b2de22d79333b229d48810b919d6202971ec65a5529e5a7ffb09ba30237a02a3",
+    "accepted_actual_sha256": "42878b485bb199c52241728bc32b7a2967e95fb513cedb7aa83d579c34757237",
+    "diff_bounds": [
+      16,
+      310,
+      374,
+      844
+    ],
+    "pixels_changed": 93392,
+    "review_image": "daily_log_empty_phone.png",
+    "visually_reviewed": true,
+    "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+    "reason": "Metallic gold upgrade marker with readable dark ink and a real 48px touch target replaces the stretched old status pill. Free-only group shifts 15px to accommodate safe touch; paid calorie/macro rendering and goals are unchanged. Actual image inspected, no clipping or concealed public heading."
+  },
+  {
+    "case": "daily_log_meal_entry_phone",
+    "previous_master_sha256": "983e6a6d543de31d9f57afebe108ed6d659947953a53c83e7f12e5ae766f92f3",
+    "accepted_actual_sha256": "1537ce1b1f599093a78cc19dda03c8e2d0daa68d7becec28abfddcfb41b22513",
+    "diff_bounds": [
+      16,
+      331,
+      374,
+      844
+    ],
+    "pixels_changed": 64888,
+    "review_image": "daily_log_meal_entry_phone.png",
+    "visually_reviewed": true,
+    "reviewer": "Codex actual Master/Actual/Diff visual inspection, one case at a time",
+    "reason": "Same owner-requested gold upgrade action and 48px hit area in verified-Free meal view. Consumed calorie ring, macro circles, meal title and real meal-sourced electrolyte/goal rows retained; 15px lower group shift reflects the touch target, not data or font changes."
+  }
+]

@@ -132,7 +132,10 @@ class _BilWorkoutRoutineDetailsPageState
         padding: const EdgeInsets.only(bottom: 28),
         children: [
           if (locked)
-            _LockedWorkoutHero(item: item)
+            _LockedWorkoutHero(
+              item: item,
+              onUpgrade: verified ? _openPlans : null,
+            )
           else
             _WorkoutHeroMedia(
               item: item,
@@ -200,7 +203,9 @@ class _BilWorkoutRoutineDetailsPageState
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.arrow_forward_rounded),
+                    const BilGlassPressFeedback(
+                      child: Icon(Icons.arrow_forward_rounded),
+                    ),
                     const SizedBox(width: 10),
                     Flexible(
                       child: Text(
@@ -236,9 +241,10 @@ class _BilWorkoutRoutineDetailsPageState
 }
 
 class _LockedWorkoutHero extends StatelessWidget {
-  const _LockedWorkoutHero({required this.item});
+  const _LockedWorkoutHero({required this.item, this.onUpgrade});
 
   final WellnessContentItem item;
+  final VoidCallback? onUpgrade;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -263,7 +269,7 @@ class _LockedWorkoutHero extends StatelessWidget {
               'Premium workout. Instructions stay locked until server-verified access is active.',
               'تمرين مميز. تبقى التعليمات مقفلة حتى تفعيل الوصول الموثق من الخادم.',
             ),
-            child: const PremiumLabelBadge(),
+            child: PremiumLabelBadge(onTap: onUpgrade),
           ),
         ),
       ],
@@ -459,7 +465,9 @@ class _SourceAndSafety extends StatelessWidget {
               key: const Key('workout-original-source-link'),
               style: TextButton.styleFrom(padding: EdgeInsets.zero),
               onPressed: () => _openOriginalSource(context),
-              icon: const Icon(Icons.open_in_new_rounded, size: 17),
+              icon: const BilGlassPressFeedback(
+                child: Icon(Icons.open_in_new_rounded, size: 17),
+              ),
               label: Text(
                 _copy(context, 'Open original source', 'فتح المصدر الأصلي'),
               ),

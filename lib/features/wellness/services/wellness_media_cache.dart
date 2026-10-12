@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import '../../../app/services/health_storage_directory_native.dart';
 
 import '../domain/wellness_content_pack.dart';
 import 'wellness_access_token.dart';
@@ -222,7 +222,7 @@ class WellnessMediaCache implements WellnessMediaResolver {
         _injectedDirectory ??
         Directory(
           p.join(
-            (await getApplicationSupportDirectory()).path,
+            (await getProtectedApplicationSupportDirectory()).path,
             'wellness_media_cache',
           ),
         );

@@ -1,3 +1,4 @@
+import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/food_v2/coach_food_v2.dart';
@@ -231,7 +232,7 @@ class CoachFoodNutrientStrip extends StatelessWidget {
         color: color.withValues(alpha: .16),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, color: color, size: 20),
+      child: BilGlassPressFeedback(child: Icon(icon, color: color, size: 20)),
     );
     final labels = Column(
       crossAxisAlignment: CrossAxisAlignment.start,

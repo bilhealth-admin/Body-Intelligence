@@ -1,0 +1,26 @@
+[
+  {
+    "file": "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_masterImage.png",
+    "original_sha256": "0ab4091f33df9b445a57a369531b23de44cf589aea6dfd5f91177cdc3df54744",
+    "prior_generated_sha256": "0ab4091f33df9b445a57a369531b23de44cf589aea6dfd5f91177cdc3df54744",
+    "verified_restored": true
+  },
+  {
+    "file": "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_testImage.png",
+    "original_sha256": "e9d46a3822a81ed21928ea9e57989129ace904f3fbdc717bf1f174a69f1e2749",
+    "prior_generated_sha256": "e9d46a3822a81ed21928ea9e57989129ace904f3fbdc717bf1f174a69f1e2749",
+    "verified_restored": true
+  },
+  {
+    "file": "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_isolatedDiff.png",
+    "original_sha256": "09580d54c0a13c75ea910c6195d8b4ef6876fa0c121f95a2bf922b7def368bb3",
+    "prior_generated_sha256": "09580d54c0a13c75ea910c6195d8b4ef6876fa0c121f95a2bf922b7def368bb3",
+    "verified_restored": true
+  },
+  {
+    "file": "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_maskedDiff.png",
+    "original_sha256": "3b226dc3b7551c1d1de7dcb914228fc9eee5c66ed3109ef82c1fd549314f9198",
+    "prior_generated_sha256": "3b226dc3b7551c1d1de7dcb914228fc9eee5c66ed3109ef82c1fd549314f9198",
+    "verified_restored": true
+  }
+]

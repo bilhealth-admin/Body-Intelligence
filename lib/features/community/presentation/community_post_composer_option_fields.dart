@@ -39,9 +39,11 @@ extension _CommunityPostComposerOptionFields
               FilterChip(
                 key: Key('community-composer-topic-${topic.slug}'),
                 selected: widget.draft.topicSlugs.contains(topic.slug),
-                avatar: Icon(
-                  CommunityTaxonomySheet.iconForSlug(topic.slug),
-                  size: 16,
+                avatar: BilGlassPressFeedback(
+                  child: Icon(
+                    CommunityTaxonomySheet.iconForSlug(topic.slug),
+                    size: 16,
+                  ),
                 ),
                 label: Text(
                   CommunityTaxonomySheet.titleForSlug(context, topic.slug),
@@ -115,7 +117,9 @@ extension _CommunityPostComposerOptionFields
               ChoiceChip(
                 key: Key('community-composer-circle-${circle.slug}'),
                 selected: widget.draft.circleSlug == circle.slug,
-                avatar: Icon(_circleIcon(circle.slug), size: 16),
+                avatar: BilGlassPressFeedback(
+                  child: Icon(_circleIcon(circle.slug), size: 16),
+                ),
                 label: Text(_circleTitle(context, circle.slug)),
                 onSelected: busy
                     ? null

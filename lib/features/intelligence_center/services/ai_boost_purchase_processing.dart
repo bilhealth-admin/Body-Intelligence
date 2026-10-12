@@ -82,7 +82,7 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
         if (!current()) return;
         if (!verified.verified) throw StateError('verification_failed');
         checkoutTrace?.mark(StorePurchaseStage.serverProof);
-        _acceptDelivery(verified.delivery);
+        _acceptDelivery(verified.delivery, key);
         if (lastDelivery != null) {
           StorePurchaseTraceRegistry.bind(
             lastDelivery!.eventKey,
@@ -93,14 +93,27 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
             _userInitiatedProduct == purchase.productID &&
             purchase.status == PurchaseStatus.purchased;
         if (verified.delivery?.active == false) {
-          if (purchase.pendingCompletePurchase &&
-              defaultTargetPlatform != TargetPlatform.android) {
-            await _purchase.completePurchase(purchase).timeout(launchTimeout);
+          if (_verifiedInactive.add(key)) {
+            if (_verifiedInactive.length > 128) {
+              _verifiedInactive.remove(_verifiedInactive.first);
+            }
+            // Readers reload the authoritative balance; this never adds credit.
+            verifiedCreditsRevision++;
           }
-          if (!current()) return;
-          _unresolved = null;
-          _userInitiatedProduct = null;
           _publish(AiBoostPurchaseState.ready, 'purchase_inactive');
+          try {
+            if (purchase.pendingCompletePurchase &&
+                defaultTargetPlatform != TargetPlatform.android) {
+              await _purchase.completePurchase(purchase).timeout(launchTimeout);
+            }
+            if (!current()) return;
+            _unresolved = null;
+            _userInitiatedProduct = null;
+          } on Object {
+            if (current()) {
+              _publish(AiBoostPurchaseState.ready, 'store_finish_pending');
+            }
+          }
           return;
         }
         if (_credited.add(key)) {
@@ -112,6 +125,16 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
       if (current()) {
         _publish(AiBoostPurchaseState.failed, 'verification_failed');
       }
+      return;
+    }
+    if (_credited.contains(key)) {
+      // A replay/retry belongs to this transaction, never the most recent pack.
+      lastDelivery = _receiptDeliveries[key];
+    }
+    if (_verifiedInactive.contains(key)) {
+      _unresolved = null;
+      _userInitiatedProduct = null;
+      _publish(AiBoostPurchaseState.ready, 'purchase_inactive');
       return;
     }
     // Durable credit and native finish are different outcomes. No local balance
@@ -127,12 +150,32 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
           owner,
         ).timeout(const Duration(seconds: 28));
         if (!current()) return;
+        final delivery = finished.delivery;
+        final previous = _receiptDeliveries[key];
         if (!finished.verified ||
-            finished.delivery?.active != true ||
-            finished.delivery?.finishPending != false) {
+            delivery == null ||
+            previous == null ||
+            delivery.ownerId != owner ||
+            delivery.eventKey != previous.eventKey ||
+            delivery.store != previous.store ||
+            delivery.environment != previous.environment ||
+            delivery.productId != previous.productId ||
+            delivery.verifiedAt.isBefore(previous.verifiedAt) ||
+            delivery.finishPending ||
+            (!delivery.active && delivery.quantity != 0)) {
           throw StateError('store_finish_pending');
         }
-        _acceptDelivery(finished.delivery);
+        _acceptDelivery(delivery, key);
+        if (!delivery.active) {
+          if (_verifiedInactive.add(key)) {
+            verifiedCreditsRevision++; // Reload, never refund or grant locally.
+          }
+          _unresolved = null;
+          _userInitiatedProduct = null;
+          checkoutTrace?.mark(StorePurchaseStage.finishCompleted);
+          _publish(AiBoostPurchaseState.ready, 'purchase_inactive');
+          return;
+        }
       }
       if (defaultTargetPlatform != TargetPlatform.android &&
           purchase.pendingCompletePurchase) {
@@ -163,7 +206,9 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
     String owner,
   ) {
     final key = _receiptKey(purchase, owner);
-    if (!_credited.contains(key)) return false;
+    if (!_credited.contains(key) && !_verifiedInactive.contains(key)) {
+      return false;
+    }
     return state == AiBoostPurchaseState.pending ||
         errorCode == 'purchase_status_unknown' ||
         (_unresolved != null && _receiptKey(_unresolved!, owner) != key);

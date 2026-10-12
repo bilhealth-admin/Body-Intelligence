@@ -47,7 +47,9 @@ class _LinkRow extends StatelessWidget {
   Widget build(BuildContext context) => ListTile(
     title: Text(title),
     subtitle: subtitle == null ? null : Text(subtitle!),
-    trailing: const Icon(Icons.chevron_right_rounded),
+    trailing: const BilGlassPressFeedback(
+      child: Icon(Icons.chevron_right_rounded),
+    ),
     onTap: onTap,
   );
 }
@@ -107,9 +109,11 @@ class _PremiumRow extends ConsumerWidget {
         enabled: true,
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: Icon(
-          Icons.chevron_right_rounded,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        trailing: BilGlassPressFeedback(
+          child: Icon(
+            Icons.chevron_right_rounded,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         // An unknown or previously verified Free result may precede a fresh
         // server-side grant. Recheck on entry, then let the protected feature
@@ -188,9 +192,15 @@ class _StoredFitnessNumber extends ConsumerStatefulWidget {
 class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
   int value = 0;
   bool editorOpen = false;
+  int _ownerEpoch = 0;
   @override
   void initState() {
     super.initState();
+    ref.listenManual(profileAuthIdentityProvider, (previous, next) {
+      if (previous?.asData?.value.ownerId != next.asData?.value.ownerId) {
+        _ownerEpoch++;
+      }
+    });
     ref.read(preferencesRepositoryProvider).get(widget.keyName).then((saved) {
       if (mounted) setState(() => value = int.tryParse(saved ?? '') ?? 0);
     });
@@ -198,6 +208,7 @@ class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
 
   @override
   Widget build(BuildContext context) => ListTile(
+    key: Key('fitness-goal-${widget.keyName}'),
     title: Text(
       _copy[widget.label]?[Localizations.localeOf(context).languageCode] ??
           widget.label,
@@ -210,13 +221,14 @@ class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
       if (editorOpen) return;
       editorOpen = true;
       final repository = ref.read(preferencesRepositoryProvider);
+      final epoch = _ownerEpoch;
       final maximum = widget.keyName == 'goals.workoutsPerWeek' ? 14 : 300;
       int? next;
+      var draft = value;
       try {
         next = await showDialog<int>(
           context: context,
           builder: (dialogContext) {
-            var draft = value;
             return StatefulBuilder(
               builder: (_, setDialog) => AlertDialog(
                 title: Text(
@@ -228,21 +240,37 @@ class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
+                    RepeatingStepAction(
+                      cancelScope: (widget.keyName, maximum),
+                      canStep: () => draft > 0 && epoch == _ownerEpoch,
                       onPressed: draft > 0
                           ? () => setDialog(() => draft--)
                           : null,
-                      icon: const Icon(Icons.remove_rounded),
+                      builder: (_, action, _) => IconButton(
+                        key: const Key('fitness-goal-decrease'),
+                        tooltip:
+                            '-1 ${_copy[widget.label]?[Localizations.localeOf(context).languageCode] ?? widget.label}',
+                        onPressed: action,
+                        icon: const Icon(Icons.remove_rounded),
+                      ),
                     ),
                     Text(
                       '$draft',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                    IconButton(
+                    RepeatingStepAction(
+                      cancelScope: (widget.keyName, maximum),
+                      canStep: () => draft < maximum && epoch == _ownerEpoch,
                       onPressed: draft < maximum
                           ? () => setDialog(() => draft++)
                           : null,
-                      icon: const Icon(Icons.add_rounded),
+                      builder: (_, action, _) => IconButton(
+                        key: const Key('fitness-goal-increase'),
+                        tooltip:
+                            '+1 ${_copy[widget.label]?[Localizations.localeOf(context).languageCode] ?? widget.label}',
+                        onPressed: action,
+                        icon: const Icon(Icons.add_rounded),
+                      ),
                     ),
                   ],
                 ),
@@ -263,12 +291,14 @@ class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
       final saved = next;
       if (saved == null ||
           !mounted ||
+          epoch != _ownerEpoch ||
           !identical(repository, ref.read(preferencesRepositoryProvider))) {
         return;
       }
       try {
         await repository.set(widget.keyName, '$saved');
         if (mounted &&
+            epoch == _ownerEpoch &&
             identical(repository, ref.read(preferencesRepositoryProvider))) {
           setState(() => value = saved);
         }

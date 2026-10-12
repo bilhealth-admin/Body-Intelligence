@@ -1,0 +1,14 @@
+{
+  "case": "dashboard_phone",
+  "visually_reviewed": true,
+  "reviewer": "Codex actual-image inspection, not automatic pixel approval",
+  "reason": "Master predates accepted 2c. Exact 2c versus current has only 180 arrow pixels; watch, layout, calculated target2606 and all other pixels are preserved.",
+  "previous_master_sha256": "7cbc48ed77f8a7e19a2b4634955280248a86cebbe2ee9aa3852a6aec8c86e56e",
+  "accepted_actual_sha256": "4584eeafda11e75fc788216e792bcfef4d388615ef913262382f85df0e6031c8",
+  "review_image": "dashboard_phone.png",
+  "promotion": {
+    "time": 1791818686.5314746,
+    "master_sha256": "4584eeafda11e75fc788216e792bcfef4d388615ef913262382f85df0e6031c8",
+    "method": "one exact named file; visual decision required"
+  }
+}

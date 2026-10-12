@@ -1,0 +1,366 @@
+{
+  "applied": true,
+  "changed_files": [
+    "lib/features/admin/presentation/admin_notification_controls.dart",
+    "lib/features/analytics/nutrition_analytics_page.dart",
+    "lib/features/auth/account_data_conflict_page.dart",
+    "lib/features/cloud_platform/presentation/cloud_restore_conflict_controls.dart",
+    "lib/features/commerce/presentation/premium_route_access_surfaces.dart",
+    "lib/features/community/channels/presentation/community_channel_composer.dart",
+    "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+    "lib/features/community/presentation/community_chat_rendering.dart",
+    "lib/features/community/presentation/community_circles_page.dart",
+    "lib/features/community/presentation/community_connections_page.dart",
+    "lib/features/community/presentation/community_entry_gate.dart",
+    "lib/features/community/presentation/community_hub_sign_in_required.dart",
+    "lib/features/community/presentation/community_member_profile_header.dart",
+    "lib/features/community/presentation/community_messages_page.dart",
+    "lib/features/community/presentation/community_notifications_rendering.dart",
+    "lib/features/community/presentation/community_post_detail_rendering.dart",
+    "lib/features/community/presentation/community_safety_page.dart",
+    "lib/features/connected_health/connected_health_page.dart",
+    "lib/features/connected_health/connected_health_source_card.dart",
+    "lib/features/connected_health/partner_capabilities_page.dart",
+    "lib/features/connected_health/steps_history_page.dart",
+    "lib/features/connected_health/widgets/connected_health_card.dart",
+    "lib/features/dashboard/presentation/dashboard_preferences_sign_out.dart",
+    "lib/features/dashboard/widgets/dashboard_reference_goal_components.dart",
+    "lib/features/dashboard/widgets/dashboard_reference_locked_values.dart",
+    "lib/features/experiments/experiments_page.dart",
+    "lib/features/intelligence_center/presentation/ai_coach_settings_body.dart",
+    "lib/features/settings/account_deletion_page.dart",
+    "lib/features/settings/health_information_sources_page.dart",
+    "lib/features/settings/local_export_range_page.dart",
+    "lib/features/wellness/presentation/bil_workout_fullscreen_view.dart",
+    "lib/features/wellness/presentation/bil_workout_routine_details.dart",
+    "lib/features/wellness/presentation/bil_workout_routine_media.dart",
+    "lib/features/wellness/presentation/bil_workout_routines_page.dart",
+    "lib/features/wellness/presentation/bil_workout_routines_states.dart",
+    "lib/features/wellness/presentation/fasting_timer_page.dart",
+    "lib/features/wellness/presentation/professional_content_library_page.dart",
+    "lib/features/wellness/presentation/wellness_library_page.dart"
+  ],
+  "arrow_names": [
+    "CupertinoIcons.arrow_2_circlepath",
+    "CupertinoIcons.arrow_down_doc",
+    "CupertinoIcons.arrow_up_arrow_down",
+    "CupertinoIcons.chevron_back",
+    "CupertinoIcons.chevron_forward",
+    "Icons.arrow_back_ios_new_rounded",
+    "Icons.arrow_back_rounded",
+    "Icons.arrow_downward_rounded",
+    "Icons.arrow_drop_down_rounded",
+    "Icons.arrow_forward",
+    "Icons.arrow_forward_ios_rounded",
+    "Icons.arrow_forward_rounded",
+    "Icons.arrow_upward_rounded",
+    "Icons.chevron_left_rounded",
+    "Icons.chevron_right",
+    "Icons.chevron_right_rounded",
+    "Icons.compare_arrows",
+    "Icons.download_for_offline_outlined",
+    "Icons.download_rounded",
+    "Icons.drive_file_move_outline",
+    "Icons.expand_less_rounded",
+    "Icons.expand_more_rounded",
+    "Icons.file_download_outlined",
+    "Icons.keyboard_arrow_down_rounded",
+    "Icons.keyboard_arrow_up_rounded",
+    "Icons.login_rounded",
+    "Icons.logout_rounded",
+    "Icons.north_east_rounded",
+    "Icons.north_rounded",
+    "Icons.open_in_new_rounded",
+    "Icons.play_arrow_rounded",
+    "Icons.refresh",
+    "Icons.refresh_rounded",
+    "Icons.reply_all_outlined",
+    "Icons.reply_rounded",
+    "Icons.send_rounded",
+    "Icons.south_east_rounded",
+    "Icons.south_rounded",
+    "Icons.swap_horiz_rounded",
+    "Icons.sync",
+    "Icons.sync_problem_rounded",
+    "Icons.sync_rounded",
+    "Icons.trending_down_rounded",
+    "Icons.trending_flat_rounded",
+    "Icons.trending_up_rounded",
+    "Icons.undo_rounded",
+    "Icons.upload_rounded"
+  ],
+  "wrappers": [
+    {
+      "file": "lib/features/admin/presentation/admin_notification_controls.dart",
+      "line": 198,
+      "original": "const Icon(Icons.send_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.send_rounded))"
+    },
+    {
+      "file": "lib/features/analytics/nutrition_analytics_page.dart",
+      "line": 387,
+      "original": "const Icon(Icons.sync_problem_rounded, size: 44)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.sync_problem_rounded, size: 44))"
+    },
+    {
+      "file": "lib/features/auth/account_data_conflict_page.dart",
+      "line": 134,
+      "original": "const Icon(Icons.logout_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.logout_rounded))"
+    },
+    {
+      "file": "lib/features/cloud_platform/presentation/cloud_restore_conflict_controls.dart",
+      "line": 29,
+      "original": "const Icon(Icons.compare_arrows)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.compare_arrows))"
+    },
+    {
+      "file": "lib/features/commerce/presentation/premium_route_access_surfaces.dart",
+      "line": 42,
+      "original": "Icon(\n                      Icons.sync_problem_rounded,\n                      size: 42,\n                      color: scheme.onSurfaceVariant,\n                    )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                      Icons.sync_problem_rounded,\n                      size: 42,\n                      color: scheme.onSurfaceVariant,\n                    ))"
+    },
+    {
+      "file": "lib/features/community/channels/presentation/community_channel_composer.dart",
+      "line": 63,
+      "original": "const Icon(Icons.send_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.send_rounded))"
+    },
+    {
+      "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+      "line": 206,
+      "original": "const Icon(Icons.upload_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.upload_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_chat_rendering.dart",
+      "line": 411,
+      "original": "const Icon(Icons.send_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.send_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_circles_page.dart",
+      "line": 330,
+      "original": "const Icon(Icons.logout_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.logout_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_connections_page.dart",
+      "line": 481,
+      "original": "const Icon(Icons.login_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.login_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_entry_gate.dart",
+      "line": 315,
+      "original": "const Icon(Icons.login_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.login_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_hub_sign_in_required.dart",
+      "line": 39,
+      "original": "const Icon(Icons.login_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.login_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_member_profile_header.dart",
+      "line": 369,
+      "original": "const Icon(\n                                Icons.swap_horiz_rounded,\n                                size: 17,\n                              )",
+      "replacement": "const BilGlassPressFeedback(child: Icon(\n                                Icons.swap_horiz_rounded,\n                                size: 17,\n                              ))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_messages_page.dart",
+      "line": 421,
+      "original": "const Icon(Icons.login_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.login_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_notifications_rendering.dart",
+      "line": 93,
+      "original": "const Icon(Icons.login_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.login_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_post_detail_rendering.dart",
+      "line": 357,
+      "original": "const Icon(Icons.send_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.send_rounded))"
+    },
+    {
+      "file": "lib/features/community/presentation/community_safety_page.dart",
+      "line": 288,
+      "original": "const Icon(Icons.open_in_new_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded))"
+    },
+    {
+      "file": "lib/features/connected_health/connected_health_page.dart",
+      "line": 310,
+      "original": "const Icon(Icons.sync_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.sync_rounded))"
+    },
+    {
+      "file": "lib/features/connected_health/connected_health_source_card.dart",
+      "line": 61,
+      "original": "const Icon(Icons.sync_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.sync_rounded))"
+    },
+    {
+      "file": "lib/features/connected_health/partner_capabilities_page.dart",
+      "line": 187,
+      "original": "const Icon(Icons.open_in_new_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded))"
+    },
+    {
+      "file": "lib/features/connected_health/steps_history_page.dart",
+      "line": 130,
+      "original": "const Icon(Icons.sync_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.sync_rounded))"
+    },
+    {
+      "file": "lib/features/connected_health/widgets/connected_health_card.dart",
+      "line": 664,
+      "original": "Icon(Icons.sync_rounded, size: compact ? 14 : 17)",
+      "replacement": "BilGlassPressFeedback(child: Icon(Icons.sync_rounded, size: compact ? 14 : 17))"
+    },
+    {
+      "file": "lib/features/connected_health/widgets/connected_health_card.dart",
+      "line": 262,
+      "original": "const Icon(Icons.sync_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.sync_rounded))"
+    },
+    {
+      "file": "lib/features/dashboard/presentation/dashboard_preferences_sign_out.dart",
+      "line": 18,
+      "original": "const Icon(Icons.logout_rounded, color: Color(0xFFD92D3A))",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.logout_rounded, color: Color(0xFFD92D3A)))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_goal_components.dart",
+      "line": 557,
+      "original": "const Icon(Icons.swap_horiz_rounded, size: 20)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.swap_horiz_rounded, size: 20))"
+    },
+    {
+      "file": "lib/features/dashboard/widgets/dashboard_reference_locked_values.dart",
+      "line": 69,
+      "original": "const Icon(Icons.swap_horiz_rounded, size: 20)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.swap_horiz_rounded, size: 20))"
+    },
+    {
+      "file": "lib/features/experiments/experiments_page.dart",
+      "line": 182,
+      "original": "const Icon(Icons.play_arrow_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.play_arrow_rounded))"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/ai_coach_settings_body.dart",
+      "line": 224,
+      "original": "const Icon(Icons.open_in_new_rounded, size: 18)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded, size: 18))"
+    },
+    {
+      "file": "lib/features/settings/account_deletion_page.dart",
+      "line": 273,
+      "original": "const Icon(Icons.open_in_new_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded))"
+    },
+    {
+      "file": "lib/features/settings/account_deletion_page.dart",
+      "line": 212,
+      "original": "const Icon(Icons.open_in_new_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded))"
+    },
+    {
+      "file": "lib/features/settings/health_information_sources_page.dart",
+      "line": 137,
+      "original": "const Icon(Icons.open_in_new_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded))"
+    },
+    {
+      "file": "lib/features/settings/local_export_range_page.dart",
+      "line": 114,
+      "original": "const Icon(Icons.file_download_outlined)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.file_download_outlined))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_fullscreen_view.dart",
+      "line": 270,
+      "original": "Icon(\n                      value.isPlaying\n                          ? Icons.pause_rounded\n                          : Icons.play_arrow_rounded,\n                    )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                      value.isPlaying\n                          ? Icons.pause_rounded\n                          : Icons.play_arrow_rounded,\n                    ))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routines_page.dart",
+      "line": 417,
+      "original": "const Icon(Icons.download_for_offline_outlined)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.download_for_offline_outlined))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routines_states.dart",
+      "line": 119,
+      "original": "const Icon(Icons.download_for_offline_outlined)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.download_for_offline_outlined))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_details.dart",
+      "line": 464,
+      "original": "const Icon(Icons.open_in_new_rounded, size: 17)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded, size: 17))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_media.dart",
+      "line": 644,
+      "original": "const Icon(Icons.download_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.download_rounded))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_media.dart",
+      "line": 623,
+      "original": "const Icon(Icons.play_arrow_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.play_arrow_rounded))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routine_media.dart",
+      "line": 161,
+      "original": "Icon(Icons.play_arrow_rounded, color: Colors.black87)",
+      "replacement": "BilGlassPressFeedback(child: Icon(Icons.play_arrow_rounded, color: Colors.black87))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/fasting_timer_page.dart",
+      "line": 469,
+      "original": "Icon(\n                                        active\n                                            ? Icons.stop_rounded\n                                            : Icons.play_arrow_rounded,\n                                      )",
+      "replacement": "BilGlassPressFeedback(child: Icon(\n                                        active\n                                            ? Icons.stop_rounded\n                                            : Icons.play_arrow_rounded,\n                                      ))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/professional_content_library_page.dart",
+      "line": 497,
+      "original": "const Icon(Icons.open_in_new_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.open_in_new_rounded))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/professional_content_library_page.dart",
+      "line": 299,
+      "original": "const Icon(Icons.download_rounded)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.download_rounded))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/professional_content_library_page.dart",
+      "line": 88,
+      "original": "const Icon(Icons.download_for_offline_outlined)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.download_for_offline_outlined))"
+    },
+    {
+      "file": "lib/features/wellness/presentation/wellness_library_page.dart",
+      "line": 51,
+      "original": "const Icon(Icons.download_for_offline_outlined)",
+      "replacement": "const BilGlassPressFeedback(child: Icon(Icons.download_for_offline_outlined))"
+    }
+  ],
+  "typed_sdk_icon_slots": [
+    {
+      "file": "lib/features/nutrition/presentation/food_barcode_scanner_page.dart",
+      "line": 144,
+      "original": "const Icon(Icons.chevron_left_rounded)",
+      "coverage": "typed BarcodeAppBar Icon slot; shared enabled SDK arrow feedback"
+    }
+  ]
+}

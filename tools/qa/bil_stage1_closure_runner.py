@@ -22,7 +22,7 @@ def source_inputs() -> dict[str, str]:
         generated = '/failures/' in name and name.endswith((
             '_masterImage.png', '_testImage.png',
             '_isolatedDiff.png', '_maskedDiff.png'))
-        if not generated and name.startswith(('lib/', 'test/', 'supabase/functions/', 'supabase/migrations/', 'supabase/tests/', 'tools/qa/')) and path.is_file():
+        if not generated and (name.startswith(('lib/', 'test/', 'supabase/functions/', 'supabase/migrations/', 'supabase/tests/', 'tools/qa/', 'ios/Runner/', 'ios/Runner.xcodeproj/', 'android/app/')) or name in ('pubspec.yaml', 'pubspec.lock', 'assets/branding/google_translate_color.png', 'assets/branding/google_translate_white.png', 'tool/release/candidate_versions.json', 'tool/release/candidate_version_args.py')) and path.is_file():
             values[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     return values
 
@@ -41,10 +41,14 @@ def main() -> int:
     parser.add_argument("--case")
     parser.add_argument("--name", help="test name regular expression")
     parser.add_argument("--analyze", action="store_true")
+    parser.add_argument('--check-public-workout-stream', action='store_true',
+                        help='Opt into the existing read-only unauthenticated 32-byte CDN smoke test')
     parser.add_argument('--capture-purchase-review', action='store_true',
                         help='Enable commerce with fixture-only legal URLs for mocked host integration')
     parser.add_argument('--capture-health-review', action='store_true',
                         help='Enable the existing real Flutter health capture harness')
+    parser.add_argument('--capture-ipad', action='store_true',
+                        help='Include all existing iPad Golden cases, without updating masters')
     parser.add_argument('--wall-timeout', type=int, default=1800)
     parser.add_argument("--flutter", default=os.environ.get("BIL_FLUTTER", "flutter"))
     args = parser.parse_args()
@@ -67,6 +71,14 @@ def main() -> int:
         if args.analyze:
             parser.error('capture applies only to tests')
         command += ['--dart-define=BIL_CAPTURE_HEALTH_REVIEW=true']
+    if args.check_public_workout_stream:
+        if args.analyze:
+            parser.error('public stream smoke applies only to tests')
+        command += ['--dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true']
+    if args.capture_ipad:
+        if args.analyze:
+            parser.error('iPad capture applies only to tests')
+        command += ['--dart-define=BIL_CAPTURE_IPAD=true']
     if args.case:
         if args.analyze:
             parser.error("case applies only to tests")
@@ -82,7 +94,7 @@ def main() -> int:
     if log.exists() or record.exists():
         parser.error("run label already recorded; choose a new label")
     state = {"label": args.label, "command": command, "head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "started": time.time(), "files": {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest() for path in args.files}}
-    state['fingerprint_version'] = 2
+    state['fingerprint_version'] = 3
     state['source_inputs'] = source_inputs()
     state['source_fingerprint'] = fingerprint(state['source_inputs'])
     with log.open("wb") as output:

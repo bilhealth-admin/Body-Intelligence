@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/wellness_content_pack.dart';
@@ -154,7 +155,7 @@ class _PackCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(_icon(pack.type)),
+              BilGlassPressFeedback(child: Icon(_icon(pack.type))),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -247,7 +248,7 @@ class _MessageState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 52),
+          BilGlassPressFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 16),
           Text(
             title,

@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_striped_progress.dart';
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -43,7 +45,9 @@ class NutritionProgressCard extends StatelessWidget {
                   CircleAvatar(
                     radius: 18,
                     backgroundColor: color.withValues(alpha: 0.14),
-                    child: Icon(icon, color: color, size: 20),
+                    child: BilGlassPressFeedback(
+                      child: Icon(icon, color: color, size: 20),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -64,10 +68,12 @@ class NutritionProgressCard extends StatelessWidget {
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: progress,
-                color: color,
-                backgroundColor: color.withValues(alpha: 0.14),
+              BilStripedProgress(
+                child: LinearProgressIndicator(
+                  value: progress,
+                  color: color,
+                  backgroundColor: color.withValues(alpha: 0.14),
+                ),
               ),
               const SizedBox(height: 6),
               Text(

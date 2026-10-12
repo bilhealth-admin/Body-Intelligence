@@ -60,7 +60,9 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
                       dimension: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.send_rounded),
+                  : const BilGlassPressFeedback(
+                      child: Icon(Icons.send_rounded),
+                    ),
             ),
           ),
         ],
@@ -178,7 +180,7 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
             controller.sending || !controller.canSend || !controller.foreground
             ? null
             : () => _send(controller, retry: true),
-        icon: const Icon(Icons.refresh_rounded),
+        icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
         label: Text(_copy(CommunityChannelsCopyKey.retrySend)),
       ),
     );

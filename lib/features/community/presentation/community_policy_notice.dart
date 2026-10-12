@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/community_content_policy.dart';
@@ -9,20 +10,26 @@ import 'community_copy.dart';
 class CommunityPolicyNotice extends StatelessWidget {
   const CommunityPolicyNotice({
     required this.state,
+    this.initialState,
     required this.onReview,
     required this.onRetry,
     super.key,
   });
 
   final Future<CommunityPolicyState> state;
+  final CommunityPolicyState? initialState;
   final VoidCallback onReview;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) => FutureBuilder<CommunityPolicyState>(
     future: state,
+    initialData: initialState,
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done) {
+        if (initialState?.permitsCommunityPublishing == true) {
+          return const SizedBox.shrink();
+        }
         return _NoticeCard(
           key: const Key('community-policy-notice-loading'),
           icon: Icons.hourglass_top_rounded,
@@ -142,7 +149,7 @@ class _NoticeCard extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           else
-            Icon(icon, size: 24),
+            BilGlassPressFeedback(child: Icon(icon, size: 24)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

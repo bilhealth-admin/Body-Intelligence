@@ -7,6 +7,11 @@ abstract final class BilStoreRecoveryCopy {
   ];
 
   static String? text(String locale, String key) {
+    if (key == 'purchase_inactive') {
+      return _inactivePurchase[locale] ??
+          _inactivePurchase[locale.split('-').first] ??
+          _inactivePurchase['en']!;
+    }
     if (key == 'continue_verification') {
       return _continueVerification[locale] ??
           _continueVerification[locale.split('-').first] ??
@@ -23,6 +28,39 @@ abstract final class BilStoreRecoveryCopy {
         _copy[locale] ?? _copy[locale.split('-').first] ?? _copy['en']!;
     return copy[index];
   }
+
+  static const _inactivePurchase = <String, String>{
+    'en': "This purchase is no longer active. No benefits were added.",
+    'ar': "هذه العملية لم تعد فعّالة. لم تتم إضافة أي مزايا.",
+    'fr': "Cet achat n’est plus actif. Aucun avantage n’a été ajouté.",
+    'es': "Esta compra ya no está activa. No se añadieron beneficios.",
+    'tr': "Bu satın alma artık etkin değil. Herhangi bir avantaj eklenmedi.",
+    'de':
+        "Dieser Kauf ist nicht mehr aktiv. Es wurden keine Vorteile hinzugefügt.",
+    'it': "Questo acquisto non è più attivo. Non sono stati aggiunti vantaggi.",
+    'pt': "Esta compra já não está ativa. Não foram adicionados benefícios.",
+    'pt-br':
+        "Esta compra não está mais ativa. Nenhum benefício foi adicionado.",
+    'pt-pt': "Esta compra já não está ativa. Não foram adicionados benefícios.",
+    'fa': "این خرید دیگر فعال نیست. هیچ مزیتی اضافه نشده است.",
+    'ur': "یہ خریداری اب فعال نہیں ہے۔ کوئی سہولت شامل نہیں کی گئی۔",
+    'hi': "यह खरीदारी अब सक्रिय नहीं है। कोई लाभ नहीं जोड़ा गया।",
+    'id':
+        "Pembelian ini sudah tidak aktif. Tidak ada manfaat yang ditambahkan.",
+    'ms': "Pembelian ini tidak lagi aktif. Tiada manfaat ditambah.",
+    'ja': "この購入は現在有効ではありません。特典は追加されていません。",
+    'ko': "이 구매는 더 이상 활성 상태가 아닙니다. 혜택이 추가되지 않았습니다.",
+    'zh-hans': "此购买已不再有效。未添加任何权益。",
+    'zh-hant': "此購買已不再有效。未新增任何權益。",
+    'ru': "Эта покупка больше не активна. Преимущества не добавлены.",
+    'bn': "এই কেনাকাটা আর সক্রিয় নেই। কোনো সুবিধা যোগ করা হয়নি।",
+    'vi': "Giao dịch này không còn hiệu lực. Không có quyền lợi nào được thêm.",
+    'th': "การซื้อนี้ไม่มีผลแล้ว ยังไม่มีการเพิ่มสิทธิประโยชน์",
+    'pl': "Ten zakup nie jest już aktywny. Nie dodano żadnych korzyści.",
+    'nl':
+        "Deze aankoop is niet meer actief. Er zijn geen voordelen toegevoegd.",
+    'uk': "Ця покупка більше не активна. Переваги не додано.",
+  };
 
   static const _continueVerification = <String, String>{
     'en': 'Continue verification',

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -252,7 +253,7 @@ class HelpCenterPage extends StatelessWidget {
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/settings'),
-            icon: const Icon(Icons.arrow_back_rounded),
+            icon: const BackButtonIcon(),
           ),
           title: Text(t('Help', 'المساعدة', 'Aide', 'Ayuda', 'Yardım')),
         ),
@@ -268,12 +269,14 @@ class HelpCenterPage extends StatelessWidget {
             return ListTile(
               minTileHeight: 54,
               title: Text(row.title),
-              trailing: Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
-                size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              trailing: BilGlassPressFeedback(
+                child: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               onTap: row.action,
             );

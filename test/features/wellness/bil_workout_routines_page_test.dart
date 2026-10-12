@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -20,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -317,6 +319,73 @@ void main() {
     expect(routine['source'], 'https://bilhealth.com/workouts/strength-01');
     expect(routine['recordedAt'], isA<String>());
     expect(routine, isNot(contains('calories')));
+  });
+
+  testWidgets('workout gold badge opens Plans only after verified denial', (
+    tester,
+  ) async {
+    final lookup = Completer<SubscriptionState>();
+    final mediaCache = _RecordingMediaCache();
+    addTearDown(mediaCache.dispose);
+    var plansVisits = 0;
+    final router = GoRouter(
+      initialLocation: '/routine',
+      routes: [
+        GoRoute(
+          path: '/routine',
+          builder: (_, _) => BilWorkoutRoutineDetailsPage(
+            item: _paidWorkout,
+            initiallySaved: false,
+            onToggleSaved: () async {},
+            mediaCache: mediaCache,
+            offline: true,
+          ),
+        ),
+        GoRoute(
+          path: '/plans',
+          builder: (_, _) {
+            plansVisits++;
+            return const Scaffold(body: Text('Explicit Plans destination'));
+          },
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWith((_) => lookup.future),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    expect(
+      tester.widget<PremiumLabelBadge>(find.byType(PremiumLabelBadge)).onTap,
+      isNull,
+    );
+    expect(plansVisits, 0);
+    expect(find.text('PRIVATE INSTRUCTION MUST STAY HIDDEN'), findsNothing);
+    lookup.complete(
+      SubscriptionState(
+        plan: CommercePlan.free,
+        entitlements: FreePlan.entitlements,
+        authority: EntitlementAuthority.verifiedServer,
+        isPurchasable: true,
+        canRestorePurchases: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<PremiumLabelBadge>(find.byType(PremiumLabelBadge)).onTap,
+      isNotNull,
+    );
+    await tester.tap(find.byType(PremiumLabelBadge));
+    await tester.pumpAndSettle();
+    expect(plansVisits, 1);
+    expect(find.text('Explicit Plans destination'), findsOneWidget);
+    expect(mediaCache.videoResolutions, 0);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(

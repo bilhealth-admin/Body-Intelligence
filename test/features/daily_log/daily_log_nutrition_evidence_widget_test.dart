@@ -1,4 +1,3 @@
-import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_meals_list.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_summary_widgets.dart';
@@ -48,25 +47,30 @@ void main() {
             diaryText(tester, 'daily-summary-calories-value'),
             contains('1905'),
           );
-          final unavailable = tester
-              .element(find.byType(DailyLogSnapshot))
-              .strings
-              .text('Unavailable');
-          for (final macro in ['carbs', 'protein', 'fat']) {
-            expect(diaryText(tester, 'daily-summary-$macro-grams'), '—');
+          for (final macro in {
+            'carbs': 250,
+            'protein': 100,
+            'fat': 70,
+          }.entries) {
+            expect(
+              diaryText(tester, 'daily-summary-${macro.key}-grams'),
+              '— / ${macro.value}',
+            );
             expect(
               tester
                   .widget<Semantics>(
-                    find.byKey(Key('daily-summary-$macro-percent')),
+                    find.byKey(Key('daily-summary-${macro.key}-percent')),
                   )
                   .properties
                   .value,
-              unavailable,
+              '—',
             );
           }
-          for (final goalText in [' / 250', ' / 100', ' / 70']) {
+          for (final macro in ['carbs', 'protein', 'fat']) {
             expect(
-              tester.widget<Text>(find.text(goalText)).textDirection,
+              tester
+                  .widget<Text>(find.byKey(Key('daily-summary-$macro-grams')))
+                  .textDirection,
               TextDirection.ltr,
             );
           }
@@ -91,7 +95,7 @@ void main() {
         startsWith('—'),
       );
       expect(diaryText(tester, 'daily-summary-calories-status'), 'Unavailable');
-      expect(diaryText(tester, 'daily-summary-protein-grams'), '—');
+      expect(diaryText(tester, 'daily-summary-protein-grams'), '— / 100');
       expect(
         diaryText(tester, 'daily-summary-calories-value'),
         isNot(contains('123')),
@@ -151,9 +155,20 @@ void main() {
         ),
       );
       expect(diaryText(tester, 'daily-meal-totals-breakfast'), startsWith('—'));
+      final macros = find.byKey(const Key('daily-meal-macros-breakfast'));
+      for (final label in ['Carbohydrates · g', 'Protein · g', 'Fat · g']) {
+        expect(
+          find.descendant(of: macros, matching: find.text(label)),
+          findsOneWidget,
+        );
+      }
       expect(
-        diaryText(tester, 'daily-meal-macros-breakfast'),
-        'C —   P —   F —',
+        find.descendant(of: macros, matching: find.text('—')),
+        findsNWidgets(3),
+      );
+      expect(
+        find.descendant(of: macros, matching: find.text('0')),
+        findsNothing,
       );
     },
   );
@@ -269,11 +284,16 @@ void main() {
       ]),
     );
     expect(diaryText(tester, 'daily-summary-calories-value'), startsWith('0 '));
-    for (final macro in ['carbs', 'protein', 'fat']) {
-      expect(diaryText(tester, 'daily-summary-$macro-grams'), '0 g');
+    for (final macro in {'carbs': 250, 'protein': 100, 'fat': 70}.entries) {
+      expect(
+        diaryText(tester, 'daily-summary-${macro.key}-grams'),
+        '0 / ${macro.value}',
+      );
       expect(
         tester
-            .widget<Semantics>(find.byKey(Key('daily-summary-$macro-percent')))
+            .widget<Semantics>(
+              find.byKey(Key('daily-summary-${macro.key}-percent')),
+            )
             .properties
             .value,
         '0%',

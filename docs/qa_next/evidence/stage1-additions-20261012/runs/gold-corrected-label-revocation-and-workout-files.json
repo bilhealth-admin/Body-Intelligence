@@ -1,0 +1,188 @@
+{
+  "label": "gold-corrected-label-revocation-and-workout-files",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/paywall_ai_market_benefits_test.dart",
+    "test/features/wellness/recipe_detail_entitlement_lifecycle_test.dart",
+    "test/features/wellness/bil_workout_routines_page_test.dart"
+  ],
+  "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+  "started": 1791821551.9573548,
+  "files": {
+    "test/features/commerce/paywall_ai_market_benefits_test.dart": "69c606ac35ff5f5427a3afd4efa31e90bc5ad899fbf0075a5ff6e9896e734ccc",
+    "test/features/wellness/recipe_detail_entitlement_lifecycle_test.dart": "cda208eb85ab6ba0fa061d4e1c370071c744aad2caa95b703ba5cf86f9a873b1",
+    "test/features/wellness/bil_workout_routines_page_test.dart": "787ee06c8b23b44e118d515b76bd4842ed89b459d3a69eaca2f644847bcedb3a"
+  },
+  "fingerprint_version": 3,
+  "source_fingerprint": "e2f89678cf1675550ca99e3a2f38c842d0c2fb8d675c66e20bed74e27da92491",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/paywall_ai_market_benefits_test.dart",
+    "test/features/wellness/recipe_detail_entitlement_lifecycle_test.dart",
+    "test/features/wellness/bil_workout_routines_page_test.dart"
+  ],
+  "pid": 6400,
+  "exit_code": 0,
+  "finished": 1791821572.6057127,
+  "end_fingerprint": "e2f89678cf1675550ca99e3a2f38c842d0c2fb8d675c66e20bed74e27da92491",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "AI-only storefront explains concrete Premium and AI benefits",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/paywall_ai_market_benefits_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an already-open recipe relocks on refund",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/recipe_detail_entitlement_lifecycle_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an already-open recipe relocks on expiry",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/recipe_detail_entitlement_lifecycle_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "phone header renders the complete workout title readably",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verified routine supports details, truthful video state, logging, and saving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "custom routine saves two movements and survives rebuild",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed custom routine write keeps builder input for retry",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "malformed and duplicate stored custom routines fail closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "empty library offers honest non-playable metadata covers",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "default logger preserves today and records trusted provenance",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workout gold badge opens Plans only after verified denial",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "paid routine stays locked and never reveals instructions without verified access",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "open paid details relock immediately when verified access is revoked",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "localized categories use distinct promotional covers with safe semantics",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one premium hub keeps Gym and Home in bounded plan sections",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "presenter filter uses explicit metadata without claiming training eligibility",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "presenter disclaimer uses training suitability in five locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/bil_workout_routines_page_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 17,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": [],
+  "original_record_sha256": "6cfb26e268bee7f5b165eae77d75e2e14ffda79879e50db0c537accc5f55d4f8",
+  "delta_to_final": [
+    {
+      "file": "lib/features/commerce/presentation/premium_nutrition_glass.dart",
+      "tested_sha256": "39b68b93da9cfd1b9d9b022a2f95129313f236a321266fcaf6d00fb973177a39",
+      "final_sha256": "081629cd218afe2a51546d812e723cccdafb5c0d1fef1b330a200de542806664"
+    },
+    {
+      "file": "test/dashboard_polish/dashboard_reference_nutrition_cards_test.dart",
+      "tested_sha256": "2f0fee727ee41ea95f056d54efd18c612e637f5584d350a57fd326020be82ffe",
+      "final_sha256": "77c1741c542b33ed2dbec2d556b50f09eb415869a53f10c2522c17a99fd702d6"
+    },
+    {
+      "file": "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "tested_sha256": "a1e032fa7806c79de4652f9fe5bfc287e657ac50ef4418ef25bcd00a72208707",
+      "final_sha256": "7e0f6793248a399c15097e8f0a7f0fcd6f6e19098dcde24162e005adf0804f97"
+    },
+    {
+      "file": "test/features/commerce/premium_label_badge_test.dart",
+      "tested_sha256": "c6008e02d4e790a867481acbaed2c8d0345a4e0a4212e2a01c47cd3d1737b90f",
+      "final_sha256": "033ec91f17af57f6e9ef91f64258ab63089bb73c4d236c4312634b228e5d7f33"
+    },
+    {
+      "file": "test/features/commerce/premium_nutrition_glass_test.dart",
+      "tested_sha256": "bf4bb41e5f71d9ad77dd62a6a461854e16f5f160f10a1be7929c5819b7db06d1",
+      "final_sha256": "6520898ff235585c96b24914578641ffcce891de2e0f12bbb4707240de1a117d"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+      "tested_sha256": "b2de22d79333b229d48810b919d6202971ec65a5529e5a7ffb09ba30237a02a3",
+      "final_sha256": "42878b485bb199c52241728bc32b7a2967e95fb513cedb7aa83d579c34757237"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
+      "tested_sha256": "983e6a6d543de31d9f57afebe108ed6d659947953a53c83e7f12e5ae766f92f3",
+      "final_sha256": "1537ce1b1f599093a78cc19dda03c8e2d0daa68d7becec28abfddcfb41b22513"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_nutrient_goal_card_phone.png",
+      "tested_sha256": "d4e5118f09ddb6fa748c2a7df092c0880fc1b9d2ed959cf8cb12266884e22405",
+      "final_sha256": "bf85b0d9b211cfd6206404d1607dceb596be2a67c07a61167bb71690f5ccca49"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
+      "tested_sha256": "4dc2a3d95a51a14454f4d7108141caacc4eb9fc30b8447393b9dc80c51ee8317",
+      "final_sha256": "1948089cfd282c9a7da6d4ae4cb3e7bc7e488520f8c363b620da3e71ab297bb7"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_saved_goals_phone.png",
+      "tested_sha256": null,
+      "final_sha256": "02e546396d2b6cdfbc27e85bc637b3b7a7c1d02efab19bb8d11986fcc9ed54e4"
+    }
+  ]
+}

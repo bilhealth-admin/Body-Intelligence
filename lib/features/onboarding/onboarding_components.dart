@@ -143,7 +143,7 @@ class _InfoBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: scheme.primary),
+            BilGlassPressFeedback(child: Icon(icon, color: scheme.primary)),
             const SizedBox(width: 10),
             Expanded(child: Text(text, style: const TextStyle(height: 1.4))),
           ],

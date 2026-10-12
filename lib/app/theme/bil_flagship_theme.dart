@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import 'bil_flagship_tokens.dart';
 import 'bil_typography.dart';
+import 'bil_navigation_press_style.dart';
 import 'premium_design_tokens.dart';
 
 abstract final class BilFlagshipTheme {
@@ -290,6 +291,9 @@ abstract final class BilFlagshipTheme {
             borderRadius: BorderRadius.circular(BilFlagshipTokens.radiusMd),
           ),
         ),
+      ),
+      actionIconTheme: const ActionIconThemeData(
+        backButtonIconBuilder: BilNavigationPressStyle.backIcon,
       ),
       iconButtonTheme: IconButtonThemeData(
         style: ButtonStyle(

@@ -1,0 +1,1654 @@
+{
+  "schema_version": 1,
+  "dataset_scope": "preserved_historical_owner_reference_dataset",
+  "source_root": "G:\\BIL_Project\\body_intelligence_log",
+  "source_head": "2a5cbb3f48fd64347cc2dbb79228d99772acb5cc",
+  "source_branch": "codex/bil-release-recovery-20260908",
+  "source_worktree_dirty": true,
+  "source_worktree_status_counts": {
+    "entries": 1569,
+    "tracked_changes": 27,
+    "untracked_entries": 1542
+  },
+  "selected_input_git_status": [],
+  "captured_utc": "2026-10-12T22:47:59.655186+00:00",
+  "not_git_2c518ee4_snapshot": true,
+  "not_current_polish_evidence": true,
+  "not_store_or_device_evidence": true,
+  "no_new_visual_approvals": true,
+  "metadata_bytes_unchanged": true,
+  "truth_statuses_and_routes_unchanged": true,
+  "expected_summary": {
+    "artifacts": 177,
+    "approved_visual_equivalence": 44,
+    "external_validation_pending": 34,
+    "unique_visual_evidence": 161
+  },
+  "png_total_bytes": 10321500,
+  "production_source_count": 35,
+  "production_source_total_bytes": 692353,
+  "source_storage_transform": "Exact production Dart bytes stored as .dart.txt; reconstruct original paths only in a temporary verifier root. No stubs or aliases.",
+  "preserved_screen_label_discrepancies": [
+    {
+      "reference": 4852,
+      "manifest_screen": "subscription",
+      "truth_screen": "workout discovery"
+    },
+    {
+      "reference": 4951,
+      "manifest_screen": "community",
+      "truth_screen": "community navigation"
+    },
+    {
+      "reference": 4952,
+      "manifest_screen": "community navigation",
+      "truth_screen": "community"
+    },
+    {
+      "reference": 4953,
+      "manifest_screen": "community navigation",
+      "truth_screen": "community"
+    }
+  ],
+  "git_2c_snapshot_gap": {
+    "head": "2c518ee469fa5c14f9d9e2c496340b6c4811d57f",
+    "png_manifest_hash_matches": 24,
+    "unique_png_count": 161,
+    "missing_production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "decision": "Preserve the coherent owner reference dataset instead of falsely attributing it to Git2c. Current artifacts were not synchronized or changed."
+  },
+  "files": [
+    {
+      "repository_path": "artifacts/release/visual_closure/reference/visual_reference_coverage.csv",
+      "fixture_path": "snapshot/artifacts/release/visual_closure/reference/visual_reference_coverage.csv",
+      "kind": "historical_metadata",
+      "bytes": 131440,
+      "sha256": "337b60b089e9b2871ed6e188f0d6277a2053001f699229599284125a012722da",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "artifacts/release/visual_closure/reference/visual_reference_manifest.json",
+      "fixture_path": "snapshot/artifacts/release/visual_closure/reference/visual_reference_manifest.json",
+      "kind": "historical_metadata",
+      "bytes": 191959,
+      "sha256": "82d7ee84ed4d989f62ff5fb46d63d7e9aa37e063ba252bacd91a586506d15bfd",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "artifacts/release/visual_closure/reference/visual_reference_truth_matrix.csv",
+      "fixture_path": "snapshot/artifacts/release/visual_closure/reference/visual_reference_truth_matrix.csv",
+      "kind": "historical_metadata",
+      "bytes": 54202,
+      "sha256": "f0cfd98899b40d920b4d3ed17dfe4591a9115d906cb33b36212ef5d1b83f35a1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/ads/advertising_privacy_page.dart",
+      "fixture_path": "snapshot/lib/features/ads/advertising_privacy_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 27779,
+      "sha256": "e0ae9456beb8fed08935afd7faedc10f6ffcc58d08fc086838953680591589c1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/analytics/nutrition_analytics_page.dart",
+      "fixture_path": "snapshot/lib/features/analytics/nutrition_analytics_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 14680,
+      "sha256": "7cea3074d1a9d4428a52b3c648d995b4ac484cd4f9c093807e3257ad03533c7e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/analytics/weekly_report_page.dart",
+      "fixture_path": "snapshot/lib/features/analytics/weekly_report_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 20729,
+      "sha256": "ee69a2c4adb92de6ebb9d8464da1a35856c58642ddecf49c76ae9936b476332a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/commerce/presentation/bil_store_plans_page.dart",
+      "fixture_path": "snapshot/lib/features/commerce/presentation/bil_store_plans_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 10296,
+      "sha256": "4f81fffa48b2a191d670244732bbdd2f256975b8e22e7963fb0ad3c18354db0a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/community/presentation/community_connections_page.dart",
+      "fixture_path": "snapshot/lib/features/community/presentation/community_connections_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 21457,
+      "sha256": "9429db602b5716af710bdca073cd0d5a51c40e6a20b9d2579c2cbc1fd7f3df2f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/community/presentation/community_hub_page.dart",
+      "fixture_path": "snapshot/lib/features/community/presentation/community_hub_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 9741,
+      "sha256": "75c377e77e3f9d89584f62f9967cd5bfb845918ec08e577924a26882447b1df5",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/community/presentation/community_messages_page.dart",
+      "fixture_path": "snapshot/lib/features/community/presentation/community_messages_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 20322,
+      "sha256": "c86bd3d8ca4ffffc5a88c3a8c7ada7b1559c38a66bcbe749222d4b947e6becc8",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/community/presentation/community_notifications_page.dart",
+      "fixture_path": "snapshot/lib/features/community/presentation/community_notifications_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 8114,
+      "sha256": "b61c5623f8cbdb7a49a19a3cb13ab1388810ad71b2d979d18388bd2eda59ea63",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/community/presentation/community_people_page.dart",
+      "fixture_path": "snapshot/lib/features/community/presentation/community_people_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 24622,
+      "sha256": "bd5d5d07f3c3ab9d877967538df21aad9f348c617967bc6baf3621ca704c1952",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/community/presentation/community_profile_page.dart",
+      "fixture_path": "snapshot/lib/features/community/presentation/community_profile_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 24692,
+      "sha256": "73d2896531a1b2c9a1c4fe662a02e7b2c40bdc4c264d710215e5e3fc2d98806e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/connected_health/connected_health_page.dart",
+      "fixture_path": "snapshot/lib/features/connected_health/connected_health_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 32568,
+      "sha256": "427b3811ea10dbd82ca754ad5fa03cfd941f3398bd2e2cc047cec8872913cffe",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/daily_check_in/daily_check_in_page.dart",
+      "fixture_path": "snapshot/lib/features/daily_check_in/daily_check_in_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 21547,
+      "sha256": "94e2c57685d2e41ad46f10f5092b06ff245e293e0d6041019c20103053c90776",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/daily_log/daily_log_page.dart",
+      "fixture_path": "snapshot/lib/features/daily_log/daily_log_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 31139,
+      "sha256": "ce3d9256b282babeb084e1783eb53b6c3ee2979ff872723d436a0b8ba0e43d48",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/daily_log/daily_log_page_actions.dart",
+      "fixture_path": "snapshot/lib/features/daily_log/daily_log_page_actions.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 17319,
+      "sha256": "25750fa63a21e3cca2893caf4acd15ac7757a0c64c40d114c37437ca3361ab76",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/dashboard/dashboard_page.dart",
+      "fixture_path": "snapshot/lib/features/dashboard/dashboard_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 19645,
+      "sha256": "5baf0942bf48308baefbead24599725f32bdd98f525a7b6dd14596736cb55d6a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
+      "fixture_path": "snapshot/lib/features/dashboard/presentation/dashboard_preferences_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 25811,
+      "sha256": "79de60a9a4f30097eddbaeb86f7f400eb049cca06fd9d2212d206366294713e1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/history/progress_page.dart",
+      "fixture_path": "snapshot/lib/features/history/progress_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 22351,
+      "sha256": "395b3b65e77f58d77865a0844b47e15d2880fb82cc0c0737e4c62ae3c1ada980",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/notifications/presentation/notification_settings_page.dart",
+      "fixture_path": "snapshot/lib/features/notifications/presentation/notification_settings_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 36275,
+      "sha256": "9197f39be8969f4dceabfb8b50cf95895292db6e735dae5b7bf67251dcf8a7ad",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/nutrition/food_page.dart",
+      "fixture_path": "snapshot/lib/features/nutrition/food_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 19715,
+      "sha256": "b402830d1dc5e5fc878426038bf4cfbea83c551b0af3a02a3ac31f701ad4d05c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/nutrition/presentation/food_barcode_scanner_page.dart",
+      "fixture_path": "snapshot/lib/features/nutrition/presentation/food_barcode_scanner_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 21875,
+      "sha256": "9d52d4954007d322cf7a5a5a14a4cf2bd672593cef84e47666df4826b0120cbd",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/profile/premium_profile_page.dart",
+      "fixture_path": "snapshot/lib/features/profile/premium_profile_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 19774,
+      "sha256": "6bc45cd7b06b654db78d9edc9effc63577cd60f75844e25bdf100d9d44e23f56",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/account_connection_settings_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/account_connection_settings_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 1960,
+      "sha256": "a28105a9278ba2979b8f20d14a1a5de7eee67e60a42775826469d8e92ac60f85",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/account_password_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/account_password_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 7947,
+      "sha256": "e7b76e6f229d36c976c493c5238042aff0afddc3191733f4e45804fc31f19a25",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/help_center_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/help_center_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 13528,
+      "sha256": "a18f8733db2b30e2b62b0f7f055b8b1a4b8b9ffc946d1b6c57b9aaea65f1e761",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/legal_document_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/legal_document_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 40346,
+      "sha256": "7de45fb54693770e8a0c87317a69d59bc7513d6abb8692ffa1dc50f827060a6f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/local_export_range_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/local_export_range_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 8772,
+      "sha256": "2fcd582942d86998127c6deeb6df4df63533e1e23900878f2fd09db3c195202f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/reference_preferences_pages.dart",
+      "fixture_path": "snapshot/lib/features/settings/reference_preferences_pages.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 21731,
+      "sha256": "a88e4f03deb7c03b75d5a7ec19b68d29b53eb2cfc1505db3ce669fb72a4054a2",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/reference_settings_home_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/reference_settings_home_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 8799,
+      "sha256": "db960d408f93700ae968f1fbb8f834bbe75c77905cfbe4beea1c674102ecb2b3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/settings_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/settings_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 21657,
+      "sha256": "50902004b82b46978e562d727d3091a372d4f8f3bb7110c940ae3c04c5c0219a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/settings/sharing_privacy_settings_page.dart",
+      "fixture_path": "snapshot/lib/features/settings/sharing_privacy_settings_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 28000,
+      "sha256": "0605c66565d5dcb066fcc75f2070586edc8dce248296fc0315ce19e0f6a82854",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/wellness/presentation/fasting_timer_page.dart",
+      "fixture_path": "snapshot/lib/features/wellness/presentation/fasting_timer_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 24043,
+      "sha256": "fefba96a243e478b2a4adeb0bf95d348bb1576bcb301950e1a0911bcd53a009c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/wellness/presentation/professional_content_library_page.dart",
+      "fixture_path": "snapshot/lib/features/wellness/presentation/professional_content_library_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 17236,
+      "sha256": "78b1ecf061c6d2a5a5fbcf74532150035a5e3ef8310073805ba3529d466c6676",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/wellness/presentation/sleep_tracker_page.dart",
+      "fixture_path": "snapshot/lib/features/wellness/presentation/sleep_tracker_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 4643,
+      "sha256": "93c795ceb9306a81c8d074a04d7f14fdd82b46e129ffde82a26bfce54df53bf1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/wellness/presentation/wellness_learn_page.dart",
+      "fixture_path": "snapshot/lib/features/wellness/presentation/wellness_learn_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 24835,
+      "sha256": "f11d4a7cb05b47d0d55cbcbb80a9d4e4fe275d4e9b8f8426f10093eebad40c99",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "lib/features/wellness/presentation/workout_library_page.dart",
+      "fixture_path": "snapshot/lib/features/wellness/presentation/workout_library_page.dart.txt",
+      "kind": "production_source_text",
+      "bytes": 18405,
+      "sha256": "36d5a0d3f609776cf371d9025b932f211de3abc4a90fbfb997bfb8e8b0187f1b",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic15_android_phone_ar_06_connected_health.png",
+      "fixture_path": "snapshot/test/goldens/epic15_android_phone_ar_06_connected_health.png",
+      "kind": "historical_png",
+      "bytes": 40223,
+      "sha256": "940fb62304cb23ba684c109a78a4af06679765e50dedf16a2d6456851144e5c5",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic15_iphone_69_ar_06_connected_health.png",
+      "fixture_path": "snapshot/test/goldens/epic15_iphone_69_ar_06_connected_health.png",
+      "kind": "historical_png",
+      "bytes": 67309,
+      "sha256": "952b6c3aca0362c0d2b6367f870d10254460ec4771ad6c7af1de0687dce62ef7",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png",
+      "fixture_path": "snapshot/test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png",
+      "kind": "historical_png",
+      "bytes": 67824,
+      "sha256": "543352ae70921b3e12da8341bfa71117efa90d7554af536d3f85e83b13d6a3e6",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic15_iphone_69_en_05_connected_health.png",
+      "fixture_path": "snapshot/test/goldens/epic15_iphone_69_en_05_connected_health.png",
+      "kind": "historical_png",
+      "bytes": 61304,
+      "sha256": "50f72458365617d4e55a71fbabdc0441d73c8dadd3e5e2865a794a3b925226aa",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic8_weekly_report_alltime_anchor.png",
+      "fixture_path": "snapshot/test/goldens/epic8_weekly_report_alltime_anchor.png",
+      "kind": "historical_png",
+      "bytes": 34366,
+      "sha256": "644285f74985893eff8202d879950c219334ca644849b385c86c85dca18e1700",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic8_weekly_report_calories_anchor.png",
+      "fixture_path": "snapshot/test/goldens/epic8_weekly_report_calories_anchor.png",
+      "kind": "historical_png",
+      "bytes": 41581,
+      "sha256": "92fb4f3648d7784823b5e3c50b0e48061e417b9f6866548b86d6d3bf95c64368",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic8_weekly_report_coverage_phone.png",
+      "fixture_path": "snapshot/test/goldens/epic8_weekly_report_coverage_phone.png",
+      "kind": "historical_png",
+      "bytes": 129540,
+      "sha256": "7a037d37efed6cd12e133f91196ebcf3cb9c430bff695482a2ae924f5abeb9a7",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic8_weekly_report_exercise_anchor.png",
+      "fixture_path": "snapshot/test/goldens/epic8_weekly_report_exercise_anchor.png",
+      "kind": "historical_png",
+      "bytes": 40001,
+      "sha256": "e240e940110590bf764634b4933c3f7b3914f5a90d85614cca3314af66a46c6c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic8_weekly_report_frequent_anchor.png",
+      "fixture_path": "snapshot/test/goldens/epic8_weekly_report_frequent_anchor.png",
+      "kind": "historical_png",
+      "bytes": 36930,
+      "sha256": "06d0c73b0946a01f9a4ecd53a65cabefbe27f22a63de6e91a85dd4f6fdf1d27c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic8_weekly_report_macros_anchor.png",
+      "fixture_path": "snapshot/test/goldens/epic8_weekly_report_macros_anchor.png",
+      "kind": "historical_png",
+      "bytes": 40572,
+      "sha256": "e35f6bfb090d04b52c385df31922419f78ebeff04d29b0ac9b8c24d9bdc04349",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
+      "fixture_path": "snapshot/test/goldens/epic8_weekly_report_phone_ltr_light.png",
+      "kind": "historical_png",
+      "bytes": 152529,
+      "sha256": "5347bc20b15df350bb7f47ef8748ad63ca88fb452700e648d95b06c6734b5ab5",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/quick_add_en_light_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/quick_add_en_light_phone.png",
+      "kind": "historical_png",
+      "bytes": 55815,
+      "sha256": "ea00d65b75d91945e423abfa8d317dfbed09db8618aafb62a1fdd92cf0d9a395",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_account_password_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_account_password_phone.png",
+      "kind": "historical_png",
+      "bytes": 20094,
+      "sha256": "051acc199c940cbfc7e50b15cdddcab6c07cc0f12b3110c01d341f7eef660ff6",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png",
+      "kind": "historical_png",
+      "bytes": 42327,
+      "sha256": "0f2034e4569b5e3d608531d6cf78cb89e4eabb4d7139a27d4b190cb4ae12396c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_appearance_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_appearance_phone.png",
+      "kind": "historical_png",
+      "bytes": 13510,
+      "sha256": "63bf44ade3a634b6a370ec947b9adf42e302379e68edd26f74c2fcb5ffffa2ca",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_barcode_unavailable_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_barcode_unavailable_phone.png",
+      "kind": "historical_png",
+      "bytes": 15483,
+      "sha256": "84d75a34c2c18743524a6c2e57351a3c556f040b8faa7b791a5a113d10876d09",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_add_friends_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_add_friends_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 18964,
+      "sha256": "602cb6a134300b0a9a340f15119f5704798a5f275c131b9f84902920e2ee6747",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 20158,
+      "sha256": "50574e8fa61dabe0143af06ac015c51fe4b7028ddb7f00d9780f44ecffc7488a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 24835,
+      "sha256": "c289ff81354c5101f2a28a4e74b8e06cf637dbd125d61210c4995d1b7ce5cf6b",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_inbox_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_inbox_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 13488,
+      "sha256": "b1e2939a0c390013a7be00e53918129fd650533dddf25cfbb0bce679597b677a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 31603,
+      "sha256": "9857339df16a4a07ae88e8cdce33902077fba9bcf2986d1dc8c4ec6a1cec7b59",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_notifications_empty_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_notifications_empty_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 15600,
+      "sha256": "89d8b8261c2c599b094a4806c81db21d10f3d541992672561c5f1e247e736b02",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_people_search_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_people_search_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 17818,
+      "sha256": "8517ba3571a96cee5f0903169848aa4f5ba51e106f498c1fa3410c6794c2b331",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 44906,
+      "sha256": "5113dd4b336531f809cdb5884cfb011964c81179bc26d8f529e81f5868901c60",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 24927,
+      "sha256": "f5a3498cd0ce37ed3b3a6715b5563b610379960f3195e1b7d96e74f524fb119e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_community_sent_authenticated_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_community_sent_authenticated_phone.png",
+      "kind": "historical_png",
+      "bytes": 12888,
+      "sha256": "605dacbf94298b4201dddb38dc0955bf9c126100045750bd4683c523d79368b3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_connected_health_compatibility_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_connected_health_compatibility_phone.png",
+      "kind": "historical_png",
+      "bytes": 51841,
+      "sha256": "73405694308797cb3413f895a45a5f32ccb450d911971ea719282dc48c0dac4a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_connected_health_offline_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_connected_health_offline_phone.png",
+      "kind": "historical_png",
+      "bytes": 56543,
+      "sha256": "416fc95be1f2281e0f4f4e6ff6337662af1d6dc542b3c251ad720022a278d21e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
+      "kind": "historical_png",
+      "bytes": 54701,
+      "sha256": "4af6b3d4ebbbb2c79e535e93013c303db289dc42fc19215e2dd20697928fc4d8",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_connected_health_unavailable_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_connected_health_unavailable_phone.png",
+      "kind": "historical_png",
+      "bytes": 53300,
+      "sha256": "727f632da07ba9d846bcba914afa4ebc0e09669151d5105465c24dfcc4d7d567",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_connected_health_update_required_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_connected_health_update_required_phone.png",
+      "kind": "historical_png",
+      "bytes": 56214,
+      "sha256": "d0a9a6d0e0a933ce976058fd56fdcddf5c284cfe50b0befd6e9f6fe7f2954d3e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_custom_food_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_custom_food_phone.png",
+      "kind": "historical_png",
+      "bytes": 29135,
+      "sha256": "7adeef55b062cbcf4071e31c912d3452c47d2fcc1fa0ed5b76455e04602ffcce",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_daily_check_in_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_daily_check_in_phone.png",
+      "kind": "historical_png",
+      "bytes": 131518,
+      "sha256": "2a352ba792457b65f1526a36bdfdd239537a2ebe6a3b18f72e6b767ace936b8e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+      "kind": "historical_png",
+      "bytes": 43777,
+      "sha256": "95da8bd1ccef3225ca640b2fbc1d80e3d22687e8dfe98d75dda7538dd5981a09",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
+      "kind": "historical_png",
+      "bytes": 47077,
+      "sha256": "8b8c6a8a5bbd72ebcacea1d27e35aa2c5294137637d45226bbad519012c78451",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png",
+      "kind": "historical_png",
+      "bytes": 35468,
+      "sha256": "e71df8802643010608dc92b72dcc4f13f7b190d3fc17f76b39847778f7f902fc",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
+      "kind": "historical_png",
+      "bytes": 40375,
+      "sha256": "2967e3fde6341d488401098663a45b3e4729dba442636c7d33c630e86cdd2eef",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_daily_log_water_entry_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_daily_log_water_entry_phone.png",
+      "kind": "historical_png",
+      "bytes": 19965,
+      "sha256": "f5645de2db56c95b1ec90bfcfa42636a9801a7f9c43c7165d3bf309c153f80fa",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_phone.png",
+      "kind": "historical_png",
+      "bytes": 95146,
+      "sha256": "77d5cbf96c6a818a0b6eb1f9433ab635e4d806d1e1d4e5f053d7c79dd7eaa4d5",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_phone_2.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_phone_2.png",
+      "kind": "historical_png",
+      "bytes": 62274,
+      "sha256": "601db3b35877b80d41b22be3770ba1a9273aefae60ab859c205fa823d4b50d4b",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_phone_3.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_phone_3.png",
+      "kind": "historical_png",
+      "bytes": 41742,
+      "sha256": "634d73be7f1f0ca653a572546ae5f79e13af218b5598d15e8ba42cea812bd9b3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_phone_4.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_phone_4.png",
+      "kind": "historical_png",
+      "bytes": 23593,
+      "sha256": "e40ce80fe7008fc317e3317b1a24e9e57f6ff31871187b17cce8b766a544eac3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
+      "kind": "historical_png",
+      "bytes": 29661,
+      "sha256": "c6ef19989d75e75213ebf7060849053ba6366ad1d71e5e64899dbcf5c7f81b8c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_phone_6.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_phone_6.png",
+      "kind": "historical_png",
+      "bytes": 33514,
+      "sha256": "8e634e1e506d0c7e4ca136a6f8a9554f0e72fa9a8aabebab3ddcae8f7844bda5",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_phone_7.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_phone_7.png",
+      "kind": "historical_png",
+      "bytes": 193936,
+      "sha256": "68b319e8ca639ef7e5e77ce5ece8f075bbdc8968393fc65c4208d6b07841dbad",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_activity_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_activity_phone.png",
+      "kind": "historical_png",
+      "bytes": 48886,
+      "sha256": "3e5dd38ed70cbd05d007abad7d17302b44c80965b727b22304b3ee0fb4ee9668",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_best_action_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_best_action_phone.png",
+      "kind": "historical_png",
+      "bytes": 51698,
+      "sha256": "99bfe09bb68171844f7785f708a3f39c4d5c3f6facfbfa98bfc54ee25434271b",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_body_twin_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_body_twin_phone.png",
+      "kind": "historical_png",
+      "bytes": 48953,
+      "sha256": "d941fe7212c02c25a27bf53d903c328297c9d6b76279212b002b26fd5ecbf199",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
+      "kind": "historical_png",
+      "bytes": 52451,
+      "sha256": "5cbc2809029aff942204bf07d06a1c9d6687cac4da1387980dc3cae4ba90943f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_connected_health_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_connected_health_phone.png",
+      "kind": "historical_png",
+      "bytes": 48946,
+      "sha256": "f96fd9689ae23083a4bace7a3e7f256725bb4bba753ad80e506d7530e6544f45",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_daily_intelligence_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_daily_intelligence_phone.png",
+      "kind": "historical_png",
+      "bytes": 39805,
+      "sha256": "317a6bd19f20411fb53361b310d6b0018bba9ca00149ef4fc9f3799751d3c44d",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_discover_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_discover_phone.png",
+      "kind": "historical_png",
+      "bytes": 46874,
+      "sha256": "6e3ca6fdab74dc8b19bde7b5c533e7c860dd977b939cdd70d81f0e526c624d7a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_macros_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_macros_phone.png",
+      "kind": "historical_png",
+      "bytes": 48887,
+      "sha256": "9b8d0ea466e89bfb3f9b4ba75bef845cca3de3e1c2c6c98971c07f8661cafdc8",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
+      "kind": "historical_png",
+      "bytes": 52840,
+      "sha256": "3be925b9094704132e491e31b7145b246c05023ce242286f5bb575acb283cd9d",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone_2.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_phone_2.png",
+      "kind": "historical_png",
+      "bytes": 52822,
+      "sha256": "ba3c318e68e61e23e219e5503fc613f36c0b90ab214c501aa50cff21266f070e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_progress_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_progress_phone.png",
+      "kind": "historical_png",
+      "bytes": 47198,
+      "sha256": "29f716fcb856f8c370e537e089468c1a07d6231e836a160405dc1bf57f1db1e2",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_dashboard_preferences_quick_log_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_dashboard_preferences_quick_log_phone.png",
+      "kind": "historical_png",
+      "bytes": 52230,
+      "sha256": "b0f4633ff1505e400bacc77b74d857c28b60f2c4be63d4b065ceca8a6d3e09b1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_default_search_tab_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_default_search_tab_phone.png",
+      "kind": "historical_png",
+      "bytes": 9461,
+      "sha256": "5190ed2228edea49883d67ff2d6ce7bbd0ea09b7112844c6499d2a5c9a9a21f4",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_diary_settings_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_diary_settings_phone.png",
+      "kind": "historical_png",
+      "bytes": 43882,
+      "sha256": "33a9031623d498435ff9dbf86560da7080d516a48e7e4192d582a8b64d65c47b",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_diary_sharing_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_diary_sharing_phone.png",
+      "kind": "historical_png",
+      "bytes": 16627,
+      "sha256": "77a0d215da68a0cacc018fc956f81514d7cdf6c977d45fdf66131dc7b97ceef3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_email_settings_lower_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_email_settings_lower_phone.png",
+      "kind": "historical_png",
+      "bytes": 54788,
+      "sha256": "ba9bdd49eca2fe9526381a2a4e5952db272e92c701c5740824cf80f6b397dd09",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_email_settings_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_email_settings_phone.png",
+      "kind": "historical_png",
+      "bytes": 55142,
+      "sha256": "cac03e718c1cec56c71ef02ba6648af7dea2fbe1c0b00b18cace9e87e1da3b17",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_facebook_settings_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_facebook_settings_phone.png",
+      "kind": "historical_png",
+      "bytes": 19207,
+      "sha256": "aa492b1dddd0b4adb64901e2edad57e83c6c631bbb12663f41cb69aca3008031",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_fasting_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_fasting_phone.png",
+      "kind": "historical_png",
+      "bytes": 147915,
+      "sha256": "939f356866f94528c2de0e10b177d747bd1befa844da0594453cd116d617d5e2",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_food_catalog_favorite_result_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_food_catalog_favorite_result_phone.png",
+      "kind": "historical_png",
+      "bytes": 196761,
+      "sha256": "b92e7be950d3d85067d692024e90173ae71e4cc391fd63ac8c8c0e766262086d",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
+      "kind": "historical_png",
+      "bytes": 191764,
+      "sha256": "c80c62b228d9e539be272d2eabe2e26395d4ef29124c2e42b49956e74f34975e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_food_catalog_recent_result_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_food_catalog_recent_result_phone.png",
+      "kind": "historical_png",
+      "bytes": 197020,
+      "sha256": "9e5d548af54913380dadd7925eda8d68c3728d98c563f405d37dd85a4aa3ef0c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png",
+      "kind": "historical_png",
+      "bytes": 196786,
+      "sha256": "e2cd8acba96cd437a3f480e06c675e0c5fc5401d040f36f5fd01fdec9a6109e9",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_food_meal_search_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_food_meal_search_phone.png",
+      "kind": "historical_png",
+      "bytes": 11797,
+      "sha256": "69047f1c48c4d177e517fa1e784c942f723252d7e25f8f895618adfd9814f486",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_google_settings_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_google_settings_phone.png",
+      "kind": "historical_png",
+      "bytes": 19485,
+      "sha256": "778f220b7b40efa3dbe70d4a71b2593ee9f2d5c3a5d60357067b7912ad37f8ea",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_help_center_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_help_center_phone.png",
+      "kind": "historical_png",
+      "bytes": 24782,
+      "sha256": "9222cf90f47a4e6c6c76219410688f7b1f38e73b1288454c5041579d39411c93",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_help_faq_medical_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_help_faq_medical_phone.png",
+      "kind": "historical_png",
+      "bytes": 22850,
+      "sha256": "68683a0df6a97fe3302ad1bbf6805a12496deaedef53416804bd1ced26a67d17",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_help_faq_offline_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_help_faq_offline_phone.png",
+      "kind": "historical_png",
+      "bytes": 23517,
+      "sha256": "ef8fd4c84c12d796678de3bb14c326ca7e47f01180f2935152c0da0603e99ccd",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_help_faq_targets_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_help_faq_targets_phone.png",
+      "kind": "historical_png",
+      "bytes": 22740,
+      "sha256": "a19e4a432887693c5f25941d9ecf5e01dbe83978d389048d63fe3e3044b3b4b3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_help_service_status_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_help_service_status_phone.png",
+      "kind": "historical_png",
+      "bytes": 30026,
+      "sha256": "3ec132208c2ed89d487d6af20840003bc3bb282c4b1e5b23f422f379db875d99",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_help_troubleshooting_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_help_troubleshooting_phone.png",
+      "kind": "historical_png",
+      "bytes": 28421,
+      "sha256": "a18f40f719154d9f0b9fd65df425ead4748ce46c11829b94d2160d85b26a4ce3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_local_export_selected_day_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_local_export_selected_day_phone.png",
+      "kind": "historical_png",
+      "bytes": 27594,
+      "sha256": "5e2f264a090567f5639af7790f7667d373b01f8e5499cb18c1af2b5e8a212bcf",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_meal_image_guide_1_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_meal_image_guide_1_phone.png",
+      "kind": "historical_png",
+      "bytes": 35582,
+      "sha256": "c16bdbc3cdb313249978752a2eb7f477dd3fcac74c048503bbf94372e5e41463",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_meal_image_guide_2_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_meal_image_guide_2_phone.png",
+      "kind": "historical_png",
+      "bytes": 39104,
+      "sha256": "47517fac03c5042470b69b98f6917e16862575efd6c29033da8297e83d544790",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_meal_image_guide_3_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_meal_image_guide_3_phone.png",
+      "kind": "historical_png",
+      "bytes": 38642,
+      "sha256": "cc583491530c35c9317b10a770b5583b63ad442ad0e50db525c952e4cc7cf25a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_meal_image_guide_4_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_meal_image_guide_4_phone.png",
+      "kind": "historical_png",
+      "bytes": 43188,
+      "sha256": "2939e66f280272263c8ccb5375a5b921ab0c6c91bd633955b86ae1aae2c5aa0d",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_meal_names_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_meal_names_phone.png",
+      "kind": "historical_png",
+      "bytes": 24072,
+      "sha256": "b28f4e2cd6c911b6c158847bf6df35e0ce771fd8681a45bad3d1d2bc7cc450df",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_more_lower_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_more_lower_phone.png",
+      "kind": "historical_png",
+      "bytes": 34215,
+      "sha256": "52cc2e232ed945e3fac54babebde14958f87e94dd7d0424b0d03f3aa1de1500c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_more_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_more_phone.png",
+      "kind": "historical_png",
+      "bytes": 56638,
+      "sha256": "723a97672b1dea206b031d3aeeb20cfc9387153c73c66ce721212f48724caa4e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_notification_settings_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_notification_settings_phone.png",
+      "kind": "historical_png",
+      "bytes": 54532,
+      "sha256": "a86e613c6d76ed1d03bab2de5d0cd13e873e9e11500bf0d0a28d6040833ce17e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png",
+      "kind": "historical_png",
+      "bytes": 22207,
+      "sha256": "58a605df251d421004c2c20b86972d84b98d0d736e16adea2ac1bcf39f099759",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png",
+      "kind": "historical_png",
+      "bytes": 23228,
+      "sha256": "eef07e9942ed4a33705df788bf4ea6fd256c32ad352e1e66153176bd289fa4c0",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png",
+      "kind": "historical_png",
+      "bytes": 26514,
+      "sha256": "75ff9727f8ec11e7cf93513e9d2aa6073112a7acd7e4e2e7068239a6b645c2e4",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_privacy_policy_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_privacy_policy_phone.png",
+      "kind": "historical_png",
+      "bytes": 85293,
+      "sha256": "7aaafff32ef997c71812d2d675b518741162fc0a0ccf0d86f1a6f7a849c97398",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_profile_goals_phone.png",
+      "kind": "historical_png",
+      "bytes": 48649,
+      "sha256": "cee028ba6e5b6b7b51bba34fe42bacc2b248c7284e2d6e4d5039008c79fd4029",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_profile_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_profile_phone.png",
+      "kind": "historical_png",
+      "bytes": 51769,
+      "sha256": "b299b54d85ac2751fcb7b80d6e9e77c736eead5023b1859a0b96c064e7fa226c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_progress_body_empty_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_progress_body_empty_phone.png",
+      "kind": "historical_png",
+      "bytes": 26647,
+      "sha256": "f9c335e9885f09d7481b2153ca272aeb129448a2743b81e2796acc9be884795a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_progress_metric_picker_lower_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_progress_metric_picker_lower_phone.png",
+      "kind": "historical_png",
+      "bytes": 34201,
+      "sha256": "9bb09774b4fde9dda1f29c5ca9a10957efda69e36a7f3cb42925c9a0f1d3933f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_progress_metric_picker_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_progress_metric_picker_phone.png",
+      "kind": "historical_png",
+      "bytes": 35109,
+      "sha256": "39546369afbc3a2996d04e2f8e23321775fabdf2b7c51f93bc134affc35a4214",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_progress_range_picker_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_progress_range_picker_phone.png",
+      "kind": "historical_png",
+      "bytes": 26391,
+      "sha256": "3742a805e452249d66ac230ed4f7fb1b5665b5f8411a6f2ba758e38bbf5c62fd",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_progress_steps_month_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_progress_steps_month_phone.png",
+      "kind": "historical_png",
+      "bytes": 75396,
+      "sha256": "b6f1b7bd6cc53b2e4c717554b6de18111a69dd5f6d75f1057e9815b6935f386c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_collection_plant_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_collection_plant_phone.png",
+      "kind": "historical_png",
+      "bytes": 152786,
+      "sha256": "e3b2e10e04d8561d909277054a024d8041ec1c4383056a74b606976ca3e2c212",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_collection_quick_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_collection_quick_phone.png",
+      "kind": "historical_png",
+      "bytes": 190678,
+      "sha256": "1a084e178bb8c747c81e553096a51a5da1448b729e3d6152853db10651c50252",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_collection_regional_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_collection_regional_phone.png",
+      "kind": "historical_png",
+      "bytes": 125316,
+      "sha256": "fe487a7af49dbfd60ca748ad4196164da5216babc25c6d5c584781df570f844a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_collection_saved_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_collection_saved_phone.png",
+      "kind": "historical_png",
+      "bytes": 89439,
+      "sha256": "77b15b1e22175509f6641395db914f2cabbe20f43467036ad6462c8141f181d0",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone.png",
+      "kind": "historical_png",
+      "bytes": 198166,
+      "sha256": "49e554f044be8498f684e5bb41017acb766f65a674236beae159584dcb848b52",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_10.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_10.png",
+      "kind": "historical_png",
+      "bytes": 146508,
+      "sha256": "dc06e84e409e0571bf4612e383c9d4a85ccacae95642a1c89993622bf3aa0ad3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_11.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_11.png",
+      "kind": "historical_png",
+      "bytes": 109879,
+      "sha256": "6373eb1d4b297a2ad3b1be3d3c02d2774e4dbab69ea60a59a92900282b422bd5",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_12.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_12.png",
+      "kind": "historical_png",
+      "bytes": 135577,
+      "sha256": "fb9b13c2f54db09165081a2569e4f7b94fa8ee84c5dcc84e3563125be532736c",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_13.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_13.png",
+      "kind": "historical_png",
+      "bytes": 155227,
+      "sha256": "d9040f8ea4875e4273a5320ae04a87c3993f31fde68340cbca504fb7a479bb72",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_2.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_2.png",
+      "kind": "historical_png",
+      "bytes": 118352,
+      "sha256": "a8450c92bb4d7d661422bf1093dc852213bbfe7d4d466095eaa84a2b1dc88ce1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_3.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_3.png",
+      "kind": "historical_png",
+      "bytes": 112535,
+      "sha256": "67c04c3e7d4019b434b5c8411ad4a3bc4e5b539413ddf67e1f4c759ada7f8844",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_4.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_4.png",
+      "kind": "historical_png",
+      "bytes": 138306,
+      "sha256": "54a4e21f6370e47d7b61d0f7836c5a26b0ddc3f5689b8feb96f4d0dd6b5af9c0",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_5.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_5.png",
+      "kind": "historical_png",
+      "bytes": 94375,
+      "sha256": "c3857244d36ac87de22ddfdedb174d987cc5e8de2479ab2bb05502232ec8e9f8",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_6.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_6.png",
+      "kind": "historical_png",
+      "bytes": 145360,
+      "sha256": "2259f91ec169a5178ac08235e0f70be5c903be083206831e63051a3e272fd0e1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_7.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_7.png",
+      "kind": "historical_png",
+      "bytes": 152640,
+      "sha256": "fb6737eccc3658e94e6f428cf007ebfe1a16856f2ca57eb87f9390a07cf37be8",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_8.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_8.png",
+      "kind": "historical_png",
+      "bytes": 150968,
+      "sha256": "6ec734e0d96b4ebe51a5c8ee342140230f8df2da38b5954ff0be597592d81ae9",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_9.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_recipe_discovery_phone_9.png",
+      "kind": "historical_png",
+      "bytes": 133062,
+      "sha256": "c5f7d0d8f24061732a259404aed720d08d122075896606c5bda86230dedbc0dd",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png",
+      "kind": "historical_png",
+      "bytes": 22332,
+      "sha256": "dd6419ae858bf6e4f014a106e6e2153144a860a8b571b0b1abaadcba2469ca41",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png",
+      "kind": "historical_png",
+      "bytes": 29465,
+      "sha256": "adac219d493256a21ad8c872eef762bfb15a0d0e62486efab2fe822fa8292017",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png",
+      "kind": "historical_png",
+      "bytes": 27283,
+      "sha256": "b3f8c950e3ef7f8768edbc096fbfed0b93906ab8516db860def39f9d5391f6ed",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_settings_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_settings_phone.png",
+      "kind": "historical_png",
+      "bytes": 57846,
+      "sha256": "8055eeb5ac2bdd790b01d9d8e3b35cff175cee9190a852285d2469282d427988",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png",
+      "kind": "historical_png",
+      "bytes": 51617,
+      "sha256": "0ba409c410f4bfd70e5be201b646f29b6db7949d4f66bb305c816a3d00023612",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_sleep_learn_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_sleep_learn_phone.png",
+      "kind": "historical_png",
+      "bytes": 58104,
+      "sha256": "6cbafc3327284c8540e5f38acdbdc423ae5cc021af6450b835c1ef7e7e20078a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_sleep_learn_phone_2.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_sleep_learn_phone_2.png",
+      "kind": "historical_png",
+      "bytes": 60783,
+      "sha256": "03f83654440293aab639e77cfc4faf73784c3cda5c3d10ded8800e862a95b342",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_sleep_learn_phone_3.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_sleep_learn_phone_3.png",
+      "kind": "historical_png",
+      "bytes": 55460,
+      "sha256": "80adcf16bf99e8285800df5c1f714144040c66b28d32c376e09f78ae1cdaabfe",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_sleep_trend_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_sleep_trend_phone.png",
+      "kind": "historical_png",
+      "bytes": 54138,
+      "sha256": "4da4be7301d1c45b82d3bbaef3f097ab5c6b07c81569ba7668ff8a88f66a32a5",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_store_plans_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_store_plans_phone.png",
+      "kind": "historical_png",
+      "bytes": 111926,
+      "sha256": "5ca438593a053b73673b861901b9dfc747d3aa2ca2065a76c21c3ecf06329ff8",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_store_plans_phone_2.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_store_plans_phone_2.png",
+      "kind": "historical_png",
+      "bytes": 88535,
+      "sha256": "78b8f16368e47f2b7853476eccddc827bd31e5484b78d1278c315b6190b36b09",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_terms_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_terms_phone.png",
+      "kind": "historical_png",
+      "bytes": 72722,
+      "sha256": "8f1dea9fd244a1947105437d26555a2f95339c094392a596057cda89a55f7c84",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_article_movement_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_article_movement_phone.png",
+      "kind": "historical_png",
+      "bytes": 116536,
+      "sha256": "70fd4cc941412b429f70b2087be88573e233a8b85e4cbd3780153343e9ff8f2d",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_article_nutrition_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_article_nutrition_phone.png",
+      "kind": "historical_png",
+      "bytes": 81916,
+      "sha256": "5095c3477db57f3e3e6b952dea63b00b0a06ac2fc36fdaaeb7eaae884526fb18",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_article_privacy_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_article_privacy_phone.png",
+      "kind": "historical_png",
+      "bytes": 70136,
+      "sha256": "85b6c0febf62d115e38d34f3cde41526d1825a1c0a5bc512dac4060bd15718ff",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_article_sleep_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_article_sleep_phone.png",
+      "kind": "historical_png",
+      "bytes": 91135,
+      "sha256": "edecaf2a2d373b16659850ec65cf09b8a295d13d6d5dcb5294f31e5e5f597bb7",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png",
+      "kind": "historical_png",
+      "bytes": 67251,
+      "sha256": "f7d1cdacebaa8492c696aa24a6ae82e9040dcc807aea222379d803c0243ccbd3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png",
+      "kind": "historical_png",
+      "bytes": 67617,
+      "sha256": "08efb9342f851b9a6c9e92c48b18130a6386db4a4efd8524fadc23c540ce6864",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_phone.png",
+      "kind": "historical_png",
+      "bytes": 241363,
+      "sha256": "b3e5745165c6fec01dd844354db250f3dbae59f8468349f0c018cc802d1b0b59",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_privacy_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_privacy_phone.png",
+      "kind": "historical_png",
+      "bytes": 61284,
+      "sha256": "18b4595bee0966581ef5498a2d0895e6577949edd5bdffcedd2566a500f115a2",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_search_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_search_phone.png",
+      "kind": "historical_png",
+      "bytes": 60488,
+      "sha256": "9a470ff08e251e9f9c83a86eef418e097750945f5ac9e07603f36bd47c5ccb9f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png",
+      "kind": "historical_png",
+      "bytes": 61758,
+      "sha256": "fe3f61e9385ebc35270b96cbacc1e06218b3bf2477c186853ef9b3232540ce03",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_breathing_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_breathing_phone.png",
+      "kind": "historical_png",
+      "bytes": 30780,
+      "sha256": "afefea93154641cc09bcdcda842a8876cb653291cf87be7c4844a50cbd37b8ec",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_circuit_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_circuit_phone.png",
+      "kind": "historical_png",
+      "bytes": 28846,
+      "sha256": "e5c83704363b5b368b6313860cbff4c364fb932d41bb0a66a13f92a389dc1365",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_core_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_core_phone.png",
+      "kind": "historical_png",
+      "bytes": 29387,
+      "sha256": "11f945eb42d690056f76ddb09e24e0df101721f649e349d8c1cf981a28549bfb",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_cycle_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_cycle_phone.png",
+      "kind": "historical_png",
+      "bytes": 29378,
+      "sha256": "7e59dab9968ad09a296a1053592ea1e6d0ba8bf4726008af52575d60c255a006",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_dance_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_dance_phone.png",
+      "kind": "historical_png",
+      "bytes": 29063,
+      "sha256": "5f2df65637fac9df2fefa2a6f87e5067e0aacf16bdc54d3184daeb2242e6c58b",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_hike_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_hike_phone.png",
+      "kind": "historical_png",
+      "bytes": 27730,
+      "sha256": "1da26e58d8963c2a50cdd2d4b1f5ecde2302cf6d74145b07e7783d457ab9c65e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_lower_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_lower_phone.png",
+      "kind": "historical_png",
+      "bytes": 30497,
+      "sha256": "5d66ef5c8ecd619e13abc7ba63bb75c109a7d468a15bcd6f2ff46bf3eb439f64",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_mobility_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_mobility_phone.png",
+      "kind": "historical_png",
+      "bytes": 54992,
+      "sha256": "03fc7c1b27a06d75e20c65604e8232d5ba73d49ddc1d82a5beb63b7fe608e54f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_pilates_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_pilates_phone.png",
+      "kind": "historical_png",
+      "bytes": 28128,
+      "sha256": "f25b40ebc3a655bf1c3fc4551d56cd28cb030931d423348a7a982d0c230f42d1",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_row_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_row_phone.png",
+      "kind": "historical_png",
+      "bytes": 28068,
+      "sha256": "1c913e887b0849a2bc7a6580e90994ae5ee81f225623d93ea06debcbfed32b8e",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_run_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_run_phone.png",
+      "kind": "historical_png",
+      "bytes": 29211,
+      "sha256": "560946b8b68adff83c17f66eab1cc33d6a733eec4a14019dc37687ee02729750",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_stairs_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_stairs_phone.png",
+      "kind": "historical_png",
+      "bytes": 28408,
+      "sha256": "67ea811589bac9e63c5f408948d43cbf57d7395981fa3579c259c188249f48c8",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_strength_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_strength_phone.png",
+      "kind": "historical_png",
+      "bytes": 56793,
+      "sha256": "cb2ffd2480422739daa2ea235a8f1fd8021305506eb3f26e68df135ff8ce148f",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_stretch_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_stretch_phone.png",
+      "kind": "historical_png",
+      "bytes": 29784,
+      "sha256": "28a9464fd5cabe5499654b196fb59177cc9c6444201a66c63073e204a0debda9",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_swim_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_swim_phone.png",
+      "kind": "historical_png",
+      "bytes": 28364,
+      "sha256": "1d26cd6bf835ef67a7b61e8b91befb2fcc3e590b6c430e436dbd0401e3fa0fb3",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_upper_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_upper_phone.png",
+      "kind": "historical_png",
+      "bytes": 29294,
+      "sha256": "df7e242adaad9b14f279bed41418a740ad576ccac5143334ead5ac6fad063e69",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_walk_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_walk_phone.png",
+      "kind": "historical_png",
+      "bytes": 28698,
+      "sha256": "574d5819fc4def47fda42fb4cc8fb4fcc17e5a86e8769846918d66f277f38387",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_entry_yoga_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_entry_yoga_phone.png",
+      "kind": "historical_png",
+      "bytes": 28133,
+      "sha256": "06dceddf082effec02a71cbe4aa65dbaa04eb56b26521bd7e86315ad9407f6fb",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_library_phone.png",
+      "kind": "historical_png",
+      "bytes": 162239,
+      "sha256": "7d040b896e9386f3a84fe381cd50378babc9606b5e7eaf8e6124a15c418a5022",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_log_phone.png",
+      "kind": "historical_png",
+      "bytes": 128984,
+      "sha256": "ab0f1eb073c595ce6b7548b3a93c420fca973bc10e465235ea2a7250cc2ed900",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_log_phone_2.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_log_phone_2.png",
+      "kind": "historical_png",
+      "bytes": 128222,
+      "sha256": "f914e5c0090fb8cdfe7da46b62028718e3fdc8628a0d43567437a7bc380ff430",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_log_phone_3.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_log_phone_3.png",
+      "kind": "historical_png",
+      "bytes": 130928,
+      "sha256": "c5a8d61a990a682b6b4d6b718a5ba2ffbc2fc01b5ccbcd2fe4bf38fe783936c0",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_log_phone_4.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_log_phone_4.png",
+      "kind": "historical_png",
+      "bytes": 129874,
+      "sha256": "c886a82f189692bc181da32e17465211cd43fc050059f84a267206db0959dfcb",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_my_exercises_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_my_exercises_phone.png",
+      "kind": "historical_png",
+      "bytes": 131057,
+      "sha256": "247e65eceaef328f6974672bbd1c8f7117e0387d52e58244acf8189a0cb32967",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_routine_builder_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_routine_builder_phone.png",
+      "kind": "historical_png",
+      "bytes": 22093,
+      "sha256": "4eb2546d7dfd84b1c62bd4936aee0bf5e6f88d3a150e1fab7117a48fb7a42c5a",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    },
+    {
+      "repository_path": "test/visual_closure/goldens/visual_closure_workout_routines_saved_phone.png",
+      "fixture_path": "snapshot/test/visual_closure/goldens/visual_closure_workout_routines_saved_phone.png",
+      "kind": "historical_png",
+      "bytes": 55773,
+      "sha256": "e138928371b90a60772a8e39bd33fa5486cfa7605bd45c0301766c07bdd93e62",
+      "origin": "preserved primary working file bytes; not the Git2c snapshot"
+    }
+  ]
+}
