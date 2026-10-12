@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
@@ -6,8 +7,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:body_intelligence_log/app/environment/app_environment.dart';
 import 'package:body_intelligence_log/app/services/scoped_media_file_cache.dart';
 
+class _LoopbackPhotoClient implements HttpClient {
+  _LoopbackPhotoClient(this.port);
+  final int port;
+  final HttpClient inner = HttpClient();
+  @override
+  Future<HttpClientRequest> getUrl(Uri uri) =>
+      inner.getUrl(uri.replace(scheme: 'http', host: '127.0.0.1', port: port));
+  @override
+  set connectionTimeout(Duration? value) => inner.connectionTimeout = value;
+  @override
+  void close({bool force = false}) => inner.close(force: force);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
   late ScopedMediaFileCache cache;
   late HttpClient client;
@@ -123,4 +138,148 @@ void main() {
     await cache.clear();
     expect(await cache.peek(uri, 'A'), isNull);
   });
+  test(
+    'corrupt metadata and crash partial cleanup do not stop bounded LRU eviction',
+    () async {
+      final retained = await seed(photo());
+      await retained.setLastModified(DateTime(2000));
+      await cache.peek(
+        photo(),
+        'A',
+      ); // A real read touches the retained content.
+      final crash = File('${directory.path}/interrupted.partial');
+      await crash.writeAsString('not a completed image');
+      await crash.setLastModified(DateTime(2000));
+      await File('${directory.path}/bad.json').writeAsString('{broken');
+      for (var i = 0; i < ScopedMediaFileCache.maxEntries; i++) {
+        final file = File('${directory.path}/old-$i.img');
+        await file.writeAsBytes([1]);
+        await file.setLastModified(DateTime(2000).add(Duration(seconds: i)));
+      }
+      await cache.trimForTesting();
+      expect(await retained.exists(), isTrue);
+      expect(await crash.exists(), isFalse);
+      expect(await File('${directory.path}/bad.json').exists(), isFalse);
+      final entries = await directory.list().toList();
+      expect(
+        entries.where((file) => file.path.endsWith('.img')),
+        hasLength(ScopedMediaFileCache.maxEntries),
+      );
+      expect(await File('${directory.path}/old-0.img').exists(), isFalse);
+    },
+  );
+  test('byte budget is enforced independently from the entry budget', () async {
+    for (var i = 0; i < 28; i++) {
+      final file = await File(
+        '${directory.path}/large-$i.img',
+      ).open(mode: FileMode.write);
+      await file.truncate(3 * 1024 * 1024);
+      await file.close();
+    }
+    await cache.trimForTesting();
+    var bytes = 0;
+    await for (final file in directory.list()) {
+      if (file is File) bytes += await file.length();
+    }
+    expect(bytes, lessThanOrEqualTo(ScopedMediaFileCache.maxCacheBytes));
+  });
+  test(
+    'unwritable cache directory rejects without publishing a partial image',
+    () async {
+      final occupied = File('${directory.path}/not-a-directory');
+      await occupied.writeAsString('occupied');
+      final broken = ScopedMediaFileCache(
+        directory: Directory(occupied.path),
+        client: client,
+      )..bindViewer('A');
+      await expectLater(
+        broken.resolve(photo(), 'A', current: () => true),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect(await occupied.readAsString(), 'occupied');
+      broken.dispose();
+    },
+  );
+  test(
+    'real loopback downloads coalesce, survive first consumer exit and never exceed three',
+    () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final transport = _LoopbackPhotoClient(server.port);
+      final ioCache = ScopedMediaFileCache(
+        directory: directory,
+        client: transport,
+      )..bindViewer('A');
+      final release = Completer<void>(), three = Completer<void>();
+      var active = 0, maximum = 0, requests = 0, firstCurrent = true;
+      final subscription = server.listen((request) async {
+        requests++;
+        active++;
+        if (active > maximum) maximum = active;
+        if (active == 3 && !three.isCompleted) three.complete();
+        await release.future;
+        request.response.add([
+          0x89,
+          0x50,
+          0x4e,
+          0x47,
+          13,
+          10,
+          26,
+          10,
+          1,
+          2,
+          3,
+          4,
+        ]);
+        await request.response.close();
+        active--;
+      });
+      try {
+        final first = ioCache.resolve(
+          photo(),
+          'A',
+          current: () => firstCurrent,
+        );
+        final firstError = expectLater(first, throwsStateError);
+        final second = ioCache.resolve(photo(), 'A', current: () => true);
+        final others = [
+          for (var i = 0; i < 5; i++)
+            ioCache.resolve(
+              photo().replace(
+                path:
+                    '/storage/v1/object/public/profile-avatars/a/photo-$i.png',
+              ),
+              'A',
+              current: () => true,
+            ),
+        ];
+        await three.future.timeout(const Duration(seconds: 10));
+        expect(requests, 3);
+        expect(maximum, 3);
+        firstCurrent = false;
+        release.complete();
+        final files = await Future.wait([second, ...others]);
+        await firstError;
+        expect(files, hasLength(6));
+        expect(requests, 6);
+        expect(maximum, 3);
+        for (final file in files) {
+          expect(await file.exists(), isTrue);
+        }
+        final metadata = await directory
+            .list()
+            .where((entry) => entry.path.endsWith('.json'))
+            .toList();
+        for (final entry in metadata.cast<File>()) {
+          expect(await entry.readAsString(), isNot(contains('token')));
+        }
+      } finally {
+        if (!release.isCompleted) release.complete();
+        await subscription.cancel();
+        await server.close(force: true);
+        transport.close(force: true);
+        ioCache.dispose();
+      }
+    },
+  );
 }

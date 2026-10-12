@@ -82,6 +82,7 @@ void main() {
     String? Function()? owner,
     Future<bool> Function(PurchaseDetails, String)? verify,
     Future<List<PurchaseDetails>> Function()? reconcile,
+    Stream<String?>? ownerChanges,
     Duration launchTimeout = const Duration(seconds: 1),
     Duration pendingTimeout = const Duration(seconds: 90),
   }) async {
@@ -89,6 +90,7 @@ void main() {
       purchase: native,
       owner: owner ?? () => 'owner-a',
       verify: verify ?? (_, _) async => true,
+      ownerChanges: ownerChanges,
       reconcile: reconcile ?? () async => [],
       launchTimeout: launchTimeout,
       pendingTimeout: pendingTimeout,
@@ -114,7 +116,8 @@ void main() {
       expect(service.canPurchase, isFalse);
       expect(service.canRetry, isTrue);
       await service.retryPendingTransaction();
-      expect(service.canPurchase, isTrue);
+      expect(service.canPurchase, isFalse);
+      expect(service.errorCode, 'purchase_status_unknown');
       expect(native.launches, 1);
     },
   );
@@ -179,7 +182,8 @@ void main() {
       expect(service.state, AiBoostPurchaseState.failed);
       expect(service.canPurchase, isFalse);
       await service.retryPendingTransaction();
-      expect(service.canPurchase, isTrue);
+      expect(service.canPurchase, isFalse);
+      expect(service.errorCode, 'purchase_status_unknown');
       expect(native.launches, 1);
     },
   );
@@ -432,6 +436,79 @@ void main() {
       expect(service.verifiedCreditsRevision, 0);
       expect(native.finishes, 0);
       expect(service.canPurchase, isFalse);
+    },
+  );
+  test(
+    'A to B to A retires Boost verification from the earlier A visit',
+    () async {
+      final native = _Native();
+      var owner = 'owner-a';
+      final changes = StreamController<String?>.broadcast(sync: true);
+      addTearDown(changes.close);
+      final verification = Completer<bool>();
+      final service = await create(
+        native,
+        owner: () => owner,
+        ownerChanges: changes.stream,
+        verify: (_, _) => verification.future,
+      );
+      native.updates.add([_receipt('first-a-visit')]);
+      await _settle();
+      owner = 'owner-b';
+      changes.add(owner);
+      owner = 'owner-a';
+      changes.add(owner);
+      verification.complete(true);
+      await _settle();
+      expect(service.verifiedCreditsRevision, 0);
+      expect(native.finishes, 0);
+      expect(service.canPurchase, isFalse);
+      expect(service.state, AiBoostPurchaseState.unavailable);
+      await service.initialize();
+      expect(service.canPurchase, isTrue);
+    },
+  );
+  test('empty unfinished history cannot resolve an uncertain charge', () async {
+    final native = _Native()
+      ..launch = () async => throw StateError('uncertain native launch');
+    final service = await create(native);
+    await service.purchaseBoost();
+    await service.retryPendingTransaction();
+    expect(service.errorCode, 'purchase_status_unknown');
+    expect(service.canPurchase, isFalse);
+    expect(service.canRetry, isTrue);
+    await service.purchaseBoost();
+    expect(native.launches, 1);
+  });
+  test(
+    'changed JWS does not turn the same platform transaction into a new delivery',
+    () async {
+      final native = _Native();
+      var verifications = 0;
+      final service = await create(
+        native,
+        verify: (_, _) async {
+          verifications++;
+          return true;
+        },
+      );
+      native.updates.add([_receipt('stable-platform-id')]);
+      await _settle();
+      final replay = PurchaseDetails(
+        purchaseID: 'stable-platform-id',
+        productID: AiBoostPurchaseService.productId,
+        verificationData: PurchaseVerificationData(
+          localVerificationData: '',
+          serverVerificationData: 'rotated-signed-fixture',
+          source: 'app_store',
+        ),
+        transactionDate: '1',
+        status: PurchaseStatus.purchased,
+      )..pendingCompletePurchase = true;
+      native.updates.add([replay]);
+      await _settle();
+      expect(verifications, 1);
+      expect(service.verifiedCreditsRevision, 1);
     },
   );
 }

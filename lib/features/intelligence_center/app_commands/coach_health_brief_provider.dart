@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/database/database_provider.dart';
 import '../../../data/database/date_keys.dart';
-import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../nutrition/domain/macro_gram_goals.dart';
 import '../../nutrition/domain/percentage_nutrition_goals.dart';
+import '../../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import '../domain/coach_nutrition_goal_resolver.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
@@ -146,15 +146,17 @@ final coachHealthBriefProvider =
           );
         }
         final savedSchedule = await checkedHealthAwait(schedule.read, check);
-        final savedGoals = <String, double>{};
-        for (final key in defaultNutritionGoalPreferenceKeys) {
-          final raw = await checkedHealthAwait(
-            () => preferences.get(key),
-            check,
-          );
-          final value = double.tryParse(raw ?? '');
-          if (value != null && value.isFinite) savedGoals[key] = value;
-        }
+        final goalSnapshot = await checkedHealthAwait(
+          // Keep a dependency subscription while awaiting the first snapshot.
+          // A read-only StreamProvider can pause with no listeners in Riverpod
+          // 3, leaving an otherwise bounded opening brief pending forever.
+          () => ref.watch(nutritionGoalSnapshotProvider.future),
+          check,
+        );
+        final savedGoals = <String, double>{
+          for (final goal in goalSnapshot.goals.values)
+            if (goal.value != null) goal.key: goal.value!,
+        };
         final percentages = PercentageNutritionGoals.resolve(
           calories: savedGoals['goal.calories'] ?? 0,
           carbohydratesPercent: savedGoals['goal.carbsPercent'] ?? 0,
@@ -163,7 +165,7 @@ final coachHealthBriefProvider =
         );
         double? validGram(String key) {
           final value = savedGoals[key];
-          return value != null && value > 0 && value <= 1000 ? value : null;
+          return value != null && value >= 0 && value <= 2500 ? value : null;
         }
 
         if (savedSchedule.targetFor(today) != null || percentages != null) {

@@ -1,0 +1,95 @@
+{
+  "method": "painted Flutter WidgetTester frames at 10 test-clock fps",
+  "not_device_latency": true,
+  "frames": 16,
+  "dimensions": [
+    390,
+    844
+  ],
+  "sha256": "c6ba5aa9dc8066799b64d14677f763e54bfa970a790b1ec74c74f46e1d37aae9",
+  "steps": [
+    {
+      "frame": 0,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 100
+    },
+    {
+      "frame": 1,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 200
+    },
+    {
+      "frame": 2,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 300
+    },
+    {
+      "frame": 3,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 400
+    },
+    {
+      "frame": 4,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 500
+    },
+    {
+      "frame": 5,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 600
+    },
+    {
+      "frame": 6,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 700
+    },
+    {
+      "frame": 7,
+      "step": "00-real-home-ar-390-guide",
+      "pumpedMs": 800
+    },
+    {
+      "frame": 8,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 900
+    },
+    {
+      "frame": 9,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 1000
+    },
+    {
+      "frame": 10,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 1100
+    },
+    {
+      "frame": 11,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 1200
+    },
+    {
+      "frame": 12,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 1300
+    },
+    {
+      "frame": 13,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 1400
+    },
+    {
+      "frame": 14,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 1500
+    },
+    {
+      "frame": 15,
+      "step": "00-real-home-ar-390-skipped",
+      "pumpedMs": 1600
+    }
+  ],
+  "tested_source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "test_run_label": "closure-approved-skip-video-case",
+  "environment": "Actual host Flutter painted frames / SQLite fixture; not a physical-device recording"
+}

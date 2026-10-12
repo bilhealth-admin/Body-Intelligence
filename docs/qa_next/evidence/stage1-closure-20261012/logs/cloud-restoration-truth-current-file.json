@@ -1,0 +1,59 @@
+{
+  "label": "cloud-restoration-truth-current-file",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/cloud_platform/cloud_manual_sync_restoration_truth_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791760882.1793003,
+  "files": {
+    "test/features/cloud_platform/cloud_manual_sync_restoration_truth_test.dart": "d9959afb61f6961c52a2a78b26f69b4491711c9eacf30118a5eca61de9b3c5bf"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "5efaf10aa448c792028f590d7673f3421050b4ba18c3d114e9b32d44b0f553a3",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/cloud_platform/cloud_manual_sync_restoration_truth_test.dart"
+  ],
+  "pid": 8836,
+  "exit_code": 0,
+  "finished": 1791760887.0738578,
+  "end_fingerprint": "5efaf10aa448c792028f590d7673f3421050b4ba18c3d114e9b32d44b0f553a3",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "actual SQLite restore completed only with supported records false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_manual_sync_restoration_truth_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual SQLite restore completed only with supported records true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_manual_sync_restoration_truth_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "local conflict cannot overwrite the successful-sync timestamp",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_manual_sync_restoration_truth_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 3,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

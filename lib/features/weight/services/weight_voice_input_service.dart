@@ -5,9 +5,13 @@ import 'package:flutter/foundation.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/runtime_copy_check_in.dart';
+import '../../../app/localization/runtime_copy_voice_status.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
+import '../../nutrition/services/meal_voice_session.dart';
+import '../../nutrition/presentation/bil_meal_voice_session_panel.dart';
+import '../../nutrition/presentation/bil_meal_voice_capture_dialog.dart';
 import 'spoken_weight_parser.dart';
 
 export 'spoken_weight_parser.dart';
@@ -53,175 +57,126 @@ final class WeightVoiceInputService {
     required BuildContext context,
     required MeasurementSystem fallbackSystem,
   }) async {
-    final gate = permissionGate;
-    final permissionGranted = gate == null
-        ? await _ensurePermission(context)
-        : await gate(context);
-    if (!permissionGranted || !context.mounted) return null;
-    var userEdited = false;
-    var failed = false;
-    var listening = true;
-    var reviewUnit = fallbackSystem == MeasurementSystem.metric
-        ? SpokenWeightUnit.kilograms
-        : SpokenWeightUnit.pounds;
-    final interfaceLocale = Localizations.localeOf(context).toLanguageTag();
-    var recognizedLocale = interfaceLocale;
-    StateSetter? refresh;
-    Timer? timer;
-    final editor = TextEditingController();
+    if (!VoiceCaptureLease.acquire(this)) return null;
+    MealVoiceSession? session;
     try {
-      final available = await _speech.initialize(
-        onError: (_) {
-          failed = true;
-          listening = false;
-          refresh?.call(() {});
-        },
-      );
-      if (!available || !context.mounted) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.strings.text('Voice input unavailable')),
-            ),
+      final gate = permissionGate;
+      final permissionGranted = gate == null
+          ? await _ensurePermission(context)
+          : await gate(context);
+      if (!permissionGranted || !context.mounted) return null;
+      var reviewUnit = fallbackSystem == MeasurementSystem.metric
+          ? SpokenWeightUnit.kilograms
+          : SpokenWeightUnit.pounds;
+      final interfaceLocale = Localizations.localeOf(context).toLanguageTag();
+      var recognizedLocale = interfaceLocale;
+      final model = MealVoiceSession(
+        speech: _speech,
+        appLocale: interfaceLocale,
+        deviceLocale: WidgetsBinding.instance.platformDispatcher.locale
+            .toLanguageTag(),
+        optionsForLocales: (locales) {
+          final allowed = _releaseSpeechLocales(
+            locales
+                .map((locale) => locale.localeId)
+                .where((locale) => locale.trim().isNotEmpty)
+                .toList(growable: false),
           );
-        }
-        return null;
-      }
-      final locales = await _speech.locales();
-      final availableLocaleIds = locales
-          .map((locale) => locale.localeId)
-          .where((locale) => locale.trim().isNotEmpty)
-          .toList(growable: false);
-      // Android exposes every JVM locale here, not only BIL's release
-      // languages. Sending that unbounded list to the recognizer can exceed
-      // platform intent limits. Keep at most one recognizer locale per BIL
-      // locale (two for the supported Portuguese and Chinese variants).
-      final allowed = _releaseSpeechLocales(availableLocaleIds);
-      final preferredLocale = _preferredSpeechLocale(allowed, interfaceLocale);
-      await _speech.listen(
-        onResult: (result) {
-          listening = !result.isFinal;
-          if (!userEdited) {
-            recognizedLocale = result.localeId?.trim().isNotEmpty == true
-                ? result.localeId!.trim()
-                : preferredLocale ?? interfaceLocale;
-            final parsed = SpokenWeightParser.parse(
-              result.recognizedWords,
-              fallbackSystem: fallbackSystem,
-              localeTag: recognizedLocale,
-            );
-            if (parsed != null) reviewUnit = parsed.unit;
-            final reviewedNumber = parsed == null
-                ? ''
-                : _formatReviewedNumber(parsed.value);
-            editor.value = TextEditingValue(
-              // The field and returned candidate are numeric evidence only.
-              // Raw recognizer text does not leave this callback.
-              text: reviewedNumber,
-              selection: TextSelection.collapsed(offset: reviewedNumber.length),
-            );
-          }
-          refresh?.call(() {});
+          return SpeechListenOptions(
+            localeId: _preferredSpeechLocale(allowed, interfaceLocale),
+            listenFor: const Duration(seconds: 20),
+            pauseFor: const Duration(seconds: 3),
+            listenMode: ListenMode.confirmation,
+            partialResults: true,
+            cancelOnError: true,
+            autoDetectLanguage: true,
+            allowedLocaleIds: allowed,
+          );
         },
-        listenOptions: SpeechListenOptions(
-          // iOS does not support Android's automatic language switching, so
-          // seed both platforms with the selected BIL interface language.
-          localeId: preferredLocale,
-          listenFor: const Duration(seconds: 20),
-          pauseFor: const Duration(seconds: 3),
-          listenMode: ListenMode.confirmation,
-          partialResults: true,
-          cancelOnError: true,
-          autoDetectLanguage: true,
-          allowedLocaleIds: allowed,
-        ),
+        reviewTextForResult: (result) {
+          recognizedLocale = result.localeId?.trim().isNotEmpty == true
+              ? result.localeId!.trim()
+              : interfaceLocale;
+          final parsed = SpokenWeightParser.parse(
+            result.recognizedWords,
+            fallbackSystem: fallbackSystem,
+            localeTag: recognizedLocale,
+          );
+          if (parsed != null) reviewUnit = parsed.unit;
+          // Only a real parsed number enters the editor; an unrecognized phrase
+          // never invents a value. Manual edits use the displayed review unit.
+          return parsed == null ? '' : _formatReviewedNumber(parsed.value);
+        },
       );
-      timer = Timer(const Duration(seconds: 21), () async {
-        listening = false;
-        if (_speech.isListening) await _speech.stop();
-        refresh?.call(() {});
-      });
-      if (!context.mounted) return null;
-
+      session = model;
       SpokenWeightCandidate? accepted;
-      await showDialog<void>(
+      final route = DialogRoute<void>(
         context: context,
         barrierDismissible: false,
-        builder: (dialogContext) => StatefulBuilder(
-          builder: (context, setState) {
-            refresh = setState;
+        builder: (dialogContext) => BilMealVoiceSessionPanel(
+          session: model,
+          builder: (context) {
             final reviewSystem = reviewUnit == SpokenWeightUnit.kilograms
                 ? MeasurementSystem.metric
                 : MeasurementSystem.imperial;
             final candidate = SpokenWeightParser.parse(
-              editor.text,
+              model.editor.text,
               fallbackSystem: reviewSystem,
               localeTag: recognizedLocale,
             );
-            return AlertDialog(
-              icon: Icon(
-                listening ? Icons.graphic_eq_rounded : Icons.mic_none_rounded,
+            return BilMealVoiceCaptureDialog(
+              title: context.strings.text('Add weight'),
+              instructions: VoiceStatusRuntimeCopy.resolve(
+                VoiceStatusCopyKey.weightReview,
+                interfaceLocale,
               ),
-              title: Text(context.strings.text('Add weight')),
-              content: TextField(
-                key: const Key('spoken-weight-review-field'),
-                controller: editor,
-                autofocus: false,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                onChanged: (_) {
-                  userEdited = true;
-                  setState(() {});
-                },
-                decoration: InputDecoration(
-                  labelText: context.strings.text(
-                    listening ? 'Listening…' : 'Weight',
-                  ),
-                  errorText: failed
-                      ? context.strings.text('Voice input unavailable')
-                      : !listening && candidate == null
-                      ? _invalidWeightText(context)
-                      : null,
-                  suffixText: reviewUnit == SpokenWeightUnit.kilograms
-                      ? 'kg'
-                      : 'lb',
-                  suffixIcon: candidate == null
-                      ? null
-                      : const Icon(Icons.check_circle_outline_rounded),
-                ),
+              transcript: model.editor.text,
+              editor: model.editor,
+              editing: true,
+              phase: model.phase,
+              reviewLabel: context.strings.text('Weight'),
+              textFieldKey: const Key('spoken-weight-review-field'),
+              useKey: const Key('use-spoken-weight'),
+              useIcon: Icons.done_rounded,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    refresh = null;
-                    Navigator.pop(dialogContext);
-                  },
-                  child: Text(context.strings.text('Cancel')),
-                ),
-                FilledButton.icon(
-                  key: const Key('use-spoken-weight'),
-                  onPressed: candidate == null
-                      ? null
-                      : () {
-                          accepted = candidate;
-                          refresh = null;
-                          Navigator.pop(dialogContext);
-                        },
-                  icon: const Icon(Icons.done_rounded),
-                  label: Text(
-                    CheckInRuntimeCopy.resolve(
-                          'Apply',
-                          Localizations.localeOf(context).toLanguageTag(),
-                        ) ??
-                        context.strings.text('Apply'),
-                  ),
-                ),
-              ],
+              unitLabel: reviewUnit == SpokenWeightUnit.kilograms ? 'kg' : 'lb',
+              error: model.failure != null
+                  ? context.strings.text('Voice input unavailable')
+                  : model.phase == MealVoicePhase.review && candidate == null
+                  ? _invalidWeightText(context)
+                  : null,
+              cancelLabel: context.strings.text('Cancel'),
+              useLabel:
+                  CheckInRuntimeCopy.resolve(
+                    'Apply',
+                    Localizations.localeOf(context).toLanguageTag(),
+                  ) ??
+                  context.strings.text('Apply'),
+              onEdit: model.beginManualEdit,
+              onTextChanged: (_) => model.textChanged(),
+              onRetry: model.starting ? null : () => unawaited(model.start()),
+              onStop: () => unawaited(model.stop()),
+              onCancel: () {
+                unawaited(model.close());
+                Navigator.pop(dialogContext);
+              },
+              onUse: !model.canAccept || candidate == null
+                  ? null
+                  : () {
+                      accepted = candidate;
+                      unawaited(model.close());
+                      Navigator.pop(dialogContext);
+                    },
             );
           },
         ),
       );
+      final popped = Navigator.of(context, rootNavigator: true).push(route);
+      await Future.any<void>([popped, route.completed.then<void>((_) {})]);
+      await model.close();
+      await route.completed;
       return accepted;
     } on Object {
       if (context.mounted) {
@@ -233,17 +188,13 @@ final class WeightVoiceInputService {
       }
       return null;
     } finally {
-      refresh = null;
-      timer?.cancel();
-      if (_speech.isListening) {
-        try {
-          await _speech.cancel();
-        } on Object {
-          // The platform recognizer may have closed after the final result.
-        }
+      try {
+        await session?.close();
+        await _speech.dispose();
+      } finally {
+        session?.dispose();
+        VoiceCaptureLease.release(this);
       }
-      await _speech.dispose();
-      editor.dispose();
     }
   }
 

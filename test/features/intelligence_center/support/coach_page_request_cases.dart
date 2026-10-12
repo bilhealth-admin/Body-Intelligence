@@ -129,6 +129,9 @@ void registerCoachRequestCases() {
     addTearDown(database.close);
     final owners = StreamController<String?>();
     addTearDown(owners.close);
+    // An intentionally unresolved identity keeps a checking animation. Seed
+    // the first authenticated owner before waiting for this mounted fixture.
+    owners.add('member-one');
     await _mount(
       tester,
       database: database,
@@ -136,7 +139,6 @@ void registerCoachRequestCases() {
       gate: true,
       owners: owners.stream,
     );
-    owners.add('member-one');
     await tester.pumpAndSettle();
     final state = tester.state(find.byType(IntelligenceCenterPage));
     await tester.enterText(
@@ -250,7 +252,7 @@ void registerCoachRequestCases() {
           expect(find.byType(IntelligenceCenterPage), findsOneWidget);
         } else {
           expect(
-            find.byKey(const Key('premium-route-glass-blur')),
+            find.byKey(const Key('premium-route-upgrade-cta')),
             findsOneWidget,
           );
           expect(

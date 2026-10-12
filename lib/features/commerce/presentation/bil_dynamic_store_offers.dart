@@ -35,6 +35,9 @@ class BilDynamicStoreOffers extends StatefulWidget {
     this.purchaseInProgress = false,
     this.restoreInProgress = false,
     this.purchaseEnabled = true,
+    this.purchaseAllowedForKind,
+    this.onContinueVerification,
+    this.continueVerificationLabel,
     this.blockedPurchaseKinds = const <BilStoreProductKind>{},
     this.blockedPurchaseMessage,
     this.purchaseStatusMessage,
@@ -62,6 +65,9 @@ class BilDynamicStoreOffers extends StatefulWidget {
   /// The verified store service owns this gate. The display surface never
   /// guesses that a stale product can be purchased.
   final bool purchaseEnabled;
+  final bool Function(BilStoreProductKind)? purchaseAllowedForKind;
+  final VoidCallback? onContinueVerification;
+  final String? continueVerificationLabel;
   final Set<BilStoreProductKind> blockedPurchaseKinds;
   final String? blockedPurchaseMessage;
 
@@ -308,6 +314,13 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           ),
                         ),
                       ),
+                      if (widget.onContinueVerification != null)
+                        TextButton.icon(
+                          key: const Key('store-continue-verification'),
+                          onPressed: widget.onContinueVerification,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: Text(widget.continueVerificationLabel!),
+                        ),
                       TextButton(
                         onPressed: widget.onManage,
                         style: TextButton.styleFrom(
@@ -333,7 +346,10 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
               label: _copy('continue'),
               price: selectedOffer.localizedPrice,
               loading: controlsLocked,
-              enabled: widget.purchaseEnabled && !selectedOwnershipBlocked,
+              enabled:
+                  (widget.purchaseAllowedForKind?.call(selectedOffer.kind) ??
+                      widget.purchaseEnabled) &&
+                  !selectedOwnershipBlocked,
               statusMessage: selectedOwnershipBlocked
                   ? widget.blockedPurchaseMessage
                   : widget.purchaseStatusMessage,

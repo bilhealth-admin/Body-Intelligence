@@ -1,7 +1,9 @@
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
+import '../database/food_basis_evidence.dart';
 import '../database/nutrient_evidence.dart';
+import '../database/database_scope.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
 import '../../features/nutrition/domain/food_access.dart';
 import '../../features/nutrition/domain/unified_food.dart';
@@ -18,6 +20,7 @@ part 'food_repository_ranking.dart';
 part 'food_repository_validation.dart';
 part 'food_repository_access.dart';
 part 'food_repository_read_streams.dart';
+part 'food_repository_custom_writes.dart';
 
 class FoodRepository
     with _FoodRepositoryReadStreams, _FoodRepositoryAccessMethods
@@ -61,112 +64,105 @@ class FoodRepository
     double? calcium,
     double? magnesium,
     double? phosphorus,
-    double iron = 0,
-    double vitaminC = 0,
+    double? iron,
+    double? vitaminC,
+    Map<FoodNutrient, double?> additionalNutrients = const {},
     String? uuid,
     bool caloriesKnown = true,
     bool proteinKnown = true,
     bool carbsKnown = true,
     bool fatsKnown = true,
-  }) async {
-    final normalizedBarcode = _optional(barcode);
-    if (isCustom && normalizedBarcode != null) {
-      _validateCustomBarcode(normalizedBarcode);
-    }
-    if (isCustom && (servingSize == null || servingUnit == null)) {
-      throw ArgumentError(
-        'Custom foods require an explicit serving size and serving unit',
-      );
-    }
-    final effectiveServingSize = servingSize ?? 100;
-    final normalizedServingUnit = _validateServingUnit(servingUnit ?? 'g');
-    _validateNutritionBounds(
-      calories: calories,
-      protein: protein,
-      carbs: carbs,
-      fats: fats,
-      fiber: fiber,
-      sugar: sugar,
-      sodium: sodium,
-      potassium: potassium,
-      calcium: calcium,
-      magnesium: magnesium,
-      phosphorus: phosphorus,
-    );
-    _validateFood(
-      name: name,
-      servingSize: effectiveServingSize,
-      nutrients: [
-        calories,
-        protein,
-        carbs,
-        fats,
-        fiber ?? 0,
-        sugar ?? 0,
-        sodium ?? 0,
-        potassium ?? 0,
-        calcium ?? 0,
-        magnesium ?? 0,
-        phosphorus ?? 0,
-        iron,
-        vitaminC,
-      ],
-    );
-    // Open/migrate the lazy database before entering the serialized barcode
-    // check+insert transaction. Initializing the schema from inside the first
-    // transaction can deadlock NativeDatabase during cold-start tests.
-    await (_database.select(_database.foods)..limit(1)).get();
-    return _database.transaction(() async {
-      if (isCustom && normalizedBarcode != null) {
-        await _ensureBarcodeAvailable(normalizedBarcode);
-      }
-      return _database
-          .into(_database.foods)
-          .insert(
-            FoodsCompanion.insert(
-              uuid: uuid == null ? const Value.absent() : Value(uuid),
-              name: name.trim(),
-              arabicName: Value(_optional(arabicName)),
-              category: Value(category),
-              keywords: Value(keywords.trim()),
-              barcode: Value(normalizedBarcode),
-              servingSize: Value(effectiveServingSize),
-              servingUnit: Value(normalizedServingUnit),
-              calories: calories,
-              protein: protein,
-              carbs: carbs,
-              fats: fats,
-              fiber: Value(fiber ?? 0),
-              sugar: Value(sugar ?? 0),
-              potassium: Value(potassium ?? 0),
-              sodium: Value(sodium ?? 0),
-              calcium: Value(calcium ?? 0),
-              iron: Value(iron),
-              magnesium: Value(magnesium ?? 0),
-              phosphorus: Value(phosphorus ?? 0),
-              nutrientEvidenceMask: Value(
-                NutrientEvidenceMask.fromValues(
-                  fiber: fiber,
-                  sugar: sugar,
-                  sodium: sodium,
-                  potassium: potassium,
-                  calcium: calcium,
-                  magnesium: magnesium,
-                  phosphorus: phosphorus,
-                  calories: caloriesKnown ? calories : null,
-                  protein: proteinKnown ? protein : null,
-                  carbohydrates: carbsKnown ? carbs : null,
-                  fat: fatsKnown ? fats : null,
-                ),
-              ),
-              vitaminC: Value(vitaminC),
-              verified: Value(verified),
-              isCustom: Value(isCustom),
-              source: Value(source.trim().isEmpty ? 'local' : source.trim()),
-            ),
-          );
-    });
-  }
+    bool Function()? isCurrent,
+  }) => _addCustomFood(
+    name: name,
+    category: category,
+    calories: calories,
+    protein: protein,
+    carbs: carbs,
+    fats: fats,
+    arabicName: arabicName,
+    barcode: barcode,
+    servingSize: servingSize,
+    servingUnit: servingUnit,
+    isCustom: isCustom,
+    source: source,
+    verified: verified,
+    keywords: keywords,
+    fiber: fiber,
+    sugar: sugar,
+    sodium: sodium,
+    potassium: potassium,
+    calcium: calcium,
+    magnesium: magnesium,
+    phosphorus: phosphorus,
+    iron: iron,
+    vitaminC: vitaminC,
+    additionalNutrients: additionalNutrients,
+    uuid: uuid,
+    caloriesKnown: caloriesKnown,
+    proteinKnown: proteinKnown,
+    carbsKnown: carbsKnown,
+    fatsKnown: fatsKnown,
+    isCurrent: isCurrent,
+  );
+
+  Future<void> updateCustomFood({
+    required int id,
+    required String name,
+    required String category,
+    required double calories,
+    required double protein,
+    required double carbs,
+    required double fats,
+    String? arabicName,
+    String? barcode,
+    required double servingSize,
+    required String servingUnit,
+    double? fiber,
+    double? sugar,
+    double? sodium,
+    double? potassium,
+    double? calcium,
+    double? magnesium,
+    double? phosphorus,
+    double? iron,
+    double? vitaminC,
+    String? source,
+    Map<FoodNutrient, double?> additionalNutrients = const {},
+    bool caloriesKnown = true,
+    bool proteinKnown = true,
+    bool carbsKnown = true,
+    bool fatsKnown = true,
+    bool Function()? isCurrent,
+  }) => _updateCustomFood(
+    id: id,
+    name: name,
+    category: category,
+    calories: calories,
+    protein: protein,
+    carbs: carbs,
+    fats: fats,
+    arabicName: arabicName,
+    barcode: barcode,
+    servingSize: servingSize,
+    servingUnit: servingUnit,
+    fiber: fiber,
+    sugar: sugar,
+    sodium: sodium,
+    potassium: potassium,
+    calcium: calcium,
+    magnesium: magnesium,
+    phosphorus: phosphorus,
+    iron: iron,
+    vitaminC: vitaminC,
+    source: source,
+    additionalNutrients: additionalNutrients,
+    caloriesKnown: caloriesKnown,
+    proteinKnown: proteinKnown,
+    carbsKnown: carbsKnown,
+    fatsKnown: fatsKnown,
+    isCurrent: isCurrent,
+  );
 
   Stream<List<Food>> watchFoods() {
     return (_database.select(_database.foods)
@@ -228,114 +224,6 @@ class FoodRepository
     );
   }
 
-  Future<void> updateCustomFood({
-    required int id,
-    required String name,
-    required String category,
-    required double calories,
-    required double protein,
-    required double carbs,
-    required double fats,
-    String? arabicName,
-    String? barcode,
-    required double servingSize,
-    required String servingUnit,
-    double? fiber,
-    double? sugar,
-    double? sodium,
-    double? potassium,
-    double? calcium,
-    double? magnesium,
-    double? phosphorus,
-    bool caloriesKnown = true,
-    bool proteinKnown = true,
-    bool carbsKnown = true,
-    bool fatsKnown = true,
-  }) async {
-    final normalizedBarcode = _optional(barcode);
-    if (normalizedBarcode != null) {
-      _validateCustomBarcode(normalizedBarcode);
-    }
-    final normalizedServingUnit = _validateServingUnit(servingUnit);
-    _validateNutritionBounds(
-      calories: calories,
-      protein: protein,
-      carbs: carbs,
-      fats: fats,
-      fiber: fiber,
-      sugar: sugar,
-      sodium: sodium,
-      potassium: potassium,
-      calcium: calcium,
-      magnesium: magnesium,
-      phosphorus: phosphorus,
-    );
-    _validateFood(
-      name: name,
-      servingSize: servingSize,
-      nutrients: [
-        calories,
-        protein,
-        carbs,
-        fats,
-        fiber ?? 0,
-        sugar ?? 0,
-        sodium ?? 0,
-        potassium ?? 0,
-        calcium ?? 0,
-        magnesium ?? 0,
-        phosphorus ?? 0,
-      ],
-    );
-    await _database.transaction(() async {
-      if (normalizedBarcode != null) {
-        await _ensureBarcodeAvailable(normalizedBarcode, excludingId: id);
-      }
-      final existing = await _customFood(id);
-      await (_database.update(
-        _database.foods,
-      )..where((row) => row.id.equals(id))).write(
-        FoodsCompanion(
-          name: Value(name.trim()),
-          arabicName: Value(_optional(arabicName)),
-          category: Value(category),
-          barcode: Value(normalizedBarcode),
-          servingSize: Value(servingSize),
-          servingUnit: Value(normalizedServingUnit),
-          calories: Value(calories),
-          protein: Value(protein),
-          carbs: Value(carbs),
-          fats: Value(fats),
-          fiber: Value(fiber ?? 0),
-          sugar: Value(sugar ?? 0),
-          sodium: Value(sodium ?? 0),
-          potassium: Value(potassium ?? 0),
-          calcium: Value(calcium ?? 0),
-          magnesium: Value(magnesium ?? 0),
-          phosphorus: Value(phosphorus ?? 0),
-          nutrientEvidenceMask: Value(
-            NutrientEvidenceMask.fromValues(
-              fiber: fiber,
-              sugar: sugar,
-              sodium: sodium,
-              potassium: potassium,
-              calcium: calcium,
-              magnesium: magnesium,
-              phosphorus: phosphorus,
-              calories: caloriesKnown ? calories : null,
-              protein: proteinKnown ? protein : null,
-              carbohydrates: carbsKnown ? carbs : null,
-              fat: fatsKnown ? fats : null,
-            ),
-          ),
-          updatedAt: Value(DateTime.now()),
-          revision: Value(existing.revision + 1),
-          syncStatus: const Value('pending'),
-        ),
-      );
-    });
-  }
-
   Future<void> deleteCustomFood(int id) async {
     final existing = await _customFood(id);
     final now = DateTime.now();
@@ -351,7 +239,44 @@ class FoodRepository
     );
   }
 
+  Future<void> _writeCatalogEvidence(
+    Food row,
+    Map<FoodNutrient, double?> values,
+  ) async {
+    final raw = FoodBasisEvidence.encodeCatalog(
+      row,
+      values,
+      ownerKey: row.isCustom
+          ? LocalDatabaseScope.keyForOwner(_database.localOwnerId)
+          : null,
+    );
+    await (_database.update(_database.foods)..where((r) => r.id.equals(row.id)))
+        .write(FoodsCompanion(foodEvidenceJson: Value(raw)));
+  }
+
   Future<Food> materializeUnifiedFood(UnifiedFood food) async {
+    await (_database.select(_database.foods)..limit(1)).get();
+    return _database.transaction(() async {
+      final row = await _materializeUnifiedFood(food);
+      final prior = FoodBasisEvidence.read(row);
+      if (food.isCustom ||
+          FoodNutrient.values
+              .where((n) => n.index > FoodNutrient.vitaminC.index)
+              .any((n) => food.knownValue(n) != null) ||
+          prior.isCatalog) {
+        await _writeCatalogEvidence(row, {
+          for (final n in FoodNutrient.values)
+            n: food.knownValue(n) ?? prior.value(n),
+        });
+        return (_database.select(
+          _database.foods,
+        )..where((r) => r.id.equals(row.id))).getSingle();
+      }
+      return row;
+    });
+  }
+
+  Future<Food> _materializeUnifiedFood(UnifiedFood food) async {
     final canonicalServingGrams = food.serving.grams;
     if (!canonicalServingGrams.isFinite || canonicalServingGrams <= 0) {
       throw StateError('Catalog food ${food.id} has no valid gram basis');

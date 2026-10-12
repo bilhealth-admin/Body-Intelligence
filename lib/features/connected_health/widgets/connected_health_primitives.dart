@@ -12,6 +12,8 @@ class HealthSlide extends StatelessWidget {
     required this.explanation,
     required this.footer,
     required this.icon,
+    this.publicUnit,
+    this.protectValues,
   });
 
   final String title;
@@ -19,6 +21,8 @@ class HealthSlide extends StatelessWidget {
   final String explanation;
   final String footer;
   final IconData icon;
+  final String? publicUnit;
+  final Widget Function(Widget)? protectValues;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +61,7 @@ class HealthSlide extends StatelessWidget {
                 const SizedBox(width: PremiumDesignTokens.spaceXs),
                 Expanded(
                   child: Text(
-                    title,
+                    publicUnit != null ? '$title · $publicUnit' : title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -68,25 +72,50 @@ class HealthSlide extends StatelessWidget {
               ],
             ),
             SizedBox(height: compact ? 3 : 5),
-            Text(
-              result,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: compact
-                  ? Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    )
-                  : Theme.of(context).textTheme.titleSmall,
-            ),
-            SizedBox(height: compact ? 3 : 6),
-            Expanded(
-              child: Text(
-                explanation,
-                maxLines: 5,
+            if (protectValues != null)
+              Expanded(
+                child: protectValues!(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        result,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Expanded(
+                        child: Text(
+                          explanation,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else ...[
+              Text(
+                result,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: compact
+                    ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      )
+                    : Theme.of(context).textTheme.titleSmall,
               ),
-            ),
+              SizedBox(height: compact ? 3 : 6),
+              Expanded(
+                child: Text(
+                  explanation,
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ],
             SizedBox(height: compact ? 3 : 6),
             Text(
               footer,

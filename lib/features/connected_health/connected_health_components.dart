@@ -1,21 +1,42 @@
 part of 'connected_health_page.dart';
 
+double _healthTextHeight(
+  BuildContext context,
+  String text,
+  TextStyle style,
+  double width,
+) {
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  );
+  try {
+    painter.layout(maxWidth: width);
+    return painter.height;
+  } finally {
+    painter.dispose();
+  }
+}
+
 class _ConnectionTab extends StatelessWidget {
   const _ConnectionTab({
     required this.label,
     required this.selected,
     required this.onTap,
+    required this.height,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final double height;
 
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
     child: Container(
-      height: 54,
+      height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         border: Border(
@@ -203,7 +224,16 @@ class _CompatibilitySection extends StatelessWidget {
 }
 
 class _FitnessDeviceSection extends ConsumerWidget {
-  const _FitnessDeviceSection();
+  const _FitnessDeviceSection({
+    required this.accessGranted,
+    required this.checking,
+    required this.verifiedDenied,
+    required this.onRequestAccess,
+  });
+  final bool accessGranted;
+  final bool checking;
+  final bool verifiedDenied;
+  final VoidCallback onRequestAccess;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -284,27 +314,53 @@ class _FitnessDeviceSection extends ConsumerWidget {
                         ],
                       )
                     : FilledButton(
-                        onPressed: busy
+                        onPressed: busy || checking
                             ? null
-                            : () => controller.connect(device),
-                        child: Text(tr('Connect', 'اتصال')),
+                            : accessGranted
+                            ? () => controller.connect(device)
+                            : onRequestAccess,
+                        child: Text(
+                          accessGranted
+                              ? tr('Connect', 'اتصال')
+                              : verifiedDenied
+                              ? tr('Upgrade', 'ترقية')
+                              : tr('Retry', 'إعادة المحاولة'),
+                        ),
                       ),
               ),
           ],
           const SizedBox(height: PremiumDesignTokens.spaceSm),
           FilledButton.icon(
             key: const Key('scan-fitness-devices-button'),
-            onPressed: !snapshot.supported || busy ? null : controller.scan,
+            onPressed: !snapshot.supported || busy || checking
+                ? null
+                : accessGranted
+                ? controller.scan
+                : onRequestAccess,
             icon: busy
                 ? const SizedBox.square(
                     dimension: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.bluetooth_searching_rounded),
+                : Icon(
+                    accessGranted
+                        ? Icons.bluetooth_searching_rounded
+                        : checking
+                        ? Icons.hourglass_empty_rounded
+                        : verifiedDenied
+                        ? Icons.lock_outline_rounded
+                        : Icons.refresh_rounded,
+                  ),
             label: Text(
               !snapshot.supported
                   ? tr('Requires Android or iPhone', 'يتطلب Android أو iPhone')
-                  : tr('Scan for fitness devices', 'البحث عن أجهزة لياقة'),
+                  : accessGranted
+                  ? tr('Scan for fitness devices', 'البحث عن أجهزة لياقة')
+                  : checking
+                  ? tr('Checking subscription', 'جارٍ التحقق من الاشتراك')
+                  : verifiedDenied
+                  ? tr('Upgrade', 'ترقية')
+                  : tr('Retry', 'إعادة المحاولة'),
             ),
           ),
         ],

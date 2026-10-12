@@ -80,7 +80,7 @@ void main() {
         );
         expect(
           catalog['premium_ai_coach']!.toLowerCase(),
-          isNot(contains(localizedPremium)),
+          contains('ai coach'),
         );
         expect(catalog['premium_ai_detail'], contains('AI'));
       }
@@ -128,73 +128,80 @@ void main() {
       }
 
       expect(premiumMentions(premiumTierVisibleCopy), 1);
-      expect(premiumMentions(aiTierVisibleCopy), 1);
+      expect(premiumMentions(aiTierVisibleCopy), 2);
+      expect(catalog['premium_ai_coach'], 'Premium AI Coach');
     }
   });
 
-  test('one-Premium route contract holds across all 25 locales', () {
-    final benefitKeys = BilStoreCopy.catalogs['en']!.keys
-        .where((key) => key.startsWith('premium_benefit_'))
-        .toList(growable: false);
+  test(
+    'exact Premium AI Coach title and one inheritance label across all 25 locales',
+    () {
+      final benefitKeys = BilStoreCopy.catalogs['en']!.keys
+          .where((key) => key.startsWith('premium_benefit_'))
+          .toList(growable: false);
 
-    for (final locale in RuntimeCopy.supported) {
-      final premiumToken = BilStoreCopy.text(locale, 'premium').toLowerCase();
-      final premiumRoute = <String>[
-        BilStoreCopy.text(locale, 'premium'),
-        BilStoreCopy.text(locale, 'premium_store_title'),
-        BilStoreCopy.text(locale, 'premium_detail'),
-        for (final key in benefitKeys) BilStoreCopy.text(locale, key),
-      ].join(' ').toLowerCase();
-      final aiRoute = <String>[
-        BilStoreCopy.text(locale, 'premium_ai_coach'),
-        BilStoreCopy.text(locale, 'premium_store_title'),
-        BilStoreCopy.text(locale, 'premium_ai_detail'),
-        for (var index = 1; index <= 4; index++)
-          BilStoreCopy.text(locale, 'ai_benefit_$index'),
-        for (final key in benefitKeys)
-          if (key != 'premium_benefit_1') BilStoreCopy.text(locale, key),
-      ].join(' ').toLowerCase();
+      for (final locale in RuntimeCopy.supported) {
+        final premiumToken = BilStoreCopy.text(locale, 'premium').toLowerCase();
+        final premiumRoute = <String>[
+          BilStoreCopy.text(locale, 'premium'),
+          BilStoreCopy.text(locale, 'premium_store_title'),
+          BilStoreCopy.text(locale, 'premium_detail'),
+          for (final key in benefitKeys) BilStoreCopy.text(locale, key),
+        ].join(' ').toLowerCase();
+        final aiRoute = <String>[
+          BilStoreCopy.text(locale, 'premium_store_title'),
+          BilStoreCopy.text(locale, 'premium_ai_detail'),
+          for (var index = 1; index <= 4; index++)
+            BilStoreCopy.text(locale, 'ai_benefit_$index'),
+          for (final key in benefitKeys)
+            if (key != 'premium_benefit_1') BilStoreCopy.text(locale, key),
+        ].join(' ').toLowerCase();
+        expect(
+          BilStoreCopy.text(locale, 'premium_ai_coach'),
+          'Premium AI Coach',
+        );
 
-      int mentions(String value, String token) {
-        var count = 0;
-        var start = 0;
-        while (true) {
-          final match = value.indexOf(token, start);
-          if (match < 0) return count;
-          count += 1;
-          start = match + token.length;
+        int mentions(String value, String token) {
+          var count = 0;
+          var start = 0;
+          while (true) {
+            final match = value.indexOf(token, start);
+            if (match < 0) return count;
+            count += 1;
+            start = match + token.length;
+          }
         }
-      }
 
-      final premiumTokens = {premiumToken, 'premium'};
-      for (final token in premiumTokens) {
+        final premiumTokens = {premiumToken, 'premium'};
+        for (final token in premiumTokens) {
+          expect(
+            mentions(premiumRoute, token),
+            lessThanOrEqualTo(1),
+            reason: '$locale Premium route; token=$token; copy=$premiumRoute',
+          );
+          expect(
+            mentions(aiRoute, token),
+            lessThanOrEqualTo(1),
+            reason: '$locale AI Coach route; token=$token; copy=$aiRoute',
+          );
+        }
         expect(
-          mentions(premiumRoute, token),
-          lessThanOrEqualTo(1),
-          reason: '$locale Premium route; token=$token; copy=$premiumRoute',
+          premiumTokens
+              .map((token) => mentions(premiumRoute, token))
+              .reduce((left, right) => left > right ? left : right),
+          1,
+          reason: '$locale Premium route has no tier label',
         );
         expect(
-          mentions(aiRoute, token),
-          lessThanOrEqualTo(1),
-          reason: '$locale AI Coach route; token=$token; copy=$aiRoute',
+          premiumTokens
+              .map((token) => mentions(aiRoute, token))
+              .reduce((left, right) => left > right ? left : right),
+          1,
+          reason: '$locale AI Coach route has no inheritance label',
         );
       }
-      expect(
-        premiumTokens
-            .map((token) => mentions(premiumRoute, token))
-            .reduce((left, right) => left > right ? left : right),
-        1,
-        reason: '$locale Premium route has no tier label',
-      );
-      expect(
-        premiumTokens
-            .map((token) => mentions(aiRoute, token))
-            .reduce((left, right) => left > right ? left : right),
-        1,
-        reason: '$locale AI Coach route has no inheritance label',
-      );
-    }
-  });
+    },
+  );
 
   test('tier summaries stay concise on compact paywall cards', () {
     for (final catalog in BilStoreCopy.catalogs.values) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme/bil_pearl_finish.dart';
 
 import 'bil_coach_identity.dart';
 
@@ -41,7 +42,10 @@ class BilPremiumTrustSurface extends StatelessWidget {
               begin: AlignmentDirectional.topStart,
               end: AlignmentDirectional.bottomEnd,
               colors: dark
-                  ? const <Color>[Color(0xFF0A0B0E), Color(0xFF11151C)]
+                  ? const <Color>[
+                      BilPearlFinish.darkInset,
+                      BilPearlFinish.darkSurface,
+                    ]
                   : const <Color>[Color(0xFFFFFFFF), Color(0xFFF3F7FF)],
             ),
             border: Border.all(
@@ -73,17 +77,8 @@ class BilPremiumTrustSurface extends StatelessWidget {
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: <Color>[Color(0xFF0A84FF), Color(0xFF6D5DFB)],
+                        colors: <Color>[Color(0xFF166FAD), Color(0xFF2C8DC1)],
                       ),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: const Color(
-                            0xFF3A63FF,
-                          ).withValues(alpha: dark ? .30 : .18),
-                          blurRadius: 20,
-                          spreadRadius: -8,
-                        ),
-                      ],
                     ),
                     alignment: Alignment.center,
                     child: Icon(icon, color: Colors.white, size: 23),
@@ -213,7 +208,10 @@ class BilPremiumConsentToggle extends StatelessWidget {
             begin: AlignmentDirectional.topStart,
             end: AlignmentDirectional.bottomEnd,
             colors: dark
-                ? const <Color>[Color(0xFF090A0D), Color(0xFF12161D)]
+                ? const <Color>[
+                    BilPearlFinish.darkInset,
+                    BilPearlFinish.darkSurface,
+                  ]
                 : const <Color>[Color(0xFFFFFFFF), Color(0xFFF4F7FF)],
           ),
           border: Border.all(color: scheme.outlineVariant),
@@ -234,7 +232,7 @@ class BilPremiumConsentToggle extends StatelessWidget {
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: <Color>[Color(0xFF0A84FF), Color(0xFF6D5DFB)],
+                  colors: <Color>[Color(0xFF166FAD), Color(0xFF2C8DC1)],
                 ),
               ),
               alignment: Alignment.center,

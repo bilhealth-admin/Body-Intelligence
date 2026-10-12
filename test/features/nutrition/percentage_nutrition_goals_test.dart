@@ -26,7 +26,9 @@ void main() {
         );
 
     expect(resolve(2000, 40), isNull);
-    expect(resolve(499, 45), isNull);
+    expect(resolve(0, 45), isNull);
+    expect(resolve(1, 45)!.calories, 1);
+    expect(resolve(499, 45)!.calories, 499);
     expect(resolve(10001, 45), isNull);
     expect(resolve(double.nan, 45), isNull);
     expect(resolve(2000, -5), isNull);

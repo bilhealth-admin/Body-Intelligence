@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,28 +84,30 @@ class _MealsRecipesFoodsPageState extends ConsumerState<MealsRecipesFoodsPage> {
             appBar: SecondaryPageAppBar(
               title: Text(_c(context, 'My nutrition')),
             ),
-            body: Column(
-              children: [
-                TabBar(
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
-                  dividerHeight: 1,
-                  tabs: [
-                    Tab(text: _c(context, 'My meals')),
-                    Tab(text: _c(context, 'My recipes')),
-                    Tab(text: _c(context, 'My foods')),
-                  ],
-                ),
-                const Expanded(
-                  child: TabBarView(
-                    children: [
-                      _MealsTab(),
-                      _RecipesTab(),
-                      FoodPage(embedded: true, userOwnedOnly: true),
+            body: BilPearlBackdrop(
+              child: Column(
+                children: [
+                  TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    dividerHeight: 1,
+                    tabs: [
+                      Tab(text: _c(context, 'My meals')),
+                      Tab(text: _c(context, 'My recipes')),
+                      Tab(text: _c(context, 'My foods')),
                     ],
                   ),
-                ),
-              ],
+                  const Expanded(
+                    child: TabBarView(
+                      children: [
+                        _MealsTab(),
+                        _RecipesTab(),
+                        FoodPage(embedded: true, userOwnedOnly: true),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

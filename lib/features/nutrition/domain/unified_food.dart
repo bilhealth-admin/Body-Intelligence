@@ -17,6 +17,12 @@ enum FoodNutrient {
   phosphorus,
   iron,
   vitaminC,
+  saturatedFat,
+  polyunsaturatedFat,
+  monounsaturatedFat,
+  transFat,
+  cholesterol,
+  vitaminA,
 }
 
 class NutrientAmount {

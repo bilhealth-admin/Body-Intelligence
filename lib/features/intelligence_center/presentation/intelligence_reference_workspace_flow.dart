@@ -1,20 +1,33 @@
 part of 'intelligence_center_page.dart';
 
 extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
-  Future<void> _showCoachMenuSheet() async {
+  Future<void> _showCoachMenuSheet(BuildContext anchor) async {
+    final menuTheme = Theme.of(anchor);
     final action = await showModalBottomSheet<String>(
       context: context,
       useSafeArea: true,
       showDragHandle: true,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (context) => const _CoachMenuSheet(),
+      backgroundColor: Colors.transparent,
+      builder: (context) => Theme(
+        data: menuTheme,
+        child: BilFrostedPanel(
+          radius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: _CoachMenuSheet(
+            currentTitle: activeConversationTitle,
+            canRename: activeConversationId != null,
+          ),
+        ),
+      ),
     );
     if (!mounted || action == null) return;
     if (action == 'overview') {
       _updateState(() => _referenceOverview = true);
     } else if (action == 'history') {
       await _openConversationHistory();
+    } else if (action == 'rename') {
+      final id = activeConversationId;
+      if (id != null) await _renameConversation(id);
     } else if (action == 'memory') {
       await context.push('/decision-memory');
     } else if (action == 'settings') {
@@ -53,7 +66,6 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
   }
 
   Widget _buildReferencePresentation(BuildContext context) {
-    final inherited = Theme.of(context);
     if (_referenceOverview) {
       final snapshot = ref.watch(coachContextSnapshotProvider).asData?.value;
       return CoachReferenceWorkspace(
@@ -71,29 +83,7 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
         },
       );
     }
-    return Theme(
-      data: inherited.copyWith(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF07111B),
-        iconTheme: const IconThemeData(color: Color(0xFFB4C5DA)),
-        iconButtonTheme: IconButtonThemeData(
-          style: IconButton.styleFrom(
-            foregroundColor: const Color(0xFFB4C5DA),
-            disabledForegroundColor: const Color(0xFF738397),
-          ),
-        ),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF318BFF),
-          brightness: Brightness.dark,
-          surface: const Color(0xFF07111B),
-          onSurface: const Color(0xFFF0F5FC),
-        ),
-        textTheme: inherited.textTheme.apply(
-          bodyColor: const Color(0xFFF0F5FC),
-          displayColor: const Color(0xFFF0F5FC),
-        ),
-      ),
-      child: Builder(builder: _buildReferenceChat),
-    );
+    // Follow the user's light/dark choice; the glass roles own presentation only.
+    return Builder(builder: _buildReferenceChat);
   }
 }

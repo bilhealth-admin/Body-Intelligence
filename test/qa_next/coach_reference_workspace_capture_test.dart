@@ -107,6 +107,7 @@ Future<void> _mount(
   String language = 'en',
   bool premium = true,
   double scale = 1,
+  bool dark = false,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(390, 844);
@@ -169,7 +170,9 @@ Future<void> _mount(
           GlobalCupertinoLocalizations.delegate,
         ],
         theme: visualEvidenceTheme(
-          BilFlagshipTheme.light(isArabic: language == 'ar'),
+          dark
+              ? BilFlagshipTheme.dark(isArabic: language == 'ar')
+              : BilFlagshipTheme.light(isArabic: language == 'ar'),
           fontFamily: language == 'ar'
               ? 'NotoArabicEvidence'
               : 'RobotoEvidence',
@@ -200,61 +203,198 @@ void main() {
     }),
   );
 
-  for (final language in ['en', 'ar']) {
-    for (final scale in [1.0, 2.0]) {
-      testWidgets('workspace actual Flutter $language text $scale', (
-        tester,
-      ) async {
-        final db = AppDatabase.forTesting(NativeDatabase.memory());
-        addTearDown(db.close);
-        final key = GlobalKey();
-        var photos = 0;
-        var voices = 0;
-        final routes = <String>[];
-        final page = CoachReferenceWorkspace(
-          snapshot: _snapshot,
-          now: _clock,
-          onChat: () {},
-          onRoute: routes.add,
-          onPhoto: () => photos++,
-          onVoice: () => voices++,
+  for (final dark in [false, true]) {
+    for (final language in ['en', 'ar']) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets(
+          'workspace actual Flutter $language text $scale ${dark ? 'dark' : 'light'}',
+          (tester) async {
+            final db = AppDatabase.forTesting(NativeDatabase.memory());
+            addTearDown(db.close);
+            final key = GlobalKey();
+            var photos = 0;
+            var voices = 0;
+            final routes = <String>[];
+            final page = CoachReferenceWorkspace(
+              snapshot: _snapshot,
+              now: _clock,
+              onChat: () {},
+              onRoute: routes.add,
+              onPhoto: () => photos++,
+              onVoice: () => voices++,
+            );
+            await _mount(
+              tester,
+              page,
+              db,
+              key,
+              language: language,
+              scale: scale,
+              dark: dark,
+            );
+            expect(tester.takeException(), isNull);
+            expect(find.text('612 / 1200'), findsOneWidget);
+            expect(find.text('Premium AI Coach'), findsOneWidget);
+            expect(find.text('Pro'), findsNothing);
+            final valueText = tester.widget<Text>(find.text('612 / 1200'));
+            expect(valueText.textDirection, TextDirection.ltr);
+            // Phone values retain readable type rather than wrapping one card
+            // into a taller row or shrinking all four values to fit.
+            expect(valueText.style!.fontSize, greaterThanOrEqualTo(14));
+            expect(
+              tester.getRect(find.text('612 / 1200')).top,
+              tester.getRect(find.text('48 / 150 g')).top,
+            );
+            expect(
+              tester.getRect(find.text('26 / 50 g')).top,
+              greaterThan(tester.getRect(find.text('612 / 1200')).bottom),
+            );
+            final valueContext = tester.element(find.text('612 / 1200'));
+            final scheme = Theme.of(valueContext).colorScheme;
+            final greeting = find.byKey(const Key('coach-workspace-greeting'));
+            expect(
+              tester.widget<Text>(greeting).style!.color,
+              scheme.onSurface,
+            );
+            expect(tester.getRect(greeting).top, greaterThanOrEqualTo(0));
+            expect(
+              tester.getRect(greeting).bottom,
+              lessThanOrEqualTo(
+                tester
+                    .getRect(
+                      find.byKey(const Key('coach-workspace-plan-label')),
+                    )
+                    .top,
+              ),
+            );
+            expect(valueText.style!.color, scheme.onSurface);
+            for (final label in [
+              language == 'ar' ? 'السعرات' : 'Calories',
+              language == 'ar' ? 'البروتين' : 'Protein',
+              language == 'ar' ? 'الكربوهيدرات' : 'Carbs',
+              language == 'ar' ? 'الدهون' : 'Fat',
+            ]) {
+              final ink = tester.widget<Text>(find.text(label)).style!.color!;
+              final back = dark
+                  ? const Color(0xFF30485C)
+                  : const Color(0xFFEBF3FA);
+              final a = ink.computeLuminance(), b = back.computeLuminance();
+              final contrast = a > b
+                  ? (a + .05) / (b + .05)
+                  : (b + .05) / (a + .05);
+              expect(
+                contrast,
+                greaterThanOrEqualTo(4.5),
+                reason: '$label readable across the panel gradient',
+              );
+            }
+            await _capture(
+              tester,
+              key,
+              'coach_workspace_${language}_${scale}_${dark ? 'dark' : 'light'}',
+            );
+            final photo = find.text(
+              language == 'ar' ? 'سجّل وجبة' : 'Log a Meal',
+            );
+            await tester.ensureVisible(photo);
+            await tester.pumpAndSettle();
+            expect(photo.hitTestable(), findsOneWidget);
+            await tester.tap(photo);
+            expect(photos, 1);
+            final voice = find.text(
+              language == 'ar' ? 'تسجيل صوتي' : 'Voice Log',
+            );
+            await tester.ensureVisible(voice);
+            await tester.pumpAndSettle();
+            expect(voice.hitTestable(), findsOneWidget);
+            await tester.tap(voice);
+            expect(voices, 1);
+            final scan = find.text(
+              language == 'ar' ? 'مسح منتج' : 'Scan Product',
+            );
+            await tester.ensureVisible(scan);
+            await tester.pumpAndSettle();
+            expect(scan.hitTestable(), findsOneWidget);
+            await tester.tap(scan);
+            expect(routes.last, '/daily-log?foodLog=1&action=barcode');
+            await tester.drag(find.byType(ListView), const Offset(0, -1000));
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            await _capture(
+              tester,
+              key,
+              'coach_workspace_timeline_${language}_${scale}_${dark ? 'dark' : 'light'}',
+            );
+            await tester.pumpWidget(const SizedBox.shrink());
+            await tester.pump();
+          },
         );
-        await _mount(tester, page, db, key, language: language, scale: scale);
-        expect(tester.takeException(), isNull);
-        expect(find.text('612 / 1200'), findsOneWidget);
-        await _capture(tester, key, 'coach_workspace_${language}_$scale');
-        final photo = find.text(language == 'ar' ? 'سجّل وجبة' : 'Log a Meal');
-        await tester.ensureVisible(photo);
-        await tester.pumpAndSettle();
-        expect(photo.hitTestable(), findsOneWidget);
-        await tester.tap(photo);
-        expect(photos, 1);
-        final voice = find.text(language == 'ar' ? 'تسجيل صوتي' : 'Voice Log');
-        await tester.ensureVisible(voice);
-        await tester.pumpAndSettle();
-        expect(voice.hitTestable(), findsOneWidget);
-        await tester.tap(voice);
-        expect(voices, 1);
-        final scan = find.text(language == 'ar' ? 'مسح منتج' : 'Scan Product');
-        await tester.ensureVisible(scan);
-        await tester.pumpAndSettle();
-        expect(scan.hitTestable(), findsOneWidget);
-        await tester.tap(scan);
-        expect(routes.last, '/daily-log?foodLog=1&action=barcode');
-        await tester.drag(find.byType(ListView), const Offset(0, -1000));
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        await _capture(
-          tester,
-          key,
-          'coach_workspace_timeline_${language}_$scale',
-        );
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
-      });
+      }
     }
   }
 
+  testWidgets(
+    'workspace preserves a known zero target separately from missing intake',
+    (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final snapshot = CoachContextSnapshot(
+        generatedAt: _clock,
+        profile: const {},
+        weights: const [],
+        waterHistory: const [],
+        nutritionDays: const [
+          CoachNutritionDay(
+            day: '2026-10-05',
+            meals: [],
+            calories: 0,
+            protein: 0,
+            carbs: 497,
+            fat: 0,
+            sodium: 0,
+            knownTotals: {'proteinG'},
+          ),
+        ],
+        computedHealth: const {
+          'dailyTargets': {
+            'caloriesKcal': 1200,
+            'proteinG': 0,
+            'carbsG': 50,
+            'fatG': 65,
+          },
+        },
+      );
+      await _mount(
+        tester,
+        CoachReferenceWorkspace(
+          snapshot: snapshot,
+          now: _clock,
+          onChat: () {},
+          onRoute: (_) {},
+          onPhoto: () {},
+          onVoice: () {},
+        ),
+        db,
+        GlobalKey(),
+      );
+      expect(find.text('0 / 0 g'), findsOneWidget);
+      expect(find.text('— / 50 g'), findsOneWidget);
+      expect(find.text('497 / 50 g'), findsNothing);
+      expect(
+        tester.widget<Text>(find.text('0 / 0 g')).textDirection,
+        TextDirection.ltr,
+      );
+      for (final bar in tester.widgetList<LinearProgressIndicator>(
+        find.byType(LinearProgressIndicator),
+      )) {
+        expect(bar.value, 0);
+        expect(bar.value!.isFinite, isTrue);
+      }
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    },
+  );
   testWidgets(
     'locked nutrition preserves labels but hides values and targets',
     (tester) async {
@@ -281,7 +421,12 @@ void main() {
       expect(find.text('612 / 1200'), findsNothing);
       expect(find.text('48 / 150 g'), findsNothing);
       await tester.tap(find.text('Calories'));
-      expect(routes, ['/plans']);
+      expect(routes, ['/analytics/nutrition']);
+      expect(
+        routes,
+        isNot(contains('/plans')),
+        reason: 'the visible feature label is not an automatic purchase trap',
+      );
       await _capture(tester, key, 'coach_workspace_locked');
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();

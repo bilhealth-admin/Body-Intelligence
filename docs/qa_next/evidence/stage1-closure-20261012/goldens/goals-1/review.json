@@ -1,0 +1,34 @@
+{
+  "case": "nutrition goals production capture page 1",
+  "reason": "One page book, clean closed rows, editable locks and fixed-unit reference; no inline explanatory caption.",
+  "reference": "test/visual_closure/goldens/visual_closure_nutrition_goals_phone.png",
+  "reviewed_artifacts_sha256": {
+    "master": "0334482da2a629ffc6539f054c695507220425bdf05ea1856f3a113734c032ed",
+    "actual": "7e47b2a07244d10b321384559a928fc238cf15f5594f6a5181ff57e18812df85",
+    "diff": "5906adba7284e34c6350568168e6f7e6e73fd3de1df2a92db7f6b6f53fab4bbb"
+  },
+  "update_only": true,
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "--plain-name",
+    "nutrition goals production capture page 1",
+    "--update-goldens"
+  ],
+  "started": 1791754181.5796413,
+  "pid": 14876,
+  "exit_code": 0,
+  "changed_baselines": [
+    "test/visual_closure/goldens/visual_closure_nutrition_goals_phone.png"
+  ],
+  "after_sha256": "7e47b2a07244d10b321384559a928fc238cf15f5594f6a5181ff57e18812df85",
+  "exactly_one_success": true,
+  "accepted_one_reviewed_image": true
+}

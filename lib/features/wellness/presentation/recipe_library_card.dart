@@ -12,6 +12,7 @@ class _RecipeCard extends StatelessWidget {
     required this.favorite,
     required this.onFavorite,
     required this.onOpen,
+    this.protectNutrition = false,
   });
 
   final RecipeCatalogSummary recipe;
@@ -23,7 +24,8 @@ class _RecipeCard extends StatelessWidget {
   final Future<WellnessMediaCacheResult>? imageResult;
   final bool favorite;
   final VoidCallback? onFavorite;
-  final VoidCallback onOpen;
+  final VoidCallback? onOpen;
+  final bool protectNutrition;
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +133,7 @@ class _RecipeCard extends StatelessWidget {
                           ),
                           const Spacer(),
                           _RecipeCardFacts(
+                            protectNutrition: protectNutrition,
                             minutes: recipe.totalMinutes,
                             initialFacts: initialFacts,
                             facts: facts,
@@ -154,11 +157,13 @@ class _RecipeCardFacts extends StatelessWidget {
     required this.minutes,
     required this.initialFacts,
     required this.facts,
+    required this.protectNutrition,
   });
 
   final int minutes;
   final RecipeCatalogCardFacts? initialFacts;
   final Future<RecipeCatalogCardFacts>? facts;
+  final bool protectNutrition;
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +220,10 @@ class _RecipeCardFacts extends StatelessWidget {
                       ? const _RecipeFactSkeleton()
                       : _RecipeFactCell(
                           icon: Icons.local_fire_department_outlined,
+                          paid:
+                              protectNutrition &&
+                              value != null &&
+                              !value.nutritionNeedsReview,
                           label: context.strings.get('calories'),
                           value: value == null || value.nutritionNeedsReview
                               ? '—'
@@ -227,6 +236,10 @@ class _RecipeCardFacts extends StatelessWidget {
                       ? const _RecipeFactSkeleton()
                       : _RecipeFactCell(
                           icon: Icons.fitness_center_rounded,
+                          paid:
+                              protectNutrition &&
+                              value != null &&
+                              !value.nutritionNeedsReview,
                           label: context.strings.get('protein'),
                           value: value == null || value.nutritionNeedsReview
                               ? '—'
@@ -247,8 +260,10 @@ class _RecipeFactCell extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.paid = false,
   });
 
+  final bool paid;
   final IconData icon;
   final String label;
   final String value;
@@ -256,6 +271,39 @@ class _RecipeFactCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final valueText = Text(
+      value,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+    if (paid) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+            ],
+          ),
+          PremiumNutritionGlass(
+            compact: true,
+            showLabel: false,
+            child: valueText,
+          ),
+        ],
+      );
+    }
     return Tooltip(
       message: '$label: $value',
       child: Semantics(

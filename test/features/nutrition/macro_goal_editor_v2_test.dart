@@ -91,4 +91,13 @@ void main() {
       isFalse,
     );
   });
+  test(
+    'contradictory stored percentages must not silently rebalance on edit or calorie change',
+    () {
+      const invalid = MacroGoalAllocation(1000, 80, 80, 80);
+      expect(() => invalid.edit(MacroGoal.protein, 20), throwsFormatException);
+      expect(() => invalid.withCalories(2000), throwsFormatException);
+      expect(invalid.toPreferences()['goal.carbsPercent'], '80.0');
+    },
+  );
 }

@@ -11,6 +11,8 @@ import 'package:body_intelligence_log/features/cloud_platform/services/cloud_dur
 import 'package:body_intelligence_log/features/cloud_platform/services/local_data_account_boundary.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
+import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
 
 void main() {
   group('AppDatabase cloud outbox producer', () {
@@ -29,6 +31,60 @@ void main() {
     });
 
     tearDown(() => database.close());
+
+    test(
+      'nutrition envelope retains all nineteen fields and immutable evidence without expanding live consent',
+      () async {
+        final food = await FoodRepository(database).materializeUnifiedFood(
+          UnifiedFood(
+            id: 'usda:outbox-test-nineteen',
+            name: 'TEST nineteen nutrients',
+            serving: const FoodServing(amount: 100, unit: 'g', grams: 100),
+            source: FoodDataSource.foundation,
+            sourceLabel: 'TEST attributed source',
+            verified: true,
+            isCustom: false,
+            nutrients: {
+              for (final n in FoodNutrient.values)
+                n: n == FoodNutrient.transFat
+                    ? const NutrientAmount.missing()
+                    : NutrientAmount.known(
+                        n == FoodNutrient.cholesterol ? 0 : 4,
+                      ),
+            },
+          ),
+        );
+        await MealRepository(database).addReviewedMealItemsAtomically(
+          date: DateTime(2026, 10, 11),
+          mealType: 'lunch',
+          quantitiesInGrams: true,
+          items: [(foodId: food.id, quantity: 80.0)],
+        );
+        final item = await database.select(database.mealItems).getSingle();
+        final evidence = MealFoodEvidence.read(item);
+        for (final n in FoodNutrient.values) {
+          expect(
+            evidence.fullValue(n),
+            n == FoodNutrient.transFat
+                ? isNull
+                : closeTo(n == FoodNutrient.cholesterol ? 0 : 3.2, .00001),
+          );
+        }
+        await boundary.bindAuthenticatedOwner('owner-a');
+        await AppDatabaseCloudOutboxProducer(
+          database: database,
+          accountBoundary: boundary,
+          sink: sink,
+        ).produce();
+        final envelope = sink.records.singleWhere(
+          (record) => record.payload['recordType'] == 'mealItem',
+        );
+        expect(envelope.payload['foodEvidenceJson'], item.foodEvidenceJson);
+        expect(envelope.payload['foodSourceSnapshot'], item.foodSourceSnapshot);
+        expect(envelope.ownerId, 'owner-a');
+        expect(envelope.payload['quantity'], 80);
+      },
+    );
 
     test(
       'adopted guest health data becomes durable owner-scoped envelopes',

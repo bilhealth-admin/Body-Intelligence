@@ -1,0 +1,932 @@
+{
+  "label": "final-commerce-access-files",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+    "test/features/commerce/verified_store_purchase_startup_event_test.dart",
+    "test/features/commerce/bil_store_copy_test.dart",
+    "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+    "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+    "test/features/commerce/verified_subscription_access_test.dart",
+    "test/features/commerce/server_entitlement_owner_epoch_test.dart",
+    "test/features/commerce/reviewer_subscription_mirror_fallback_test.dart",
+    "test/features/community/community_review_v2_repository_test.dart",
+    "test/features/community/community_post_moderation_test.dart",
+    "test/features/commerce/premium_value_mask_test.dart",
+    "test/features/dashboard/premium_nutrition_cards_test.dart",
+    "test/features/commerce/premium_nutrition_glass_test.dart",
+    "test/features/commerce/premium_route_keyboard_access_test.dart",
+    "test/features/commerce/premium_route_unverified_retry_test.dart",
+    "test/architecture_source_file_size_guard_test.dart",
+    "test/features/commerce/store_benefit_delivery_test.dart",
+    "test/features/commerce/store_confirmation_journal_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791757998.410303,
+  "files": {
+    "test/features/commerce/store_transaction_queue_test.dart": "197b60427d4058f51a88a96c75aa0508ab014617804a3aa978a2ea87b5f4219e",
+    "test/features/intelligence_center/ai_boost_purchase_service_test.dart": "10bfbc81530f49ae4ff11b52c947d36a76f30f52e74a6a6b25070ce7c2086f82",
+    "test/features/commerce/verified_store_purchase_startup_event_test.dart": "5d219e0e7e5b55b96e2d32d46ef5e3061fd9db0754cb75081571acf5ce0e7564",
+    "test/features/commerce/bil_store_copy_test.dart": "29ea8df79553eb59017e24ac236e6d81ceb0d7242cebd47fae8fb68cbd166169",
+    "test/features/commerce/bil_store_plans_dynamic_contract_test.dart": "78877b1162c20436102bc42639b21791dea91bebf021c37e8102161a40138462",
+    "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart": "c87f264031a300dce0be943973f262a1e8be8ccdeef3c187a83f48dc60e66fd0",
+    "test/features/commerce/verified_subscription_access_test.dart": "336b95dd8cf6ce963add2bf0377d6dea89b551599b33582c92c6578108bebe82",
+    "test/features/commerce/server_entitlement_owner_epoch_test.dart": "c3faa0490846e902b4a8a33c4032074404a8d411cd2bd0a8689c8130917c078b",
+    "test/features/commerce/reviewer_subscription_mirror_fallback_test.dart": "beb7500631ce20ad17fed446bea1f6a3772fddb17a3c5669055ba291b070a93a",
+    "test/features/community/community_review_v2_repository_test.dart": "d6c5b12c94b95b1d46f04015b4891a6935f7fd654b23d6ff6cfe164d5abf49ba",
+    "test/features/community/community_post_moderation_test.dart": "dd007a759d880f6214009c77c2bfa8535300ca622a109033616e7dac241c399d",
+    "test/features/commerce/premium_value_mask_test.dart": "a06907a1d5552b5ec2eae700aa62a66f1095b96eb958705c05865e3e468074c3",
+    "test/features/dashboard/premium_nutrition_cards_test.dart": "e394fdfb210f05c6bf4a52896cfa8fa90ca4116bfd12bd5f218042b9ace44a54",
+    "test/features/commerce/premium_nutrition_glass_test.dart": "94bb2706f4b841fc882becdf4c6e49314dbec2da4b710db29ce37384b2db13fa",
+    "test/features/commerce/premium_route_keyboard_access_test.dart": "516b289296fe0a2777a0659cd86239d2b363d8ad032d2fa4ad7edf65ef47ac05",
+    "test/features/commerce/premium_route_unverified_retry_test.dart": "d296566efdde797f4edfeab0fd22d007748b44681f4e71ed57dc670b23e1ca32",
+    "test/architecture_source_file_size_guard_test.dart": "da9e08f1e3324ae063538e1c86bd60c89686be6b2441b60453658a9754508aee",
+    "test/features/commerce/store_benefit_delivery_test.dart": "1f6ce2fdb225faefb0de60e98aed57b7a22bdd4226f85756e1a6840e6353f02a",
+    "test/features/commerce/store_confirmation_journal_test.dart": "ed3c80cea6340bdf8361684c5ab5026fc2feb4b03dca0ddeb017dc70aa5b2e89"
+  },
+  "source_fingerprint": "97fbd712a8a89c3aa49e7d966fa6d31b64d8493b3dd9892022e6cb92f313887f",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+    "test/features/commerce/verified_store_purchase_startup_event_test.dart",
+    "test/features/commerce/bil_store_copy_test.dart",
+    "test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+    "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+    "test/features/commerce/verified_subscription_access_test.dart",
+    "test/features/commerce/server_entitlement_owner_epoch_test.dart",
+    "test/features/commerce/reviewer_subscription_mirror_fallback_test.dart",
+    "test/features/community/community_review_v2_repository_test.dart",
+    "test/features/community/community_post_moderation_test.dart",
+    "test/features/commerce/premium_value_mask_test.dart",
+    "test/features/dashboard/premium_nutrition_cards_test.dart",
+    "test/features/commerce/premium_nutrition_glass_test.dart",
+    "test/features/commerce/premium_route_keyboard_access_test.dart",
+    "test/features/commerce/premium_route_unverified_retry_test.dart",
+    "test/architecture_source_file_size_guard_test.dart",
+    "test/features/commerce/store_benefit_delivery_test.dart",
+    "test/features/commerce/store_confirmation_journal_test.dart"
+  ],
+  "pid": 8140,
+  "exit_code": 0,
+  "finished": 1791758097.90417,
+  "end_fingerprint": "97fbd712a8a89c3aa49e7d966fa6d31b64d8493b3dd9892022e6cb92f313887f",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "subscription callback timeout stays unresolved and cannot open a second charge",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "receipt rejection survives app initialization without a second checkout",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "durable active subscription is published before slow native finish",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore preserves ownership rejection for bil_premium HTTP 200",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore preserves ownership rejection for bil_premium HTTP 400",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore preserves ownership rejection for bil_ai_boost HTTP 200",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore preserves ownership rejection for bil_ai_boost HTTP 400",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "later inactive receipt cannot hide an earlier restore ownership rejection",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a callback locks purchase immediately before asynchronous verification",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "slow prices cannot overwrite a pending native transaction",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed prices cannot overwrite a transaction that already verified",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late Boost launch failure (throws=false) cannot replace a verified receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late plan launch failure (throws=false) cannot unlock a pending native transaction",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late Boost launch failure (throws=true) cannot replace a verified receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late plan launch failure (throws=true) cannot unlock a pending native transaction",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "acknowledgement failure after verification cannot enable a second purchase",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a native stream error leaves pending state without enabling recharge",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a startup StoreKit stream fault recovers after the catalog loads",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a startup historical StoreKit error does not lock the loaded catalog",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a receipt verification failure cannot be overwritten by a startup fault",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a stream error cannot replace the outcome of an in-flight receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "explicit iOS restore syncs before StoreKit restoration",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a failed explicit Apple sync never starts native restoration",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "deduplicates a queued failed transaction but permits a new purchase id",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a cooled-down replay cannot replace a newly pending checkout",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "explicit Restore retries a failed transaction once despite cooldown",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed replay cooldown is account scoped across Plans service instances",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore waits for receipt verification before publishing its result",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore waits for a delayed restored Premium callback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a verified inactive subscription completes without restoring stale paid access",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a verified subscription missing entitlement state stays fail-closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a newer canonical active row wins an inactive receipt response race",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore verification failure stays restore-specific and fail-closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verification HTTP 409 stays fail closed and unacknowledged",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verification HTTP 429 stays fail closed and unacknowledged",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verification HTTP 500 stays fail closed and unacknowledged",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verification HTTP 503 stays fail closed and unacknowledged",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a transient empty entitlement read retains the verified member state",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a malformed active row does not erase a still-valid entitlement",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "native launch exception is bounded and reconciles without new charge",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hanging launch cannot leave pending forever or enable duplicate charge",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cancellation returns actionable ready state without verification",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "false launch allows a real retry without fabricated credit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "lost callback watchdog offers reconciliation, not a second charge",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verified consumable can be purchased again in the same service",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "finish failure preserves verified credit and retries only existing transaction",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verification failure stays unfinished and blocks new charge until retry",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "duplicate callbacks serialize and never duplicate credit publication",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "credited replay cannot replace a later pending consumable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "retry and native replay share verification and finish queue",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "credited canceled replay cannot cancel a later purchase",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "credited error replay cannot cancel a later purchase",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late launch failure cannot overwrite newer verified callback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "old owner verification cannot publish credit or finish for new owner",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "A to B to A retires Boost verification from the earlier A visit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "empty unfinished history cannot resolve an uncertain charge",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "changed JWS does not turn the same platform transaction into a new delivery",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a startup purchase-stream fault does not disable a loaded catalog",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_store_purchase_startup_event_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a purchase-stream fault during the current attempt stays fail-closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_store_purchase_startup_event_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a fault while a native transaction is pending stays fail-closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_store_purchase_startup_event_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "catalog changes explain no checkout in all 25 supported locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "store/paywall copy is balanced across five production locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "catalog has final tier vocabulary and no monetary literals",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Premium brand names stay exact across all 25 locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AI tier states the complete inherited paid tier without repetition",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "paywall copy permits one visible Premium label per tier route",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "exact Premium AI Coach title and one inheritance label across all 25 locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "tier summaries stay concise on compact paywall cards",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "compact tier summaries remain localized across all 25 locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "trial renewal disclosure is localized and store-price driven",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "explicit Premium benefits are localized in all 25 locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workout inventory is two explicit video benefits",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AI Boost sells the BIL coach experience in all 25 locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ownership conflict is scoped to the authenticated BIL owner",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "changed Play offer reloads the screen without a second purchase",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "settled inactive restore immediately refreshes mounted access without purchasing",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unconfirmed receipt shows calm recovery guidance, not loss of access",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "thrown purchase request resolves localized feedback, never raw code",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore verification failure never claims that purchase history was checked",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restore ownership rejection is not shown as an empty history",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ownership conflict survives plans route recreation and blocks repurchase",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "plan route is fail-closed when owner store IDs are absent",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "plan route respects dark interface and 200% text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy glass paywall is not imported by the production plan route",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unavailable price is tappable and reloads the store catalog",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "empty catalog reloads after returning to the foreground",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "malformed catalog remains reloadable after app resume",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "resume does not duplicate an in-flight store query",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Continue dispatches exactly one selected store offer",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a cancelled native sheet clears feedback and permits a lower term",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "changing term clears retryable purchase feedback without reopening the route",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/bil_store_plans_dynamic_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit nativeFinishPending",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit rejectedVerification",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit repeatedConsumable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit contextAndUsageFailure",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual Coach Settings verified credit contextStorageFailure",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Guest Free snapshot reloads when verified owner signs in",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verified Free recheck stays neutral until new paid response",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same owner auth startup does not reload a verified paid grant",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SubscriptionLifecycle.active locks at its exact deadline without a server response",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SubscriptionLifecycle.trial locks at its exact deadline without a server response",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SubscriptionLifecycle.cancelled locks at its exact deadline without a server response",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "real owner stream reload drops the old grant and sign-out wins over seed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same-owner refresh retains valid access, then a terminal response locks immediately",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account dependency reload never retains the previous owner paid access",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/verified_subscription_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cold entitlement lease cannot return after account transition ABA=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/server_entitlement_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cold entitlement lease cannot return after account transition ABA=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/server_entitlement_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same-owner restoration keeps the valid cold lease without a network request",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/server_entitlement_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unreadable grant independently checks mirror (paid=true)",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/reviewer_subscription_mirror_fallback_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unreadable grant independently checks mirror (paid=false)",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/reviewer_subscription_mirror_fallback_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "displayed text and revision come from the snapshot with a second hydration check",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "content changed during media loading discards the reviewed result",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "missing V2 is an explicit unavailable error with no old moderation fallback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "review decision binds post owner revision and stable idempotency without client amount",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "request is not a grant and an unconfirmed amount cannot be presented as credit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ABA during hydration retires the operation before a second data request",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "author-only reason validates identity and displayed content",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "author reason response is retired after ABA and never reveals a late explanation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_review_v2_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "review service and decoded content missing review V2 keeps existing hidden tools and reports an honest unavailable state",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "review service and decoded content network queue failure is not described as a missing moderator role",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "review service and decoded content an undecodable review image cannot be approved or published blindly",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "moderation refresh rebuilds from the new readback feed remove succeeds and renders its refreshed result",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "moderation refresh rebuilds from the new readback feed hide succeeds and renders its refreshed result",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "moderation refresh rebuilds from the new readback queue refresh renders the completed replacement future",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "migration makes post review private, atomic, and idempotent",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repository requests moderation status and uses guarded RPCs",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "post status copy remains native in all five Community locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "moderator queue offers approve and reject and saves once",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "post owner sees the pending state in their feed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_moderation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "locked pixels never reveal values or charts",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_value_mask_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "public names and free actions stay outside lock light en 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_value_mask_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "public names and free actions stay outside lock light ar 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_value_mask_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "public names and free actions stay outside lock dark en 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_value_mask_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "public names and free actions stay outside lock dark ar 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_value_mask_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "checking and error do not offer an upgrade or leak focus",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_value_mask_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "heart health reuses the three macro ring colors",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "free users see Premium labels on macros and heart health locks",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x en light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x en dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x ar light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home public headings stay outside paid values 320 2x ar dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home normal glass public heading ar light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home normal glass public heading ar dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Home access error retries without Premium or Plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/premium_nutrition_cards_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "verified Free hides nutrition semantics and routes to plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "only server-verified Premium removes the glass",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "subscription loading never flashes an upgrade action",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "subscription error stays protected with retry and no false Premium offer",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "local Free fallback requires retry, never a paid upsell",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_nutrition_glass_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Premium keyboard boundary is enforced for free",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_keyboard_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Premium keyboard boundary is enforced for unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_keyboard_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Premium keyboard boundary is enforced for paid",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_keyboard_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Premium AI Coach grants every paid shared route without Plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_unverified_retry_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared Premium gate distinguishes unverified without leakage",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_unverified_retry_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared Premium gate distinguishes verified-free without leakage",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_unverified_retry_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared Premium gate distinguishes verified-premium without leakage",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_unverified_retry_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "5000 server-owned AI credits allow Coach, zero does not",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/premium_route_unverified_retry_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "hand-maintained Dart sources stay below the architecture ceiling",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/architecture_source_file_size_guard_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "trusted transport quantity survives and missing or mismatched proof is rejected",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_benefit_delivery_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "canonical handoff wins an older Free read, but a newer revocation wins",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_benefit_delivery_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "inactive handoff excludes older store access and preserves independent grants",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_benefit_delivery_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "handoff is retired during A to B to A, without changing balances or roles",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_benefit_delivery_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "two simultaneous deliveries and reservations commit one visual event",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_confirmation_journal_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restart can resume a waiting recent event after fresh verification, but not a reserved crash",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_confirmation_journal_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "historical, refunded and other environments cannot acquire a celebration",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_confirmation_journal_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "retired account visit cannot reserve, mark shown or write a new event",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_confirmation_journal_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cancellation is separate from rights and retains unknown archive data",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_confirmation_journal_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 167,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

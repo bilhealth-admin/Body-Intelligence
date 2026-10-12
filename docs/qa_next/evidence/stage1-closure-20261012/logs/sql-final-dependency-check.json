@@ -1,0 +1,23 @@
+[
+  {
+    "label": "postgres-admin-20261011213704634346",
+    "cases": 7,
+    "changed_dependencies": [],
+    "pass": true,
+    "result_sha256": "6b479009af5dab2785109fffbb3724227dcd899e0c0219aa06e8e786773c36e7"
+  },
+  {
+    "label": "postgres-review-v2-20261011221245201746",
+    "cases": 12,
+    "changed_dependencies": [],
+    "pass": true,
+    "result_sha256": "4aeab062ffd98aa5614c8bb375fa1eaa2cfaf9148a52af892dd09546eba90303"
+  },
+  {
+    "label": "postgres-cloud-20261011221428775487",
+    "cases": 7,
+    "changed_dependencies": [],
+    "pass": true,
+    "result_sha256": "2bbab9779290c3a0beb241409013219501ba8d42b85bc8531979f00f5bea235a"
+  }
+]

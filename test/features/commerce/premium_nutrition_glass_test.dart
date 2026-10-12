@@ -59,7 +59,7 @@ void main() {
   });
 
   testWidgets(
-    'subscription error stays protected and labels Premium beside retry',
+    'subscription error stays protected with retry and no false Premium offer',
     (tester) async {
       await tester.pumpWidget(
         _appWithSubscription(
@@ -76,7 +76,11 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
-      expect(find.text('Premium'), findsOneWidget);
+      expect(find.text('Premium'), findsNothing);
+      expect(
+        find.bySemanticsLabel('Subscription check unavailable'),
+        findsOneWidget,
+      );
     },
   );
 
@@ -98,7 +102,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
-    expect(find.text('Premium'), findsOneWidget);
+    expect(find.text('Premium'), findsNothing);
   });
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 
 /// Community-only design tokens: never installed on dashboard/watch surfaces.
 abstract final class CommunitySapphire {
@@ -6,16 +7,16 @@ abstract final class CommunitySapphire {
   static const navy = Color(0xFF14243A);
   static Color canvas(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
-      ? const Color(0xFF101824)
-      : const Color(0xFFF5F7FB);
+      ? BilPearlFinish.darkCanvas
+      : BilPearlFinish.lightCanvas;
   static Color paper(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
-      ? const Color(0xFF1B283A)
-      : Colors.white;
+      ? BilPearlFinish.darkSurface
+      : BilPearlFinish.lightSurface;
   static Color muted(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
-      ? const Color(0xFFBAC7D9)
-      : const Color(0xFF5E6E83);
+      ? BilPearlFinish.darkSecondary
+      : BilPearlFinish.lightSecondary;
   static Color ink(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
       ? const Color(0xFFF3F6FC)

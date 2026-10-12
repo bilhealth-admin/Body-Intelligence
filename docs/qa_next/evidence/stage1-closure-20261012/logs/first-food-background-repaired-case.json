@@ -1,0 +1,53 @@
+{
+  "label": "first-food-background-repaired-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+    "--plain-name",
+    "inactive first-food event stays ready until a foreground offer"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791765251.0267253,
+  "files": {
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart": "bd26fd140cbe19ea8d098698fa99fd6b40aa23304c8010c7ea03b102ee53fe45"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "c3229066728f186369b3c3d697f77971568055c3ac00c1184ca254d6731ba76b",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+    "--plain-name",
+    "inactive first-food event stays ready until a foreground offer"
+  ],
+  "pid": 12460,
+  "exit_code": 0,
+  "finished": 1791765255.6879885,
+  "end_fingerprint": "c3229066728f186369b3c3d697f77971568055c3ac00c1184ca254d6731ba76b",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "inactive first-food event stays ready until a foreground offer",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

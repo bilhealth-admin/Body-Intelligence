@@ -30,6 +30,7 @@ final class MacroGoalAllocation {
         calories > 10000 ||
         !value.isFinite ||
         value < 0 ||
+        (carbohydrate + protein + fat - 100).abs() > 1e-7 ||
         MacroGoal.values.any(
           (item) =>
               !percent(item).isFinite ||
@@ -90,6 +91,7 @@ final class MacroGoalAllocation {
         next > 10000 ||
         !calories.isFinite ||
         calories <= 0 ||
+        (carbohydrate + protein + fat - 100).abs() > 1e-7 ||
         MacroGoal.values.any(
           (item) =>
               !percent(item).isFinite ||

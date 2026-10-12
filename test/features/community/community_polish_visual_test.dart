@@ -22,6 +22,7 @@ import 'package:body_intelligence_log/features/community/domain/community_refere
 import 'package:body_intelligence_log/features/community/domain/community_rewards.dart';
 import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_review_snapshot.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_attention_scope.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
@@ -1056,6 +1057,21 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
   Future<List<CommunityPost>> hydrateModerationReviewContents(
     List<CommunityPost> posts,
   ) async => posts;
+
+  @override
+  Future<List<CommunityReviewSnapshot>> loadReviewedPosts(
+    List<CommunityPost> posts,
+  ) async => [
+    for (final post in posts)
+      CommunityReviewSnapshot(
+        post: post,
+        revision: 'a' * 64,
+        canPublishOnly: false,
+      ),
+  ];
+
+  @override
+  Future<List<CommunityRewardReview>> loadRewardReviewQueue() async => const [];
 }
 
 /// The real native picker contract, injected with bundled synthetic QA
@@ -1301,6 +1317,10 @@ void main() {
         testWidgets(
           'production Community surfaces ${arabic ? 'ar' : 'en'} ${dark ? 'dark' : 'light'} text $scale',
           (tester) async {
+            WidgetController.hitTestWarningShouldBeFatal = true;
+            addTearDown(
+              () => WidgetController.hitTestWarningShouldBeFatal = false,
+            );
             tester.view.devicePixelRatio = 1;
             tester.view.physicalSize = const Size(414, 896);
             addTearDown(tester.view.resetDevicePixelRatio);
@@ -1634,6 +1654,37 @@ void main() {
                   await tester.ensureVisible(addPhoto);
                   await tester.pumpAndSettle();
                   await tester.tap(addPhoto);
+                  // Selecting a native photo now stages the actual review
+                  // sheet. The underlying composer stays busy until explicit
+                  // acceptance; waiting for all its animation frames before
+                  // confirming would deadlock this journey.
+                  final accept = find.byKey(
+                    const Key('bil-media-review-confirm'),
+                  );
+                  for (var attempt = 0; attempt < 40; attempt++) {
+                    await tester.runAsync(
+                      () =>
+                          Future<void>.delayed(const Duration(milliseconds: 5)),
+                    );
+                    await tester.pump(const Duration(milliseconds: 16));
+                    if (accept.evaluate().isNotEmpty &&
+                        tester.widget<FilledButton>(accept).onPressed != null) {
+                      break;
+                    }
+                  }
+                  expect(accept, findsOneWidget);
+                  expect(
+                    tester.widget<FilledButton>(accept).onPressed,
+                    isNotNull,
+                    reason: 'actual decoded review must authorize acceptance',
+                  );
+                  expect(
+                    find.byKey(const Key('bil-media-review-body')),
+                    findsOneWidget,
+                  );
+                  await tester.pump(const Duration(milliseconds: 400));
+                  expect(accept.hitTestable(), findsOneWidget);
+                  await tester.tap(accept);
                   await tester.pumpAndSettle();
                   final photoTile = find.byKey(
                     Key('community-selected-photo-$index'),

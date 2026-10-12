@@ -1,0 +1,34 @@
+{
+  "case": "nutrition goals production capture page 2",
+  "reason": "FDA units/references and Mg/P rows; total sugar remains unspecified; no invented legacy-percent conversion.",
+  "reference": "test/visual_closure/goldens/visual_closure_nutrition_goals_phone_2.png",
+  "reviewed_artifacts_sha256": {
+    "master": "dead540864ec3b9474aef6c3808507bcc4c2ec225e44c1a4d40466fc8f585d67",
+    "actual": "4510f16e4da994cb1dfdc1f7e1a64604c036e4b9259f6cec94431b34a88e284b",
+    "diff": "9f5f43e29c09eabbfbbaad71052ae4da7f275b2e73f663ab15730f81fbff71be"
+  },
+  "update_only": true,
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "--plain-name",
+    "nutrition goals production capture page 2",
+    "--update-goldens"
+  ],
+  "started": 1791754197.2899117,
+  "pid": 4708,
+  "exit_code": 0,
+  "changed_baselines": [
+    "test/visual_closure/goldens/visual_closure_nutrition_goals_phone_2.png"
+  ],
+  "after_sha256": "4510f16e4da994cb1dfdc1f7e1a64604c036e4b9259f6cec94431b34a88e284b",
+  "exactly_one_success": true,
+  "accepted_one_reviewed_image": true
+}

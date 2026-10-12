@@ -105,10 +105,24 @@ enum NutrientProgressState { unknown, below, near, reached, exceeded }
 abstract final class NutrientProgressPolicy {
   static NutrientProgressState evaluate({
     required double? value,
-    required double goal,
+    required double? goal,
     required bool minimumGoal,
   }) {
-    if (value == null || goal <= 0) return NutrientProgressState.unknown;
+    if (value == null ||
+        !value.isFinite ||
+        value < 0 ||
+        goal == null ||
+        !goal.isFinite ||
+        goal < 0) {
+      return NutrientProgressState.unknown;
+    }
+    if (goal == 0) {
+      return minimumGoal
+          ? NutrientProgressState.unknown
+          : value > 0
+          ? NutrientProgressState.exceeded
+          : NutrientProgressState.below;
+    }
     final ratio = value / goal;
     if (minimumGoal) {
       if (ratio >= 1) return NutrientProgressState.reached;

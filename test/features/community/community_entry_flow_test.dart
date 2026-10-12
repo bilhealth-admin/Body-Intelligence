@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'community_preload_probe.dart';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
@@ -136,6 +137,7 @@ class EntryWidgetFixture {
   GoRouter? router;
   Future<bool> Function()? syncPhoto;
   bool welcome = false;
+  Widget? destination;
   Widget app({Locale locale = const Locale('en'), double scale = 1}) {
     router = GoRouter(
       initialLocation: '/community?fixture=preserved',
@@ -157,9 +159,11 @@ class EntryWidgetFixture {
                 repository: repository,
                 showWelcome: welcome,
                 syncPhoto: syncPhoto,
-                child: Scaffold(
-                  body: Text('Member destination ${state.uri.query}'),
-                ),
+                child:
+                    destination ??
+                    Scaffold(
+                      body: Text('Member destination ${state.uri.query}'),
+                    ),
               );
             },
           ),
@@ -233,6 +237,30 @@ void main() {
     }
     _entryClients.clear();
   });
+  _entryTest(
+    'authorized content initializes during the preserved welcome and is not mounted twice',
+    (tester) async {
+      var preparations = 0;
+      final r = _entryRepository()..profiles[ownerA] = profile(ownerA);
+      final fixture = EntryWidgetFixture(r)
+        ..welcome = true
+        ..destination = CommunityPreloadProbe(onInit: () => preparations++);
+      await mountEntry(tester, fixture: fixture);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(CommunityWelcome), findsOneWidget);
+      expect(preparations, 1);
+      expect(find.text('TEST prepared feed'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 2300));
+      await tester.pumpAndSettle();
+      expect(find.byType(CommunityWelcome), findsNothing);
+      expect(find.text('TEST prepared feed'), findsOneWidget);
+      expect(
+        preparations,
+        1,
+        reason: 'the content remains mounted after the splash',
+      );
+    },
+  );
 
   test('checking missing profile never writes or provisions a code', () async {
     final r = _entryRepository();

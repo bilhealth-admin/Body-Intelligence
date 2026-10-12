@@ -1,0 +1,53 @@
+{
+  "label": "closure-approved-skip-video-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart",
+    "--plain-name",
+    "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791768929.1278577,
+  "files": {
+    "test/features/dashboard/first_use_actual_home_capture_test.dart": "9d2588ed62a0b7cffdf69fda526e992eaadc2abfd38fc82e1c9fb1221581c593"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart",
+    "--plain-name",
+    "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip"
+  ],
+  "pid": 10352,
+  "exit_code": 0,
+  "finished": 1791768937.5089402,
+  "end_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

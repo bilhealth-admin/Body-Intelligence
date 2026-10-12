@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../community/services/community_owner_operation.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/admin_subscription_access.dart';
 import '../domain/entitlement_resolver.dart';
@@ -50,6 +51,19 @@ final class ServerEntitlementRepository {
     final client = Supabase.instance.client;
     final ownerId = client.auth.currentUser?.id;
     if (ownerId == null) return FreePlan.createState();
+    // Reuse the app transport's existing auth fence. UID equality alone does
+    // not retire A -> B -> A; the zone also checks after SDK token resolution.
+    return CommunityOwnerOperation.run(
+      client: client,
+      ownerId: ownerId,
+      action: (_) => _currentOwned(client, ownerId),
+    );
+  }
+
+  Future<SubscriptionState> _currentOwned(
+    SupabaseClient client,
+    String ownerId,
+  ) async {
     // On a cold process, render a still-valid server lease from encrypted
     // storage before waiting for network timeouts. Consume this shortcut once
     // per owner so the observed provider's next scheduled refresh reaches the
@@ -61,6 +75,7 @@ final class ServerEntitlementRepository {
           ownerId: ownerId,
           now: now,
         );
+        CommunityOwnerOperation.checkCurrent();
         if (client.auth.currentUser?.id != ownerId) {
           return FreePlan.createState();
         }
@@ -77,6 +92,7 @@ final class ServerEntitlementRepository {
           ownerId: ownerId,
           now: now,
         );
+        CommunityOwnerOperation.checkCurrent();
         if (client.auth.currentUser?.id != ownerId) {
           return FreePlan.createState();
         }
@@ -88,17 +104,21 @@ final class ServerEntitlementRepository {
           );
           return persistedSubscription;
         }
+      } on CommunityOwnerOperationCancelled {
+        rethrow;
       } on Object {
         // Continue to the authoritative network path when secure storage is
         // unavailable or corrupt.
       }
     }
     final store = await _storeCurrent();
+    CommunityOwnerOperation.checkCurrent();
     if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
     try {
       final grant = await client
           .rpc('bil_get_my_admin_subscription')
           .timeout(const Duration(seconds: 10));
+      CommunityOwnerOperation.checkCurrent();
       if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
       final resolved = composeAdminSubscriptionAccess(
         store: store,
@@ -121,6 +141,8 @@ final class ServerEntitlementRepository {
         );
       }
       return resolved;
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } on Object {
       // A transient RPC failure must not visibly switch a currently verified
       // admin lease between Premium and Free. Continuity is owner-scoped,
@@ -137,6 +159,7 @@ final class ServerEntitlementRepository {
           ownerId: ownerId,
           now: DateTime.now().toUtc(),
         );
+        CommunityOwnerOperation.checkCurrent();
         if (client.auth.currentUser?.id != ownerId) {
           return FreePlan.createState();
         }
@@ -148,6 +171,8 @@ final class ServerEntitlementRepository {
           );
           return persisted;
         }
+      } on CommunityOwnerOperationCancelled {
+        rethrow;
       } on Object {
         // Secure storage is continuity only. Store authority still determines
         // access when the local encrypted slot is unavailable.
@@ -157,6 +182,7 @@ final class ServerEntitlementRepository {
   }
 
   Future<SubscriptionState> _storeCurrent() async {
+    CommunityOwnerOperation.checkCurrent();
     if (!AppEnvironment.supabaseRuntimeReady) {
       return FreePlan.createState();
     }
@@ -229,7 +255,11 @@ final class ServerEntitlementRepository {
       if (plan == CommercePlan.free) {
         return closedTestReadFailed
             ? FreePlan.createState()
-            : await _remember(user.id, _verifiedFree(), now);
+            : await _remember(
+                user.id,
+                _verifiedFree(verifiedAt: verifiedAt),
+                now,
+              );
       }
       final lifecycle = _lifecycleOrNull('${row['lifecycle']}');
       if (lifecycle == null) return await _transientFallback(user.id, now);
@@ -257,7 +287,11 @@ final class ServerEntitlementRepository {
         // closed-test grant is revoked. Keep verification unresolved.
         return closedTestReadFailed
             ? FreePlan.createState()
-            : await _remember(user.id, _verifiedFree(), now);
+            : await _remember(
+                user.id,
+                _verifiedFree(verifiedAt: verifiedAt),
+                now,
+              );
       }
       final resolved = _resolver.resolve(
         record: SubscriptionRecord(
@@ -271,6 +305,7 @@ final class ServerEntitlementRepository {
               ? expiresAt
               : null,
           gracePeriodEndsAt: gracePeriodEndsAt,
+          verifiedAt: verifiedAt,
         ),
         now: now,
       );
@@ -287,6 +322,8 @@ final class ServerEntitlementRepository {
         return FreePlan.createState();
       }
       return await _remember(user.id, resolved, now);
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } on Object {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return FreePlan.createState();
@@ -299,6 +336,7 @@ final class ServerEntitlementRepository {
     SubscriptionState state,
     DateTime now,
   ) async {
+    CommunityOwnerOperation.checkCurrent();
     _sessionCache.remember(ownerId: ownerId, state: state, now: now);
     try {
       await _subscriptionStore.remember(
@@ -317,6 +355,7 @@ final class ServerEntitlementRepository {
     String ownerId,
     DateTime now,
   ) async {
+    CommunityOwnerOperation.checkCurrent();
     if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
       return FreePlan.createState();
     }
@@ -327,6 +366,7 @@ final class ServerEntitlementRepository {
         ownerId: ownerId,
         now: now,
       );
+      CommunityOwnerOperation.checkCurrent();
       if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
         return FreePlan.createState();
       }
@@ -334,13 +374,16 @@ final class ServerEntitlementRepository {
         _sessionCache.remember(ownerId: ownerId, state: persisted, now: now);
         return persisted;
       }
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } on Object {
       // A failed secure read cannot create access.
     }
     return FreePlan.createState();
   }
 
-  SubscriptionState _verifiedFree() => SubscriptionState(
+  SubscriptionState _verifiedFree({DateTime? verifiedAt}) => SubscriptionState(
+    verifiedAt: verifiedAt,
     plan: CommercePlan.free,
     entitlements: FreePlan.entitlements,
     authority: EntitlementAuthority.verifiedServer,

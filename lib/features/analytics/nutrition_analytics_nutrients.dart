@@ -147,7 +147,7 @@ class _EvidenceProgressRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = NutrientProgressPolicy.evaluate(
       value: value,
-      goal: goal ?? 0,
+      goal: goal,
       minimumGoal: minimumGoal,
     );
     final color = switch (state) {
@@ -157,8 +157,10 @@ class _EvidenceProgressRow extends StatelessWidget {
       NutrientProgressState.reached => const Color(0xFF269E68),
       NutrientProgressState.exceeded => const Color(0xFFD64B4B),
     };
-    final progress = value == null || goal == null || goal! <= 0
+    final progress = value == null || goal == null || goal! < 0
         ? 0.0
+        : goal == 0
+        ? (value! > 0 ? 1.0 : 0.0)
         : (value! / goal!).clamp(0.0, 1.0);
     return Column(
       children: [
@@ -166,7 +168,7 @@ class _EvidenceProgressRow extends StatelessWidget {
           children: [
             Expanded(child: Text(label)),
             Text(
-              value == null || goal == null || goal! <= 0
+              value == null || goal == null || goal! < 0
                   ? _t(context, 'Unknown')
                   : '${value!.round()} / ${goal!.round()} $unit',
             ),

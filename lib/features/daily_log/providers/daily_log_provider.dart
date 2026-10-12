@@ -9,6 +9,7 @@ import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../../data/repositories/water_repository.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 
 final selectedLogDateProvider = StateProvider<DateTime>(
   (ref) => DateTime.now(),
@@ -92,7 +93,11 @@ final defaultNutritionGoalTargetProvider = Provider<NutritionGoalTarget?>((
 ) {
   return defaultNutritionGoalTargetFromPreferences({
     for (final key in defaultNutritionGoalPreferenceKeys)
-      key: ref.watch(dailyNutritionGoalPreferenceProvider(key)).value,
+      key: ref
+          .watch(nutritionGoalCurrentSnapshotProvider)
+          ?.goals[key]
+          ?.value
+          ?.toString(),
   });
 });
 

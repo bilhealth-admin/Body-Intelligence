@@ -1,0 +1,86 @@
+{
+  "label": "closure-approved-individual-golden-cases",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "--name",
+    "^(?:food\\ catalog\\ production\\ empty\\ state\\ capture|daily\\ log\\ production\\ empty\\ day\\ capture|nutrition\\ goals\\ production\\ capture\\ page\\ 1|nutrition\\ goals\\ production\\ capture\\ page\\ 2|saved\\ nutrition\\ meals\\ production\\ empty\\-state\\ capture|saved\\ nutrition\\ recipes\\ production\\ empty\\-state\\ capture|saved\\ nutrition\\ my_foods\\ production\\ empty\\-state\\ capture)$"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791768814.4572468,
+  "files": {
+    "test/visual_closure/actual_data_pages_golden_test.dart": "d0a82f5efcedafc4d2441222949ce601095d6709592d0480e7da5ad43dd3ec99",
+    "test/visual_closure/actual_production_pages_golden_test.dart": "6fc268430b2a9a56d4fd861271a2a4aea3d43f802c5710a1ccb6af5d9f285461"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "--name",
+    "^(?:food\\ catalog\\ production\\ empty\\ state\\ capture|daily\\ log\\ production\\ empty\\ day\\ capture|nutrition\\ goals\\ production\\ capture\\ page\\ 1|nutrition\\ goals\\ production\\ capture\\ page\\ 2|saved\\ nutrition\\ meals\\ production\\ empty\\-state\\ capture|saved\\ nutrition\\ recipes\\ production\\ empty\\-state\\ capture|saved\\ nutrition\\ my_foods\\ production\\ empty\\-state\\ capture)$"
+  ],
+  "pid": 18180,
+  "exit_code": 0,
+  "finished": 1791768828.4332764,
+  "end_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "food catalog production empty state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "daily log production empty day capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition goals production capture page 1",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition goals production capture page 2",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "saved nutrition meals production empty-state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_production_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "saved nutrition recipes production empty-state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_production_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "saved nutrition my_foods production empty-state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_production_pages_golden_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 7,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

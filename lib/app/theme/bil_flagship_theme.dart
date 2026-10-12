@@ -31,11 +31,11 @@ abstract final class BilFlagshipTheme {
 
     final scheme = ColorScheme(
       brightness: brightness,
-      primary: BilFlagshipTokens.cyan500,
-      onPrimary: Colors.white,
+      primary: dark ? const Color(0xFF82C4F2) : BilFlagshipTokens.cyan500,
+      onPrimary: dark ? const Color(0xFF102B40) : Colors.white,
       primaryContainer: dark
-          ? BilFlagshipTokens.navy800
-          : const Color(0xFFD9F8FD),
+          ? const Color(0xFF243E54)
+          : const Color(0xFFE2EFF9),
       onPrimaryContainer: dark
           ? BilFlagshipTokens.textPrimaryDark
           : BilFlagshipTokens.navy900,
@@ -62,6 +62,18 @@ abstract final class BilFlagshipTheme {
       surface: dark
           ? BilFlagshipTokens.surfaceDark
           : BilFlagshipTokens.surfaceLight,
+      surfaceContainerLowest: dark
+          ? BilFlagshipTokens.canvasDark
+          : const Color(0xFFFFFFFF),
+      surfaceContainerLow: dark
+          ? const Color(0xFF162737)
+          : const Color(0xFFF5F9FC),
+      surfaceContainer: dark
+          ? const Color(0xFF203545)
+          : const Color(0xFFEDF4FA),
+      surfaceContainerHigh: dark
+          ? const Color(0xFF294052)
+          : const Color(0xFFE6F0F7),
       onSurface: dark
           ? BilFlagshipTokens.textPrimaryDark
           : BilFlagshipTokens.textPrimaryLight,
@@ -222,7 +234,7 @@ abstract final class BilFlagshipTheme {
         titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
       ),
       cardTheme: CardThemeData(
-        elevation: PremiumDesignTokens.elevationNone,
+        elevation: highContrast ? PremiumDesignTokens.elevationNone : 1,
         margin: EdgeInsets.zero,
         color: dark
             ? BilFlagshipTokens.surfaceDark
@@ -370,18 +382,19 @@ abstract final class BilFlagshipTheme {
         shape: const RoundedRectangleBorder(),
       ),
       dialogTheme: DialogThemeData(
-        elevation: 0,
+        elevation: highContrast ? 0 : 8,
         backgroundColor: dark
             ? BilFlagshipTokens.surfaceDark
             : BilFlagshipTokens.surfaceLight,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(BilFlagshipTokens.radiusXl),
+          borderRadius: BorderRadius.circular(24),
           side: BorderSide(color: scheme.outlineVariant),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        elevation: 0,
+        elevation: highContrast ? 0 : 8,
+        modalBarrierColor: Colors.black.withValues(alpha: dark ? .48 : .24),
         backgroundColor: dark
             ? BilFlagshipTokens.surfaceDark
             : BilFlagshipTokens.surfaceLight,

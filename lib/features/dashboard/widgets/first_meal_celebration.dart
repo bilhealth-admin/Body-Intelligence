@@ -6,10 +6,16 @@ import 'package:flutter/material.dart';
 import '../../../data/repositories/first_meal_milestone.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import 'first_use_glass_surface.dart';
+import '../../../shared/widgets/bil_experience_presentation.dart';
 
 /// Only a real, committed first food item may trigger the one-time effect.
 /// The local database owns the decision; this UI never writes nutrition data.
 abstract final class FirstMealCelebration {
+  static bool get _foreground {
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    return lifecycle == null || lifecycle == AppLifecycleState.resumed;
+  }
+
   static Future<bool> showIfPending(
     BuildContext context,
     PreferencesRepository preferences, {
@@ -17,7 +23,10 @@ abstract final class FirstMealCelebration {
     VoidCallback? onFinished,
     bool Function()? ownerIsCurrent,
   }) async {
-    if (!context.mounted || (ownerIsCurrent != null && !ownerIsCurrent())) {
+    if (!_foreground ||
+        !context.mounted ||
+        ModalRoute.of(context)?.isCurrent == false ||
+        (ownerIsCurrent != null && !ownerIsCurrent())) {
       return false;
     }
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
@@ -33,24 +42,23 @@ abstract final class FirstMealCelebration {
       targetRect =
           target.localToGlobal(Offset.zero, ancestor: overlayBox) & target.size;
     }
-    bool claimed;
+    bool current() =>
+        _foreground &&
+        context.mounted &&
+        ModalRoute.of(context)?.isCurrent != false &&
+        (ownerIsCurrent == null || ownerIsCurrent());
+    // Do not toggle the presentation lease for an absent/done event: lease
+    // release wakes the Dashboard's pending-event retry, so that would loop.
     try {
-      claimed = await preferences.mutateIfUnchanged(
-        expected: const {firstMealCelebrationPreferenceKey: 'ready'},
-        set: const {
-          firstMealCelebrationPreferenceKey: 'done',
-          firstMealStreakGuidePreferenceKey: 'ready',
-        },
-      );
+      if (await preferences.get(firstMealCelebrationPreferenceKey) != 'ready' ||
+          !current()) {
+        return false;
+      }
     } on Object {
-      // A decoration must not interfere with an already committed meal.
       return false;
     }
-    if (!claimed ||
-        !context.mounted ||
-        (ownerIsCurrent != null && !ownerIsCurrent())) {
-      return false;
-    }
+    final release = BilExperiencePresentation.tryClaim();
+    if (release == null) return false;
 
     late OverlayEntry entry;
     var removed = false;
@@ -59,24 +67,56 @@ abstract final class FirstMealCelebration {
       removed = true;
       entry.remove();
       entry.dispose();
+      release();
       if (ownerIsCurrent == null || ownerIsCurrent()) onFinished?.call();
     }
 
     entry = OverlayEntry(
       builder: (_) => _FirstFoodBurst(
         onFinished: finish,
+        onRetired: release,
+        onFirstFrame: () async {
+          if (removed || !current()) {
+            finish();
+            return;
+          }
+          try {
+            // Claim only after a painted frame. If the route/owner retires
+            // before that point, leave ready intact for the next safe visit.
+            final claimed = await preferences.mutateIfUnchanged(
+              expected: const {firstMealCelebrationPreferenceKey: 'ready'},
+              set: const {
+                firstMealCelebrationPreferenceKey: 'done',
+                firstMealStreakGuidePreferenceKey: 'ready',
+              },
+              isCurrent: current,
+            );
+            if (!claimed || !current()) finish();
+          } on Object {
+            // Meal data was already committed independently of this effect.
+            finish();
+          }
+        },
         targetRect: targetRect,
         ownerIsCurrent: ownerIsCurrent,
       ),
     );
-    overlay.insert(entry);
-    return true;
+    try {
+      overlay.insert(entry);
+      return true;
+    } on Object {
+      entry.dispose();
+      release();
+      return false;
+    }
   }
 }
 
 class _FirstFoodBurst extends StatefulWidget {
   const _FirstFoodBurst({
     required this.onFinished,
+    required this.onFirstFrame,
+    required this.onRetired,
     this.targetRect,
     this.ownerIsCurrent,
   });
@@ -84,13 +124,15 @@ class _FirstFoodBurst extends StatefulWidget {
   final bool Function()? ownerIsCurrent;
 
   final VoidCallback onFinished;
+  final VoidCallback onRetired;
+  final Future<void> Function() onFirstFrame;
 
   @override
   State<_FirstFoodBurst> createState() => _FirstFoodBurstState();
 }
 
 class _FirstFoodBurstState extends State<_FirstFoodBurst>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2450),
@@ -102,6 +144,7 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) widget.onFinished();
     });
@@ -112,6 +155,9 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(widget.onFirstFrame());
+    });
     _reducedMotion = MediaQuery.disableAnimationsOf(context);
     if (_reducedMotion) {
       _reducedMotionTimer = Timer(
@@ -124,9 +170,19 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed && mounted) widget.onFinished();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _reducedMotionTimer?.cancel();
     _controller.dispose();
+    // The root Overlay can disappear before either animation/timer finishes.
+    // Release after the widget tree unlocks; the token callback is idempotent
+    // and never mutates the meal or its already-painted milestone.
+    scheduleMicrotask(widget.onRetired);
     super.dispose();
   }
 

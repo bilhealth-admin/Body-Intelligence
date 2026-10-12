@@ -1,0 +1,52 @@
+{
+  "label": "coach-goal-stream-subscription-repaired-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+    "--plain-name",
+    "pending or failed context keeps one bounded intro and no request"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791760804.9821224,
+  "files": {
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart": "333e683417354519c658f3febe1e9ed95f14fa318f67662aa03019eb6d6247c1"
+  },
+  "source_fingerprint": "d9264bddec98180283c203a3b472cf8a6826978f117e9eb49fcb1817bdd5e460",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+    "--plain-name",
+    "pending or failed context keeps one bounded intro and no request"
+  ],
+  "pid": 15444,
+  "exit_code": 0,
+  "finished": 1791760812.1878695,
+  "end_fingerprint": "d9264bddec98180283c203a3b472cf8a6826978f117e9eb49fcb1817bdd5e460",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "pending or failed context keeps one bounded intro and no request",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

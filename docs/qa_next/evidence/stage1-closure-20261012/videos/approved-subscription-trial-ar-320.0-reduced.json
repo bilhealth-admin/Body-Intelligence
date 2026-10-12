@@ -1,0 +1,155 @@
+{
+  "method": "painted Flutter WidgetTester frames at 10 test-clock fps",
+  "not_device_latency": true,
+  "frames": 28,
+  "dimensions": [
+    320,
+    844
+  ],
+  "sha256": "bc5247092f78c48601f22d0038a2f0ec3f53993544ccdf1160c61a262d667c2c",
+  "steps": [
+    {
+      "frame": 0,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 100
+    },
+    {
+      "frame": 1,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 200
+    },
+    {
+      "frame": 2,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 300
+    },
+    {
+      "frame": 3,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 400
+    },
+    {
+      "frame": 4,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 500
+    },
+    {
+      "frame": 5,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 600
+    },
+    {
+      "frame": 6,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 700
+    },
+    {
+      "frame": 7,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 800
+    },
+    {
+      "frame": 8,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 900
+    },
+    {
+      "frame": 9,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1000
+    },
+    {
+      "frame": 10,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1100
+    },
+    {
+      "frame": 11,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1200
+    },
+    {
+      "frame": 12,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1300
+    },
+    {
+      "frame": 13,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1400
+    },
+    {
+      "frame": 14,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1500
+    },
+    {
+      "frame": 15,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1600
+    },
+    {
+      "frame": 16,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1700
+    },
+    {
+      "frame": 17,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1800
+    },
+    {
+      "frame": 18,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 1900
+    },
+    {
+      "frame": 19,
+      "step": "canonical-active-before-held-native-finish",
+      "pumpedMs": 2000
+    },
+    {
+      "frame": 20,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2100
+    },
+    {
+      "frame": 21,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2200
+    },
+    {
+      "frame": 22,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2300
+    },
+    {
+      "frame": 23,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2400
+    },
+    {
+      "frame": 24,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2500
+    },
+    {
+      "frame": 25,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2600
+    },
+    {
+      "frame": 26,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2700
+    },
+    {
+      "frame": 27,
+      "step": "real-continue-keeps-draft",
+      "pumpedMs": 2800
+    }
+  ],
+  "tested_source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "test_run": "closure-approved-purchase-and-zone-files",
+  "capture_environment": "host WidgetTester, native Store/HTTP fixtures, 10 test-clock fps"
+}

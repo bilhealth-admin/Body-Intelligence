@@ -51,8 +51,12 @@ void main() {
     );
 
     await pump(bytes);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 30)),
+    );
+    await tester.pump();
     final memberAvatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
-    expect(memberAvatar.foregroundImage, isA<MemoryImage>());
+    expect(memberAvatar.foregroundImage, isA<ResizeImage>());
     expect(memberAvatar.backgroundImage, isNull);
     coach = tester.widget<Image>(
       find.byKey(const ValueKey('ai-boost-coach-artwork-image')),
@@ -73,8 +77,12 @@ void main() {
       MaterialApp(home: BilAccountAvatar(radius: 24, photoBytes: bytes)),
     );
 
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 30)),
+    );
+    await tester.pump();
     final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
-    expect(avatar.foregroundImage, isA<MemoryImage>());
+    expect(avatar.foregroundImage, isA<ResizeImage>());
     expect(avatar.backgroundImage, isNull);
   });
 
@@ -94,8 +102,16 @@ void main() {
       ),
     );
 
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 30)),
+    );
+    await tester.pump();
     final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
-    expect(avatar.foregroundImage, isA<MemoryImage>());
-    expect(avatar.backgroundImage, isA<NetworkImage>());
+    expect(avatar.foregroundImage, isA<ResizeImage>());
+    expect(avatar.backgroundImage, isNull);
+    expect(
+      (avatar.foregroundImage as ResizeImage).imageProvider,
+      isA<MemoryImage>(),
+    );
   });
 }

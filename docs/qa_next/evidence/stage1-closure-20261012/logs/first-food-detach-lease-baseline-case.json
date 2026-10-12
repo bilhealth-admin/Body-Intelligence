@@ -1,0 +1,62 @@
+{
+  "label": "first-food-detach-lease-baseline-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+    "--plain-name",
+    "disposed first-food overlay releases the lease reduced=true"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791762190.9706118,
+  "files": {
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart": "07b3d9b1a2dab4f0af827d0c78ba674c6c554d4d3087de8574cff248c9e3a3c6"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "66321a28d7b9a327ac1825bc9f87349972502966bf46337c417764a5c3d0044a",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+    "--plain-name",
+    "disposed first-food overlay releases the lease reduced=true"
+  ],
+  "pid": 18580,
+  "exit_code": 1,
+  "finished": 1791762197.4673755,
+  "end_fingerprint": "66321a28d7b9a327ac1825bc9f87349972502966bf46337c417764a5c3d0044a",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "disposed first-food overlay releases the lease reduced=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+      "result": "error"
+    }
+  ],
+  "counts": {
+    "success": 0,
+    "failure": 0,
+    "error": 1,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 3,
+      "error": "Test failed. See exception logs above.\nThe test description was: disposed first-food overlay releases the lease reduced=true",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 4061
+    }
+  ],
+  "incomplete_tests": []
+}

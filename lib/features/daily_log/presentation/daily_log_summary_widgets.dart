@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
@@ -7,6 +8,9 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../commerce/presentation/premium_nutrition_glass.dart';
+import '../../commerce/providers/commerce_providers.dart';
+import '../../commerce/domain/commerce_entitlement.dart';
+import '../../commerce/domain/subscription_state.dart';
 import '../../settings/premium_meal_features_page.dart';
 import 'daily_log_nutrition_evidence.dart';
 import 'macro_value_formatter.dart';
@@ -198,10 +202,8 @@ class DailyLogSnapshot extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         surface(
-          PremiumNutritionGlass(
+          PremiumNutritionFieldsGroup(
             key: const Key('daily-log-summary-macros-glass'),
-            compact: true,
-            borderRadius: 14,
             child: Row(
               children: [
                 Expanded(
@@ -433,7 +435,7 @@ class _CalorieSummary extends StatelessWidget {
   }
 }
 
-class DailyLogCalorieMacroRing extends StatelessWidget {
+class DailyLogCalorieMacroRing extends ConsumerWidget {
   const DailyLogCalorieMacroRing({
     super.key,
     required this.calories,
@@ -452,7 +454,11 @@ class DailyLogCalorieMacroRing extends StatelessWidget {
   final double dimension;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
+    final macrosAllowed =
+        state?.authority == EntitlementAuthority.verifiedServer &&
+        state!.grants(CommerceEntitlement.advancedIntelligence);
     return Semantics(
       label: calories == null
           ? '${_summaryText(context, 'calories')}: ${context.strings.text('Unavailable')}'
@@ -465,9 +471,9 @@ class DailyLogCalorieMacroRing extends StatelessWidget {
             CustomPaint(
               size: Size.square(dimension),
               painter: _MacroRingPainter(
-                carbs: carbs,
-                fat: fat,
-                protein: protein,
+                carbs: macrosAllowed ? carbs : null,
+                fat: macrosAllowed ? fat : null,
+                protein: macrosAllowed ? protein : null,
                 track: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
             ),

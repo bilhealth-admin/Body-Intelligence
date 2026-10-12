@@ -2,6 +2,7 @@ import '../../../shared/widgets/first_use_target_guide.dart';
 import 'package:flutter/material.dart';
 
 import 'first_use_glass_surface.dart';
+import '../../../shared/widgets/bil_experience_presentation.dart';
 
 /// A glass bubble placed by the real control's target wrapper. Standalone
 /// surfaces may place it inline; Skip never writes food or blocks navigation.
@@ -47,7 +48,13 @@ class FirstUseContextCoachmark extends StatelessWidget {
       };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: BilExperiencePresentation.occupied,
+    builder: (context, busy, _) =>
+        busy ? const SizedBox.shrink() : _guide(context),
+  );
+
+  Widget _guide(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final below = FirstUseGuidePlacement.belowOf(context);
     final pointer = Align(

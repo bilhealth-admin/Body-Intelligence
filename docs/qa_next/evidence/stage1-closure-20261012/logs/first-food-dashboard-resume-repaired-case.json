@@ -1,0 +1,62 @@
+{
+  "label": "first-food-dashboard-resume-repaired-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart",
+    "--plain-name",
+    "Dashboard resumes a committed first-food event without repeating it"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791765304.09222,
+  "files": {
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart": "022dfe1ac1b3b42d649d1075ecf64cdb42601cd82f3ad5eed704c47bc6ea8880"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "93995e24c51f1ced210e62df5d5eaea108373a15985decccec56633a53b4bbdb",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart",
+    "--plain-name",
+    "Dashboard resumes a committed first-food event without repeating it"
+  ],
+  "pid": 16412,
+  "exit_code": 1,
+  "finished": 1791765312.36947,
+  "end_fingerprint": "93995e24c51f1ced210e62df5d5eaea108373a15985decccec56633a53b4bbdb",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "Dashboard resumes a committed first-food event without repeating it",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_first_use_guidance_test.dart",
+      "result": "error"
+    }
+  ],
+  "counts": {
+    "success": 0,
+    "failure": 0,
+    "error": 1,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 3,
+      "error": "Test failed. See exception logs above.\nThe test description was: Dashboard resumes a committed first-food event without repeating it",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 5802
+    }
+  ],
+  "incomplete_tests": []
+}

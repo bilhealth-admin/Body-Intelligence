@@ -42,8 +42,8 @@ class SettingsPage extends ConsumerWidget {
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final displayName = ref.watch(displayNameProvider).value;
-    final photo = ref.watch(profilePhotoProvider).value;
-    final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+    final photo = ref.watch(profileAvatarStateProvider).bytes;
+    final photoUrl = ref.watch(profileAvatarStateProvider).url;
     final subscription = ref.watch(verifiedSubscriptionAccessProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
     final adminAccess = ref.watch(aiCoachAdminAccessProvider);

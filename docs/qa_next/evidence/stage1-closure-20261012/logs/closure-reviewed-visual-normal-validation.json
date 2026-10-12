@@ -1,0 +1,93 @@
+{
+  "label": "closure-reviewed-visual-normal-validation",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/architecture_source_file_size_guard_test.dart",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "--name",
+    "hand-maintained Dart sources|food catalog production empty state|daily log production empty day|nutrition goals production capture page|saved nutrition (meals|recipes|my_foods) production"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791755982.8887558,
+  "files": {
+    "test/architecture_source_file_size_guard_test.dart": "da9e08f1e3324ae063538e1c86bd60c89686be6b2441b60453658a9754508aee",
+    "test/visual_closure/actual_data_pages_golden_test.dart": "d0a82f5efcedafc4d2441222949ce601095d6709592d0480e7da5ad43dd3ec99",
+    "test/visual_closure/actual_production_pages_golden_test.dart": "6fc268430b2a9a56d4fd861271a2a4aea3d43f802c5710a1ccb6af5d9f285461"
+  },
+  "source_fingerprint": "08c9830000447b69a545b0a3d2c716387823baeabb6067301966246383b8bd72",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/architecture_source_file_size_guard_test.dart",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "--name",
+    "hand-maintained Dart sources|food catalog production empty state|daily log production empty day|nutrition goals production capture page|saved nutrition (meals|recipes|my_foods) production"
+  ],
+  "pid": 11380,
+  "exit_code": 0,
+  "finished": 1791756030.412231,
+  "end_fingerprint": "08c9830000447b69a545b0a3d2c716387823baeabb6067301966246383b8bd72",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "hand-maintained Dart sources stay below the architecture ceiling",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/architecture_source_file_size_guard_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food catalog production empty state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "daily log production empty day capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition goals production capture page 1",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition goals production capture page 2",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_data_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "saved nutrition meals production empty-state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_production_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "saved nutrition recipes production empty-state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_production_pages_golden_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "saved nutrition my_foods production empty-state capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/visual_closure/actual_production_pages_golden_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 8,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

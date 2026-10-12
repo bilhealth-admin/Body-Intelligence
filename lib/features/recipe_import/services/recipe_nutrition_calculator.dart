@@ -98,6 +98,12 @@ abstract final class RecipeNutritionCalculator {
       phosphorusMg: value(FoodNutrient.phosphorus),
       ironMg: value(FoodNutrient.iron),
       vitaminCMg: value(FoodNutrient.vitaminC),
+      additionalNutrients: {
+        for (final n in FoodNutrient.values.where(
+          (n) => n.index > FoodNutrient.vitaminC.index,
+        ))
+          n: value(n),
+      },
       provenance: RecipeNutritionProvenance(
         source: 'BIL calculated from selected food records',
         recordId: draft.fingerprint,

@@ -1,0 +1,388 @@
+{
+  "label": "first-use-and-recipe-affected-final-files",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_use_reference_journey_test.dart",
+    "test/features/dashboard/first_use_recovery_regression_test.dart",
+    "test/features/dashboard/first_use_context_coachmark_test.dart",
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart",
+    "test/data/repositories/first_food_milestone_commit_test.dart",
+    "test/features/dashboard/first_meal_celebration_visual_test.dart",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart",
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+    "test/features/wellness/recipe_deep_link_entitlement_loading_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791762345.1249895,
+  "files": {
+    "test/features/dashboard/first_use_reference_journey_test.dart": "89fb645207a5700d427d2e2a09b255181d160eec6230c6db49bab93acf760bf5",
+    "test/features/dashboard/first_use_recovery_regression_test.dart": "3a0c9286d4ef55e79c08765caa63d94d972dfc08b542d1499d165858ba27fa64",
+    "test/features/dashboard/first_use_context_coachmark_test.dart": "ed4da9463f208e4fb57f14506200e5125babc45f1d07369d444bb2ae4a7ecca0",
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart": "e2e3926c0c1778cdf0ca0ada7b97bf1479b7fa63e726cc5a0b12db9d378bf892",
+    "test/data/repositories/first_food_milestone_commit_test.dart": "f6bf7c1041aac08264e3de3b38e101eec74f35f61c8cc5fe2e336964bdaf5fb6",
+    "test/features/dashboard/first_meal_celebration_visual_test.dart": "d047781c8f04b9321aba65fc40d36a5fb5d059e02ef28fae7711eaf8209bef23",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart": "9d2588ed62a0b7cffdf69fda526e992eaadc2abfd38fc82e1c9fb1221581c593",
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart": "07b3d9b1a2dab4f0af827d0c78ba674c6c554d4d3087de8574cff248c9e3a3c6",
+    "test/features/wellness/recipe_deep_link_entitlement_loading_test.dart": "a012dd4d4f35eff787cbd7d47ad3cc40b5685b899165358031c300a362e06cac"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "77f0d149a7741362cc1c1b0b6082d4377b658a5eea50ff0cbf67fd2ff030f80d",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_use_reference_journey_test.dart",
+    "test/features/dashboard/first_use_recovery_regression_test.dart",
+    "test/features/dashboard/first_use_context_coachmark_test.dart",
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart",
+    "test/data/repositories/first_food_milestone_commit_test.dart",
+    "test/features/dashboard/first_meal_celebration_visual_test.dart",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart",
+    "test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+    "test/features/wellness/recipe_deep_link_entitlement_loading_test.dart"
+  ],
+  "pid": 17524,
+  "exit_code": 0,
+  "finished": 1791762391.169151,
+  "end_fingerprint": "77f0d149a7741362cc1c1b0b6082d4377b658a5eea50ff0cbf67fd2ff030f80d",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "ar anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak reduced motion",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 320.0 px 1.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 320.0 px 1.8 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 320.0 px 2.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 390.0 px 1.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 390.0 px 1.8 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 390.0 px 2.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 430.0 px 1.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 430.0 px 1.8 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en anchored guide 430.0 px 2.0 text: Skip and Add stay reachable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en real food journey: cancel, edit 80g, commit once, celebrate, streak",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en real food journey: cancel, edit 80g, commit once, celebrate, streak reduced motion",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar celebration 320px 2x reduced=false remains nonblocking",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar celebration 320px 2x reduced=true remains nonblocking",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en celebration 320px 2x reduced=false remains nonblocking",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en celebration 320px 2x reduced=true remains nonblocking",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar Food Log 320.0 px 2x text and keyboard can confirm quantity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar Food Log 390.0 px 2x text and keyboard can confirm quantity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar Food Log 430.0 px 2x text and keyboard can confirm quantity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en Food Log 320.0 px 2x text and keyboard can confirm quantity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en Food Log 390.0 px 2x text and keyboard can confirm quantity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "en Food Log 430.0 px 2x text and keyboard can confirm quantity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "menu Skip is below glass and preserves the real control without saving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "search Skip is below glass and preserves the real control without saving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "choose Skip is below glass and preserves the real control without saving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "quantity Skip is below glass and preserves the real control without saving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "save Skip is below glass and preserves the real control without saving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fr starter CTA opens the actual optional Log Food menu",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "es starter CTA opens the actual optional Log Food menu",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "tr starter CTA opens the actual optional Log Food menu",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed real SQLite meal insert cannot celebrate or create partial food",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "A to B to A while quantity is open rejects stale save for both owners",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_recovery_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "glassy contextual guide is optional and does not cover content",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_context_coachmark_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reduce-motion mode has no entrance transition",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_context_coachmark_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "narrow Arabic layout with large text keeps Skip available",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_context_coachmark_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "empty meal bucket shows optional steps and Skip dismisses them",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_first_use_guidance_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "completed first food does not reopen the tutorial",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_first_use_guidance_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "continuing the guide enables contextual Food Log help",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/dashboard_first_use_guidance_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restored legacy food with deleted=false is done before another insert",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restored legacy food with deleted=true is done before another insert",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner retires while legacy diary preparation is awaiting SQLite",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a meal bucket alone is not a first committed food",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "manual food marks ready and edits or later foods cannot rearm",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a failed atomic first food cannot create a celebration",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "calculated recipe first serving creates milestone atomically",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy deleted food is not classified as a new first food",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/first_food_milestone_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "retired route before first painted frame preserves ready for retry",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_meal_celebration_visual_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "first successful marker celebrates once and arms streak tip",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_meal_celebration_visual_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "disposed first-food overlay releases the lease reduced=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "disposed first-food overlay releases the lease reduced=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "CommercePlan.premium recipe deep link waits for authoritative access without Plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/recipe_deep_link_entitlement_loading_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "CommercePlan.free recipe deep link waits for authoritative access without Plans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/wellness/recipe_deep_link_entitlement_loading_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 64,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

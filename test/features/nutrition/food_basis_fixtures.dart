@@ -113,4 +113,5 @@ Food replaceBasisNutrient(Food row, FoodNutrient nutrient, double value) =>
       FoodNutrient.phosphorus => row.copyWith(phosphorus: value),
       FoodNutrient.iron => row.copyWith(iron: value),
       FoodNutrient.vitaminC => row.copyWith(vitaminC: value),
+      _ => throw ArgumentError('Extended nutrients have no physical column.'),
     };

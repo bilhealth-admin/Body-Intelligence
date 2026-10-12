@@ -1,0 +1,59 @@
+{
+  "label": "first-food-dashboard-resume-frame-repaired-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart",
+    "--plain-name",
+    "Dashboard resumes a committed first-food event without repeating it"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791765496.2227523,
+  "files": {
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart": "c45f440ae543d5687db3fef5250df20f740d05f8a3c88e245d335237868dfe8a"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "71e033d7d9609f01f60b135dbc7fd6a74495d6f71b6119b3256064d84deb4662",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/dashboard_first_use_guidance_test.dart",
+    "--plain-name",
+    "Dashboard resumes a committed first-food event without repeating it"
+  ],
+  "pid": 20420,
+  "exit_code": 1,
+  "finished": 1791765707.916261,
+  "end_fingerprint": "532c0713eac2828c75353de6cd85b392c481fe912c4c1c3b1db6e900c5d46210",
+  "stable_source": false,
+  "tests": [],
+  "counts": {
+    "success": 0,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 3,
+      "error": "Test failed. See exception logs above.\nThe test description was: Dashboard resumes a committed first-food event without repeating it",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 3497
+    }
+  ],
+  "incomplete_tests": [
+    "Dashboard resumes a committed first-food event without repeating it"
+  ],
+  "termination_reason": "Owned failed-test cleanup was hung beyond 180 seconds after Drift timer invariant failure. Explicitly terminated; incomplete and not accepted."
+}

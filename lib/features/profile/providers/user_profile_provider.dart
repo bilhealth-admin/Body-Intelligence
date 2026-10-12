@@ -20,6 +20,9 @@ import '../../nutrition/domain/dietary_preferences.dart';
 import '../../nutrition/repositories/dietary_preferences_repository.dart';
 import '../../nutrition_plans/data/diet_plan_repository.dart';
 import '../services/display_name_sync.dart';
+import '../services/profile_photo_validation.dart';
+import 'package:flutter/foundation.dart' show compute;
+export 'profile_avatar_state.dart';
 
 export '../services/display_name_sync.dart' show DisplayNameSync;
 
@@ -200,34 +203,45 @@ final accountGatewayReviewedProvider = FutureProvider.autoDispose<bool>((
 
 final profilePhotoProvider = StreamProvider<Uint8List?>((ref) {
   final preferences = ref.watch(preferencesRepositoryProvider);
-  return preferences.watch('profilePhoto').map((encoded) {
+  return preferences.watch('profilePhoto').asyncMap((encoded) async {
     if (!_preferencesMatchCurrentAuth(preferences)) return null;
     if (encoded == null || encoded.isEmpty) return null;
-    try {
-      return base64Decode(encoded);
-    } on FormatException {
-      return null;
+    final bytes = base64Decode(encoded);
+    if (!await compute(isDecodableProfilePhoto, bytes)) {
+      throw const FormatException('Corrupt persisted profile photo.');
     }
+    return _preferencesMatchCurrentAuth(preferences) ? bytes : null;
   });
 });
 
-/// Resolves the same cloud-backed photo used by Community on a second device.
-/// Local bytes remain first priority; this URL is only the cross-device path.
+final profilePhotoMetadataProvider = StreamProvider<Map<String, String>>((ref) {
+  return ref.watch(preferencesRepositoryProvider).watchSnapshot(const [
+    'profilePhotoPublicUrl',
+    'profilePhotoDeleted',
+    'profilePhotoPending',
+  ]);
+});
+
+/// Shared cross-device reference. Pending local edits win over delayed reads.
 final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
   ref,
 ) async {
   final preferences = ref.watch(preferencesRepositoryProvider);
+  ref.watch(profilePhotoMetadataProvider);
+  if (await preferences.get('profilePhotoDeleted') == 'true') return null;
   final stored = (await preferences.get('profilePhotoPublicUrl'))?.trim();
   final hasStoredUrl = stored != null && stored.isNotEmpty;
-  // The local bytes are the exact image the member just chose. Do not launch a
-  // redundant cloud profile query during normal avatar rebuilds; it can race
-  // the local stream and briefly swap the avatar back to a network image.
-  final localPhoto = await preferences.get('profilePhoto');
-  if ((localPhoto != null && localPhoto.isNotEmpty) || hasStoredUrl) {
+  final initialPhoto = await preferences.get('profilePhoto');
+  final initialPending = await preferences.get('profilePhotoPending');
+  final initialDeleted = await preferences.get('profilePhotoDeleted');
+  final expected = {
+    'profilePhoto': initialPhoto,
+    'profilePhotoPublicUrl': stored,
+    'profilePhotoPending': initialPending,
+    'profilePhotoDeleted': initialDeleted,
+  };
+  if (initialPending == 'true' || !AppEnvironment.supabaseRuntimeReady) {
     return hasStoredUrl ? stored : null;
-  }
-  if (!AppEnvironment.supabaseRuntimeReady) {
-    return null;
   }
   final client = Supabase.instance.client;
   final user = client.auth.currentUser;
@@ -238,14 +252,35 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
         .select('avatar_url')
         .eq('user_id', user.id)
         .maybeSingle();
-    final url = (row?['avatar_url'] as String?)?.trim();
-    if (url == null || url.isEmpty) {
+    if (!ref.mounted ||
+        client.auth.currentUser?.id != user.id ||
+        await preferences.get('profilePhotoDeleted') == 'true') {
       return null;
     }
-    await preferences.set('profilePhotoPublicUrl', url);
+    final url = (row?['avatar_url'] as String?)?.trim();
+    if (url == null || url.isEmpty) {
+      if (hasStoredUrl) {
+        await preferences.mutateIfUnchanged(
+          expected: expected,
+          set: {'profilePhotoDeleted': 'true'},
+          remove: const ['profilePhoto', 'profilePhotoPublicUrl'],
+        );
+      }
+      return null;
+    }
+    if (url != stored) {
+      final updated = await preferences.mutateIfUnchanged(
+        expected: expected,
+        set: {'profilePhotoPublicUrl': url},
+        remove: const ['profilePhoto'],
+      );
+      if (!updated) {
+        return (await preferences.get('profilePhotoPublicUrl'))?.trim();
+      }
+    }
     return url;
   } on Object {
-    return null;
+    return hasStoredUrl ? stored : null;
   }
 });
 

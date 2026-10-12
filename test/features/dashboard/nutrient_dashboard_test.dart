@@ -111,4 +111,41 @@ void main() {
       NutrientProgressState.unknown,
     );
   });
+  test(
+    'known zero limit, unknown target and invalid evidence never divide by zero or reward excess',
+    () {
+      expect(
+        NutrientProgressPolicy.evaluate(value: 1, goal: 0, minimumGoal: false),
+        NutrientProgressState.exceeded,
+      );
+      expect(
+        NutrientProgressPolicy.evaluate(value: 0, goal: 0, minimumGoal: false),
+        NutrientProgressState.below,
+      );
+      expect(
+        NutrientProgressPolicy.evaluate(
+          value: 1,
+          goal: null,
+          minimumGoal: false,
+        ),
+        NutrientProgressState.unknown,
+      );
+      expect(
+        NutrientProgressPolicy.evaluate(
+          value: double.nan,
+          goal: 10,
+          minimumGoal: true,
+        ),
+        NutrientProgressState.unknown,
+      );
+      expect(
+        NutrientProgressPolicy.evaluate(
+          value: 1,
+          goal: double.infinity,
+          minimumGoal: true,
+        ),
+        NutrientProgressState.unknown,
+      );
+    },
+  );
 }

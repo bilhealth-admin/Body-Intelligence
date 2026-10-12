@@ -49,6 +49,28 @@ void main() {
     expect(find.text('Quick Add macros'), findsNothing);
   });
 
+  testWidgets(
+    'Arabic Persian digits retain explicit zero and blank evidence in Quick Macro',
+    (tester) async {
+      QuickMacroDraft? saved;
+      await open(tester, (draft) async => saved = draft);
+      await tester.enterText(
+        find.byKey(const Key('quick-macro-field-0')),
+        '٤٥٥٫٥',
+      );
+      await tester.enterText(find.byKey(const Key('quick-macro-field-1')), '۰');
+      await tester.tap(find.text('Add'));
+      await tester.pumpAndSettle();
+      expect(saved?.calories, 455.5);
+      expect(saved?.caloriesKnown, isTrue);
+      expect(saved?.protein, 0);
+      expect(saved?.proteinKnown, isTrue);
+      expect(saved?.carbohydratesKnown, isFalse);
+      expect(saved?.fatKnown, isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('write failure keeps the dialog and entered draft', (
     tester,
   ) async {

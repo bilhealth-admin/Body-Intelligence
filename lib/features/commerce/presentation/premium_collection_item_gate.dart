@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../app/localization/app_localizations.dart';
+import '../domain/subscription_state.dart';
+import '../providers/commerce_providers.dart';
 import 'premium_label_badge.dart';
 
-/// Keeps paid collection content visible as a real preview while preventing
-/// every interaction with it until the verified subscription is active.
-class PremiumCollectionItemGate extends StatelessWidget {
+/// Collection previews contain public metadata only. Callers separately guard
+/// paid values and never load paid payloads to build this preview.
+class PremiumCollectionItemGate extends ConsumerWidget {
   const PremiumCollectionItemGate({
     required this.locked,
     required this.tier,
@@ -13,7 +16,6 @@ class PremiumCollectionItemGate extends StatelessWidget {
     this.showLabel = true,
     super.key,
   });
-
   final bool locked;
   final String tier;
   final VoidCallback onUpgrade;
@@ -21,41 +23,73 @@ class PremiumCollectionItemGate extends StatelessWidget {
   final bool showLabel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (!locked) return child;
+    final access = ref.watch(verifiedSubscriptionAccessProvider);
+    final checking = access.isLoading;
+    final verified =
+        access.asData?.value.authority == EntitlementAuthority.verifiedServer;
+    final unavailable = !checking && !verified;
+    final upgrade =
+        Localizations.of<AppLocalizations>(
+          context,
+          AppLocalizations,
+        )?.text('Upgrade') ??
+        'Upgrade';
     return Stack(
       fit: StackFit.expand,
       children: [
-        AbsorbPointer(absorbing: true, child: ExcludeSemantics(child: child)),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xB8DBA936), width: 1.2),
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0x08000000), Color(0x52000000)],
-            ),
-          ),
-        ),
-        Semantics(
-          button: true,
-          label: tier,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              key: const ValueKey('premium-collection-upgrade'),
-              onTap: onUpgrade,
-              borderRadius: BorderRadius.circular(18),
-              child: showLabel
-                  ? Align(
-                      alignment: AlignmentDirectional.topEnd,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: PremiumLabelBadge(semanticLabel: tier),
+        ExcludeFocus(child: AbsorbPointer(child: child)),
+        Align(
+          alignment: AlignmentDirectional.topEnd,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Tooltip(
+              message: checking
+                  ? context.strings.text('Checking subscription')
+                  : unavailable
+                  ? context.strings.text('Subscription check unavailable')
+                  : upgrade,
+              child: Semantics(
+                button: !checking,
+                label: checking
+                    ? context.strings.text('Checking subscription')
+                    : unavailable
+                    ? context.strings.text('Retry')
+                    : '$upgrade · $tier',
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    key: const ValueKey('premium-collection-upgrade'),
+                    onTap: checking
+                        ? null
+                        : unavailable
+                        ? () =>
+                              ref.invalidate(verifiedSubscriptionStateProvider)
+                        : onUpgrade,
+                    borderRadius: BorderRadius.circular(18),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: 48,
+                        minWidth: 48,
                       ),
-                    )
-                  : const SizedBox.expand(),
+                      child: Center(
+                        widthFactor: 1,
+                        child: checking
+                            ? const SizedBox.square(
+                                dimension: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : unavailable
+                            ? const Icon(Icons.refresh_rounded)
+                            : PremiumLabelBadge(semanticLabel: tier),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

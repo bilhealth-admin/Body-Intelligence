@@ -81,9 +81,17 @@ class _DashboardNutrientGoalCards extends StatelessWidget {
             final id = ids[index];
             final value = values[id];
             final goal = goals[id];
-            final progress = value == null || goal == null || goal <= 0
+            final progress = value == null || goal == null || goal < 0
                 ? null
+                : goal == 0
+                ? (value > 0 ? 1.0 : 0.0)
                 : (value / goal).clamp(0.0, 1.0);
+            final upperLimit = id == DashboardNutrientGoalIds.sodium;
+            final progressState = NutrientProgressPolicy.evaluate(
+              value: value,
+              goal: goal,
+              minimumGoal: !upperLimit,
+            );
             final milligrams =
                 id == DashboardNutrientGoalIds.sodium ||
                 id == DashboardNutrientGoalIds.potassium;
@@ -126,6 +134,11 @@ class _DashboardNutrientGoalCards extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                             color: progress == null
                                 ? Theme.of(context).colorScheme.outlineVariant
+                                : progressState ==
+                                      NutrientProgressState.exceeded
+                                ? const Color(0xFFD64B4B)
+                                : upperLimit
+                                ? const Color(0xFFF2A23A)
                                 : progress >= .8
                                 ? const Color(0xFF2E9D62)
                                 : progress >= .4

@@ -3,6 +3,7 @@ part of 'ai_boost_purchase_service.dart';
 extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
   void _enqueue(List<PurchaseDetails> purchases) {
     final owner = _catalogOwner;
+    final visit = _accountVisit.capture();
     if (_disposed || owner == null || _owner() != owner) return;
     final boosts = purchases
         .where(
@@ -12,14 +13,19 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
         )
         .toList();
     if (boosts.isEmpty) return;
+    checkoutTrace?.mark(StorePurchaseStage.nativeCallback);
     _generation++;
     _watchdog?.cancel();
     _queued++;
     _updates = _updates.then((_) async {
       try {
         for (final purchase in boosts) {
-          if (_disposed || _owner() != owner) return;
-          await _process(purchase, owner);
+          if (_disposed ||
+              _owner() != owner ||
+              !_accountVisit.isCurrent(visit)) {
+            return;
+          }
+          await _process(purchase, owner, expectedVisit: visit);
         }
       } finally {
         _queued--;
@@ -28,17 +34,22 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
     });
   }
 
-  Future<void> _process(PurchaseDetails purchase, String owner) async {
-    if (_disposed || _owner() != owner) return;
+  Future<void> _process(
+    PurchaseDetails purchase,
+    String owner, {
+    StoreAccountSnapshot? expectedVisit,
+  }) async {
+    final visit = expectedVisit ?? _accountVisit.capture();
+    bool current() =>
+        !_disposed && _owner() == owner && _accountVisit.isCurrent(visit);
+    if (!current()) return;
     if (_isCreditedReplayDuringAnotherPurchase(purchase, owner)) return;
     if (purchase.status == PurchaseStatus.pending) {
       _unresolved = purchase;
       _publish(AiBoostPurchaseState.pending, null);
       _watchdog?.cancel();
       _watchdog = Timer(pendingTimeout, () {
-        if (!_disposed &&
-            _owner() == owner &&
-            state == AiBoostPurchaseState.pending) {
+        if (current() && state == AiBoostPurchaseState.pending) {
           _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
         }
       });
@@ -63,36 +74,77 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
     final key = _receiptKey(purchase, owner);
     try {
       if (!_credited.contains(key)) {
+        checkoutTrace?.mark(StorePurchaseStage.verificationStarted);
         final verified = await _verify(
           purchase,
           owner,
         ).timeout(const Duration(seconds: 28));
-        if (_disposed || _owner() != owner) return;
-        if (!verified) throw StateError('verification_failed');
+        if (!current()) return;
+        if (!verified.verified) throw StateError('verification_failed');
+        checkoutTrace?.mark(StorePurchaseStage.serverProof);
+        _acceptDelivery(verified.delivery);
+        if (lastDelivery != null) {
+          StorePurchaseTraceRegistry.bind(
+            lastDelivery!.eventKey,
+            checkoutTrace,
+          );
+        }
+        lastDeliveryIsUserPurchase =
+            _userInitiatedProduct == purchase.productID &&
+            purchase.status == PurchaseStatus.purchased;
+        if (verified.delivery?.active == false) {
+          if (purchase.pendingCompletePurchase &&
+              defaultTargetPlatform != TargetPlatform.android) {
+            await _purchase.completePurchase(purchase).timeout(launchTimeout);
+          }
+          if (!current()) return;
+          _unresolved = null;
+          _userInitiatedProduct = null;
+          _publish(AiBoostPurchaseState.ready, 'purchase_inactive');
+          return;
+        }
         if (_credited.add(key)) {
           if (_credited.length > 128) _credited.remove(_credited.first);
           verifiedCreditsRevision++;
         }
       }
     } on Object {
-      if (!_disposed && _owner() == owner) {
+      if (current()) {
         _publish(AiBoostPurchaseState.failed, 'verification_failed');
       }
       return;
     }
     // Durable credit and native finish are different outcomes. No local balance
     // is changed; refresh the server balance even when StoreKit finish fails.
+    checkoutTrace?.mark(StorePurchaseStage.benefitPublished);
     _publish(AiBoostPurchaseState.verified, null);
+    checkoutTrace?.mark(StorePurchaseStage.finishStarted);
     try {
+      if (defaultTargetPlatform == TargetPlatform.android &&
+          lastDelivery?.finishPending == true) {
+        final finished = await _finishVerification!(
+          purchase,
+          owner,
+        ).timeout(const Duration(seconds: 28));
+        if (!current()) return;
+        if (!finished.verified ||
+            finished.delivery?.active != true ||
+            finished.delivery?.finishPending != false) {
+          throw StateError('store_finish_pending');
+        }
+        _acceptDelivery(finished.delivery);
+      }
       if (defaultTargetPlatform != TargetPlatform.android &&
           purchase.pendingCompletePurchase) {
         await _purchase.completePurchase(purchase).timeout(launchTimeout);
       }
-      if (_disposed || _owner() != owner) return;
+      if (!current()) return;
+      checkoutTrace?.mark(StorePurchaseStage.finishCompleted);
       _unresolved = null;
+      _userInitiatedProduct = null;
       _publish(AiBoostPurchaseState.verified, null);
     } on Object {
-      if (!_disposed && _owner() == owner) {
+      if (current()) {
         _publish(AiBoostPurchaseState.verified, 'store_finish_pending');
       }
     }
@@ -101,7 +153,7 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
   String _receiptKey(PurchaseDetails purchase, String owner) => sha256
       .convert(
         utf8.encode(
-          '$owner|${purchase.productID}|${purchase.purchaseID}|${purchase.verificationData.serverVerificationData}',
+          '$owner|${purchase.verificationData.source}|${purchase.productID}|${purchase.purchaseID?.trim().isNotEmpty == true ? 'transaction:${purchase.purchaseID}' : 'receipt:${sha256.convert(utf8.encode(purchase.verificationData.serverVerificationData))}'}',
         ),
       )
       .toString();
@@ -154,26 +206,73 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
   }
 }
 
-Future<bool> _verifyOnServer(PurchaseDetails purchase, String owner) async {
+Future<StoreVerificationOutcome> _verifyOnServer(
+  PurchaseDetails purchase,
+  String owner,
+) => _verifyOnServerPhase(purchase, owner, finishStore: false);
+Future<StoreVerificationOutcome> _finishOnServer(
+  PurchaseDetails purchase,
+  String owner,
+) => _verifyOnServerPhase(purchase, owner, finishStore: true);
+Future<StoreVerificationOutcome> _verifyOnServerPhase(
+  PurchaseDetails purchase,
+  String owner, {
+  required bool finishStore,
+}) async {
   final client = Supabase.instance.client;
-  if (client.auth.currentUser?.id != owner) return false;
+  return CommunityOwnerOperation.run(
+    client: client,
+    ownerId: owner,
+    action: (_) =>
+        _verifyOwnedBoost(client, purchase, owner, finishStore: finishStore),
+  );
+}
+
+Future<StoreVerificationOutcome> _verifyOwnedBoost(
+  SupabaseClient client,
+  PurchaseDetails purchase,
+  String owner, {
+  required bool finishStore,
+}) async {
+  if (client.auth.currentUser?.id != owner) {
+    return const StoreVerificationOutcome(false);
+  }
   final protectedBody = await BilMobileIntegrityService.instance.protect(
     action: 'store.verify_ai_boost',
     payload: <String, Object?>{
       'action': 'verify_ai_boost',
+      'delivery_version': 2,
+      'finish_store': finishStore,
       'product_id': AiBoostPurchaseService.productId,
       'source': purchase.verificationData.source,
       'verification_data': purchase.verificationData.serverVerificationData,
     },
   );
-  if (client.auth.currentUser?.id != owner) return false;
+  if (client.auth.currentUser?.id != owner) {
+    return const StoreVerificationOutcome(false);
+  }
   final response = await client.functions.invoke(
     'verify-store-purchase',
     body: protectedBody,
   );
   final data = response.data;
-  return client.auth.currentUser?.id == owner &&
-      response.status == 200 &&
-      data is Map &&
-      data['verified'] == true;
+  if (client.auth.currentUser?.id != owner ||
+      response.status != 200 ||
+      data is! Map ||
+      data['verified'] != true) {
+    return const StoreVerificationOutcome(false);
+  }
+  final delivery = StoreBenefitDelivery.parse(
+    data['delivery'],
+    ownerId: owner,
+    productId: purchase.productID,
+    source: purchase.verificationData.source,
+  );
+  // Legacy credited=true proves a fresh committed grant, but carries no
+  // quantity for presentation. credited=false cannot distinguish a replay
+  // from a refund, so it stays unresolved until v2 verification is available.
+  return StoreVerificationOutcome(
+    delivery != null || data['credited'] == true,
+    delivery: delivery,
+  );
 }

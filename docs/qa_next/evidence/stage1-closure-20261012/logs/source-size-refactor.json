@@ -1,0 +1,8 @@
+{
+  "reason": "Architecture cap failed at 726 lines. Move Boost checkout to existing checkout responsibility; retain public API and exact method body.",
+  "exact_moved_body_sha256": "9b553831f5bd1c1ecdaf05f28fd545d6fd84e8217a2ec74842d2cd59f374c539",
+  "body_unchanged_before_format": true,
+  "previous_service_lines": 726,
+  "service_lines_after_move": 676,
+  "checkout_lines_after_move": 248
+}

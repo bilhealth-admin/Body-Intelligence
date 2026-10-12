@@ -25,11 +25,24 @@ final class _RecordingFoodSearchAuthority extends FoodRuntimeSearchAuthority {
   final resultNames = <String, List<String>>{};
 
   @override
-  Future<List<Food>> search(String query, {int limit = 50}) async {
-    final foods = await super.search(query, limit: limit);
-    queries.add(query);
-    resultNames[query] = foods.map((food) => food.name).toList(growable: false);
-    return foods;
+  Stream<List<Food>> searchProgressively(
+    String query, {
+    int limit = 50,
+    Duration remoteDebounce = const Duration(milliseconds: 180),
+  }) {
+    return super
+        .searchProgressively(
+          query,
+          limit: limit,
+          remoteDebounce: remoteDebounce,
+        )
+        .map((foods) {
+          queries.add(query);
+          resultNames[query] = foods
+              .map((food) => food.name)
+              .toList(growable: false);
+          return foods;
+        });
   }
 }
 
@@ -48,7 +61,11 @@ void main() {
       addTearDown(tester.view.reset);
 
       final database = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(database.close);
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+        await tester.runAsync(database.close);
+      });
       final repository = FoodRepository(database);
       for (final name in const <String>['Apple', 'Apricot', 'Avocado']) {
         await repository.addFood(
@@ -174,7 +191,21 @@ void main() {
         final query = sequence[index];
         await tester.enterText(searchBar, query);
         await tester.pump(const Duration(milliseconds: 220));
-        await tester.pumpAndSettle();
+        // Native SQLite completes on real IO time, independent of animations.
+        // Wait for this exact progressive query rather than an arbitrary frame.
+        for (
+          var attempt = 0;
+          attempt < 100 && !authority.resultNames.containsKey(query);
+          attempt++
+        ) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await tester.pump(const Duration(milliseconds: 10));
+        }
+        expect(authority.resultNames, contains(query));
+        await tester.pump();
+        await tester.pump();
 
         expect(authority.queries.last, query, reason: '$mealType/$query');
         expect(

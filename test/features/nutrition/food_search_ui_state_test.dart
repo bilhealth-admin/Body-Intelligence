@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dar
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/premium_label_badge.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/food_page.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
@@ -41,6 +42,18 @@ final class _ControlledFoodSearchAuthority extends FoodRuntimeSearchAuthority {
     return pending
         .putIfAbsent(query, Completer<FoodRuntimeSearchResult>.new)
         .future;
+  }
+
+  @override
+  Stream<FoodRuntimeSearchResult> searchResultsProgressively(
+    String query, {
+    int limit = 50,
+    Duration remoteDebounce = const Duration(milliseconds: 180),
+  }) {
+    // This fixture controls the initial storage response as well as the
+    // network boundary. Local-first behavior is tested with the real authority
+    // in progressive_food_local_first_test, not faked by this UI fixture.
+    return Stream.fromFuture(searchDetailed(query, limit: limit));
   }
 }
 
@@ -116,7 +129,8 @@ void main() {
           reason: '$key touch target',
         );
       }
-      expect(find.byIcon(Icons.workspace_premium_rounded), findsOneWidget);
+      expect(find.byType(PremiumLabelBadge), findsOneWidget);
+      expect(find.byIcon(Icons.workspace_premium_rounded), findsNothing);
       expect(
         find.byKey(const Key('food-add-barcode-premium-group')),
         findsOneWidget,

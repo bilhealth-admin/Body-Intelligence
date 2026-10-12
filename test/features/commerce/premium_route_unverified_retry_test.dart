@@ -162,7 +162,7 @@ void main() {
         kind == 'unverified' ? findsOneWidget : findsNothing,
       );
       expect(
-        find.byKey(const ValueKey('premium-route-glass-blur')),
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         kind == 'verified-free' ? findsOneWidget : findsNothing,
       );
       expect(
@@ -177,6 +177,14 @@ void main() {
         expect(protectedTaps, 1);
       } else {
         expect(protectedTaps, 0);
+        expect(
+          find.byKey(const Key('reviewer-protected-action')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const Key('premium-route-public-title')),
+          findsOneWidget,
+        );
       }
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();

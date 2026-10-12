@@ -1,0 +1,46 @@
+{
+  "host": "127.0.0.1",
+  "database": "bil_qa_cloud_20261011221428775487",
+  "postgres": "17.6",
+  "cases": [
+    {
+      "name": "32-35 encrypted contract on current catalog schema",
+      "result": "PASS"
+    },
+    {
+      "name": "new encrypted contract on current catalog schema",
+      "result": "PASS"
+    },
+    {
+      "name": "32-35 encrypted contract after proposed review/admin migrations",
+      "result": "PASS"
+    },
+    {
+      "name": "new encrypted contract after proposed review/admin migrations",
+      "result": "PASS"
+    },
+    {
+      "name": "real RLS and direct RPC isolate two owners and deny direct ledger writes",
+      "result": "PASS"
+    },
+    {
+      "name": "a newer consent denial blocks both RPC and direct RLS reads",
+      "result": "PASS"
+    },
+    {
+      "name": "a revoked device cannot silently be registered again",
+      "result": "PASS"
+    }
+  ],
+  "files": {
+    "supabase\\tests\\fixtures\\cloud_ledger_baseline\\schema.sql": "3f516d0ca6845a322760462cb31a9a63192f2f29b403a13e5d4f87db2098606c",
+    "supabase\\tests\\fixtures\\cloud_ledger_baseline\\function.sql": "3342dc46c64284a8fe82cb74284f180ab74ae6e45f5cfc853301102f4884126f",
+    "supabase\\tests\\fixtures\\community_review_baseline\\schema.sql": "78bfb546bdf274daddd20879ca4b91e22310420f184dc3021f61b16c3a9b8d39",
+    "supabase\\tests\\fixtures\\community_review_baseline\\functions.sql": "ace46d709eec3d91b3352e52cc47984d5259bac49db1a9d765589a88be512606",
+    "supabase\\tests\\fixtures\\community_review_baseline\\moderator_population.sql": "24c2412250e3eba0b98ea8aa7fd8674cc846b83e170ced6bb39b20e5675a02b7",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\schema.sql": "d581186a0068b4c3b582eeb957fbd54ea26732d4b6323291a971fc0c4f2d2f8b",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\functions.sql": "1ed9fc32bee7c1c7613129d2dd2a27b19729def6d79b6e9d396b3d233a1e794d",
+    "supabase\\migrations\\20261011193000_community_review_revision_v2.sql": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+    "supabase\\migrations\\20261011211500_admin_authority_transaction_lock.sql": "e10b82d4b2abbfab9f3c558be344cc20b18e4ca890cf62851d0e3e05b1a6c93d"
+  }
+}

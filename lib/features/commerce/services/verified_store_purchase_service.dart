@@ -15,21 +15,74 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/security/bil_mobile_integrity_service.dart';
+import '../../community/services/community_owner_operation.dart';
+import 'store_account_visit.dart';
+import 'store_purchase_trace.dart';
+import '../domain/store_benefit_delivery.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/subscription_term.dart';
+import '../repositories/server_entitlement_repository.dart'
+    show isAcceptableServerVerificationTimestamp;
 
 part 'verified_store_purchase_support.dart';
 part 'verified_store_purchase_processing.dart';
+part 'verified_store_receipt_verification.dart';
 part 'verified_store_purchase_checkout.dart';
 part 'verified_store_purchase_restore.dart';
+part 'verified_store_purchase_owned.dart';
+part 'verified_store_purchase_pending.dart';
+part 'verified_store_purchase_completion.dart';
 
 class VerifiedStorePurchaseService extends ChangeNotifier {
-  VerifiedStorePurchaseService({InAppPurchase? purchase, this._appleStoreSync})
-    : _purchaseInstance = purchase;
+  VerifiedStorePurchaseService({
+    InAppPurchase? purchase,
+    this._appleStoreSync,
+    this.pendingTimeout = const Duration(seconds: 90),
+    this.handlesBoost = true,
+  }) : _purchaseInstance = purchase;
 
   InAppPurchase? _purchaseInstance;
   final Future<void> Function()? _appleStoreSync;
+  final Duration pendingTimeout;
+  final bool handlesBoost;
+  late final StoreAccountVisit _storeVisit = StoreAccountVisit(
+    readOwner: _currentStoreOwnerId,
+    changes: storeAccountOwnerChanges(),
+    onChanged: _retireStoreOwner,
+  );
+  int verifiedBenefitRevision = 0;
+  String? benefitOwnerId;
+  String? benefitStoreSource;
+  DateTime? get verifiedInactiveAt =>
+      _serverVerifiedInactiveOwnerId == benefitOwnerId &&
+          _serverVerifiedInactiveFallbackExpiresAt == null &&
+          isAcceptableServerVerificationTimestamp(
+            verifiedAt: _serverVerifiedInactiveAt,
+            now: DateTime.now().toUtc(),
+          )
+      ? _serverVerifiedInactiveAt
+      : null;
+  StoreBenefitDelivery? lastDelivery;
+  final _deliveries = <String, StoreBenefitDelivery>{};
+  bool deliveryIsActive(String key) =>
+      !_disposed &&
+      benefitOwnerId != null &&
+      _isCurrentStoreOwner(benefitOwnerId!) &&
+      _deliveries[key]?.active == true;
+  void _acceptDelivery(StoreBenefitDelivery? event) {
+    lastDelivery = event;
+    if (event == null) return;
+    if (_deliveries.length >= 128) _deliveries.remove(_deliveries.keys.first);
+    _deliveries[event.eventKey] = event;
+  }
+
+  bool lastDeliveryIsUserPurchase = false;
+  // UI continuations belong to the durable service zone, not the temporary
+  // authenticated HTTP-operation zone that retires after verification.
+  final Zone _notificationZone = Zone.current;
+  StorePurchaseTrace? checkoutTrace;
+  final Set<String> _publishedBenefits = {};
   InAppPurchase get _purchase => _purchaseInstance ??= InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   VerifiedStoreState state = VerifiedStoreState.loading;
@@ -63,8 +116,13 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   DateTime? _serverVerifiedInactiveFallbackExpiresAt;
   final Set<String> _queuedTransactionKeys = <String>{};
   final Set<String> _explicitRestoreTransactionKeys = <String>{};
+  final Map<String, PurchaseDetails> _pendingVerifiedFinishes = {};
+  Future<void>? _verifiedFinishRetry;
 
-  // The Plans page owns a short-lived service instance. Keep only failed
+  /// Retrying an acknowledgement never opens another purchase sheet or
+  /// changes a server-confirmed benefit. Native unfinished transactions also
+  /// replay after restart; receipts remain server-idempotent.
+  // The authenticated app owns this service. Keep only failed
   // transaction fingerprints process-local so reopening that page cannot turn
   // one unfinished StoreKit transaction into a verification storm. Keys are
   // owner-scoped hashes; no entitlement or raw receipt is cached here.
@@ -72,7 +130,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   // StoreKit may publish a purchase update after the native purchase call
   // returns. Never leave the Plans button permanently disabled if that
   // callback is lost or the platform sheet stops responding.
-  static const _purchaseWatchdogDuration = Duration(seconds: 90);
   static const _maximumFailedTransactionCooldowns = 256;
   static final Map<String, DateTime> _failedTransactionCooldowns =
       <String, DateTime>{};
@@ -83,6 +140,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   }
 
   bool get configured => AppEnvironment.commerceConfigured;
+  bool get hasPendingVerifiedFinish => _pendingVerifiedFinishes.isNotEmpty;
   bool get busy =>
       _restoring ||
       _checkoutPreflightInFlight ||
@@ -98,6 +156,17 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   Future<void> initialize() {
     if (_disposed || busy) return Future<void>.value();
+    _storeVisit.capture();
+    if (const {
+      'purchase_status_unknown',
+      'store_finish_pending',
+      'verification_failed',
+      'restore_verification_failed',
+      'reconciliation_verification_failed',
+      'purchase_owned_by_another_account',
+    }.contains(messageCode)) {
+      return Future<void>.value();
+    }
     // The page timeout/resume path can call again while native StoreKit/Play
     // is still answering. Reuse that work rather than launching another query.
     return _initialization ??= _initialize().whenComplete(() {
@@ -285,6 +354,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       }
     }
 
+    checkoutTrace = StorePurchaseTrace();
     final purchaseGeneration = _purchaseEventGeneration;
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
@@ -344,9 +414,11 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     try {
       _purchaseInitiatedByThisService = true;
       _purchaseInitiatedProductId = product.id;
+      checkoutTrace?.mark(StorePurchaseStage.nativeLaunch);
       final started = await _purchase.buyNonConsumable(
         purchaseParam: purchaseParam,
       );
+      checkoutTrace?.mark(StorePurchaseStage.nativeLaunchReturned);
       if (_disposed ||
           started ||
           purchaseGeneration != _purchaseEventGeneration) {
@@ -358,9 +430,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       notifyListeners();
     } on PlatformException catch (error) {
       if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
-      _clearPurchaseInitiation();
       if (defaultTargetPlatform == TargetPlatform.iOS &&
           error.code == 'storekit_duplicate_product_object') {
+        _clearPurchaseInitiation();
         // StoreKit 2 refuses a second checkout while an older transaction for
         // this product is still unfinished. Reconcile that transaction instead
         // of leaving App Review at a generic purchase failure.
@@ -401,94 +473,22 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         return;
       }
       state = VerifiedStoreState.failed;
-      messageCode = 'purchase_failed';
+      messageCode = 'purchase_status_unknown';
       notifyListeners();
     } on Object {
       if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
       state = VerifiedStoreState.failed;
-      messageCode = 'purchase_failed';
-      _clearPurchaseInitiation();
+      messageCode = 'purchase_status_unknown';
       notifyListeners();
     }
   }
 
-  void _armPurchaseWatchdog(int generation) {
-    _purchaseWatchdog?.cancel();
-    _purchaseWatchdog = Timer(_purchaseWatchdogDuration, () {
-      if (_disposed ||
-          generation != _purchaseEventGeneration ||
-          !_purchaseInitiatedByThisService ||
-          state != VerifiedStoreState.purchasePending) {
-        return;
-      }
-      // Keep the native transaction unfinished so a later StoreKit update can
-      // still be verified. Only release the UI state and allow a controlled
-      // retry; never claim that access was granted.
-      state = products.isEmpty
-          ? VerifiedStoreState.unavailable
-          : VerifiedStoreState.ready;
-      messageCode = 'purchase_failed';
-      _clearPurchaseInitiation();
-      notifyListeners();
-    });
-  }
-
-  Future<void> purchaseBoost({String? offerToken}) async {
-    if (_disposed || busy) return;
-    final user = Supabase.instance.client.auth.currentUser;
-    final product = products[StoreCatalogConfiguration.aiBoost];
-    if (user == null ||
-        product == null ||
-        !canStartStorePurchase(
-          state: state,
-          productAvailable: true,
-          messageCode: messageCode,
-        )) {
-      messageCode = 'purchase_unavailable';
-      notifyListeners();
-      return;
-    }
-    state = VerifiedStoreState.purchasePending;
-    messageCode = null;
-    notifyListeners();
-    final accountHash = storeAccountIdentifier(
-      ownerId: user.id,
-      platform: defaultTargetPlatform,
-    );
-    final purchaseParam = verifiedBoostPurchaseParam(
-      product: product,
-      accountHash: accountHash,
-      platform: defaultTargetPlatform,
-      offerToken: offerToken,
-    );
-    final purchaseGeneration = _purchaseEventGeneration;
-    try {
-      _purchaseInitiatedByThisService = true;
-      _purchaseInitiatedProductId = product.id;
-      final started = await _purchase.buyConsumable(
-        purchaseParam: purchaseParam,
-        autoConsume: false,
-      );
-      if (_disposed ||
-          started ||
-          purchaseGeneration != _purchaseEventGeneration) {
-        return;
-      }
-      state = VerifiedStoreState.failed;
-      messageCode = 'purchase_not_started';
-      _clearPurchaseInitiation();
-      notifyListeners();
-    } on Object {
-      if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
-      state = VerifiedStoreState.failed;
-      messageCode = 'purchase_failed';
-      _clearPurchaseInitiation();
-      notifyListeners();
-    }
-  }
+  Future<void> purchaseBoost({String? offerToken}) =>
+      _purchaseBoost(offerToken: offerToken);
 
   Future<void> refreshEntitlement() async {
     if (_disposed) return;
+    final visit = _storeVisit.capture();
     final generation = ++_entitlementRefreshGeneration;
     final user = AppEnvironment.supabaseRuntimeReady
         ? Supabase.instance.client.auth.currentUser
@@ -509,7 +509,11 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           .eq('owner_id', user.id)
           .limit(1)
           .timeout(const Duration(seconds: 10));
-      if (_disposed || generation != _entitlementRefreshGeneration) return;
+      if (_disposed ||
+          generation != _entitlementRefreshGeneration ||
+          !_storeVisit.isCurrent(visit)) {
+        return;
+      }
       if (Supabase.instance.client.auth.currentUser?.id != user.id) {
         // Never carry one member's verified purchase into another member's
         // session, even if the original request finishes after auth changes.
@@ -528,6 +532,11 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       final verifiedAt = DateTime.tryParse('${row['verified_at']}')?.toUtc();
       if (verifiedAt == null) {
         _retainEntitlementIfValid(user.id);
+        return;
+      }
+      if (_entitlementOwnerId == user.id &&
+          entitlement != null &&
+          verifiedAt.isBefore(entitlement!.verifiedAt)) {
         return;
       }
       final plan = _planFromIdOrNull('${row['plan_id']}');
@@ -578,7 +587,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     } on Object {
       // Never turn an unverifiable local label into paid access, but do not
       // erase a still-valid server-verified result for a transient failure.
-      if (!_disposed && generation == _entitlementRefreshGeneration) {
+      if (!_disposed &&
+          generation == _entitlementRefreshGeneration &&
+          _storeVisit.isCurrent(visit)) {
         _retainEntitlementIfValid(user.id);
       }
     }
@@ -650,7 +661,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (_disposed) return;
     _disposed = true;
+    _storeVisit.dispose();
     _purchaseWatchdog?.cancel();
     _purchaseWatchdog = null;
     _entitlementRefreshGeneration++;
@@ -661,6 +674,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   @override
   void notifyListeners() {
-    if (!_disposed) super.notifyListeners();
+    if (!_disposed) _notificationZone.run(super.notifyListeners);
   }
 }

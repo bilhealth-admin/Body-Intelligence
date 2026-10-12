@@ -1,0 +1,34 @@
+{
+  "case": "saved nutrition recipes production empty-state capture",
+  "reason": "Pearl surfaces and accurate create/discover/save/log guidance; no fabricated recipe nutrition.",
+  "reference": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png",
+  "reviewed_artifacts_sha256": {
+    "master": "ef890e35d3bc575929a2b83d5a5e98dbc97e25f88b3c35718e82cfcfcaea94fe",
+    "actual": "ad827fce24afe0f30894fce51951cb0009b354b54182f4a75f75d44d28282d64",
+    "diff": "2ebf8840245565b5a3791df9dcf99d16b911d85b548eca7ff347bdd21d189cc2"
+  },
+  "update_only": true,
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "--plain-name",
+    "saved nutrition recipes production empty-state capture",
+    "--update-goldens"
+  ],
+  "started": 1791754275.5512493,
+  "pid": 1852,
+  "exit_code": 0,
+  "changed_baselines": [
+    "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png"
+  ],
+  "after_sha256": "ad827fce24afe0f30894fce51951cb0009b354b54182f4a75f75d44d28282d64",
+  "exactly_one_success": true,
+  "accepted_one_reviewed_image": true
+}

@@ -21,6 +21,7 @@ import '../weight/providers/weight_provider.dart';
 import '../dashboard/domain/nutrient_dashboard.dart';
 import '../dashboard/providers/dashboard_preferences_provider.dart';
 import '../nutrition/domain/percentage_nutrition_goals.dart';
+import '../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import 'domain/food_analysis_engine.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
@@ -61,36 +62,20 @@ class NutritionAnalyticsPage extends ConsumerWidget {
     final profile = profileState.value;
     final goal = goalState.value;
     final presetState = ref.watch(dashboardNutrientDashboardProvider);
-    const goalKeys = <String>[
-      'goal.calories',
-      'goal.carbsPercent',
-      'goal.proteinPercent',
-      'goal.fatPercent',
-      'goal.sodium',
-      'goal.fiber',
-      'goal.potassium',
-      'goal.sugar',
-    ];
-    final goalStates = {
-      for (final key in goalKeys)
-        key: ref.watch(dashboardNutrientGoalProvider(key)),
-    };
-    if ((presetState.isLoading && !presetState.hasValue) ||
-        goalStates.values.any((state) => state.isLoading && !state.hasValue)) {
+    final goalStateSnapshot = ref.watch(nutritionGoalSnapshotProvider);
+    if (presetState.isLoading || goalStateSnapshot.isLoading) {
       return _NutritionAnalyticsLoadingShell(initialTab: initialTab);
     }
-    if (presetState.hasError ||
-        goalStates.values.any((state) => state.hasError)) {
+    if (presetState.hasError || goalStateSnapshot.hasError) {
       return _NutritionDependencyError(
         onRetry: () {
           ref.invalidate(dashboardNutrientDashboardProvider);
-          for (final key in goalKeys) {
-            ref.invalidate(dashboardNutrientGoalProvider(key));
-          }
+          ref.invalidate(nutritionGoalSnapshotProvider);
         },
       );
     }
-    double? storedGoal(String key) => goalStates[key]?.value;
+    final currentGoals = ref.watch(nutritionGoalCurrentSnapshotProvider);
+    double? storedGoal(String key) => currentGoals?.goals[key]?.value;
     final nutrientPreset = NutrientDashboardPreset.parse(presetState.value);
     final caloriesGoal = storedGoal('goal.calories');
     final carbsPercent = storedGoal('goal.carbsPercent');
@@ -161,18 +146,20 @@ class NutritionAnalyticsPage extends ConsumerWidget {
             protein: selectedDayTarget.proteinGrams,
             carbs: selectedDayTarget.carbsGrams,
             fats: selectedDayTarget.fatGrams,
-            fiber: fiberGoal ?? planTargets.fiber,
+            fiber: fiberGoal,
           );
     final targets =
         scheduledTargets ??
-        (percentageGoals == null
+        (ref.watch(nutritionMacroGoalsNeedReviewProvider)
+            ? const _NutritionTargets()
+            : percentageGoals == null
             ? planTargets
             : _NutritionTargets(
                 calories: percentageGoals.calories,
                 protein: percentageGoals.proteinGrams,
                 carbs: percentageGoals.carbohydratesGrams,
                 fats: percentageGoals.fatGrams,
-                fiber: fiberGoal ?? planTargets.fiber,
+                fiber: fiberGoal,
               ));
     return BilCalmVisualScope(
       builder: (context) => DefaultTabController(

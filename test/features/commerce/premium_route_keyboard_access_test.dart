@@ -74,7 +74,17 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pump();
       expect(presses, mode == 'paid' ? 1 : 0);
-      expect(node.canRequestFocus, mode == 'paid');
+      expect(node.context != null, mode == 'paid');
+      expect(
+        find.byKey(const Key('protected-premium-action')),
+        mode == 'paid' ? findsOneWidget : findsNothing,
+      );
+      if (mode != 'paid') {
+        expect(
+          find.byKey(const Key('premium-route-public-title')),
+          findsOneWidget,
+        );
+      }
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();

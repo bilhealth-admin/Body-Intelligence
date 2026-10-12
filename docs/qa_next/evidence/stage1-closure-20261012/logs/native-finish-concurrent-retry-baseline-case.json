@@ -1,0 +1,61 @@
+{
+  "label": "native-finish-concurrent-retry-baseline-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "--plain-name",
+    "simultaneous verified finish retries share one native acknowledgement"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791758287.1039586,
+  "files": {
+    "test/features/commerce/store_transaction_queue_test.dart": "290639689519e739ef70c3ed5087474bcf5faa609e103ada4e19e59650b97a60"
+  },
+  "source_fingerprint": "dd46143452747d47132ba3645380a8bdc257d3cb96f9c96e4cb9001e1036b4a7",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "--plain-name",
+    "simultaneous verified finish retries share one native acknowledgement"
+  ],
+  "pid": 4896,
+  "exit_code": 1,
+  "finished": 1791758293.0252254,
+  "end_fingerprint": "dd46143452747d47132ba3645380a8bdc257d3cb96f9c96e4cb9001e1036b4a7",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "simultaneous verified finish retries share one native acknowledgement",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "failure"
+    }
+  ],
+  "counts": {
+    "success": 0,
+    "failure": 1,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 3,
+      "error": "Expected: <2>\n  Actual: <3>\none failed attempt plus one shared retry\n",
+      "stackTrace": "package:matcher                                                 expect\npackage:flutter_test/src/widget_tester.dart 473:18              expect\ntest\\features\\commerce\\store_transaction_queue_test.dart 393:9  main.<fn>\n",
+      "isFailure": true,
+      "type": "error",
+      "time": 3427
+    }
+  ],
+  "incomplete_tests": []
+}

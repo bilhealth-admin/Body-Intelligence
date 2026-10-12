@@ -41,6 +41,7 @@ Widget _app({
   required Future<void> Function(BuildContext) open,
   Locale locale = const Locale('en'),
   double scale = 1,
+  bool reduced = false,
 }) => MaterialApp(
   locale: locale,
   supportedLocales: const [Locale('en'), Locale('ar')],
@@ -50,7 +51,10 @@ Widget _app({
     GlobalCupertinoLocalizations.delegate,
   ],
   builder: (context, child) => MediaQuery(
-    data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+    data: MediaQuery.of(context).copyWith(
+      textScaler: TextScaler.linear(scale),
+      disableAnimations: reduced,
+    ),
     child: child!,
   ),
   home: Scaffold(
@@ -71,6 +75,49 @@ void main() {
   });
   tearDown(
     () => WidgetController.hitTestWarningShouldBeFatal = previousHitTestSetting,
+  );
+
+  testWidgets(
+    'reduced motion keeps the actual review and confirmation immediately reachable',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 740);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      List<int>? submitted;
+      await tester.pumpWidget(
+        _app(
+          locale: const Locale('ar'),
+          scale: 2,
+          reduced: true,
+          open: (context) async {
+            submitted = await showBilMediaReviewSheet<int>(
+              context,
+              entries: [
+                BilMediaReviewEntry(
+                  value: 7,
+                  preview: MemoryImage(_photoBytes()),
+                ),
+              ],
+              forCommunity: true,
+            );
+          },
+        ),
+      );
+      await tester.tap(find.text('Open review'));
+      await tester.pump();
+      final confirm = find.byKey(const Key('bil-media-review-confirm'));
+      expect(confirm, findsOneWidget);
+      final route = ModalRoute.of(tester.element(confirm))!;
+      expect(route.transitionDuration, Duration.zero);
+      expect(tester.getRect(confirm).bottom, lessThanOrEqualTo(740));
+      await _pumpDecodedPreviews(tester);
+      expect(submitted, isNull, reason: 'no automatic acceptance');
+      expect(confirm.hitTestable(), findsOneWidget);
+      await tester.tap(confirm);
+      await tester.pumpAndSettle();
+      expect(submitted, [7]);
+      expect(tester.takeException(), isNull);
+    },
   );
 
   testWidgets('multi-selection is staged, removable and never auto-accepted', (

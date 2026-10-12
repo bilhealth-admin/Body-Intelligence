@@ -462,7 +462,14 @@ void main() {
         isNot(contains('assets/images/connected_health/bil_medical_hub.png')),
         reason: 'The Dashboard must not retain a blood-pressure side card.',
       );
-      expect(page, contains("Key('fitness-devices-premium-gate')"));
+      expect(
+        page,
+        isNot(contains("Key('fitness-devices-premium-gate')")),
+        reason:
+            'Public device identity and warnings must remain outside paid actions',
+      );
+      expect(page, contains('accessGranted: fitnessDevicesUnlocked'));
+      expect(page, contains('verifiedDenied: confirmedFree'));
       expect(page, contains("'connected-health-live-watch-card'"));
       expect(
         File(
@@ -473,7 +480,7 @@ void main() {
       expect(page, contains("'connected-health-signals-card'"));
       expect(page, contains('liveHealthWatchCanShowMetrics(snapshot)'));
       expect(page, contains('defaultTargetPlatform == TargetPlatform.android'));
-      expect(page, contains('child: const _FitnessDeviceSection()'));
+      expect(page, contains('_FitnessDeviceSection('));
       expect(card, contains('LiveHealthWatch('));
       expect(card, contains("Key('dashboard-live-fitness-watch-slot')"));
       expect(card, contains("Key('dashboard-compact-health-hub')"));

@@ -35,12 +35,25 @@ class PreferencesRepository {
   }
 
   /// Atomically derives and persists one preference from its latest value.
-  Future<String> update(String key, String Function(String? current) derive) {
+  Future<String> update(
+    String key,
+    String Function(String? current) derive, {
+    bool Function()? isCurrent,
+  }) {
     if (key.trim().isEmpty) throw ArgumentError.value(key);
     return _database.transaction(() async {
+      if (isCurrent?.call() == false) {
+        throw StateError('preference_owner_changed');
+      }
       final current = await get(key);
+      if (isCurrent?.call() == false) {
+        throw StateError('preference_owner_changed');
+      }
       final next = derive(current);
       await set(key, next);
+      if (isCurrent?.call() == false) {
+        throw StateError('preference_owner_changed');
+      }
       return next;
     });
   }
@@ -140,12 +153,24 @@ class PreferencesRepository {
     required Map<String, String?> expected,
     Map<String, String> set = const {},
     Iterable<String> remove = const [],
+    bool Function()? isCurrent,
   }) => _database.transaction(() async {
+    void checkOwner() {
+      if (isCurrent?.call() == false) {
+        throw StateError('preference_owner_changed');
+      }
+    }
+
+    checkOwner();
     for (final entry in expected.entries) {
-      if (await get(entry.key) != entry.value) return false;
+      final current = await get(entry.key);
+      checkOwner();
+      if (current != entry.value) return false;
     }
     await setManyInCurrentTransaction(set);
+    checkOwner();
     await removeManyInCurrentTransaction(remove.toSet()..removeAll(set.keys));
+    checkOwner();
     return true;
   });
 }

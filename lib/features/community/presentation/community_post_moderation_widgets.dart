@@ -59,18 +59,53 @@ class _HiddenPostCard extends StatelessWidget {
   );
 }
 
-class _PendingPostCard extends StatelessWidget {
+class _PendingPostCard extends StatefulWidget {
   const _PendingPostCard({
     required this.post,
     required this.busy,
     required this.onApprove,
     required this.onReject,
+    this.onPublishOnly,
   });
 
   final CommunityPost post;
   final bool busy;
   final VoidCallback onApprove;
   final VoidCallback onReject;
+  final VoidCallback? onPublishOnly;
+
+  @override
+  State<_PendingPostCard> createState() => _PendingPostCardState();
+}
+
+class _PendingPostCardState extends State<_PendingPostCard> {
+  final Map<int, bool> _decoded = {};
+  int _mediaEpoch = 0;
+  CommunityPost get post => widget.post;
+  bool get busy => widget.busy;
+  bool get imagesReady =>
+      post.mediaItems.asMap().keys.every((i) => _decoded[i] == true);
+  String _identity(CommunityPost value) =>
+      '${value.id}:${value.mediaItems.map((m) => '${m.objectPath}:${m.url}').join('|')}';
+  @override
+  void didUpdateWidget(covariant _PendingPostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_identity(oldWidget.post) != _identity(post)) {
+      _mediaEpoch++;
+      _decoded.clear();
+    }
+  }
+
+  void _markDecoded(int epoch, int index, bool ready) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && epoch == _mediaEpoch && _decoded[index] != ready) {
+        setState(() => _decoded[index] = ready);
+      }
+    });
+  }
+
+  void Function(int, bool) _imageReporter(int epoch) =>
+      (index, ready) => _markDecoded(epoch, index, ready);
 
   @override
   Widget build(BuildContext context) => Card(
@@ -117,7 +152,10 @@ class _PendingPostCard extends StatelessWidget {
           ),
           if (post.mediaItems.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _ModerationMediaGrid(post: post),
+            _ModerationMediaGrid(
+              post: post,
+              onDecoded: _imageReporter(_mediaEpoch),
+            ),
           ],
           if (post.poll != null) ...[
             const SizedBox(height: 12),
@@ -128,15 +166,24 @@ class _PendingPostCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
+              if (widget.onPublishOnly != null)
+                OutlinedButton.icon(
+                  key: Key('community-moderation-publish-only-${post.id}'),
+                  onPressed: busy || !imagesReady ? null : widget.onPublishOnly,
+                  icon: const Icon(Icons.public_rounded),
+                  label: Text(
+                    communityText(context, 'Publish only', 'نشر فقط'),
+                  ),
+                ),
               FilledButton.icon(
                 key: Key('community-moderation-approve-${post.id}'),
-                onPressed: busy ? null : onApprove,
+                onPressed: busy || !imagesReady ? null : widget.onApprove,
                 icon: const Icon(Icons.check_circle_outline_rounded),
                 label: Text(communityText(context, 'Approve', 'اعتماد')),
               ),
               OutlinedButton.icon(
                 key: Key('community-moderation-reject-${post.id}'),
-                onPressed: busy ? null : onReject,
+                onPressed: busy ? null : widget.onReject,
                 icon: const Icon(Icons.cancel_outlined),
                 label: Text(communityText(context, 'Reject', 'رفض')),
               ),
@@ -225,13 +272,14 @@ class _OpenReportCard extends StatelessWidget {
 }
 
 class _ModerationMediaGrid extends StatelessWidget {
-  const _ModerationMediaGrid({required this.post});
+  const _ModerationMediaGrid({required this.post, this.onDecoded});
 
   final CommunityPost post;
+  final void Function(int, bool)? onDecoded;
 
   @override
   Widget build(BuildContext context) {
-    final items = post.mediaItems.take(4).toList(growable: false);
+    final items = post.mediaItems;
     return GridView.builder(
       key: Key('community-moderation-media-${post.id}'),
       shrinkWrap: true,
@@ -246,10 +294,38 @@ class _ModerationMediaGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = items[index];
         final url = item.url;
-        Widget unavailable() => const ColoredBox(
-          color: Color(0xFFE8EBF0),
-          child: Icon(Icons.broken_image_outlined),
-        );
+        Widget unavailable() {
+          onDecoded?.call(index, false);
+          return ColoredBox(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.broken_image_outlined),
+                  Text(
+                    communityText(
+                      context,
+                      'Image unavailable',
+                      'الصورة غير متاحة',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        Widget frame(
+          BuildContext context,
+          Widget child,
+          int? frame,
+          bool synchronous,
+        ) {
+          if (frame != null || synchronous) onDecoded?.call(index, true);
+          return child;
+        }
+
         return ClipRRect(
           key: Key('community-moderation-media-${post.id}-$index'),
           borderRadius: BorderRadius.circular(14),
@@ -259,11 +335,13 @@ class _ModerationMediaGrid extends StatelessWidget {
               ? Image.asset(
                   url.substring('asset://'.length),
                   fit: BoxFit.cover,
+                  frameBuilder: frame,
                   errorBuilder: (_, _, _) => unavailable(),
                 )
               : Image.network(
                   url,
                   fit: BoxFit.cover,
+                  frameBuilder: frame,
                   errorBuilder: (_, _, _) => unavailable(),
                 ),
         );
@@ -326,9 +404,13 @@ class _ModerationPollPreview extends StatelessWidget {
 }
 
 class _ModerationUnavailable extends StatelessWidget {
-  const _ModerationUnavailable({required this.onRetry});
+  const _ModerationUnavailable({
+    required this.onRetry,
+    required this.accessDenied,
+  });
 
   final Future<void> Function() onRetry;
+  final bool accessDenied;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -342,8 +424,12 @@ class _ModerationUnavailable extends StatelessWidget {
           Text(
             communityText(
               context,
-              'Moderator access is required.',
-              'يتطلب هذا القسم صلاحية مشرف.',
+              accessDenied
+                  ? 'Moderator access is required.'
+                  : 'Could not load the moderation queue.',
+              accessDenied
+                  ? 'يتطلب هذا القسم صلاحية مشرف.'
+                  : 'تعذر تحميل قائمة المراجعة.',
             ),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge,
@@ -374,9 +460,45 @@ class _CommunityModerationQueue {
     required this.posts,
     required this.hiddenPosts,
     required this.reports,
+    required this.rewards,
+    this.reviewUnavailable = false,
   });
 
   final List<CommunityPost> posts;
   final List<CommunityPost> hiddenPosts;
   final List<Map<String, dynamic>> reports;
+  final List<CommunityRewardReview> rewards;
+  final bool reviewUnavailable;
+}
+
+class _ReviewVersionUnavailable extends StatelessWidget {
+  const _ReviewVersionUnavailable();
+  @override
+  Widget build(BuildContext context) => Card(
+    key: const Key('community-review-version-unavailable'),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            communityText(
+              context,
+              'Review service unavailable',
+              'خدمة المراجعة غير متاحة',
+            ),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            communityText(
+              context,
+              'This version cannot submit review decisions yet. Refresh after the review service is enabled.',
+              'لا تستطيع هذه النسخة إرسال قرارات المراجعة بعد. حدّث القائمة بعد تفعيل خدمة المراجعة.',
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

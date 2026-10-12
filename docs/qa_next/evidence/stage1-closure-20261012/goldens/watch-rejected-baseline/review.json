@@ -1,0 +1,11 @@
+{
+  "classification": "Rejected transient baseline; NOT adopted as new Golden",
+  "reason": "The watch at 1x is protected. The layout code was fixed to match the unchanged approved master; only owner-authorized large-text time adaptation is retained.",
+  "files": {
+    "live_health_watch_compact_all_metrics_isolatedDiff.png": "09580d54c0a13c75ea910c6195d8b4ef6876fa0c121f95a2bf922b7def368bb3",
+    "live_health_watch_compact_all_metrics_maskedDiff.png": "3b226dc3b7551c1d1de7dcb914228fc9eee5c66ed3109ef82c1fd549314f9198",
+    "live_health_watch_compact_all_metrics_masterImage.png": "0ab4091f33df9b445a57a369531b23de44cf589aea6dfd5f91177cdc3df54744",
+    "live_health_watch_compact_all_metrics_testImage.png": "e9d46a3822a81ed21928ea9e57989129ace904f3fbdc717bf1f174a69f1e2749"
+  },
+  "final_validation": "live_health_watch_layout_golden_test.dart in results.json"
+}

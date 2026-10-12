@@ -1,3 +1,7 @@
+import {
+  boostCreditOutcome,
+  deliveryReceipt,
+} from "./store_delivery_receipt.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   compactVerify,
@@ -443,6 +447,8 @@ export type StoreBackendHandlerDependencies = {
   readAppleTransaction?: typeof readAppleTransaction;
   verifyGoogle?: typeof verifyGoogle;
   readGoogleConsumable?: typeof readGoogleConsumable;
+  consumeGoogleConsumable?: typeof consumeGoogleConsumable;
+  verifyGoogleConsumable?: typeof verifyGoogleConsumable;
   verifyGooglePushIdentity?: typeof verifyGooglePushIdentity;
   googleVoidedPurchases?: typeof googleVoidedPurchases;
   readEnvironment?: EnvironmentReader;
@@ -1280,6 +1286,20 @@ async function verifyPurchase(
     verified_at: verifiedAt,
     lifecycle,
     store_country_code: purchase.storeCountryCode,
+    ...(body.delivery_version === 2
+      ? {
+        delivery: await deliveryReceipt({
+          ownerId: user.id,
+          store: purchase.provider === "apple" ? "app_store" : "google_play",
+          environment: purchase.environment,
+          transactionId: purchase.transactionId,
+          productId: purchase.productId,
+          verifiedAt,
+          kind: "subscription",
+          active,
+        }),
+      }
+      : {}),
   });
 }
 
@@ -1311,11 +1331,13 @@ async function verifyAiBoost(
   if (!verification) throw new Error("invalid_receipt_payload");
   let purchase: VerifiedConsumable;
   if (source === "google_play") {
-    const googlePurchase = await verifyGoogleConsumable(
-      env("GOOGLE_PLAY_PACKAGE_NAME"),
-      productId,
-      verification,
-    );
+    const googlePurchase =
+      await (dependencies.verifyGoogleConsumable ?? verifyGoogleConsumable)(
+        dependencies.readEnvironment?.("GOOGLE_PLAY_PACKAGE_NAME") ??
+          env("GOOGLE_PLAY_PACKAGE_NAME"),
+        productId,
+        verification,
+      );
     await assertGoogleConsumableOwnership(admin, user.id, googlePurchase);
     purchase = googlePurchase;
   } else if (source === "app_store") {
@@ -1370,17 +1392,46 @@ async function verifyAiBoost(
     }
     throw new Error("persistence_failed");
   }
-  if (purchase.provider === "google") {
-    await consumeGoogleConsumable(
-      purchase.packageOrBundleId,
-      productId,
-      purchase.transactionId,
-    );
+  // A v2 delivery receipt proves the durable ledger independently of Play
+  // consumption. Keep the legacy completion contract unchanged for 32/35.
+  const outcome = body.delivery_version === 2 ? boostCreditOutcome(data) : null;
+  let finishPending = purchase.provider === "google" && outcome != null;
+  if (
+    purchase.provider === "google" && (!outcome || body.finish_store === true)
+  ) {
+    try {
+      await (dependencies.consumeGoogleConsumable ?? consumeGoogleConsumable)(
+        purchase.packageOrBundleId,
+        productId,
+        purchase.transactionId,
+      );
+      finishPending = false;
+    } catch (error) {
+      if (!outcome) throw error;
+      finishPending = true;
+    }
   }
   return json({
     verified: true,
     product_id: productId,
     credited: Boolean((data as Record<string, unknown> | null)?.credited),
+    ...(outcome
+      ? {
+        delivery: await deliveryReceipt({
+          ownerId: user.id,
+          store,
+          environment: purchase.environment,
+          transactionId: purchase.transactionId,
+          productId,
+          verifiedAt: purchase.verifiedAt,
+          kind: "boost",
+          active: outcome.active,
+          quantity: outcome.quantity,
+          creditedNow: outcome.credited,
+          finishPending,
+        }),
+      }
+      : {}),
   });
 }
 

@@ -1,0 +1,36 @@
+{
+  "read_at": "2026-10-11 23:08:50 UTC",
+  "method": "read-only authenticated list_edge_functions metadata; not a runtime or catalogue/store test",
+  "functions": [
+    {
+      "slug": "ai-coach",
+      "status": "ACTIVE",
+      "version": 106,
+      "ezbr_sha256": "f26e76601bf786c85fd2a3c516a8fb38c0843da22d450341af15eed81dd39e93"
+    },
+    {
+      "slug": "verify-store-purchase",
+      "status": "ACTIVE",
+      "version": 93,
+      "ezbr_sha256": "dfc4ea32ef48b7210d0eee1cd4a8a3f217229b58e3172681e290a4d1a97dea3c"
+    },
+    {
+      "slug": "ai-coach-global-reset",
+      "status": "ACTIVE",
+      "version": 62,
+      "ezbr_sha256": "e2fc093d136a896aca747932ddceec2fec1e13fb427ca2bbeb6c96a8291dd043"
+    },
+    {
+      "slug": "community-push-dispatch",
+      "status": "ACTIVE",
+      "version": 56,
+      "ezbr_sha256": "d7f2aae00790ad1e4936f6782ad8d4034cc822b313c4536074b7463225256162"
+    },
+    {
+      "slug": "food-search",
+      "status": "ACTIVE",
+      "version": 60,
+      "ezbr_sha256": "aafba16d3d3ed320525ff2885e8a76e179412a7c9b60b3d43b6ca523b122a96e"
+    }
+  ]
+}

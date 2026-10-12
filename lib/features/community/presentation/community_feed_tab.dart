@@ -82,6 +82,10 @@ class _FeedTabState extends State<_FeedTab>
   int _feedGeneration = 0;
   @override
   bool _feedRefreshing = false;
+  @override
+  bool _cacheRefreshing = false;
+  @override
+  bool _cacheRefreshFailed = false;
 
   @override
   late CommunityFeedMode _selectedFeedMode;
@@ -559,9 +563,13 @@ class _FeedTabState extends State<_FeedTab>
                           onOpen: _openTopic,
                         ),
                       ),
-                    if (loading && snapshot.hasData)
+                    if ((loading && snapshot.hasData) || _cacheRefreshing)
                       const SliverToBoxAdapter(
                         child: LinearProgressIndicator(),
+                      ),
+                    if (_cacheRefreshFailed)
+                      SliverToBoxAdapter(
+                        child: CommunityFeedRefreshNotice(onRetry: _refresh),
                       ),
                     if (snapshot.hasError)
                       SliverFillRemaining(
@@ -626,7 +634,10 @@ class _FeedTabState extends State<_FeedTab>
                           child: Center(
                             child: TextButton.icon(
                               key: const Key('community-feed-load-more'),
-                              onPressed: _loadingMore || _feedRefreshing
+                              onPressed:
+                                  _loadingMore ||
+                                      _feedRefreshing ||
+                                      _cacheRefreshing
                                   ? null
                                   : () => _loadMore(posts),
                               icon: _loadingMore

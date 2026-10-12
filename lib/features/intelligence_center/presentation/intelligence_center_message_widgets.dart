@@ -42,12 +42,18 @@ class _MessageBubble extends StatelessWidget {
           margin: const EdgeInsets.only(left: 48, bottom: 18),
           padding: const EdgeInsetsDirectional.fromSTEB(16, 11, 16, 12),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF3F85DD), Color(0xFF285897)],
+              colors: [
+                scheme.primaryContainer,
+                scheme.primaryContainer.withValues(alpha: .84),
+              ],
             ),
-            border: Border.all(color: const Color(0xFF568CCB), width: .7),
+            border: Border.all(
+              color: scheme.primary.withValues(alpha: .26),
+              width: .7,
+            ),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(22),
               topRight: Radius.circular(22),
@@ -61,7 +67,10 @@ class _MessageBubble extends StatelessWidget {
             createdAt: message.createdAt,
             alignEnd: true,
             textDirection: _messageTextDirection(message.text),
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.4),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              height: 1.4,
+              color: scheme.onPrimaryContainer,
+            ),
           ),
         ),
       );
@@ -76,14 +85,10 @@ class _MessageBubble extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF21334A), Color(0xFF132236)],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF344D68), width: .65),
+      decoration: BilPearlFinish.panel(
+        context,
+        radius: BorderRadius.circular(18),
+        shadow: false,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,0 +1,257 @@
+{
+  "label": "coach-lifecycle-and-initial-credit-final-files",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+    "test/features/commerce/ai_coach_initial_credit_gate_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791761743.0074148,
+  "files": {
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart": "745075f33ee54b0f9934eb81c9bbfe5147a622933cc76505ca4ade7f1403d5df",
+    "test/features/commerce/ai_coach_initial_credit_gate_test.dart": "baed96336b19c7bf703bd9a4495e78812f163ea6fedb7557cc9de6fa2a758bc8"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "355b97adcbe5bc1740ee019663559a5529dd4a789c604e681d32862b61e8e567",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+    "test/features/commerce/ai_coach_initial_credit_gate_test.dart"
+  ],
+  "pid": 776,
+  "exit_code": 0,
+  "finished": 1791761764.160227,
+  "end_fingerprint": "355b97adcbe5bc1740ee019663559a5529dd4a789c604e681d32862b61e8e567",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "pending or failed context keeps one bounded intro and no request",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one introduction through refresh and re-entry Arabic=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one introduction through refresh and re-entry Arabic=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Coach layout: TargetPlatform.iOS Arabic=false large text and keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Coach layout: TargetPlatform.iOS Arabic=true large text and keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Coach layout: TargetPlatform.android Arabic=false large text and keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Coach layout: TargetPlatform.android Arabic=true large text and keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restored history ends with its reply, not a new welcome",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "welcome and user move above the newest reply, including a long reply",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Quick Add pauses live voice and retains the unfinished transcript",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "camera permission is single-flight and returning late cannot open a route",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "voice opening is single-flight and cannot start after leaving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unavailable recognizer leaves the composer usable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "voice reply completion respects next draft and lifecycle leave=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "voice reply completion respects next draft and lifecycle leave=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "backgrounding a live call prevents reply speech and microphone restart",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Arabic greeting completes locally without an incomplete reply card",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repeated service failure keeps one transcript retry surface",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one first-message failure surface: service",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one first-message failure surface: exception",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "one first-message failure surface: timeout",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a different entitlement owner gets a fresh UI state",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed local restore preserves the transcript and offers retry",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "leaving a corrupt snapshot does not silently overwrite it",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "credit refresh denies exhausted/error access, retains draft, recovers error=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "credit refresh denies exhausted/error access, retains draft, recovers error=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "in-flight response disables send without a second spinner",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "retry keeps exactly one user turn",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "slow touch scroll through a long new reply TargetPlatform.iOS Arabic=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "slow touch scroll through a long new reply TargetPlatform.iOS Arabic=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "incoming reply cannot cancel a slow active drag TargetPlatform.iOS",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "slow touch scroll through a long new reply TargetPlatform.android Arabic=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "slow touch scroll through a long new reply TargetPlatform.android Arabic=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "incoming reply cannot cancel a slow active drag TargetPlatform.android",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "successful reply must preserve coach state and unsent draft through valid credit refresh",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "iOS-themed transcript scroll and keyboard Arabic=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "iOS-themed transcript scroll and keyboard Arabic=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "incoming reply must keep the message being read in the same place",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "leaving coach while history loads must not use a disposed WidgetRef",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "rapidly opening history creates only one sheet",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "known initial zero credit shows a truthful gate and working Back",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/ai_coach_initial_credit_gate_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "old positive credit is never inherited by B during A B A lookup",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/ai_coach_initial_credit_gate_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 42,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

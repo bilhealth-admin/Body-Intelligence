@@ -168,6 +168,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
   }
 
   Future<void> _captureMealVoice() async {
+    final authority = ref.read(foodRuntimeSearchAuthorityProvider);
     final service = MealVoiceInputService(SpeechToText());
     final result = await service.capture(
       context: context,
@@ -176,22 +177,18 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       localeId: BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
       arabic: _arabic,
     );
-    if (!mounted || result == null || result.foodQuery.isEmpty) return;
-
-    foodSearch.text = result.foodQuery;
-    final foods = await ref
-        .read(foodRuntimeSearchAuthorityProvider)
-        .search(result.foodQuery, limit: 10);
-    if (!mounted) return;
-    if (foods.isEmpty) {
-      _message(
-        _arabic
-            ? 'تم تدوين كلامك، لكن لا يوجد تطابق غذائي موثوق. راجع العبارة أو أنشئ طعامًا مخصصًا.'
-            : 'Your words were captured, but no trusted food matched them. Review the phrase or create a custom food.',
-      );
+    if (!mounted ||
+        result == null ||
+        result.foodQuery.isEmpty ||
+        !identical(authority, ref.read(foodRuntimeSearchAuthorityProvider))) {
       return;
     }
-    _updateState(() => selectedFood = foods.first);
+
+    foodSearch.text = result.foodQuery;
+    _updateState(() => selectedFood = null);
+    // Use the same progressive picker as typing. Recognition is not consent
+    // to select the first network result or to save a guessed food identity.
+    foodSearch.openView();
   }
 
   Future<void> _analyzeMealImage({

@@ -1,10 +1,11 @@
 part of 'recipe_library_page.dart';
 
-double _recipeCardExtent(BuildContext context) {
+double _recipeCardExtent(BuildContext context, {bool needsValueMasks = false}) {
   final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 3.0);
   // Give text-enlarged cards adequate room for labels and nutrition facts.
-  // The previous 106px growth overflowed ~2px at 180% on two-column phones.
-  return 306 + ((scale - 1) * 116);
+  // Public labels and the independent paid-value regions need real room.
+  // Increase layout height; never shrink the user's text or touch target.
+  return 306 + ((scale - 1) * 140) + (needsValueMasks ? 66 : 0);
 }
 
 double _recipePreviewWidth(BuildContext context) =>

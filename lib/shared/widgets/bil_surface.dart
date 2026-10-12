@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme/bil_elevation.dart';
 import '../../app/theme/bil_flagship_tokens.dart';
 import '../../app/theme/bil_spacing.dart';
+import '../../app/theme/bil_pearl_finish.dart';
 
 /// Reusable premium surface used across BIL.
 ///
@@ -46,6 +47,18 @@ class BilSurface extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
 
+    if (glass && backgroundColor == null && borderColor == null) {
+      return Padding(
+        padding: margin ?? EdgeInsets.zero,
+        child: BilFrostedPanel(
+          radius:
+              borderRadius ?? BorderRadius.circular(BilFlagshipTokens.radiusLg),
+          padding: padding,
+          child: child,
+        ),
+      );
+    }
+
     final resolvedBackground =
         backgroundColor ??
         (glass
@@ -62,6 +75,9 @@ class BilSurface extends StatelessWidget {
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
+        gradient: backgroundColor == null
+            ? BilPearlFinish.panel(context).gradient
+            : null,
         color: resolvedBackground,
         borderRadius:
             borderRadius ?? BorderRadius.circular(BilFlagshipTokens.radiusLg),

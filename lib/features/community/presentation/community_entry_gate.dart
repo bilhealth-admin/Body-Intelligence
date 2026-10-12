@@ -294,16 +294,9 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
       CommunitySurface(child: Builder(builder: _buildGate));
 
   Widget _buildGate(BuildContext context) {
-    if (_receipt != null &&
-        !_checking &&
-        !_welcomePending &&
-        _receipt!.profile.userId == _owner) {
-      return KeyedSubtree(
-        key: ValueKey('community-member-$_owner'),
-        child: widget.child,
-      );
-    }
-    return Scaffold(
+    final ready =
+        _receipt != null && !_checking && _receipt!.profile.userId == _owner;
+    final gate = Scaffold(
       key: const Key('community-entry-gate'),
       appBar: AppBar(
         leading: const CommunityReturnButton(),
@@ -361,6 +354,22 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
                 onContinue: _save,
               ),
       ),
+    );
+    if (!ready) return gate;
+    // Keep the original welcome intact while the authorized child prepares
+    // its real feed. Offstage prevents pixels, input and accessibility leakage,
+    // but preserves the same mounted child when the 2200ms welcome ends.
+    return Stack(
+      children: [
+        Offstage(
+          offstage: _welcomePending,
+          child: KeyedSubtree(
+            key: ValueKey('community-member-$_owner'),
+            child: widget.child,
+          ),
+        ),
+        if (_welcomePending) gate,
+      ],
     );
   }
 }

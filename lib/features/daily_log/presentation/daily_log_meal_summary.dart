@@ -117,10 +117,8 @@ class DailyMealDetailSummary extends StatelessWidget {
               ),
             ],
           );
-          final premiumNutrition = PremiumNutritionGlass(
+          final premiumNutrition = PremiumNutritionFieldsGroup(
             key: const Key('daily-meal-detail-premium-group'),
-            compact: true,
-            borderRadius: 18,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
@@ -175,63 +173,60 @@ class _MealMacroDial extends StatelessWidget {
               ? '${(grams! / goalGrams! * 100).round()}%'
               : '—'
         : '${formatDiaryMacroGrams(grams!)} g';
-    return Semantics(
-      value: grams == null
-          ? context.strings.text('Unavailable')
-          : displayPercent
-          ? displayValue
-          : hasGoal
-          ? '${formatDiaryMacroGrams(grams!)} / ${formatDiaryMacroGrams(goalGrams!)} g'
-          : '${formatDiaryMacroGrams(grams!)} g',
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox.square(
-              dimension: 62,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  ExcludeSemantics(
-                    excluding: grams == null || !hasGoal,
-                    child: CircularProgressIndicator(
-                      value: progress,
-                      strokeWidth: 6,
-                      color: color,
-                      backgroundColor: color.withValues(alpha: .13),
-                      strokeCap: StrokeCap.round,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PremiumNutritionGlass(
+            compact: true,
+            showLabel: false,
+            child: Semantics(
+              value: displayValue,
+              child: SizedBox.square(
+                dimension: 62,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ExcludeSemantics(
+                      excluding: grams == null || !hasGoal,
+                      child: CircularProgressIndicator(
+                        value: progress,
+                        strokeWidth: 6,
+                        color: color,
+                        backgroundColor: color.withValues(alpha: .13),
+                        strokeCap: StrokeCap.round,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(9),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        displayValue,
-                        maxLines: 1,
-                        textDirection: TextDirection.ltr,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
+                    Padding(
+                      padding: const EdgeInsets.all(9),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          displayValue,
+                          maxLines: 1,
+                          textDirection: TextDirection.ltr,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ],
       ),
     );
   }

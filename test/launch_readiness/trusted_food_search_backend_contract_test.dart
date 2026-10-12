@@ -6,6 +6,41 @@ import 'package:body_intelligence_log/features/nutrition/services/food_presentat
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'USDA units preserve kJ conversion, mcg RAE, known zero and missing instead of IU or wrong fat units',
+    () {
+      const resolver = TrustedFoodNetworkSearchResolver();
+      final food = resolver.decodeServerFoodForTesting({
+        'fdc_id': 9001,
+        'name': 'TEST units',
+        'nutrients': [
+          {'name': 'Energy', 'unit': 'kJ', 'amount': 418.4},
+          {'name': 'Vitamin A, RAE', 'unit': 'UG', 'amount': 120},
+          {'name': 'Vitamin C, total ascorbic acid', 'unit': 'MG', 'amount': 8},
+          {'name': 'Sugars, total including NLEA', 'unit': 'G', 'amount': 0},
+          {'name': 'Fatty acids, total saturated', 'unit': 'MG', 'amount': 200},
+          {'name': 'Cholesterol', 'unit': 'MG', 'amount': 0},
+        ],
+      });
+      expect(food, isNotNull);
+      expect(food!.knownValue(FoodNutrient.calories), closeTo(100, 1e-9));
+      expect(food.knownValue(FoodNutrient.vitaminA), 120);
+      expect(food.knownValue(FoodNutrient.vitaminC), 8);
+      expect(food.knownValue(FoodNutrient.sugar), 0);
+      expect(food.knownValue(FoodNutrient.cholesterol), 0);
+      expect(food.knownValue(FoodNutrient.saturatedFat), isNull);
+      expect(
+        resolver.decodeServerFoodForTesting({
+          'fdc_id': 9,
+          'name': 'TEST no energy unit',
+          'nutrients': [
+            {'name': 'Energy', 'amount': 100},
+          ],
+        }),
+        isNull,
+      );
+    },
+  );
   test('trusted food search keeps USDA credentials server-side', () {
     final backend = File(
       'supabase/functions/food-search/index.ts',

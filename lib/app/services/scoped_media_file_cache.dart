@@ -27,6 +27,12 @@ class ScopedMediaFileCache extends ChangeNotifier {
   final Directory? _root;
   final HttpClient _client;
   final Map<String, Future<File>> _inFlight = {};
+  final Map<String, Future<File?>> _reads = {};
+  final Map<
+    String,
+    ({int size, DateTime modified, DateTime metadataModified, String digest})
+  >
+  _verified = {};
   final List<Completer<void>> _queue = [];
   final Set<String> _deletedPosts = {};
   int _active = 0, _epoch = 0;
@@ -123,15 +129,24 @@ class ScopedMediaFileCache extends ChangeNotifier {
   }
 
   /// Cache-only read: never waits for, starts, or cancels a network download.
-  Future<File?> peek(Uri uri, String? viewer) async {
+  Future<File?> peek(Uri uri, String? viewer) {
+    final key = '$_epoch:${identity(uri, viewer)}';
+    return _reads.putIfAbsent(
+      key,
+      () => _peek(uri, viewer).whenComplete(() {
+        _reads.remove(key);
+      }),
+    );
+  }
+
+  Future<File?> _peek(Uri uri, String? viewer) async {
     if (!_permitted(uri, viewer)) return null;
     final epoch = _epoch;
     final root = await _directory();
     final key = identity(uri, viewer);
     try {
-      final metadata = jsonDecode(
-        await File('${root.path}/$key.json').readAsString(),
-      );
+      final metadataFile = File('${root.path}/$key.json');
+      final metadata = jsonDecode(await metadataFile.readAsString());
       if (metadata is! Map) return null;
       final digest = metadata['digest'],
           length = metadata['length'],
@@ -152,10 +167,40 @@ class ScopedMediaFileCache extends ChangeNotifier {
           await file.length() != length) {
         return null;
       }
-      if (await compute(_photoDigest, await file.readAsBytes()) != digest ||
+      final stamp = await file.stat(),
+          metadataStamp = await metadataFile.stat();
+      final previous = _verified[key];
+      final alreadyVerified =
+          previous != null &&
+          previous.digest == digest &&
+          previous.size == stamp.size &&
+          previous.modified == stamp.modified &&
+          previous.metadataModified == metadataStamp.modified;
+      if ((!alreadyVerified &&
+              await compute(_photoDigest, await file.readAsBytes()) !=
+                  digest) ||
           epoch != _epoch ||
           !_permitted(uri, viewer)) {
         return null;
+      }
+      _verified[key] = (
+        size: stamp.size,
+        modified: stamp.modified,
+        metadataModified: metadataStamp.modified,
+        digest: digest,
+      );
+      // Access time, rather than the first download, owns the disk LRU.
+      final touched = DateTime.now();
+      await file.setLastModified(touched);
+      final actualModified = (await file.stat()).modified;
+      _verified[key] = (
+        size: stamp.size,
+        modified: actualModified,
+        metadataModified: metadataStamp.modified,
+        digest: digest,
+      );
+      while (_verified.length > maxEntries) {
+        _verified.remove(_verified.keys.first);
       }
       return file;
     } on Object {
@@ -179,12 +224,9 @@ class ScopedMediaFileCache extends ChangeNotifier {
     // consumer checks its own generation after completion; auth uses the epoch.
     final future = _inFlight.putIfAbsent(
       operationKey,
-      () => _resolve(
-        uri,
-        viewer,
-        key,
-        epoch,
-      ).whenComplete(() => _inFlight.remove(operationKey)),
+      () => _resolve(uri, viewer, key, epoch).whenComplete(() {
+        _inFlight.remove(operationKey);
+      }),
     );
     return future.then((file) {
       if (!current() || epoch != _epoch || !_permitted(uri, viewer)) {
@@ -322,6 +364,7 @@ class ScopedMediaFileCache extends ChangeNotifier {
   }
 
   Future<void> remove(Uri uri, String? viewer) async {
+    _verified.remove(identity(uri, viewer));
     try {
       final root = await _directory(), key = identity(uri, viewer);
       await for (final file in root.list(followLinks: false)) {
@@ -345,7 +388,13 @@ class ScopedMediaFileCache extends ChangeNotifier {
       final root = await _directory();
       await for (final entry in root.list(followLinks: false)) {
         if (entry is! File || !entry.path.endsWith('.json')) continue;
-        final metadata = jsonDecode(await entry.readAsString());
+        Object? metadata;
+        try {
+          metadata = jsonDecode(await entry.readAsString());
+        } on FormatException {
+          await entry.delete();
+          continue;
+        }
         if (metadata is Map &&
             metadata['path'] is String &&
             (metadata['path'] as String).contains('/$id/')) {
@@ -383,8 +432,21 @@ class ScopedMediaFileCache extends ChangeNotifier {
       }
       // Remove metadata whose content was evicted; do not accumulate sidecars.
       await for (final entry in root.list(followLinks: false)) {
+        if (entry is File &&
+            entry.path.endsWith('.partial') &&
+            DateTime.now().difference(await entry.lastModified()) >
+                const Duration(days: 1)) {
+          await entry.delete();
+          continue;
+        }
         if (entry is! File || !entry.path.endsWith('.json')) continue;
-        final metadata = jsonDecode(await entry.readAsString());
+        Object? metadata;
+        try {
+          metadata = jsonDecode(await entry.readAsString());
+        } on FormatException {
+          await entry.delete();
+          continue;
+        }
         final key = entry.uri.pathSegments.last.replaceFirst('.json', '');
         final digest = metadata is Map ? metadata['digest'] : null;
         if (digest is! String ||
@@ -398,9 +460,13 @@ class ScopedMediaFileCache extends ChangeNotifier {
     }
   }
 
+  @visibleForTesting
+  Future<void> trimForTesting() async => _prune(await _directory(), '');
+
   /// Logout/account change retires queued writers before deleting account data.
   Future<void> clear() {
     _epoch++;
+    _verified.clear();
     _invalidatedPost = null;
     notifyListeners();
     final previous = _clearing;

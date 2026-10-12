@@ -29,6 +29,8 @@ import '../../onboarding/domain/onboarding_goal_bindings.dart';
 import '../../nutrition/domain/macro_gram_goals.dart';
 import '../../nutrition/domain/percentage_nutrition_goals.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
+import '../../nutrition/domain/nutrition_goal_snapshot.dart';
+import '../../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import 'coach_health_tools.dart';
 
 part 'coach_context_assembly.dart';
@@ -178,8 +180,9 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   final goalScheduleFuture = ref
       .read(nutritionGoalScheduleRepositoryProvider)
       .read();
+  final goalSnapshotFuture = ref.watch(nutritionGoalSnapshotProvider.future);
   Future<double> storedNumber(String key) async =>
-      double.tryParse(await preferences.get(key) ?? '') ?? 0;
+      (await goalSnapshotFuture).goals[key]?.value ?? double.nan;
   final caloriesGoalFuture = storedNumber('goal.calories');
   final carbsPercentFuture = storedNumber('goal.carbsPercent');
   final proteinPercentFuture = storedNumber('goal.proteinPercent');
@@ -233,7 +236,8 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
     proteinPercent: await proteinPercentFuture,
     fatPercent: await fatPercentFuture,
   );
-  double? validGram(double value) => value > 0 && value <= 1000 ? value : null;
+  double? validGram(double value) =>
+      value.isFinite && value >= 0 && value <= 2500 ? value : null;
   final gramGoals = MacroGramGoals(
     protein: validGram(await proteinGramsFuture),
     carbohydrates: validGram(await carbsGramsFuture),
@@ -279,78 +283,46 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
           dietaryPreferences: dietaryPreferences,
         );
   double targetNumber(num? value) => value?.toDouble() ?? 0;
-  String fallbackSource(num? override, num? recommended) => override != null
-      ? 'saved_plan_override'
-      : recommended != null
-      ? 'saved_plan_recommendation'
-      : 'body_profile_calculation';
-  final hasSavedGoalContext =
-      goalSchedule.targetFor(DateTime.now()) != null ||
-      percentageGoals != null ||
-      gramGoals.protein != null ||
-      gramGoals.carbohydrates != null ||
-      gramGoals.fat != null;
-  final hasTargetContext = recommendation != null || hasSavedGoalContext;
-  final targetResolution = hasTargetContext
+  final goalSnapshot = await goalSnapshotFuture;
+  final macroNeedsReview = NutritionGoalSnapshot.macroKeys.any(
+    (key) => goalSnapshot.goals[key]!.needsReview,
+  );
+  final hasTargetContext =
+      percentageGoals != null || goalSchedule.targetFor(DateTime.now()) != null;
+  final targetResolution =
+      hasTargetContext &&
+          (!macroNeedsReview || goalSchedule.targetFor(DateTime.now()) != null)
       ? CoachNutritionGoalResolver.resolveWithSources(
           localDay: DateTime.now(),
           schedule: goalSchedule,
           percentageGoals: percentageGoals,
           gramGoals: gramGoals,
-          fallback: <String, double>{
-            'caloriesKcal': targetNumber(
-              plan?.overrideCalories ??
-                  plan?.recommendedCalories ??
-                  recommendation?.targets.calories,
-            ),
-            'proteinG': targetNumber(
-              plan?.overrideProtein ??
-                  plan?.recommendedProtein ??
-                  recommendation?.targets.protein,
-            ),
-            'carbsG': targetNumber(
-              plan?.overrideCarbs ??
-                  plan?.recommendedCarbs ??
-                  recommendation?.targets.carbs,
-            ),
-            'fatG': targetNumber(
-              plan?.overrideFats ??
-                  plan?.recommendedFats ??
-                  recommendation?.targets.fats,
-            ),
-            'fiberG': targetNumber(
-              plan?.overrideFiber ??
-                  plan?.recommendedFiber ??
-                  recommendation?.targets.fiber,
-            ),
+          fallback: {
+            for (final mapping in const {
+              'goal.calories': 'caloriesKcal',
+              'goal.proteinGrams': 'proteinG',
+              'goal.carbsGrams': 'carbsG',
+              'goal.fatGrams': 'fatG',
+              'goal.fiber': 'fiberG',
+            }.entries)
+              if (goalSnapshot.goals[mapping.key]!.value != null)
+                mapping.value: goalSnapshot.goals[mapping.key]!.value!,
             'waterMl': targetNumber(
               plan?.overrideWater ??
                   plan?.recommendedWater ??
                   recommendation?.targets.water,
             ),
           },
-          fallbackSources: <String, String>{
-            'caloriesKcal': fallbackSource(
-              plan?.overrideCalories,
-              plan?.recommendedCalories,
-            ),
-            'proteinG': fallbackSource(
-              plan?.overrideProtein,
-              plan?.recommendedProtein,
-            ),
-            'carbsG': fallbackSource(
-              plan?.overrideCarbs,
-              plan?.recommendedCarbs,
-            ),
-            'fatG': fallbackSource(plan?.overrideFats, plan?.recommendedFats),
-            'fiberG': fallbackSource(
-              plan?.overrideFiber,
-              plan?.recommendedFiber,
-            ),
-            'waterMl': fallbackSource(
-              plan?.overrideWater,
-              plan?.recommendedWater,
-            ),
+          fallbackSources: {
+            for (final mapping in const {
+              'goal.calories': 'caloriesKcal',
+              'goal.proteinGrams': 'proteinG',
+              'goal.carbsGrams': 'carbsG',
+              'goal.fatGrams': 'fatG',
+              'goal.fiber': 'fiberG',
+            }.entries)
+              mapping.value: goalSnapshot.goals[mapping.key]!.source,
+            'waterMl': 'profile_plan_water',
           },
         )
       : null;
@@ -499,6 +471,22 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
             'mealTargets': CoachNutritionGoalResolver.mealTargets(goalSchedule),
           },
         };
+  health['dailyNutrientTargets'] = {
+    for (final goal in goalSnapshot.goals.values)
+      if (goal.value != null)
+        goal.key: {
+          'value': goal.value,
+          'unit': goal.unit,
+          'kind': goal.kind.name,
+          'source': goal.source,
+          if (goal.warning != null) 'reviewWarning': goal.warning,
+        },
+  };
+  health['dailyGoalReview'] = {
+    for (final goal in goalSnapshot.goals.values)
+      if (goal.needsReview)
+        goal.key: {'status': goal.status.name, 'unit': goal.unit},
+  };
   final activityHistory = _coachActivityHistory(dailyLogs, connectedHealth);
 
   final includeNutrition = coachContextPreferences.includes(

@@ -609,9 +609,13 @@ void main() {
     expect(service, contains(".eq('owner_id', ownerId)"));
     expect(service, contains("'bil_dismiss_ai_coach_reset_notice'"));
     expect(service, isNot(contains('DateTime.now')));
-    final settings = File(
-      'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
-    ).readAsStringSync();
+    final settings =
+        File(
+          'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
+        ).readAsStringSync() +
+        File(
+          'lib/features/intelligence_center/presentation/ai_coach_settings_body.dart',
+        ).readAsStringSync();
     expect(settings, contains(".select('reset_id,created_at,message')"));
     expect(settings, contains("notice['message']"));
     expect(settings, contains("'p_owner_id': ownerId"));
@@ -719,9 +723,13 @@ void main() {
   );
 
   test('user counter shows both unchanged current-period boundaries', () {
-    final page = File(
-      'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
-    ).readAsStringSync();
+    final page =
+        File(
+          'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
+        ).readAsStringSync() +
+        File(
+          'lib/features/intelligence_center/presentation/ai_coach_settings_body.dart',
+        ).readAsStringSync();
     final usageWidgets = File(
       'lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart',
     ).readAsStringSync();

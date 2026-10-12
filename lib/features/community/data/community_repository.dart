@@ -1,4 +1,5 @@
 import '../../../app/services/scoped_media_file_cache.dart';
+import 'community_feed_cache.dart';
 import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,6 +18,7 @@ import '../domain/community_post_context.dart';
 import '../domain/community_referral.dart';
 import '../domain/community_reference_parity.dart';
 import '../domain/community_rewards.dart';
+import '../domain/community_review_snapshot.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_text_limits.dart';
 import '../domain/community_topics.dart';
@@ -33,31 +35,41 @@ part 'community_repository_discovery_mixin.dart';
 part 'community_repository_profile_moderation_mixin.dart';
 part 'community_repository_reference_parity_mixin.dart';
 part 'community_repository_publishing_mixin.dart';
+part 'community_repository_cached_feed.dart';
+part 'community_repository_review_v2.dart';
 
 class CommunityRepository
     with
         CommunitySocialRepositoryMixin,
         CommunityFeedRepositoryMixin,
+        _CommunityReviewV2RepositoryMixin,
         _CommunityComposerPersistenceRepositoryMixin,
         _CommunityDiscoveryRepositoryMixin,
         _CommunityProfileModerationRepositoryMixin,
         _CommunityReferenceParityRepositoryMixin,
         _CommunityPublishingRepositoryMixin,
         _CommunityConnectionsMessagingRepositoryMixin {
-  CommunityRepository(this._client, {CommunityPostStoreContract? postStore})
+  CommunityRepository(
+    this._client, {
+    CommunityPostStoreContract? postStore,
+    CommunityFeedCache? feedCache,
+  })
     // Keep the public injection seam named `postStore` while its field stays private.
     // ignore: prefer_initializing_formals
-    : _postStore = postStore;
+    : _postStore = postStore,
+       _feedCache = feedCache ?? CommunityFeedCache.instance;
 
   @override
   final SupabaseClient _client;
   final CommunityPostStoreContract? _postStore;
+  final CommunityFeedCache _feedCache;
 
   @override
   SupabaseClient get communitySocialClient => _client;
 
   /// Server-authorized review enrichment; overridable by synthetic QA
   /// repositories without changing production moderator permissions.
+  @override
   Future<List<CommunityPost>> hydrateModerationReviewContents(
     List<CommunityPost> posts,
   ) => CommunityModerationContentLoader.hydrate(
@@ -280,8 +292,27 @@ class CommunityRepository
 
   Future<void> deletePost(String postId) async {
     await _posts.delete(postId);
+    CommunityFeedCache.instance.invalidatePost(postId);
     await ScopedMediaFileCache.instance.invalidatePost(postId);
   }
+
+  Future<CommunityFeedModeBatch> loadCommunityFeedCachedFirst({
+    required CommunityFeedMode mode,
+    required String locale,
+    required bool Function() current,
+    required void Function(CommunityFeedModeBatch) onRefresh,
+    required void Function() onRefreshing,
+    required void Function(Object) onRefreshError,
+    int limit = 40,
+  }) => _loadCommunityFeedCachedFirst(
+    mode: mode,
+    locale: locale,
+    current: current,
+    onRefresh: onRefresh,
+    onRefreshing: onRefreshing,
+    onRefreshError: onRefreshError,
+    limit: limit,
+  );
 
   Future<List<Map<String, dynamic>>> loadReviewableFoods() async {
     final response = await _client.rpc('bil_list_reviewable_products');

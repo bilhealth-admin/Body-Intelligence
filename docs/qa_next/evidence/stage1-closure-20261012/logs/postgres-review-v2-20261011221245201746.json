@@ -1,0 +1,58 @@
+{
+  "database": "bil_qa_review_20261011221245201746",
+  "host": "127.0.0.1",
+  "port": 55432,
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "postgres": "17.6 native, independent psql sessions",
+  "records": [
+    {
+      "name": "legacy 32/35 moderation contract remains unchanged",
+      "result": "PASS"
+    },
+    {
+      "name": "changed text rejects stale review and fresh revision succeeds",
+      "result": "PASS"
+    },
+    {
+      "name": "ordinary user direct API and revoked moderator are denied",
+      "result": "PASS"
+    },
+    {
+      "name": "two independent sessions and response retry grant once",
+      "result": "PASS"
+    },
+    {
+      "name": "publish only is denied until owner policy explicitly enables it",
+      "result": "PASS"
+    },
+    {
+      "name": "publish only requests a separate administrator award and simultaneous retries credit once",
+      "result": "PASS"
+    },
+    {
+      "name": "media revision invalidates a decision and late owner edits cannot change an approved post",
+      "result": "PASS"
+    },
+    {
+      "name": "role withdrawn in a separate pending transaction prevents a decision",
+      "result": "PASS"
+    },
+    {
+      "name": "rejection requires a reason and deleted recreated content cannot reuse a review",
+      "result": "PASS"
+    },
+    {
+      "name": "late reward uses original approval day and notification failure cannot award twice",
+      "result": "PASS"
+    },
+    {
+      "name": "reward queue separates content authority and grants without blocking actor deletion",
+      "result": "PASS"
+    },
+    {
+      "name": "only the author receives a reason for the current rejected revision",
+      "result": "PASS"
+    }
+  ],
+  "migration_sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85"
+}

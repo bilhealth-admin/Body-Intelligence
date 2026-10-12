@@ -20,7 +20,11 @@ void main() {
         preferences,
         authenticatedOwnerId: () => null,
       );
-      final bytes = Uint8List.fromList(const [1, 2, 3, 4]);
+      final bytes = Uint8List.fromList(
+        image.encodePng(
+          image.Image(width: 2, height: 2)..clear(image.ColorRgb8(1, 120, 180)),
+        ),
+      );
 
       final result = await service.save(bytes, contentType: 'image/png');
 
@@ -44,7 +48,12 @@ void main() {
         preferences,
         authenticatedOwnerId: () => null,
       );
-      final bytes = Uint8List.fromList(const [11, 12, 13, 14]);
+      final bytes = Uint8List.fromList(
+        image.encodePng(
+          image.Image(width: 2, height: 2)
+            ..clear(image.ColorRgb8(11, 120, 180)),
+        ),
+      );
 
       final saved = await service.save(bytes, contentType: 'image/png');
       final synced = await service.syncStoredPhotoToCommunity();
@@ -183,7 +192,12 @@ void main() {
 
     await expectLater(
       service.save(
-        Uint8List.fromList(const [5, 6, 7]),
+        Uint8List.fromList(
+          image.encodePng(
+            image.Image(width: 2, height: 2)
+              ..clear(image.ColorRgb8(5, 120, 180)),
+          ),
+        ),
         contentType: 'image/jpeg',
       ),
       throwsA(isA<ProfilePhotoIdentityChangedException>()),
@@ -207,7 +221,12 @@ void main() {
       photoPicker: (_) async {
         authenticatedOwner = 'owner-b';
         return XFile.fromData(
-          Uint8List.fromList(const [8, 9, 10]),
+          Uint8List.fromList(
+            image.encodePng(
+              image.Image(width: 2, height: 2)
+                ..clear(image.ColorRgb8(8, 120, 180)),
+            ),
+          ),
           name: 'avatar.png',
           mimeType: 'image/png',
         );
@@ -235,7 +254,12 @@ void main() {
       photoPicker: (_) async {
         normalPickerCalls += 1;
         return XFile.fromData(
-          Uint8List.fromList(const [20, 21, 22]),
+          Uint8List.fromList(
+            image.encodePng(
+              image.Image(width: 2, height: 2)
+                ..clear(image.ColorRgb8(20, 120, 180)),
+            ),
+          ),
           name: 'unexpected.png',
           mimeType: 'image/png',
         );
@@ -258,7 +282,11 @@ void main() {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     final preferences = PreferencesRepository(database);
-    final bytes = Uint8List.fromList(const [30, 31, 32, 33]);
+    final bytes = Uint8List.fromList(
+      image.encodePng(
+        image.Image(width: 2, height: 2)..clear(image.ColorRgb8(30, 120, 180)),
+      ),
+    );
     final service = ProfilePhotoService(
       preferences,
       authenticatedOwnerId: () => null,
@@ -283,7 +311,12 @@ void main() {
       preferences,
       authenticatedOwnerId: () => null,
       photoPicker: (_) async => XFile.fromData(
-        Uint8List.fromList(const [4, 5, 6, 7]),
+        Uint8List.fromList(
+          image.encodePng(
+            image.Image(width: 2, height: 2)
+              ..clear(image.ColorRgb8(4, 120, 180)),
+          ),
+        ),
         name: 'selected.png',
         mimeType: 'image/png',
       ),
@@ -291,7 +324,17 @@ void main() {
     final result = await service.chooseAndSave(
       confirmSelection: (bytes) async {
         reviews += 1;
-        expect(bytes.length, 4);
+        expect(
+          bytes,
+          orderedEquals(
+            Uint8List.fromList(
+              image.encodePng(
+                image.Image(width: 2, height: 2)
+                  ..clear(image.ColorRgb8(4, 120, 180)),
+              ),
+            ),
+          ),
+        );
         return false;
       },
     );
@@ -307,7 +350,12 @@ void main() {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(database.close);
       final preferences = PreferencesRepository(database);
-      final source = Uint8List.fromList(const [51, 52, 53, 54]);
+      final source = Uint8List.fromList(
+        image.encodePng(
+          image.Image(width: 2, height: 2)
+            ..clear(image.ColorRgb8(51, 120, 180)),
+        ),
+      );
       final service = ProfilePhotoService(
         preferences,
         authenticatedOwnerId: () => null,

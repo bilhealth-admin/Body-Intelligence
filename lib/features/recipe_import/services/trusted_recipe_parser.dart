@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../domain/trusted_recipe.dart';
+import '../../nutrition/domain/unified_food.dart';
 
 final class TrustedRecipeParseException implements Exception {
   const TrustedRecipeParseException(this.code);
@@ -194,6 +195,7 @@ abstract final class TrustedRecipeParser {
       'phosphorusMg',
       'ironMg',
       'vitaminCMg',
+      'additionalNutrients',
     };
     if (!raw.keys.toSet().containsAll(nutritionKeys) ||
         raw.keys.any(
@@ -222,6 +224,34 @@ abstract final class TrustedRecipeParser {
       max: 200,
       code: 'invalid_nutrition_source',
     );
+    final additional = <FoodNutrient, double?>{};
+    final rawAdditional = raw['additionalNutrients'];
+    if (rawAdditional != null) {
+      if (rawAdditional is! Map) {
+        throw const TrustedRecipeParseException('invalid_additional_nutrients');
+      }
+      final supported = {
+        for (final n in FoodNutrient.values.where(
+          (n) => n.index > FoodNutrient.vitaminC.index,
+        ))
+          n.name: n,
+      };
+      for (final entry in rawAdditional.entries) {
+        final n = supported[entry.key];
+        final amount = entry.value;
+        if (n == null ||
+            (amount != null &&
+                (amount is! num ||
+                    !amount.isFinite ||
+                    amount < 0 ||
+                    amount > 10000000))) {
+          throw const TrustedRecipeParseException(
+            'invalid_additional_nutrients',
+          );
+        }
+        additional[n] = (amount as num?)?.toDouble();
+      }
+    }
     final recordId = _text(
       provenance['recordId'],
       max: 200,
@@ -252,6 +282,7 @@ abstract final class TrustedRecipeParser {
           : nutrient('phosphorusMg'),
       ironMg: raw['ironMg'] == null ? null : nutrient('ironMg'),
       vitaminCMg: raw['vitaminCMg'] == null ? null : nutrient('vitaminCMg'),
+      additionalNutrients: additional,
       provenance: RecipeNutritionProvenance(
         source: source,
         recordId: recordId,

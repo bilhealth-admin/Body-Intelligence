@@ -216,10 +216,9 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   @override
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.symmetric(vertical: 5),
-    decoration: BoxDecoration(
-      color: CommunitySapphire.paper(context),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+    decoration: BilPearlFinish.panel(
+      context,
+      radius: BorderRadius.circular(16),
     ),
     child: Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
@@ -281,6 +280,14 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                                 CommunityPostModerationStatus.approved)) ...[
                       const SizedBox(height: 4),
                       _CommunityPostStatusChip(post: widget.post),
+                      if (widget.post.moderationStatus ==
+                          CommunityPostModerationStatus.rejected)
+                        CommunityPostReviewReason(
+                          repository: widget.repository,
+                          post: widget.post,
+                          ownerIsCurrent: widget.ownerIsCurrent,
+                          ownerChanges: widget.ownerChanges,
+                        ),
                     ] else if (widget.post.authorId != widget.currentUserId)
                       _CommunityAuthorRelationshipAction(
                         ownerIsCurrent: widget.ownerIsCurrent,

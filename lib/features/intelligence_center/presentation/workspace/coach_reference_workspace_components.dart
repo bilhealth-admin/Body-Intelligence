@@ -1,30 +1,20 @@
 part of 'coach_reference_workspace.dart';
 
-class _DarkCard extends StatelessWidget {
-  const _DarkCard({required this.child});
+class _WorkspaceCard extends StatelessWidget {
+  const _WorkspaceCard({required this.child});
   final Widget child;
   @override
   Widget build(BuildContext context) => Container(
     clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(13),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF20364C), Color(0xFF0C1725)],
-      ),
-      border: Border.all(color: const Color(0xFF3E5168), width: .6),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x2013263C),
-          blurRadius: 8,
-          offset: Offset(0, 3),
-        ),
-      ],
-    ),
-    child: child,
+    decoration: BilPearlFinish.panel(context),
+    child: Material(type: MaterialType.transparency, child: child),
   );
 }
+
+Color _workspaceAccent(BuildContext context, Color accent) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? Color.lerp(accent, Theme.of(context).colorScheme.onSurface, .60)!
+    : HSLColor.fromColor(accent).withLightness(.27).toColor();
 
 class _NutrientTile extends StatelessWidget {
   const _NutrientTile({
@@ -42,7 +32,7 @@ class _NutrientTile extends StatelessWidget {
   final bool locked;
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => _DarkCard(
+  Widget build(BuildContext context) => _WorkspaceCard(
     child: InkWell(
       onTap: onTap,
       child: Padding(
@@ -56,27 +46,28 @@ class _NutrientTile extends StatelessWidget {
                   child: Text(
                     label,
                     style: TextStyle(
-                      color: accent,
-                      fontSize: 11,
+                      color: _workspaceAccent(context, accent),
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 if (locked)
-                  const Icon(
+                  Icon(
                     Icons.lock_outline_rounded,
                     size: 11,
-                    color: Colors.white60,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
               ],
             ),
             const SizedBox(height: 7),
             Text(
               '$amount / $target',
-              style: const TextStyle(
-                fontSize: 12,
+              textDirection: TextDirection.ltr,
+              style: TextStyle(
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 height: 1.4,
               ),
             ),
@@ -86,8 +77,10 @@ class _NutrientTile extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 3,
-                backgroundColor: const Color(0xFF35485A),
-                color: accent,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                color: _workspaceAccent(context, accent),
               ),
             ),
           ],
@@ -117,11 +110,15 @@ class _TimelineRow extends StatelessWidget {
           Container(
             width: 31,
             height: 31,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xFFE8F2FF),
+              color: Theme.of(context).colorScheme.primaryContainer,
             ),
-            child: Icon(icon, size: 17, color: Color(0xFF1677FF)),
+            child: Icon(
+              icon,
+              size: 17,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -130,18 +127,18 @@ class _TimelineRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF101D2D),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   detail,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: Color(0xFF738196),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

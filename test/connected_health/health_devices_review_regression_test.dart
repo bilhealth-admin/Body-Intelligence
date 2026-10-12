@@ -9,6 +9,9 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/premium_value_mask.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_copy.dart';
@@ -41,9 +44,11 @@ Future<void> _captureSurface(WidgetTester tester, String name) async {
     final image = await boundary.toImage(pixelRatio: 1);
     try {
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      await File(
+      final target = File(
         'build/diagnostics/health_devices_review_20260909/$name.png',
-      ).writeAsBytes(bytes!.buffer.asUint8List());
+      );
+      await target.parent.create(recursive: true);
+      await target.writeAsBytes(bytes!.buffer.asUint8List());
     } finally {
       image.dispose();
     }
@@ -154,15 +159,26 @@ class _Gateway implements ConnectedHealthGateway {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   if (_capture) setUpAll(loadVisualEvidenceFont);
-  for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
-    for (final locale in AppLocalizations.supportedLocales) {
+  for (final (platform, plan) in [
+    for (final platform in [TargetPlatform.iOS, TargetPlatform.android])
+      for (final plan in [CommercePlan.premium, CommercePlan.free])
+        (platform, plan),
+  ]) {
+    for (final (locale, narrow, dark) in [
+      for (final locale in AppLocalizations.supportedLocales)
+        (locale, false, false),
+      for (final locale in [const Locale('ar'), const Locale('en')])
+        for (final dark in [false, true]) (locale, true, dark),
+    ]) {
       final tag = BilLocalePolicy.canonicalTag(locale);
+      final variantTag =
+          '$tag${narrow ? '_narrow_320_2x_${dark ? 'dark' : 'light'}' : ''}';
       testWidgets(
-        '${platform.name}/$tag manual refresh, phone steps, navigation and uncluttered readings',
+        '${platform.name}/$variantTag/${plan.name} manual refresh, phone steps, navigation and uncluttered readings',
         (tester) async {
           debugDefaultTargetPlatformOverride = platform;
           addTearDown(() => debugDefaultTargetPlatformOverride = null);
-          tester.view.physicalSize = const Size(390, 844);
+          tester.view.physicalSize = Size(narrow ? 320 : 390, 844);
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.reset);
           final gateway = _Gateway(_snapshot(platform));
@@ -199,8 +215,10 @@ void main() {
                 ),
                 verifiedSubscriptionStateProvider.overrideWith(
                   (ref) async => SubscriptionState(
-                    plan: CommercePlan.premium,
-                    entitlements: {},
+                    plan: plan,
+                    entitlements: plan == CommercePlan.free
+                        ? FreePlan.createState().entitlements
+                        : PaidPlanCatalog.composedEntitlementsFor(plan),
                     authority: EntitlementAuthority.verifiedServer,
                     isPurchasable: true,
                     canRestorePurchases: true,
@@ -213,11 +231,15 @@ void main() {
                 locale: locale,
                 theme: _capture
                     ? visualEvidenceTheme(
-                        BilFlagshipTheme.light(isArabic: tag == 'ar'),
+                        dark
+                            ? BilFlagshipTheme.dark(isArabic: tag == 'ar')
+                            : BilFlagshipTheme.light(isArabic: tag == 'ar'),
                         fontFamily: tag == 'ar'
                             ? 'NotoArabicEvidence'
                             : 'RobotoEvidence',
                       )
+                    : dark
+                    ? BilFlagshipTheme.dark(isArabic: tag == 'ar')
                     : null,
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: const [
@@ -229,7 +251,7 @@ void main() {
                 builder: (context, child) => MediaQuery(
                   data: MediaQuery.of(
                     context,
-                  ).copyWith(textScaler: const TextScaler.linear(1.3)),
+                  ).copyWith(textScaler: TextScaler.linear(narrow ? 2 : 1.3)),
                   child: RepaintBoundary(
                     key: const Key('health-review-capture'),
                     child: child!,
@@ -247,7 +269,10 @@ void main() {
           expect(find.text('4321'), findsOneWidget);
           expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
           expect(find.byIcon(Icons.arrow_forward_rounded), findsNothing);
-          await _captureSurface(tester, '${platform.name}_${tag}_dashboard');
+          await _captureSurface(
+            tester,
+            '${platform.name}_${variantTag}_${plan.name}_dashboard',
+          );
           final refresh = find.byKey(const Key('dashboard-fitness-last-sync'));
           await tester.tap(refresh);
           await tester.pump();
@@ -282,12 +307,61 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(find.byType(ConnectedHealthPage), findsOneWidget);
+          if (narrow) {
+            final clock = tester.renderObject<RenderParagraph>(
+              find.descendant(
+                of: find.byKey(const Key('watch-digital-time')),
+                matching: find.byType(RichText),
+              ),
+            );
+            expect(clock.text.toPlainText(), '20:42  00');
+            final clockPainter = TextPainter(
+              text: clock.text,
+              textDirection: TextDirection.ltr,
+              textScaler: clock.textScaler,
+              maxLines: 1,
+            )..layout(maxWidth: clock.size.width);
+            expect(clockPainter.computeLineMetrics(), hasLength(1));
+            expect(clockPainter.didExceedMaxLines, isFalse);
+            expect(clockPainter.width, lessThanOrEqualTo(clock.size.width));
+            clockPainter.dispose();
+            final pageTitle = tester.widget<Text>(
+              find
+                  .descendant(
+                    of: find.byType(AppBar),
+                    matching: find.byType(Text),
+                  )
+                  .first,
+            );
+            expect(pageTitle.maxLines, greaterThan(1));
+            expect(pageTitle.overflow, TextOverflow.visible);
+            expect(
+              find.descendant(
+                of: find.byType(AppBar),
+                matching: find.byType(FittedBox),
+              ),
+              findsNothing,
+              reason: 'Device/page titles must keep the requested text scale',
+            );
+          }
           expect(gateway.syncs, 1);
           expect(
             find.byKey(const Key('connected-health-live-watch-card')),
             findsOneWidget,
           );
-          await _captureSurface(tester, '${platform.name}_${tag}_devices');
+          await _captureSurface(
+            tester,
+            '${platform.name}_${variantTag}_${plan.name}_devices',
+          );
+          expect(
+            find.descendant(
+              of: find.byKey(const Key('fitness-bluetooth-section')),
+              matching: find.byType(PremiumValueMask),
+            ),
+            findsNothing,
+            reason:
+                'Device identity, connection warnings and help are public; only paid actions are gated',
+          );
           await tester.tap(
             find.byKey(const Key('connected-health-watch-refresh')),
           );
@@ -309,7 +383,10 @@ void main() {
           await tester.scrollUntilVisible(settings, 220);
           await tester.ensureVisible(settings);
           await tester.pumpAndSettle();
-          await _captureSurface(tester, '${platform.name}_${tag}_source');
+          await _captureSurface(
+            tester,
+            '${platform.name}_${variantTag}_${plan.name}_source',
+          );
           await tester.tap(settings);
           await tester.pumpAndSettle();
           final export = find.byKey(

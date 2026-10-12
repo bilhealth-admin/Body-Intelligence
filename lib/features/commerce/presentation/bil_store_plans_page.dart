@@ -10,6 +10,8 @@ import '../domain/store_offer_metadata.dart';
 import '../services/verified_store_catalog_adapter.dart';
 import '../services/verified_store_purchase_service.dart';
 import '../providers/commerce_providers.dart';
+import '../providers/app_purchase_providers.dart';
+import '../../intelligence_center/services/ai_boost_purchase_service.dart';
 import 'bil_dynamic_store_offers.dart';
 import 'bil_store_copy.dart';
 
@@ -37,6 +39,7 @@ class BilStorePlansPage extends ConsumerStatefulWidget {
 class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     with WidgetsBindingObserver {
   VerifiedStorePurchaseService? _ownedStore;
+  AiBoostPurchaseService? _sharedBoost;
   late final BilStoreCatalogGateway? _catalog;
   List<BilStoreOfferMetadata> _offers = const [];
   bool _loading = true;
@@ -57,13 +60,46 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     } else if (widget.store != null) {
       _catalog = VerifiedStoreCatalogAdapter(widget.store!);
     } else if (widget.connectToDeviceStore) {
-      _ownedStore = VerifiedStorePurchaseService();
-      _catalog = VerifiedStoreCatalogAdapter(_ownedStore!);
+      _ownedStore = ref.read(appSubscriptionPurchaseProvider);
+      final boost = ref.read(appBoostPurchaseProvider);
+      boost.addListener(_onBoostChanged);
+      _sharedBoost = boost;
+      _catalog = VerifiedStoreCatalogAdapter(
+        _ownedStore!,
+        boostCheckout: (offer) async {
+          await _sharedBoost!.initialize();
+          await _sharedBoost!.purchaseBoost(
+            expectedPrice: offer.localizedPrice,
+            expectedCurrency: offer.currencyCode,
+            expectedOfferToken: offer.purchaseOfferToken,
+          );
+        },
+      );
     } else {
       _catalog = null;
     }
     (widget.store ?? _ownedStore)?.addListener(_onStoreChanged);
     _load();
+  }
+
+  void _onBoostChanged() {
+    if (!mounted || _sharedBoost == null) return;
+    final boost = _sharedBoost!;
+    setState(() {
+      _purchaseFeedbackKey = switch (boost.errorCode) {
+        'purchase_status_unknown' ||
+        'verification_failed' => 'purchase_verification_unavailable',
+        'store_catalog_changed' => 'purchase_catalog_changed',
+        'store_finish_pending' => 'purchase_verified',
+        _ => switch (boost.state) {
+          AiBoostPurchaseState.pending => 'purchase_in_progress',
+          AiBoostPurchaseState.verified => 'purchase_verified',
+          AiBoostPurchaseState.failed => 'purchase_error',
+          _ => null,
+        },
+      };
+      _purchaseFeedbackIsError = _purchaseFeedbackKey == 'purchase_error';
+    });
   }
 
   @override
@@ -89,7 +125,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     // mounted surfaces immediately, not only after an active purchase. Empty
     // store history also uses this message: it triggers a read, never a local
     // revocation of an independently verified account entitlement.
-    if (verifiedTransition || settledRestore) {
+    if (widget.store != null && (verifiedTransition || settledRestore)) {
       ref.invalidate(verifiedSubscriptionStateProvider);
       ref.invalidate(aiCoachCreditAccessProvider);
       ref
@@ -162,7 +198,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       'store_catalog_changed' => 'purchase_catalog_changed',
       'store_catalog_refresh_failed' => 'purchase_error',
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
-      'verification_failed' => 'purchase_verification_unavailable',
+      'verification_failed' ||
+      'purchase_status_unknown' => 'purchase_verification_unavailable',
+      'store_finish_pending' => 'purchase_verified',
       'restore_verification_failed' => 'restore_verification_failed',
       'purchase_owned_by_another_account' =>
         'purchase_owned_by_another_account',
@@ -186,7 +224,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   }
 
   bool get _purchaseInProgress =>
-      _purchaseRequestInFlight || (widget.store ?? _ownedStore)?.busy == true;
+      _purchaseRequestInFlight ||
+      (widget.store ?? _ownedStore)?.busy == true ||
+      _sharedBoost?.state == AiBoostPurchaseState.pending;
 
   Future<void> _load() async {
     if (_loadInFlight) return;
@@ -318,7 +358,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     (widget.store ?? _ownedStore)?.removeListener(_onStoreChanged);
-    _ownedStore?.dispose();
+    _sharedBoost?.removeListener(_onBoostChanged);
     super.dispose();
   }
 
@@ -384,6 +424,32 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         purchaseInProgress: _purchaseInProgress,
         restoreInProgress: _restoring,
         purchaseEnabled: store?.canStartPurchase ?? true,
+        purchaseAllowedForKind: (kind) =>
+            kind == BilStoreProductKind.aiBoostConsumable &&
+                _sharedBoost != null
+            ? _sharedBoost!.canPurchase
+            : (store?.canStartPurchase ?? true),
+        onContinueVerification:
+            (_sharedBoost?.canRetry == true ||
+                (store != null &&
+                    !store.busy &&
+                    (store.hasPendingVerifiedFinish ||
+                        const {
+                          'purchase_status_unknown',
+                          'store_finish_pending',
+                        }.contains(store.messageCode))))
+            ? () async {
+                if (_sharedBoost?.canRetry == true) {
+                  await _sharedBoost!.retryPendingTransaction();
+                } else {
+                  await store!.continueVerification();
+                }
+              }
+            : null,
+        continueVerificationLabel: BilStoreCopy.text(
+          locale,
+          'continue_verification',
+        ),
         blockedPurchaseKinds: blockedPurchaseKinds,
         blockedPurchaseMessage: BilStoreCopy.text(
           locale,

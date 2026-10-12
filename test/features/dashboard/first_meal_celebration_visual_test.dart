@@ -7,6 +7,63 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'retired route before first painted frame preserves ready for retry',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final preferences = PreferencesRepository(database);
+      await preferences.set(firstMealCelebrationPreferenceKey, 'ready');
+      addTearDown(database.close);
+      late BuildContext surface;
+      var visitCurrent = true;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              surface = context;
+              return const Scaffold(body: Text('Food remains committed'));
+            },
+          ),
+        ),
+      );
+      expect(
+        await FirstMealCelebration.showIfPending(
+          surface,
+          preferences,
+          ownerIsCurrent: () => visitCurrent,
+        ),
+        isTrue,
+      );
+      // A concurrent caller cannot claim the same presentation before paint.
+      expect(
+        await FirstMealCelebration.showIfPending(surface, preferences),
+        isFalse,
+      );
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'ready');
+      visitCurrent = false;
+      await tester.pump();
+      await tester.pump();
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'ready');
+      expect(
+        find.byKey(const Key('dashboard-first-food-celebration')),
+        findsNothing,
+      );
+      visitCurrent = true;
+      expect(
+        await FirstMealCelebration.showIfPending(
+          surface,
+          preferences,
+          ownerIsCurrent: () => visitCurrent,
+        ),
+        isTrue,
+      );
+      await tester.pump();
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'done');
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('first successful marker celebrates once and arms streak tip', (
     tester,
   ) async {

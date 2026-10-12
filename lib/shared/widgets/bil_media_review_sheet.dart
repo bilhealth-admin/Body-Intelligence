@@ -37,6 +37,9 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,
+    sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+        ? AnimationStyle.noAnimation
+        : null,
     constraints: const BoxConstraints(maxWidth: 620),
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: const RoundedRectangleBorder(

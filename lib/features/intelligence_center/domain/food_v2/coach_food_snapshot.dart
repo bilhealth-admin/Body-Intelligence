@@ -96,7 +96,8 @@ final class CoachFoodSourceEvidence {
   };
 }
 
-/// Exactly the thirteen nutrients already represented by BIL's FoodNutrient.
+/// Every nutrient exposed by BIL's food/goal interfaces. Missing optional
+/// fields in older snapshots remain unknown during forward-compatible reads.
 /// Total carbohydrate includes fiber; source adapters must normalize any
 /// available-carbohydrate convention before constructing this contract.
 final class CoachFoodNutrients {
@@ -137,6 +138,12 @@ final class CoachFoodNutrients {
     FoodNutrient.phosphorus: 'mg',
     FoodNutrient.iron: 'mg',
     FoodNutrient.vitaminC: 'mg',
+    FoodNutrient.saturatedFat: 'g',
+    FoodNutrient.polyunsaturatedFat: 'g',
+    FoodNutrient.monounsaturatedFat: 'g',
+    FoodNutrient.transFat: 'g',
+    FoodNutrient.cholesterol: 'mg',
+    FoodNutrient.vitaminA: 'mcg RAE',
   };
 
   final Map<FoodNutrient, double?> values;

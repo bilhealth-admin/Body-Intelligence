@@ -1,0 +1,34 @@
+{
+  "case": "food catalog production empty state capture",
+  "reason": "Pearl surface and public Scan/Barcode labels remain visible; paid routes still enforce access.",
+  "reference": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
+  "reviewed_artifacts_sha256": {
+    "master": "55d0253d69ef406ee0277f1100544d8c94c4bd620646083362f680d32855344d",
+    "actual": "691d30ee918dc4286e2f3dd9c09bd84f76134795becb71472d18abd6a02bbbd2",
+    "diff": "713f975b2bbb829711f9d7f57f8dae343a597a3ce75aff1a71906019c04c96f5"
+  },
+  "update_only": true,
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "--plain-name",
+    "food catalog production empty state capture",
+    "--update-goldens"
+  ],
+  "started": 1791754385.5528157,
+  "pid": 21108,
+  "exit_code": 0,
+  "changed_baselines": [
+    "test/visual_closure/goldens/visual_closure_food_catalog_phone.png"
+  ],
+  "after_sha256": "691d30ee918dc4286e2f3dd9c09bd84f76134795becb71472d18abd6a02bbbd2",
+  "exactly_one_success": true,
+  "accepted_one_reviewed_image": true
+}

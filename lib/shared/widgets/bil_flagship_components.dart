@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/theme/bil_flagship_motion.dart';
 import '../../app/theme/bil_flagship_tokens.dart';
+import '../../app/theme/bil_pearl_finish.dart';
 
 class BilPremiumSurface extends StatelessWidget {
   const BilPremiumSurface({
@@ -18,18 +19,14 @@ class BilPremiumSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final body = AnimatedContainer(
       duration: BilFlagshipMotion.duration(context),
       curve: BilFlagshipMotion.enterCurve,
       padding: padding,
-      decoration: BoxDecoration(
-        gradient: gradient,
-        color: gradient == null ? scheme.surface : null,
-        borderRadius: BorderRadius.circular(BilFlagshipTokens.radiusLg),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .72)),
-        boxShadow: BilFlagshipTokens.shadowCard,
-      ),
+      decoration: BilPearlFinish.panel(
+        context,
+        radius: BorderRadius.circular(BilFlagshipTokens.radiusLg),
+      ).copyWith(gradient: gradient),
       child: child,
     );
     if (onTap == null) return body;

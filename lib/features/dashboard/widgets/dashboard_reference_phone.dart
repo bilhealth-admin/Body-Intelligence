@@ -42,6 +42,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
     required this.visibleSections,
     required this.premiumUnlocked,
     required this.premiumAccessResolved,
+    required this.premiumAccessChecking,
+    required this.onPremiumRetry,
   });
 
   final bool arabic;
@@ -53,11 +55,11 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   final int? remainingCalories;
   final bool burnedCaloriesApplied;
   final int? proteinConsumed;
-  final int proteinGoal;
+  final int? proteinGoal;
   final int? carbohydratesConsumed;
-  final int carbohydratesGoal;
+  final int? carbohydratesGoal;
   final int? fatConsumed;
-  final int fatGoal;
+  final int? fatGoal;
   final int? fiberGoal;
   final int? sodiumGoal;
   final int? potassiumGoal;
@@ -84,6 +86,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   final Set<String> visibleSections;
   final bool premiumUnlocked;
   final bool premiumAccessResolved;
+  final bool premiumAccessChecking;
+  final VoidCallback? onPremiumRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -131,17 +135,20 @@ class _ReferenceDashboardPhone extends StatelessWidget {
     }
     if (visibleSections.contains(DashboardSectionIds.macros)) {
       overviewCards.add(
-        PremiumDashboardCardLock(
+        _ReferenceLockedValuesCard(
           key: const Key('dashboard-macros-premium-lock'),
           locked: premiumAccessResolved && !premiumUnlocked,
-          checking: !premiumAccessResolved,
-          title: tr('Nutrient goals', 'أهداف المغذيات'),
+          checking:
+              !premiumAccessResolved &&
+              (premiumAccessChecking || onPremiumRetry == null),
+          onRetry: !premiumAccessResolved && !premiumAccessChecking
+              ? onPremiumRetry
+              : null,
+          title: tr('Macros', 'المغذيات الكبرى'),
           detail: tr(
             'See protein, carbs, and fat progress at a glance.',
             'تابع تقدم البروتين والكربوهيدرات والدهون بلمحة.',
           ),
-          borderRadius: 12,
-          showLabel: true,
           onTap: () => context.push('/plans'),
           child: _ReferenceMacrosCard(
             onEdit: () => context.push('/settings/nutrition-goals'),
@@ -169,17 +176,20 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         ),
       );
       overviewCards.add(
-        PremiumDashboardCardLock(
+        _ReferenceLockedValuesCard(
           key: const Key('dashboard-heart-premium-lock'),
           locked: premiumAccessResolved && !premiumUnlocked,
-          checking: !premiumAccessResolved,
-          title: tr('Heart health', 'صحة القلب'),
+          checking:
+              !premiumAccessResolved &&
+              (premiumAccessChecking || onPremiumRetry == null),
+          onRetry: !premiumAccessResolved && !premiumAccessChecking
+              ? onPremiumRetry
+              : null,
+          title: tr('Heart Healthy', 'صحة القلب'),
           detail: tr(
             'Heart, sodium, fiber, and custom targets',
             'أهداف القلب والصوديوم والألياف والأهداف المخصصة',
           ),
-          borderRadius: 12,
-          showLabel: true,
           onTap: () => context.push('/plans'),
           child: _CircularNutrientCard(
             key: const Key('dashboard-heart-circle-card'),
@@ -228,18 +238,6 @@ class _ReferenceDashboardPhone extends StatelessWidget {
       key: const Key('premium-dashboard-benchmark'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (premiumAccessResolved &&
-            !premiumUnlocked &&
-            (visibleSections.contains(DashboardSectionIds.macros) ||
-                visibleSections.contains(
-                  DashboardSectionIds.connectedHealth,
-                ))) ...[
-          const Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: PremiumLabelBadge(key: Key('dashboard-premium-page-label')),
-          ),
-          const SizedBox(height: 12),
-        ],
         if (visibleSections.contains(DashboardSectionIds.aiCoach)) ...[
           KeyedSubtree(
             key: const Key('dashboard-ai-coach-slot'),

@@ -1,0 +1,7 @@
+{
+  "tested_source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "tested_inputs": 4517,
+  "mismatched_worktree_index_blobs": [],
+  "method": "git hash-object --no-filters --stdin-paths compared against git ls-files --stage; all 4517 tested input blobs are exactly the staged bytes. No line-ending normalization occurred at staging.",
+  "staged_diff_check_exit": 0
+}

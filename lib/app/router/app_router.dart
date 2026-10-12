@@ -1,3 +1,4 @@
+import '../../features/commerce/presentation/app_purchase_presentation_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -127,6 +128,8 @@ class AppRouter {
       current.path == '/plans' && next.path == '/plans';
 
   static final router = GoRouter(
+    navigatorKey: bilAppNavigatorKey,
+    observers: [bilStorePresentationRouteObserver],
     initialLocation: '/startup',
     errorBuilder: (_, _) => const InvalidRoutePage(),
     onEnter: (_, currentState, nextState, _) {

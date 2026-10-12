@@ -18,12 +18,16 @@ void main() {
       expect(scoped.iconTheme.size, BilCalmTokens.iconSize);
       expect(scoped.colorScheme.primary, base.colorScheme.primary);
       expect(base.textTheme.titleLarge!.fontSize, originalSize);
-      expect(scoped.scaffoldBackgroundColor, BilCalmTokens.lightCanvas);
+      expect(scoped.scaffoldBackgroundColor, Colors.transparent);
+      expect(
+        scoped.colorScheme.surfaceContainerLowest,
+        BilCalmTokens.lightCanvas,
+      );
       expect(
         BilCalmVisualScope.resolve(
           ThemeData.dark(useMaterial3: true),
           isArabic: true,
-        ).scaffoldBackgroundColor,
+        ).colorScheme.surfaceContainerLowest,
         BilCalmTokens.darkCanvas,
       );
     },

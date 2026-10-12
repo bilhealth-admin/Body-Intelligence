@@ -1,6 +1,11 @@
 part of '../food_page.dart';
 
 String _foodValueCopy(BuildContext context, String key) {
+  final translated = RuntimeCopy.resolve(
+    key,
+    BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+  );
+  if (translated != null) return translated;
   final code = Localizations.localeOf(context).languageCode;
   return _foodValueTranslations[code]?[key] ??
       _foodValueTranslations['en']![key]!;
@@ -8,6 +13,13 @@ String _foodValueCopy(BuildContext context, String key) {
 
 const Map<String, Map<String, String>> _foodValueTranslations = {
   'en': {
+    'Saturated fat': 'Saturated fat',
+    'Polyunsaturated fat': 'Polyunsaturated fat',
+    'Monounsaturated fat': 'Monounsaturated fat',
+    'Trans fat': 'Trans fat',
+    'Cholesterol': 'Cholesterol',
+    'Vitamin A': 'Vitamin A',
+
     'Calories': 'Calories',
     'Protein': 'Protein',
     'Carbs': 'Carbs',
@@ -24,6 +36,13 @@ const Map<String, Map<String, String>> _foodValueTranslations = {
     'Not available': 'Not available',
   },
   'ar': {
+    'Saturated fat': 'الدهون المشبعة',
+    'Polyunsaturated fat': 'الدهون متعددة اللاتشبع',
+    'Monounsaturated fat': 'الدهون أحادية اللاتشبع',
+    'Trans fat': 'الدهون المتحولة',
+    'Cholesterol': 'الكوليسترول',
+    'Vitamin A': 'فيتامين A',
+
     'Calories': 'السعرات',
     'Protein': 'البروتين',
     'Carbs': 'الكربوهيدرات',
@@ -40,6 +59,13 @@ const Map<String, Map<String, String>> _foodValueTranslations = {
     'Not available': 'غير متوفر',
   },
   'fr': {
+    'Saturated fat': 'Graisses saturées',
+    'Polyunsaturated fat': 'Graisses polyinsaturées',
+    'Monounsaturated fat': 'Graisses monoinsaturées',
+    'Trans fat': 'Acides gras trans',
+    'Cholesterol': 'Cholestérol',
+    'Vitamin A': 'Vitamine A',
+
     'Calories': 'Calories',
     'Protein': 'Protéines',
     'Carbs': 'Glucides',
@@ -56,6 +82,13 @@ const Map<String, Map<String, String>> _foodValueTranslations = {
     'Not available': 'Non disponible',
   },
   'es': {
+    'Saturated fat': 'Grasas saturadas',
+    'Polyunsaturated fat': 'Grasas poliinsaturadas',
+    'Monounsaturated fat': 'Grasas monoinsaturadas',
+    'Trans fat': 'Grasas trans',
+    'Cholesterol': 'Colesterol',
+    'Vitamin A': 'Vitamina A',
+
     'Calories': 'Calorías',
     'Protein': 'Proteína',
     'Carbs': 'Carbohidratos',
@@ -72,6 +105,13 @@ const Map<String, Map<String, String>> _foodValueTranslations = {
     'Not available': 'No disponible',
   },
   'tr': {
+    'Saturated fat': 'Doymuş yağ',
+    'Polyunsaturated fat': 'Çoklu doymamış yağ',
+    'Monounsaturated fat': 'Tekli doymamış yağ',
+    'Trans fat': 'Trans yağ',
+    'Cholesterol': 'Kolesterol',
+    'Vitamin A': 'A vitamini',
+
     'Calories': 'Kalori',
     'Protein': 'Protein',
     'Carbs': 'Karbonhidrat',

@@ -192,4 +192,57 @@ extension _VerifiedStorePurchaseCheckout on VerifiedStorePurchaseService {
       return false;
     }
   }
+
+  Future<void> _purchaseBoost({String? offerToken}) async {
+    if (_disposed || busy) return;
+    final user = Supabase.instance.client.auth.currentUser;
+    final product = products[StoreCatalogConfiguration.aiBoost];
+    if (user == null ||
+        product == null ||
+        !canStartStorePurchase(
+          state: state,
+          productAvailable: true,
+          messageCode: messageCode,
+        )) {
+      messageCode = 'purchase_unavailable';
+      notifyListeners();
+      return;
+    }
+    state = VerifiedStoreState.purchasePending;
+    messageCode = null;
+    notifyListeners();
+    final accountHash = storeAccountIdentifier(
+      ownerId: user.id,
+      platform: defaultTargetPlatform,
+    );
+    final purchaseParam = verifiedBoostPurchaseParam(
+      product: product,
+      accountHash: accountHash,
+      platform: defaultTargetPlatform,
+      offerToken: offerToken,
+    );
+    final purchaseGeneration = _purchaseEventGeneration;
+    try {
+      _purchaseInitiatedByThisService = true;
+      _purchaseInitiatedProductId = product.id;
+      final started = await _purchase.buyConsumable(
+        purchaseParam: purchaseParam,
+        autoConsume: false,
+      );
+      if (_disposed ||
+          started ||
+          purchaseGeneration != _purchaseEventGeneration) {
+        return;
+      }
+      state = VerifiedStoreState.failed;
+      messageCode = 'purchase_not_started';
+      _clearPurchaseInitiation();
+      notifyListeners();
+    } on Object {
+      if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
+      state = VerifiedStoreState.failed;
+      messageCode = 'purchase_status_unknown';
+      notifyListeners();
+    }
+  }
 }

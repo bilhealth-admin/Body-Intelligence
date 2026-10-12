@@ -1,0 +1,103 @@
+{
+  "label": "coach-workspace-pearl-final-file",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/qa_next/coach_reference_workspace_capture_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791757574.7611396,
+  "files": {
+    "test/qa_next/coach_reference_workspace_capture_test.dart": "84763d87e44e8e1a262e4f0a05fb0498fff92ece695391b5ed4662e99bea9edd"
+  },
+  "source_fingerprint": "5a8a52d32be3374fe0bb146e4cf3e45867ba6bf7b13eeee476a83986061c0865",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/qa_next/coach_reference_workspace_capture_test.dart"
+  ],
+  "pid": 9812,
+  "exit_code": 0,
+  "finished": 1791757596.7487872,
+  "end_fingerprint": "5a8a52d32be3374fe0bb146e4cf3e45867ba6bf7b13eeee476a83986061c0865",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "workspace actual Flutter en text 1.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 2.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 1.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 2.0 light",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 1.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter en text 2.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 1.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace actual Flutter ar text 2.0 dark",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workspace preserves a known zero target separately from missing intake",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "locked nutrition preserves labels but hides values and targets",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "real conversation restores SQLite transcript and preserves draft on overview return",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "shared dock keeps five accessible destinations",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/qa_next/coach_reference_workspace_capture_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 12,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

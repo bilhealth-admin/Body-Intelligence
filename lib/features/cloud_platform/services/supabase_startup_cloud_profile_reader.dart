@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../community/services/community_owner_operation.dart';
 
 import '../domain/cloud_sync_models.dart';
 import 'aes_gcm_cloud_payload_cipher.dart';
@@ -28,12 +29,25 @@ final class SupabaseStartupCloudProfileReader
   @override
   Future<List<CloudRecordEnvelope>> readRestoreRecords(String ownerId) async {
     final owner = ownerId.trim();
+    if (owner.isEmpty || client.auth.currentUser?.id != owner) return const [];
+    return CommunityOwnerOperation.run(
+      client: client,
+      ownerId: owner,
+      action: (_) => _readRestoreRecordsOwned(owner),
+    );
+  }
+
+  Future<List<CloudRecordEnvelope>> _readRestoreRecordsOwned(
+    String ownerId,
+  ) async {
+    final owner = ownerId.trim();
     final user = client.auth.currentUser;
     if (owner.isEmpty || user == null || user.id != owner) {
       return const <CloudRecordEnvelope>[];
     }
 
     final key = await keyRepository.resolveExisting(owner);
+    CommunityOwnerOperation.checkCurrent();
     if (key == null || client.auth.currentUser?.id != owner) {
       return const <CloudRecordEnvelope>[];
     }
@@ -58,6 +72,7 @@ final class SupabaseStartupCloudProfileReader
           .order('entity_kind')
           .order('record_id')
           .range(offset, offset + pageSize - 1);
+      CommunityOwnerOperation.checkCurrent();
       if (client.auth.currentUser?.id != owner) {
         return const <CloudRecordEnvelope>[];
       }

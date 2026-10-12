@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_review_snapshot.dart';
 import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
@@ -15,19 +16,25 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 final class _ModerationRepository extends CommunityRepository {
   _ModerationRepository()
-    : super(
+    : this._(
         SupabaseClient(
           'https://moderation.invalid',
           'moderation-anon-key',
           authOptions: const AuthClientOptions(autoRefreshToken: false),
         ),
       );
+  _ModerationRepository._(this.client) : super(client);
+  final SupabaseClient client;
 
   static const authorId = '11111111-1111-4111-8111-111111111111';
   static const moderatorId = '22222222-2222-4222-8222-222222222222';
   static const postId = '33333333-3333-4333-8333-333333333333';
 
   bool includePendingPost = true;
+  bool reviewServiceMissing = false;
+  bool queueNetworkFailure = false;
+  bool includeHiddenPost = false;
+  bool withUnavailableImage = false;
   int moderationCalls = 0;
   CommunityPostModerationDecision? lastDecision;
 
@@ -38,6 +45,18 @@ final class _ModerationRepository extends CommunityRepository {
     body: 'A post that requires a human decision',
     createdAt: DateTime.utc(2026, 9, 4),
     moderationStatus: CommunityPostModerationStatus.pending,
+    media: [
+      if (withUnavailableImage)
+        const CommunityPostMedia(
+          position: 0,
+          objectPath: 'synthetic/missing.png',
+          mimeType: 'image/png',
+          bytes: 100,
+          width: 200,
+          height: 200,
+          url: 'asset://synthetic-missing-image.png',
+        ),
+    ],
   );
 
   @override
@@ -64,6 +83,39 @@ final class _ModerationRepository extends CommunityRepository {
   ) async => posts;
 
   @override
+  Future<List<CommunityReviewSnapshot>> loadReviewedPosts(
+    List<CommunityPost> posts,
+  ) async {
+    if (reviewServiceMissing) {
+      throw const PostgrestException(
+        message: 'Synthetic missing V2 RPC',
+        code: 'PGRST202',
+      );
+    }
+    if (queueNetworkFailure) throw StateError('Synthetic network outage');
+    return [
+      for (final post in posts)
+        CommunityReviewSnapshot(
+          post: post,
+          revision: 'a' * 64,
+          canPublishOnly: false,
+        ),
+    ];
+  }
+
+  @override
+  Future<List<CommunityRewardReview>> loadRewardReviewQueue() async => const [];
+
+  @override
+  Future<CommunityPostModerationResult> moderateReviewedPost({
+    required CommunityReviewSnapshot snapshot,
+    required CommunityPostModerationDecision decision,
+    required String operationId,
+    String reason = '',
+    bool publishOnly = false,
+  }) => moderatePost(postId: snapshot.post.id, decision: decision);
+
+  @override
   Future<List<CommunityPost>> loadPendingPostsForModeration({
     int limit = 100,
   }) async => includePendingPost ? [pendingPost] : const [];
@@ -71,7 +123,7 @@ final class _ModerationRepository extends CommunityRepository {
   @override
   Future<List<CommunityPost>> loadHiddenPostsForModeration({
     int limit = 100,
-  }) async => const [];
+  }) async => includeHiddenPost ? [pendingPost] : const [];
 
   @override
   Future<List<Map<String, dynamic>>> loadOpenModerationReports() async =>
@@ -211,6 +263,134 @@ final class _ModerationRefreshRepository extends _ModerationRepository {
 }
 
 void main() {
+  group('review service and decoded content', () {
+    late _ModerationRepository repository;
+    setUp(() {
+      repository = _ModerationRepository();
+    });
+    tearDown(() => repository.client.dispose());
+    testWidgets(
+      'missing review V2 keeps existing hidden tools and reports an honest unavailable state',
+      (tester) async {
+        repository
+          ..reviewServiceMissing = true
+          ..includeHiddenPost = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: CommunityPostModerationPage(repository: repository),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('community-review-version-unavailable')),
+          findsOneWidget,
+        );
+        expect(find.text('Moderator access is required.'), findsNothing);
+        expect(
+          find.byKey(
+            const Key(
+              'community-moderation-approve-${_ModerationRepository.postId}',
+            ),
+          ),
+          findsNothing,
+        );
+        expect(
+          tester
+              .widget<FilledButton>(
+                find.byKey(
+                  const Key(
+                    'community-hidden-post-restore-${_ModerationRepository.postId}',
+                  ),
+                ),
+              )
+              .onPressed,
+          isNotNull,
+        );
+        expect(repository.moderationCalls, 0);
+        repository
+          ..reviewServiceMissing = false
+          ..includeHiddenPost = false;
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byIcon(Icons.refresh_rounded),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('community-review-version-unavailable')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(
+            const Key(
+              'community-moderation-approve-${_ModerationRepository.postId}',
+            ),
+          ),
+          findsOneWidget,
+        );
+        expect(repository.moderationCalls, 0);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+    testWidgets(
+      'network queue failure is not described as a missing moderator role',
+      (tester) async {
+        repository.queueNetworkFailure = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: CommunityPostModerationPage(repository: repository),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Could not load the moderation queue.'),
+          findsOneWidget,
+        );
+        expect(find.text('Moderator access is required.'), findsNothing);
+        await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+        await tester.pumpAndSettle();
+        expect(repository.moderationCalls, 0);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+    testWidgets(
+      'an undecodable review image cannot be approved or published blindly',
+      (tester) async {
+        repository.withUnavailableImage = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: CommunityPostModerationPage(repository: repository),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final approve = find.byKey(
+          const Key(
+            'community-moderation-approve-${_ModerationRepository.postId}',
+          ),
+        );
+        expect(tester.widget<FilledButton>(approve).onPressed, isNull);
+        expect(find.text('Image unavailable'), findsOneWidget);
+        expect(
+          tester
+              .widget<OutlinedButton>(
+                find.byKey(
+                  const Key(
+                    'community-moderation-reject-${_ModerationRepository.postId}',
+                  ),
+                ),
+              )
+              .onPressed,
+          isNotNull,
+        );
+        expect(repository.moderationCalls, 0);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  });
+
   group('moderation refresh rebuilds from the new readback', () {
     late _ModerationRefreshRepository repository;
 

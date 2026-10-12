@@ -27,34 +27,20 @@ class _TokenHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const light = Color(0xFFC8F3FF);
+    final scheme = Theme.of(context).colorScheme;
+    final light = scheme.onSurfaceVariant;
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF12394E), Color(0xFF071923)],
+          colors: [scheme.surfaceContainerHigh, scheme.surfaceContainerLow],
         ),
         borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x26071923),
-            blurRadius: 28,
-            offset: Offset(0, 14),
-          ),
-        ],
       ),
       child: Stack(
         children: [
-          PositionedDirectional(
-            end: -18,
-            bottom: -6,
-            child: Opacity(
-              opacity: 0.42,
-              child: const BilCoachPortrait(height: 210, fit: BoxFit.contain),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.all(22),
             child: ConstrainedBox(
@@ -62,7 +48,10 @@ class _TokenHero extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 12,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -71,13 +60,13 @@ class _TokenHero extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color:
-                              (active ? const Color(0xFF65D59A) : Colors.white)
+                              (active
+                                      ? scheme.primary
+                                      : scheme.onSurfaceVariant)
                                   .withValues(alpha: 0.14),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
-                            color: active
-                                ? const Color(0xFF65D59A)
-                                : Colors.white54,
+                            color: active ? scheme.primary : scheme.outline,
                           ),
                         ),
                         child: Text(
@@ -98,11 +87,21 @@ class _TokenHero extends StatelessWidget {
                                 ),
                           style: TextStyle(
                             color: active
-                                ? const Color(0xFF8BE6B5)
-                                : Colors.white,
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant,
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.7,
+                          ),
+                        ),
+                      ),
+                      const ClipOval(
+                        child: SizedBox(
+                          width: 64,
+                          height: 64,
+                          child: BilCoachPortrait(
+                            height: 64,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
@@ -111,8 +110,8 @@ class _TokenHero extends StatelessWidget {
                   const SizedBox(height: 18),
                   Text(
                     _number(totalRemaining),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: scheme.onSurface,
                       fontSize: 38,
                       height: 1,
                       fontWeight: FontWeight.w900,
@@ -120,8 +119,14 @@ class _TokenHero extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  const Text(
-                    'BIL AI Tokens',
+                  Text(
+                    t(
+                      'BIL AI Tokens',
+                      'توكنز BIL AI',
+                      'Jetons BIL AI',
+                      'Tokens BIL AI',
+                      'BIL AI Tokenleri',
+                    ),
                     style: TextStyle(
                       color: light,
                       fontSize: 16,
@@ -134,10 +139,10 @@ class _TokenHero extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(99),
                       child: LinearProgressIndicator(
-                        value: 1 - spentFraction,
+                        value: weeklyLimit <= 0 ? 0 : 1 - spentFraction,
                         minHeight: 7,
-                        backgroundColor: Colors.white.withValues(alpha: 0.13),
-                        valueColor: const AlwaysStoppedAnimation(light),
+                        backgroundColor: scheme.outlineVariant,
+                        valueColor: AlwaysStoppedAnimation(light),
                       ),
                     ),
                   ),
@@ -150,26 +155,20 @@ class _TokenHero extends StatelessWidget {
                       '${_number(weeklyRemaining)} de ${_number(weeklyLimit)} esta semana',
                       'Bu hafta ${_number(weeklyLimit)} tokenden ${_number(weeklyRemaining)} kaldı',
                     ),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: scheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   if (paidRemaining > 0)
                     Text(
                       '${_number(paidRemaining)} ${t('non-expiring Boost', 'Boost لا تنتهي صلاحيته', 'Boost sans expiration', 'Boost sin caducidad', 'süresiz Boost')}',
-                      style: const TextStyle(
-                        color: Color(0xBFFFFFFF),
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: light, fontSize: 12),
                     ),
                   Text(
                     '${t('Current period', 'الفترة الحالية', 'Période actuelle', 'Periodo actual', 'Mevcut dönem')}: ${_periodDate(context, weekStart)} – ${_periodDate(context, resetAt)}',
                     key: const Key('ai-coach-current-period'),
-                    style: const TextStyle(
-                      color: Color(0xBFFFFFFF),
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: light, fontSize: 12),
                   ),
                 ],
               ),
@@ -195,16 +194,15 @@ class _PremiumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return Material(
-      color: dark ? const Color(0xFF0B0D10) : Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
-        side: BorderSide(color: scheme.outlineVariant),
+    return Container(
+      decoration: BilPearlFinish.panel(
+        context,
+        radius: BorderRadius.circular(22),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(padding: const EdgeInsets.all(18), child: child),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Padding(padding: const EdgeInsets.all(18), child: child),
+      ),
     );
   }
 }
@@ -219,15 +217,7 @@ class _SectionTitle extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: .10),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: scheme.primary),
-        ),
+        Icon(icon, color: scheme.onSurfaceVariant, size: 22),
         const SizedBox(width: 11),
         Expanded(
           child: Text(
@@ -288,12 +278,19 @@ class _ConsentTile extends StatelessWidget {
   final String subtitle;
 
   @override
-  Widget build(BuildContext context) => BilPremiumConsentToggle(
-    icon: icon,
-    title: title,
-    subtitle: subtitle,
+  Widget build(BuildContext context) => SwitchListTile.adaptive(
+    contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+    secondary: Icon(
+      icon,
+      size: 22,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    ),
+    title: Text(title),
+    subtitle: Text(
+      subtitle,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.5),
+    ),
     value: value,
     onChanged: enabled ? onChanged : null,
-    loading: !enabled,
   );
 }

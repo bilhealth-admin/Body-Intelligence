@@ -1,3 +1,4 @@
+import 'unit_food_evidence.dart';
 import 'recipe_serving_evidence.dart';
 
 import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
@@ -9,13 +10,19 @@ enum MealFoodEvidenceState { legacy, valid, invalid }
 /// Validates the complete immutable basis and its compatibility projection.
 /// An invalid modern snapshot is unavailable evidence, never a legacy fallback.
 final class MealFoodEvidence {
-  MealFoodEvidence._(this.item, this.state, this.portion, [this.recipe])
-    : _nutrients = portion?.nutrients;
+  MealFoodEvidence._(
+    this.item,
+    this.state,
+    this.portion, [
+    this.recipe,
+    this.unit,
+  ]) : _nutrients = portion?.nutrients;
 
   factory MealFoodEvidence.read(MealItem item, {String? ownerKey}) {
     final raw = item.foodEvidenceJson;
     if (raw == null) {
       if (item.foodSourceSnapshot.startsWith('coach_food_v2:') ||
+          item.foodSourceSnapshot.startsWith(UnitFoodEvidence.sourcePrefix) ||
           item.foodSourceSnapshot.startsWith(
             RecipeServingEvidence.sourcePrefix,
           )) {
@@ -24,6 +31,36 @@ final class MealFoodEvidence {
       return MealFoodEvidence._(item, MealFoodEvidenceState.legacy, null);
     }
     try {
+      if (item.foodSourceSnapshot.startsWith(UnitFoodEvidence.sourcePrefix)) {
+        final unit = UnitFoodEvidence.decode(raw);
+        final expectedMask = TrackedNutrient.values.fold<int>(
+          0,
+          (mask, n) => unit.value(foodNutrient(n)) == null
+              ? mask
+              : mask | NutrientEvidenceMask.bit(n),
+        );
+        final matches =
+            (ownerKey == null || unit.ownerKey == ownerKey) &&
+            _near(item.quantity, unit.quantity) &&
+            _near(item.servingSizeSnapshot, unit.basisQuantity) &&
+            item.servingUnitSnapshot == unit.unit &&
+            !item.foodVerifiedSnapshot &&
+            item.foodSourceSnapshot == unit.sourceLabel &&
+            item.nutrientEvidenceMask == expectedMask &&
+            TrackedNutrient.values.every(
+              (n) => _near(
+                _legacyValue(item, n),
+                unit.value(foodNutrient(n)) ?? 0,
+              ),
+            );
+        return MealFoodEvidence._(
+          item,
+          matches ? MealFoodEvidenceState.valid : MealFoodEvidenceState.invalid,
+          null,
+          null,
+          matches ? unit : null,
+        );
+      }
       if (item.foodSourceSnapshot.startsWith(
         RecipeServingEvidence.sourcePrefix,
       )) {
@@ -95,7 +132,8 @@ final class MealFoodEvidence {
   final MealFoodEvidenceState state;
   final CoachFoodPortion? portion;
   final RecipeServingEvidence? recipe;
-  String? get foodName => portion?.food.name ?? recipe?.name;
+  final UnitFoodEvidence? unit;
+  String? get foodName => portion?.food.name ?? recipe?.name ?? unit?.name;
   final CoachFoodNutrients? _nutrients;
 
   bool get isModern => state != MealFoodEvidenceState.legacy;
@@ -104,6 +142,7 @@ final class MealFoodEvidence {
   double? value(TrackedNutrient nutrient) {
     if (state == MealFoodEvidenceState.invalid) return null;
     if (recipe != null) return recipe!.value(foodNutrient(nutrient));
+    if (unit != null) return unit!.value(foodNutrient(nutrient));
     final modern = portion;
     if (modern != null) return _nutrients![foodNutrient(nutrient)];
     final raw = _legacyValue(item, nutrient);
@@ -122,6 +161,7 @@ final class MealFoodEvidence {
   double? fullValue(FoodNutrient nutrient) {
     if (state == MealFoodEvidenceState.invalid) return null;
     if (recipe != null) return recipe!.value(nutrient);
+    if (unit != null) return unit!.value(nutrient);
     if (portion != null) return _nutrients![nutrient];
     for (final tracked in TrackedNutrient.values) {
       if (foodNutrient(tracked) == nutrient) return value(tracked);

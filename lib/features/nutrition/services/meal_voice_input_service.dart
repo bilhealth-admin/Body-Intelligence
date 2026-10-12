@@ -8,7 +8,9 @@ import '../../../app/localization/runtime_copy_meal_voice.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import 'bil_speech_to_text.dart';
 import 'meal_voice_candidate.dart';
+import 'meal_voice_session.dart';
 import '../presentation/bil_meal_voice_capture_dialog.dart';
+import '../presentation/bil_meal_voice_session_panel.dart';
 
 typedef MealVoicePermissionGate = Future<bool> Function(BuildContext context);
 
@@ -58,6 +60,7 @@ class MealVoiceInputService {
     required String localeId,
     required bool arabic,
   }) async {
+    if (!VoiceCaptureLease.acquire(this)) return null;
     try {
       final gate = permissionGate;
       final permissionGranted = gate == null
@@ -84,7 +87,11 @@ class MealVoiceInputService {
       // Each Quick Add voice invocation owns its recognizer subscription.
       // Releasing it here prevents stale EventChannel listeners from receiving
       // results during a later attempt or after the route has closed.
-      await _speech.dispose();
+      try {
+        await _speech.dispose();
+      } finally {
+        VoiceCaptureLease.release(this);
+      }
     }
   }
 
@@ -187,151 +194,69 @@ class MealVoiceInputService {
     required BuildContext context,
     required String localeId,
   }) async {
-    var transcript = '';
-    var userEdited = false;
-    MealVoiceFailure? failure;
-    StateSetter? refreshDialog;
-    var dialogActive = true;
-    Timer? timeout;
-    final editor = TextEditingController();
-    final available = await _speech.initialize(
-      onError: (error) {
-        failure = classifyMealVoiceFailure(error.errorMsg);
-        if (dialogActive) refreshDialog?.call(() {});
-      },
-    );
-    if (!available || !context.mounted) {
-      editor.dispose();
-      if (context.mounted) {
-        await _showFailure(context, MealVoiceFailure.recognizerUnavailable);
-      }
-      return null;
-    }
-
-    final locales = await _speech.locales();
-    final selectedLocale = MealVoiceLocaleResolver.resolve(
-      appLanguage: localeId,
+    final session = MealVoiceSession(
+      speech: _speech,
+      appLocale: localeId,
       deviceLocale: WidgetsBinding.instance.platformDispatcher.locale
           .toLanguageTag(),
-      availableLocales: locales.map((locale) => locale.localeId),
     );
-    if (selectedLocale == null) {
-      editor.dispose();
-      if (context.mounted) {
-        await _showFailure(context, MealVoiceFailure.localeUnavailable);
-      }
-      return null;
-    }
-    if (!context.mounted) {
-      editor.dispose();
-      return null;
-    }
-
-    await _speech.listen(
-      onResult: (result) {
-        transcript = result.recognizedWords.trim();
-        if (!userEdited) {
-          editor.value = TextEditingValue(
-            text: transcript,
-            selection: TextSelection.collapsed(offset: transcript.length),
-          );
-        }
-        if (result.isFinal && transcript.isEmpty) {
-          failure = MealVoiceFailure.noMatch;
-        }
-        if (dialogActive) refreshDialog?.call(() {});
-      },
-      listenOptions: SpeechListenOptions(
-        localeId: selectedLocale,
-        listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 4),
-        listenMode: ListenMode.confirmation,
-        partialResults: true,
-        cancelOnError: true,
-      ),
-    );
-    timeout = Timer(const Duration(seconds: 31), () async {
-      if (!_speech.isListening) return;
-      failure = transcript.isEmpty
-          ? MealVoiceFailure.timeout
-          : MealVoiceFailure.noMatch;
-      await _speech.cancel();
-      if (dialogActive) refreshDialog?.call(() {});
-    });
-
-    if (!context.mounted) {
-      timeout.cancel();
-      editor.dispose();
-      return null;
-    }
-    var accepted = false;
-    var editing = false;
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          refreshDialog = setDialogState;
-          final copy = _VoiceCopy.forLocaleTag(
-            BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
-          );
-          return BilMealVoiceCaptureDialog(
-            title: copy.title,
-            instructions: copy.instructions,
-            transcript: editor.text,
-            editor: editor,
-            editing: editing,
-            cancelLabel: copy.cancel,
-            useLabel: copy.useForSearch,
-            error: failure == null ? null : copy.failure(failure!),
-            onEdit: () => setDialogState(() {
-              editing = true;
-              userEdited = true;
-            }),
-            onCancel: () {
-              unawaited(() async {
-                dialogActive = false;
-                refreshDialog = null;
-                await _speech.cancel();
-                if (dialogContext.mounted) Navigator.pop(dialogContext);
-              }());
-            },
-            onUse: failure != null || editor.text.trim().isEmpty
-                ? null
-                : () {
-                    unawaited(() async {
-                      accepted = true;
-                      dialogActive = false;
-                      refreshDialog = null;
-                      await _speech.stop();
-                      if (dialogContext.mounted) Navigator.pop(dialogContext);
-                    }());
-                  },
-          );
-        },
-      ),
-    );
-    dialogActive = false;
-    refreshDialog = null;
-    timeout.cancel();
-    if (_speech.isListening) await _speech.stop();
-    if (!accepted) {
-      editor.dispose();
-      return null;
-    }
+    String? reviewedText;
     try {
-      final candidate = MealVoiceCandidateParser.parse(
-        transcript: editor.text,
-        localeId: selectedLocale,
+      final route = DialogRoute<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => BilMealVoiceSessionPanel(
+          session: session,
+          builder: (context) {
+            final copy = _VoiceCopy.forLocaleTag(
+              BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+            );
+            return BilMealVoiceCaptureDialog(
+              title: copy.title,
+              instructions: copy.instructions,
+              transcript: session.editor.text,
+              editor: session.editor,
+              editing: true,
+              phase: session.phase,
+              cancelLabel: copy.cancel,
+              useLabel: copy.useForSearch,
+              error: session.failure == null
+                  ? null
+                  : copy.failure(session.failure!),
+              onEdit: session.beginManualEdit,
+              onTextChanged: (_) => session.textChanged(),
+              onRetry: session.starting
+                  ? null
+                  : () => unawaited(session.start()),
+              onStop: () => unawaited(session.stop()),
+              onCancel: () {
+                unawaited(session.close());
+                Navigator.pop(dialogContext);
+              },
+              onUse: !session.canAccept
+                  ? null
+                  : () {
+                      reviewedText = session.editor.text.trim();
+                      unawaited(session.close());
+                      Navigator.pop(dialogContext);
+                    },
+            );
+          },
+        ),
       );
-      editor.dispose();
-      return candidate;
-    } on FormatException {
-      editor.dispose();
-      if (context.mounted) {
-        await _showFailure(context, MealVoiceFailure.noMatch);
-      }
-      return null;
+      final popped = Navigator.of(context, rootNavigator: true).push(route);
+      // Navigator disposal also ends this lease, even if no pop result arrives.
+      await Future.any<void>([popped, route.completed.then<void>((_) {})]);
+      await session.close();
+      await route.completed;
+      if (reviewedText == null) return null;
+      return MealVoiceCandidateParser.parse(
+        transcript: reviewedText!,
+        localeId: session.selectedLocale ?? localeId,
+      );
+    } finally {
+      await session.close();
+      session.dispose();
     }
   }
 

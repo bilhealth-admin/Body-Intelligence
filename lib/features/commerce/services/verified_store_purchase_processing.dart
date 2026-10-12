@@ -31,13 +31,14 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
   ) async {
     for (final update in updates) {
       final purchase = update.purchase;
-      if (_disposed) {
+      if (_disposed || !_storeVisit.isCurrent(update.visit)) {
         final attempt = update.transactionAttempt;
         if (attempt != null) {
           _finishTransactionAttempt(attempt, settled: false);
         }
         continue;
       }
+      checkoutTrace?.mark(StorePurchaseStage.nativeCallback);
       final origin = _purchaseEventOriginFor(purchase);
       switch (purchase.status) {
         case PurchaseStatus.pending:
@@ -93,21 +94,24 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
             purchase,
             origin: origin,
             transactionAttempt: update.transactionAttempt,
+            expectedVisit: update.visit,
           );
       }
     }
   }
 
-  Future<void> _handleVerifiedPurchase(
+  Future<void> _handleOwnedVerifiedPurchase(
     PurchaseDetails purchase, {
     required _StorePurchaseEventOrigin origin,
     required _StoreTransactionAttempt? transactionAttempt,
   }) async {
     var transactionSettled = false;
+    var acknowledgementScheduled = false;
     try {
       final boost = purchase.productID == StoreCatalogConfiguration.aiBoost;
       final ownerId = _currentStoreOwnerId();
       if (ownerId == null) return;
+      checkoutTrace?.mark(StorePurchaseStage.verificationStarted);
       final verification = boost
           ? await _verifyBoostOnServer(purchase, ownerId: ownerId)
           : await _verifyOnServer(purchase, ownerId: ownerId);
@@ -120,39 +124,26 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       if (!boost && verifiedActive && purchase is GooglePlayPurchaseDetails) {
         _activeGooglePurchase = purchase;
       }
-      // Google consumables are consumed by the server only after the durable,
-      // idempotent credit succeeds. StoreKit still requires the transaction to
-      // be completed on-device. A server failure deliberately remains
-      // unfinished and therefore fail-closed.
-      if (verifiedReceipt && purchase.pendingCompletePurchase) {
-        if (!boost || defaultTargetPlatform != TargetPlatform.android) {
-          try {
-            await _purchase
-                .completePurchase(purchase)
-                .timeout(const Duration(seconds: 12));
-          } on Object {
-            // The receipt is already server-verified. StoreKit 2 can
-            // occasionally fail to settle the plugin completion Future even
-            // after Transaction.finish, or leave the transaction unfinished.
-            // Confirm native state before turning that into a purchase error.
-            final recovered = await _recoverVerifiedStoreKit2Completion(
-              purchase,
-            );
-            if (!recovered) {
-              state = VerifiedStoreState.failed;
-              messageCode = 'verification_failed';
-              if (origin == _StorePurchaseEventOrigin.purchase) {
-                _clearPurchaseInitiation();
-              }
-              notifyListeners();
-              return;
-            }
-          }
-        }
+      // A durable, owner-checked benefit is ready before native finish. Finish
+      // is an acknowledgement lane, not an entitlement or credit authority.
+      if (verifiedActive) {
+        lastDeliveryIsUserPurchase =
+            origin == _StorePurchaseEventOrigin.purchase &&
+            purchase.status == PurchaseStatus.purchased;
+        checkoutTrace?.mark(StorePurchaseStage.benefitPublished);
+        _recordBenefit(purchase, ownerId, active: true);
+        lastVerifiedProductId = purchase.productID;
+        state = VerifiedStoreState.verified;
+        messageCode = boost ? 'ai_boost_verified' : 'subscription_verified';
+        notifyListeners();
+      } else if (verification ==
+          _StoreReceiptVerificationResult.verifiedInactive) {
+        _recordBenefit(purchase, ownerId, active: false);
+        notifyListeners();
       }
       transactionSettled = verifiedReceipt;
-      // completePurchase can yield to the platform. Never publish the old
-      // account's receipt result into a newer signed-in member's Plans state.
+      // Receipt verification remains serialized. Native acknowledgement owns
+      // no benefit authority and must not hold the next distinct receipt.
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
       switch (verification) {
         case _StoreReceiptVerificationResult.ownershipConflict:
@@ -165,6 +156,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           state = VerifiedStoreState.verified;
           messageCode = boost ? 'ai_boost_verified' : 'subscription_verified';
         case _StoreReceiptVerificationResult.verifiedInactive:
+          _recordBenefit(purchase, ownerId, active: false);
           lastVerifiedProductId = purchase.productID;
           // An authentic but expired/refunded/revoked transaction must stop
           // replaying without granting paid access.
@@ -185,8 +177,22 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
         _clearPurchaseInitiation();
       }
       notifyListeners();
+      if (verifiedReceipt) {
+        acknowledgementScheduled = true;
+        unawaited(
+          _finishVerifiedNativeReceipt(
+            purchase,
+            visit: _storeVisit.capture(),
+            generation: _purchaseEventGeneration,
+            benefitRevision: verifiedBenefitRevision,
+            active: verifiedActive,
+            trace: checkoutTrace,
+            transactionAttempt: transactionAttempt,
+          ),
+        );
+      }
     } finally {
-      if (transactionAttempt != null) {
+      if (transactionAttempt != null && !acknowledgementScheduled) {
         _finishTransactionAttempt(
           transactionAttempt,
           settled: transactionSettled,
@@ -230,6 +236,15 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     final updates = <_QueuedStorePurchaseUpdate>[];
     var cooledDownReplaySuppressed = false;
     for (final purchase in purchases) {
+      if ((!handlesBoost &&
+              purchase.productID == StoreCatalogConfiguration.aiBoost) ||
+          (StoreCatalogConfiguration.bindingForProduct(purchase.productID) ==
+                  null &&
+              purchase.productID != StoreCatalogConfiguration.aiBoost)) {
+        continue;
+      }
+      final visit = _storeVisit.capture();
+      if (visit.ownerId == null) continue;
       final transactionAttempt = _transactionAttemptFor(purchase);
       if (transactionAttempt != null) {
         switch (_reserveTransactionAttempt(transactionAttempt)) {
@@ -246,6 +261,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
         _QueuedStorePurchaseUpdate(
           purchase: purchase,
           transactionAttempt: transactionAttempt,
+          visit: visit,
         ),
       );
     }
@@ -408,8 +424,15 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       ? Supabase.instance.client.auth.currentUser?.id
       : null;
 
-  bool _isCurrentStoreOwner(String ownerId) =>
-      _currentStoreOwnerId() == ownerId;
+  bool _isCurrentStoreOwner(String ownerId) {
+    if (_currentStoreOwnerId() != ownerId) return false;
+    try {
+      CommunityOwnerOperation.checkCurrent();
+      return true;
+    } on Object {
+      return false;
+    }
+  }
 
   void _markServerVerifiedInactive(
     String ownerId, {
@@ -475,146 +498,6 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     }
   }
 
-  Future<_StoreReceiptVerificationResult> _verifyOnServer(
-    PurchaseDetails purchase, {
-    required String ownerId,
-  }) async {
-    if (StoreCatalogConfiguration.bindingForProduct(purchase.productID) ==
-        null) {
-      return _StoreReceiptVerificationResult.failed;
-    }
-    try {
-      if (!_isCurrentStoreOwner(ownerId)) {
-        return _StoreReceiptVerificationResult.failed;
-      }
-      final body = <String, Object?>{
-        'action': 'verify_purchase',
-        'product_id': purchase.productID,
-        'purchase_id': purchase.purchaseID,
-        'source': purchase.verificationData.source,
-        'verification_data': purchase.verificationData.serverVerificationData,
-      };
-      final protectedBody = await BilMobileIntegrityService.instance
-          .protect(action: 'store.verify_purchase', payload: body)
-          .timeout(const Duration(seconds: 12));
-      if (!_isCurrentStoreOwner(ownerId)) {
-        return _StoreReceiptVerificationResult.failed;
-      }
-      final response = await Supabase.instance.client.functions
-          .invoke('verify-store-purchase', body: protectedBody)
-          .timeout(const Duration(seconds: 30));
-      final data = response.data;
-      if (!_isCurrentStoreOwner(ownerId) ||
-          response.status != 200 ||
-          data is! Map ||
-          data['verified'] != true) {
-        return _verificationFailure(data);
-      }
-      final entitlementActive = data['entitlement_active'];
-      if (entitlementActive == true) {
-        // If a prior receipt was authoritatively inactive, retain its
-        // watermark until the canonical active row proves it is newer. This
-        // preserves fail-closed behavior during read-replica lag.
-        // The verification function persists first, but the read replica can
-        // briefly lag. Retry the read a few times before reporting a false
-        // verification failure to the native purchase queue.
-        for (var attempt = 0; attempt < 3; attempt++) {
-          if (!_isCurrentStoreOwner(ownerId)) {
-            return _StoreReceiptVerificationResult.failed;
-          }
-          await refreshEntitlement();
-          if (!_isCurrentStoreOwner(ownerId)) {
-            return _StoreReceiptVerificationResult.failed;
-          }
-          if (entitlement?.grantsPaidAccess == true) break;
-          if (attempt < 2) {
-            await Future<void>.delayed(
-              Duration(milliseconds: attempt == 0 ? 150 : 300),
-            );
-          }
-        }
-        // An active response without a durable, access-granting canonical row
-        // stays fail-closed. Completing it would discard the StoreKit evidence
-        // before BIL can prove the entitlement.
-        return entitlement?.grantsPaidAccess == true
-            ? _StoreReceiptVerificationResult.verifiedActive
-            : _StoreReceiptVerificationResult.failed;
-      }
-      if (entitlementActive == false) {
-        // The server has verified and persisted an inactive lifecycle. Clear
-        // any stale local paid snapshot first: a read failure must not retain
-        // access after the server explicitly says it is inactive.
-        _markServerVerifiedInactive(
-          ownerId,
-          verifiedAt: DateTime.tryParse('${data['verified_at']}')?.toUtc(),
-        );
-        await refreshEntitlement();
-        if (!_isCurrentStoreOwner(ownerId)) {
-          return _StoreReceiptVerificationResult.failed;
-        }
-        // The marker rejects only older replica rows. If the canonical read
-        // already observes a newer active verification, publish that current
-        // entitlement instead of reporting an obsolete empty restore.
-        return entitlement?.grantsPaidAccess == true
-            ? _StoreReceiptVerificationResult.verifiedActive
-            : _StoreReceiptVerificationResult.verifiedInactive;
-      }
-      return _StoreReceiptVerificationResult.failed;
-    } on FunctionException catch (error) {
-      return _verificationFailure(error.details);
-    } on Object {
-      return _StoreReceiptVerificationResult.failed;
-    }
-  }
-
-  Future<_StoreReceiptVerificationResult> _verifyBoostOnServer(
-    PurchaseDetails purchase, {
-    required String ownerId,
-  }) async {
-    if (purchase.productID != StoreCatalogConfiguration.aiBoost) {
-      return _StoreReceiptVerificationResult.failed;
-    }
-    try {
-      if (!_isCurrentStoreOwner(ownerId)) {
-        return _StoreReceiptVerificationResult.failed;
-      }
-      final body = <String, Object?>{
-        'action': 'verify_ai_boost',
-        'product_id': purchase.productID,
-        'source': purchase.verificationData.source,
-        'verification_data': purchase.verificationData.serverVerificationData,
-      };
-      final protectedBody = await BilMobileIntegrityService.instance
-          .protect(action: 'store.verify_ai_boost', payload: body)
-          .timeout(const Duration(seconds: 12));
-      if (!_isCurrentStoreOwner(ownerId)) {
-        return _StoreReceiptVerificationResult.failed;
-      }
-      final response = await Supabase.instance.client.functions
-          .invoke('verify-store-purchase', body: protectedBody)
-          .timeout(const Duration(seconds: 30));
-      final data = response.data;
-      if (!_isCurrentStoreOwner(ownerId)) {
-        return _StoreReceiptVerificationResult.failed;
-      }
-      return response.status == 200 && data is Map && data['verified'] == true
-          ? _StoreReceiptVerificationResult.verifiedActive
-          : _verificationFailure(data);
-    } on FunctionException catch (error) {
-      return _verificationFailure(error.details);
-    } on Object {
-      return _StoreReceiptVerificationResult.failed;
-    }
-  }
-
-  _StoreReceiptVerificationResult _verificationFailure(Object? data) {
-    // Allowlist the server's public code; never render raw error/receipt data
-    // or the identity of the other account in the storefront.
-    return data is Map && data['error'] == 'purchase_owned_by_another_account'
-        ? _StoreReceiptVerificationResult.ownershipConflict
-        : _StoreReceiptVerificationResult.failed;
-  }
-
   _StorePurchaseEventOrigin _purchaseEventOriginFor(PurchaseDetails purchase) {
     if (_restoring) return _StorePurchaseEventOrigin.restore;
     if (_purchaseInitiatedByThisService &&
@@ -663,10 +546,12 @@ final class _QueuedStorePurchaseUpdate {
   const _QueuedStorePurchaseUpdate({
     required this.purchase,
     required this.transactionAttempt,
+    required this.visit,
   });
 
   final PurchaseDetails purchase;
   final _StoreTransactionAttempt? transactionAttempt;
+  final StoreAccountSnapshot visit;
 }
 
 final class _StoreTransactionAttempt {

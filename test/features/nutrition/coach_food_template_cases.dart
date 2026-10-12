@@ -111,7 +111,7 @@ void _foodTemplateCases() {
         MealRepository(
           other,
         ).instantiateTemplate(template: template, date: DateTime(2026, 10, 7)),
-        _conflict(CoachMealConflictReason.invalidEvidence),
+        _conflict(CoachMealConflictReason.ownerChanged),
       );
       expect(await other.select(other.meals).get(), isEmpty);
       expect(await other.select(other.mealItems).get(), isEmpty);

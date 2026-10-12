@@ -1,0 +1,62 @@
+{
+  "label": "native-finish-next-receipt-baseline-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "--plain-name",
+    "verified native finish cannot block a distinct receipt in the same batch"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791764346.190047,
+  "files": {
+    "test/features/commerce/store_transaction_queue_test.dart": "ff45101114d7fc2386c35babc5da46c1ec80697a1e2cf4ddc8bc30c7c2424b54"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "ece029a63d49bf2fe9b35ec63eb5f736f456a0197f2503d4df735f14e0d4dac9",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "--plain-name",
+    "verified native finish cannot block a distinct receipt in the same batch"
+  ],
+  "pid": 12836,
+  "exit_code": 1,
+  "finished": 1791764353.4263875,
+  "end_fingerprint": "ece029a63d49bf2fe9b35ec63eb5f736f456a0197f2503d4df735f14e0d4dac9",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "verified native finish cannot block a distinct receipt in the same batch",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "failure"
+    }
+  ],
+  "counts": {
+    "success": 0,
+    "failure": 1,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 3,
+      "error": "Expected: <2>\n  Actual: <1>\nServer verification stays serialized, but a verified native acknowledgement must not hold the next distinct receipt.\n",
+      "stackTrace": "package:matcher                                                 expect\npackage:flutter_test/src/widget_tester.dart 473:18              expect\ntest\\features\\commerce\\store_transaction_queue_test.dart 403:7  main.<fn>\n",
+      "isFailure": true,
+      "type": "error",
+      "time": 4653
+    }
+  ],
+  "incomplete_tests": []
+}

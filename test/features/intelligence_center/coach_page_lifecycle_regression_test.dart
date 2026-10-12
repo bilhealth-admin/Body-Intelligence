@@ -14,6 +14,7 @@ import 'package:body_intelligence_log/features/commerce/domain/subscription_stat
 import 'package:body_intelligence_log/features/commerce/presentation/premium_route_glass_gate.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
+import 'package:body_intelligence_log/features/intelligence_center/app_commands/coach_health_brief_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_message.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_anchored_history.dart';
@@ -91,7 +92,17 @@ Future<GoRouter> _mount(
   double textScale = 1,
   Stream<String?>? owners,
   Future<CoachContextSnapshot> Function()? contextLoader,
+  bool waitForBrief = false,
 }) async {
+  final messenger = tester.binding.defaultBinaryMessenger;
+  const tts = MethodChannel('bil/tts');
+  if (messenger.checkMockMessageHandler(tts.name, null)) {
+    messenger.setMockMethodCallHandler(tts, (call) async {
+      if (call.method != 'stop') throw MissingPluginException(call.method);
+      return null;
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(tts, null));
+  }
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -137,6 +148,12 @@ Future<GoRouter> _mount(
     ],
   );
   addTearDown(router.dispose);
+  // Close subscribers before NativeDatabase.close even when an assertion fails.
+  // The previous fixture waited for database shutdown with a live page mounted.
+  addTearDown(() async {
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -222,7 +239,30 @@ Future<GoRouter> _mount(
     ),
   );
   await tester.pumpAndSettle();
+  if (waitForBrief) await _settleBoundedBrief(tester);
   return router;
+}
+
+Future<void> _settleBoundedBrief(WidgetTester tester) async {
+  final container = ProviderScope.containerOf(
+    tester.element(find.byType(IntelligenceCenterPage)),
+  );
+  // pumpAndSettle drains frames, not SQLite's native I/O. Observe the real
+  // bounded provider rather than replacing its data with a fake brief.
+  final timer = Stopwatch()..start();
+  while (container.read(coachHealthBriefProvider).isLoading &&
+      timer.elapsed < const Duration(seconds: 5)) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    // Riverpod schedules dependency refreshes with the next Flutter frame.
+    await tester.pump();
+  }
+  final state = container.read(coachHealthBriefProvider);
+  expect(state.isLoading, isFalse, reason: 'Real bounded brief stayed pending');
+  expect(state.hasError, isFalse, reason: '${state.error}');
+  expect(tester.takeException(), isNull);
+  await tester.pumpAndSettle();
 }
 
 Future<void> _send(

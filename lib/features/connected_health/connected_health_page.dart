@@ -1,5 +1,6 @@
 import '../commerce/presentation/optional_access_offer.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,6 @@ import '../../shared/widgets/premium_surface.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
-import '../dashboard/widgets/premium_dashboard_card_lock.dart';
 import '../global_platform/fitness_devices/ble_fitness_device_platform.dart';
 import 'connected_health_model.dart';
 import 'connected_health_copy.dart';
@@ -28,6 +28,7 @@ import 'widgets/apple_health_permission_review.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'connected_health_components.dart';
+part 'connected_health_signal_row.dart';
 part 'connected_health_source_card.dart';
 part 'connected_health_page_search.dart';
 
@@ -138,44 +139,87 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
     final fitnessDevicesUnlocked =
         verified?.authority == EntitlementAuthority.verifiedServer &&
         verified?.plan != CommercePlan.free;
+    final pageTitle = defaultTargetPlatform == TargetPlatform.android
+        ? tr('Health Connect', 'Health Connect')
+        : tr('Apps & Devices', 'التطبيقات والأجهزة');
+    final titleStyle =
+        Theme.of(context).appBarTheme.titleTextStyle ??
+        Theme.of(context).textTheme.titleLarge!;
+    // These are the explicit AppBar slot widths below, not a text scale-down.
+    final availableTitleWidth = math.max(
+      1.0,
+      MediaQuery.sizeOf(context).width - 56 - 96 - 32,
+    );
+    final toolbarHeight = math.max(
+      56.0,
+      _healthTextHeight(context, pageTitle, titleStyle, availableTitleWidth) +
+          16,
+    );
+    final tabStyle = Theme.of(
+      context,
+    ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w800);
+    final tabWidth = MediaQuery.sizeOf(context).width / 2;
+    final tabHeight = math.max(
+      54.0,
+      math.max(
+            _healthTextHeight(context, tr('All', 'الكل'), tabStyle, tabWidth),
+            _healthTextHeight(
+              context,
+              tr('Connected', 'المتصلة'),
+              tabStyle,
+              tabWidth,
+            ),
+          ) +
+          16,
+    );
 
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
         appBar: AppBar(
+          leadingWidth: 56,
+          titleSpacing: 16,
+          toolbarHeight: toolbarHeight,
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/dashboard'),
             icon: const Icon(Icons.arrow_back_rounded),
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           ),
-          title: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: AlignmentDirectional.centerStart,
-            child: Text(
-              defaultTargetPlatform == TargetPlatform.android
-                  ? tr('Health Connect', 'Health Connect')
-                  : tr('Apps & Devices', 'التطبيقات والأجهزة'),
-            ),
+          title: Text(
+            pageTitle,
+            key: const Key('connected-health-page-title'),
+            style: titleStyle,
+            maxLines: 10,
+            softWrap: true,
+            overflow: TextOverflow.visible,
           ),
           actions: [
-            IconButton(
-              tooltip: tr('Connection capabilities', 'قدرات الاتصال'),
-              onPressed: () => context.push('/connected-health/capabilities'),
-              icon: const Icon(Icons.fact_check_outlined),
+            SizedBox(
+              width: 48,
+              child: IconButton(
+                tooltip: tr('Connection capabilities', 'قدرات الاتصال'),
+                onPressed: () => context.push('/connected-health/capabilities'),
+                icon: const Icon(Icons.fact_check_outlined),
+              ),
             ),
-            IconButton(
-              tooltip: tr('Search connections', 'بحث في الاتصالات'),
-              onPressed: () => _showConnectionSearch(context),
-              icon: const Icon(Icons.search_rounded),
+            SizedBox(
+              width: 48,
+              child: IconButton(
+                tooltip: tr('Search connections', 'بحث في الاتصالات'),
+                onPressed: () => _showConnectionSearch(context),
+                icon: const Icon(Icons.search_rounded),
+              ),
             ),
           ],
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(54),
+            preferredSize: Size.fromHeight(tabHeight),
             child: Row(
               children: [
                 Expanded(
                   child: _ConnectionTab(
                     label: tr('All', 'الكل'),
                     selected: !_connectedOnly,
+                    height: tabHeight,
                     onTap: () => setState(() => _connectedOnly = false),
                   ),
                 ),
@@ -183,6 +227,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                   child: _ConnectionTab(
                     label: tr('Connected', 'المتصلة'),
                     selected: _connectedOnly,
+                    height: tabHeight,
                     onTap: () => setState(() => _connectedOnly = true),
                   ),
                 ),
@@ -301,23 +346,11 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                               onOpenSettings: _openSystemSettings,
                             ),
                             const SizedBox(height: PremiumDesignTokens.spaceMd),
-                            PremiumDashboardCardLock(
-                              key: const Key('fitness-devices-premium-gate'),
-                              locked: !fitnessDevicesUnlocked,
-                              // A centered floating badge obscures the live BLE
-                              // status/action copy on compact screens. The whole
-                              // card remains a semantic Premium gate and opens
-                              // the plans route when locked.
-                              showLabel: false,
-                              title: tr(
-                                'Premium fitness device connections',
-                                'اتصال أجهزة اللياقة ضمن Premium',
-                              ),
-                              detail: tr(
-                                'Weight, body composition, and heart rate',
-                                'الوزن وتركيب الجسم ومعدل ضربات القلب',
-                              ),
-                              onTap: () {
+                            _FitnessDeviceSection(
+                              accessGranted: fitnessDevicesUnlocked,
+                              checking: subscription.isLoading,
+                              verifiedDenied: confirmedFree,
+                              onRequestAccess: () {
                                 if (confirmedFree) {
                                   showOptionalAccessOffer(
                                     context,
@@ -349,7 +382,6 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                   ),
                                 );
                               },
-                              child: const _FitnessDeviceSection(),
                             ),
                             if (!kIsWeb &&
                                 defaultTargetPlatform ==
@@ -414,7 +446,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                       height: PremiumDesignTokens.spaceSm,
                                     ),
                                     for (final signal in snapshot.signals)
-                                      ListTile(
+                                      _ConnectedSignalRow(
                                         contentPadding: EdgeInsets.zero,
                                         leading: BilFlatIcon(
                                           kind:

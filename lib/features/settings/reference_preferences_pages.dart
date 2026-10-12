@@ -3,9 +3,11 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import '../nutrition/presentation/nutrition_entry_fields.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
@@ -15,6 +17,8 @@ import '../profile/providers/user_profile_provider.dart';
 import '../nutrition/domain/macro_goal_editor.dart';
 import '../dashboard/providers/dashboard_preferences_provider.dart';
 import '../nutrition/domain/nutrient_daily_references.dart';
+import '../nutrition/domain/nutrition_goal_snapshot.dart';
+import '../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import '../nutrition/providers/nutrition_goal_defaults_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
@@ -24,6 +28,10 @@ import '../visual_2026/bil_calm_visual_scope.dart';
 part 'reference_preferences_controls.dart';
 part 'reference_preferences_numeric.dart';
 part 'reference_preferences_macros.dart';
+part 'reference_preferences_goal_legacy.dart';
+part 'reference_preferences_goal_sources.dart';
+part 'reference_preferences_goal_writes.dart';
+part 'reference_preferences_goal_editor_help.dart';
 part 'reference_preferences_email.dart';
 
 final _macroLockProvider = StreamProvider.family<bool, String>(

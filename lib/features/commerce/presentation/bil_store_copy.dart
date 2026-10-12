@@ -132,7 +132,7 @@ abstract final class BilStoreCopy {
       'boost_benefit_4': 'One-time purchase',
       'boost_benefit_5': 'Tokens stack and never expire',
       'premium': 'Premium',
-      'premium_ai_coach': 'AI Coach',
+      'premium_ai_coach': 'Premium AI Coach',
       'ai_boost': 'BIL AI Boost',
       'monthly': 'Monthly',
       'annual': 'Annual',
@@ -228,7 +228,7 @@ abstract final class BilStoreCopy {
       'boost_benefit_4': 'شراء لمرة واحدة',
       'boost_benefit_5': 'يتراكم الرصيد ولا تنتهي صلاحيته',
       'premium': 'Premium',
-      'premium_ai_coach': 'AI Coach',
+      'premium_ai_coach': 'Premium AI Coach',
       'ai_boost': 'BIL AI Boost',
       'monthly': 'شهري',
       'annual': 'سنوي',
@@ -285,7 +285,7 @@ abstract final class BilStoreCopy {
       'boost_detail':
           'BIL AI Coach prend en charge plusieurs langues et vous accompagne comme partenaire d’entraînement et de nutrition.',
       'premium': 'Premium',
-      'premium_ai_coach': 'AI Coach',
+      'premium_ai_coach': 'Premium AI Coach',
       'ai_boost': 'BIL AI Boost',
       'free_benefit_1': 'Suivi des aliments, de l’eau et du poids',
       'free_benefit_2': 'Analyses nutritionnelles essentielles',
@@ -390,7 +390,7 @@ abstract final class BilStoreCopy {
       'boost_detail':
           'BIL AI Coach admite varios idiomas y trabaja contigo como compañero de entrenamiento y nutrición.',
       'premium': 'Premium',
-      'premium_ai_coach': 'AI Coach',
+      'premium_ai_coach': 'Premium AI Coach',
       'ai_boost': 'BIL AI Boost',
       'free_benefit_1': 'Seguimiento de comida, agua y peso',
       'free_benefit_2': 'Información nutricional esencial',
@@ -492,7 +492,7 @@ abstract final class BilStoreCopy {
       'boost_detail':
           'BIL AI Coach birden fazla dili destekler ve antrenman ile beslenme ortağınız olarak yanınızda çalışır.',
       'premium': 'Premium',
-      'premium_ai_coach': 'AI Coach',
+      'premium_ai_coach': 'Premium AI Coach',
       'ai_boost': 'BIL AI Boost',
       'free_benefit_1': 'Yemek, su ve kilo takibi',
       'free_benefit_2': 'Temel beslenme bilgileri',
@@ -619,6 +619,7 @@ abstract final class BilStoreCopy {
   };
 
   static String text(String locale, String key) {
+    if (key == 'premium_ai_coach') return 'Premium AI Coach';
     final normalized = locale.replaceAll('_', '-').toLowerCase();
     final language = normalized.split('-').first;
     final english = catalogs['en']![key] ?? key;

@@ -35,41 +35,49 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
   }
 
   Future<void> _edit() async {
+    final repository = ref.read(foodRepositoryProvider);
+    final sync = ref.read(communityFoodSyncServiceProvider);
+    bool current() =>
+        mounted && identical(repository, ref.read(foodRepositoryProvider));
     final draft = await showDialog<_FoodDraft>(
       context: context,
       barrierDismissible: false,
       builder: (_) => _CustomFoodDialog(
         food: widget.food,
         onSave: (draft) async {
+          if (!current()) throw StateError('Food edit owner changed.');
           final localeCode = Localizations.localeOf(context).toLanguageTag();
-          await ref
-              .read(foodRepositoryProvider)
-              .updateCustomFood(
-                id: widget.food.id,
-                name: draft.name,
-                arabicName: draft.arabicName,
-                barcode: draft.barcode,
-                category: 'custom',
-                servingSize: draft.servingSize,
-                servingUnit: draft.servingUnit,
-                calories: draft.calories,
-                protein: draft.protein,
-                carbs: draft.carbs,
-                fats: draft.fats,
-                caloriesKnown: draft.caloriesKnown,
-                proteinKnown: draft.proteinKnown,
-                carbsKnown: draft.carbsKnown,
-                fatsKnown: draft.fatsKnown,
-                fiber: draft.fiber,
-                sodium: draft.sodium,
-                potassium: draft.potassium,
-                calcium: draft.calcium,
-                magnesium: draft.magnesium,
-                sugar: draft.sugar,
-              );
-          await ref
-              .read(communityFoodSyncServiceProvider)
-              .publishFood(widget.food.id, localeCode: localeCode);
+          await repository.updateCustomFood(
+            id: widget.food.id,
+            name: draft.name,
+            arabicName: draft.arabicName,
+            barcode: draft.barcode,
+            category: 'custom',
+            servingSize: draft.servingSize,
+            servingUnit: draft.servingUnit,
+            calories: draft.calories,
+            protein: draft.protein,
+            carbs: draft.carbs,
+            fats: draft.fats,
+            caloriesKnown: draft.caloriesKnown,
+            proteinKnown: draft.proteinKnown,
+            carbsKnown: draft.carbsKnown,
+            fatsKnown: draft.fatsKnown,
+            fiber: draft.fiber,
+            sodium: draft.sodium,
+            potassium: draft.potassium,
+            calcium: draft.calcium,
+            magnesium: draft.magnesium,
+            sugar: draft.sugar,
+            source: draft.source,
+            phosphorus: draft.phosphorus,
+            iron: draft.iron,
+            vitaminC: draft.vitaminC,
+            additionalNutrients: draft.additionalNutrients,
+            isCurrent: current,
+          );
+          if (!current()) throw StateError('Food edit owner changed.');
+          await sync.publishFood(widget.food.id, localeCode: localeCode);
         },
       ),
     );
@@ -218,6 +226,44 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                     // copy. Translating them can alter the cited dataset and
                     // also routes arbitrary catalog data through RuntimeCopy.
                     Text('${t('Source')}: ${food.source}'),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: Text(t('Sources')),
+                        onPressed: () async {
+                          final source = Uri.tryParse(food.source.trim());
+                          final link =
+                              source?.scheme == 'https' &&
+                                  source!.host.isNotEmpty
+                              ? source
+                              : food.source.contains('USDA')
+                              ? Uri.parse('https://fdc.nal.usda.gov/')
+                              : null;
+                          if (link != null) {
+                            final opened = await launchUrl(
+                              link,
+                              mode: LaunchMode.externalApplication,
+                            );
+                            if (opened || !context.mounted) return;
+                          }
+                          if (!context.mounted) return;
+                          await showDialog<void>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(t('Source')),
+                              content: SelectableText(food.source),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text(t('OK')),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     Text(
                       food.verified
                           ? t('Verified catalog record')

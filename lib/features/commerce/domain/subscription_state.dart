@@ -26,6 +26,7 @@ final class SubscriptionState {
     this.currentPeriodEndsAt,
     this.trialEndsAt,
     this.gracePeriodEndsAt,
+    this.verifiedAt,
   }) : entitlements = Set.unmodifiable(entitlements) {
     if (authority == EntitlementAuthority.localDefault &&
         (isPurchasable || canRestorePurchases)) {
@@ -48,6 +49,7 @@ final class SubscriptionState {
   final DateTime? currentPeriodEndsAt;
   final DateTime? trialEndsAt;
   final DateTime? gracePeriodEndsAt;
+  final DateTime? verifiedAt;
   final bool isPurchasable;
   final bool canRestorePurchases;
 

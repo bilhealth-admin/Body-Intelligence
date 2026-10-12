@@ -333,9 +333,8 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
             ),
           ),
           const SizedBox(height: 16),
-          PremiumNutritionGlass(
+          PremiumNutritionFieldsGroup(
             key: const Key('daily-log-food-premium-group'),
-            borderRadius: 14,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -502,13 +501,18 @@ class _NutritionFactRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          '${value.toStringAsFixed(decimals)} $unit',
-          textDirection: TextDirection.ltr,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+        PremiumNutritionGlass(
+          compact: true,
+          showLabel: false,
+          child: Text(
+            value.toStringAsFixed(decimals),
+            textDirection: TextDirection.ltr,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
         ),
+        Text(unit),
       ],
     );
   }

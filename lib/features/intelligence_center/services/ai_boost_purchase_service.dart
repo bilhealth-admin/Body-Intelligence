@@ -11,8 +11,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../../commerce/domain/store_catalog_configuration.dart';
+import '../../commerce/domain/store_benefit_delivery.dart';
+import '../../commerce/services/store_purchase_trace.dart';
 import '../../commerce/services/verified_store_catalog_adapter.dart';
 import '../../commerce/services/verified_store_purchase_service.dart';
+import '../../commerce/services/store_account_visit.dart';
+import '../../community/services/community_owner_operation.dart';
 
 part 'ai_boost_purchase_processing.dart';
 
@@ -32,17 +36,57 @@ final class AiBoostPurchaseService extends ChangeNotifier {
     InAppPurchase? purchase,
     String? Function()? owner,
     Future<bool> Function(PurchaseDetails, String)? verify,
+    Future<StoreVerificationOutcome> Function(PurchaseDetails, String)?
+    verifyDelivery,
+    Future<StoreVerificationOutcome> Function(PurchaseDetails, String)?
+    finishDelivery,
+    this._ownerChanges,
     this._reconcile,
     this.launchTimeout = const Duration(seconds: 12),
     this.pendingTimeout = const Duration(seconds: 90),
   }) : _purchase = purchase ?? InAppPurchase.instance,
        _owner = owner ?? _currentOwner,
-       _verify = verify ?? _verifyOnServer;
+       _verify =
+           verifyDelivery ??
+           (verify == null
+               ? _verifyOnServer
+               : ((purchase, owner) async =>
+                     StoreVerificationOutcome(await verify(purchase, owner)))),
+       _finishVerification =
+           finishDelivery ??
+           (verify == null && verifyDelivery == null ? _finishOnServer : null);
 
   static const productId = StoreCatalogConfiguration.aiBoost;
+  // Dispatch UI listeners outside a temporary authenticated-operation fence.
+  final Zone _notificationZone = Zone.current;
   final InAppPurchase _purchase;
   final String? Function() _owner;
-  final Future<bool> Function(PurchaseDetails, String) _verify;
+  final Future<StoreVerificationOutcome> Function(PurchaseDetails, String)
+  _verify;
+  final Future<StoreVerificationOutcome> Function(PurchaseDetails, String)?
+  _finishVerification;
+  StoreBenefitDelivery? lastDelivery;
+  final _deliveries = <String, StoreBenefitDelivery>{};
+  bool deliveryIsActive(String key) =>
+      !_disposed &&
+      _owner() == _catalogOwner &&
+      _deliveries[key]?.active == true;
+  void _acceptDelivery(StoreBenefitDelivery? event) {
+    lastDelivery = event;
+    if (event == null) return;
+    if (_deliveries.length >= 128) _deliveries.remove(_deliveries.keys.first);
+    _deliveries[event.eventKey] = event;
+  }
+
+  bool lastDeliveryIsUserPurchase = false;
+  String? _userInitiatedProduct;
+  StorePurchaseTrace? checkoutTrace;
+  final Stream<String?>? _ownerChanges;
+  late final StoreAccountVisit _accountVisit = StoreAccountVisit(
+    readOwner: _owner,
+    changes: _ownerChanges ?? storeAccountOwnerChanges(),
+    onChanged: _retireAccount,
+  );
   final Future<List<PurchaseDetails>> Function()? _reconcile;
   final Duration launchTimeout;
   final Duration pendingTimeout;
@@ -94,6 +138,7 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   }
 
   Future<void> _initialize() async {
+    final visit = _accountVisit.capture();
     final owner = _owner();
     if (owner != _catalogOwner) {
       _catalogOwner = owner;
@@ -130,7 +175,9 @@ final class AiBoostPurchaseService extends ChangeNotifier {
       final response = await _purchase
           .queryProductDetails({productId})
           .timeout(launchTimeout);
-      if (!_current(owner, generation)) return;
+      if (!_current(owner, generation) || !_accountVisit.isCurrent(visit)) {
+        return;
+      }
       product = response.productDetails
           .where((item) => item.id == productId)
           .firstOrNull;
@@ -152,8 +199,22 @@ final class AiBoostPurchaseService extends ChangeNotifier {
     }
   }
 
-  Future<void> purchaseBoost() async {
+  Future<void> purchaseBoost({
+    String? expectedPrice,
+    String? expectedCurrency,
+    String? expectedOfferToken,
+  }) async {
     if (!canPurchase) return;
+    checkoutTrace = StorePurchaseTrace();
+    _userInitiatedProduct = productId;
+    if ((expectedPrice != null && expectedPrice != displayPrice) ||
+        (expectedCurrency != null &&
+            expectedCurrency != product!.currencyCode) ||
+        (expectedOfferToken != null &&
+            expectedOfferToken != _purchaseOfferToken)) {
+      _publish(AiBoostPurchaseState.ready, 'store_catalog_changed');
+      return;
+    }
     final owner = _owner()!;
     final selected = product!;
     final generation = _generation;
@@ -166,6 +227,7 @@ final class AiBoostPurchaseService extends ChangeNotifier {
       }
     });
     try {
+      checkoutTrace?.mark(StorePurchaseStage.nativeLaunch);
       final started = await _purchase
           .buyConsumable(
             purchaseParam: verifiedBoostPurchaseParam(
@@ -180,6 +242,7 @@ final class AiBoostPurchaseService extends ChangeNotifier {
             autoConsume: false,
           )
           .timeout(launchTimeout);
+      checkoutTrace?.mark(StorePurchaseStage.nativeLaunchReturned);
       if (!_current(owner, generation) || started) return;
       _watchdog?.cancel();
       _publish(AiBoostPurchaseState.ready, 'purchase_not_started');
@@ -197,6 +260,7 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   Future<void> retryPendingTransaction() async {
     if (!canRetry) return;
     final owner = _catalogOwner!;
+    final visit = _accountVisit.capture();
     _reconciling = true;
     notifyListeners();
     // Store callbacks and explicit reconciliation must share one receipt lane.
@@ -209,7 +273,11 @@ final class AiBoostPurchaseService extends ChangeNotifier {
         } else {
           final purchases = await (_reconcile?.call() ?? _readUnfinished())
               .timeout(launchTimeout);
-          if (_disposed || _owner() != owner) return;
+          if (_disposed ||
+              _owner() != owner ||
+              !_accountVisit.isCurrent(visit)) {
+            return;
+          }
           final boosts = purchases
               .where((item) => item.productID == productId)
               .toList();
@@ -217,12 +285,13 @@ final class AiBoostPurchaseService extends ChangeNotifier {
             await _process(purchase, owner);
           }
           if (boosts.isEmpty) {
-            _unresolved = null;
-            _publish(AiBoostPurchaseState.ready, null);
+            // Ask to Buy/lost callbacks need not be in unfinished history.
+            // Absence does not prove cancellation or permit a second charge.
+            _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
           }
         }
       } on Object {
-        if (!_disposed && _owner() == owner) {
+        if (!_disposed && _owner() == owner && _accountVisit.isCurrent(visit)) {
           _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
         }
       } finally {
@@ -236,6 +305,21 @@ final class AiBoostPurchaseService extends ChangeNotifier {
 
   bool _current(String owner, int generation) =>
       !_disposed && _owner() == owner && generation == _generation;
+
+  void _retireAccount() {
+    lastDelivery = null;
+    _deliveries.clear();
+    checkoutTrace = null;
+    _userInitiatedProduct = null;
+    _generation++;
+    _catalogOwner = null;
+    _unresolved = null;
+    _credited.clear();
+    product = null;
+    displayPrice = null;
+    _watchdog?.cancel();
+    _publish(AiBoostPurchaseState.unavailable, 'authentication_required');
+  }
 
   // Receipt-lane extensions call this instance boundary rather than accessing
   // ChangeNotifier's protected notifyListeners member directly.
@@ -259,8 +343,14 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   }
 
   @override
+  void notifyListeners() {
+    if (!_disposed) _notificationZone.run(super.notifyListeners);
+  }
+
+  @override
   void dispose() {
     _disposed = true;
+    _accountVisit.dispose();
     _watchdog?.cancel();
     unawaited(_subscription?.cancel());
     super.dispose();

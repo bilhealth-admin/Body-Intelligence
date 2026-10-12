@@ -151,8 +151,8 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
             if (!formHydrated) {
               return const Center(child: CircularProgressIndicator());
             }
-            final photo = ref.watch(profilePhotoProvider).value;
-            final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+            final photo = ref.watch(profileAvatarStateProvider).bytes;
+            final photoUrl = ref.watch(profileAvatarStateProvider).url;
             return AbsorbPointer(
               absorbing: saving,
               child: Form(

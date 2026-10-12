@@ -1,0 +1,81 @@
+{
+  "base": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "original_patch_sha256": "8364714ef80cd8ef8bc4af710cb339fb6692341d609f4cb232caf98020599205",
+  "original_files": [
+    {
+      "path": "lib/app/router/responsive_app_shell.dart",
+      "expected_original_sha256": "bd5c6fd1e9924d584e7f6b69f28c4a4844178bed497f70cbbac8a5da3341c71b",
+      "recovered_original_sha256": "bd5c6fd1e9924d584e7f6b69f28c4a4844178bed497f70cbbac8a5da3341c71b",
+      "original_preserved": true,
+      "current_sha256": "4399856cf50e96dbcf584ac5fac89e09f27be7707878e196df86802013545fd4"
+    },
+    {
+      "path": "lib/features/daily_log/food_log_actions.dart",
+      "expected_original_sha256": "d5c824ec93689ef0d3ffb4086210224e1b364c91a753f795658bb994d6e7082f",
+      "recovered_original_sha256": "d5c824ec93689ef0d3ffb4086210224e1b364c91a753f795658bb994d6e7082f",
+      "original_preserved": true,
+      "current_sha256": "0ac51bf1da30af333f21ba75a8e849a890f62ec3827b3c3d9f48d028d13108f8"
+    },
+    {
+      "path": "lib/features/daily_log/food_log_page.dart",
+      "expected_original_sha256": "44f6b5432360caeaa6e115f584825b68f22ebbf2ff4bbafdd5d152b9808fff4e",
+      "recovered_original_sha256": "44f6b5432360caeaa6e115f584825b68f22ebbf2ff4bbafdd5d152b9808fff4e",
+      "original_preserved": true,
+      "current_sha256": "68ffa942e714c885c62b002fa22929e0ecc92b2981e88b187b30eda117a9eacb"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_first_use_experience.dart",
+      "expected_original_sha256": "25435fc2b80e3f9e81957206c35db521905baef7bac23f206a4a0d4ad92fe25d",
+      "recovered_original_sha256": "25435fc2b80e3f9e81957206c35db521905baef7bac23f206a4a0d4ad92fe25d",
+      "original_preserved": true,
+      "current_sha256": "2862d261bb13cd49116f9751851476837e9390ed2cd54b2d7915e3cd179bd44b"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_meal_celebration.dart",
+      "expected_original_sha256": "985c46d31d01de74fcda040f702e270c2c7653d5c8df56b9f1c21e1e1f2545ff",
+      "recovered_original_sha256": "985c46d31d01de74fcda040f702e270c2c7653d5c8df56b9f1c21e1e1f2545ff",
+      "original_preserved": true,
+      "current_sha256": "f13bcce41bfbc97267bf44fb85537be8688a3bf80522a6f74741818c1bc516ef"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_use_context_coachmark.dart",
+      "expected_original_sha256": "1c1f4a7bf47150835a8afe094133edf51d177232044ffa33ea39192db131a263",
+      "recovered_original_sha256": "1c1f4a7bf47150835a8afe094133edf51d177232044ffa33ea39192db131a263",
+      "original_preserved": true,
+      "current_sha256": "0e37fabf7ddfc1b5ff686a82694792e6decce9bf84a7870eb4ae9ab83cdc729c"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_use_glass_surface.dart",
+      "expected_original_sha256": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+      "recovered_original_sha256": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb",
+      "original_preserved": true,
+      "current_sha256": "a22d05f58ab530607e7b8ebf82059bfe8694c082ac29e3ff27338190031dbafb"
+    },
+    {
+      "path": "lib/shared/widgets/bil_reference_bottom_bar.dart",
+      "expected_original_sha256": "2a399e040b44b24338eb0002b65ba139d667c40243738af4b2f45dffa9e8d4a5",
+      "recovered_original_sha256": "2a399e040b44b24338eb0002b65ba139d667c40243738af4b2f45dffa9e8d4a5",
+      "original_preserved": true,
+      "current_sha256": "7e070a02b70dff05408dcb48ac4473b81d719f1e89d2b34c599b53268b5df909"
+    },
+    {
+      "path": "lib/shared/widgets/first_use_guide_anchor.dart",
+      "expected_original_sha256": "6085b9690a5c2251e8a1089613e96ad4bd23c305b422ee0f44f2c753b12387fd",
+      "recovered_original_sha256": "6085b9690a5c2251e8a1089613e96ad4bd23c305b422ee0f44f2c753b12387fd",
+      "original_preserved": true,
+      "current_sha256": "2813d9180e02fb7a39a898bc0f0f60d1d6550a25f90def482be937d523a3eb80"
+    },
+    {
+      "path": "test/features/dashboard/first_use_reference_journey_test.dart",
+      "expected_original_sha256": "5f7d615d8021b4b4d04e0f51870501d9e0397b14fdb1292861a9b394d6c43d78",
+      "recovered_original_sha256": "5f7d615d8021b4b4d04e0f51870501d9e0397b14fdb1292861a9b394d6c43d78",
+      "original_preserved": true,
+      "current_sha256": "89fb645207a5700d427d2e2a09b255181d160eec6230c6db49bab93acf760bf5"
+    }
+  ],
+  "ancestors_preserved": {
+    "f8693133cfc042ce34718dab9f078bdd488f3cbf": true,
+    "3f0085e6e6686f2e87e9cf14789e9e578ea64159": true
+  },
+  "note": "Original bytes remain preserved; current integration includes intentional owner-authorized fixes, not exact old file replacement. Protected behavior must additionally pass selected tests."
+}

@@ -31,6 +31,7 @@ import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'widgets/analytics_page_primitives.dart';
 part 'analytics_progress_confidence.dart';
+part 'analytics_baseline_card.dart';
 
 /// Single clock boundary for Analytics range and recovery calculations.
 ///
@@ -426,51 +427,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 ),
               if (recovery.state != RecoveryState.current)
                 const SizedBox(height: PremiumDesignTokens.spaceSm),
-              PremiumNutritionGlass(
-                key: const Key('analytics-personal-baseline-premium-glass'),
-                child: _SummaryCard(
-                  title: tr('Your personal baseline', 'خطك الأساسي الشخصي'),
-                  lines: baseline.sufficient
-                      ? [
-                          if (recentAverageWeightKg != null)
-                            tr(
-                              'Recent average weight: ${UnitConverter.weightFromKg(recentAverageWeightKg, system).toStringAsFixed(1)} $weightUnit',
-                              'متوسط الوزن الحديث: ${UnitConverter.weightFromKg(recentAverageWeightKg, system).toStringAsFixed(1)} $weightUnit',
-                            ),
-                          tr(
-                            'Last 7 days compared with your previous record',
-                            'آخر 7 أيام مقارنة بسجلك السابق',
-                          ),
-                          tr(
-                            'Compared with your own earlier records · ${localizedBaselineConfidence(baseline.confidence, arabic: false)} confidence',
-                            'مقارنة بسجلاتك السابقة أنت · ثقة ${localizedBaselineConfidence(baseline.confidence, arabic: true)}',
-                          ),
-                          ...baseline.comparisons.map((item) {
-                            final sign = item.change >= 0 ? '+' : '';
-                            return '${tr(item.metric, switch (item.metric) {
-                              'Calories' => 'السعرات',
-                              'Protein' => 'البروتين',
-                              'Sodium' => 'الصوديوم',
-                              'Water' => 'الماء',
-                              _ => 'الوزن',
-                            })}: ${item.current.toStringAsFixed(1)} ${item.unit} ($sign${item.change.toStringAsFixed(1)} ${tr('vs your baseline', 'مقابل خطك الأساسي')})';
-                          }),
-                          tr(
-                            'Associations describe your records; they do not prove a cause.',
-                            'العلاقات تصف سجلاتك ولا تثبت سببًا.',
-                          ),
-                        ]
-                      : [
-                          tr(
-                            'A personal comparison needs at least 7 earlier and 3 recent days for one metric.',
-                            'تحتاج المقارنة الشخصية إلى 7 أيام سابقة و3 أيام حديثة على الأقل لمؤشر واحد.',
-                          ),
-                          tr(
-                            'No population average is substituted for your missing data.',
-                            'لن نستخدم متوسطات السكان بدلًا من بياناتك الناقصة.',
-                          ),
-                        ],
-                ),
+              AnalyticsPersonalBaselineCard(
+                report: baseline,
+                recentAverageWeight: recentAverageWeightKg == null
+                    ? null
+                    : UnitConverter.weightFromKg(
+                        recentAverageWeightKg,
+                        system,
+                      ).toStringAsFixed(1),
+                weightUnit: weightUnit,
               ),
               const SizedBox(height: PremiumDesignTokens.spaceSm),
               AnalyticsWeeklyProgressCard(weekly: weekly, weeklyRateKg: rate),
@@ -664,23 +629,26 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                   ),
                 )
               else
-                PremiumNutritionGlass(
-                  key: const Key('analytics-daily-nutrition-premium-glass'),
-                  showLabel: false,
-                  child: Column(
-                    children: caloriesByDay.keys
-                        .toList()
-                        .reversed
-                        .map(
-                          (day) => ListTile(
-                            title: Text(day),
-                            subtitle: Text(
+                Column(
+                  children: caloriesByDay.keys
+                      .toList()
+                      .reversed
+                      .map(
+                        (day) => ListTile(
+                          title: Text(day),
+                          subtitle: PremiumNutritionGlass(
+                            key: Key(
+                              'analytics-daily-nutrition-premium-glass-$day',
+                            ),
+                            showLabel: false,
+                            compact: true,
+                            child: Text(
                               '${caloriesByDay[day]!.round()} ${tr('kcal', 'سعرة')} · ${(proteinByDay[day] ?? 0).toStringAsFixed(1)} ${tr('g protein', 'غ بروتين')}',
                             ),
                           ),
-                        )
-                        .toList(growable: false),
-                  ),
+                        ),
+                      )
+                      .toList(growable: false),
                 ),
               const SizedBox(height: PremiumDesignTokens.spaceSm),
               Text(

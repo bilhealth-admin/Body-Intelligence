@@ -2,6 +2,8 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/first_meal_milestone.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/food_repository.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_experience_presentation.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_first_use_experience.dart';
 import 'package:drift/native.dart';
@@ -12,6 +14,109 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
+  testWidgets(
+    'Dashboard resumes a committed first-food event without repeating it',
+    (tester) async {
+      final db = AppDatabase.forTesting(
+        NativeDatabase.memory(),
+        localOwnerId: 'foreground-a',
+      );
+      addTearDown(db.close);
+      addTearDown(() async {
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      });
+      final preferences = PreferencesRepository(db);
+      final food = await FoodRepository(db).addFood(
+        name: 'Synthetic foreground meal',
+        category: 'test',
+        calories: 95,
+        protein: 5.1,
+        carbs: 11.9,
+        fats: 3.4,
+        servingSize: 100,
+        servingUnit: 'g',
+      );
+      final meals = MealRepository(db);
+      final meal = await meals.createMeal(
+        date: DateTime(2026, 10, 12),
+        name: 'breakfast',
+        type: 'breakfast',
+      );
+      await meals.addMealItem(mealId: meal, foodId: food, quantity: 80);
+      final savedRows = (await db.select(db.mealItems).get())
+          .map((r) => r.toJson())
+          .toList();
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'ready');
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [databaseProvider.overrideWithValue(db)],
+          child: MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: child!,
+            ),
+            home: const Scaffold(
+              body: DashboardFirstUseExperience(
+                ownerScope: 'foreground-a',
+                ownerReady: true,
+                child: Text('Preserved Home body'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'ready');
+      expect(
+        find.byKey(const Key('dashboard-first-food-celebration')),
+        findsNothing,
+      );
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      final nativeDeadline = Stopwatch()..start();
+      while (await preferences.get(firstMealCelebrationPreferenceKey) !=
+              'done' &&
+          nativeDeadline.elapsed < const Duration(seconds: 2)) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'done');
+      expect(
+        find.byKey(const Key('dashboard-first-food-celebration')),
+        findsOneWidget,
+      );
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      expect(
+        find.byKey(const Key('dashboard-first-food-celebration')),
+        findsNothing,
+      );
+      expect(BilExperiencePresentation.occupied.value, isFalse);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('dashboard-first-food-celebration')),
+        findsNothing,
+      );
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'done');
+      expect(
+        (await db.select(db.mealItems).get()).map((r) => r.toJson()).toList(),
+        savedRows,
+      );
+      expect(savedRows.length, 1);
+      expect(tester.takeException(), isNull);
+      // Cancel Riverpod/Drift query streams before Flutter verifies timers.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 10));
+    },
+  );
+
   testWidgets(
     'empty meal bucket shows optional steps and Skip dismisses them',
     (tester) async {

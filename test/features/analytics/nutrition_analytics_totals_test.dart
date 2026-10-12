@@ -24,6 +24,23 @@ void main() {
     expect(totals.isComplete(TrackedNutrient.calories), isFalse);
     expect(totals.isKnown(TrackedNutrient.carbohydrates), isFalse);
   });
+  test('legacy required core columns retain their release32/35 meaning', () {
+    final legacy = _item(
+      id: 3,
+      calories: 900,
+      protein: 30,
+      mask: 0,
+      source: 'legacy_catalog',
+    );
+    final totals = NutritionAnalyticsTotals.fromMeals([
+      _meal([legacy]),
+    ]);
+    expect(totals.calories, 900);
+    expect(totals.protein, 30);
+    expect(totals.knownCounts[TrackedNutrient.calories], 1);
+    expect(totals.unknownCounts[TrackedNutrient.calories], 0);
+    expect(totals.isKnown(TrackedNutrient.fiber), isFalse);
+  });
 }
 
 MealWithItems _meal(List<MealItem> items) => MealWithItems(
@@ -49,6 +66,7 @@ MealItem _item({
   required double calories,
   required double protein,
   required int mask,
+  String source = 'quick_add',
 }) => MealItem(
   id: id,
   uuid: 'item-$id',
@@ -68,7 +86,7 @@ MealItem _item({
   phosphorus: 0,
   sugar: 0,
   nutrientEvidenceMask: mask,
-  foodSourceSnapshot: 'test',
+  foodSourceSnapshot: source,
   foodVerifiedSnapshot: false,
   servingSizeSnapshot: 1,
   servingUnitSnapshot: 'serving',

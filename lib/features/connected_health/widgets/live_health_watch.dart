@@ -7,6 +7,7 @@ import '../connected_health_model.dart';
 import '../connected_health_copy.dart';
 
 part 'live_health_watch_painter.dart';
+part 'live_health_watch_time.dart';
 
 final liveHealthNowProvider = Provider<DateTime Function()>((ref) {
   return DateTime.now;
@@ -277,9 +278,8 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                     // pixels tall. Keep the clock in its own upper zone so the
                     // four-metric grid below can never paint over it.
                     top: d(widget.compact ? 51 : 82),
-                    child: Text.rich(
-                      key: const Key('watch-digital-time'),
-                      TextSpan(
+                    child: _WatchTimeText(
+                      span: TextSpan(
                         children: [
                           TextSpan(text: '$digitalHour:$digitalMinute'),
                           TextSpan(
@@ -295,8 +295,6 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                           ),
                         ],
                       ),
-                      textAlign: TextAlign.center,
-                      textDirection: TextDirection.ltr,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: d(widget.compact ? 28 : 42),

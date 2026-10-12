@@ -1,4 +1,8 @@
 import 'runtime_copy_integration_gap.dart';
+import 'runtime_copy_closure_access.dart';
+import 'runtime_copy_closure_coach.dart';
+import 'runtime_copy_closure_food.dart';
+import 'runtime_copy_closure_review.dart';
 import 'runtime_copy_next_workspace.dart';
 import 'runtime_copy_coach_controls.dart';
 import 'runtime_copy_primary.dart';
@@ -72,6 +76,14 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final coachClosure = ClosureCoachRuntimeCopy.resolve(english, localeTag);
+    if (coachClosure != null) return coachClosure;
+    final foodClosure = ClosureFoodRuntimeCopy.resolve(english, localeTag);
+    if (foodClosure != null) return foodClosure;
+    final reviewClosure = ClosureReviewRuntimeCopy.resolve(english, localeTag);
+    if (reviewClosure != null) return reviewClosure;
+    final closure = ClosureAccessRuntimeCopy.resolve(english, localeTag);
+    if (closure != null) return closure;
     final invalidRoute = InvalidRouteRuntimeCopy.resolve(english, localeTag);
     if (invalidRoute != null) return invalidRoute;
     final statusCopy = QualityFeedbackRuntimeCopy.resolve(english, localeTag);
@@ -259,6 +271,10 @@ abstract final class RuntimeCopy {
         MealVoiceRuntimeCopy.balanced &&
         CoachReviewRuntimeCopy.balanced &&
         HealthDevicesReviewCopy.balanced &&
+        ClosureAccessRuntimeCopy.balanced &&
+        ClosureCoachRuntimeCopy.balanced &&
+        ClosureFoodRuntimeCopy.balanced &&
+        ClosureReviewRuntimeCopy.balanced &&
         HealthDeviceStatusCopy.balanced &&
         SleepScheduleRuntimeCopy.balanced &&
         ReleaseClosureRuntimeCopy.balanced &&

@@ -1,0 +1,302 @@
+{
+  "remote": "da6022802112811b8aa8ece7c7c07fe010867ce1\trefs/heads/integration/bil-qa-media-policy-20261011",
+  "open_integration_pull_requests": [],
+  "workflows": [
+    {
+      "file": ".github/workflows/android_debug_build.yml",
+      "sha256": "d3b9414b60e77adafc0d0ee34487a33d86b746487c5e0b8c0c50935b93acc515",
+      "events": "on:\n  push:\n    branches:\n      - phase-3-product-excellence\n  pull_request:\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_activity_read_targeted.yml",
+      "sha256": "48f1d056ddb2d11f26f512a020bd4a803bb5d09edef8cfc547d0a1eca773c63e",
+      "events": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - lib/features/community/presentation/community_visible_activity_scope.dart\n      - lib/features/community/presentation/community_notification_read_receipts.dart\n      - lib/features/community/presentation/community_notifications_page.dart\n      - lib/features/community/presentation/community_notifications_rendering.dart\n      - test/features/community/community_visible_activity_scope_test.dart\n      - test/features/community/community_activity_auto_read_test.dart\n      - .github/workflows/bil_activity_read_targeted.yml"
+    },
+    {
+      "file": ".github/workflows/bil_activity_retry_diagnostic.yml",
+      "sha256": "f7a363a1837b2bcfa7871982eecec14749350e9e5390f71aa522730335663b29",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_activity_retry_diagnostic.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_android_release_candidate.yml",
+      "sha256": "7324259726d5f2873a44d365332e83509b405fe55188be58f1f97fa508cce4f1",
+      "events": "on:\n  workflow_dispatch:\n    inputs:\n      build_number:\n        description: Exact Google Play build number for this candidate; must be 31\n        required: true\n        type: string\n      run_native_crypto_checks:\n        description: Run the Android-emulator AES-GCM bridge check for this candidate\n        required: false\n        type: boolean\n        default: false"
+    },
+    {
+      "file": ".github/workflows/bil_apply_qa_handoff_20261008.yml",
+      "sha256": "30aed048f69d6c1a18815345bdbc80188fcc42b92a75a21b38d842a1323e87ac",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - '.github/workflows/bil_apply_qa_handoff_20261008.yml'\n      - 'docs/qa_handoffs/20261008/base64/**'"
+    },
+    {
+      "file": ".github/workflows/bil_calorie_only_qa.yml",
+      "sha256": "1d732986c02de089f93b7b2e6e7901b5d313282842b4392806522f9a80c1cb24",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - lib/features/intelligence_center/services/local_coach_calorie_command.dart\n      - lib/features/intelligence_center/services/local_coach_command_parser.dart\n      - test/qa_next/coach_calorie_only_command_test.dart\n      - test/qa_next/coach_calorie_only_flow_test.dart\n      - .github/workflows/bil_calorie_only_qa.yml"
+    },
+    {
+      "file": ".github/workflows/bil_candidate_prepare_20261011.yml",
+      "sha256": "4f453026411ebe9558082fbbe899f5557184236fc934c04a3bb7ba15dffe0896",
+      "events": "on:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_candidate_prepare_20261011.yml\n      - docs/qa_next/candidate_20261011/**\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_community_3033_candidate_qa.yml",
+      "sha256": "25ee87b8e13d4fa325c2bbe8f917fb2cdff2513d50853a3526ca674ec9f61e7b",
+      "events": "on:\n  push:\n    branches: [fix/community-3033-ready, staging/community-final-qa-20261003, fix/community-acceptance-notifications-20261003]\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_community_acceptance_targeted_qa.yml",
+      "sha256": "1bd3b26cb22377cccca719e00edeff7a1992efddecb77e06058616c967c2f6f0",
+      "events": "on:\n  push:\n    branches:\n      - fix/community-acceptance-notifications-20261003\n      - staging/community-final-qa-20261003"
+    },
+    {
+      "file": ".github/workflows/bil_community_entry_r5.yml",
+      "sha256": "80ac33da6aaebe783c817c5f29cca422d657ff9961d4553e0b1becdcbde28e7e",
+      "events": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - .github/workflows/bil_community_entry_r5.yml\n      - tool/prebuild/run_code_tests.py\n      - tool/qa_next/run_regression.py\n      - lib/features/community/**\n      - lib/features/profile/services/profile_photo_service.dart\n      - lib/main.dart\n      - lib/features/community/services/community_owner_http_client.dart\n      - lib/app/router/app_community_routes.dart\n      - lib/app/router/app_router.dart\n      - test/features/community/community_entry*\n      # Review/pagination tests are part of R5's portable matrix; edits must rerun R5.\n      - test/features/community/community_review_regression_test.dart\n      - test/features/community/community_polish_visual_test.dart\n      - test/qa_next/community_composer_reference_capture_test.dart\n      - test/qa_next/community_profile_drafts_reference_capture_test.dart\n      - test/features/community/community_composer_auth_session_test.dart\n      - test/features/community/community_post_moderation_test.dart\n      - test/features/community/community_publish_operation*\n      - test/features/community/community_owner_refresh_transport_test.dart\n      - test/features/community/community_unicode_body_boundary_test.dart\n      - test/features/community/community_voice_unicode_retention_test.dart\n      - test/features/community/community_drafts*\n      - test/features/community/community_activity*\n      - test/features/community/community_notification_auth_session_test.dart\n      - test/features/profile/profile_photo_entry_owner_test.dart\n      - test/qa_next/community_entry_capture_test.dart"
+    },
+    {
+      "file": ".github/workflows/bil_community_notification_resilience.yml",
+      "sha256": "65b80f29b3cd76f84789a6ba4a2ff6c74a8c4c4867c5cbb75e8055fdf640fcae",
+      "events": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - lib/features/community/presentation/community_notifications_page.dart\n      - test/features/community/community_notification_resilience_test.dart\n      - .github/workflows/bil_community_notification_resilience.yml\n  pull_request:\n    paths:\n      - lib/features/community/presentation/community_notifications_page.dart\n      - test/features/community/community_notification_resilience_test.dart\n      - .github/workflows/bil_community_notification_resilience.yml"
+    },
+    {
+      "file": ".github/workflows/bil_extended_prebuild_coverage.yml",
+      "sha256": "7d9e907077d36d7b90056b9911b19052b261574951b79425c75590a59ce6cde3",
+      "events": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - .github/workflows/bil_extended_prebuild_coverage.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_extract_bounded_host_tooling.yml",
+      "sha256": "427d72dd9485a8cfc18fabf21dd0e8e593b992ca1720ba15e8ba201677919c15",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_extract_bounded_host_tooling.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_final_release_certification.yml",
+      "sha256": "b67a5ccfcc0199033f0a0d4edf783d9cecd4865f59d0cb1c8816c28972d20387",
+      "events": "on:\n  push:\n    branches: [fix/community-sapphire-health-3033, fix/admob-clean-production-2026-10-02]\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_functional_finish_20261011.yml",
+      "sha256": "aeeda98e3be6af7e34bda24b39fbabd1aab75f6d395eeec19cf024350b124d35",
+      "events": "on:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_functional_finish_20261011.yml\n      - docs/qa_next/functional_finish_20261011/**\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_healthkit_cloud_simulator.yml",
+      "sha256": "17b87bf91264624d0aacc8997e85d0db8cd74f10c974536555fc298af103f8c7",
+      "events": "on:\n  workflow_dispatch:\n  push:\n    branches:\n      - cloud/healthkit-4988-4991"
+    },
+    {
+      "file": ".github/workflows/bil_install_reference_revision_20261006.yml",
+      "sha256": "2febb24834dfbae99b09466a0b54f6c3b21de4816d437c60b566779b6bfc449d",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - tool/qa_next/install_reference_revision_20261006.py\n      - .github/workflows/bil_install_reference_revision_20261006.yml"
+    },
+    {
+      "file": ".github/workflows/bil_instant_experience_qa.yml",
+      "sha256": "f0e9d4b530b3af1eb5ab4acbe13070c3f4625fea352b19fe59aa8a1b0410dead",
+      "events": "on:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_instant_experience_qa.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_integration_media_policy_focused.yml",
+      "sha256": "a80ef94d0258882537f81e9a162b6818d54918ba4c2ab52dcee99cccc3bd176d",
+      "events": "on:\n  push:\n    branches:\n      - integration/bil-qa-media-policy-20261011\n    paths:\n      - .github/workflows/bil_integration_media_policy_focused.yml\n      - lib/**\n      - test/**\n      - tool/prebuild/**\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_ios_plus8_dual_simulator_qa.yml",
+      "sha256": "152e47ea54451fa4660f2e6dddd9ee9873a4795cddd86e9087111f27137c229e",
+      "events": "on:\n  workflow_dispatch:\n    inputs:\n      build_number:\n        description: Exact audited simulator build number; build 7 is forbidden\n        required: true\n        default: '8'\n        type: string"
+    },
+    {
+      "file": ".github/workflows/bil_ios_signed_release.yml",
+      "sha256": "d659bef67a871897574c39bce622bc37d1a8e1271b74a94aceda7ef83b36ca49",
+      "events": "on:\n  workflow_dispatch:\n    inputs:\n      upload_to_testflight:\n        description: Upload the validated build to TestFlight (owner-controlled; leave false for artifact-only QA)\n        required: true\n        default: false\n        type: boolean\n      build_number:\n        description: Exact App Store build number for this candidate; must be 34\n        required: true\n        type: string\n      run_native_crypto_checks:\n        description: Run the optional iOS Simulator AES-GCM runtime check\n        required: true\n        default: false\n        type: boolean"
+    },
+    {
+      "file": ".github/workflows/bil_ios_unsigned_release.yml",
+      "sha256": "59064c372aa6cd6b30fa48d9caa93f27bfe4c0b13e29ad03f80cb47da24341a7",
+      "events": "on:\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_isolated_host_toolchain.yml",
+      "sha256": "c64e883640e70c2850a694f8b2face57d914c166a6cbac8716fa4f9eddae2a67",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_isolated_host_toolchain.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_local_visual_font_qa_20261008.yml",
+      "sha256": "e355289df18ceeee925e6a9d165bd3481887d44f783c28b68ffa65a22c0c78a3",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_local_visual_font_qa_20261008.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_next_coach_community_qa_only.yml",
+      "sha256": "59442d54407f0a8049f59f8dbb177ffe477d852f09804f9af3051d461695b1e1",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_next_offline_dart_tooling.yml",
+      "sha256": "9ae42a8828310f08e0465a30436958b0d4d9fe8feab1353c247897c0b0bc5dff",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_next_offline_dart_tooling.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_next_source_snapshot_20261006.yml",
+      "sha256": "4050ee2b9c62df5d6754eb82051efc2d1662d32a125b756a2d245cf90e35d5d3",
+      "events": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_next_source_snapshot_20261006.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_offline_qa_recovery.yml",
+      "sha256": "f23a8f3113176c8bf2ce71ab953812ae428fb480d131a23a794e5952e56a754f",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_offline_qa_recovery.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_offline_sqlite_runtime.yml",
+      "sha256": "96b74f40ba823f3bcb13c4b2b3870cbe038b7daa69cb5113f5088670ba1abf62",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_offline_sqlite_runtime.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_prebuild_store_backend_qa.yml",
+      "sha256": "273212a170f3bb03f1d05e95b415fff2570f63d5a7dd0f4cb607b4b8f9030702",
+      "events": "on:\n  push:\n    branches: [staging/community-final-qa-20261003, fix/community-acceptance-notifications-20261003]\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_premium_keyboard_boundary.yml",
+      "sha256": "0f3ecb0232b8be10c0d46919299b4dbb687a49e2c444768473709434ebd532ea",
+      "events": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - lib/features/commerce/presentation/premium_route_glass_gate.dart\n      - test/features/commerce/premium_route_keyboard_access_test.dart\n      - .github/workflows/bil_premium_keyboard_boundary.yml\n  pull_request:\n    paths:\n      - lib/features/commerce/presentation/premium_route_glass_gate.dart\n      - test/features/commerce/premium_route_keyboard_access_test.dart\n      - .github/workflows/bil_premium_keyboard_boundary.yml"
+    },
+    {
+      "file": ".github/workflows/bil_public_dependency_sources_qa.yml",
+      "sha256": "0f25c4e84f51e6854d9e0841d8d91d3984bf5218dd58b613b6e6714eb0a1f87d",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_public_dependency_sources_qa.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_public_site_deploy.yml",
+      "sha256": "de672dc037623f90f751c5e073efb9a7e451d7c866dd4820e30251411ebe9714",
+      "events": "on:\n  workflow_dispatch:\n  push:\n    branches:\n      - fix/community-sapphire-health-3033\n    paths:\n      - 'public_site/**'\n      - 'wrangler.site.jsonc'\n      - 'tool/release/bilhealth_site_worker.mjs'\n      - '.github/workflows/bil_public_site_deploy.yml'"
+    },
+    {
+      "file": ".github/workflows/bil_qa_binary_golden_restore_20261008.yml",
+      "sha256": "66a97447801878bdf8e96cb40cba3ec35bb86e734bf60c320307319e906c2c45",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_qa_binary_golden_restore_20261008.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_qa_contract_clusters_20261010.yml",
+      "sha256": "b35c14ac9a5aaf5f107f3332a978e103cbd1544833822a5a7c904d2a0069211e",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_contract_clusters_20261010.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_qa_dashboard_overflow_probe_20261010.yml",
+      "sha256": "077d3c1a7a7a19fb37f47f868b63baa7a5b31cf4dd0121b93f9e446d01dd01cc",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_dashboard_overflow_probe_20261010.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_qa_focused_then_broad_20261010.yml",
+      "sha256": "08517b4cf6b14cbeb1996186bd985a3c97c9771b8ff1e06c55589df2a441539f",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_focused_then_broad_20261010.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_qa_more_flat_contract_20261010.yml",
+      "sha256": "2200a3b53bec2ad09f691c2cad5727e98cb5767df9ce4adda053a0620b9e3649",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_more_flat_contract_20261010.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_qa_p0_fast_20261010.yml",
+      "sha256": "81c54108344efe49be3778bee67199df3efe7aabc5a314f051606d5308cdae35",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_p0_fast_20261010.yml\n      - lib/data/repositories/meal_repository.dart\n      - lib/data/repositories/meal_repository_validation.dart\n      - lib/data/repositories/meal_repository_vision_journal.dart\n      - lib/features/daily_log/food_log_actions.dart\n      - lib/features/daily_log/daily_log_capture_actions.dart\n      - lib/features/intelligence_center/presentation/intelligence_vision_flow.dart\n      - lib/features/nutrition/presentation/meal_image_review_dialog.dart\n      - test/features/nutrition/meal_vision_verified_commit_test.dart\n      - lib/features/daily_log/food_log_page.dart\n      - lib/features/daily_log/food_log_tile_widgets.dart\n      - lib/features/nutrition/services/meal_image_gateway_contract.dart\n      - test/features/nutrition/meal_image_unified_review_contract_test.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_review.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_match.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_visuals.dart\n      - test/features/nutrition/coach_food_commit_test.dart\n      - test/features/nutrition/coach_meal_commit_boundary_test.dart\n      - test/features/nutrition/meal_vision_premium_review_test.dart\n      - test/features/nutrition/meal_vision_flutter_capture_test.dart\n      - test/parallel/bil02/coach_media_page_overlay_test.dart\n      - test/features/intelligence_center/coach_image_source_regression_test.dart\n      - test/features/nutrition/meal_image_language_regression_test.dart\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_qa_reviewed_back_arrow_goldens_20261010.yml",
+      "sha256": "9c5809076262646421ad46597566acb6fc5dfe3fbf5e388f893e39a136646c31",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_reviewed_back_arrow_goldens_20261010.yml"
+    },
+    {
+      "file": ".github/workflows/bil_qa_reviewed_golden_promotion_20261010.yml",
+      "sha256": "c98e3eb656d8307db6a365029f9db3bc4026619e40556d43a633d4ff3a8ad789",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_reviewed_golden_promotion_20261010.yml"
+    },
+    {
+      "file": ".github/workflows/bil_qa_scoped_sdk_format_20261010.yml",
+      "sha256": "792b593e33f3008108ad4d9e1d0d80f148caf2add7d8794e0cae636feddeff4b",
+      "events": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths:\n      - .github/workflows/bil_qa_scoped_sdk_format_20261010.yml"
+    },
+    {
+      "file": ".github/workflows/bil_qa_targeted_community_return.yml",
+      "sha256": "ac42b2d4cff1381b45b08d14f04b285852d3817d1ed3cbf8da3dad36cfa36daf",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - test/features/community/community_message_retry_cases.dart\n      - test/features/community/community_chat_auth_session_test.dart\n      - lib/features/community/presentation/community_return_button.dart\n      - lib/features/community/presentation/community_chat_rendering.dart\n      - .github/workflows/bil_qa_targeted_community_return.yml"
+    },
+    {
+      "file": ".github/workflows/bil_qa_vision_arabic_capture_20261010.yml",
+      "sha256": "441e8db9ec4c4619f0595e349b0f652af8877ed69b0de2975fe50163729778a1",
+      "events": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_vision_arabic_capture_20261010.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_rc_mobile_test_build.yml",
+      "sha256": "ad85ba35fd257e20c0d6fa975a4b770fcdfc91b79dc8d67ba76d6ee7fd71d326",
+      "events": "on:\n  push:\n    branches: [fix/community-sapphire-health-3033]\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_reference_native_candidate.yml",
+      "sha256": "cc78ca9785e990ec395f922d112e1b4646f9bcd1cf21dfac239d9da3f86fef80",
+      "events": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - lib/features/community/presentation/**\n      - lib/features/community/channels/presentation/**\n      - test/features/community/community_polish_visual_test.dart\n      - test/features/community/community_review_regression_test.dart\n      - lib/features/intelligence_center/presentation/**\n      - lib/shared/widgets/bil_reference_bottom_bar.dart\n      - test/qa_next/**\n      - .github/workflows/bil_reference_native_candidate.yml"
+    },
+    {
+      "file": ".github/workflows/bil_restore_epic3_qa_goldens_20261008.yml",
+      "sha256": "35ed0c81f53420f2c679e58b8695dcf1ba152cee768ae19d049b60a4d398bd10",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_restore_epic3_qa_goldens_20261008.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_reviewer_access_preflight.yml",
+      "sha256": "cbe819a56ed62828c067605b15d24df704d7652264634582b67ac7eb81b3d990",
+      "events": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - tool/prebuild/reviewer_access_preflight.mjs\n      - tool/prebuild/reviewer_access_preflight_test.mjs\n      - .github/workflows/bil_reviewer_access_preflight.yml\n  workflow_dispatch:\n    inputs:\n      google_reviewer_owner_id:\n        description: Owner-approved new Google reviewer UUID; blank keeps read-only mode\n        required: false\n        default: ''\n      google_reviewer_email:\n        description: Dedicated owner-controlled Google reviewer email\n        required: false\n        default: ''\n      owner_confirmation:\n        description: OWNER_APPROVED_GOOGLE_REVIEWER_CONFIRMATION\n        required: false\n        default: ''"
+    },
+    {
+      "file": ".github/workflows/bil_sapphire_history_qa.yml",
+      "sha256": "e1a1f37643653d8218854e728e6d88d149d42bc90399ec333f2a794b709f4bd3",
+      "events": "on:\n  push:\n    branches: [fix/community-sapphire-health-3033, fix/admob-clean-production-2026-10-02]\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_source_checkpoint_qa.yml",
+      "sha256": "42e5079f40c451354a2706bebb670fb1ca7c43facb975ee7b07afc9ece954520",
+      "events": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_source_checkpoint_qa.yml]"
+    },
+    {
+      "file": ".github/workflows/bil_store_lifecycle_adversarial_contracts.yml",
+      "sha256": "10bfe698e77cda5788a0a954a33a5cddc7d6d07db54c36ffd510238d154f9bdd",
+      "events": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - supabase/functions/verify-store-purchase/**\n      - .github/workflows/bil_store_lifecycle_adversarial_contracts.yml\n  pull_request:\n    paths:\n      - supabase/functions/verify-store-purchase/**\n      - .github/workflows/bil_store_lifecycle_adversarial_contracts.yml"
+    },
+    {
+      "file": ".github/workflows/bil_vision_formatter_once_20261010.yml",
+      "sha256": "7659efde60081245cccb96756d39934d5746a88f3a9c770db4ffce6eefe897d1",
+      "events": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths:\n      - .github/workflows/bil_vision_formatter_once_20261010.yml"
+    },
+    {
+      "file": ".github/workflows/bil_vision_postintegration_20261010.yml",
+      "sha256": "b3f2e395c125e7264d848388150e5d27c74862352fbbcf8c4abd287037deac42",
+      "events": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths:\n      - lib/features/nutrition/services/meal_image_gateway_contract.dart\n      - lib/data/repositories/meal_repository_vision_journal.dart\n      - lib/features/daily_log/food_log_actions.dart\n      - lib/features/daily_log/daily_log_capture_actions.dart\n      - test/features/nutrition/meal_image_unified_review_contract_test.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_review.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_visuals.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_match.dart\n      - test/features/nutrition/meal_vision_premium_review_test.dart\n      - test/features/nutrition/meal_vision_flutter_capture_test.dart\n      - test/features/nutrition/meal_vision_verified_commit_test.dart\n      - .github/workflows/bil_vision_postintegration_20261010.yml\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/bil_vision_premium_20261010.yml",
+      "sha256": "75d32a0c86354d4cff9303f7f53ac6087a162736c5bf0979267838bc02398278",
+      "events": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths: [.github/vision_payload.part09.txt]\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/build18_ai_coach_full_tests.yml",
+      "sha256": "c6eb5aeb4d408515c6452bf8f49d55ab54431f701266d0adc3aa64f3b4b082a7",
+      "events": "on:\n  push:\n    branches:\n      - codex/build18-ai-coach-no-loading-flash-20260913\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/build18_health_responsive_tests.yml",
+      "sha256": "d28b3ba9305b800b4dd6f3b95b1fda6efb93cd474b35d05636e7eef5ed0fb93a",
+      "events": "on:\n  push:\n    branches:\n      - codex/build18-ai-coach-no-loading-flash-20260913\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/ios_test_build.yml",
+      "sha256": "922f88018a3fe93a5063cd0e5f941d5d3c69fd476dbbe2ed256ec247c513c63c",
+      "events": "on:\n  workflow_dispatch:"
+    },
+    {
+      "file": ".github/workflows/verify.yml",
+      "sha256": "c192b7d16b7a1fed8a4ffc97765eb5d2c8b60a17a7ccd9d82c48c21edfce21d5",
+      "events": "on:\n  push:\n    branches:\n      - phase-3-product-excellence\n      - fix/admob-clean-production-2026-10-02\n  pull_request:\n  workflow_dispatch:"
+    }
+  ],
+  "github_workflow_changes": [],
+  "commit_skip_marker": "[skip ci]",
+  "rule": "No dispatch, root test, Full8, build or deployment; official GitHub skip applies to push/pull_request runs. workflow_run events inspected manually; no triggering pipeline.",
+  "checked_date": "2026-10-12",
+  "authenticated_login": "bilhealth-admin",
+  "checked_at_utc": "2026-10-12T01:39:07.145026+00:00"
+}

@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/data/repositories/body_measurement_reposit
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'package:drift/native.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -37,8 +38,19 @@ void main() {
         type: 'lunch',
       );
       await meals.addMealItem(mealId: meal, foodId: food, quantity: 150);
-      final before = await database.select(database.mealItems).getSingle();
-      final foodBefore = await database.select(database.foods).getSingle();
+      // Schema 21 snapshots used the ordinary catalog source. A modern source
+      // prefix with its evidence column removed would be corrupt modern data,
+      // not a valid legacy migration fixture.
+      await database.customStatement(
+        "UPDATE meal_items SET food_source_snapshot = 'custom'",
+      );
+      // The fixture is schema 21: neither table had the v22 evidence column.
+      // Current writers freeze evidence, so remove only that absent column
+      // from the expected legacy snapshots before comparing every other field.
+      final before = (await database.select(database.mealItems).getSingle())
+          .copyWith(foodEvidenceJson: const Value(null));
+      final foodBefore = (await database.select(database.foods).getSingle())
+          .copyWith(foodEvidenceJson: const Value(null));
       final measurements = BodyMeasurementRepository(database);
       await measurements.saveForDay(
         date: DateTime(2026, 10, 5),

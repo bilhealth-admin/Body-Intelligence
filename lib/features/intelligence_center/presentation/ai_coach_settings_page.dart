@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,17 +14,21 @@ import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/bil_flat_icon.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../../shared/widgets/bil_clinical_note.dart';
-import '../../../shared/widgets/bil_premium_trust_surface.dart';
 import '../../commerce/presentation/ai_boost_coach_artwork.dart';
 import '../../commerce/providers/commerce_providers.dart';
+import '../../commerce/providers/app_purchase_providers.dart';
 import '../../onboarding/onboarding_runtime_copy.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/coach_context_preferences.dart';
 import '../services/ai_boost_purchase_service.dart';
+import '../services/coach_settings_context_provider.dart';
+import '../services/coach_context_provider.dart';
+import '../../../data/repositories/preferences_repository.dart';
 import '../services/remote_ai_consent_coordinator.dart';
 
 part 'ai_coach_settings_components.dart';
 part 'ai_coach_settings_usage_widgets.dart';
+part 'ai_coach_settings_body.dart';
 
 const _globalResetGiftCopy =
     'A gift from BIL 🎁 Your current-period AI Coach usage was reset, and 2,500 non-expiring AI Boost tokens were added.';
@@ -54,17 +60,42 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   bool changingConsent = false;
   bool changingContextFocus = false;
   Set<CoachContextFocus>? contextFocuses;
-  int _lastBoostCreditsRevision = 0;
   int _usageLoadVersion = 0;
   String? _verifiedUsageOwnerId;
   Map<String, Object?>? _lastVerifiedUsage;
+  PreferencesRepository? _contextRepository;
+  CoachContextPreferences? _lastLocalContext;
+  int _ownerEpoch = 0;
+  String? _sessionOwner;
+  StreamSubscription<AuthState>? _ownerSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    boost = AiBoostPurchaseService()..addListener(_boostChanged);
-    usage = _loadUsage();
+    boost = ref.read(appBoostPurchaseProvider)..addListener(_boostChanged);
+    _sessionOwner = Supabase.instance.client.auth.currentUser?.id;
+    _ownerSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
+      (state) {
+        if (state.session == null && state.event != AuthChangeEvent.signedOut) {
+          return;
+        }
+        final next = state.session?.user.id;
+        if (next == _sessionOwner || !mounted) return;
+        _sessionOwner = next;
+        _ownerEpoch++;
+        setState(() {
+          _lastVerifiedUsage = null;
+          _verifiedUsageOwnerId = null;
+          contextFocuses = null;
+          _lastLocalContext = null;
+          changingContextFocus = false;
+          changingConsent = false;
+          usage = _startUsageLoad();
+        });
+      },
+    );
+    usage = _startUsageLoad();
     boost.initialize();
   }
 
@@ -72,22 +103,31 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || !mounted) return;
     boost.initialize();
-    setState(() => usage = _loadUsage());
+    setState(() {
+      usage = _startUsageLoad();
+    });
   }
 
   void _boostChanged() {
     if (!mounted) return;
-    if (boost.verifiedCreditsRevision != _lastBoostCreditsRevision) {
-      _lastBoostCreditsRevision = boost.verifiedCreditsRevision;
-      usage = _loadUsage();
-      ref.invalidate(aiCoachCreditAccessProvider);
-      ref.invalidate(aiBoostVisionAccessProvider);
-    }
+    // The app-owned receipt listener refreshes all readers once, even after
+    // leaving this page. The existing usage signal updates this local view.
     setState(() {});
+  }
+
+  Future<Map<String, Object?>> _startUsageLoad() {
+    final pending = _loadUsage();
+    // A fast I/O failure can precede the next frame's FutureBuilder listener.
+    // Observe it immediately, while returning the original failed future to
+    // the builder so the error/retry and last verified data stay visible.
+    unawaited(pending.then<void>((_) {}, onError: (Object _, StackTrace _) {}));
+    return pending;
   }
 
   Future<Map<String, Object?>> _loadUsage() async {
     final loadVersion = ++_usageLoadVersion;
+    final epoch = _ownerEpoch;
+    final preferences = ref.read(preferencesRepositoryProvider);
     final client = Supabase.instance.client;
     if (client.auth.currentSession == null) {
       throw StateError('authentication_required');
@@ -96,9 +136,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     if (ownerId == null) throw StateError('authentication_required');
     final value = await client.rpc('bil_get_ai_usage_status');
     final result = Map<String, Object?>.from(value as Map);
-    final storedContext = await ref
-        .read(preferencesRepositoryProvider)
-        .get(CoachContextPreferences.storageKey);
+    final storedContext = await preferences.get(
+      CoachContextPreferences.storageKey,
+    );
     result['context_focuses'] = CoachContextPreferences.decode(
       storedContext,
     ).focuses.map((focus) => focus.name).toList(growable: false);
@@ -133,14 +173,16 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     // An older request may complete after sign-out, sign-in or a newer
     // refresh. Never publish its private credit and consent data to the
     // current owner's UI.
-    if (client.auth.currentUser?.id != ownerId) {
+    if (client.auth.currentUser?.id != ownerId ||
+        epoch != _ownerEpoch ||
+        !mounted ||
+        !identical(ref.read(preferencesRepositoryProvider), preferences)) {
       throw StateError('authentication_required');
     }
     result['_qualityOwnerId'] = ownerId;
     if (mounted && loadVersion == _usageLoadVersion) {
       _verifiedUsageOwnerId = ownerId;
       _lastVerifiedUsage = Map<String, Object?>.unmodifiable(result);
-      if (!changingContextFocus) contextFocuses = null;
     }
     return result;
   }
@@ -154,10 +196,18 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
           ? coordinator.grantAndVerify()
           : coordinator.revokeAndVerify());
       if (!verified) throw StateError('consent_readback_failed');
-      if (mounted) setState(() => usage = _loadUsage());
+      if (mounted) {
+        setState(() {
+          usage = _startUsageLoad();
+        });
+      }
     } on Object {
       if (!mounted) return;
-      if (!granted) setState(() => usage = _loadUsage());
+      if (!granted) {
+        setState(() {
+          usage = _startUsageLoad();
+        });
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -182,6 +232,15 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     Set<CoachContextFocus> current,
   ) async {
     if (changingContextFocus) return;
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final epoch = _ownerEpoch;
+    final owner = _sessionOwner;
+    bool currentOwner() =>
+        mounted &&
+        epoch == _ownerEpoch &&
+        owner == _sessionOwner &&
+        identical(ref.read(preferencesRepositoryProvider), preferences);
+    if (!currentOwner()) return;
     final next = <CoachContextFocus>{...current};
     included ? next.add(focus) : next.remove(focus);
     // The switch follows the requested value immediately, but the
@@ -191,16 +250,18 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
       contextFocuses = Set.unmodifiable(next);
     });
     try {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set(
-            CoachContextPreferences.storageKey,
-            CoachContextPreferences(focuses: Set.unmodifiable(next)).encode(),
-          );
+      await preferences.update(CoachContextPreferences.storageKey, (raw) {
+        final latest = {...CoachContextPreferences.decode(raw).focuses};
+        included ? latest.add(focus) : latest.remove(focus);
+        return CoachContextPreferences(
+          focuses: Set.unmodifiable(latest),
+        ).encode();
+      }, isCurrent: currentOwner);
+      if (currentOwner()) ref.invalidate(coachContextSnapshotProvider);
       // The verified preference stream will adopt the same value after
       // the next usage read. Keep the choice stable in the interim.
     } on Object {
-      if (!mounted) return;
+      if (!mounted || !currentOwner()) return;
       setState(() => contextFocuses = Set.unmodifiable(current));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -216,7 +277,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         ),
       );
     } finally {
-      if (mounted) setState(() => changingContextFocus = false);
+      if (currentOwner()) setState(() => changingContextFocus = false);
     }
   }
 
@@ -238,8 +299,42 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   Widget build(BuildContext context) {
     ref.listen<int>(aiCoachUsageRefreshProvider, (previous, next) {
       if (previous == next || !mounted) return;
-      setState(() => usage = _loadUsage());
+      setState(() {
+        usage = _startUsageLoad();
+      });
     });
+    final localRepository = ref.watch(preferencesRepositoryProvider);
+    if (!identical(localRepository, _contextRepository)) {
+      final replacingOwner = _contextRepository != null;
+      _contextRepository = localRepository;
+      _lastLocalContext = null;
+      contextFocuses = null;
+      changingContextFocus = false;
+      if (replacingOwner) {
+        _usageLoadVersion++;
+        _lastVerifiedUsage = null;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted &&
+              identical(
+                ref.read(preferencesRepositoryProvider),
+                localRepository,
+              )) {
+            setState(() {
+              usage = _startUsageLoad();
+            });
+          }
+        });
+      }
+    }
+    final local = ref.watch(coachSettingsContextProvider);
+    final localData = local.asData?.value;
+    if (localData != null && identical(localData.repository, localRepository)) {
+      _lastLocalContext = localData.preferences;
+      if (contextFocuses != null &&
+          setEquals(contextFocuses!, localData.preferences.focuses)) {
+        contextFocuses = null;
+      }
+    }
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -249,281 +344,104 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         foregroundColor: scheme.onSurface,
         title: Text(
           t(
-            'Coach access',
-            'رصيد المدرب',
-            'Accès Coach',
-            'Acceso al Coach',
-            'Koç erişimi',
+            'Coach settings',
+            'إعدادات المدرب',
+            'Réglages du Coach',
+            'Ajustes del Coach',
+            'Koç ayarları',
           ),
           style: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
-      body: FutureBuilder<Map<String, Object?>>(
-        future: usage,
-        builder: (context, snapshot) {
-          final currentOwner = Supabase.instance.client.auth.currentUser?.id;
-          final received = snapshot.data;
-          final currentData = received?['_qualityOwnerId'] == currentOwner
-              ? received
-              : null;
-          // A refresh or transient network error may retain the last
-          // server-verified data, but never data from a different account.
-          final cached =
-              currentOwner != null && _verifiedUsageOwnerId == currentOwner
-              ? _lastVerifiedUsage
-              : null;
-          final data = currentData ?? cached;
-          if (data == null) {
-            if (snapshot.hasError) return _errorState(snapshot.error);
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1D8ACB)),
+      body: BilPearlBackdrop(
+        child: FutureBuilder<Map<String, Object?>>(
+          future: usage,
+          builder: (context, snapshot) {
+            final currentOwner = Supabase.instance.client.auth.currentUser?.id;
+            final received = snapshot.data;
+            final currentData = received?['_qualityOwnerId'] == currentOwner
+                ? received
+                : null;
+            // A refresh or transient network error may retain the last
+            // server-verified data, but never data from a different account.
+            final cached =
+                currentOwner != null && _verifiedUsageOwnerId == currentOwner
+                ? _lastVerifiedUsage
+                : null;
+            final data = currentData ?? cached;
+            if (data == null) {
+              return _settingsBody(
+                null,
+                usageError: snapshot.error,
+                usageLoading:
+                    snapshot.connectionState == ConnectionState.waiting,
+                contextError: local.error,
+              );
+            }
+            final refreshing =
+                snapshot.connectionState == ConnectionState.waiting;
+            return Column(
+              children: [
+                SizedBox(
+                  height: 3,
+                  child: refreshing
+                      ? const LinearProgressIndicator()
+                      : const SizedBox.shrink(),
+                ),
+                if (snapshot.hasError)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ListTile(
+                      key: const Key('ai-coach-settings-stale-notice'),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      leading: const Icon(Icons.info_outline_rounded, size: 20),
+                      title: Text(
+                        t(
+                          'Refresh failed. Showing last verified settings.',
+                          'تعذّر التحديث. تظهر آخر إعدادات مؤكدة.',
+                          'Actualisation impossible. Derniers réglages vérifiés.',
+                          'No se pudo actualizar. Se muestra la última versión verificada.',
+                          'Yenileme başarısız. Son doğrulanmış ayarlar gösteriliyor.',
+                        ),
+                      ),
+                      trailing: IconButton(
+                        tooltip: t(
+                          'Retry',
+                          'إعادة المحاولة',
+                          'Réessayer',
+                          'Reintentar',
+                          'Yeniden dene',
+                        ),
+                        onPressed: () => setState(() {
+                          usage = _startUsageLoad();
+                        }),
+                        icon: const Icon(Icons.refresh_rounded),
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      final fresh = _startUsageLoad();
+                      setState(() {
+                        usage = fresh;
+                      });
+                      try {
+                        await fresh;
+                      } on Object {
+                        // Keep the verified snapshot; the inline notice and
+                        // explicit Retry expose the failed refresh.
+                      }
+                    },
+                    child: _settingsBody(data, contextError: local.error),
+                  ),
+                ),
+              ],
             );
-          }
-          final refreshing =
-              snapshot.connectionState == ConnectionState.waiting;
-          return Column(
-            children: [
-              SizedBox(
-                height: 3,
-                child: refreshing
-                    ? const LinearProgressIndicator()
-                    : const SizedBox.shrink(),
-              ),
-              if (snapshot.hasError)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ListTile(
-                    key: const Key('ai-coach-settings-stale-notice'),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    leading: const Icon(Icons.info_outline_rounded, size: 20),
-                    title: Text(
-                      t(
-                        'Refresh failed. Showing last verified settings.',
-                        'تعذّر التحديث. تظهر آخر إعدادات مؤكدة.',
-                        'Actualisation impossible. Derniers réglages vérifiés.',
-                        'No se pudo actualizar. Se muestra la última versión verificada.',
-                        'Yenileme başarısız. Son doğrulanmış ayarlar gösteriliyor.',
-                      ),
-                    ),
-                    trailing: IconButton(
-                      tooltip: t(
-                        'Retry',
-                        'إعادة المحاولة',
-                        'Réessayer',
-                        'Reintentar',
-                        'Yeniden dene',
-                      ),
-                      onPressed: () => setState(() {
-                        usage = _loadUsage();
-                      }),
-                      icon: const Icon(Icons.refresh_rounded),
-                    ),
-                  ),
-                ),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    final fresh = _loadUsage();
-                    setState(() => usage = fresh);
-                    try {
-                      await fresh;
-                    } on Object {
-                      // Keep the verified snapshot; the inline notice and
-                      // explicit Retry expose the failed refresh.
-                    }
-                  },
-                  child: _settingsBody(data),
-                ),
-              ),
-            ],
-          );
-        },
+          },
+        ),
       ),
-    );
-  }
-
-  Widget _settingsBody(Map<String, Object?> data) {
-    final loadedFocuses = coachContextFocusesFromUsage(data['context_focuses']);
-    final effectiveFocuses = contextFocuses ?? loadedFocuses;
-    final rawCredits = data['credits'];
-    final credits = rawCredits is Map
-        ? Map<String, Object?>.from(rawCredits)
-        : const <String, Object?>{};
-    final weeklyLimit = _int(credits['weekly_limit']);
-    final weeklyUsed = _int(credits['weekly_used']);
-    final weeklyReserved = _int(credits['weekly_reserved']);
-    final weeklyRemaining = _int(credits['weekly_remaining']);
-    final paidRemaining = _int(credits['paid_remaining']);
-    final totalRemaining = _int(credits['total_remaining']);
-    final spentFraction = weeklyLimit <= 0
-        ? 0.0
-        : ((weeklyUsed + weeklyReserved) / weeklyLimit).clamp(0.0, 1.0);
-    final active = data['plan'] == 'ai_coach';
-    final rawNotice = data['reset_notice'];
-    final notice = rawNotice is Map
-        ? Map<String, Object?>.from(rawNotice)
-        : const <String, Object?>{};
-    final resetNoticeId = notice['reset_id']?.toString() ?? '';
-    final authoredResetMessage = notice['message']?.toString().trim();
-
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
-      children: [
-        if (resetNoticeId.isNotEmpty) ...[
-          _ResetGiftBanner(
-            message: authoredResetMessage?.isNotEmpty == true
-                ? authoredResetMessage!
-                : context.strings.text(_globalResetGiftCopy),
-            onDismiss: () => _dismissResetNotice(resetNoticeId),
-          ),
-          const SizedBox(height: 14),
-        ],
-        _TokenHero(
-          totalRemaining: totalRemaining,
-          weeklyRemaining: weeklyRemaining,
-          weeklyLimit: weeklyLimit,
-          paidRemaining: paidRemaining,
-          spentFraction: spentFraction,
-          active: active,
-          weekStart: data['week_start']?.toString() ?? '—',
-          resetAt: data['reset_at']?.toString() ?? '—',
-          t: t,
-        ),
-        const SizedBox(height: 14),
-        _PremiumCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SectionTitle(
-                icon: Icons.hub_rounded,
-                title: t(
-                  'One balance. Every way you coach.',
-                  'رصيد واحد. لكل طرق التدريب.',
-                  'Un solde pour tous vos échanges.',
-                  'Un saldo para todas tus consultas.',
-                  'Tüm koçluk için tek bakiye.',
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _CapabilityChip(
-                    icon: Icons.chat_bubble_rounded,
-                    label: t('Text', 'نص', 'Texte', 'Texto', 'Metin'),
-                  ),
-                  _CapabilityChip(
-                    icon: Icons.graphic_eq_rounded,
-                    label: t('Voice', 'صوت', 'Voix', 'Voz', 'Ses'),
-                  ),
-                  _CapabilityChip(
-                    icon: Icons.camera_alt_rounded,
-                    label: t('Vision', 'صورة', 'Vision', 'Visión', 'Görüntü'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                t(
-                  'BIL reserves a small amount before a cloud request, then charges only the actual provider cost. Local answers cost zero tokens.',
-                  'يحجز BIL مبلغًا صغيرًا قبل الطلب السحابي، ثم يخصم التكلفة الفعلية فقط. الإجابات المحلية لا تستهلك أي توكن.',
-                  'BIL réserve un petit montant puis facture uniquement le coût réel. Les réponses locales sont gratuites.',
-                  'BIL reserva una pequeña cantidad y cobra solo el coste real. Las respuestas locales no gastan tokens.',
-                  'BIL önce küçük bir tutar ayırır, sonra yalnızca gerçek maliyeti düşer. Yerel yanıtlar ücretsizdir.',
-                ),
-                style: TextStyle(
-                  height: 1.45,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        _ConsentTile(
-          icon: Icons.auto_awesome_rounded,
-          value: data['remote_ai_consent'] == true,
-          enabled: !changingConsent,
-          onChanged: _setRemoteAiConsent,
-          title: t(
-            'Google Gemini AI consent',
-            'ذكاء مخصص لك',
-            'Intelligence personnalisée',
-            'Inteligencia personalizada',
-            'Kişiselleştirilmiş zekâ',
-          ),
-          subtitle: t(
-            'When enabled, your question and selected weight/body, nutrition, activity, sleep, habit, and recent conversation context can be sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. Turn this off at any time; local BIL features remain available.',
-            'عند التفعيل، قد يُرسل سؤالك والسياق المحدد عن الوزن والجسم والتغذية والنشاط والنوم والعادات والمحادثة الحديثة إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، فقط للإجابة عن طلبك. يمكنك إيقافه في أي وقت، وتبقى ميزات BIL المحلية متاحة.',
-            'Lorsque cette option est activée, seul le contexte limité nécessaire à votre question est envoyé au service Gemini de BIL. L’historique reste local, hormis les 12 derniers messages envoyés avec cette requête. Vous pouvez désactiver cette option à tout moment.',
-            'Cuando está activado, solo se envía al servicio Gemini de BIL el contexto limitado necesario para tu pregunta. El historial permanece local, salvo los últimos 12 mensajes enviados con esa solicitud. Puedes desactivarlo en cualquier momento.',
-            'Etkinleştirildiğinde yalnızca sorunuz için gereken sınırlı bağlam BIL’in Gemini hizmetine gönderilir. Konuşma geçmişi, istekle gönderilen son 12 mesaj dışında yerel kalır. İstediğiniz zaman kapatabilirsiniz.',
-          ),
-        ),
-        const SizedBox(height: 10),
-        _ContextFocusCard(
-          focuses: effectiveFocuses,
-          enabled: !changingContextFocus,
-          onChanged: (focus, included) =>
-              _setContextFocus(focus, included, effectiveFocuses),
-          t: t,
-        ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-          ),
-          child: ListTile(
-            leading: const BilFlatIcon(
-              kind: BilSemanticIconKind.privacy,
-              materialIcon: Icons.phonelink_lock_rounded,
-              appleIcon: Icons.phonelink_lock_rounded,
-            ),
-            title: Text(
-              t(
-                'Your platform handles speech recognition',
-                'تتولى خدمة المنصة التعرّف على الكلام',
-                'Votre plateforme gère la reconnaissance vocale',
-                'Tu plataforma gestiona el reconocimiento de voz',
-                'Konuşma tanımayı platformunuz gerçekleştirir',
-              ),
-            ),
-            subtitle: Text(
-              t(
-                'Raw microphone audio is not sent to BIL or Gemini. Your device or platform speech service converts it to text under its settings; only recognized text is sent when you submit.',
-                'لا يُرسل صوت الميكروفون الخام إلى BIL أو Gemini. تحوّله خدمة الكلام في جهازك أو منصتك إلى نص وفق إعداداتها؛ ولا يُرسل سوى النص المتعرّف عليه عندما ترسله.',
-                'Le son brut du microphone n’est pas envoyé à BIL ni à Gemini. Le service vocal de votre appareil ou de votre plateforme le convertit en texte selon ses réglages ; seul le texte reconnu est envoyé lorsque vous validez.',
-                'El audio sin procesar del micrófono no se envía a BIL ni a Gemini. El servicio de voz del dispositivo o de la plataforma lo convierte en texto según sus ajustes; solo se envía el texto reconocido cuando lo confirmas.',
-                'Ham mikrofon sesi BIL’e veya Gemini’ye gönderilmez. Cihazınızdaki ya da platformdaki konuşma hizmeti, kendi ayarlarına göre sesi metne dönüştürür; yalnızca gönderdiğinizde tanınan metin iletilir.',
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 14),
-        _BoostCard(boost: boost, t: t),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: _manageSubscription,
-          icon: const Icon(Icons.open_in_new_rounded, size: 18),
-          label: Text(
-            t(
-              'Manage subscription in store',
-              'إدارة الاشتراك في المتجر',
-              'Gérer l’abonnement',
-              'Gestionar suscripción',
-              'Aboneliği yönet',
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -563,7 +481,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
             FilledButton.tonalIcon(
               onPressed: authenticationRequired
                   ? () => context.push('/login')
-                  : () => setState(() => usage = _loadUsage()),
+                  : () => setState(() {
+                      usage = _startUsageLoad();
+                    }),
               icon: Icon(
                 authenticationRequired
                     ? Icons.login_rounded
@@ -599,7 +519,11 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         params: <String, Object?>{'p_owner_id': ownerId, 'p_reset_id': resetId},
       );
       if (changed != true) return;
-      if (mounted) setState(() => usage = _loadUsage());
+      if (mounted) {
+        setState(() {
+          usage = _startUsageLoad();
+        });
+      }
     } on Object {
       // Keep the notice visible when acknowledgement did not persist.
     }
@@ -615,8 +539,8 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    unawaited(_ownerSubscription?.cancel());
     boost.removeListener(_boostChanged);
-    boost.dispose();
     super.dispose();
   }
 }

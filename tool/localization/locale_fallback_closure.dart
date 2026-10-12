@@ -1,4 +1,8 @@
 import 'package:body_intelligence_log/app/localization/runtime_copy_integration_gap.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_closure_access.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_closure_coach.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_closure_food.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_closure_review.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_next_workspace.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_coach_controls.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_creation.dart';
@@ -124,6 +128,10 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     File('lib/features/auth/auth_five_locale_copy.dart').readAsString(),
   ])).join('\n');
   final catalogKeys = <String>{
+    ...ClosureAccessRuntimeCopy.sources,
+    ...ClosureCoachRuntimeCopy.sources,
+    ...ClosureFoodRuntimeCopy.sources,
+    ...ClosureReviewRuntimeCopy.sources,
     ...RegExp(r'^    ("(?:\\.|[^"])*"): \{$', multiLine: true)
         .allMatches(catalogSource)
         .map(

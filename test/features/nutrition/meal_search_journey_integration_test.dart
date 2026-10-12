@@ -142,8 +142,15 @@ void main() {
     }
     expect(RegExp(r'\bSearchAnchor\(').allMatches(entry), hasLength(1));
     expect(entry, contains('_mealQuerySuggestions(controller, query, locale)'));
-    expect(search, contains('effectiveQuery = controller.text.trim()'));
-    expect(search, contains('final latestQuery = controller.text.trim()'));
+    expect(search, contains('effectiveQuery = query.trim()'));
+    expect(search, contains('controller.text.trim() == effectiveQuery'));
+    expect(search, contains('authority.searchProgressively(effectiveQuery'));
+    expect(
+      search,
+      contains(
+        'identical(authority, ref.read(foodRuntimeSearchAuthorityProvider))',
+      ),
+    );
   });
 
   test('camera and gallery captures share the same raw-value callback', () {

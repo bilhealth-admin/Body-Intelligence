@@ -12,6 +12,7 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
       return;
     }
     final restoreOwnerId = _currentStoreOwnerId()!;
+    final visit = _storeVisit.capture();
     _restoring = true;
     _restoreOwnershipConflict = false;
     _explicitRestoreTransactionKeys.clear();
@@ -39,9 +40,17 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
       while (_queuedPurchaseUpdates > 0) {
         await _purchaseUpdates;
       }
-      if (_disposed || !_isCurrentStoreOwner(restoreOwnerId)) return;
+      if (_disposed ||
+          !_isCurrentStoreOwner(restoreOwnerId) ||
+          !_storeVisit.isCurrent(visit)) {
+        return;
+      }
       await refreshEntitlement();
-      if (_disposed || !_isCurrentStoreOwner(restoreOwnerId)) return;
+      if (_disposed ||
+          !_isCurrentStoreOwner(restoreOwnerId) ||
+          !_storeVisit.isCurrent(visit)) {
+        return;
+      }
       if (_restoreOwnershipConflict) {
         state = VerifiedStoreState.failed;
         messageCode = 'purchase_owned_by_another_account';
@@ -60,7 +69,11 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
         notifyListeners();
       }
     } on Object {
-      if (_disposed || !_isCurrentStoreOwner(restoreOwnerId)) return;
+      if (_disposed ||
+          !_isCurrentStoreOwner(restoreOwnerId) ||
+          !_storeVisit.isCurrent(visit)) {
+        return;
+      }
       state = VerifiedStoreState.failed;
       messageCode = 'restore_failed';
       notifyListeners();

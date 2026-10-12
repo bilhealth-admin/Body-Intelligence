@@ -471,7 +471,12 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               _ActionSheet(actions: transientActions, onAction: _executeAction),
         );
       }
-    } on Object {
+    } on Object catch (error, stack) {
+      if (kDebugMode) {
+        // Never print the question, reply, token or provider error payload.
+        debugPrint('AI Coach request failed (${error.runtimeType}).');
+        debugPrintStack(stackTrace: stack);
+      }
       if (!mounted || generation != requestGeneration) return;
       _updateState(() {
         replyPhase = _CoachReplyPhase.failed;
@@ -508,7 +513,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         // server may still have settled a reservation before its reply was
         // discarded. autoDispose clears the snapshot when this page is gone.
         ref.invalidate(aiCoachCreditAccessProvider);
-        ref.invalidate(aiBoostVisionAccessProvider);
+        ref.invalidate(aiVisionCreditStateProvider);
       }
       if (mounted && generation == requestGeneration) {
         // A cancelled, older response must not cancel the next turn's timer.

@@ -1,7 +1,28 @@
 part of '../food_page.dart';
 
 const _customFoodAuthored = <String, Map<String, String>>{
+  'ar': {
+    'Saturated fat': 'الدهون المشبعة',
+    'Polyunsaturated fat': 'الدهون متعددة اللاتشبع',
+    'Monounsaturated fat': 'الدهون أحادية اللاتشبع',
+    'Trans fat': 'الدهون المتحولة',
+    'Cholesterol': 'الكوليسترول',
+    'Vitamin A': 'فيتامين A',
+    'Vitamin A (mcg RAE)': 'فيتامين A (mcg RAE)',
+    'Source': 'المصدر',
+    'Phosphorus': 'الفوسفور',
+    'Iron': 'الحديد',
+    'Vitamin C': 'فيتامين C',
+  },
   'fr': {
+    'Saturated fat': 'Graisses saturées',
+    'Polyunsaturated fat': 'Graisses polyinsaturées',
+    'Monounsaturated fat': 'Graisses monoinsaturées',
+    'Trans fat': 'Acides gras trans',
+    'Cholesterol': 'Cholestérol',
+    'Vitamin A': 'Vitamine A',
+    'Vitamin A (mcg RAE)': 'Vitamine A (mcg RAE)',
+
     'Create custom food': 'Créer un aliment personnalisé',
     'Edit custom food': 'Modifier l’aliment personnalisé',
     'English name': 'Nom anglais',
@@ -29,6 +50,14 @@ const _customFoodAuthored = <String, Map<String, String>>{
         'Un aliment avec ce code-barres existe déjà.',
   },
   'es': {
+    'Saturated fat': 'Grasas saturadas',
+    'Polyunsaturated fat': 'Grasas poliinsaturadas',
+    'Monounsaturated fat': 'Grasas monoinsaturadas',
+    'Trans fat': 'Grasas trans',
+    'Cholesterol': 'Colesterol',
+    'Vitamin A': 'Vitamina A',
+    'Vitamin A (mcg RAE)': 'Vitamina A (mcg RAE)',
+
     'Create custom food': 'Crear alimento personalizado',
     'Edit custom food': 'Editar alimento personalizado',
     'English name': 'Nombre en inglés',
@@ -56,6 +85,14 @@ const _customFoodAuthored = <String, Map<String, String>>{
         'Ya existe un alimento con este código de barras.',
   },
   'tr': {
+    'Saturated fat': 'Doymuş yağ',
+    'Polyunsaturated fat': 'Çoklu doymamış yağ',
+    'Monounsaturated fat': 'Tekli doymamış yağ',
+    'Trans fat': 'Trans yağ',
+    'Cholesterol': 'Kolesterol',
+    'Vitamin A': 'A vitamini',
+    'Vitamin A (mcg RAE)': 'A vitamini (mcg RAE)',
+
     'Create custom food': 'Özel yiyecek oluştur',
     'Edit custom food': 'Özel yiyeceği düzenle',
     'English name': 'İngilizce ad',

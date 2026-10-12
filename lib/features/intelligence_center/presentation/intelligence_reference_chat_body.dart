@@ -33,18 +33,17 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
         retryableErrorMessageIds.isEmpty;
     final showReplyThinking = sending;
     final showIntroBrief = introVisible && dailyBrief != null;
-    const coachNavy = Color(0xFF07111B);
+    final coachCanvas = Theme.of(context).scaffoldBackgroundColor;
     return Scaffold(
       bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0
           ? null
           : BilReferenceBottomBar(
               selected: 1,
-              dark: true,
+              dark: Theme.of(context).brightness == Brightness.dark,
               onSelected: (index) => unawaited(_navigateReference(index)),
             ),
-      backgroundColor: coachNavy,
-      body: ColoredBox(
-        color: coachNavy,
+      backgroundColor: coachCanvas,
+      body: BilPearlBackdrop(
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.zero,
@@ -54,18 +53,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                 width: double.infinity,
                 constraints: const BoxConstraints(maxWidth: 760),
                 clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  color: scheme.surface,
-                  borderRadius: BorderRadius.zero,
-                  border: Border.all(color: Colors.transparent, width: 0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .3),
-                      blurRadius: 28,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
+                decoration: const BoxDecoration(),
                 child: Column(
                   children: [
                     _CoachHero(
@@ -79,7 +67,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                         }
                       },
                       onHistory: () => unawaited(_openConversationHistory()),
-                      onMenu: () => unawaited(_openCoachMenuSheet()),
+                      onMenu: () => unawaited(_openCoachMenuSheet(context)),
                     ),
                     if (conversationLoadFailed)
                       _CoachReplyFailure(
@@ -130,7 +118,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                         margin: const EdgeInsets.fromLTRB(12, 5, 12, 12),
                         padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
                         decoration: BoxDecoration(
-                          color: scheme.surfaceContainerLow,
+                          gradient: BilPearlFinish.panel(context).gradient,
                           borderRadius: BorderRadius.circular(30),
                           border: Border.all(
                             color: listening
@@ -209,14 +197,12 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                 tooltip: tr('Sending', 'جارٍ الإرسال'),
                                 onPressed: null,
                                 style: IconButton.styleFrom(
-                                  backgroundColor: const Color(0xFF12394E),
-                                  foregroundColor: const Color(0xFFC8F3FF),
-                                  disabledBackgroundColor: const Color(
-                                    0xFF12394E,
-                                  ).withValues(alpha: .58),
-                                  disabledForegroundColor: const Color(
-                                    0xFFC8F3FF,
-                                  ).withValues(alpha: .58),
+                                  backgroundColor: scheme.primary,
+                                  foregroundColor: scheme.onPrimary,
+                                  disabledBackgroundColor: scheme.primary
+                                      .withValues(alpha: .58),
+                                  disabledForegroundColor: scheme.onPrimary
+                                      .withValues(alpha: .58),
                                   minimumSize: const Size.square(48),
                                 ),
                                 icon: const Icon(Icons.arrow_upward_rounded),
@@ -233,13 +219,13 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                     ? _stopLiveCall
                                     : _toggleLiveCall,
                                 style: IconButton.styleFrom(
-                                  backgroundColor: const Color(0xFF12394E),
-                                  foregroundColor: const Color(0xFFC8F3FF),
+                                  backgroundColor: scheme.primary,
+                                  foregroundColor: scheme.onPrimary,
                                   minimumSize: const Size.square(48),
                                 ),
                                 icon: listening
-                                    ? const _VoiceListeningWave(
-                                        color: Color(0xFFC8F3FF),
+                                    ? _VoiceListeningWave(
+                                        color: scheme.onPrimary,
                                         compact: true,
                                       )
                                     : const Icon(Icons.graphic_eq_rounded),
@@ -250,8 +236,8 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                 tooltip: tr('Send', 'إرسال'),
                                 onPressed: !conversationReady ? null : ask,
                                 style: IconButton.styleFrom(
-                                  backgroundColor: const Color(0xFF12394E),
-                                  foregroundColor: const Color(0xFFC8F3FF),
+                                  backgroundColor: scheme.primary,
+                                  foregroundColor: scheme.onPrimary,
                                   minimumSize: const Size.square(48),
                                 ),
                                 icon: const Icon(Icons.arrow_upward_rounded),
@@ -267,11 +253,11 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                   ? null
                                   : _analyzeFoodImageInChat,
                               style: IconButton.styleFrom(
-                                foregroundColor: const Color(0xFFBFD0E5),
+                                foregroundColor: scheme.onSurfaceVariant,
                                 minimumSize: const Size.square(44),
                               ),
                               icon: analyzingFoodImage
-                                  ? const SizedBox.square(
+                                  ? SizedBox.square(
                                       dimension: 19,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,

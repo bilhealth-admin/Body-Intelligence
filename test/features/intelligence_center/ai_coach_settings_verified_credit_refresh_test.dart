@@ -6,6 +6,7 @@
 // Debug integrity's normal opt-out is not App Attest/Play Integrity evidence.
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -14,8 +15,13 @@ import 'package:body_intelligence_log/features/commerce/providers/commerce_provi
 import 'package:body_intelligence_log/features/intelligence_center/presentation/ai_coach_settings_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/ai_boost_purchase_service.dart';
 import 'package:drift/native.dart';
+import 'package:crypto/crypto.dart';
+import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,12 +32,32 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_platform_interface/in_app_purchase_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../visual_closure/closure_surface_capture.dart';
+import '../../visual_closure/visual_evidence_font.dart';
 
 const _storage = MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
 const _host = 'coach-settings-credit-fixture.invalid';
 const _token = 'coach-settings-credit-fixture-token';
 
-enum _Case { nativeFinishPending, rejectedVerification, repeatedConsumable }
+enum _Case {
+  nativeFinishPending,
+  rejectedVerification,
+  repeatedConsumable,
+  contextAndUsageFailure,
+  contextStorageFailure,
+}
+
+class _ContextPreferences extends PreferencesRepository {
+  _ContextPreferences(super.database);
+  bool failWrites = false;
+  @override
+  Future<void> set(String key, String value) {
+    if (failWrites && key == CoachContextPreferences.storageKey) {
+      throw StateError('controlled storage failure');
+    }
+    return super.set(key, value);
+  }
+}
 
 class _NativePlatform extends InAppPurchasePlatform {
   final updates = StreamController<List<PurchaseDetails>>.broadcast(sync: true);
@@ -93,6 +119,7 @@ class _HttpBoundary {
   final verification = Completer<bool>();
   final creditedReceipts = <String>{};
   int balance = 0;
+  bool usageFailure = false;
   int usageReads = 0;
   int verificationReads = 0;
   int activeRequests = 0;
@@ -108,6 +135,15 @@ class _HttpBoundary {
         case '/rest/v1/rpc/bil_get_ai_usage_status':
           expectSync(request.method, 'POST');
           usageReads++;
+          if (usageFailure) {
+            return http.Response(
+              '{"message":"controlled usage unavailable"}',
+              503,
+              headers: {'content-type': 'application/json'},
+              request: request,
+              reasonPhrase: 'Service Unavailable',
+            );
+          }
           data = {
             'plan': 'free',
             'week_start': '2026-10-04T00:00:00Z',
@@ -141,7 +177,26 @@ class _HttpBoundary {
           // Simulated server ledger changes only after this owner-authenticated
           // verification response, never from a native status or UI callback.
           if (verified && creditedReceipts.add(receipt)) balance += 2500;
-          data = {'verified': verified};
+          data = {
+            'verified': verified,
+            if (verified)
+              'delivery': {
+                'version': 2,
+                'owner_id': owner,
+                'product_id': AiBoostPurchaseService.productId,
+                'store': 'app_store',
+                'environment': 'sandbox',
+                'event_key': sha256
+                    .convert(utf8.encode('host-ledger|$owner|$receipt'))
+                    .toString(),
+                'verified_at': DateTime.now().toUtc().toIso8601String(),
+                'kind': 'boost',
+                'active': true,
+                'quantity': 2500,
+                'credited_now': true,
+                'finish_pending': false,
+              },
+          };
         default:
           throw StateError(
             'Unexpected host HTTP boundary: ${request.url.path}',
@@ -180,6 +235,7 @@ PurchaseDetails _receipt(String owner, String id) {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadVisualEvidenceFont);
   var sequence = 0;
   for (final scenario in _Case.values) {
     testWidgets(
@@ -197,7 +253,10 @@ void main() {
         ProviderSubscription<AsyncValue<bool>>? coach;
         ProviderSubscription<AsyncValue<bool>>? vision;
         try {
-          tester.view.physicalSize = const Size(600, 1400);
+          final narrowArabic = scenario == _Case.contextAndUsageFailure;
+          tester.view.physicalSize = narrowArabic
+              ? const Size(320, 844)
+              : const Size(600, 1400);
           tester.view.devicePixelRatio = 1;
           final native = ownedNative = _NativePlatform()
             ..finishFails = scenario == _Case.nativeFinishPending;
@@ -275,8 +334,12 @@ void main() {
             NativeDatabase.memory(),
             localOwnerId: owner,
           );
+          final localPreferences = _ContextPreferences(database);
           final container = ownedContainer = ProviderContainer(
-            overrides: [databaseProvider.overrideWithValue(database)],
+            overrides: [
+              databaseProvider.overrideWithValue(database),
+              preferencesRepositoryProvider.overrideWithValue(localPreferences),
+            ],
           );
           // This regression starts on an already authenticated Settings route.
           // Settle the real SDK-backed owner stream before observing its credit
@@ -306,8 +369,23 @@ void main() {
           await tester.pumpWidget(
             UncontrolledProviderScope(
               container: container,
-              child: const MaterialApp(
-                locale: Locale('en'),
+              child: MaterialApp(
+                theme: visualEvidenceTheme(
+                  narrowArabic
+                      ? BilFlagshipTheme.dark(isArabic: true)
+                      : BilFlagshipTheme.light(),
+                  fontFamily: narrowArabic
+                      ? 'NotoArabicEvidence'
+                      : 'RobotoEvidence',
+                ),
+                locale: Locale(narrowArabic ? 'ar' : 'en'),
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(narrowArabic ? 2 : 1),
+                    disableAnimations: true,
+                  ),
+                  child: child!,
+                ),
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: [
                   AppLocalizations.delegate,
@@ -324,8 +402,7 @@ void main() {
                 server.activeRequests == 0 &&
                 native.catalogReads == 1 &&
                 native.updates.hasListener &&
-                accessIs(false) &&
-                find.text('0').evaluate().length == 1,
+                accessIs(false),
             'actual Settings plus both default access loaders at zero',
             diagnostics: () =>
                 'usage=${server.usageReads}, requests=${server.activeRequests}, '
@@ -336,6 +413,132 @@ void main() {
                 'httpFailure=${server.failure}',
           );
           expect(server.failure, isNull);
+          await _reach(tester, find.text('0'));
+          expect(find.text('0'), findsOneWidget);
+          if (Platform.environment['BIL_CLOSURE_CAPTURE_STAGE'] != null) {
+            await tester.runAsync(loadVisualEvidenceFont);
+            await tester.pumpAndSettle();
+            if (Platform.environment['BIL_CLOSURE_CAPTURE_STAGE'] == 'after') {
+              await _reach(
+                tester,
+                find.byKey(const Key('ai-coach-context-nutrition')),
+                towardTop: true,
+              );
+            }
+            await captureClosureSurface(
+              tester,
+              find.byType(AiCoachSettingsPage),
+              narrowArabic ? 'settings-ar-dark-320-2x' : 'settings-en',
+            );
+          }
+          if (scenario == _Case.contextAndUsageFailure ||
+              scenario == _Case.contextStorageFailure) {
+            final nutrition = find.byKey(
+              const Key('ai-coach-context-nutrition'),
+            );
+            await _reach(tester, nutrition, towardTop: true);
+            expect(tester.widget<CheckboxListTile>(nutrition).value, isTrue);
+            localPreferences.failWrites =
+                scenario == _Case.contextStorageFailure;
+            final archiveBefore = await localPreferences.get(
+              'intelligenceConversationHistoryV1',
+            );
+            await tester.tap(nutrition);
+            await tester.pump();
+            await _waitUntil(
+              tester,
+              () =>
+                  tester.widget<CheckboxListTile>(nutrition).onChanged != null,
+              'context update completes',
+            );
+            if (localPreferences.failWrites) {
+              expect(tester.widget<CheckboxListTile>(nutrition).value, isTrue);
+              expect(
+                await localPreferences.get(CoachContextPreferences.storageKey),
+                isNull,
+              );
+              expect(
+                find.text(
+                  'Could not update Coach context categories. Nothing changed.',
+                ),
+                findsOneWidget,
+              );
+              localPreferences.failWrites = false;
+              await tester.tap(nutrition);
+              await tester.pump();
+              await _waitUntil(
+                tester,
+                () =>
+                    tester.widget<CheckboxListTile>(nutrition).onChanged !=
+                    null,
+                'context retry completes',
+              );
+            }
+            expect(tester.widget<CheckboxListTile>(nutrition).value, isFalse);
+            final saved = await localPreferences.get(
+              CoachContextPreferences.storageKey,
+            );
+            expect(
+              CoachContextPreferences.decode(
+                saved,
+              ).includes(CoachContextFocus.nutrition),
+              isFalse,
+            );
+            server.usageFailure = true;
+            final reads = server.usageReads;
+            container.read(aiCoachUsageRefreshProvider.notifier).state++;
+            await _waitUntil(
+              tester,
+              () =>
+                  server.usageReads > reads &&
+                  find
+                      .byKey(const Key('ai-coach-settings-stale-notice'))
+                      .evaluate()
+                      .isNotEmpty,
+              'failed balance refresh retains same-owner data',
+            );
+            expect(tester.widget<CheckboxListTile>(nutrition).value, isFalse);
+            expect(
+              await localPreferences.get(CoachContextPreferences.storageKey),
+              saved,
+            );
+            await tester.pumpWidget(const SizedBox.shrink());
+            await tester.pumpAndSettle();
+            await tester.pumpWidget(
+              UncontrolledProviderScope(
+                container: container,
+                child: MaterialApp(
+                  locale: const Locale('en'),
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: [
+                    AppLocalizations.delegate,
+                    ...GlobalMaterialLocalizations.delegates,
+                  ],
+                  theme: ThemeData(
+                    fontFamily: 'RobotoEvidence',
+                    brightness: Brightness.dark,
+                  ),
+                  home: const AiCoachSettingsPage(),
+                ),
+              ),
+            );
+            await _waitUntil(
+              tester,
+              () => nutrition.evaluate().isNotEmpty,
+              'local context restores while balance is unavailable',
+            );
+            expect(tester.widget<CheckboxListTile>(nutrition).value, isFalse);
+            expect(
+              await localPreferences.get('intelligenceConversationHistoryV1'),
+              archiveBefore,
+            );
+            expect(server.balance, 0);
+            expect(server.verificationReads, 0);
+            expect(native.launches, 0);
+            expect(server.failure, isNull);
+            expect(tester.takeException(), isNull);
+            return;
+          }
           final baselineReads = server.usageReads;
           await _reach(tester, _buyButton());
           expect(
@@ -394,6 +597,8 @@ void main() {
                   accessIs(true) &&
                   _buyButton().evaluate().length == 1,
               'verification refreshes Settings and both genuine access loaders',
+              diagnostics: () =>
+                  'usage=${server.usageReads}, baseline=$baselineReads, requests=${server.activeRequests}, finishes=${native.finishes}, coach=${container.read(aiCoachCreditAccessProvider)}, vision=${container.read(aiBoostVisionAccessProvider)}, buy=${_buyButton().evaluate().length}',
             );
             expect(server.balance, 2500);
             if (scenario == _Case.nativeFinishPending) {

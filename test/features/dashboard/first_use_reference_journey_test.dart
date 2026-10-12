@@ -3,6 +3,7 @@ import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/app/router/responsive_app_shell.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import '../../visual_closure/visual_evidence_font.dart';
+import '../../visual_closure/closure_surface_capture.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 
@@ -100,11 +102,7 @@ Widget journeyApp(
       GlobalCupertinoLocalizations.delegate,
     ],
     theme: visualEvidenceTheme(
-      referenceTheme ??
-          ThemeData(
-            useMaterial3: true,
-            colorSchemeSeed: const Color(0xFF079D87),
-          ),
+      referenceTheme ?? BilFlagshipTheme.light(isArabic: language == 'ar'),
       fontFamily: language == 'ar' ? 'NotoArabicEvidence' : 'RobotoEvidence',
     ),
     builder: (context, child) => RepaintBoundary(
@@ -142,6 +140,13 @@ Future<void> capture(WidgetTester tester, String name) async {
       image.dispose();
     }
   });
+  await captureClosureFrames(
+    tester,
+    find.byKey(const Key('first-use-capture')),
+    'first-use-${Localizations.localeOf(tester.element(find.byType(Scaffold).first)).languageCode}-${MediaQuery.disableAnimationsOf(tester.element(find.byType(Scaffold).first)) ? 'reduced' : 'motion'}',
+    step: name,
+    frames: name.startsWith('05-') ? 12 : 8,
+  );
 }
 
 void main() {
@@ -231,161 +236,185 @@ void main() {
       }
     }
 
-    testWidgets(
-      '$language real food journey: cancel, edit 80g, commit once, celebrate, streak',
-      (tester) async {
-        final originalShadows = debugDisableShadows;
-        debugDisableShadows = false;
-        addTearDown(() => debugDisableShadows = originalShadows);
-        WidgetController.hitTestWarningShouldBeFatal = true;
-        addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
-        tester.view.physicalSize = const Size(390, 844);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-        final db = AppDatabase.forTesting(
-          NativeDatabase.memory(),
-          localOwnerId: 'reference-test',
-        );
-        addTearDown(db.close);
-        final preferences = PreferencesRepository(db);
-        final foodId = await FoodRepository(db).addFood(
-          name: 'TEST فول',
-          category: 'beans',
-          calories: 95,
-          protein: 5.1,
-          carbs: 11.9,
-          fats: 3.4,
-          servingSize: 100,
-          servingUnit: 'g',
-        );
-        final router = journeyRouter();
-        addTearDown(router.dispose);
-        addTearDown(() async {
+    for (final reduced in [false, true]) {
+      testWidgets(
+        '$language real food journey: cancel, edit 80g, commit once, celebrate, streak${reduced ? ' reduced motion' : ''}',
+        (tester) async {
+          final originalShadows = debugDisableShadows;
+          debugDisableShadows = false;
+          addTearDown(() => debugDisableShadows = originalShadows);
+          WidgetController.hitTestWarningShouldBeFatal = true;
+          addTearDown(
+            () => WidgetController.hitTestWarningShouldBeFatal = false,
+          );
+          tester.view.physicalSize = const Size(390, 844);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.reset);
+          final db = AppDatabase.forTesting(
+            NativeDatabase.memory(),
+            localOwnerId: 'reference-test',
+          );
+          addTearDown(db.close);
+          final preferences = PreferencesRepository(db);
+          final foodId = await FoodRepository(db).addFood(
+            name: 'TEST فول',
+            category: 'beans',
+            calories: 95,
+            protein: 5.1,
+            carbs: 11.9,
+            fats: 3.4,
+            servingSize: 100,
+            servingUnit: 'g',
+          );
+          final router = journeyRouter();
+          addTearDown(router.dispose);
+          addTearDown(() async {
+            await tester.pumpWidget(const SizedBox.shrink());
+            await tester.pump(const Duration(milliseconds: 20));
+            debugDisableShadows = originalShadows;
+          });
+          await tester.pumpWidget(
+            journeyApp(db, router, language, reduced: reduced),
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('shell-quick-add')));
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('quick-add-food-guide')), findsOneWidget);
+          await capture(tester, '00-menu-$language');
+          await tester.tap(find.byKey(const Key('quick-add-primary-0')));
+          await tester.pumpAndSettle();
+          expect(
+            router.routeInformationProvider.value.uri.queryParameters['guide'],
+            '1',
+          );
+          expect(
+            find.byKey(const Key('food-log-search-guide')),
+            findsOneWidget,
+          );
+          await capture(tester, '01-search-$language');
+          await tester.enterText(
+            find.byKey(const Key('food-log-search')),
+            'TEST',
+          );
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const Key('food-log-choose-guide')),
+            findsOneWidget,
+          );
+          await capture(tester, '02-choose-$language');
+          final addFood = find.byKey(Key('food-log-add-$foodId'));
+          await tester.ensureVisible(addFood);
+          await tester.tap(addFood);
+          await tester.pumpAndSettle();
+          await capture(tester, '03-quantity-$language');
+          await tester.tap(
+            find.text(language == 'ar' ? 'إلغاء' : 'Cancel').last,
+          );
+          await tester.pumpAndSettle();
+          expect(
+            await preferences.get(firstMealCelebrationPreferenceKey),
+            isNull,
+          );
+          expect(await MealRepository(db).watchAll().first, isEmpty);
+          await tester.tap(addFood);
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.byKey(const Key('food-log-serving-quantity-field')),
+            '80',
+          );
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('food-log-save-guide')), findsOneWidget);
+          await capture(tester, '04-ready-$language');
+          final confirm = tester
+              .widget<FilledButton>(
+                find.byKey(const Key('food-log-serving-confirm')),
+              )
+              .onPressed!;
+          confirm();
+          confirm();
+          // Allow the asynchronous SQLite commit without settling away the burst.
+          for (
+            var i = 0;
+            i < 30 &&
+                find
+                    .byKey(const Key('dashboard-first-food-celebration'))
+                    .evaluate()
+                    .isEmpty;
+            i++
+          ) {
+            await tester.pump(const Duration(milliseconds: 20));
+          }
+          expect(
+            find.byKey(const Key('dashboard-first-food-celebration')),
+            findsOneWidget,
+          );
+          await tester.pump(const Duration(milliseconds: 700));
+          await capture(tester, '05-celebration-$language');
+          expect(
+            find.byKey(const Key('food-log-reference-page')),
+            findsOneWidget,
+          );
+          final meals = await MealRepository(db).watchAll().first;
+          expect(meals, hasLength(1));
+          expect(meals.single.items, hasLength(1));
+          expect(meals.single.items.single.quantity, 80);
+          expect(
+            await preferences.get(firstMealCelebrationPreferenceKey),
+            'done',
+          );
+          expect(
+            await FirstMealCelebration.showIfPending(
+              tester.element(find.byType(FoodLogPage)),
+              preferences,
+            ),
+            isFalse,
+          );
+          // The reduced-motion duration is a Timer, not an animation frame.
+          // pumpAndSettle cannot advance that timer after the static burst.
+          await tester.pump(const Duration(milliseconds: 2500));
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const Key('food-log-success-guide')),
+            findsOneWidget,
+          );
+          await capture(tester, '06-success-$language');
+          await tester.tap(
+            find.byKey(const Key('food-log-success-guide-skip')),
+          );
+          await tester.pumpAndSettle();
+          router.go('/dashboard');
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const Key('dashboard-first-food-streak-guide')),
+            findsNothing,
+          );
+          router.go('/daily-log');
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('daily-log-week-strip')), findsOneWidget);
+          expect(
+            find.byKey(const Key('dashboard-first-food-streak-guide')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('dashboard-food-guide-anchored')),
+            findsNothing,
+          );
+          await capture(tester, '06-streak-$language');
+          await tester.tap(
+            find.byKey(const Key('dashboard-streak-guide-done')),
+          );
+          await tester.pumpAndSettle();
+          expect(
+            await preferences.get(firstMealStreakGuidePreferenceKey),
+            'seen',
+          );
+          expect(tester.takeException(), isNull);
           await tester.pumpWidget(const SizedBox.shrink());
           await tester.pump(const Duration(milliseconds: 20));
           debugDisableShadows = originalShadows;
-        });
-        await tester.pumpWidget(journeyApp(db, router, language));
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('shell-quick-add')));
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('quick-add-food-guide')), findsOneWidget);
-        await capture(tester, '00-menu-$language');
-        await tester.tap(find.byKey(const Key('quick-add-primary-0')));
-        await tester.pumpAndSettle();
-        expect(
-          router.routeInformationProvider.value.uri.queryParameters['guide'],
-          '1',
-        );
-        expect(find.byKey(const Key('food-log-search-guide')), findsOneWidget);
-        await capture(tester, '01-search-$language');
-        await tester.enterText(
-          find.byKey(const Key('food-log-search')),
-          'TEST',
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('food-log-choose-guide')), findsOneWidget);
-        await capture(tester, '02-choose-$language');
-        final addFood = find.byKey(Key('food-log-add-$foodId'));
-        await tester.ensureVisible(addFood);
-        await tester.tap(addFood);
-        await tester.pumpAndSettle();
-        await capture(tester, '03-quantity-$language');
-        await tester.tap(find.text(language == 'ar' ? 'إلغاء' : 'Cancel').last);
-        await tester.pumpAndSettle();
-        expect(
-          await preferences.get(firstMealCelebrationPreferenceKey),
-          isNull,
-        );
-        expect(await MealRepository(db).watchAll().first, isEmpty);
-        await tester.tap(addFood);
-        await tester.pumpAndSettle();
-        await tester.enterText(
-          find.byKey(const Key('food-log-serving-quantity-field')),
-          '80',
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('food-log-save-guide')), findsOneWidget);
-        await capture(tester, '04-ready-$language');
-        final confirm = tester
-            .widget<FilledButton>(
-              find.byKey(const Key('food-log-serving-confirm')),
-            )
-            .onPressed!;
-        confirm();
-        confirm();
-        // Allow the asynchronous SQLite commit without settling away the burst.
-        for (
-          var i = 0;
-          i < 30 &&
-              find
-                  .byKey(const Key('dashboard-first-food-celebration'))
-                  .evaluate()
-                  .isEmpty;
-          i++
-        ) {
-          await tester.pump(const Duration(milliseconds: 20));
-        }
-        expect(
-          find.byKey(const Key('dashboard-first-food-celebration')),
-          findsOneWidget,
-        );
-        await tester.pump(const Duration(milliseconds: 700));
-        await capture(tester, '05-celebration-$language');
-        expect(
-          find.byKey(const Key('food-log-reference-page')),
-          findsOneWidget,
-        );
-        final meals = await MealRepository(db).watchAll().first;
-        expect(meals, hasLength(1));
-        expect(meals.single.items, hasLength(1));
-        expect(meals.single.items.single.quantity, 80);
-        expect(
-          await preferences.get(firstMealCelebrationPreferenceKey),
-          'done',
-        );
-        expect(
-          await FirstMealCelebration.showIfPending(
-            tester.element(find.byType(FoodLogPage)),
-            preferences,
-          ),
-          isFalse,
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('food-log-success-guide')), findsOneWidget);
-        await capture(tester, '06-success-$language');
-        await tester.tap(find.byKey(const Key('food-log-success-guide-skip')));
-        await tester.pumpAndSettle();
-        router.go('/dashboard');
-        await tester.pumpAndSettle();
-        expect(
-          find.byKey(const Key('dashboard-first-food-streak-guide')),
-          findsNothing,
-        );
-        router.go('/daily-log');
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('daily-log-week-strip')), findsOneWidget);
-        expect(
-          find.byKey(const Key('dashboard-first-food-streak-guide')),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(const Key('dashboard-food-guide-anchored')),
-          findsNothing,
-        );
-        await capture(tester, '06-streak-$language');
-        await tester.tap(find.byKey(const Key('dashboard-streak-guide-done')));
-        await tester.pumpAndSettle();
-        expect(
-          await preferences.get(firstMealStreakGuidePreferenceKey),
-          'seen',
-        );
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump(const Duration(milliseconds: 20));
-        debugDisableShadows = originalShadows;
-      },
-    );
+        },
+      );
+    }
   }
   for (final language in ['ar', 'en']) {
     for (final reduced in [false, true]) {

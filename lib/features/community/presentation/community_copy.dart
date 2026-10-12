@@ -1,4 +1,7 @@
 import '../../../app/localization/runtime_copy_community_ai_reward.dart';
+import '../../../app/localization/runtime_copy_closure_access.dart';
+import '../../../app/localization/runtime_copy_closure_food.dart';
+import '../../../app/localization/runtime_copy_closure_review.dart';
 import '../../../app/localization/runtime_copy_next_workspace.dart';
 import '../../../app/localization/runtime_copy_quality_feedback.dart';
 import '../../../app/localization/runtime_copy_community_creation.dart';
@@ -53,6 +56,9 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
       (code == 'ar' ? ar : null) ??
       CommunityExpansionRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityFormCopy.resolve(catalogEnglish, canonical) ??
+      ClosureAccessRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      ClosureFoodRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      ClosureReviewRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityModerationRuntimeCopy.resolve(catalogEnglish, canonical) ??
       communityMediaText(canonical, catalogEnglish) ??
       _communityCopy[baseLanguage]?[catalogEnglish] ??

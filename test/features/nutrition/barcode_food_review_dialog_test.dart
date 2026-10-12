@@ -6,8 +6,97 @@ import 'package:body_intelligence_log/features/nutrition/presentation/barcode_fo
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../visual_closure/visual_evidence_font.dart';
+import '../../visual_closure/closure_surface_capture.dart';
 
 void main() {
+  setUpAll(loadVisualEvidenceFont);
+  for (final locale in ['ar', 'en']) {
+    testWidgets(
+      'barcode review $locale 320 keyboard 2x preserves explicit selection source and serving',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 844);
+        tester.view.devicePixelRatio = 1;
+        tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+        addTearDown(tester.view.reset);
+        final first = _food();
+        final second = first.copyWith(
+          id: 2,
+          name: locale == 'ar'
+              ? 'طعام اختبار ذو اسم عربي طويل جدًا للمراجعة والاختيار'
+              : 'A long TEST product name for explicit review',
+          source: 'TEST label source',
+          servingSize: 45,
+          servingUnit: 'ml',
+        );
+        Food? accepted;
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: Locale(locale),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            theme: ThemeData(
+              brightness: Brightness.dark,
+              fontFamily: locale == 'ar'
+                  ? 'NotoArabicEvidence'
+                  : 'RobotoEvidence',
+            ),
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () async {
+                    accepted = await showBarcodeFoodReviewDialog(
+                      context,
+                      barcode: '4006381333931',
+                      candidates: [first, second],
+                      ingredients: 'TEST ingredients only',
+                    );
+                  },
+                  child: const Text('Open'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+        expect(accepted, isNull);
+        final choice = find.descendant(
+          of: find.widgetWithText(RadioListTile<int>, second.name),
+          matching: find.byType(Radio<int>),
+        );
+        await tester.ensureVisible(choice);
+        await tester.tap(choice);
+        await tester.pumpAndSettle();
+        final use = find.byKey(const Key('barcode-food-review-confirm'));
+        await tester.ensureVisible(use);
+        await tester.pumpAndSettle();
+        await captureClosureSurface(
+          tester,
+          find.byType(AlertDialog),
+          'barcode-review-$locale-320-keyboard-2x',
+        );
+        await tester.tap(use);
+        await tester.pumpAndSettle();
+        expect(accepted?.id, 2);
+        expect(accepted?.source, 'TEST label source');
+        expect(accepted?.servingSize, 45);
+        expect(accepted?.servingUnit, 'ml');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   test('barcode review copy covers every production locale exactly', () {
     expect(barcodeReviewTags, BilLocalePolicy.productionTags);
   });

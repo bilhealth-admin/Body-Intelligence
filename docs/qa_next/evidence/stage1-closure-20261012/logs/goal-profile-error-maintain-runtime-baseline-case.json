@@ -1,0 +1,61 @@
+{
+  "label": "goal-profile-error-maintain-runtime-baseline-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/nutrition_goal_profile_loading_test.dart",
+    "--plain-name",
+    "real goal defaults distinguish storageError without inventing maintenance targets"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791759506.4291196,
+  "files": {
+    "test/features/nutrition/nutrition_goal_profile_loading_test.dart": "a7f5bdc77902b6fe745756ae1e324a74e80bf27b1cf13efd6248d645a944b5ed"
+  },
+  "source_fingerprint": "2b6feaea916a712770c034d2445897db7f9fa0260223e226d3e51afd5310160a",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/nutrition_goal_profile_loading_test.dart",
+    "--plain-name",
+    "real goal defaults distinguish storageError without inventing maintenance targets"
+  ],
+  "pid": 19700,
+  "exit_code": 1,
+  "finished": 1791759513.8036892,
+  "end_fingerprint": "2b6feaea916a712770c034d2445897db7f9fa0260223e226d3e51afd5310160a",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "real goal defaults distinguish storageError without inventing maintenance targets",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_profile_loading_test.dart",
+      "result": "failure"
+    }
+  ],
+  "counts": {
+    "success": 0,
+    "failure": 1,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 3,
+      "error": "Expected: false\n  Actual: <true>\n",
+      "stackTrace": "package:matcher                                                         expect\npackage:flutter_test/src/widget_tester.dart 473:18                      expect\ntest\\features\\nutrition\\nutrition_goal_profile_loading_test.dart 69:11  main.<fn>\n",
+      "isFailure": true,
+      "type": "error",
+      "time": 4724
+    }
+  ],
+  "incomplete_tests": []
+}

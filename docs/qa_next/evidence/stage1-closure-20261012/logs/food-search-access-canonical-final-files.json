@@ -1,0 +1,211 @@
+{
+  "label": "food-search-access-canonical-final-files",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/food_search_ui_state_test.dart",
+    "test/features/nutrition/food_add_access_indicator_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791759226.432109,
+  "files": {
+    "test/features/nutrition/food_search_ui_state_test.dart": "41a3d69a80bc73710e0ef83fe087b04333e0fc49c6fc3d1579787e45b83efc1b",
+    "test/features/nutrition/food_add_access_indicator_test.dart": "836f18c0834f06fbe0e4115664cbad47b7f168dbe5e1115003ac51e27b1e428f"
+  },
+  "source_fingerprint": "28d8e5c67a91144e25d15738c89142a522ec4c4f5c170faadb4eb99cfb5cc55f",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/food_search_ui_state_test.dart",
+    "test/features/nutrition/food_add_access_indicator_test.dart"
+  ],
+  "pid": 4360,
+  "exit_code": 0,
+  "finished": 1791759240.707956,
+  "end_fingerprint": "28d8e5c67a91144e25d15738c89142a522ec4c4f5c170faadb4eb99cfb5cc55f",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "embedded My foods is task-first and consolidates capture methods",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "avocado search separates loading, results, and empty states",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "My foods excludes materialized catalog rows and searches owned foods only",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ar at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits en at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits fr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits es at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits tr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits de at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits it at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits pt-BR at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits pt-PT at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ur at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits fa at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits hi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits id at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ms at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ja at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ko at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits zh-Hans at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits zh-Hant at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ru at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits bn at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits vi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits th at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits pl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits nl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits uk at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food Add honest badge and free custom action free Arabic 320 2x keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_add_access_indicator_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food Add honest badge and free custom action premium Arabic 320 2x keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_add_access_indicator_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food Add honest badge and free custom action expired Arabic 320 2x keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_add_access_indicator_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food Add honest badge and free custom action checking Arabic 320 2x keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_add_access_indicator_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food Add honest badge and free custom action error Arabic 320 2x keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_add_access_indicator_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 33,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

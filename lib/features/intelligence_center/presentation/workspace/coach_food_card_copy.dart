@@ -108,6 +108,18 @@ final class CoachFoodCardCopy {
     FoodNutrient.phosphorus => tr('Phosphorus', 'الفوسفور'),
     FoodNutrient.iron => tr('Iron', 'الحديد'),
     FoodNutrient.vitaminC => tr('Vitamin C', 'فيتامين ج'),
+    FoodNutrient.saturatedFat => tr('Saturated fat', 'الدهون المشبعة'),
+    FoodNutrient.polyunsaturatedFat => tr(
+      'Polyunsaturated fat',
+      'الدهون متعددة اللاتشبع',
+    ),
+    FoodNutrient.monounsaturatedFat => tr(
+      'Monounsaturated fat',
+      'الدهون أحادية اللاتشبع',
+    ),
+    FoodNutrient.transFat => tr('Trans fat', 'الدهون المتحولة'),
+    FoodNutrient.cholesterol => tr('Cholesterol', 'الكوليسترول'),
+    FoodNutrient.vitaminA => tr('Vitamin A', 'فيتامين أ'),
   };
 
   String number(double number) => NumberFormat('0.##', locale).format(number);

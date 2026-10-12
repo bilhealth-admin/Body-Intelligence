@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../app/environment/app_environment.dart';
-import '../../../app/security/bil_mobile_integrity_service.dart';
+import 'admin_owner_operation.dart';
 import 'ai_coach_admin_service.dart';
 
 class AdminSubscriptionEntry {
@@ -129,18 +129,11 @@ class SupabaseAdminSubscriptionGateway implements AdminSubscriptionGateway {
       'idempotency_key': key,
       ...fields,
     };
-    final protected = await BilMobileIntegrityService.instance
-        .protect(action: 'admin.subscriptions.$operation', payload: body)
-        .timeout(const Duration(seconds: 12));
-    if (activeClient.auth.currentUser?.id != owner) {
-      throw StateError('admin_session_changed');
-    }
-    final response = await activeClient.functions
-        .invoke('ai-coach-global-reset', body: protected)
-        .timeout(const Duration(seconds: 20));
-    if (activeClient.auth.currentUser?.id != owner) {
-      throw StateError('admin_session_changed');
-    }
+    final response = await AdminOwnerOperation.invoke(
+      activeClient,
+      integrityAction: 'admin.subscriptions.$operation',
+      body: body,
+    );
     if (response.status != 200) throw StateError('admin_subscription_failed');
     return response.data;
   }

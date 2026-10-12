@@ -2,40 +2,48 @@ part of '../food_page.dart';
 
 extension _FoodPageActions on _FoodPageState {
   Future<void> _createFood([String? initialBarcode]) async {
+    final repository = ref.read(foodRepositoryProvider);
+    final sync = ref.read(communityFoodSyncServiceProvider);
+    bool current() =>
+        mounted && identical(repository, ref.read(foodRepositoryProvider));
     final created = await showDialog<_FoodDraft>(
       context: context,
       barrierDismissible: false,
       builder: (_) => _CustomFoodDialog(
         initialBarcode: initialBarcode,
         onSave: (draft) async {
+          if (!current()) throw StateError('Food edit owner changed.');
           final localeCode = Localizations.localeOf(context).toLanguageTag();
-          final id = await ref
-              .read(foodRepositoryProvider)
-              .addFood(
-                name: draft.name,
-                arabicName: draft.arabicName,
-                barcode: draft.barcode,
-                category: 'custom',
-                servingSize: draft.servingSize,
-                servingUnit: draft.servingUnit,
-                calories: draft.calories,
-                protein: draft.protein,
-                carbs: draft.carbs,
-                fats: draft.fats,
-                caloriesKnown: draft.caloriesKnown,
-                proteinKnown: draft.proteinKnown,
-                carbsKnown: draft.carbsKnown,
-                fatsKnown: draft.fatsKnown,
-                fiber: draft.fiber,
-                sodium: draft.sodium,
-                potassium: draft.potassium,
-                calcium: draft.calcium,
-                magnesium: draft.magnesium,
-                sugar: draft.sugar,
-              );
-          await ref
-              .read(communityFoodSyncServiceProvider)
-              .publishFood(id, localeCode: localeCode);
+          final id = await repository.addFood(
+            name: draft.name,
+            arabicName: draft.arabicName,
+            barcode: draft.barcode,
+            category: 'custom',
+            servingSize: draft.servingSize,
+            servingUnit: draft.servingUnit,
+            calories: draft.calories,
+            protein: draft.protein,
+            carbs: draft.carbs,
+            fats: draft.fats,
+            caloriesKnown: draft.caloriesKnown,
+            proteinKnown: draft.proteinKnown,
+            carbsKnown: draft.carbsKnown,
+            fatsKnown: draft.fatsKnown,
+            fiber: draft.fiber,
+            sodium: draft.sodium,
+            potassium: draft.potassium,
+            calcium: draft.calcium,
+            magnesium: draft.magnesium,
+            sugar: draft.sugar,
+            source: draft.source,
+            phosphorus: draft.phosphorus,
+            iron: draft.iron,
+            vitaminC: draft.vitaminC,
+            additionalNutrients: draft.additionalNutrients,
+            isCurrent: current,
+          );
+          if (!current()) throw StateError('Food edit owner changed.');
+          await sync.publishFood(id, localeCode: localeCode);
         },
       ),
     );
@@ -275,13 +283,13 @@ extension _FoodPageActions on _FoodPageState {
   }
 
   Future<void> _showAddFoodActions() async {
-    final method = await showModalBottomSheet<_FoodAddMethod>(
+    final method = await showBilModalBottomSheet<_FoodAddMethod>(
       context: context,
       showDragHandle: true,
       useSafeArea: true,
       isScrollControlled: true,
       constraints: const BoxConstraints(maxWidth: 640),
-      builder: (_) => _FoodAddActionSheet(showPremiumLabel: widget.embedded),
+      builder: (_) => const _FoodAddActionSheet(),
     );
     if (!mounted || method == null) return;
     switch (method) {

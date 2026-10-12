@@ -1,4 +1,5 @@
 import 'features/community/presentation/community_attention_scope.dart';
+import 'features/commerce/presentation/app_purchase_coordinator.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -449,7 +450,9 @@ class BILApp extends ConsumerWidget {
                             label: AppLocalizations.of(
                               context,
                             ).get('app_title'),
-                            child: CommunityAttentionScope(child: content),
+                            child: AppPurchaseCoordinator(
+                              child: CommunityAttentionScope(child: content),
+                            ),
                           ),
                         ),
                       ),

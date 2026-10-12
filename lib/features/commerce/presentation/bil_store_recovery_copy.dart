@@ -7,6 +7,11 @@ abstract final class BilStoreRecoveryCopy {
   ];
 
   static String? text(String locale, String key) {
+    if (key == 'continue_verification') {
+      return _continueVerification[locale] ??
+          _continueVerification[locale.split('-').first] ??
+          _continueVerification['en']!;
+    }
     if (key == 'purchase_owned_by_another_account') {
       return _ownershipConflict[locale] ??
           _ownershipConflict[locale.split('-').first] ??
@@ -18,6 +23,35 @@ abstract final class BilStoreRecoveryCopy {
         _copy[locale] ?? _copy[locale.split('-').first] ?? _copy['en']!;
     return copy[index];
   }
+
+  static const _continueVerification = <String, String>{
+    'en': 'Continue verification',
+    'ar': 'متابعة التحقق',
+    'fr': 'Poursuivre la vérification',
+    'es': 'Continuar la verificación',
+    'tr': 'Doğrulamaya devam et',
+    'de': 'Überprüfung fortsetzen',
+    'it': 'Continua la verifica',
+    'pt': 'Continuar verificação',
+    'pt-br': 'Continuar verificação',
+    'pt-pt': 'Continuar verificação',
+    'fa': 'ادامهٔ تأیید',
+    'ur': 'تصدیق جاری رکھیں',
+    'hi': 'सत्यापन जारी रखें',
+    'id': 'Lanjutkan verifikasi',
+    'ms': 'Teruskan pengesahan',
+    'ja': '確認を続ける',
+    'ko': '확인 계속',
+    'zh-hans': '继续验证',
+    'zh-hant': '繼續驗證',
+    'ru': 'Продолжить проверку',
+    'bn': 'যাচাই চালিয়ে যান',
+    'vi': 'Tiếp tục xác minh',
+    'th': 'ดำเนินการตรวจสอบต่อ',
+    'pl': 'Kontynuuj weryfikację',
+    'nl': 'Verificatie voortzetten',
+    'uk': 'Продовжити перевірку',
+  };
 
   static const _ownershipConflict = <String, String>{
     'en':

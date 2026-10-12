@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/bil_coach_identity.dart';
@@ -6,6 +7,7 @@ import '../../../commerce/domain/commerce_entitlement.dart';
 import '../../../commerce/domain/commerce_plan.dart';
 import '../../../commerce/domain/subscription_state.dart';
 import '../../../commerce/providers/commerce_providers.dart';
+import '../../../commerce/presentation/bil_store_copy.dart';
 import '../../domain/coach_context_snapshot.dart';
 import '../../intelligence_locale_copy.dart';
 
@@ -29,13 +31,13 @@ class CoachReferenceWorkspace extends ConsumerWidget {
   final ValueChanged<String> onRoute;
   final VoidCallback onPhoto;
   final VoidCallback onVoice;
-  static const _ink = Color(0xFF101D2D);
   static const _blue = Color(0xFF1677FF);
-  static const _muted = Color(0xFF738196);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ar = Directionality.of(context) == TextDirection.rtl;
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurfaceVariant;
     String t(String en, String arabic) => intelligenceText(context, en, arabic);
     final access = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
     final unlocked =
@@ -65,7 +67,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
         : v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
     String target(String key) {
       final n = targets[key];
-      return unlocked && n is num && n.isFinite && n > 0
+      return unlocked && n is num && n.isFinite && n >= 0
           ? n.toStringAsFixed(0)
           : '—';
     }
@@ -115,24 +117,10 @@ class CoachReferenceWorkspace extends ConsumerWidget {
         progress(today?.fat, 'fatG'),
       ),
     ];
-    final inherited = Theme.of(context);
-    return Theme(
-      data: inherited.copyWith(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF4F7FC),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _blue,
-          brightness: Brightness.light,
-          surface: Colors.white,
-        ),
-        textTheme: inherited.textTheme.apply(
-          bodyColor: _ink,
-          displayColor: _ink,
-        ),
-      ),
-      child: Scaffold(
-        key: const Key('coach-reference-workspace'),
-        body: SafeArea(
+    return Scaffold(
+      key: const Key('coach-reference-workspace'),
+      body: BilPearlBackdrop(
+        child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
@@ -144,39 +132,50 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                       children: [
                         Text(
                           '${now.hour < 12 ? t('Good morning', 'صباح الخير') : t('Welcome back', 'أهلًا بعودتك')}${name == null || name.isEmpty ? '' : ', $name'}',
-                          style: const TextStyle(
+                          key: const Key('coach-workspace-greeting'),
+                          style: TextStyle(
+                            color: scheme.onSurface,
                             fontSize: 19,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             height: 1.3,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           t("Let's make today count.", 'لنصنع فرقًا اليوم.'),
-                          style: const TextStyle(fontSize: 12, color: _muted),
+                          key: const Key('coach-workspace-greeting-detail'),
+                          style: TextStyle(fontSize: 12, color: muted),
                         ),
+                        if (unlocked) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              BilStoreCopy.text(
+                                Localizations.localeOf(context).toLanguageTag(),
+                                access.plan == CommercePlan.premiumAiCoach
+                                    ? 'premium_ai_coach'
+                                    : 'premium',
+                              ),
+                              key: const Key('coach-workspace-plan-label'),
+                              style: TextStyle(
+                                color: scheme.onPrimaryContainer,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  if (unlocked)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFE8BE),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Pro',
-                        style: TextStyle(
-                          color: Color(0xFF875B14),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
                   const SizedBox(width: 9),
                   Container(
                     width: 44,
@@ -214,7 +213,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                           style: TextButton.styleFrom(
                             foregroundColor: item.$2 == 'chat'
                                 ? Colors.white
-                                : _muted,
+                                : muted,
                             backgroundColor: item.$2 == 'chat'
                                 ? _blue
                                 : Colors.transparent,
@@ -232,7 +231,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                               : () => onRoute(item.$2),
                           child: Text(
                             item.$1,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -247,7 +246,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                 builder: (context, constraints) {
                   final columns =
                       MediaQuery.textScalerOf(context).scale(1) > 1.3 ||
-                          constraints.maxWidth < 340
+                          constraints.maxWidth < 560
                       ? 2
                       : 4;
                   final width =
@@ -274,7 +273,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: 13),
-              _DarkCard(
+              _WorkspaceCard(
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Row(
@@ -292,8 +291,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                           children: [
                             Text(
                               t("Today's Focus", 'تركيز اليوم'),
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: scheme.onSurface,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -304,8 +303,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                                 'One small action at a time. Your coach is here to help you log, reflect, and plan.',
                                 'خطوة صغيرة في كل مرة. مدربك هنا ليساعدك على التسجيل والمراجعة والتخطيط.',
                               ),
-                              style: const TextStyle(
-                                color: Color(0xFFCBD5E5),
+                              style: TextStyle(
+                                color: muted,
                                 fontSize: 11,
                                 height: 1.5,
                               ),
@@ -357,7 +356,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                         ])
                       SizedBox(
                         width: (constraints.maxWidth - 9) / 2,
-                        child: _DarkCard(
+                        child: _WorkspaceCard(
                           child: InkWell(
                             onTap: tool.$5,
                             borderRadius: BorderRadius.circular(13),
@@ -368,24 +367,10 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                               ),
                               child: Row(
                                 children: [
-                                  Container(
-                                    width: 35,
-                                    height: 35,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          tool.$4,
-                                          tool.$4.withValues(alpha: .35),
-                                        ],
-                                      ),
-                                      border: Border.all(color: Colors.white24),
-                                    ),
-                                    child: Icon(
-                                      tool.$1,
-                                      color: Colors.white,
-                                      size: 21,
-                                    ),
+                                  Icon(
+                                    tool.$1,
+                                    color: _workspaceAccent(context, tool.$4),
+                                    size: 25,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -395,8 +380,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                                       children: [
                                         Text(
                                           tool.$2,
-                                          style: const TextStyle(
-                                            color: Colors.white,
+                                          style: TextStyle(
+                                            color: scheme.onSurface,
                                             fontSize: 12,
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -404,8 +389,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                                         const SizedBox(height: 4),
                                         Text(
                                           tool.$3,
-                                          style: const TextStyle(
-                                            color: Color(0xFFB2C1D6),
+                                          style: TextStyle(
+                                            color: muted,
                                             fontSize: 10,
                                           ),
                                         ),
@@ -422,7 +407,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 15),
-              _DarkCard(
+              _WorkspaceCard(
                 child: Stack(
                   children: [
                     Positioned.fill(
@@ -437,11 +422,18 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: const [
-                              Color(0xF2112031),
-                              Color(0xC5112031),
-                              Color(0x20112031),
-                            ],
+                            colors:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? const [
+                                    Color(0xF2112031),
+                                    Color(0xC5112031),
+                                    Color(0x20112031),
+                                  ]
+                                : const [
+                                    Color(0xFAFCFDFE),
+                                    Color(0xF2FCFDFE),
+                                    Color(0xA8FCFDFE),
+                                  ],
                             stops: const [0, .6, 1],
                             begin: ar
                                 ? Alignment.centerRight
@@ -466,8 +458,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                                 'Turn any meal into insights',
                                 'حوّل وجبتك إلى معلومات',
                               ),
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: scheme.onSurface,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
                               ),
@@ -478,8 +470,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                                 "Snap a photo to review food and portions before adding it to your log.",
                                 'التقط صورة لمراجعة الطعام والكميات قبل إضافتها إلى سجلك.',
                               ),
-                              style: const TextStyle(
-                                color: Color(0xFFD5DFEC),
+                              style: TextStyle(
+                                color: muted,
                                 fontSize: 11,
                                 height: 1.5,
                               ),
@@ -504,7 +496,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                                   'Try Photo Logging  ›',
                                   'جرّب تسجيل الصورة  ‹',
                                 ),
-                                style: const TextStyle(fontSize: 11),
+                                style: TextStyle(fontSize: 11),
                               ),
                             ),
                           ],
@@ -517,18 +509,11 @@ class CoachReferenceWorkspace extends ConsumerWidget {
               const SizedBox(height: 17),
               Text(
                 t('Your Health Timeline', 'تسلسل يومك الصحي'),
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 9),
               DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: const Color(0xFFE3EAF5)),
-                ),
+                decoration: BilPearlFinish.panel(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Column(
@@ -581,7 +566,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                               'Your verified entries will appear here.',
                               'ستظهر تسجيلاتك الفعلية هنا.',
                             ),
-                            style: const TextStyle(color: _muted, fontSize: 12),
+                            style: TextStyle(color: muted, fontSize: 12),
                           ),
                         ),
                     ],
@@ -591,22 +576,14 @@ class CoachReferenceWorkspace extends ConsumerWidget {
               const SizedBox(height: 13),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: const Color(0xFFE3EAF5)),
-                ),
+                decoration: BilPearlFinish.panel(context),
                 child: Text(
                   t(
                     'Small consistent actions create meaningful progress.\n— BIL AI Coach',
                     'خطوات صغيرة مستمرة تصنع تقدمًا حقيقيًا.\n— مدرب BIL الذكي',
                   ),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    height: 1.7,
-                    color: _muted,
-                  ),
+                  style: TextStyle(fontSize: 11, height: 1.7, color: muted),
                 ),
               ),
             ],

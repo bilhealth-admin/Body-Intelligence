@@ -246,7 +246,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   Widget build(BuildContext context) {
     final copy = _CommunityProfileCopy.of(context);
     final localPhoto = widget.repository == null
-        ? ref.watch(profilePhotoProvider).value
+        ? ref.watch(profileAvatarStateProvider).bytes
         : null;
     return PopScope(
       canPop: !_saving,

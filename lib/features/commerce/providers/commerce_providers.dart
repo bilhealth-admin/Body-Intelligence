@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../domain/commerce_plan.dart';
+import 'verified_purchase_handoff.dart';
 import '../domain/free_plan.dart';
 import '../domain/market_offer_policy.dart';
 import '../domain/store_catalog_configuration.dart';
@@ -222,7 +223,12 @@ final verifiedEntitlementClockProvider = Provider<DateTime Function()>(
 /// cache. A slow refresh must not keep a cached paid plan alive past its period.
 final verifiedSubscriptionAccessProvider =
     Provider.autoDispose<AsyncValue<SubscriptionState>>((ref) {
-      final snapshot = ref.watch(verifiedSubscriptionStateProvider);
+      final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
+      final snapshot = purchaseHandoffView(
+        ref.watch(verifiedSubscriptionStateProvider),
+        ref.watch(verifiedPurchaseHandoffProvider),
+        now,
+      );
       // A dependency reload includes an account change. Never reuse another
       // owner's previous AsyncValue; only an explicit same-owner refresh may
       // retain its previously verified value while the server is answering.
@@ -238,7 +244,6 @@ final verifiedSubscriptionAccessProvider =
       if (snapshot.hasError) return snapshot;
       final state = snapshot.value;
       if (state == null || state.plan == CommercePlan.free) return snapshot;
-      final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
       final boundary = switch (state.lifecycle) {
         SubscriptionLifecycle.trial => state.trialEndsAt,
         SubscriptionLifecycle.active ||

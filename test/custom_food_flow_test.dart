@@ -84,6 +84,11 @@ void main() {
   testWidgets('custom food can be created, edited, and tombstoned', (
     tester,
   ) async {
+    final hitTestFatal = WidgetController.hitTestWarningShouldBeFatal;
+    WidgetController.hitTestWarningShouldBeFatal = true;
+    addTearDown(
+      () => WidgetController.hitTestWarningShouldBeFatal = hitTestFatal,
+    );
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     await tester.pumpWidget(
@@ -110,7 +115,11 @@ void main() {
     // Custom food is intentionally nested behind the single Add food action so
     // the catalog keeps one clear primary task instead of exposing competing
     // capture buttons above the fold.
-    await tester.tap(find.byKey(const Key('food-primary-add-action')));
+    final addFood = find.byKey(const Key('food-primary-add-action'));
+    await tester.ensureVisible(addFood);
+    await tester.pumpAndSettle();
+    expect(addFood.hitTestable(), findsOneWidget);
+    await tester.tap(addFood);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('food-add-custom-food')));
     await tester.pumpAndSettle();
@@ -161,11 +170,10 @@ void main() {
       isFalse,
     );
 
-    final favoriteButton = tester.widget<IconButton>(
+    await _tapReach(
+      tester,
       find.widgetWithIcon(IconButton, Icons.favorite_border),
     );
-    favoriteButton.onPressed!();
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Favorites'));
     await tester.pumpAndSettle();
     expect(find.text('Personal yogurt'), findsOneWidget);
@@ -174,28 +182,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Personal yogurt'), findsOneWidget);
 
-    tester
-        .widget<ListTile>(find.widgetWithText(ListTile, 'Personal yogurt'))
-        .onTap!();
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit custom food'));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Calories'),
-      '130',
-    );
+    await _tapReach(tester, find.widgetWithText(ListTile, 'Personal yogurt'));
+    await _tapReach(tester, find.text('Edit custom food'));
+    final caloriesEditor = find.widgetWithText(TextFormField, 'Calories');
+    for (
+      var frame = 0;
+      frame < 100 && caloriesEditor.evaluate().isEmpty;
+      frame++
+    ) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(caloriesEditor, findsOneWidget);
+    await tester.enterText(caloriesEditor, '130');
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
     food = await database.select(database.foods).getSingle();
     expect(food.calories, 130);
     expect(food.revision, 2);
 
-    tester
-        .widget<ListTile>(find.widgetWithText(ListTile, 'Personal yogurt'))
-        .onTap!();
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Delete'));
-    await tester.pumpAndSettle();
+    await _tapReach(tester, find.widgetWithText(ListTile, 'Personal yogurt'));
+    await _tapReach(tester, find.widgetWithText(OutlinedButton, 'Delete'));
     expect(find.text('Delete custom food?'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
     await tester.pumpAndSettle();
@@ -273,4 +282,12 @@ void main() {
       expect(arabic.text(key), isNot(key), reason: 'ar/$key');
     }
   });
+}
+
+Future<void> _tapReach(WidgetTester tester, Finder action) async {
+  await tester.ensureVisible(action);
+  await tester.pumpAndSettle();
+  expect(action.hitTestable(), findsOneWidget);
+  await tester.tap(action);
+  await tester.pumpAndSettle();
 }

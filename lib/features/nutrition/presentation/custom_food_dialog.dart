@@ -21,6 +21,11 @@ class _FoodDraft {
     required this.proteinKnown,
     required this.carbsKnown,
     required this.fatsKnown,
+    required this.source,
+    required this.phosphorus,
+    required this.iron,
+    required this.vitaminC,
+    required this.additionalNutrients,
   });
   final String name;
   final String? arabicName;
@@ -37,6 +42,9 @@ class _FoodDraft {
   final double? calcium;
   final double? magnesium;
   final double? sugar;
+  final String source;
+  final double? phosphorus, iron, vitaminC;
+  final Map<FoodNutrient, double?> additionalNutrients;
   final bool caloriesKnown;
   final bool proteinKnown;
   final bool carbsKnown;
@@ -56,7 +64,7 @@ class _CustomFoodDialog extends StatefulWidget {
 
 class _CustomFoodDialogState extends State<_CustomFoodDialog> {
   final formKey = GlobalKey<FormState>();
-  final controllers = List.generate(15, (_) => TextEditingController());
+  final controllers = List.generate(25, (_) => TextEditingController());
   bool saving = false;
   String? saveError;
 
@@ -68,6 +76,8 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       controllers[2].text = widget.initialBarcode ?? '';
       return;
     }
+    final basis = FoodBasisEvidence.read(food);
+    String nutrient(FoodNutrient n) => basis.value(n)?.toString() ?? '';
     final values = <String>[
       food.name,
       food.arabicName ?? '',
@@ -134,6 +144,16 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
           )
           ? food.sugar.toString()
           : '',
+      food.source,
+      nutrient(FoodNutrient.phosphorus),
+      nutrient(FoodNutrient.iron),
+      nutrient(FoodNutrient.vitaminC),
+      nutrient(FoodNutrient.saturatedFat),
+      nutrient(FoodNutrient.polyunsaturatedFat),
+      nutrient(FoodNutrient.monounsaturatedFat),
+      nutrient(FoodNutrient.transFat),
+      nutrient(FoodNutrient.cholesterol),
+      nutrient(FoodNutrient.vitaminA),
     ];
     for (var index = 0; index < values.length; index++) {
       controllers[index].text = values[index];
@@ -167,6 +187,16 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       'Calcium',
       'Magnesium',
       'Sugar',
+      'Source',
+      'Phosphorus',
+      'Iron',
+      'Vitamin C',
+      'Saturated fat',
+      'Polyunsaturated fat',
+      'Monounsaturated fat',
+      'Trans fat',
+      'Cholesterol',
+      'Vitamin A (mcg RAE)',
     ];
     return PopScope(
       canPop: !saving,
@@ -186,7 +216,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                     controller: controllers[index],
                     enabled: !saving,
                     decoration: InputDecoration(labelText: t(labels[index])),
-                    keyboardType: index >= 3 && index != 4
+                    keyboardType: index >= 3 && index != 4 && index != 15
                         ? const TextInputType.numberWithOptions(decimal: true)
                         : TextInputType.text,
                     validator: (value) {
@@ -204,13 +234,11 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                           return t('Enter a valid 8 to 14 digit barcode');
                         }
                       }
-                      if (index >= 3 && index != 4) {
+                      if (index >= 3 && index != 4 && index != 15) {
                         if (index >= 5 && (value == null || value.isEmpty)) {
                           return null;
                         }
-                        final number = double.tryParse(
-                          (value ?? '').replaceAll(',', '.'),
-                        );
+                        final number = parseNutritionNumber(value ?? '');
                         if (number == null ||
                             !number.isFinite ||
                             number < 0 ||
@@ -241,9 +269,8 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                 ? null
                 : () async {
                     if (!formKey.currentState!.validate()) return;
-                    double number(int index) => double.parse(
-                      controllers[index].text.replaceAll(',', '.'),
-                    );
+                    double number(int index) =>
+                        parseNutritionNumber(controllers[index].text)!;
                     double? optionalNumber(int index) =>
                         controllers[index].text.trim().isEmpty
                         ? null
@@ -272,6 +299,20 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                       calcium: optionalNumber(12),
                       magnesium: optionalNumber(13),
                       sugar: optionalNumber(14),
+                      source: controllers[15].text.trim().isEmpty
+                          ? 'local'
+                          : controllers[15].text.trim(),
+                      phosphorus: optionalNumber(16),
+                      iron: optionalNumber(17),
+                      vitaminC: optionalNumber(18),
+                      additionalNutrients: {
+                        for (final n in FoodNutrient.values.where(
+                          (n) => n.index > FoodNutrient.vitaminC.index,
+                        ))
+                          n: optionalNumber(
+                            19 + n.index - FoodNutrient.saturatedFat.index,
+                          ),
+                      },
                       caloriesKnown: controllers[5].text.trim().isNotEmpty,
                       proteinKnown: controllers[6].text.trim().isNotEmpty,
                       carbsKnown: controllers[7].text.trim().isNotEmpty,

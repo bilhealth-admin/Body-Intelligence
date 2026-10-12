@@ -8,7 +8,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/premium_surface.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../ads/presentation/safe_free_ad_anchor.dart';
-import '../../commerce/presentation/premium_label_badge.dart';
 import '../providers/dashboard_preferences_provider.dart';
 import '../dashboard_five_locale_copy.dart';
 import '../domain/dashboard_heart_health_policy.dart';
@@ -24,6 +23,7 @@ part 'dashboard_reference_phone_components.dart';
 part 'dashboard_reference_goal_components.dart';
 part 'dashboard_reference_progress_components.dart';
 part 'dashboard_reference_phone_sections.dart';
+part 'dashboard_reference_locked_values.dart';
 
 /// Presentation-only benchmark for the premium dashboard hierarchy.
 ///
@@ -101,6 +101,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     },
     this.premiumUnlocked = false,
     this.premiumAccessResolved = true,
+    this.premiumAccessChecking = false,
+    this.onPremiumRetry,
   });
 
   final bool arabic;
@@ -139,11 +141,11 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final int? remainingCalories;
   final bool burnedCaloriesApplied;
   final int? proteinConsumed;
-  final int proteinGoal;
+  final int? proteinGoal;
   final int? carbohydratesConsumed;
-  final int carbohydratesGoal;
+  final int? carbohydratesGoal;
   final int? fatConsumed;
-  final int fatGoal;
+  final int? fatGoal;
   final int? fiberGoal;
   final int? sodiumGoal;
   final int? potassiumGoal;
@@ -161,6 +163,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final Set<String> visibleSections;
   final bool premiumUnlocked;
   final bool premiumAccessResolved;
+  final bool premiumAccessChecking;
+  final VoidCallback? onPremiumRetry;
 
   String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
 
@@ -216,6 +220,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
       visibleSections: visibleSections,
       premiumUnlocked: premiumUnlocked,
       premiumAccessResolved: premiumAccessResolved,
+      premiumAccessChecking: premiumAccessChecking,
+      onPremiumRetry: onPremiumRetry,
     );
     return LayoutBuilder(
       key: const Key('dashboard-unified-adaptive-layout'),

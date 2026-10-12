@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../community/services/community_owner_operation.dart';
 
 import '../domain/cloud_identity_models.dart';
 import '../domain/cloud_sync_models.dart';
@@ -21,6 +22,24 @@ final class SupabaseCloudTransport implements CloudTransport {
 
   @override
   Future<CloudSyncBatchResult> synchronize({
+    required String ownerId,
+    required String deviceId,
+    required CloudSession session,
+    required List<CloudSyncOperation> operations,
+    required String? cursor,
+  }) => CommunityOwnerOperation.run(
+    client: client,
+    ownerId: ownerId,
+    action: (_) => _synchronizeOwned(
+      ownerId: ownerId,
+      deviceId: deviceId,
+      session: session,
+      operations: operations,
+      cursor: cursor,
+    ),
+  );
+
+  Future<CloudSyncBatchResult> _synchronizeOwned({
     required String ownerId,
     required String deviceId,
     required CloudSession session,
@@ -66,6 +85,7 @@ final class SupabaseCloudTransport implements CloudTransport {
           },
         )
         .timeout(requestTimeout);
+    CommunityOwnerOperation.checkCurrent();
     final ownerAfterRequest = client.auth.currentUser;
     if (ownerAfterRequest == null || ownerAfterRequest.id != ownerId) {
       throw StateError('Cloud owner changed during synchronization.');

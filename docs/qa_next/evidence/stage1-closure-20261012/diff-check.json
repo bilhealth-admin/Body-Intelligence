@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "-c",
+    "core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol",
+    "diff",
+    "--check"
+  ],
+  "exit_code": 0,
+  "note": "Working Dart files use CRLF after Windows formatter; original unconfigured diff check treated CR terminators as trailing whitespace. The CRLF-aware check still checks actual trailing spaces, EOF blanks, and space-before-tab. No source/test/assertion changes or repository configuration edits."
+}

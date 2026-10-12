@@ -112,14 +112,37 @@ class TrustedFoodNetworkSearchResolver {
         ? row['nutrients'] as List
         : const <Object?>[];
 
-    double? nutrient(String expected) {
+    double? nutrient(String expected, {String? requiredUnit}) {
       for (final raw in nutrientRows) {
         if (raw is! Map) continue;
         final nutrient = Map<String, dynamic>.from(raw);
         if (_text(nutrient['name']).toLowerCase() != expected.toLowerCase()) {
           continue;
         }
-        return _number(nutrient['amount']);
+        final unit = _text(nutrient['unit']).toLowerCase().replaceAll('µ', 'u');
+        final expectedUnit =
+            requiredUnit ??
+            (expected == 'Energy'
+                ? 'kcal'
+                : const {
+                    'Sodium, Na',
+                    'Potassium, K',
+                    'Calcium, Ca',
+                    'Magnesium, Mg',
+                    'Phosphorus, P',
+                    'Iron, Fe',
+                    'Vitamin C',
+                    'Vitamin C, total ascorbic acid',
+                  }.contains(expected)
+                ? 'mg'
+                : 'g');
+        final amount = _number(nutrient['amount']);
+        if (amount == null || !amount.isFinite || amount < 0) return null;
+        if (expected == 'Energy' && unit == 'kj') return amount / 4.184;
+        if (unit != expectedUnit && !(expectedUnit == 'ug' && unit == 'mcg')) {
+          continue;
+        }
+        return amount;
       }
       return null;
     }
@@ -157,14 +180,36 @@ class TrustedFoodNetworkSearchResolver {
         ),
         FoodNutrient.fat: _amount(nutrient('Total lipid (fat)')),
         FoodNutrient.fiber: _amount(nutrient('Fiber, total dietary')),
-        FoodNutrient.sugar: _amount(nutrient('Sugars, total')),
+        FoodNutrient.sugar: _amount(
+          nutrient('Sugars, total') ?? nutrient('Sugars, total including NLEA'),
+        ),
         FoodNutrient.sodium: _amount(nutrient('Sodium, Na')),
         FoodNutrient.potassium: _amount(nutrient('Potassium, K')),
         FoodNutrient.calcium: _amount(nutrient('Calcium, Ca')),
         FoodNutrient.magnesium: _amount(nutrient('Magnesium, Mg')),
         FoodNutrient.phosphorus: _amount(nutrient('Phosphorus, P')),
         FoodNutrient.iron: _amount(nutrient('Iron, Fe')),
-        FoodNutrient.vitaminC: _amount(nutrient('Vitamin C')),
+        FoodNutrient.vitaminC: _amount(
+          nutrient('Vitamin C, total ascorbic acid') ?? nutrient('Vitamin C'),
+        ),
+        FoodNutrient.saturatedFat: _amount(
+          nutrient('Fatty acids, total saturated', requiredUnit: 'g'),
+        ),
+        FoodNutrient.polyunsaturatedFat: _amount(
+          nutrient('Fatty acids, total polyunsaturated', requiredUnit: 'g'),
+        ),
+        FoodNutrient.monounsaturatedFat: _amount(
+          nutrient('Fatty acids, total monounsaturated', requiredUnit: 'g'),
+        ),
+        FoodNutrient.transFat: _amount(
+          nutrient('Fatty acids, total trans', requiredUnit: 'g'),
+        ),
+        FoodNutrient.cholesterol: _amount(
+          nutrient('Cholesterol', requiredUnit: 'mg'),
+        ),
+        FoodNutrient.vitaminA: _amount(
+          nutrient('Vitamin A, RAE', requiredUnit: 'ug'),
+        ),
       },
       source: FoodDataSource.foundation,
       sourceLabel: 'USDA FoodData Central — verified',

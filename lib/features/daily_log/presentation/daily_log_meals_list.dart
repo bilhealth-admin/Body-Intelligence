@@ -254,19 +254,13 @@ class _DiaryMealCard extends StatelessWidget {
     final showMacroSummary = items.isNotEmpty && macroDisplay?.enabled == true;
     final effectiveGoal = mealGoal ?? dailyGoal;
     final macroLine = _mealMacroLine(
+      context,
       display: macroDisplay,
       carbs: carbValue,
       protein: evidence.total(TrackedNutrient.protein, emptyAsZero: true),
       fat: evidence.total(TrackedNutrient.fat, emptyAsZero: true),
       goal: effectiveGoal,
     );
-    final macroGoalText = mealGoal == null
-        ? null
-        : '${_mealListText(context, 'mealGoal')}: '
-              '${mealGoal!.calories.round()} ${_mealListText(context, 'kcal')}  '
-              'C ${mealGoal!.carbsGrams.round()} g  '
-              'P ${mealGoal!.proteinGrams.round()} g  '
-              'F ${mealGoal!.fatGrams.round()} g';
     Widget logButton() => SizedBox(
       width: 100,
       child: FilledButton.tonal(
@@ -347,17 +341,25 @@ class _DiaryMealCard extends StatelessWidget {
                         logButton(),
                       ],
                     ),
-                    if (macroGoalText != null) ...[
+                    if (mealGoal != null) ...[
                       const SizedBox(height: 4),
                       Text(
                         key: Key('daily-meal-macro-goal-$type'),
-                        macroGoalText,
+                        '${_mealListText(context, 'mealGoal')}: ${mealGoal!.calories.round()} ${_mealListText(context, 'kcal')}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: scheme.primary,
                           fontWeight: FontWeight.w700,
                         ),
+                      ),
+                      _mealMacroLine(
+                        context,
+                        display: null,
+                        carbs: mealGoal!.carbsGrams,
+                        protein: mealGoal!.proteinGrams,
+                        fat: mealGoal!.fatGrams,
+                        goal: null,
                       ),
                     ],
                   ],
@@ -397,29 +399,13 @@ class _DiaryMealCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             if (showMacroSummary)
-                              PremiumNutritionGlass(
+                              KeyedSubtree(
                                 key: Key('daily-meal-macros-$type'),
-                                compact: true,
-                                showLabel: false,
-                                borderRadius: 8,
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 3,
                                   ),
-                                  child: Text(
-                                    macroLine,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textDirection: TextDirection.ltr,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          fontSize: 13,
-                                          color: scheme.onSurfaceVariant,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                  ),
+                                  child: macroLine,
                                 ),
                               ),
                           ],
@@ -467,35 +453,66 @@ BilSemanticIconKind _mealSemanticIcon(String type) => switch (type) {
   _ => BilSemanticIconKind.snack,
 };
 
-String _mealMacroLine({
+Widget _mealMacroLine(
+  BuildContext context, {
   required MealMacroDisplay? display,
   required double? carbs,
   required double? protein,
   required double? fat,
   required NutritionGoalTarget? goal,
 }) {
-  String grams(String label, double? consumed, double? target) {
-    if (consumed == null) return '$label —';
+  String grams(double? consumed, double? target) {
+    if (consumed == null) return '—';
     final consumedText = formatDiaryMacroGrams(consumed);
     if (target == null || !target.isFinite || target <= 0) {
-      return '$label $consumedText g';
+      return consumedText;
     }
-    return '$label $consumedText / ${formatDiaryMacroGrams(target)} g';
+    return '$consumedText / ${formatDiaryMacroGrams(target)}';
   }
 
-  String percent(String label, double? consumed, double? target) {
+  String percent(double? consumed, double? target) {
     if (consumed == null || target == null || !target.isFinite || target <= 0) {
-      return '$label —';
+      return '—';
     }
-    return '$label ${(consumed / target * 100).round()}%';
+    return '${(consumed / target * 100).round()}';
   }
 
-  if (display?.mode == MealMacroDisplayMode.percent) {
-    return '${percent('C', carbs, goal?.carbsGrams)}   '
-        '${percent('P', protein, goal?.proteinGrams)}   '
-        '${percent('F', fat, goal?.fatGrams)}';
-  }
-  return '${grams('C', carbs, goal?.carbsGrams)}   '
-      '${grams('P', protein, goal?.proteinGrams)}   '
-      '${grams('F', fat, goal?.fatGrams)}';
+  final percentages = display?.mode == MealMacroDisplayMode.percent;
+  final rows = [
+    ('Carbohydrates', carbs, goal?.carbsGrams),
+    ('Protein', protein, goal?.proteinGrams),
+    ('Fat', fat, goal?.fatGrams),
+  ];
+  return PremiumNutritionFieldsGroup(
+    child: Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      children: [
+        for (final (label, consumed, target) in rows)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${context.strings.text(label)} · ${percentages ? '%' : context.strings.text('g')}',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              if (consumed == null)
+                const Text('—')
+              else
+                PremiumNutritionGlass(
+                  compact: true,
+                  showLabel: false,
+                  child: Text(
+                    percentages
+                        ? percent(consumed, target)
+                        : grams(consumed, target),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+            ],
+          ),
+      ],
+    ),
+  );
 }

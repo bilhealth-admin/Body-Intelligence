@@ -23,18 +23,15 @@ class _AiCoachEntryWelcome extends StatelessWidget {
       _ => null,
     };
     return Scaffold(
-      backgroundColor: const Color(0xFF030405),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,
           children: [
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0, -.18),
-                  radius: .86,
-                  colors: [Color(0xFF173A62), Color(0xFF030405)],
-                  stops: [0, 1],
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: BilPearlFinish.background(context),
                 ),
               ),
             ),
@@ -53,17 +50,8 @@ class _AiCoachEntryWelcome extends StatelessWidget {
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF64D8FF), Color(0xFF7568FF)],
+                          colors: [Color(0xFFE8F4FD), Color(0xFFBED4E6)],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(
-                              0xFF3C75FF,
-                            ).withValues(alpha: .30),
-                            blurRadius: 34,
-                            spreadRadius: -8,
-                          ),
-                        ],
                       ),
                       child: const ClipOval(
                         child: BilCoachPortrait(
@@ -84,7 +72,7 @@ class _AiCoachEntryWelcome extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
                             fontFamily: displayFamily,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontWeight: FontWeight.w700,
                             letterSpacing: locale == 'ar' ? 0 : -.45,
                             height: locale == 'ar' ? 1.28 : 1.12,
@@ -99,15 +87,15 @@ class _AiCoachEntryWelcome extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFFC5D2E3),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const SizedBox.square(
+                    SizedBox.square(
                       dimension: 28,
                       child: CircularProgressIndicator(
-                        color: Color(0xFF7BDFFF),
+                        color: Theme.of(context).colorScheme.primary,
                         strokeWidth: 2.4,
                         strokeCap: StrokeCap.round,
                       ),
@@ -253,10 +241,10 @@ class _CoachHeroPortrait extends StatelessWidget {
             height: size,
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
-              color: const Color(0xFFC8F3FF),
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withValues(alpha: .7),
+                color: Theme.of(context).colorScheme.outlineVariant,
                 width: 2,
               ),
             ),
@@ -321,23 +309,14 @@ class _CoachEmptyState extends StatelessWidget {
             Container(
               width: 82,
               height: 82,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [scheme.primary, scheme.tertiary],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: .24),
-                    blurRadius: 32,
-                    spreadRadius: 2,
-                  ),
-                ],
+              decoration: BilPearlFinish.panel(
+                context,
+                radius: BorderRadius.circular(41),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.graphic_eq_rounded,
                 size: 38,
-                color: Colors.white,
+                color: scheme.primary,
               ),
             ),
             const SizedBox(height: 18),
@@ -350,7 +329,7 @@ class _CoachEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 7),
             Text(

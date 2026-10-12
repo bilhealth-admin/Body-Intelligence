@@ -1,0 +1,2854 @@
+{
+  "base_head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "tested_source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "recorded_at_utc": "2026-10-12T01:40:04.005555+00:00",
+  "note": "Working-byte SHA256 for this stage. This manifest excludes its own bytes to avoid recursion; exact new commit SHA is supplied in the delivery. Unapproved generated test comparisons are preserved locally and excluded from the commit.",
+  "files": [
+    {
+      "path": "docs/qa_next/BIL_20261011_ADMIN_COMMUNITY_CLOUD_COMPATIBILITY_AR.md",
+      "sha256": "1f9f8825b4e087c9244447ab28a352d34753a637acad2cb536acdec447e37e6e",
+      "bytes": 19253
+    },
+    {
+      "path": "docs/qa_next/BIL_20261011_GOOGLE_APPEAL_PREPARATION_AR_EN.md",
+      "sha256": "749a057283e199d61746e51e2f7f329f5259839325d8a8a3e60ec4a51694d2a2",
+      "bytes": 8332
+    },
+    {
+      "path": "docs/qa_next/BIL_20261011_STAGE1_CLOSURE_AND_COACH_WINDOWS_AR.md",
+      "sha256": "9f566733e0acf9b770096173e2dd9ecdf9724458a66fe4efd5dd805489d3cc08",
+      "bytes": 18853
+    },
+    {
+      "path": "docs/qa_next/BIL_20261011_STORE_REVIEW_TEXTS_AND_TIMING_AR_EN.md",
+      "sha256": "b84c433c0750a68dfa130eb6568795e7440dd06c08d0d6c986cc25ce10cfa312",
+      "bytes": 9755
+    },
+    {
+      "path": "docs/qa_next/BIL_20261012_GOALS_PURCHASE_FIRST_USE_STAGE1_EVIDENCE_AR.md",
+      "sha256": "1691b55e5b4d4fdf9405167f9d01a07676a594c79724f9c3b56c6152372ea74d",
+      "bytes": 20828
+    },
+    {
+      "path": "docs/qa_next/BIL_20261012_INDIVIDUAL_POLISH_GOLDEN_REVIEW_AR.md",
+      "sha256": "4ef041da4cfe36ce81cda0285fd979a62d9f72a82647e2cd3b256a07c7ab2970",
+      "bytes": 6640
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/README.md",
+      "sha256": "94df3d1e764c55924463cf3e7d4417770a9f6b8770af3bf563ad4dcd4a4434d1",
+      "bytes": 4976
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/cloud-edge-metadata.json",
+      "sha256": "0f745e6bd8c119d6603e37d3430b387530864bf9726ba6ab773c6fbd58ab2323",
+      "bytes": 1086
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/current-visual-captures.json",
+      "sha256": "7425bc37bf493433b217814be7d41993aad32249ff275e4fec718ad5ce19ede3",
+      "bytes": 3907
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/diff-check.json",
+      "sha256": "16a5932c5c5a817dda3d37cdae1d49a407b571fc0bee984176add9526964edad",
+      "bytes": 479
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/catalog/actual.png",
+      "sha256": "691d30ee918dc4286e2f3dd9c09bd84f76134795becb71472d18abd6a02bbbd2",
+      "bytes": 257691
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/catalog/diff.png",
+      "sha256": "713f975b2bbb829711f9d7f57f8dae343a597a3ce75aff1a71906019c04c96f5",
+      "bytes": 258717
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/catalog/master.png",
+      "sha256": "55d0253d69ef406ee0277f1100544d8c94c4bd620646083362f680d32855344d",
+      "bytes": 194603
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/catalog/review.json",
+      "sha256": "c0d1f104d3038aaa2beab1bcf7a57745d2b585f57e0114ee60205c6893a53f47",
+      "bytes": 1367
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/foods/actual.png",
+      "sha256": "2388583c34e84bc11de475e46dc022360a62894838a244c8709f208732e536a7",
+      "bytes": 131212
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/foods/diff.png",
+      "sha256": "099a6d53a11291e3b144babfcc34412f1359b6446858ab1736711e54b9664598",
+      "bytes": 93844
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/foods/master.png",
+      "sha256": "adac219d493256a21ad8c872eef762bfb15a0d0e62486efab2fe822fa8292017",
+      "bytes": 29465
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/foods/review.json",
+      "sha256": "3441667afe4661326f63b1be9f493127b3304e1db01687b7c4c623af4f979c1f",
+      "bytes": 1408
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-1/actual.png",
+      "sha256": "7e47b2a07244d10b321384559a928fc238cf15f5594f6a5181ff57e18812df85",
+      "bytes": 30297
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-1/diff.png",
+      "sha256": "5906adba7284e34c6350568168e6f7e6e73fd3de1df2a92db7f6b6f53fab4bbb",
+      "bytes": 45300
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-1/master.png",
+      "sha256": "0334482da2a629ffc6539f054c695507220425bdf05ea1856f3a113734c032ed",
+      "bytes": 28661
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-1/review.json",
+      "sha256": "9532929fe5c7c076a07ef4d6bbffad7e2b1c0c8ade6bcba1d351991b06b53c9a",
+      "bytes": 1380
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-2/actual.png",
+      "sha256": "4510f16e4da994cb1dfdc1f7e1a64604c036e4b9259f6cec94431b34a88e284b",
+      "bytes": 32217
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-2/diff.png",
+      "sha256": "9f5f43e29c09eabbfbbaad71052ae4da7f275b2e73f663ab15730f81fbff71be",
+      "bytes": 40097
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-2/master.png",
+      "sha256": "dead540864ec3b9474aef6c3808507bcc4c2ec225e44c1a4d40466fc8f585d67",
+      "bytes": 22028
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/goals-2/review.json",
+      "sha256": "f299e3b5612aa27a530879370090c3956875b64ce5ebc5c32d8144e2503d563b",
+      "bytes": 1385
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/meals/actual.png",
+      "sha256": "5b4ef056234b5a1eabd9c199bc9157dd0ea30a4a124050a31a3e51b1f9bef444",
+      "bytes": 131037
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/meals/diff.png",
+      "sha256": "69a265b6a62a9b5fc1258e2dd14decb31ee621b70c560400186fb24ec2c1c0b2",
+      "bytes": 91665
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/meals/master.png",
+      "sha256": "e337917f71bb30a207d64a571efb2cdf52b933ee9a029d5e6d9b0474b83844a3",
+      "bytes": 24045
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/meals/review.json",
+      "sha256": "1d3f4b42eb4694528c2f85dad9a3d9f15cb1956d60d26529f4a54734b937983d",
+      "bytes": 1419
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipe-library/actual.png",
+      "sha256": "1e62e577bc61577c5eb69bf5ce9bc10376b551c2190f4ba9d054dbec20c8e656",
+      "bytes": 180835
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipe-library/diff.png",
+      "sha256": "cecbe040cf9fb03c5ca95bbe76b20643c5ebb9391b948fc0d6fcbf48d33f2260",
+      "bytes": 85731
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipe-library/master.png",
+      "sha256": "fcebd53c01d4262204761f9af10b01186be81db566f6e362b902c00bb4ebece6",
+      "bytes": 115670
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipe-library/review.json",
+      "sha256": "369f4b1c5ab533b67feef981422ecb1a892e6dabb8fb7feda5784012e2638e29",
+      "bytes": 684
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipes/actual.png",
+      "sha256": "ad827fce24afe0f30894fce51951cb0009b354b54182f4a75f75d44d28282d64",
+      "bytes": 139248
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipes/diff.png",
+      "sha256": "2ebf8840245565b5a3791df9dcf99d16b911d85b548eca7ff347bdd21d189cc2",
+      "bytes": 102552
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipes/master.png",
+      "sha256": "ef890e35d3bc575929a2b83d5a5e98dbc97e25f88b3c35718e82cfcfcaea94fe",
+      "bytes": 26646
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/recipes/review.json",
+      "sha256": "437b4a7ba2d1d714ab2e8c9792160a0a38f126a7d265f34dcbc1198b4fed29c4",
+      "bytes": 1416
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/today/actual.png",
+      "sha256": "d7f2dc0a2e99fc98e6ca0a731a11edc3e90c318bd4b9a6d1392757c2bb1056ab",
+      "bytes": 99090
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/today/diff.png",
+      "sha256": "44df72c353b0bd74cdc3608cd5f690cddaf23984aff1d57f064ea8928e22a08e",
+      "bytes": 99902
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/today/master.png",
+      "sha256": "f434fea93f2bf3d9915af982897a933ab903504d0fe07f892097ee03379fada5",
+      "bytes": 55454
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/today/review.json",
+      "sha256": "1e5938e92fb1676a6efae1a4d61aa4341d4a00f5afdc29cc48c36c3fa50224b1",
+      "bytes": 1364
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/watch-rejected-baseline/live_health_watch_compact_all_metrics_isolatedDiff.png",
+      "sha256": "09580d54c0a13c75ea910c6195d8b4ef6876fa0c121f95a2bf922b7def368bb3",
+      "bytes": 2185
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/watch-rejected-baseline/live_health_watch_compact_all_metrics_maskedDiff.png",
+      "sha256": "3b226dc3b7551c1d1de7dcb914228fc9eee5c66ed3109ef82c1fd549314f9198",
+      "bytes": 29402
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/watch-rejected-baseline/live_health_watch_compact_all_metrics_masterImage.png",
+      "sha256": "0ab4091f33df9b445a57a369531b23de44cf589aea6dfd5f91177cdc3df54744",
+      "bytes": 29024
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/watch-rejected-baseline/live_health_watch_compact_all_metrics_testImage.png",
+      "sha256": "e9d46a3822a81ed21928ea9e57989129ace904f3fbdc717bf1f174a69f1e2749",
+      "bytes": 29047
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/goldens/watch-rejected-baseline/review.json",
+      "sha256": "0bcbe0a611ca8241f27855d22fc7eb97526ca942eaa16b8ea2f8ba2190f20db4",
+      "bytes": 877
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/accepted-goals-goals-provenance-ar-custom-editor.png",
+      "sha256": "d1066fac64279b8e79a80e0d3bcd2ef0551fabc6593259e0ed11808060436448",
+      "bytes": 75515
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/accepted-goals-goals-provenance-ar-custom.png",
+      "sha256": "586eef13de8492756a56a9f5ea4fe391ef799b68fa673e5f3e6a02bea3bf51f4",
+      "bytes": 71748
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/accepted-goals-goals-provenance-ar-default-320-2x.png",
+      "sha256": "30830ca630dafec9001ef9b4ccaf7f6aceabf91e360dbe865932820a61f85d59",
+      "bytes": 60912
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/accepted-goals-goals-provenance-ar-default.png",
+      "sha256": "84bf09365656ba84957966349af85f9ac48bfee7d71484f9626bafc075b04e6e",
+      "bytes": 90975
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/accepted-goals-goals-provenance-ar-grams.png",
+      "sha256": "6cc6ac03797ba871364528fe181c93e423e8f282343e634f9486eaa606773396",
+      "bytes": 89267
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/accepted-goals-goals-provenance-en-grams.png",
+      "sha256": "e15dbfa2414f4ee1f2a2d7032e79923ba39a52ab994ee5d1b6cd452befbcacb9",
+      "bytes": 72719
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-barcode-review-ar-320-keyboard-2x.png",
+      "sha256": "e339cc2dd4774ad1d4153dcddd17029d59f0553464f1d732ea33b6132d11dddc",
+      "bytes": 61665
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-community-voice-ar-dark.png",
+      "sha256": "8702618353ac9caed8dc414d7f6690061f722254b6a6349ee151e65cba1fede7",
+      "bytes": 46274
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-rename-ar-320-keyboard-2x.png",
+      "sha256": "b652166a3e9a4346ab6e0b26bc44ab3b02d739e2ba0004baa7d95d176c97f3b8",
+      "bytes": 41790
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-settings-ar-dark-320-2x.png",
+      "sha256": "d7027a53a56d154af0a4f1a91b5143a619570b871f4aaefb63605890da24ac08",
+      "bytes": 58102
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-settings-en.png",
+      "sha256": "8eec956d31ef954a32a98138236e612b4c19670389770bb12a6d1383e3cd7421",
+      "bytes": 625364
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-voice-ar-Brightness.light-320-keyboard-2x.png",
+      "sha256": "322ff15d2bf98b92622f70074ddde3a5f003f71c027d6ba498158afb52a33832",
+      "bytes": 91991
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-voice-ar-dark.png",
+      "sha256": "cb7ed1ad2be73963553176c99c2e1beaad3fa2562fa04daa3b53de2ffaca9e4d",
+      "bytes": 5313
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/after-weight-voice-ar-dark.png",
+      "sha256": "e8a2bb7b3947de67bf59089e4c265f90174551732efd057eb4804a4d3ca0e0d3",
+      "bytes": 35032
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-boost-ar-320.0-reduced.png",
+      "sha256": "3f214a2dfce00cf5b58fb6d092134ea257669e236697a739ec5ec241f41ca822",
+      "bytes": 74133
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-boost-ar-390.0-reduced.png",
+      "sha256": "38ffe26ae17cc2c035f0ef81fd5ccade0300e27e4611fde1406ef4e9165212ef",
+      "bytes": 52636
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-first-food-ar-motion.png",
+      "sha256": "260a7fb4f83da8d4e82702d49aed7e2ed04f065e5d464a8f4a37c36463d2dda0",
+      "bytes": 89131
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-first-food-ar-reduced.png",
+      "sha256": "eec27628697586419e70f74f82df43d28e5dc95e6b1939a0e9309ff3815043dd",
+      "bytes": 74809
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-custom-320-2x.png",
+      "sha256": "4f778ee6da0a14ca38748dffd49c7323dfca262cecf71786cf09c526361b4227",
+      "bytes": 36589
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-custom-book-320-2x.png",
+      "sha256": "d2142110f495394420f4a719372353a08e10fdb250f3a0d9d05a311288a7ece4",
+      "bytes": 96695
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-custom-editor.png",
+      "sha256": "d1066fac64279b8e79a80e0d3bcd2ef0551fabc6593259e0ed11808060436448",
+      "bytes": 75515
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-default-book.png",
+      "sha256": "39207776040140f05700cb9d3592c32293069ed885c1360a1d6d75d88e65441f",
+      "bytes": 119692
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-default.png",
+      "sha256": "84bf09365656ba84957966349af85f9ac48bfee7d71484f9626bafc075b04e6e",
+      "bytes": 90975
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-fiber-book.png",
+      "sha256": "04d728d5f9555d69806be4396b5ddae9e2f45739e9c8aee44efa7ef645e9726a",
+      "bytes": 80854
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-grams.png",
+      "sha256": "6cc6ac03797ba871364528fe181c93e423e8f282343e634f9486eaa606773396",
+      "bytes": 89267
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-legacy-book.png",
+      "sha256": "ea3cbf0bcf1aabcf570012bf1858946508c2f03485e3d3218d22bc6e1dc09fd1",
+      "bytes": 132839
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-legacy.png",
+      "sha256": "a1e954ffc446a8ea69f88b5737aa846ff25d218e2bcbc7f8bf851910d4a7efe8",
+      "bytes": 78728
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-ar-restored-reference.png",
+      "sha256": "b3f9eea53935d3fe1c230de527a713e83d34f72543d30a61b199661fce26bc6a",
+      "bytes": 57457
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-goals-goals-provenance-en-grams.png",
+      "sha256": "e15dbfa2414f4ee1f2a2d7032e79923ba39a52ab994ee5d1b6cd452befbcacb9",
+      "bytes": 72719
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_ar_free_devices.png",
+      "sha256": "c86b6616ad8304ebb389c3289bdb572620bf306937bab2114929a2aca795bc96",
+      "bytes": 166007
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_ar_narrow_320_2x_light_free_dashboard.png",
+      "sha256": "6f5d2b572eb6dd8f8d3f03dbbd9723302ecf76c2735c0adfa3bac90f7f80d443",
+      "bytes": 65001
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_ar_narrow_320_2x_light_free_devices.png",
+      "sha256": "904342e111e6a9b5e6f6ac031cb5ac556c10dcdf6ffc47e2d6269bd2f73d3511",
+      "bytes": 150024
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_ar_narrow_320_2x_light_free_source.png",
+      "sha256": "255b3e4cc2929284305311b732e950db39d1408d28db22deb866b159dc22c86c",
+      "bytes": 121099
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_ar_narrow_320_2x_light_premium_dashboard.png",
+      "sha256": "6f5d2b572eb6dd8f8d3f03dbbd9723302ecf76c2735c0adfa3bac90f7f80d443",
+      "bytes": 65001
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_ar_narrow_320_2x_light_premium_devices.png",
+      "sha256": "904342e111e6a9b5e6f6ac031cb5ac556c10dcdf6ffc47e2d6269bd2f73d3511",
+      "bytes": 150024
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_ar_narrow_320_2x_light_premium_source.png",
+      "sha256": "255b3e4cc2929284305311b732e950db39d1408d28db22deb866b159dc22c86c",
+      "bytes": 121099
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_en_narrow_320_2x_light_free_dashboard.png",
+      "sha256": "146d68dae5239440e376ffbcc769fd3762d06a6d52102ef3f7fda5f39c97c38d",
+      "bytes": 65225
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_en_narrow_320_2x_light_free_devices.png",
+      "sha256": "c4312f5c51af62a246ae23236b5b23229e34d1d4ecbdefd451342d59af0a0021",
+      "bytes": 140257
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_en_narrow_320_2x_light_free_source.png",
+      "sha256": "bc0b63b6ae246dcab4bf3d8771c46884e01877854cc1f02067e4d63e381a5bfa",
+      "bytes": 110747
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_en_narrow_320_2x_light_premium_dashboard.png",
+      "sha256": "146d68dae5239440e376ffbcc769fd3762d06a6d52102ef3f7fda5f39c97c38d",
+      "bytes": 65225
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_en_narrow_320_2x_light_premium_devices.png",
+      "sha256": "c4312f5c51af62a246ae23236b5b23229e34d1d4ecbdefd451342d59af0a0021",
+      "bytes": 140257
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-android_en_narrow_320_2x_light_premium_source.png",
+      "sha256": "bc0b63b6ae246dcab4bf3d8771c46884e01877854cc1f02067e4d63e381a5bfa",
+      "bytes": 110747
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_free_devices.png",
+      "sha256": "2fcee75521d93b5ffe46a8f645a6905427f9c66b10f06ec4e64e2f2efbf64721",
+      "bytes": 173038
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_narrow_320_2x_light_free_dashboard.png",
+      "sha256": "6f5d2b572eb6dd8f8d3f03dbbd9723302ecf76c2735c0adfa3bac90f7f80d443",
+      "bytes": 65001
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_narrow_320_2x_light_free_devices.png",
+      "sha256": "03966a3b57db2ac30621d658a115207afaf8969fe129f555d3c59f4c27730c45",
+      "bytes": 150949
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_narrow_320_2x_light_free_source.png",
+      "sha256": "7f170e59d421e755d80f27a44072bf057b34cf327bee8939d07a2e58394ff976",
+      "bytes": 133596
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_narrow_320_2x_light_premium_dashboard.png",
+      "sha256": "6f5d2b572eb6dd8f8d3f03dbbd9723302ecf76c2735c0adfa3bac90f7f80d443",
+      "bytes": 65001
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_narrow_320_2x_light_premium_devices.png",
+      "sha256": "03966a3b57db2ac30621d658a115207afaf8969fe129f555d3c59f4c27730c45",
+      "bytes": 150949
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_narrow_320_2x_light_premium_source.png",
+      "sha256": "7f170e59d421e755d80f27a44072bf057b34cf327bee8939d07a2e58394ff976",
+      "bytes": 133596
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_en_narrow_320_2x_light_free_dashboard.png",
+      "sha256": "146d68dae5239440e376ffbcc769fd3762d06a6d52102ef3f7fda5f39c97c38d",
+      "bytes": 65225
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_en_narrow_320_2x_light_free_devices.png",
+      "sha256": "dce37ec4d01e2ec7907d3f95eba4cfea4feb025b88358570fd0f897b0af507fe",
+      "bytes": 141748
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_en_narrow_320_2x_light_free_source.png",
+      "sha256": "0efb5970425c02d6d2819457620f6c239da89607a5bd3feb19930ee40e60c2ae",
+      "bytes": 106872
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_en_narrow_320_2x_light_premium_dashboard.png",
+      "sha256": "146d68dae5239440e376ffbcc769fd3762d06a6d52102ef3f7fda5f39c97c38d",
+      "bytes": 65225
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_en_narrow_320_2x_light_premium_devices.png",
+      "sha256": "dce37ec4d01e2ec7907d3f95eba4cfea4feb025b88358570fd0f897b0af507fe",
+      "bytes": 141748
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_en_narrow_320_2x_light_premium_source.png",
+      "sha256": "0efb5970425c02d6d2819457620f6c239da89607a5bd3feb19930ee40e60c2ae",
+      "bytes": 106872
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-home-ar-after-skip.png",
+      "sha256": "b9a13944e3834c4b735a5b12ca137522d02e0ea49096d3dac26bdc9094665f48",
+      "bytes": 78889
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-home-ar-guidance.png",
+      "sha256": "cfe7219067f096651aa2ca7d111eb688f94963c81ae7e9f1c9354f47ee50d512",
+      "bytes": 129626
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-subscription-active-ar-390.0-reduced.png",
+      "sha256": "5831209f9f2229d941b4aaffffc6b3c0d3403a86d20622125f20a416a9538580",
+      "bytes": 50033
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-subscription-trial-ar-320.0-reduced.png",
+      "sha256": "bca9b83589229646b00d751738b3751f93d84dc01516b85260ef65938757f717",
+      "bytes": 71347
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/before-community-voice-ar-dark.png",
+      "sha256": "b7f3a0e67773ac341b64723178b376596c61c367d12cf2b78f3a9dbc5bad4bb4",
+      "bytes": 33164
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/before-settings-en-restored-git-baseline.png",
+      "sha256": "8394e4baf1f24a66829b2709202ad437c9b18f971862a79888349248378116a5",
+      "bytes": 541104
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/before-voice-ar-dark.png",
+      "sha256": "6e5a95096de16b031969ea67d377c419ac33902a6cd69e668a1e708bbc6c4bde",
+      "bytes": 33349
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/before-weight-voice-ar-dark.png",
+      "sha256": "1bd78dc93a88a86bb73908d46d775d1e881bc40caccda1678948b93aab2c7809",
+      "bytes": 25785
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/coach-workspace-after-ar-dark-2x.png",
+      "sha256": "55e0c650dea2b58b8c232385eddc24fe9ae041835937f91f7272828a9e7dba15",
+      "bytes": 642404
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/coach-workspace-after-ar-light.png",
+      "sha256": "8894d856ce9f5a4f113c48e20a25ed8862660313dd45215af6f800aad9eab78f",
+      "bytes": 680938
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/coach-workspace-before-ar.png",
+      "sha256": "5dd229c16558da1018900e40e29cd4b50b3ee80ff7de578043178ebea2d3a247",
+      "bytes": 752657
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/current-boost-ar-320.0-reduced.png",
+      "sha256": "3f214a2dfce00cf5b58fb6d092134ea257669e236697a739ec5ec241f41ca822",
+      "bytes": 74133
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/current-boost-ar-390.0-reduced.png",
+      "sha256": "38ffe26ae17cc2c035f0ef81fd5ccade0300e27e4611fde1406ef4e9165212ef",
+      "bytes": 52636
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/current-home-after-skip-ar.png",
+      "sha256": "62a6f571f63d38b620ef5de5babe12d4cb138cb15f7ebebdbf53b90eae5d4aa8",
+      "bytes": 219090
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/current-home-anchored-guide-ar.png",
+      "sha256": "669e840324d6312423a88a6f5c883d554f293094060820ba87b20f42f5fbdf50",
+      "bytes": 384638
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/current-subscription-active-ar-390.0-reduced.png",
+      "sha256": "5831209f9f2229d941b4aaffffc6b3c0d3403a86d20622125f20a416a9538580",
+      "bytes": 50033
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/current-subscription-trial-ar-320.0-reduced.png",
+      "sha256": "bca9b83589229646b00d751738b3751f93d84dc01516b85260ef65938757f717",
+      "bytes": 71347
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/food-add-accepted-food-add-free-ar-320-keyboard-2x.png",
+      "sha256": "68289e530705504018553e3c1fe938adccfe54fce3b03bacfd7546353d252dbb",
+      "bytes": 332852
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/food-add-accepted-food-add-premium-ar-320-keyboard-2x.png",
+      "sha256": "1f3d585b830d85745fc83c66c352b7603c6740066903e346650c38ad38ffdc2e",
+      "bytes": 329983
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/polish-after-shared-dark-ar.png",
+      "sha256": "3358ee19e015f0c50b8d6b4e7fd1b11f8d2ce0f41d1e1ccfff43e649635b6d14",
+      "bytes": 373448
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/images/polish-after-shared-light-ar.png",
+      "sha256": "ff3337ee9b0de6a93c42b0f13e34c59da86fbd34794aed9cf575c99ba181f290",
+      "bytes": 295838
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved-first-food-video-cases.json",
+      "sha256": "425dbd9294d7fe29c329dad97130313593969f30288a21b09f2df3214d119dba",
+      "bytes": 2393
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved-goal-image-cases.json",
+      "sha256": "e65480ee59338830090067c8dddf0973257ddb177c7021b4cadbccad3b5c5370",
+      "bytes": 3669
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved-individual-golden-cases.json",
+      "sha256": "f97c55d2c3f1abd88b8509268ebf9e1177e85b8a84102b3237c39fac2c79cee8",
+      "bytes": 4203
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved-purchase-and-zone-files.json",
+      "sha256": "c4e2fb5cd6971710c8fd231f9101b00da86a83762a0f9187bb014987a4d9669a",
+      "bytes": 3962
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved-selected-scope-files.json",
+      "sha256": "b53b30173c83a3c72d65c5dab2f76abdb8c6ecebbfa50e8990162a4541a14a00",
+      "bytes": 378742
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved-skip-video-case.json",
+      "sha256": "2ca0a6d447f8480a3899398755244835deb5b7b0481e4ec8a7c475c2801eb5fa",
+      "bytes": 1887
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved2-format.json",
+      "sha256": "dab8119319b659d961862b9cf8ecbd429722e6198939ce2f7ef5af9c707a02e9",
+      "bytes": 327
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-approved2-full-analyze.json",
+      "sha256": "d4bfb2b15c1ddb33d47b1c4ead7dec0b6c84c95d32bd2d73973a79bea281e406",
+      "bytes": 950
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-final-format.json",
+      "sha256": "6f9e1453cf2a29d0141b134d6449d1c5c8c77d5b94678a0a63b404c5ddc7caa9",
+      "bytes": 348
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-final-full-analyze.json",
+      "sha256": "8b119f98d3476f59c39c23184233ec656fe0a5126dea697275b3c2bce751b4e7",
+      "bytes": 945
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-final-selected-scope-files.json",
+      "sha256": "4280a7119a8f9aeb10b0270ee4229e021f95e0f4e2121c9f18a892314854ba18",
+      "bytes": 356095
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-reviewed-visual-normal-validation.json",
+      "sha256": "f9c94ff1d6fc5548dae7bdf0fddd65337714b7e03790550c4752d9b464fd5039",
+      "bytes": 4223
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-stabilized-format.json",
+      "sha256": "27eb85964c38738ee85904d8367b797a68310c48d458aa176e72ae4150617eac",
+      "bytes": 327
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-stabilized-full-analyze.json",
+      "sha256": "a7b74b80b028f6e6bf197dab1a5b4292d6c8bae72ca6d4ea866fda83575d311a",
+      "bytes": 951
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/closure-stabilized-repaired-files.json",
+      "sha256": "1ec6eef94851e85ba8a98cb70b4e31c13c30287a0d73435d68ed001516202c3c",
+      "bytes": 26700
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/cloud-restoration-truth-current-file.json",
+      "sha256": "2417c53b471926af637e2e5f8c1f25f8712c40f59aa2123d29db9cf6124775a0",
+      "bytes": 2243
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/coach-goal-stream-subscription-repaired-case.json",
+      "sha256": "a819998908eb8811fc91610f8802543c485f9fde83cd15b96a7056320681096c",
+      "bytes": 1861
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/coach-lifecycle-and-initial-credit-final-files.json",
+      "sha256": "ee5a9fdd95737a7f34678c5fa59732ab109be8f9ab77bd30990d0073ae4163ec",
+      "bytes": 13352
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/coach-workspace-pearl-final-file.json",
+      "sha256": "953c5c1b8722a89f2ae469c317035c98fcb07e3498824ca91a39df4452d7e5f2",
+      "bytes": 4270
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/final-commerce-access-files.json",
+      "sha256": "1631bfc15dd9fb82712f5ca37009d675c2ab4f45196b13e6e6932e130cea519e",
+      "bytes": 50684
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/final-goals-food-recipes-files.json",
+      "sha256": "620dd8cedcc5174ed46b80bd92bb90da04414aa640469ebc52d0148878517629",
+      "bytes": 46982
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/final-media-voice-search-cloud-files.json",
+      "sha256": "7055aa9b16923736f84472ea6c2757083a622ea5f0bb820cd686e4042ffc64db",
+      "bytes": 90176
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-background-baseline-case.json",
+      "sha256": "dfc10c167fee711ac21813d2f51964dc896534135cc82c999e20764860745a8b",
+      "bytes": 2093
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-background-repaired-case.json",
+      "sha256": "ab46816e1f7b28607d794a636487fdd5a27cdc3b450ea8ecb96ca3d9725ecc73",
+      "bytes": 1815
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-dashboard-resume-cleanup-repaired-case.json",
+      "sha256": "22394e370bf8b6e91d425a0fb09d7a8928604fe31b9504653273364fe9e37c01",
+      "bytes": 1852
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-dashboard-resume-frame-repaired-case.json",
+      "sha256": "7da1555fefe84de362a7cb6b890c14eca4f5808467789c031ccb2ec03510399e",
+      "bytes": 2115
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-dashboard-resume-native-wait-case.json",
+      "sha256": "31ba6b77e50abd4cc991efb8646b1fa191dc66394d34578e4d906fddc8f54789",
+      "bytes": 2132
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-dashboard-resume-observation-case.json",
+      "sha256": "61997f8c4cbf5152f77b8a110d7047f579d78d51a1730f0feb9247f89f9c816e",
+      "bytes": 2131
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-dashboard-resume-repaired-case.json",
+      "sha256": "7d9dda5b74dc03326c39c49142d29be148aac6807b73c691bc6220925d141883",
+      "bytes": 2125
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-detach-lease-baseline-case.json",
+      "sha256": "96728df8c6c93b817dd27d62b608a4c42a41b0d27146423a8afc33bc1e6e8854",
+      "bytes": 2085
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-detach-lease-repaired-case.json",
+      "sha256": "4df76023897c1625cf95313076bc857f9cedd929ac714974094a1b4f723c1063",
+      "bytes": 1807
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-food-real-both-motion-final-cases.json",
+      "sha256": "97885560708a4cdfee5783e852986745d521655bce253f33ef92e5fd1ec009ec",
+      "bytes": 2103
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/first-use-and-recipe-affected-final-files.json",
+      "sha256": "1059b1eac72050ffadf4906bb00052af6f659bb7e2b38ac4c568303bc49bf5f7",
+      "bytes": 20642
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/food-add-keyboard-indicator-repaired-case.json",
+      "sha256": "fccfc5f3f08871c74f038706bd8604a8610a9aa43cb67dc6bfa161ddf2f5a4db",
+      "bytes": 1816
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/food-add-keyboard-indicator-scroll-baseline-case.json",
+      "sha256": "b98a7ef94c9e7c215a85fcc320a07f524c41aa036cbb204f6fed8cb1bf0023dc",
+      "bytes": 2114
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/food-search-access-canonical-final-files.json",
+      "sha256": "9283d8072b1b084febbdef2c5e1b717dcf3ca9b1863ad26447d1758021a1dd48",
+      "bytes": 9582
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/goal-profile-defaults-final-file.json",
+      "sha256": "c1d9369c316d8a9ef83e22154a16b484a08647827f6a18ed32fe6ef2235dfa10",
+      "bytes": 2484
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/goal-profile-error-maintain-repaired-case.json",
+      "sha256": "fce46f7143161d7f58057c07765dc7da631c3a4d31c4ff252aec7aa0f9c0422e",
+      "bytes": 1864
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/goal-profile-error-maintain-runtime-baseline-case.json",
+      "sha256": "479e13ec90d883e4d27e4400743384b7c519c9dc046b24959e29f0c48b8f5285",
+      "bytes": 2307
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/native-finish-completion-final-files.json",
+      "sha256": "b757fd1eea78150bc534592fad401c48c5633afd0ef7488ac20f88fbabe6230f",
+      "bytes": 23829
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/native-finish-concurrent-retry-baseline-case.json",
+      "sha256": "3bd21e8b950c325754feb40140913959e2a4fdb33a1c0523e107fb0a3b2120d2",
+      "bytes": 2246
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/native-finish-concurrent-retry-repaired-case.json",
+      "sha256": "32f994a8b22c559bf1c0264d8760f26603f7ac59de87342405e55d0c0c208891",
+      "bytes": 1800
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/native-finish-next-receipt-baseline-case.json",
+      "sha256": "1bb6b10b207f4ef3f752cf38a88997ac56fe981c815ff8fb7efb95afeb0ef8fe",
+      "bytes": 2356
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/native-finish-next-receipt-repaired-case.json",
+      "sha256": "b65bf3ee565e698dd65aac0643fc3d742a817f8b40ab05aa53cfad3a7628fc54",
+      "bytes": 1833
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/native-finish-replay-lanes-repaired-case.json",
+      "sha256": "f3468551c7c65a99433a1744541751ab3bc653ff540f3515b5acb62cb34b4591",
+      "bytes": 1834
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/native-finish-stale-status-repaired-case.json",
+      "sha256": "1a4921b987c170d8b8df1c5c9a41c3eed6fa328ca21135f20951ca8383311c22",
+      "bytes": 1835
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/postgres-admin-20261011213704634346.json",
+      "sha256": "6b479009af5dab2785109fffbb3724227dcd899e0c0219aa06e8e786773c36e7",
+      "bytes": 3269
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/postgres-cloud-20261011221428775487.json",
+      "sha256": "2bbab9779290c3a0beb241409013219501ba8d42b85bc8531979f00f5bea235a",
+      "bytes": 2252
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/postgres-review-v2-20261011221245201746.json",
+      "sha256": "4aeab062ffd98aa5614c8bb375fa1eaa2cfaf9148a52af892dd09546eba90303",
+      "bytes": 1860
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/purchase-root-current-final-files.json",
+      "sha256": "d4e7b370e0595d7500a08d797bd9310541c28c8e0c788b3c75116a47bacbf9b2",
+      "bytes": 3094
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/source-size-refactor.json",
+      "sha256": "e7cb2c87eee19a8bb7c23aa1db4a22192f5bec3f740d17fe26f3f080a822ede4",
+      "bytes": 401
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/logs/sql-final-dependency-check.json",
+      "sha256": "35bc1b7ea5ac4be75ff9943570999cbe1e5b2f405a5d6478364acfe72870f295",
+      "bytes": 674
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/preservation.json",
+      "sha256": "a696f49e47e9c8972a4bec6d135ad6bf88286b570a5753ba0285b55d5231bfc7",
+      "bytes": 4733
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/preserved-worktree-status.json",
+      "sha256": "db9697e57c0c8a11d1f358b1b7c5a8ce89f59b8ebd23ec762b3ec1e4996529a7",
+      "bytes": 1059
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/push-preflight.json",
+      "sha256": "5b4efe35b697b16284bd5c0534e1c4f131ff422f4265fa413f874f36ab4e41c2",
+      "bytes": 27626
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/results.json",
+      "sha256": "5f2e31f41edeaf5f37982adf9e9dbc40562ef4ed0c59e84ad8951ff07988a7b6",
+      "bytes": 375949
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/scope-plan.json",
+      "sha256": "bfaa23e247822a700e5846df14004a408a74cdae882d098541cde452c1066a9a",
+      "bytes": 20146
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/tested-inputs.json",
+      "sha256": "34fb9bd2d6b0d2dd894aa41dd639448c68f8ac30a5e7224fa8d134bf55ffca20",
+      "bytes": 634329
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-boost-ar-320.0-reduced.json",
+      "sha256": "f4e1c5b0e6342fb8db9cefd7458a7c50dd62f3044f4dda3a98dff5c51138ebf8",
+      "bytes": 3726
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-boost-ar-320.0-reduced.mp4",
+      "sha256": "ba53111e710cf2f0fdee38a3619643b85032a844a78b7eb35a72905ed65d3989",
+      "bytes": 38263
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-boost-ar-390.0-reduced.json",
+      "sha256": "06d727e282751e41e9231ff150ca79183537f4b512a8b29ce89585be81d9936b",
+      "bytes": 3726
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-boost-ar-390.0-reduced.mp4",
+      "sha256": "b41c7e6998c74a6fdd79d56f61aef64d63defa8aa8c174d1ffdde6db6b0c5bfb",
+      "bytes": 23698
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-first-food-first-use-ar-motion.json",
+      "sha256": "9246e2cb55771bbd18106b250653c23f84cab861aea2d8007cd0293a3959fdf4",
+      "bytes": 6699
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-first-food-first-use-ar-motion.mp4",
+      "sha256": "63d76ef1289359e6c1114a3ad7f8b9fc289b1964989292e4253e7b5585c4a93e",
+      "bytes": 199385
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-first-food-first-use-ar-reduced.json",
+      "sha256": "345e52234680f71023c55b213f02489c97108576b933a157a877cdcee95b3ea3",
+      "bytes": 6699
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-first-food-first-use-ar-reduced.mp4",
+      "sha256": "0bc5cbed6623fac615b1a3eb462cb82aa939eff21be890c6c6c9e2bbd9bdd91c",
+      "bytes": 170728
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-skip-first-use-ar-reduced.json",
+      "sha256": "d98427f4b183df62ed25e003b3393150f18a34256dccffd67d7c19158a497923",
+      "bytes": 2176
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-skip-first-use-ar-reduced.mp4",
+      "sha256": "c6ba5aa9dc8066799b64d14677f763e54bfa970a790b1ec74c74f46e1d37aae9",
+      "bytes": 37656
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-subscription-active-ar-390.0-reduced.json",
+      "sha256": "2cdd5d00048c4e51234714b7033d8c8bce35e08594ce9b91e809b56010f2f3ab",
+      "bytes": 3726
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-subscription-active-ar-390.0-reduced.mp4",
+      "sha256": "7bd22df511b847da8a775764e72f180fc7d88a0feb5549d40f92e3443fad1535",
+      "bytes": 19151
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-subscription-trial-ar-320.0-reduced.json",
+      "sha256": "01d85efea3765d0452302c248bc31400586947c0a9288298f6e7ddee4904f62d",
+      "bytes": 3726
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/approved-subscription-trial-ar-320.0-reduced.mp4",
+      "sha256": "bc5247092f78c48601f22d0038a2f0ec3f53993544ccdf1160c61a262d667c2c",
+      "bytes": 32915
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/boost-ar-320.0-reduced.json",
+      "sha256": "baad3efd8c68a37a1d5853192673a02830786a48b801b6e4cccc6e7e3abcb148",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/boost-ar-320.0-reduced.mp4",
+      "sha256": "ba53111e710cf2f0fdee38a3619643b85032a844a78b7eb35a72905ed65d3989",
+      "bytes": 38263
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/boost-ar-390.0-reduced.json",
+      "sha256": "7cd8931c95bf8c3f88dd076a17be7dfd40004e49a54444a0b660b34a0bbe6021",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/boost-ar-390.0-reduced.mp4",
+      "sha256": "b41c7e6998c74a6fdd79d56f61aef64d63defa8aa8c174d1ffdde6db6b0c5bfb",
+      "bytes": 23698
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/first-food-ar-motion-current.json",
+      "sha256": "09e2d908a4aeb8b49af1b7e481cd13e7c8753c86886bc0da56472483dc960bc4",
+      "bytes": 6429
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/first-food-ar-motion-current.mp4",
+      "sha256": "1e375ac4db52175199f33e0bb382801420381b133c607dd5c20ea83a19ecc0a7",
+      "bytes": 198564
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/first-food-ar-reduced-current.json",
+      "sha256": "082e74c90e0d631622668d7ae6d1b59e2bb899bd57bd44f531d9fa2a19ebf82b",
+      "bytes": 6429
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/first-food-ar-reduced-current.mp4",
+      "sha256": "c762f1331d6d8e3fb18c5d6042bde18373a1e5f92b32f88f5ea0a68c35b7c969",
+      "bytes": 170852
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-boost-ar-320.0-reduced.json",
+      "sha256": "baad3efd8c68a37a1d5853192673a02830786a48b801b6e4cccc6e7e3abcb148",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-boost-ar-320.0-reduced.mp4",
+      "sha256": "ba53111e710cf2f0fdee38a3619643b85032a844a78b7eb35a72905ed65d3989",
+      "bytes": 38263
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-boost-ar-390.0-reduced.json",
+      "sha256": "7cd8931c95bf8c3f88dd076a17be7dfd40004e49a54444a0b660b34a0bbe6021",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-boost-ar-390.0-reduced.mp4",
+      "sha256": "b41c7e6998c74a6fdd79d56f61aef64d63defa8aa8c174d1ffdde6db6b0c5bfb",
+      "bytes": 23698
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-first-food-ar-motion.json",
+      "sha256": "8d56ca709527509f094a0bd8affd96cd9d7f373a1c2e917f0c7809311487541b",
+      "bytes": 6429
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-first-food-ar-motion.mp4",
+      "sha256": "63d76ef1289359e6c1114a3ad7f8b9fc289b1964989292e4253e7b5585c4a93e",
+      "bytes": 199385
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-first-food-ar-reduced.json",
+      "sha256": "b24ff698252044731caca0eedf52df452d9e83aee29a189f600ad0e9e36bb397",
+      "bytes": 6429
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-first-food-ar-reduced.mp4",
+      "sha256": "0bc5cbed6623fac615b1a3eb462cb82aa939eff21be890c6c6c9e2bbd9bdd91c",
+      "bytes": 170728
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-first-use-ar-skip.json",
+      "sha256": "341f2c16eee83bb517135544e5c7afd7c039db5e96f63f101a288524240607a2",
+      "bytes": 1913
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-first-use-ar-skip.mp4",
+      "sha256": "c6ba5aa9dc8066799b64d14677f763e54bfa970a790b1ec74c74f46e1d37aae9",
+      "bytes": 37656
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-subscription-active-ar-390.0-reduced.json",
+      "sha256": "5509f6c252688d6052e4ff2137f93339bc572899054ca779019fa3bc4e3c5bda",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-subscription-active-ar-390.0-reduced.mp4",
+      "sha256": "7bd22df511b847da8a775764e72f180fc7d88a0feb5549d40f92e3443fad1535",
+      "bytes": 19151
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-subscription-trial-ar-320.0-reduced.json",
+      "sha256": "af991e038d93bc35747cededdc5dacd1c89e2b13207cc95351b6fb0e6ee0e837",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/frozen-subscription-trial-ar-320.0-reduced.mp4",
+      "sha256": "bc5247092f78c48601f22d0038a2f0ec3f53993544ccdf1160c61a262d667c2c",
+      "bytes": 32915
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/subscription-active-ar-390.0-reduced.json",
+      "sha256": "5509f6c252688d6052e4ff2137f93339bc572899054ca779019fa3bc4e3c5bda",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/subscription-active-ar-390.0-reduced.mp4",
+      "sha256": "7bd22df511b847da8a775764e72f180fc7d88a0feb5549d40f92e3443fad1535",
+      "bytes": 19151
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/subscription-trial-ar-320.0-reduced.json",
+      "sha256": "af991e038d93bc35747cededdc5dacd1c89e2b13207cc95351b6fb0e6ee0e837",
+      "bytes": 3473
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/videos/subscription-trial-ar-320.0-reduced.mp4",
+      "sha256": "bc5247092f78c48601f22d0038a2f0ec3f53993544ccdf1160c61a262d667c2c",
+      "bytes": 32915
+    },
+    {
+      "path": "lib/app/localization/runtime_copy.dart",
+      "sha256": "738cc3013ce672f7cbcc314a7ebce83e29e75952bf25309c67a7b367f9a1bd80",
+      "bytes": 12124
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_closure_access.dart",
+      "sha256": "2570193a6d6953224b9694dc82b314c20683562b402419de82fa4f68b7853896",
+      "bytes": 8861
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_closure_coach.dart",
+      "sha256": "5ab99332bad440b8ba1354ab26899ea95b3176155e9521d4d8814745a3e7b858",
+      "bytes": 14879
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_closure_food.dart",
+      "sha256": "d0d733c791d6d1afbb2398caa2a14b85bb68157046f01e7ecef13450fc93a81b",
+      "bytes": 8305
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_closure_review.dart",
+      "sha256": "bbe7a39efa5b62d67f7362ce773196b6ef521c5147ad8fd83df44e322d4d518a",
+      "bytes": 22928
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_voice_status.dart",
+      "sha256": "853f1a362b57edb8df639b7013c9377948dc4c5ad92b61b272c7ee994235be2d",
+      "bytes": 6407
+    },
+    {
+      "path": "lib/app/router/app_router.dart",
+      "sha256": "e31d88b26bbae7b4c85117e375e229d20c70c7cab758519db11988055948490b",
+      "bytes": 24896
+    },
+    {
+      "path": "lib/app/services/local_data_lifecycle_service.dart",
+      "sha256": "d602ec04c6a82c1d0bfbf2c304602d1d5923741f7152a2282ee856e3bd206898",
+      "bytes": 10609
+    },
+    {
+      "path": "lib/app/services/scoped_media_access.dart",
+      "sha256": "9339c8c8185b5fc0a3a98281625969f41c7a39ec70bbe03da5bf534f7a3ac56e",
+      "bytes": 3951
+    },
+    {
+      "path": "lib/app/services/scoped_media_file_cache.dart",
+      "sha256": "e92a5186790385dae446a44c7d9a297181d393e6548858a18d419ffd97e101fc",
+      "bytes": 16653
+    },
+    {
+      "path": "lib/app/theme/bil_flagship_theme.dart",
+      "sha256": "8b7df983ec5ffcf1ce766c6f590b7c8dd2f328e2d90bfa1309ff2b19af642631",
+      "bytes": 22463
+    },
+    {
+      "path": "lib/app/theme/bil_flagship_tokens.dart",
+      "sha256": "3bfb2c2e2ca02ebc190299461d6f0691893fc3d11f8af3f06b6d2bb9291679c5",
+      "bytes": 3100
+    },
+    {
+      "path": "lib/app/theme/bil_pearl_finish.dart",
+      "sha256": "f047e596604967d092c471a71cf01f04b225f813d404e29625b8b387a1f132d5",
+      "bytes": 4654
+    },
+    {
+      "path": "lib/data/database/app_database.dart",
+      "sha256": "1e631ad641e2270e3eefc8dcb37f8fbcf422065160afd20ff919d87e7d917326",
+      "bytes": 17953
+    },
+    {
+      "path": "lib/data/database/catalog_nutrient_evidence.dart",
+      "sha256": "eb7d27a218efa8dae66f7ef3c5e1528b738db0cce3a94f5b352a0b574ac18f9d",
+      "bytes": 5100
+    },
+    {
+      "path": "lib/data/database/food_basis_evidence.dart",
+      "sha256": "07931a6024c430afa72e91e6143c21f8350a61f7b6e05cb68ffe046e4bce581f",
+      "bytes": 7327
+    },
+    {
+      "path": "lib/data/database/meal_food_evidence.dart",
+      "sha256": "5dee8c7a0973a4bc87506c1e24cc3e4594cf2d3e0b7ce85ff22a743d4e63a675",
+      "bytes": 8894
+    },
+    {
+      "path": "lib/data/database/unit_food_evidence.dart",
+      "sha256": "2e6a0062c108729e0deda9bbf7a4c3f87b4467d01669710426418a73389ac7fd",
+      "bytes": 3487
+    },
+    {
+      "path": "lib/data/repositories/food_repository.dart",
+      "sha256": "12d64cfebed1090dad509697d4a64d899e677b87be65919c344b70ce2b476fc5",
+      "bytes": 20708
+    },
+    {
+      "path": "lib/data/repositories/food_repository_custom_writes.dart",
+      "sha256": "a8e9e237ce4ed66131e18a1886481f9cee3b03671f547448c611f80830658bfc",
+      "bytes": 11146
+    },
+    {
+      "path": "lib/data/repositories/meal_repository.dart",
+      "sha256": "f054a8ad2b83086028085750e1e4d67d90058356051fbd4f52d1c0d78965622c",
+      "bytes": 22594
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_first_food_migration.dart",
+      "sha256": "9db5085d2d43244c376b74c2f441dab15678c63085537b27c0ce6418293e4535",
+      "bytes": 1061
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_food_portions.dart",
+      "sha256": "91fdc0ca274be88f1ece9c4378ce37bcc6e44bad71137cebc2c0dd720df7e6c1",
+      "bytes": 4499
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_recipe_servings.dart",
+      "sha256": "5911456114d2081ad54cdf57e86cd35fed620c65ef80afd7840283e24f554bc5",
+      "bytes": 7900
+    },
+    {
+      "path": "lib/data/repositories/preferences_repository.dart",
+      "sha256": "8bc556fd540b1ca70229ceba4e1f357af1fa4d8eb18d69fe12e6f06918584245",
+      "bytes": 5735
+    },
+    {
+      "path": "lib/features/admin/services/admin_owner_operation.dart",
+      "sha256": "556374df8949136a8ec3973cf12b52ba941dffb8f0aa53cb3387ebdf67a29a11",
+      "bytes": 2313
+    },
+    {
+      "path": "lib/features/admin/services/admin_subscription_service.dart",
+      "sha256": "f9cc12d9b641288532e176db8deb3b036ce2434e551d943b434b8852ced759e6",
+      "bytes": 5885
+    },
+    {
+      "path": "lib/features/admin/services/ai_coach_admin_service.dart",
+      "sha256": "25fa78ff46c75a87915a4aa3195e5a5dce8c44676b131838748077d873ff3b05",
+      "bytes": 8880
+    },
+    {
+      "path": "lib/features/admin/services/community_member_access_admin_service.dart",
+      "sha256": "7ee6c23996fb896f76acc187632e064b27728cad26907d07c6dbb86326049e6b",
+      "bytes": 6704
+    },
+    {
+      "path": "lib/features/admin/services/community_moderator_admin_service.dart",
+      "sha256": "c96969fc4e33030ee6375c2e87b7ad4f5423029e5ea41ed61f1d83eab9b3cb1a",
+      "bytes": 5874
+    },
+    {
+      "path": "lib/features/analytics/analytics_baseline_card.dart",
+      "sha256": "164b370e9c1979c1f9f325c8f6763004a0b775962bafeda38a1ba35ebdd2d36c",
+      "bytes": 4019
+    },
+    {
+      "path": "lib/features/analytics/analytics_page.dart",
+      "sha256": "6576cc9e40098522763d9e1397a1a291d69f61d91e0bc28f36b5448da3c34ec7",
+      "bytes": 30888
+    },
+    {
+      "path": "lib/features/analytics/nutrition_analytics_calories.dart",
+      "sha256": "9e050831f9f3ca6c5bbc12864afbc7851cae92341e91d3f8da6a1126b6c01483",
+      "bytes": 9235
+    },
+    {
+      "path": "lib/features/analytics/nutrition_analytics_nutrients.dart",
+      "sha256": "cf92296ab571834478d9f4e935390c66437826e9837d951ecd158824552300f5",
+      "bytes": 5793
+    },
+    {
+      "path": "lib/features/analytics/nutrition_analytics_page.dart",
+      "sha256": "18127f832675e87c5fae5672d42bbca05eca9a2f77cbb731632964b9a0e3a8f0",
+      "bytes": 15587
+    },
+    {
+      "path": "lib/features/analytics/weekly_report_provider.dart",
+      "sha256": "06b19d22316eefd3d8e9b7ab6e408e792b7617a7b5d8a1a7147d51325f5b8ae4",
+      "bytes": 13835
+    },
+    {
+      "path": "lib/features/analytics/widgets/analytics_page_primitives.dart",
+      "sha256": "0693769ded510a666a59ad1ac4a0b0a98d6e1044f2750f6ae9c406bfed0243da",
+      "bytes": 8955
+    },
+    {
+      "path": "lib/features/cloud_platform/services/cloud_manual_sync_service.dart",
+      "sha256": "564dd0d3e6c956cea1bb6d1825d0053f91db8cbb6c29267fd55a1f6f50d117c9",
+      "bytes": 9387
+    },
+    {
+      "path": "lib/features/cloud_platform/services/supabase_cloud_transport.dart",
+      "sha256": "d8b00963ea46aa135b51e3d2881ce74f76757ce6343796370d382bab1bc27dd0",
+      "bytes": 6333
+    },
+    {
+      "path": "lib/features/cloud_platform/services/supabase_startup_cloud_profile_reader.dart",
+      "sha256": "1542a555f55de8fb6e538ad75c54d2bf723678544988b1892aad0412abc8b98c",
+      "bytes": 5949
+    },
+    {
+      "path": "lib/features/commerce/domain/entitlement_resolver.dart",
+      "sha256": "759ab03fc2699d2ab0379e901a4cff03ba65f8d151b33020b782cde22e046db3",
+      "bytes": 2980
+    },
+    {
+      "path": "lib/features/commerce/domain/store_benefit_delivery.dart",
+      "sha256": "31898fd08a7c0fcb0e3caa82a071d42974ef199781857eba7e4898cfe818cc1b",
+      "bytes": 2734
+    },
+    {
+      "path": "lib/features/commerce/domain/subscription_record.dart",
+      "sha256": "495fad663f8f9e62b8f8dd3ea5c8528ddedd0b191db9897016ffd6411c38093b",
+      "bytes": 1584
+    },
+    {
+      "path": "lib/features/commerce/domain/subscription_state.dart",
+      "sha256": "6d85c70ad9e42a913b18ea3a4a4b65ba2b6c7e1ef845ade49687c0592af34b86",
+      "bytes": 1880
+    },
+    {
+      "path": "lib/features/commerce/presentation/app_purchase_coordinator.dart",
+      "sha256": "aab7f70d7cf7a6007b9c8e5ad66a71914f72e6ee661c837982175af8b2d2ac50",
+      "bytes": 9514
+    },
+    {
+      "path": "lib/features/commerce/presentation/app_purchase_presentation_routes.dart",
+      "sha256": "3f89255b47118acec31a1c25207ca97b18438aeaefe67a925f52f6eb8de02936",
+      "bytes": 1304
+    },
+    {
+      "path": "lib/features/commerce/presentation/bil_dynamic_store_offers.dart",
+      "sha256": "cda5858114d280c7cbb5f46adb7fd01bc4059133fad2f3a062c3e8f5860d1d3b",
+      "bytes": 17852
+    },
+    {
+      "path": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "sha256": "8fcb8df23c04fdbce7f43f475ee2993a6bd706c30cb25bf98d897ced039498b6",
+      "bytes": 40032
+    },
+    {
+      "path": "lib/features/commerce/presentation/bil_store_plans_page.dart",
+      "sha256": "12cbb5b88169e83c02294ddc59deea82bc9b94db47e244448897897a36da98fb",
+      "bytes": 18195
+    },
+    {
+      "path": "lib/features/commerce/presentation/bil_store_recovery_copy.dart",
+      "sha256": "3c3ad62d6b6709ada2638e400429095deb211ae1ec775b94035c27330f80a68b",
+      "bytes": 15329
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_collection_item_gate.dart",
+      "sha256": "bda183069965bdfbd2f0ded6ad892dcc60554898bd769d91f3aa9e49ea7dcc33",
+      "bytes": 3565
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_label_badge.dart",
+      "sha256": "354f92ef1dd17c11975273d0b564b2dbc2eede604bc7b1efc3dcb53cbd07b3c6",
+      "bytes": 1723
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_nutrition_glass.dart",
+      "sha256": "dcfb300f56439148e4f4d432ca8849e0aca4257bf76905087539b7dfaea6138a",
+      "bytes": 3163
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_route_access_surfaces.dart",
+      "sha256": "a0d97ec21eb4cb4e1f4a6cd2825272a06949c4d0304d4d0fb39a96cdaa4c1204",
+      "bytes": 3764
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_route_glass_gate.dart",
+      "sha256": "7ecc5aacd648d288dc2b41807baa2b0e2f865da0aa87253d050d50d96c7b2472",
+      "bytes": 22050
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_route_glass_gate_components.dart",
+      "sha256": "6b36aa6bebe2c4a5eccff4dc4881edf6a3a5c97dc67924f899ca3d7731afec81",
+      "bytes": 4220
+    },
+    {
+      "path": "lib/features/commerce/presentation/premium_value_mask.dart",
+      "sha256": "8e9c96621bf3744509a90f03cfdebf6aa6cdccfd0f7f96b3769040be77e8d026",
+      "bytes": 5101
+    },
+    {
+      "path": "lib/features/commerce/presentation/store_benefit_confirmation.dart",
+      "sha256": "d18ed262acde449257d3c2f2d06954fdead6508871a81ae252bd6572b8fa0437",
+      "bytes": 6444
+    },
+    {
+      "path": "lib/features/commerce/providers/app_purchase_providers.dart",
+      "sha256": "7449bb26c9a35a28df1420e602c2915ee08c1fb44a8608cae4cfaa16c160bbcd",
+      "bytes": 4621
+    },
+    {
+      "path": "lib/features/commerce/providers/commerce_providers.dart",
+      "sha256": "c52367aa933ea2852b6c9b108a851a351235d308267c9712803a0f1a84de96cc",
+      "bytes": 18526
+    },
+    {
+      "path": "lib/features/commerce/providers/verified_purchase_handoff.dart",
+      "sha256": "341f928a6a33b7d84fed9028096b2643f9b2cb97f24ffbe7fbf2627373657a6e",
+      "bytes": 3293
+    },
+    {
+      "path": "lib/features/commerce/repositories/server_entitlement_repository.dart",
+      "sha256": "4499511f1b8e73d698cfd0bdd1fc5dc73898fe8617eca95cbe66a44a1eb5b990",
+      "bytes": 20009
+    },
+    {
+      "path": "lib/features/commerce/services/store_account_visit.dart",
+      "sha256": "4c744c3d827922bc75ba58712512a5096904340fbf29844c9662bf67e171c628",
+      "bytes": 1650
+    },
+    {
+      "path": "lib/features/commerce/services/store_confirmation_journal.dart",
+      "sha256": "f5ffd9203076a7c7ab09bf566650891f0e49662933eb878f4218ff14e904710d",
+      "bytes": 3041
+    },
+    {
+      "path": "lib/features/commerce/services/store_purchase_trace.dart",
+      "sha256": "6cdf72215bcd18c2062fd493035dcfaecf3225b19729c05b8fa0b5953d8d3b72",
+      "bytes": 1497
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_catalog_adapter.dart",
+      "sha256": "15b23c93f4eac582fd8ba583ba767f4eda218a78d5eec4a0fab4c682a9c9947d",
+      "bytes": 14926
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_checkout.dart",
+      "sha256": "465049f2d539c9850fd07afc5c04b632df69cd1b2590251cf09afef1ae89eb4f",
+      "bytes": 9164
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_completion.dart",
+      "sha256": "2d29830a76b11e55af38b4b5c92079caabe037baa1b8d2a3dec220d30fda8f14",
+      "bytes": 2471
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_owned.dart",
+      "sha256": "d6badffef4a4e0d775134115dd84315e382ff8ac21ee50ffbc9cbde97071298b",
+      "bytes": 2238
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_pending.dart",
+      "sha256": "50226fd6d961cb38dcca7667c35c6b65b6532bd28df041b07e5ce2e06b5234d8",
+      "bytes": 2469
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_processing.dart",
+      "sha256": "b3fbb394c162a21f1a3d74bf701f67d08670a513cc8893c9cc16cbac26b2859b",
+      "bytes": 22170
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_restore.dart",
+      "sha256": "2170f54f1ba1dbca2ac0b76176fd06ec27f236d2ae3acdd0203ddc879bdb914f",
+      "bytes": 3774
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_service.dart",
+      "sha256": "35e1404a620bad54d8aa34bd7baf6914373dd7f2fa53a370125744ac517d34db",
+      "bytes": 26418
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_purchase_support.dart",
+      "sha256": "51d1a3c2185a928e81ced121c415a10835c0b6648d104dc9580944bbb536715e",
+      "bytes": 15378
+    },
+    {
+      "path": "lib/features/commerce/services/verified_store_receipt_verification.dart",
+      "sha256": "e7e60d99eb33901dea77aa8e20d0c929bd416eaa55bd2d2a0d67b03fe9d2022f",
+      "bytes": 6740
+    },
+    {
+      "path": "lib/features/community/data/community_feed_cache.dart",
+      "sha256": "f84e871cd6e14951668d9684d4b5bb3d30f61cb6f2fb84c9df9e756ea9e2735f",
+      "bytes": 7074
+    },
+    {
+      "path": "lib/features/community/data/community_repository.dart",
+      "sha256": "ceea848d7dfa89cf6cb9db5d2a1851e0abc70b7ed860a57c25c5ead655749904",
+      "bytes": 14637
+    },
+    {
+      "path": "lib/features/community/data/community_repository_cached_feed.dart",
+      "sha256": "cbb6b5797f993828ce2503cd9933cce16eb48a4a2fa9d05e614974d6f9ffc0b2",
+      "bytes": 2120
+    },
+    {
+      "path": "lib/features/community/data/community_repository_review_v2.dart",
+      "sha256": "831cbe27f19cecc6f4d09a407f4f34867d1a463f9d76ef4d0ef84457fbe4cb58",
+      "bytes": 8962
+    },
+    {
+      "path": "lib/features/community/domain/community_review_snapshot.dart",
+      "sha256": "8bbbf19dc1062afb8f9cb10ad07d239d2652ce4c8dc2263119d6395fb5e77c54",
+      "bytes": 907
+    },
+    {
+      "path": "lib/features/community/presentation/community_copy.dart",
+      "sha256": "4a9a0cdbc37a3fd4aa8e2dcaa518fd4658985474ac502e890ee9aeac56dc8cf7",
+      "bytes": 41720
+    },
+    {
+      "path": "lib/features/community/presentation/community_entry_gate.dart",
+      "sha256": "07aca0d85c29c71d8cc642d530701b4d7220a997eb73eebfc126be4c5d9023a7",
+      "bytes": 12145
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_pagination.dart",
+      "sha256": "83228c97fbef764ceb7c3766e8a4ff879320b6e276e46fdb7af816470f057ea6",
+      "bytes": 8073
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_reference_header.dart",
+      "sha256": "94b89bb43871d0fd2579825780ec5417c3e3faf12fd5bb71a554ceb0e418be22",
+      "bytes": 15284
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_refresh_notice.dart",
+      "sha256": "ffc892c24ea6db668a127ea55ff4d4a2740bd2f9d44048df924176aeb8a46f82",
+      "bytes": 3927
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_tab.dart",
+      "sha256": "ec185d25532f48867a51e1a45e2934985e050114d696ca9a32933211e470e173",
+      "bytes": 24091
+    },
+    {
+      "path": "lib/features/community/presentation/community_hub_page.dart",
+      "sha256": "26862c53a5d7bb47560da9d0db083e11d510bc58c8e2996e79931fa74ec1c902",
+      "bytes": 23837
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_card.dart",
+      "sha256": "723f58fe586d4854f37824ea7929d1d6d8dbc37d6a2ddee0cf3d133453bcd26e",
+      "bytes": 21113
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_moderation_load.dart",
+      "sha256": "2915093a1938d87ceac74149147c1af2bf93138ca8c2480f6a250be9424289fb",
+      "bytes": 2367
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_moderation_page.dart",
+      "sha256": "fd91b6ddc310ac12cce058f5cd2dec35ac5a4c6600ef4553e894313ac5b62909",
+      "bytes": 24301
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_moderation_widgets.dart",
+      "sha256": "612f9807b5c9a4f7b16199680dc1cc5ae92a8a868d8e428ec84c0c1f62af4771",
+      "bytes": 16381
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_review_reason.dart",
+      "sha256": "adb3ef1271608e70218728ff0616d4f08aa7a62961db44e58f2465234c6e7b01",
+      "bytes": 4269
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_reward_review.dart",
+      "sha256": "453703e99039ce8c240cad94f9621b3598907c1f7251c85f4f8595428bef5690",
+      "bytes": 5081
+    },
+    {
+      "path": "lib/features/community/presentation/community_profile_page.dart",
+      "sha256": "86dd9b495a471715d73a2e34a2d6760034c2391ca0442315030d74e9ea382fd6",
+      "bytes": 27396
+    },
+    {
+      "path": "lib/features/community/presentation/community_sapphire.dart",
+      "sha256": "506cff0580816f4f02729e03d8531040734eeb6716c82009fcd10ac918e2e6a6",
+      "bytes": 3486
+    },
+    {
+      "path": "lib/features/community/services/community_composer_voice_input_service.dart",
+      "sha256": "d420b8b56c521446ba85511c6bad59f2fd766e2e776382431b71ca82a03b5d0a",
+      "bytes": 9584
+    },
+    {
+      "path": "lib/features/connected_health/connected_health_components.dart",
+      "sha256": "2081a608b2540fd7bf2c313a9dfe7fd661badc76ac08bdad4de47dfc402047bb",
+      "bytes": 18359
+    },
+    {
+      "path": "lib/features/connected_health/connected_health_page.dart",
+      "sha256": "70a5b7ef539fef899ae9098bf84467740ec4264e1cb277440974732722e631ae",
+      "bytes": 22132
+    },
+    {
+      "path": "lib/features/connected_health/connected_health_signal_row.dart",
+      "sha256": "171760bf53416bdef935deb72bb475aa6b4a220d8833a1bd147e6c695f6172fe",
+      "bytes": 1458
+    },
+    {
+      "path": "lib/features/connected_health/widgets/connected_health_card.dart",
+      "sha256": "f14e4f58c8d6557e4b5b4e3fd3b47a4a3ddcd35f1d5a77b30169fd8f1d0d830a",
+      "bytes": 25443
+    },
+    {
+      "path": "lib/features/connected_health/widgets/connected_health_primitives.dart",
+      "sha256": "143662e25ac21770279696f1434486a35de25531cea2b3b5999a2a25ed73fe42",
+      "bytes": 6502
+    },
+    {
+      "path": "lib/features/connected_health/widgets/live_health_watch.dart",
+      "sha256": "7483cf64fbe07c3a9314365989f604ceb8a54e7feebefccb6a0a9759b0337c79",
+      "bytes": 26527
+    },
+    {
+      "path": "lib/features/connected_health/widgets/live_health_watch_time.dart",
+      "sha256": "acef2fc6bff5ca6d10c2d50ba6353ec15d4fb077ede884a801c1584ff27097b3",
+      "bytes": 2610
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_capture_actions.dart",
+      "sha256": "745b3feb3589b0eb32450cfafa9e31113c74d193a3153a3182a3cdc1b03d52d9",
+      "bytes": 17082
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_meal_entry.dart",
+      "sha256": "0eb6798e50640f384dbc1369808236e876eb3e87c2ecdb0b18de57f7aef81276",
+      "bytes": 20242
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_meal_entry_components.dart",
+      "sha256": "7f1f68caa7ecf4aa24655ac5561ce9fc7ed61e15fa4252efc8267c3e689192f0",
+      "bytes": 2597
+    },
+    {
+      "path": "lib/features/daily_log/food_log_action_tile.dart",
+      "sha256": "3be5d3b022bfe535ba498964411bec6a97d4a5b83342bbaa1ff64f3627a6561d",
+      "bytes": 1255
+    },
+    {
+      "path": "lib/features/daily_log/food_log_page.dart",
+      "sha256": "68ffa942e714c885c62b002fa22929e0ecc92b2981e88b187b30eda117a9eacb",
+      "bytes": 24405
+    },
+    {
+      "path": "lib/features/daily_log/presentation/daily_log_meal_summary.dart",
+      "sha256": "db1f368da29b4464910db5ec5be98a5e1c7252fc63ae7764e3d54c7c07eb3738",
+      "bytes": 7716
+    },
+    {
+      "path": "lib/features/daily_log/presentation/daily_log_meals_list.dart",
+      "sha256": "a3c80619854fe1115049148dcbd70401bfde8341c8ed2f074deab00814a33c5c",
+      "bytes": 18944
+    },
+    {
+      "path": "lib/features/daily_log/presentation/daily_log_summary_metrics.dart",
+      "sha256": "9e3b91d6b3ba0e61affc9887fa73f27a56f44f839de7ea4fc0e7849420a93a4c",
+      "bytes": 4541
+    },
+    {
+      "path": "lib/features/daily_log/presentation/daily_log_summary_widgets.dart",
+      "sha256": "de56e1a23c8eb5e3eb7442249e2daaf2d5fab25b3cae84be8be3c33ac3dbdcd8",
+      "bytes": 20111
+    },
+    {
+      "path": "lib/features/daily_log/presentation/daily_log_today_sections.dart",
+      "sha256": "269671b5e0f75d50390d439ce9dda636790d0c28c514b0e73edf245b69e692c5",
+      "bytes": 12468
+    },
+    {
+      "path": "lib/features/daily_log/presentation/quick_macro_entry_dialog.dart",
+      "sha256": "d9a67d01e204ec5cc681644d2fbaa73cce7a42fbb2b43b8201c81c085c6e0c74",
+      "bytes": 12202
+    },
+    {
+      "path": "lib/features/daily_log/providers/daily_log_provider.dart",
+      "sha256": "ebfecf1acd0370681c1d76fdf448014e2567ca6f9e44a48c51ed1bf24f981b28",
+      "bytes": 4438
+    },
+    {
+      "path": "lib/features/dashboard/dashboard_page.dart",
+      "sha256": "29814b775e03d6a0426337fdde0fa59d69c7214df6bbc9e6740f0e357d584700",
+      "bytes": 19309
+    },
+    {
+      "path": "lib/features/dashboard/domain/nutrient_dashboard.dart",
+      "sha256": "72eaf74bd431cbfa8acc3f4af3da2468089dbae5dffb6979e4f25ec4dced78d9",
+      "bytes": 3899
+    },
+    {
+      "path": "lib/features/dashboard/providers/dashboard_preferences_provider.dart",
+      "sha256": "c9e79e4c74567d22c5ba4de152e567b99b87605dd364d85ccafc02fb647182a8",
+      "bytes": 5100
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_first_use_experience.dart",
+      "sha256": "2862d261bb13cd49116f9751851476837e9390ed2cd54b2d7915e3cd179bd44b",
+      "bytes": 13401
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_grid.dart",
+      "sha256": "9f62e40dd1e8e02fae4cefb5965e1ac7f4ff14f8355358050685bcb4e552c5a6",
+      "bytes": 31295
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_nutrient_goal_cards.dart",
+      "sha256": "e6421177e0643f2eca5d30dbbd7795d971d8ee2429aaa492870499fef9aedd14",
+      "bytes": 7049
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_reference_locked_values.dart",
+      "sha256": "20ec413023de187718dacede038d1f557c611d598bbab0e3b9c2561f19c86e18",
+      "bytes": 3405
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_reference_phone.dart",
+      "sha256": "58469031cbddfd3eef0b6a7c1e8531bab3ecf672747e9df9f87611d456f29f3c",
+      "bytes": 21593
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_meal_celebration.dart",
+      "sha256": "f13bcce41bfbc97267bf44fb85537be8688a3bf80522a6f74741818c1bc516ef",
+      "bytes": 21875
+    },
+    {
+      "path": "lib/features/dashboard/widgets/first_use_context_coachmark.dart",
+      "sha256": "0e37fabf7ddfc1b5ff686a82694792e6decce9bf84a7870eb4ae9ab83cdc729c",
+      "bytes": 8874
+    },
+    {
+      "path": "lib/features/dashboard/widgets/premium_dashboard_benchmark.dart",
+      "sha256": "074f7b031c46b9e3e8209db7d6c8608c2dcf404ff55c4fe005764bf9b1cc08d7",
+      "bytes": 8519
+    },
+    {
+      "path": "lib/features/dashboard/widgets/premium_dashboard_card_lock.dart",
+      "sha256": "d8a2a2d4abaa9f5c6955246aa4e29977d4dbd6798daaaeed647c4c09ade94f2c",
+      "bytes": 1312
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart",
+      "sha256": "fab340a9643baf5b98eb097a3d9ec96532c8827a994b7f212768ab3f180e647c",
+      "bytes": 8905
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/coach_conversation_titles.dart",
+      "sha256": "3724d0e5e36a9291190ffcda8965ac3398c64997c29844df4088b349d3d92079",
+      "bytes": 3771
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/food_v2/coach_food_snapshot.dart",
+      "sha256": "d5f68bae8dc593eec4b2bb10d3566ac06e34da7d1fc92279e547e3cf78c53590",
+      "bytes": 7963
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/ai_coach_settings_body.dart",
+      "sha256": "67dba16fd294e04bd74456dca85fa89f277ee84df9699ae83b9efa7e40073d01",
+      "bytes": 11745
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/ai_coach_settings_components.dart",
+      "sha256": "75ab98663d5b079096988e33d4078991f968becacf2df2ee2b60999b1587a24f",
+      "bytes": 12535
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/ai_coach_settings_page.dart",
+      "sha256": "fb76f9a2dbec6fc7e07e5e9d67c526fe7d54a5d5b6b386a5a10084065663e34c",
+      "bytes": 20799
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart",
+      "sha256": "5542e660151c698d62a64a22ff0092b58d8755a697b78d7e7f176e56032b7190",
+      "bytes": 10200
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/coach_conversation_rename_dialog.dart",
+      "sha256": "03651470619c794e4cdb9b27dd89a7292bf2648d125ff79e8e708643b9418871",
+      "bytes": 3418
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "sha256": "9863a61ec589fcf656a9d2acb246cc127f22d6fa6d6d4afcee18a8ead266db42",
+      "bytes": 25515
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+      "sha256": "b474fea4cfbcecfc3bb070a43085829fe5a010a0f4f0adb49e4c41d70a6d2a81",
+      "bytes": 20227
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_widgets.dart",
+      "sha256": "26916b4655c233847c0abe4d64fdc37a3f094a6c60d236a99f3fce8b28f6cc03",
+      "bytes": 17679
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_coach_menu.dart",
+      "sha256": "6676d0d9cf276d6b2276f150508e3d9d7bef8547f5afccc951166254e8eba5f4",
+      "bytes": 7967
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_coach_reference_header.dart",
+      "sha256": "7e30ec91b08dfd4c7b09a28744f37a8ef371a41275065632a8dd94469294a3ce",
+      "bytes": 5569
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_conversation_history.dart",
+      "sha256": "cbc22826fbebf266b61fc987332642a099666304bf6f0b539263dc95b11dc665",
+      "bytes": 20041
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_conversation_persistence.dart",
+      "sha256": "1fb33d89e829e3b2b7b87f6e191383a47cf193645681325af004bcf29c9a64d2",
+      "bytes": 21874
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_conversation_rename.dart",
+      "sha256": "697fa46da6757032f10fef1718198e68481d34a95a320b849255806b994b9127",
+      "bytes": 4245
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+      "sha256": "10f2975cb964c0d501958235eeab21f9476acc010750ee3991f5a784d71aa54c",
+      "bytes": 28971
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_reference_chat_body.dart",
+      "sha256": "73b0f42254ca94f8fcec41e3df944a40509cf353c6392333c55d63fa027a8dc6",
+      "bytes": 14602
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_reference_workspace_flow.dart",
+      "sha256": "079a803d8cfe3c70335e26e4a78510a8a91c1c02a2b0bc34b27f25e2a8a1d28a",
+      "bytes": 3159
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_food_card_copy.dart",
+      "sha256": "ba573b6d311c965e1cb47ac9afaeda46405330157d0d3240c4c5ef11bf1ba8c1",
+      "bytes": 8455
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart",
+      "sha256": "7c38f79fa8834dc5a6209036f284b4768d2d0607f1994bc4977d525def734fca",
+      "bytes": 26840
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace_components.dart",
+      "sha256": "1a186f8158e3a4e473132ba2e298b17571e06d7f602ec72a58a3b06519f187ac",
+      "bytes": 4590
+    },
+    {
+      "path": "lib/features/intelligence_center/services/ai_boost_purchase_processing.dart",
+      "sha256": "eebd7e7606bd4fb625c8bb275e499f90e3336f1776b93784a3823102320413cf",
+      "bytes": 9829
+    },
+    {
+      "path": "lib/features/intelligence_center/services/ai_boost_purchase_service.dart",
+      "sha256": "8cf023a438f51f5cd60ecfa12ca03e881c0fe409dba63382e971f186c0431208",
+      "bytes": 12546
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_context_assembly.dart",
+      "sha256": "c8804f073dfb89f675d3ca6ced50ad7a14151425bebfe77f510dca09c9162b04",
+      "bytes": 8824
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_context_provider.dart",
+      "sha256": "8418aebeddf3eaed2dadad183a5a0b87928e916dbc26dd5a5ca626d2cb400018",
+      "bytes": 26972
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_settings_context_provider.dart",
+      "sha256": "0662a02fae5146f4296489cc9cc1e166fc8e6fb7b49ce0b436516e976e0ac10f",
+      "bytes": 846
+    },
+    {
+      "path": "lib/features/nutrition/adapters/database_food_adapter.dart",
+      "sha256": "873389bb9b6d96249bb4d8430ff14a0b3e41921d44f9329e717ae6404284db89",
+      "bytes": 3149
+    },
+    {
+      "path": "lib/features/nutrition/domain/macro_goal_editor.dart",
+      "sha256": "476669630444ea344ac075ca4d8d2665894dcbeba85f1da1a1f53aefe0edfda3",
+      "bytes": 4987
+    },
+    {
+      "path": "lib/features/nutrition/domain/nutrition_goal_snapshot.dart",
+      "sha256": "3c1483001bc2d06b3c57f118aa77947ab1c453e3bcea3b6b9c5cd5eac799c57c",
+      "bytes": 12215
+    },
+    {
+      "path": "lib/features/nutrition/domain/unified_food.dart",
+      "sha256": "224b91145d1be4e5ab9c5c9a08973da20a4e71b8372f4d10d7b7ddee9c1960cf",
+      "bytes": 4162
+    },
+    {
+      "path": "lib/features/nutrition/food_page.dart",
+      "sha256": "4ff05f3bcc8fce1d4c405ff5ce214f215d283da1a3d3a59a5d4685c744144a28",
+      "bytes": 25423
+    },
+    {
+      "path": "lib/features/nutrition/presentation/bil_meal_voice_capture_dialog.dart",
+      "sha256": "d8cbf8f4a4a86cf1faa7afe212109d06f0e0f1044d0fdfb9674f150a80497781",
+      "bytes": 8760
+    },
+    {
+      "path": "lib/features/nutrition/presentation/bil_meal_voice_session_panel.dart",
+      "sha256": "0cdd7ef9e486dfd2055a8c7f1d3aac52dad7d3d23e1fa3408904644bff74f061",
+      "bytes": 1381
+    },
+    {
+      "path": "lib/features/nutrition/presentation/custom_food_dialog.dart",
+      "sha256": "9216060547c43e6a0e4c7a4a471b4a80685df5f172cb269074ad37541355521f",
+      "bytes": 12920
+    },
+    {
+      "path": "lib/features/nutrition/presentation/custom_food_locale_copy.dart",
+      "sha256": "c00b011107f2a8bf517e531189a0b8c993bfed0c104db92641687abb2a1bfece",
+      "bytes": 4975
+    },
+    {
+      "path": "lib/features/nutrition/presentation/food_catalog_overview.dart",
+      "sha256": "7ebe65ed7bb9727fad498e02ad16395f35eb86cfbc3540cf45cb3f560f28d0f1",
+      "bytes": 15124
+    },
+    {
+      "path": "lib/features/nutrition/presentation/food_catalog_tile.dart",
+      "sha256": "939195257507e2e28d3914e89fffc7561a29a2959f8e78d98cb6937b1b391d1b",
+      "bytes": 13655
+    },
+    {
+      "path": "lib/features/nutrition/presentation/food_nutrient_locale_copy.dart",
+      "sha256": "b31ce2ca57aacf54623020ba3e5ec8a89d3ea395536851e8b5a37b6b22ad34fe",
+      "bytes": 11922
+    },
+    {
+      "path": "lib/features/nutrition/presentation/food_nutrient_values.dart",
+      "sha256": "ad4c518fc14d59e827e5332f0663e60a07061e4990ae469d94249e9a61c0b9e2",
+      "bytes": 9527
+    },
+    {
+      "path": "lib/features/nutrition/presentation/food_page_actions.dart",
+      "sha256": "3207a0b45e72d9dc63dba38baf28f7791197bd0fd0fd889415d5856fdd25cc47",
+      "bytes": 11205
+    },
+    {
+      "path": "lib/features/nutrition/presentation/meal_builder_page.dart",
+      "sha256": "ba9ab49351afa7c8c7bfbfa1b230d2493943b9fae7d9204dea17abf32d086132",
+      "bytes": 10259
+    },
+    {
+      "path": "lib/features/nutrition/presentation/meals_recipes_components.dart",
+      "sha256": "30d1a8c1f693d470ae24c0bf55381fd6970f922f52c840e63de8a77f2ebb044a",
+      "bytes": 12280
+    },
+    {
+      "path": "lib/features/nutrition/presentation/meals_recipes_foods_page.dart",
+      "sha256": "cf2d2418d81ceee17fb2565817850a305854cffdbdbb23b539e8ba7cc806503d",
+      "bytes": 3949
+    },
+    {
+      "path": "lib/features/nutrition/presentation/nutrition_entry_fields.dart",
+      "sha256": "8f3cd28737d6945f5c8c771c93229ff0e266190ca366a0168de71ce8b697ef44",
+      "bytes": 2806
+    },
+    {
+      "path": "lib/features/nutrition/providers/nutrition_goal_defaults_provider.dart",
+      "sha256": "5a3dcf5aa54f1e5f2126dc8e7a5cb53de927ee8ce013714e8c8f556b63c09f13",
+      "bytes": 2712
+    },
+    {
+      "path": "lib/features/nutrition/providers/nutrition_goal_snapshot_provider.dart",
+      "sha256": "ca6d7c639ce0fbf02932f05c32128b2edffb7e6660320f1fa33bec28c3a35361",
+      "bytes": 1759
+    },
+    {
+      "path": "lib/features/nutrition/services/bil_speech_to_text.dart",
+      "sha256": "602a41ae936fd5bfe7561a725ded65431f8898536d81d13f25a53d53aa1516ea",
+      "bytes": 9268
+    },
+    {
+      "path": "lib/features/nutrition/services/food_runtime_search_authority.dart",
+      "sha256": "80153ea85cf9531d68e74d9425f4bb67e36fe0a9272f28ac460e24c5e60700c9",
+      "bytes": 24590
+    },
+    {
+      "path": "lib/features/nutrition/services/food_runtime_search_models.dart",
+      "sha256": "020492c333cd93f23ea8153fa3ff26580a257df3f3de5e19a93afb203bcc371e",
+      "bytes": 1521
+    },
+    {
+      "path": "lib/features/nutrition/services/food_runtime_search_ranking.dart",
+      "sha256": "91b44d718effa396513f52f5ca39a68bf8f64c36fa8d0d5942ee60810a8bea0c",
+      "bytes": 2268
+    },
+    {
+      "path": "lib/features/nutrition/services/meal_voice_input_service.dart",
+      "sha256": "adc9054b4007a0983fb8fd432f9624f584e676b01898e37351a44dd02eac47f6",
+      "bytes": 12237
+    },
+    {
+      "path": "lib/features/nutrition/services/meal_voice_session.dart",
+      "sha256": "389f6052127c43ccb8c62fbf411cbdb24c637a4c4cebd30e4ed24e93b926dda2",
+      "bytes": 6849
+    },
+    {
+      "path": "lib/features/nutrition/services/trusted_food_network_search_resolver.dart",
+      "sha256": "143edd9c6446fa3690dd2deee8571ee95127546e9656c54de1b93171faff2837",
+      "bytes": 9562
+    },
+    {
+      "path": "lib/features/profile/premium_profile_page.dart",
+      "sha256": "19c38bfe91b981114a7597a4ca4d8c0ff0e3cadd48e90fdab1cd069ccb1c2e20",
+      "bytes": 19727
+    },
+    {
+      "path": "lib/features/profile/profile_settings_page.dart",
+      "sha256": "394ad505e5497d65a04a497fdf9f8d63e305492cc2d772e6a87a62d5f566675d",
+      "bytes": 27000
+    },
+    {
+      "path": "lib/features/profile/profile_summary_page.dart",
+      "sha256": "f93b525e90a577e256f1de138285419a67f33d960818acb5339254fb57a3bf08",
+      "bytes": 16603
+    },
+    {
+      "path": "lib/features/profile/providers/profile_avatar_state.dart",
+      "sha256": "71a0fd0e28469081dea2958a7aaa675fd1af4ed503e1173655c0552a9ccaadc5",
+      "bytes": 2145
+    },
+    {
+      "path": "lib/features/profile/providers/user_profile_provider.dart",
+      "sha256": "6c6a8276961d028a9112c15668f75b651c5b092a536a7b7e2ce58f61f44fbb98",
+      "bytes": 10277
+    },
+    {
+      "path": "lib/features/profile/services/profile_photo_service.dart",
+      "sha256": "b53f1b679115a3221434b6aec0489f02651411d1c51226fc0e77c0f973f13916",
+      "bytes": 17839
+    },
+    {
+      "path": "lib/features/profile/services/profile_photo_validation.dart",
+      "sha256": "bb8d1296d091ddaa7fb12b1f2e1413606cd866f826a73105d370a95a53eaa5dd",
+      "bytes": 310
+    },
+    {
+      "path": "lib/features/recipe_import/domain/trusted_recipe.dart",
+      "sha256": "f40c35260e85481739da7dbd8b5b3ae70421488007912b4007733ebb0060c019",
+      "bytes": 4413
+    },
+    {
+      "path": "lib/features/recipe_import/services/recipe_nutrition_calculator.dart",
+      "sha256": "389715e693f76d1ee51cc85385631bb9e2195150467e9318fa791c37c43b81df",
+      "bytes": 3873
+    },
+    {
+      "path": "lib/features/recipe_import/services/trusted_recipe_diary_service.dart",
+      "sha256": "6f5abeac0b3331ad6dd699ff63f65e624e5cf317957b7687c6d3f8b728182151",
+      "bytes": 5527
+    },
+    {
+      "path": "lib/features/recipe_import/services/trusted_recipe_parser.dart",
+      "sha256": "7063918e0fea790592d40532a016ad7b59fd915485e50ca7e4bb5bb931c2fa25",
+      "bytes": 9897
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_controls.dart",
+      "sha256": "025d84490a2723b32b4ee86b687d277f03bb194dabc847472374fe7b813d2d9b",
+      "bytes": 15094
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_goal_editor_help.dart",
+      "sha256": "89aad078940cecc07057e3112823954fedf4c7fb05a8c2f2dec826d00ed4d7e2",
+      "bytes": 2143
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_goal_legacy.dart",
+      "sha256": "55406d2aa09954441266c6df48cc55c30e3e4c4bb223e37f227542a90ed10fb8",
+      "bytes": 2691
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_goal_sources.dart",
+      "sha256": "7019e574a34fa373747fa278fe27416d61d4c6e5441d3b111503cc17b7d82f82",
+      "bytes": 15902
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_goal_writes.dart",
+      "sha256": "ac1d20cde18d78c7b2edbec302b89b89bfc958d0d3fe91fbba73f87d40686245",
+      "bytes": 5132
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_numeric.dart",
+      "sha256": "e17bf1bf70b2e999d690fabe818ba5cea684786147a54b5134c06720095a3a1f",
+      "bytes": 30077
+    },
+    {
+      "path": "lib/features/settings/reference_preferences_pages.dart",
+      "sha256": "1a47e40e8957861557354b5ad749d110153b37f6c345a934c78c675ecd6ec5a7",
+      "bytes": 20668
+    },
+    {
+      "path": "lib/features/settings/settings_page.dart",
+      "sha256": "ad7d36330d07296d28d7656a048f5eeabe00fd25a458f4afcbd4ea8d9b1330b5",
+      "bytes": 22159
+    },
+    {
+      "path": "lib/features/visual_2026/bil_calm_visual_scope.dart",
+      "sha256": "e24e593604bb3c74c3aeea948f8af8364b1b834300370fedea2fabfebc14b6b7",
+      "bytes": 7011
+    },
+    {
+      "path": "lib/features/weight/services/weight_voice_input_service.dart",
+      "sha256": "322edf03dc08542cbf1ced542f61e5a5782641073b40eaa7bbdd5af99f78682f",
+      "bytes": 15723
+    },
+    {
+      "path": "lib/features/wellness/presentation/bil_workout_routines_list.dart",
+      "sha256": "0ceac6cb9ba5a1fdd3d48774ef0c841daf5946d7228106d53d21143f9f91899a",
+      "bytes": 22018
+    },
+    {
+      "path": "lib/features/wellness/presentation/recipe_library_card.dart",
+      "sha256": "6e5db66783e34b049ce804e0d53edc05fba4523a1196894d21c956d5796d1f98",
+      "bytes": 22619
+    },
+    {
+      "path": "lib/features/wellness/presentation/recipe_library_details.dart",
+      "sha256": "07c6fb26a665d97cf4b5665338e86b8b82a6504d254adf5217f851fef6eab3be",
+      "bytes": 8213
+    },
+    {
+      "path": "lib/features/wellness/presentation/recipe_library_helpers.dart",
+      "sha256": "b4aacd18886518dcd177633e0c1908eb7344d7df6aded21f8ce5f66e5e623627",
+      "bytes": 12487
+    },
+    {
+      "path": "lib/features/wellness/presentation/recipe_library_page.dart",
+      "sha256": "1dc472a3cc249cfeea4a83cb42eb3ad5103a958cbe78fbdd566efba6827a71e5",
+      "bytes": 24761
+    },
+    {
+      "path": "lib/main.dart",
+      "sha256": "52544eb6cc9cff773b13eea84c6876414fc2e585cab3e97a15f0daa80d08e702",
+      "bytes": 17966
+    },
+    {
+      "path": "lib/shared/widgets/bil_account_avatar.dart",
+      "sha256": "cffa5d1908ec32b71c3d27601ed6f60c4e602154e661845c2867bf927680861a",
+      "bytes": 6446
+    },
+    {
+      "path": "lib/shared/widgets/bil_experience_presentation.dart",
+      "sha256": "803a33f46d4303d74e38be90257eb13c0608d5d2c10e507a95e21bc4a5e60098",
+      "bytes": 661
+    },
+    {
+      "path": "lib/shared/widgets/bil_flagship_components.dart",
+      "sha256": "691550424c9e30d549ea3602a2f6660e32a310e2068b72fb13b91529ef2281e9",
+      "bytes": 4661
+    },
+    {
+      "path": "lib/shared/widgets/bil_media_review_sheet.dart",
+      "sha256": "5c8cc2a343cbaea4d34b57501f0323e54e6aad93d5ac8ade3ff2ae5a80fbd678",
+      "bytes": 17197
+    },
+    {
+      "path": "lib/shared/widgets/bil_modal_bottom_sheet.dart",
+      "sha256": "b2e5c4507b4354047865d000c6f608ea5b996e8e9ef9a88049caae024c7af829",
+      "bytes": 1917
+    },
+    {
+      "path": "lib/shared/widgets/bil_persistent_network_image.dart",
+      "sha256": "3a1c09fb4427c0395ad9781b7df889a025292aace4dd40f431cf364196e6be73",
+      "bytes": 10389
+    },
+    {
+      "path": "lib/shared/widgets/bil_premium_trust_surface.dart",
+      "sha256": "db00edcb421e5393f3db07e9ac604506150252cba65e678b0b1049ed75160553",
+      "bytes": 21455
+    },
+    {
+      "path": "lib/shared/widgets/bil_surface.dart",
+      "sha256": "b06cf46ddb703fa8834902245793d023aae7de24b83ef54afda444f4dd2e4604",
+      "bytes": 2551
+    },
+    {
+      "path": "lib/shared/widgets/premium_surface.dart",
+      "sha256": "89bd4a3775608c8c704771a8484af1c919063d9b4a9f65d20db88c3a10ee117c",
+      "bytes": 6964
+    },
+    {
+      "path": "supabase/functions/food-search/index.ts",
+      "sha256": "5d9082043e5bd106e8b3e1d2ab941896d12794651a1fb5b6932aba9853ac628e",
+      "bytes": 20624
+    },
+    {
+      "path": "supabase/functions/food-search/search_memo.ts",
+      "sha256": "3a00631ecae6f497e08f22bc7f39972f8374c33fc9991961b7df4cabf9319248",
+      "bytes": 2485
+    },
+    {
+      "path": "supabase/functions/food-search/search_memo_test.ts",
+      "sha256": "24b3ee0084cb69c0170ef82c33d3b7379f1756b76dd1558b9d9f9cf782742086",
+      "bytes": 3398
+    },
+    {
+      "path": "supabase/functions/verify-store-purchase/store_backend.ts",
+      "sha256": "81371e54407c8777d049e3b0a0af32a9bc5e4e6cd80a30801960a8ff57049d93",
+      "bytes": 74583
+    },
+    {
+      "path": "supabase/functions/verify-store-purchase/store_delivery_receipt.ts",
+      "sha256": "ca76c4cde0cbf63a74809a0872fbfe50d1c1121a26e928b4bc1d562bb20a263a",
+      "bytes": 2416
+    },
+    {
+      "path": "supabase/functions/verify-store-purchase/store_delivery_receipt_test.ts",
+      "sha256": "2c6b0307d97d4aa28321a3ff005e43a3b2ebca0655fe8e35e8fa33722628ec9b",
+      "bytes": 8765
+    },
+    {
+      "path": "supabase/migrations/20261011193000_community_review_revision_v2.sql",
+      "sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+      "bytes": 22709
+    },
+    {
+      "path": "supabase/migrations/20261011211500_admin_authority_transaction_lock.sql",
+      "sha256": "e10b82d4b2abbfab9f3c558be344cc20b18e4ca890cf62851d0e3e05b1a6c93d",
+      "bytes": 1054
+    },
+    {
+      "path": "supabase/tests/fixtures/admin_subscription_baseline/functions.sql",
+      "sha256": "1ed9fc32bee7c1c7613129d2dd2a27b19729def6d79b6e9d396b3d233a1e794d",
+      "bytes": 7882
+    },
+    {
+      "path": "supabase/tests/fixtures/admin_subscription_baseline/public_functions.sql",
+      "sha256": "df09be4483f5d211f4b8d7f82cfda536b10c317f903cd3ca188892959e451a76",
+      "bytes": 1592
+    },
+    {
+      "path": "supabase/tests/fixtures/admin_subscription_baseline/schema.sql",
+      "sha256": "d581186a0068b4c3b582eeb957fbd54ea26732d4b6323291a971fc0c4f2d2f8b",
+      "bytes": 3505
+    },
+    {
+      "path": "supabase/tests/fixtures/admin_subscription_baseline/store_subscription_table.sql",
+      "sha256": "49506ac60d3f7a27bcf4eba0b9370a96b07704c4c12a4eb91ab71158cb1fdf07",
+      "bytes": 2501
+    },
+    {
+      "path": "supabase/tests/fixtures/cloud_ledger_baseline/function.sql",
+      "sha256": "3342dc46c64284a8fe82cb74284f180ab74ae6e45f5cfc853301102f4884126f",
+      "bytes": 6927
+    },
+    {
+      "path": "supabase/tests/fixtures/cloud_ledger_baseline/local_postgres_responses.json",
+      "sha256": "8b6d237cc2955d9446c63ca66b656bebdf34f0bf9f3653f5d96aa436cbac90f2",
+      "bytes": 16076
+    },
+    {
+      "path": "supabase/tests/fixtures/cloud_ledger_baseline/schema.sql",
+      "sha256": "3f516d0ca6845a322760462cb31a9a63192f2f29b403a13e5d4f87db2098606c",
+      "bytes": 7420
+    },
+    {
+      "path": "supabase/tests/fixtures/community_review_baseline/functions.sql",
+      "sha256": "ace46d709eec3d91b3352e52cc47984d5259bac49db1a9d765589a88be512606",
+      "bytes": 14977
+    },
+    {
+      "path": "supabase/tests/fixtures/community_review_baseline/moderator_population.sql",
+      "sha256": "24c2412250e3eba0b98ea8aa7fd8674cc846b83e170ced6bb39b20e5675a02b7",
+      "bytes": 753
+    },
+    {
+      "path": "supabase/tests/fixtures/community_review_baseline/schema.sql",
+      "sha256": "78bfb546bdf274daddd20879ca4b91e22310420f184dc3021f61b16c3a9b8d39",
+      "bytes": 30265
+    },
+    {
+      "path": "test/app/services/scoped_media_access_test.dart",
+      "sha256": "1ec863e56324f7dda8cfb89844aa22191e874afdcb9abf4612fb8c129fd2cb13",
+      "bytes": 3509
+    },
+    {
+      "path": "test/app/services/scoped_media_file_cache_test.dart",
+      "sha256": "9cb812ede4c6ce557f7bfe9d9fda2503aba2c94d36ec2a1c70bd5b9df4be2b6e",
+      "bytes": 9976
+    },
+    {
+      "path": "test/app/theme/premium_black_dark_theme_contract_test.dart",
+      "sha256": "f295b65e8dc5c51d183afe1cea17a4ce9c74e2742e3556550e54f1660de3a74e",
+      "bytes": 2961
+    },
+    {
+      "path": "test/connected_health/connected_health_contract_test.dart",
+      "sha256": "af97d60d6e22e6464ae7d6e0c6460dbc1da221a908d939e12862090778f1a038",
+      "bytes": 26746
+    },
+    {
+      "path": "test/connected_health/health_devices_review_regression_test.dart",
+      "sha256": "1e18f46450fd3b6d016047cb038b45ac71562dec693f28a1818a7cc90eeadaa2",
+      "bytes": 22038
+    },
+    {
+      "path": "test/custom_food_flow_test.dart",
+      "sha256": "1f04aca055234367eabd304ee58c72713a948f548923d64d4b05e658adb5b38b",
+      "bytes": 10057
+    },
+    {
+      "path": "test/data/repositories/extended_nutrient_journey_test.dart",
+      "sha256": "7d54a4351cdebce98f9fe79058abe51becb499de6607f21baf361d3601662b0c",
+      "bytes": 11555
+    },
+    {
+      "path": "test/data/repositories/first_food_milestone_commit_test.dart",
+      "sha256": "222725ac263847eafe08abbacd833ea4b1c4fd73a5f2aefd2234510c80383cd6",
+      "bytes": 8547
+    },
+    {
+      "path": "test/database_v22_food_evidence_migration_test.dart",
+      "sha256": "eb30b03dd34257792f632c0792b4be11dc0997cc80e23672759a57687338e6ff",
+      "bytes": 4801
+    },
+    {
+      "path": "test/features/admin/admin_owner_operation_test.dart",
+      "sha256": "46a510f9facaf33888bd5a6404996918c5d6f02a5c4b3d9228627009b8eeeaab",
+      "bytes": 4529
+    },
+    {
+      "path": "test/features/admin/ai_coach_global_reset_test.dart",
+      "sha256": "f44845ca5c0984358ef8082926c15fc6d4cf124ef8bccc289c635655a638572a",
+      "bytes": 35685
+    },
+    {
+      "path": "test/features/analytics/nutrition_analytics_totals_test.dart",
+      "sha256": "15404c0487f629c6127ffa0d8339b6b6d4558b4510e257691ca3b5353d35a5e7",
+      "bytes": 2758
+    },
+    {
+      "path": "test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+      "sha256": "caef8f200d519244d9b90ff29511147e7e538bbf6f0e62354eee7a6b954b3c95",
+      "bytes": 11014
+    },
+    {
+      "path": "test/features/cloud_platform/cloud_manual_sync_restoration_truth_test.dart",
+      "sha256": "d9959afb61f6961c52a2a78b26f69b4491711c9eacf30118a5eca61de9b3c5bf",
+      "bytes": 4255
+    },
+    {
+      "path": "test/features/cloud_platform/cloud_release_wire_compatibility_test.dart",
+      "sha256": "fd0a4fe970875eac9604653f1fcca345bc0a93841cfb46499aceb2f7e51e8a5d",
+      "bytes": 3738
+    },
+    {
+      "path": "test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+      "sha256": "95af60f3bb0f6ff3ddde69430686370a73b49cdf46dd94403eeba74ba05f23f0",
+      "bytes": 4549
+    },
+    {
+      "path": "test/features/cloud_platform/fixtures/release32_35_cloud_wire.dart",
+      "sha256": "a4dbebd195b92a45a456447f0edfedaad241aa07af09a2892f26934b40aa9959",
+      "bytes": 2222
+    },
+    {
+      "path": "test/features/commerce/ai_coach_initial_credit_gate_test.dart",
+      "sha256": "baed96336b19c7bf703bd9a4495e78812f163ea6fedb7557cc9de6fa2a758bc8",
+      "bytes": 5040
+    },
+    {
+      "path": "test/features/commerce/app_purchase_confirmation_test.dart",
+      "sha256": "b89ca8c87f9b588fec082f4d0ec820120709961529d2e760f76d32c72353f7f5",
+      "bytes": 13408
+    },
+    {
+      "path": "test/features/commerce/app_subscription_confirmation_test.dart",
+      "sha256": "e8ff2d353ca85216bde929175b55091a55f72fd55afd00748c9091f0ee37de6b",
+      "bytes": 16906
+    },
+    {
+      "path": "test/features/commerce/bil_store_copy_test.dart",
+      "sha256": "29ea8df79553eb59017e24ac236e6d81ceb0d7242cebd47fae8fb68cbd166169",
+      "bytes": 11977
+    },
+    {
+      "path": "test/features/commerce/premium_nutrition_glass_test.dart",
+      "sha256": "94bb2706f4b841fc882becdf4c6e49314dbec2da4b710db29ce37384b2db13fa",
+      "bytes": 5366
+    },
+    {
+      "path": "test/features/commerce/premium_route_keyboard_access_test.dart",
+      "sha256": "516b289296fe0a2777a0659cd86239d2b363d8ad032d2fa4ad7edf65ef47ac05",
+      "bytes": 3819
+    },
+    {
+      "path": "test/features/commerce/premium_route_unverified_retry_test.dart",
+      "sha256": "d296566efdde797f4edfeab0fd22d007748b44681f4e71ed57dc670b23e1ca32",
+      "bytes": 7425
+    },
+    {
+      "path": "test/features/commerce/premium_value_mask_test.dart",
+      "sha256": "a06907a1d5552b5ec2eae700aa62a66f1095b96eb958705c05865e3e468074c3",
+      "bytes": 9054
+    },
+    {
+      "path": "test/features/commerce/purchase_notification_zone_test.dart",
+      "sha256": "37fad741ba333b126f18b21dede171afc8b66999282de8edfa942da484da60db",
+      "bytes": 3325
+    },
+    {
+      "path": "test/features/commerce/server_entitlement_owner_epoch_test.dart",
+      "sha256": "a17e58065c4119858ac6f2bdd5d27a5d228950c2ab118ac6a605c9d0838b3a61",
+      "bytes": 6180
+    },
+    {
+      "path": "test/features/commerce/store_benefit_delivery_test.dart",
+      "sha256": "dcbb7adfba798c98e1baa29aaa5e9ba7ed80dad7747d0e17f98482130e14d1cb",
+      "bytes": 6437
+    },
+    {
+      "path": "test/features/commerce/store_confirmation_journal_test.dart",
+      "sha256": "ed3c80cea6340bdf8361684c5ab5026fc2feb4b03dca0ddeb017dc70aa5b2e89",
+      "bytes": 4782
+    },
+    {
+      "path": "test/features/commerce/store_transaction_queue_test.dart",
+      "sha256": "6e87c9a3c5d79aab9c7011bf80e985a3eb723a954af88df165d566cd8ad88d7e",
+      "bytes": 48502
+    },
+    {
+      "path": "test/features/community/community_cached_feed_refresh_test.dart",
+      "sha256": "696751fb5c89af3263a90d9bc7d700ba593d01de6f75addb382d89750ec60422",
+      "bytes": 4248
+    },
+    {
+      "path": "test/features/community/community_entry_flow_test.dart",
+      "sha256": "a059dc340df91edcea97f3d95ee6c62b072a0da07ddde73069bf44a83971ec98",
+      "bytes": 23174
+    },
+    {
+      "path": "test/features/community/community_feed_cache_test.dart",
+      "sha256": "c448c70e07706664ab9b73c92c547a2f806950cfe97ce8b4ff7bea6726c3c7c1",
+      "bytes": 3203
+    },
+    {
+      "path": "test/features/community/community_polish_visual_test.dart",
+      "sha256": "13a7b00e1c89758e707b610728cb196c92ddb5d3a931ad9ad1818ac305b4f0ed",
+      "bytes": 64167
+    },
+    {
+      "path": "test/features/community/community_post_moderation_test.dart",
+      "sha256": "dd007a759d880f6214009c77c2bfa8535300ca622a109033616e7dac241c399d",
+      "bytes": 22853
+    },
+    {
+      "path": "test/features/community/community_post_review_reason_test.dart",
+      "sha256": "e30f662fe4d1da9e2000bd8ab5c8bd710514fa824adabda219f123235afd7677",
+      "bytes": 3983
+    },
+    {
+      "path": "test/features/community/community_preload_probe.dart",
+      "sha256": "15248f3556f3991cc63504fcf88834876267ba1a72d6c6d3150fb26d5cea7343",
+      "bytes": 516
+    },
+    {
+      "path": "test/features/community/community_review_v2_repository_test.dart",
+      "sha256": "344af3beea18be42221961f0e73c28ed53e8505051948581ec6b15c2e18b4696",
+      "bytes": 9722
+    },
+    {
+      "path": "test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+      "sha256": "b2ac0b830338c6417d25df4ec53f65b2493a38be8511d97d37215eb69466c71c",
+      "bytes": 11806
+    },
+    {
+      "path": "test/features/daily_log/meal_search_prefix_matrix_test.dart",
+      "sha256": "20f1d27a95e0535a25943428d0a9b56dee812d0495ce517452bcebf836d01447",
+      "bytes": 8721
+    },
+    {
+      "path": "test/features/daily_log/quick_macro_entry_dialog_test.dart",
+      "sha256": "6b529d1f63f36f562815990bfbea5a6a7bdedffc39527ac345707b4bd86c9f34",
+      "bytes": 6979
+    },
+    {
+      "path": "test/features/dashboard/dashboard_first_use_guidance_test.dart",
+      "sha256": "cbc4632dab6fa5b23e786103e09e9476c49ef5982e78ccfd1f9adc885b84cc9c",
+      "bytes": 11234
+    },
+    {
+      "path": "test/features/dashboard/first_meal_celebration_visual_test.dart",
+      "sha256": "d047781c8f04b9321aba65fc40d36a5fb5d059e02ef28fae7711eaf8209bef23",
+      "bytes": 3880
+    },
+    {
+      "path": "test/features/dashboard/first_meal_lease_lifecycle_test.dart",
+      "sha256": "bd26fd140cbe19ea8d098698fa99fd6b40aa23304c8010c7ea03b102ee53fe45",
+      "bytes": 4288
+    },
+    {
+      "path": "test/features/dashboard/first_use_reference_journey_test.dart",
+      "sha256": "89fb645207a5700d427d2e2a09b255181d160eec6230c6db49bab93acf760bf5",
+      "bytes": 22862
+    },
+    {
+      "path": "test/features/dashboard/nutrient_dashboard_test.dart",
+      "sha256": "7fdc18a865a92f0115cca83df4d297c5cf8563e2f86eb3ee07f1bbc7cf87be26",
+      "bytes": 4562
+    },
+    {
+      "path": "test/features/dashboard/premium_nutrition_cards_test.dart",
+      "sha256": "e394fdfb210f05c6bf4a52896cfa8fa90ca4116bfd12bd5f218042b9ace44a54",
+      "bytes": 13940
+    },
+    {
+      "path": "test/features/intelligence_center/ai_boost_purchase_service_test.dart",
+      "sha256": "10bfbc81530f49ae4ff11b52c947d36a76f30f52e74a6a6b25070ce7c2086f82",
+      "bytes": 16671
+    },
+    {
+      "path": "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart",
+      "sha256": "c87f264031a300dce0be943973f262a1e8be8ccdeef3c187a83f48dc60e66fd0",
+      "bytes": 31461
+    },
+    {
+      "path": "test/features/intelligence_center/coach_conversation_rename_ui_test.dart",
+      "sha256": "cb02e1714f8ab2b764bd01c8736b3745b5d4cc1a46776812b6e8ce0fb001b7d2",
+      "bytes": 19424
+    },
+    {
+      "path": "test/features/intelligence_center/coach_conversation_title_storage_test.dart",
+      "sha256": "407700c24b9a3b49e40775f67600c5002750d0765856403d47cd3ffec8bfe8b3",
+      "bytes": 9257
+    },
+    {
+      "path": "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "sha256": "745075f33ee54b0f9934eb81c9bbfe5147a622933cc76505ca4ade7f1403d5df",
+      "bytes": 19907
+    },
+    {
+      "path": "test/features/intelligence_center/support/coach_page_accessibility_cases.dart",
+      "sha256": "f4235a9da68d9ff988999c183bfc3054eb4c8f3bae9b006ffe4a7463983c928f",
+      "bytes": 8610
+    },
+    {
+      "path": "test/features/intelligence_center/support/coach_page_request_cases.dart",
+      "sha256": "4d71744e4229f46a785a1a8bce79a2bc195ba3eb1dac4aa2840361d95079ef2c",
+      "bytes": 12898
+    },
+    {
+      "path": "test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "sha256": "f975e3828279055ee3de67485ece7e5eabe3d659151ed012722c63af4aac23e7",
+      "bytes": 7359
+    },
+    {
+      "path": "test/features/nutrition/coach_food_commit_test.dart",
+      "sha256": "39c4b38b793d7c33364c0b1718cb374eda967632159ea6ae9f6467629dc96dd1",
+      "bytes": 11103
+    },
+    {
+      "path": "test/features/nutrition/coach_food_template_cases.dart",
+      "sha256": "e48d48166a35b8f11250294e2d6f55ba77f53ec5a8b0614c823d51e17745dca7",
+      "bytes": 5521
+    },
+    {
+      "path": "test/features/nutrition/food_add_access_indicator_test.dart",
+      "sha256": "836f18c0834f06fbe0e4115664cbad47b7f168dbe5e1115003ac51e27b1e428f",
+      "bytes": 6977
+    },
+    {
+      "path": "test/features/nutrition/food_basis_adapter_test.dart",
+      "sha256": "036a76b480757ba5b5ff2ab9d9537522158461d0e03c9e5a2acc022b3ac62acc",
+      "bytes": 7435
+    },
+    {
+      "path": "test/features/nutrition/food_basis_fixtures.dart",
+      "sha256": "c653c9588b99166fb5ee70dd1fe421cad0bacd685202599271ec424caafc44e2",
+      "bytes": 4319
+    },
+    {
+      "path": "test/features/nutrition/food_search_ui_state_test.dart",
+      "sha256": "41a3d69a80bc73710e0ef83fe087b04333e0fc49c6fc3d1579787e45b83efc1b",
+      "bytes": 13754
+    },
+    {
+      "path": "test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "sha256": "22a843c74db775253e2a73b80d43eba540fb9d93a2891673241be1c1736fedb5",
+      "bytes": 3824
+    },
+    {
+      "path": "test/features/nutrition/macro_gram_goals_test.dart",
+      "sha256": "c53d9b8106281aa95f4158bc1411cacbf4a5ac0ae11f19140e740e65c983083f",
+      "bytes": 1066
+    },
+    {
+      "path": "test/features/nutrition/meal_search_journey_integration_test.dart",
+      "sha256": "176a5429eb1ccd04396383a7f325f01fee662a6d06e2ba5ad91aa2e77d345a70",
+      "bytes": 6822
+    },
+    {
+      "path": "test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "sha256": "fd6e9959cf55e78b616ce12dab17a2d92dfffed4d51ff73ae333b1c0f2f5ccc8",
+      "bytes": 7989
+    },
+    {
+      "path": "test/features/nutrition/meal_voice_session_test.dart",
+      "sha256": "f93c176e25122791ddfd45e76ff73edc1aae365a79ee58e2689b79248a78ed21",
+      "bytes": 5745
+    },
+    {
+      "path": "test/features/nutrition/nutrition_goal_atomic_persistence_test.dart",
+      "sha256": "197289c0ae24a9e3ee22c67158a2703e8b963c53f90e4ace8431e0d0e2a93fa0",
+      "bytes": 5721
+    },
+    {
+      "path": "test/features/nutrition/nutrition_goal_profile_loading_test.dart",
+      "sha256": "a7f5bdc77902b6fe745756ae1e324a74e80bf27b1cf13efd6248d645a944b5ed",
+      "bytes": 3788
+    },
+    {
+      "path": "test/features/nutrition/nutrition_goal_recovery_test.dart",
+      "sha256": "fc52c654be8400fe6c859d8fc0820b859560fe49f220b6e3404f07ca5ce4ffba",
+      "bytes": 4632
+    },
+    {
+      "path": "test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "sha256": "c3177fad59b2953d95e76b620002d4767341d57f10d1df37c8ff270884a958a5",
+      "bytes": 9493
+    },
+    {
+      "path": "test/features/nutrition/percentage_nutrition_goals_test.dart",
+      "sha256": "7edd128915b972460ea54dcb3af17c4d860494ebbefa42e80d256dcd1f11f910",
+      "bytes": 1187
+    },
+    {
+      "path": "test/features/nutrition/speech_bridge_capture_ownership_test.dart",
+      "sha256": "2f4cdf1fc72f9281ed12c0eeb37dad3d5b162d12190ae179aa43ffcf63105cfc",
+      "bytes": 3343
+    },
+    {
+      "path": "test/features/nutrition/voice_logging_review_contract_test.dart",
+      "sha256": "833875e416cea1c97f82de522d1ae39599249fa71699bc00a94082152d86423a",
+      "bytes": 3992
+    },
+    {
+      "path": "test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "sha256": "5314a91520ff8bb0895cf9f1ebab041209e4cbbd1153946abe2ac01a2f287c4d",
+      "bytes": 7121
+    },
+    {
+      "path": "test/features/profile/profile_avatar_state_test.dart",
+      "sha256": "958e784d80e41f45629d7ddb346a87fa4a58258c30e4f0ad90ac1b3037dc1bf2",
+      "bytes": 3644
+    },
+    {
+      "path": "test/features/profile/profile_photo_account_isolation_test.dart",
+      "sha256": "dde1aeedb4e61b613e52b904b92e77388a82a75acd9981a59bd46a302d93efd8",
+      "bytes": 12639
+    },
+    {
+      "path": "test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "sha256": "cad32fc729bad6349491955d20f63e441229a78ad11ea8caa844649e754af55c",
+      "bytes": 17415
+    },
+    {
+      "path": "test/features/settings/nutrition_goals_widget_test.dart",
+      "sha256": "502c65979ac8dcda9ad9f6ee5e23ced1d7f79682483d493598c76b920c4da50e",
+      "bytes": 8641
+    },
+    {
+      "path": "test/features/weight/weight_voice_input_test.dart",
+      "sha256": "43cbf620213780e8f3a6ba981094a76fdcd626483940cfccf21efc51ad7067c2",
+      "bytes": 12447
+    },
+    {
+      "path": "test/features/wellness/goldens/recipe_library_polish_phone.png",
+      "sha256": "1e62e577bc61577c5eb69bf5ce9bc10376b551c2190f4ba9d054dbec20c8e656",
+      "bytes": 180835
+    },
+    {
+      "path": "test/features/wellness/recipe_deep_link_entitlement_loading_test.dart",
+      "sha256": "a012dd4d4f35eff787cbd7d47ad3cc40b5685b899165358031c300a362e06cac",
+      "bytes": 17000
+    },
+    {
+      "path": "test/launch_readiness/trusted_food_search_backend_contract_test.dart",
+      "sha256": "464368555a1744b21eaac60a578e897b2d77275eb454810464c28ccae6e77bda",
+      "bytes": 5797
+    },
+    {
+      "path": "test/localization/closure_interfaces_runtime_copy_test.dart",
+      "sha256": "2492aca994ec9535aeb0722002847dd026f07303e1003ac3c8d0101b6b982196",
+      "bytes": 1809
+    },
+    {
+      "path": "test/parallel/bil03/memory_selective_delete_test.dart",
+      "sha256": "0d98d677e089ed26bce1aff8c24d7ede0df3534703a281d04af30807586830c4",
+      "bytes": 5364
+    },
+    {
+      "path": "test/parallel/bil03/unit_command_test.dart",
+      "sha256": "8734bd1115842667747cef5c6d76a593e55de1c8302fb248ba55d86dc180481f",
+      "bytes": 6089
+    },
+    {
+      "path": "test/premium_ui/bil_calm_visual_scope_test.dart",
+      "sha256": "a9d71a3cdbfd85218878537104ba3a2a239ba353848b37b8516973923a1ce5d6",
+      "bytes": 6801
+    },
+    {
+      "path": "test/qa_next/closure_dialog_capture_test.dart",
+      "sha256": "12f59cae8b21355bb12e4245cb18c79ff4edc9cc9790a7ca0e444056754b826c",
+      "bytes": 2734
+    },
+    {
+      "path": "test/qa_next/coach_reference_workspace_capture_test.dart",
+      "sha256": "84763d87e44e8e1a262e4f0a05fb0498fff92ece695391b5ed4662e99bea9edd",
+      "bytes": 19878
+    },
+    {
+      "path": "test/qa_next/nutrition_window_accessibility_test.dart",
+      "sha256": "5ab93a5468d966bf1c67e7d36b4ebff9bc44aae2e13536a6d2fcb231b3405753",
+      "bytes": 5839
+    },
+    {
+      "path": "test/qa_next/other_voice_window_capture_test.dart",
+      "sha256": "af6250c73f934dd4b7776242a0bcb369beaecb610541b00ede18e308b09ae766",
+      "bytes": 3000
+    },
+    {
+      "path": "test/qa_next/premium_surface_finish_test.dart",
+      "sha256": "e61174bb9612eb9a00d88cb31e803b2922599aaecbedfa774b2dcdfd128a806b",
+      "bytes": 7881
+    },
+    {
+      "path": "test/shared/widgets/bil_account_avatar_test.dart",
+      "sha256": "7f10f36b2f7a2f08e28d926bc30ab4a7dea027748d3deee465b1d47376b7f6c9",
+      "bytes": 3912
+    },
+    {
+      "path": "test/shared/widgets/bil_avatar_lifecycle_test.dart",
+      "sha256": "3110b8a9ca663c1f1d19ea6ec9bc3c0ea28eb5d67f986462a038a47ee25b7d3a",
+      "bytes": 3616
+    },
+    {
+      "path": "test/shared/widgets/bil_media_review_sheet_test.dart",
+      "sha256": "becbafcf6c4fc37b5598add95c6e5f500c147a93b757ddd5ec1208044e83269b",
+      "bytes": 11747
+    },
+    {
+      "path": "test/shared/widgets/bil_private_image_renewal_test.dart",
+      "sha256": "0cd6fb8bb40c0574f58e79f21fa46ddacaa871fc8c23f1029d880451779382c6",
+      "bytes": 4824
+    },
+    {
+      "path": "test/visual_closure/closure_surface_capture.dart",
+      "sha256": "80defdab73a4ccb85268161c16ba595951a151a8387619a8f2adf730925870c1",
+      "bytes": 2683
+    },
+    {
+      "path": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+      "sha256": "d7f2dc0a2e99fc98e6ca0a731a11edc3e90c318bd4b9a6d1392757c2bb1056ab",
+      "bytes": 99090
+    },
+    {
+      "path": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
+      "sha256": "691d30ee918dc4286e2f3dd9c09bd84f76134795becb71472d18abd6a02bbbd2",
+      "bytes": 257691
+    },
+    {
+      "path": "test/visual_closure/goldens/visual_closure_nutrition_goals_phone.png",
+      "sha256": "7e47b2a07244d10b321384559a928fc238cf15f5594f6a5181ff57e18812df85",
+      "bytes": 30297
+    },
+    {
+      "path": "test/visual_closure/goldens/visual_closure_nutrition_goals_phone_2.png",
+      "sha256": "4510f16e4da994cb1dfdc1f7e1a64604c036e4b9259f6cec94431b34a88e284b",
+      "bytes": 32217
+    },
+    {
+      "path": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png",
+      "sha256": "5b4ef056234b5a1eabd9c199bc9157dd0ea30a4a124050a31a3e51b1f9bef444",
+      "bytes": 131037
+    },
+    {
+      "path": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png",
+      "sha256": "2388583c34e84bc11de475e46dc022360a62894838a244c8709f208732e536a7",
+      "bytes": 131212
+    },
+    {
+      "path": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png",
+      "sha256": "ad827fce24afe0f30894fce51951cb0009b354b54182f4a75f75d44d28282d64",
+      "bytes": 139248
+    },
+    {
+      "path": "tool/localization/locale_fallback_closure.dart",
+      "sha256": "065b5294af94b227552e2dcb4dd2379a030407e127fa8e4a47dd49a065344f45",
+      "bytes": 18373
+    },
+    {
+      "path": "tools/qa/bil_encode_flutter_frames.py",
+      "sha256": "be1bf3f4b20a6bd24d96110f0812eeb95a4df6bdc7775d4b82ebb3eb1d83d97c",
+      "bytes": 2031
+    },
+    {
+      "path": "tools/qa/bil_postgres_admin_grants_test.py",
+      "sha256": "fb69830c0410a1badfda8b407fca9dd13d5877bb0676b52ebe95612b76ef1899",
+      "bytes": 12407
+    },
+    {
+      "path": "tools/qa/bil_postgres_cloud_compatibility_test.py",
+      "sha256": "58e66ec58a6d57a1a3d2aaca291d5777f1bc58b7c9d2da6dec13c892a6a1df8e",
+      "bytes": 8839
+    },
+    {
+      "path": "tools/qa/bil_postgres_review_v2_test.py",
+      "sha256": "bd546d838990d265af5c37072b9706ba58041af6773888eb9d21871eb9414431",
+      "bytes": 20878
+    },
+    {
+      "path": "tools/qa/bil_reviewed_golden_case.py",
+      "sha256": "0a9041149f370070b3a727978335145a7e91a467606c39c9fc861c314a478ecb",
+      "bytes": 5746
+    },
+    {
+      "path": "tools/qa/bil_stage1_closure_runner.py",
+      "sha256": "709c11437739a11af8741384692e4766e874088fdd5d52771b3f6d446fd37733",
+      "bytes": 7745
+    },
+    {
+      "path": "tools/qa/bil_synthetic_gcm_fixture.ps1",
+      "sha256": "2998f11d471b8531dd0701e4ff607b95c17011f7684c7f81c83e6acae5f4b8ec",
+      "bytes": 1690
+    },
+    {
+      "path": "docs/qa_next/evidence/stage1-closure-20261012/staged-test-input-proof.json",
+      "sha256": "639d5769f6b484670e63c367984a7e08fedd0fe0edd2bc3a2c8eaacc515ccaf5",
+      "bytes": 409
+    }
+  ],
+  "preserved_unstaged_comparisons": [
+    "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_isolatedDiff.png",
+    "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_maskedDiff.png",
+    "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_masterImage.png",
+    "test/dashboard_polish/failures/live_health_watch_compact_all_metrics_testImage.png"
+  ]
+}

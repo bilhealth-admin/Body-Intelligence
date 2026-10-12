@@ -15,7 +15,7 @@ class _RecipeChoiceTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlCard(
     margin: EdgeInsets.zero,
     child: ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
@@ -94,7 +94,7 @@ class _ActionCard extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlCard(
     child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),

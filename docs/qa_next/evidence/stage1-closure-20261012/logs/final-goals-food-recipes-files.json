@@ -1,0 +1,863 @@
+{
+  "label": "final-goals-food-recipes-files",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/nutrition_goal_recovery_test.dart",
+    "test/features/settings/nutrition_goals_widget_test.dart",
+    "test/features/nutrition/macro_gram_goals_test.dart",
+    "test/features/nutrition/percentage_nutrition_goals_test.dart",
+    "test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+    "test/features/analytics/weekly_report_truth_fixes_test.dart",
+    "test/features/analytics/nutrition_analytics_totals_test.dart",
+    "test/features/intelligence_center/coach_nutrition_goal_resolver_test.dart",
+    "test/data/repositories/extended_nutrient_journey_test.dart",
+    "test/features/settings/nutrition_goal_provenance_ui_test.dart",
+    "test/features/nutrition/macro_goal_editor_v2_test.dart",
+    "test/custom_food_flow_test.dart",
+    "test/database_v22_food_evidence_migration_test.dart",
+    "test/features/nutrition/coach_food_commit_test.dart",
+    "test/features/nutrition/food_runtime_search_authority_test.dart",
+    "test/features/nutrition/progressive_food_local_first_test.dart",
+    "test/features/daily_log/meal_search_prefix_matrix_test.dart",
+    "test/features/daily_log/food_log_first_use_coachmark_test.dart",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart",
+    "test/features/nutrition/nutrition_goal_snapshot_test.dart",
+    "test/features/nutrition/nutrition_goal_atomic_persistence_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791758132.6700926,
+  "files": {
+    "test/features/nutrition/nutrition_goal_recovery_test.dart": "fc52c654be8400fe6c859d8fc0820b859560fe49f220b6e3404f07ca5ce4ffba",
+    "test/features/settings/nutrition_goals_widget_test.dart": "502c65979ac8dcda9ad9f6ee5e23ced1d7f79682483d493598c76b920c4da50e",
+    "test/features/nutrition/macro_gram_goals_test.dart": "c53d9b8106281aa95f4158bc1411cacbf4a5ac0ae11f19140e740e65c983083f",
+    "test/features/nutrition/percentage_nutrition_goals_test.dart": "7edd128915b972460ea54dcb3af17c4d860494ebbefa42e80d256dcd1f11f910",
+    "test/features/daily_log/daily_log_live_macro_targets_widget_test.dart": "b2ac0b830338c6417d25df4ec53f65b2493a38be8511d97d37215eb69466c71c",
+    "test/features/analytics/weekly_report_truth_fixes_test.dart": "11bbdcf46cb673991e68f7d135e584e2551f1192191d93816e722aa7271b93a2",
+    "test/features/analytics/nutrition_analytics_totals_test.dart": "15404c0487f629c6127ffa0d8339b6b6d4558b4510e257691ca3b5353d35a5e7",
+    "test/features/intelligence_center/coach_nutrition_goal_resolver_test.dart": "2f600513dd93e90a8f2a4f600d3e7226202431a9987a726bab7752369cbd269c",
+    "test/data/repositories/extended_nutrient_journey_test.dart": "7d54a4351cdebce98f9fe79058abe51becb499de6607f21baf361d3601662b0c",
+    "test/features/settings/nutrition_goal_provenance_ui_test.dart": "ce0487e58119ab82f57777054aa94b2d492323e3ec1cd6c88975fb9c5c2161d0",
+    "test/features/nutrition/macro_goal_editor_v2_test.dart": "22a843c74db775253e2a73b80d43eba540fb9d93a2891673241be1c1736fedb5",
+    "test/custom_food_flow_test.dart": "1f04aca055234367eabd304ee58c72713a948f548923d64d4b05e658adb5b38b",
+    "test/database_v22_food_evidence_migration_test.dart": "eb30b03dd34257792f632c0792b4be11dc0997cc80e23672759a57687338e6ff",
+    "test/features/nutrition/coach_food_commit_test.dart": "39c4b38b793d7c33364c0b1718cb374eda967632159ea6ae9f6467629dc96dd1",
+    "test/features/nutrition/food_runtime_search_authority_test.dart": "76f6541305b4640099ecb10f1cf578bcfd5d8d851c2d2343a0ca6058d9fe3098",
+    "test/features/nutrition/progressive_food_local_first_test.dart": "658505014aa2f7d1b6dd51d87285bfbc312cfcb77482f41e311b5d4f21d4adf3",
+    "test/features/daily_log/meal_search_prefix_matrix_test.dart": "20f1d27a95e0535a25943428d0a9b56dee812d0495ce517452bcebf836d01447",
+    "test/features/daily_log/food_log_first_use_coachmark_test.dart": "4c5da768375039b5cd9d59f94e0eba0cad54e2104dabca1ffa9a944efcca458d",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart": "9d2588ed62a0b7cffdf69fda526e992eaadc2abfd38fc82e1c9fb1221581c593",
+    "test/features/nutrition/nutrition_goal_snapshot_test.dart": "842c9705465abe7be7539edae6566bca9df605da08531ff396f78fda36a98aec",
+    "test/features/nutrition/nutrition_goal_atomic_persistence_test.dart": "197289c0ae24a9e3ee22c67158a2703e8b963c53f90e4ace8431e0d0e2a93fa0"
+  },
+  "source_fingerprint": "97fbd712a8a89c3aa49e7d966fa6d31b64d8493b3dd9892022e6cb92f313887f",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/nutrition_goal_recovery_test.dart",
+    "test/features/settings/nutrition_goals_widget_test.dart",
+    "test/features/nutrition/macro_gram_goals_test.dart",
+    "test/features/nutrition/percentage_nutrition_goals_test.dart",
+    "test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+    "test/features/analytics/weekly_report_truth_fixes_test.dart",
+    "test/features/analytics/nutrition_analytics_totals_test.dart",
+    "test/features/intelligence_center/coach_nutrition_goal_resolver_test.dart",
+    "test/data/repositories/extended_nutrient_journey_test.dart",
+    "test/features/settings/nutrition_goal_provenance_ui_test.dart",
+    "test/features/nutrition/macro_goal_editor_v2_test.dart",
+    "test/custom_food_flow_test.dart",
+    "test/database_v22_food_evidence_migration_test.dart",
+    "test/features/nutrition/coach_food_commit_test.dart",
+    "test/features/nutrition/food_runtime_search_authority_test.dart",
+    "test/features/nutrition/progressive_food_local_first_test.dart",
+    "test/features/daily_log/meal_search_prefix_matrix_test.dart",
+    "test/features/daily_log/food_log_first_use_coachmark_test.dart",
+    "test/features/dashboard/first_use_actual_home_capture_test.dart",
+    "test/features/nutrition/nutrition_goal_snapshot_test.dart",
+    "test/features/nutrition/nutrition_goal_atomic_persistence_test.dart"
+  ],
+  "pid": 13528,
+  "exit_code": 0,
+  "finished": 1791758210.3053288,
+  "end_fingerprint": "97fbd712a8a89c3aa49e7d966fa6d31b64d8493b3dd9892022e6cb92f313887f",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "portable JSON preserves raw goals units origins locks and old percentages",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_recovery_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual SQLite recovery restores original values and does not migrate twice",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_recovery_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "another owner cannot discover or restore a goal recovery snapshot",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_recovery_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "corrupt persisted nutrition goal fails closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goals_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nutrition goal saves and clears through repository",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goals_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed write keeps nutrition editor and draft open",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goals_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed explicit restore keeps draft and stored goal",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goals_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "explicit gram targets override plan targets independently",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_gram_goals_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "missing or corrupt persisted goals fail closed to plan targets",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_gram_goals_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "converts valid calorie percentages to gram targets using 4/4/9",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/percentage_nutrition_goals_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "rejects corrupt, implausible, or non-100-percent storage",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/percentage_nutrition_goals_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "default nutrition goal prefers stored grams over legacy percentages",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "default nutrition goal falls back to a valid legacy percentage split",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today resolves scheduled goal before default and otherwise falls back",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today meal card stays compact and opens its dedicated meal page",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "dedicated meal detail owns food, time, net carbs, and callbacks",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Today snapshot reports consumed grams against resolved goals",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/daily_log_live_macro_targets_widget_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly goals use exact day goals and synthetic imports stay out",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "workout estimate parser accepts only explicit bounded JSON values",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly evidence uses the same verified activity source as Today and Coach",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "My Nutrition preserves the More navigation entry context",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "active Premium is a verified status, not a disabled CTA",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest uses the original BIL pulse and signal hierarchy",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ar at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits en at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits fr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits es at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits tr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits de at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits it at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits pt-BR at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits pt-PT at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ur at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits fa at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits hi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits id at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ms at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ja at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ko at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits zh-Hans at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits zh-Hant at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits ru at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits bn at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits vi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits th at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits pl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits nl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weekly digest fits uk at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/weekly_report_truth_fixes_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "totals include only evidence-backed finite nonnegative values",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/nutrition_analytics_totals_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy required core columns retain their release32/35 meaning",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/analytics/nutrition_analytics_totals_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "active diet day target outranks stale explicit grams in Coach",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_nutrition_goal_resolver_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "active diet day target reports the same winning macro source",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_nutrition_goal_resolver_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "meal goal contract is exposed without dropping meal identity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_nutrition_goal_resolver_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "protein target retains the exact winning source",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/intelligence_center/coach_nutrition_goal_resolver_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "custom food transaction rolls back when the owner changes before commit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/extended_nutrient_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "nineteen fields and immutable source survive JSON CSV snapshot reset restore and owner isolation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/extended_nutrient_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all nineteen nutrients survive materialization fractional logging correction and duplicate",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/extended_nutrient_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "fractional recipe serving keeps all extra nutrients and known zero",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/extended_nutrient_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "custom ml food preserves source, nineteen fields, deletion and historical fractional units without an invented mass",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/data/repositories/extended_nutrient_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance ar default with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance ar default with source and real editor taps narrow 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance ar custom with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance ar custom with source and real editor taps narrow 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance ar legacy with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance ar grams with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance ar grams with source and real editor taps narrow 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance en default with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance en default with source and real editor taps narrow 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance en custom with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance en custom with source and real editor taps narrow 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance en legacy with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance en grams with source and real editor taps",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual goal provenance en grams with source and real editor taps narrow 320 2x",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/settings/nutrition_goal_provenance_ui_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "screenshot 1000 kcal percentages produce exact grams",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "grams calculate percentage and last edited protein survives low carbs",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "explicit protein lock protects it from carbohydrate edits",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "two locked siblings reject an impossible change without mutation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "locked grams survive energy change; percentages remain coherent",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "locked percentages survive energy change",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "known zero and full precision remain different from absent values",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reject nonfinite and overallocated inputs",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "FDA references have correct units and no invented total-sugar DV",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "contradictory stored percentages must not silently rebalance on edit or calorie change",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/macro_goal_editor_v2_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "duplicate active custom barcodes fail closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/custom_food_flow_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "custom food can be created, edited, and tombstoned",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/custom_food_flow_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "custom food copy is complete for all 25 locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/custom_food_flow_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "schema21 upgrade preserves historical rows and does not invent missing micronutrient evidence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/database_v22_food_evidence_migration_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage modern all-unknown mask0 stays unknown through real ledger and Dashboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage known zero remains different from unknown in full readback and daily totals",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage lost modern envelope cannot fall back to legacy zero or become a receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage invalid JSON cannot fall back to legacy zero or become a receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage unknown schema cannot fall back to legacy zero or become a receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage changed numeric projection cannot fall back to legacy zero or become a receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage changed quantity projection cannot fall back to legacy zero or become a receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage changed evidence mask cannot fall back to legacy zero or become a receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage unearned verification cannot fall back to legacy zero or become a receipt",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage lost modern mask0 envelope stays invalid and never becomes known zero",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage copy day, historical repeat and duplication preserve the full saved snapshot",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food committed storage closed day blocks a new batch without changing existing snapshots",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food operation journal second-food database failure rolls back foods, items, bucket and journal together",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food operation journal unexpected committed nutrient readback rolls back before journal success",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food operation journal concurrent same-operation calls create one batch and reject changed arguments",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food operation journal batch Undo preserves older meal items and replay never resurrects its foods",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food operation journal later quantity edit blocks stale replacement and stale batch Undo",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food operation journal fixed per-user source accepts its opaque owner and rejects another user before writes",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food operation journal every batch async owner boundary is atomic or reports an already durable commit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food templates template preserves all 13 nutrients and provenance after catalog edits",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food templates template keeps modern all-unknown mask0 unavailable in daily readback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food templates corrupted historical evidence cannot become a reusable template",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food templates another owner cannot instantiate fixed values and leaves no partial meal",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food templates template detects a corrupted inserted projection and rolls back the batch",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food reselection ordinary diary selection keeps thirteen nutrients and source evidence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food reselection meal builder keeps an unknown food alongside a known zero food",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food reselection invalid catalog basis cannot be reselected as legacy numeric nutrition",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food reselection readback corruption rolls back ordinary Food V2 reselection",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food reselection foreign fixed-owner basis cannot be reselected or counted by the ledger",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "four foods commit complete immutable evidence and replay after repository recreation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "quantity uses original thirteen-nutrient basis after catalog changes",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "replacement changes the existing entry and Undo restores full prior evidence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/coach_food_commit_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "text search preserves the existing local repository result",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_runtime_search_authority_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode lookup preserves the existing local match",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_runtime_search_authority_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "empty search keeps personalized local ordering behavior",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_runtime_search_authority_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "strict local scan recovers when the search index misses",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_runtime_search_authority_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Arabic local results render while the cloud is still blocked",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/progressive_food_local_first_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "take-first cancellation does not start a cloud request",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/progressive_food_local_first_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zero limit returns no rows without invalid clamp bounds",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/progressive_food_local_first_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "breakfast route uses the shared incremental prefix search",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_search_prefix_matrix_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "lunch route uses the shared incremental prefix search",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_search_prefix_matrix_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "dinner route uses the shared incremental prefix search",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_search_prefix_matrix_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "snack route uses the shared incremental prefix search",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/meal_search_prefix_matrix_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Food Log search guide can be skipped without blocking food",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/food_log_first_use_coachmark_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "quantity coachmark Skip leaves editable serving dialog open",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/daily_log/food_log_first_use_coachmark_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual approved Home 390.0 keeps its layout under anchored First Use and after Skip",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual approved Home 1032.0 keeps its layout under anchored First Use and after Skip",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_actual_home_capture_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "new profile separates FDA label values from profile energy without halving minerals",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner screenshot values remain preserved and labelled saved, never BIL recommendations",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "malformed/negative/infinite stored values do not become defaults",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "storage failure differs from unspecified and never yields proposals as active goals",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "intentional zero differs from unknown and no mass-unit mixing occurs",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all four release35 legacy percent keys remain unknown without an evidenced denominator",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "corrupt or contradictory macro group never presents a half repaired allocation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "independent subtype limits are not summed; only same-unit parent relationships warn",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Arabic Persian and explicit decimals parse; ambiguous separators are rejected",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "repeated gram edits preserve full precision and lock modes without rounding creep",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner screenshot outliers are preserved but not presented as active reliable targets",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unusual manual target requires explicit acknowledgment of its current unit and comparison",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "outlier does not become active during cold profile loading; small decimals remain unambiguous",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_snapshot_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "concurrent full-snapshot CAS saves commit one coherent version",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_atomic_persistence_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner visit A to B to A retires a pending CAS without losing either owner",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_atomic_persistence_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "mid-write storage failure rolls back every macro and original value",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_atomic_persistence_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner retirement after SQL write still rolls back the transaction",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_atomic_persistence_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "old percentage keys survive reopen and review without conversion or overwrite",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/nutrition_goal_atomic_persistence_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 152,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

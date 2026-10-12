@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../nutrition/domain/unified_food.dart';
 
 import 'package:crypto/crypto.dart';
 
@@ -57,12 +58,14 @@ final class TrustedRecipeNutrition {
     this.phosphorusMg,
     this.ironMg,
     this.vitaminCMg,
+    this.additionalNutrients = const {},
   });
 
   final double caloriesKcal;
   final double proteinG;
   final double carbohydrateG;
   final double fatG;
+  final Map<FoodNutrient, double?> additionalNutrients;
   final RecipeNutritionProvenance provenance;
   final double? fiberG,
       sugarG,
@@ -89,6 +92,11 @@ final class TrustedRecipeNutrition {
     if (phosphorusMg != null) 'phosphorusMg': phosphorusMg,
     if (ironMg != null) 'ironMg': ironMg,
     if (vitaminCMg != null) 'vitaminCMg': vitaminCMg,
+    if (additionalNutrients.isNotEmpty)
+      'additionalNutrients': {
+        for (final entry in additionalNutrients.entries)
+          entry.key.name: entry.value,
+      },
   };
 }
 

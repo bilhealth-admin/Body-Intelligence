@@ -69,11 +69,11 @@ class _ContextFocusCard extends StatelessWidget {
           _SectionTitle(
             icon: Icons.tune_rounded,
             title: t(
-              'Choose whether to use cloud AI',
-              'اختر ما إذا كنت تريد استخدام الذكاء السحابي',
-              'Choisissez si vous souhaitez utiliser l’IA cloud',
-              'Elige si quieres usar la IA en la nube',
-              'Bulut yapay zekâyı kullanıp kullanmayacağınızı seçin',
+              'Context included in answers',
+              'السياق المستخدم في الإجابات',
+              'Contexte inclus dans les réponses',
+              'Contexto incluido en las respuestas',
+              'Yanıtlara dahil edilen bağlam',
             ),
           ),
           const SizedBox(height: 5),
@@ -99,10 +99,10 @@ class _ContextFocusCard extends StatelessWidget {
               key: Key('ai-coach-context-${option.$1.name}'),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.trailing,
-              secondary: BilSemanticIconBadge(
-                kind: BilSemanticIconKind.aiCoach,
-                iconOverride: option.$2,
-                appleIconOverride: option.$2,
+              secondary: Icon(
+                option.$2,
+                size: 22,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               value: focuses.contains(option.$1),
               onChanged: enabled
@@ -128,23 +128,26 @@ class _ResetGiftBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     key: const Key('ai-coach-global-reset-notice'),
-    color: const Color(0xFFEAF8F0),
+    color: Theme.of(context).colorScheme.tertiaryContainer,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(18),
-      side: const BorderSide(color: Color(0xFFB7E3CA)),
+      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 8, 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.card_giftcard_rounded, color: Color(0xFF17784C)),
+          Icon(
+            Icons.card_giftcard_rounded,
+            color: Theme.of(context).colorScheme.onTertiaryContainer,
+          ),
           const SizedBox(width: 11),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
-                color: Color(0xFF123D2B),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onTertiaryContainer,
                 height: 1.4,
                 fontWeight: FontWeight.w600,
               ),

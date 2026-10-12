@@ -130,8 +130,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
     final dietaryAsync = ref.watch(dietaryPreferencesProvider);
     final effectiveCurrentWeight = ref.watch(effectiveCurrentWeightProvider);
     final activePathwayId = ref.watch(activeNutritionPathwayProvider).value;
-    final photoAsync = ref.watch(profilePhotoProvider);
-    final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+    final photoUrl = ref.watch(profileAvatarStateProvider).url;
     final authIdentityAsync = ref.watch(profileAuthIdentityProvider);
     return BilCalmVisualScope(
       builder: (context) => PopScope(
@@ -165,12 +164,6 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
               if (goalAsync.hasError) {
                 return profileStorageFailure();
               }
-              if (photoAsync.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (photoAsync.hasError) {
-                return profileStorageFailure();
-              }
               if (hydrateError != null) {
                 return profileStorageFailure();
               }
@@ -187,7 +180,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                 );
                 return const Center(child: CircularProgressIndicator());
               }
-              final photo = photoAsync.value;
+              final photo = ref.watch(profileAvatarStateProvider).bytes;
               final dietaryPreferences =
                   dietaryAsync.value ?? const DietaryPreferences();
               final activePathway = nutritionPathways

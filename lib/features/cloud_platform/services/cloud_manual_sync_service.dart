@@ -38,6 +38,7 @@ final class CloudManualSyncResult {
     this.applied = 0,
     this.conflicts = 0,
     this.pending = 0,
+    this.unsupported = 0,
   }) : assert(
          disposition == CloudManualSyncDisposition.completed
              ? completedAt != null
@@ -57,6 +58,36 @@ final class CloudManualSyncResult {
   final int applied;
   final int conflicts;
   final int pending;
+  final int unsupported;
+
+  factory CloudManualSyncResult.fromReports({
+    required String ownerId,
+    required CloudOutboxProductionReport produce,
+    required CloudSyncReport sync,
+    required CloudInboxApplyReport apply,
+  }) {
+    // Transport completion does not prove that local relational restoration
+    // finished. Keep unsupported records/conflicts visible as partial work.
+    final complete =
+        sync.availability == CloudPlatformAvailability.ready &&
+        sync.pending == 0 &&
+        apply.unsupported == 0 &&
+        apply.conflicts == 0;
+    return CloudManualSyncResult(
+      disposition: complete
+          ? CloudManualSyncDisposition.completed
+          : CloudManualSyncDisposition.partial,
+      completedAt: complete ? sync.completedAt.toUtc() : null,
+      ownerId: ownerId,
+      enqueued: produce.enqueued,
+      pushed: sync.pushed,
+      pulled: sync.pulled,
+      applied: apply.applied + apply.acknowledged,
+      conflicts: sync.conflicts + apply.conflicts,
+      pending: sync.pending,
+      unsupported: apply.unsupported,
+    );
+  }
 
   bool get completed => disposition == CloudManualSyncDisposition.completed;
 }
@@ -188,20 +219,11 @@ final class CloudManualSyncService {
             records: consumed,
           );
 
-      return CloudManualSyncResult(
-        disposition: sync.availability == CloudPlatformAvailability.ready
-            ? CloudManualSyncDisposition.completed
-            : CloudManualSyncDisposition.partial,
-        completedAt: sync.availability == CloudPlatformAvailability.ready
-            ? sync.completedAt.toUtc()
-            : null,
+      return CloudManualSyncResult.fromReports(
         ownerId: ownerId,
-        enqueued: produce.enqueued,
-        pushed: sync.pushed,
-        pulled: sync.pulled,
-        applied: apply.applied + apply.acknowledged,
-        conflicts: sync.conflicts + apply.conflicts,
-        pending: sync.pending,
+        produce: produce,
+        sync: sync,
+        apply: apply,
       );
     } on Object {
       return CloudManualSyncResult(

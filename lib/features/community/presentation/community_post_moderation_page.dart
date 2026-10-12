@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_written_language_resolver.dart';
@@ -8,9 +9,12 @@ import '../activity_rewards/community_moderation_visit.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import '../domain/community_polls.dart';
+import '../domain/community_review_snapshot.dart';
 import 'community_copy.dart';
 import 'community_return_button.dart';
 part 'community_post_moderation_widgets.dart';
+part 'community_post_reward_review.dart';
+part 'community_post_moderation_load.dart';
 
 class CommunityPostModerationPage extends StatefulWidget {
   const CommunityPostModerationPage({this.repository, super.key});
@@ -27,6 +31,9 @@ class _CommunityPostModerationPageState
   CommunityRepository? _repository;
   late Future<_CommunityModerationQueue> _queue;
   final Set<String> _busyTargets = <String>{};
+  final Set<String> _decisionEditors = <String>{};
+  final Map<String, CommunityReviewSnapshot> _reviewedPosts = {};
+  final Map<String, String> _decisionIds = {};
   CommunityModerationVisit? _visit;
 
   @override
@@ -88,41 +95,6 @@ class _CommunityPostModerationPageState
     } on StateError {
       return null;
     }
-  }
-
-  Future<_CommunityModerationQueue> _load() async {
-    final repository = _repository;
-    final visit = _visit;
-    if (repository == null || visit == null || !visit.isCurrent) {
-      throw const AuthException('Sign-in required');
-    }
-    await visit.requireFreshModerator();
-    return visit.run(() async {
-      final values = await Future.wait<Object>([
-        repository.loadPendingPostsForModeration(),
-        repository.loadHiddenPostsForModeration(),
-        repository.loadOpenModerationReports(),
-      ]);
-      if (!visit.isCurrent) {
-        throw const AuthException('Moderator session changed');
-      }
-      final posts = values[0] as List<CommunityPost>;
-      final hiddenPosts = values[1] as List<CommunityPost>;
-      final reports = values[2] as List<Map<String, dynamic>>;
-      final reviewContent = await repository.hydrateModerationReviewContents([
-        ...posts,
-        ...hiddenPosts,
-      ]);
-      if (!visit.isCurrent) {
-        throw const AuthException('Moderator session changed');
-      }
-      final byId = {for (final post in reviewContent) post.id: post};
-      return _CommunityModerationQueue(
-        posts: [for (final post in posts) byId[post.id] ?? post],
-        hiddenPosts: [for (final post in hiddenPosts) byId[post.id] ?? post],
-        reports: reports,
-      );
-    });
   }
 
   Future<void> _reloadAndReadback(CommunityModerationVisit visit) async {
@@ -216,12 +188,107 @@ class _CommunityPostModerationPageState
     setState(() {
       _queue = refreshed;
     });
-    await refreshed;
+    try {
+      await refreshed;
+    } on Object {
+      // FutureBuilder keeps and displays this failed _queue with Retry.
+      // Only a refresh gesture is handled here; decision readback must throw.
+    }
+  }
+
+  Future<void> _rewardAction(
+    CommunityRewardReview review,
+    bool? approve,
+  ) async {
+    final visit = _visit;
+    final repository = _repository;
+    final postId = review.snapshot.post.id;
+    if (visit == null ||
+        repository == null ||
+        !visit.isCurrent ||
+        _busyTargets.contains(postId)) {
+      return;
+    }
+    final reason = approve == false ? await _reviewReason(context) : '';
+    final confirmedReason = reason;
+    if (confirmedReason == null || !mounted || !visit.isCurrent) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          communityText(
+            context,
+            'Confirm reward decision',
+            'تأكيد قرار المكافأة',
+          ),
+        ),
+        content: Text(
+          communityText(
+            context,
+            'This affects the post author only. The server verifies eligibility, policy limits and the existing receipt before any credit.',
+            'يخص القرار صاحب المنشور فقط. يتحقق الخادم من الاستحقاق والحدود وإيصال المنحة السابق قبل إضافة أي رصيد.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(communityText(context, 'Cancel', 'إلغاء')),
+          ),
+          FilledButton(
+            key: const Key('community-reward-decision-confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(communityText(context, 'Confirm', 'تأكيد')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true ||
+        !mounted ||
+        !visit.isCurrent ||
+        _busyTargets.contains(postId)) {
+      return;
+    }
+    setState(() => _busyTargets.add(postId));
+    try {
+      await visit.requireFreshModerator();
+      final status = await visit.run(
+        () => approve == null
+            ? repository.requestReviewedReward(review.snapshot)
+            : repository.decideReviewedReward(
+                review,
+                approve: approve,
+                reason: confirmedReason,
+              ),
+      );
+      await _reloadAndReadback(visit);
+      if (!mounted || !visit.isCurrent) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_rewardStatusText(context, status))),
+      );
+    } on Object {
+      if (!mounted || !visit.isCurrent) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'The reward was not confirmed. Refresh and retry; no duplicate award will be issued.',
+              'لم تُؤكد المكافأة. حدّث ثم أعد المحاولة؛ لن تُصرف منحة مكررة.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted && visit.isCurrent) {
+        setState(() => _busyTargets.remove(postId));
+      }
+    }
   }
 
   Future<bool> _confirmPostDecision(
-    CommunityPostModerationDecision decision,
-  ) async {
+    CommunityPostModerationDecision decision, {
+    bool publishOnly = false,
+  }) async {
     final approving = decision == CommunityPostModerationDecision.approved;
     return await showDialog<bool>(
           context: context,
@@ -237,10 +304,14 @@ class _CommunityPostModerationPageState
               communityText(
                 context,
                 approving
-                    ? 'Approval makes the post visible under its audience rules. An eligible +5 AI token award is issued only when the server reward receipt confirms it; daily limits may result in no token grant.'
+                    ? publishOnly
+                          ? 'Publish this post without an AI award. A separate reward request can be reviewed later.'
+                          : 'Approval makes the post visible under its audience rules. An eligible +5 AI token award is issued only when the server reward receipt confirms it; daily limits may result in no token grant.'
                     : 'The rejected post stays visible only to its author.',
                 approving
-                    ? 'سيجعل الاعتماد المنشور ظاهرًا وفق نطاق جمهوره. لا تُمنح +5 توكنات AI إلا إذا أكد إيصال المكافأة من الخادم الاستحقاق، وقد تؤدي الحدود اليومية إلى عدم منح توكنات.'
+                    ? publishOnly
+                          ? 'نشر هذا المنشور دون مكافأة AI. يمكن مراجعة طلب مكافأة منفصل لاحقًا.'
+                          : 'سيجعل الاعتماد المنشور ظاهرًا وفق نطاق جمهوره. لا تُمنح +5 توكنات AI إلا إذا أكد إيصال المكافأة من الخادم الاستحقاق، وقد تؤدي الحدود اليومية إلى عدم منح توكنات.'
                     : 'سيظل المنشور المرفوض ظاهرًا لصاحبه فقط.',
               ),
             ),
@@ -268,24 +339,48 @@ class _CommunityPostModerationPageState
 
   Future<void> _decidePost(
     CommunityPost post,
-    CommunityPostModerationDecision decision,
-  ) async {
+    CommunityPostModerationDecision decision, {
+    bool publishOnly = false,
+  }) async {
     final visit = _visit;
     final repository = _repository;
+    final reviewedAtTap = _reviewedPosts[post.id];
     if (visit == null ||
         repository == null ||
         !visit.isCurrent ||
         _busyTargets.contains(post.id) ||
-        !await _confirmPostDecision(decision) ||
-        !mounted ||
-        !visit.isCurrent) {
+        reviewedAtTap == null ||
+        !_decisionEditors.add(post.id)) {
       return;
     }
+    String? reason;
+    try {
+      if (await _confirmPostDecision(decision, publishOnly: publishOnly) &&
+          mounted &&
+          visit.isCurrent) {
+        reason = decision == CommunityPostModerationDecision.rejected
+            ? await _reviewReason(context)
+            : '';
+      }
+    } finally {
+      _decisionEditors.remove(post.id);
+    }
+    final confirmedReason = reason;
+    if (confirmedReason == null || !mounted || !visit.isCurrent) return;
     setState(() => _busyTargets.add(post.id));
     try {
       await visit.requireFreshModerator();
       final result = await visit.run(
-        () => repository.moderatePost(postId: post.id, decision: decision),
+        () => repository.moderateReviewedPost(
+          snapshot: reviewedAtTap,
+          decision: decision,
+          reason: confirmedReason,
+          publishOnly: publishOnly,
+          operationId: _decisionIds.putIfAbsent(
+            '${post.id}:${reviewedAtTap.revision}:${decision.name}:$publishOnly:$confirmedReason',
+            () => const Uuid().v4(),
+          ),
+        ),
       );
       if (!mounted || !visit.isCurrent) return;
       await _reloadAndReadback(visit);
@@ -452,12 +547,20 @@ class _CommunityPostModerationPageState
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return _ModerationUnavailable(onRetry: _refresh);
+          return _ModerationUnavailable(
+            onRetry: _refresh,
+            accessDenied:
+                snapshot.error is AuthException ||
+                (snapshot.error is PostgrestException &&
+                    (snapshot.error as PostgrestException).code == '42501'),
+          );
         }
         final queue = snapshot.requireData;
-        if (queue.posts.isEmpty &&
+        if (!queue.reviewUnavailable &&
+            queue.posts.isEmpty &&
             queue.hiddenPosts.isEmpty &&
-            queue.reports.isEmpty) {
+            queue.reports.isEmpty &&
+            queue.rewards.isEmpty) {
           return Center(
             child: Text(
               communityText(
@@ -473,6 +576,7 @@ class _CommunityPostModerationPageState
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (queue.reviewUnavailable) const _ReviewVersionUnavailable(),
               Text(
                 communityText(
                   context,
@@ -482,7 +586,9 @@ class _CommunityPostModerationPageState
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 10),
-              if (queue.posts.isEmpty)
+              if (queue.reviewUnavailable)
+                const SizedBox.shrink()
+              else if (queue.posts.isEmpty)
                 Text(
                   communityText(
                     context,
@@ -503,10 +609,37 @@ class _CommunityPostModerationPageState
                       post,
                       CommunityPostModerationDecision.rejected,
                     ),
+                    onPublishOnly:
+                        _reviewedPosts[post.id]?.canPublishOnly == true
+                        ? () => _decidePost(
+                            post,
+                            CommunityPostModerationDecision.approved,
+                            publishOnly: true,
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 12),
                 ],
               const SizedBox(height: 14),
+              if (queue.rewards.isNotEmpty) ...[
+                Text(
+                  communityText(
+                    context,
+                    'Publication and reward are separate',
+                    'النشر والمكافأة عمليتان منفصلتان',
+                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                for (final review in queue.rewards)
+                  _RewardReviewCard(
+                    review: review,
+                    busy: _busyTargets.contains(review.snapshot.post.id),
+                    onRequest: () => _rewardAction(review, null),
+                    onApprove: () => _rewardAction(review, true),
+                    onReject: () => _rewardAction(review, false),
+                  ),
+                const SizedBox(height: 14),
+              ],
               Text(
                 communityText(context, 'Hidden posts', 'المنشورات المخفية'),
                 style: Theme.of(context).textTheme.titleLarge,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme/bil_pearl_finish.dart';
 
 /// BIL's 2026 editorial treatment for secondary, non-protected journeys.
 ///
@@ -17,18 +18,18 @@ abstract final class BilCalmTokens {
   static const double sectionGap = 20;
   static const double rowGap = 12;
 
-  static const Color lightCanvas = Color(0xFFF8F9FB);
-  static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSubtle = Color(0xFFF4F5F7);
-  static const Color lightInk = Color(0xFF20252D);
-  static const Color lightSecondary = Color(0xFF636B76);
-  static const Color lightBorder = Color(0xFFE8EAEE);
-  static const Color darkCanvas = Color(0xFF0D1118);
-  static const Color darkSurface = Color(0xFF171C24);
-  static const Color darkSubtle = Color(0xFF202630);
-  static const Color darkInk = Color(0xFFF3F4F6);
-  static const Color darkSecondary = Color(0xFFABB3BE);
-  static const Color darkBorder = Color(0xFF303742);
+  static const Color lightCanvas = BilPearlFinish.lightCanvas;
+  static const Color lightSurface = BilPearlFinish.lightSurface;
+  static const Color lightSubtle = BilPearlFinish.lightInset;
+  static const Color lightInk = BilPearlFinish.lightInk;
+  static const Color lightSecondary = BilPearlFinish.lightSecondary;
+  static const Color lightBorder = BilPearlFinish.lightEdge;
+  static const Color darkCanvas = BilPearlFinish.darkCanvas;
+  static const Color darkSurface = BilPearlFinish.darkSurface;
+  static const Color darkSubtle = BilPearlFinish.darkInset;
+  static const Color darkInk = BilPearlFinish.darkInk;
+  static const Color darkSecondary = BilPearlFinish.darkSecondary;
+  static const Color darkBorder = BilPearlFinish.darkEdge;
 }
 
 class BilCalmVisualScope extends StatelessWidget {
@@ -98,13 +99,15 @@ class BilCalmVisualScope extends StatelessWidget {
     );
     return parent.copyWith(
       colorScheme: scheme,
-      scaffoldBackgroundColor: canvas,
+      // The page-owned opaque backdrop paints this canvas. Transparency here
+      // reveals that gradient, never a previous route's text or account data.
+      scaffoldBackgroundColor: Colors.transparent,
       textTheme: typography,
       iconTheme: IconThemeData(color: secondary, size: BilCalmTokens.iconSize),
       appBarTheme: parent.appBarTheme.copyWith(
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: canvas,
+        backgroundColor: Colors.transparent,
         foregroundColor: ink,
         centerTitle: true,
         titleTextStyle: typography.titleLarge,
@@ -164,7 +167,9 @@ class BilCalmVisualScope extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     return Theme(
       data: resolve(Theme.of(context), isArabic: locale.languageCode == 'ar'),
-      child: Builder(builder: builder),
+      child: Builder(
+        builder: (context) => BilPearlBackdrop(child: builder(context)),
+      ),
     );
   }
 }

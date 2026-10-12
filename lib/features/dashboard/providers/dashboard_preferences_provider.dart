@@ -4,7 +4,8 @@ import '../../profile/providers/user_profile_provider.dart';
 import '../domain/nutrient_dashboard.dart';
 import '../../nutrition/domain/macro_gram_goals.dart';
 import '../../nutrition/domain/percentage_nutrition_goals.dart';
-import '../../nutrition/providers/nutrition_goal_defaults_provider.dart';
+import '../../nutrition/domain/nutrition_goal_snapshot.dart';
+import '../../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 
 abstract final class DashboardSectionIds {
   static const calories = 'calories';
@@ -104,49 +105,34 @@ final dashboardNutrientGoalProvider = StreamProvider.family<double?, String>((
   ref,
   key,
 ) {
-  final defaults = ref.watch(nutritionGoalDefaultsProvider);
-  return ref.watch(preferencesRepositoryProvider).watch(key).map((value) {
-    final parsed = double.tryParse(value ?? '') ?? defaults[key];
-    return validDashboardNutrientGoal(key, parsed) ? parsed : null;
-  });
+  final snapshot = ref.watch(nutritionGoalSnapshotProvider);
+  return snapshot.when(
+    data: (value) => Stream.value(value.goals[key]?.value),
+    error: (error, stack) => Stream.error(error, stack),
+    loading: () => const Stream.empty(),
+  );
 });
 
 /// Shared validation for persisted goals and the user-facing goal editor.
 bool validDashboardNutrientGoal(String key, double? value) {
-  if (value == null || !value.isFinite || value < 0) return false;
-  if (key == 'goal.calories' && value == 0) return false;
-  if (key == 'goal.calories') return value <= 10000;
-  if (key.endsWith('Percent')) return value <= 100;
-  if (key == 'goal.sodium' || key == 'goal.potassium') {
-    return value <= 1000000;
-  }
-  if (key == 'goal.fiber') return value <= 500;
-  if (key == 'goal.proteinGrams' ||
-      key == 'goal.carbsGrams' ||
-      key == 'goal.fatGrams') {
-    return value <= 2500;
-  }
-  return value <= 10000;
+  return NutritionGoalSnapshot.technicallyValid(key, value);
 }
 
 final dashboardMacroGramGoalsProvider = Provider<MacroGramGoals>((ref) {
+  final snapshot = ref.watch(nutritionGoalCurrentSnapshotProvider);
   double? valid(double? value) =>
       value != null && value >= 0 && value <= 2500 ? value : null;
   return MacroGramGoals(
-    protein: valid(
-      ref.watch(dashboardNutrientGoalProvider('goal.proteinGrams')).value,
-    ),
-    carbohydrates: valid(
-      ref.watch(dashboardNutrientGoalProvider('goal.carbsGrams')).value,
-    ),
-    fat: valid(ref.watch(dashboardNutrientGoalProvider('goal.fatGrams')).value),
+    protein: valid(snapshot?.goals['goal.proteinGrams']?.value),
+    carbohydrates: valid(snapshot?.goals['goal.carbsGrams']?.value),
+    fat: valid(snapshot?.goals['goal.fatGrams']?.value),
   );
 });
 
 final dashboardPercentageNutritionGoalsProvider =
     Provider<PercentageNutritionGoals?>((ref) {
-      double value(String key) =>
-          ref.watch(dashboardNutrientGoalProvider(key)).value ?? 0;
+      final snapshot = ref.watch(nutritionGoalCurrentSnapshotProvider);
+      double value(String key) => snapshot?.goals[key]?.value ?? 0;
       return PercentageNutritionGoals.resolve(
         calories: value('goal.calories'),
         carbohydratesPercent: value('goal.carbsPercent'),

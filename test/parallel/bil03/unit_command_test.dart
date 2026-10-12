@@ -132,9 +132,16 @@ class _FakePreferences implements PreferencesRepository {
   @override
   Future<String> update(
     String key,
-    String Function(String? current) derive,
-  ) async {
+    String Function(String? current) derive, {
+    bool Function()? isCurrent,
+  }) async {
+    if (isCurrent?.call() == false) {
+      throw StateError('preference_owner_changed');
+    }
     final next = derive(values[key]);
+    if (isCurrent?.call() == false) {
+      throw StateError('preference_owner_changed');
+    }
     values[key] = next;
     return next;
   }
@@ -173,6 +180,7 @@ class _FakePreferences implements PreferencesRepository {
     required Map<String, String?> expected,
     Map<String, String> set = const {},
     Iterable<String> remove = const [],
+    bool Function()? isCurrent,
   }) async {
     for (final entry in expected.entries) {
       if (values[entry.key] != entry.value) return false;

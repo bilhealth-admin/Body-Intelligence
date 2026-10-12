@@ -20,6 +20,7 @@ void registerCoachAccessibilityCases() {
         database: database,
         gateway: gateway,
         contextLoader: () => pending.future,
+        waitForBrief: true,
       );
       void expectSafeIntroOnly() {
         final history = tester.widget<CoachAnchoredHistory>(
@@ -58,6 +59,7 @@ void registerCoachAccessibilityCases() {
           arabic: arabic,
           contextLoader: () async =>
               holdContext ? pending.future : CoachContextSnapshot.empty(),
+          waitForBrief: true,
         );
         void expectSingleIntroduction() {
           final history = tester.widget<CoachAnchoredHistory>(
@@ -84,6 +86,7 @@ void registerCoachAccessibilityCases() {
         await tester.pumpAndSettle();
         router.go('/intelligence-center');
         await tester.pumpAndSettle();
+        await _settleBoundedBrief(tester);
         expectSingleIntroduction();
         await _unmount(tester);
       },

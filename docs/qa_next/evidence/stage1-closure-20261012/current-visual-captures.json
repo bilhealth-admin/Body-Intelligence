@@ -1,0 +1,92 @@
+{
+  "source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "images": [
+    {
+      "file": "images\\approved-first-food-ar-motion.png",
+      "frame": 44,
+      "session": "first-use-ar-motion",
+      "sha256": "260a7fb4f83da8d4e82702d49aed7e2ed04f065e5d464a8f4a37c36463d2dda0"
+    },
+    {
+      "file": "images\\approved-first-food-ar-reduced.png",
+      "frame": 44,
+      "session": "first-use-ar-reduced",
+      "sha256": "eec27628697586419e70f74f82df43d28e5dc95e6b1939a0e9309ff3815043dd"
+    },
+    {
+      "file": "images\\approved-home-ar-guidance.png",
+      "frame": 0,
+      "session": "first-use-ar-reduced",
+      "sha256": "cfe7219067f096651aa2ca7d111eb688f94963c81ae7e9f1c9354f47ee50d512"
+    },
+    {
+      "file": "images\\approved-home-ar-after-skip.png",
+      "frame": 8,
+      "session": "first-use-ar-reduced",
+      "sha256": "b9a13944e3834c4b735a5b12ca137522d02e0ea49096d3dac26bdc9094665f48"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-custom-320-2x.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "4f778ee6da0a14ca38748dffd49c7323dfca262cecf71786cf09c526361b4227"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-custom-book-320-2x.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "d2142110f495394420f4a719372353a08e10fdb250f3a0d9d05a311288a7ece4"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-custom-editor.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "d1066fac64279b8e79a80e0d3bcd2ef0551fabc6593259e0ed11808060436448"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-default-book.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "39207776040140f05700cb9d3592c32293069ed885c1360a1d6d75d88e65441f"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-default.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "84bf09365656ba84957966349af85f9ac48bfee7d71484f9626bafc075b04e6e"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-fiber-book.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "04d728d5f9555d69806be4396b5ddae9e2f45739e9c8aee44efa7ef645e9726a"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-grams.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "6cc6ac03797ba871364528fe181c93e423e8f282343e634f9486eaa606773396"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-legacy-book.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "ea3cbf0bcf1aabcf570012bf1858946508c2f03485e3d3218d22bc6e1dc09fd1"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-legacy.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "a1e954ffc446a8ea69f88b5737aa846ff25d218e2bcbc7f8bf851910d4a7efe8"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-ar-restored-reference.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "b3f9eea53935d3fe1c230de527a713e83d34f72543d30a61b199661fce26bc6a"
+    },
+    {
+      "file": "images\\approved-goals-goals-provenance-en-grams.png",
+      "run": "closure-approved-goal-image-cases",
+      "sha256": "e15dbfa2414f4ee1f2a2d7032e79923ba39a52ab994ee5d1b6cd452befbcacb9"
+    }
+  ],
+  "tests": [
+    "closure-approved-first-food-video-cases",
+    "closure-approved-skip-video-case",
+    "closure-approved-purchase-and-zone-files",
+    "closure-approved-selected-scope-files",
+    "closure-approved-goal-image-cases"
+  ],
+  "note": "Actual host Flutter painted frames and project fonts; synthetic fixture accounts. Health platform and screen settings simulated. Not installed release artifacts."
+}

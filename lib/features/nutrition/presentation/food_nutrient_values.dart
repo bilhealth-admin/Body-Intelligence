@@ -14,53 +14,29 @@ class _FoodNutrientValue {
 
 class _FoodNutrientSummary extends StatelessWidget {
   const _FoodNutrientSummary({required this.food, this.expanded = false});
-
   final Food food;
   final bool expanded;
 
   @override
   Widget build(BuildContext context) {
     if (!expanded) return _CompactFoodNutrientSummary(food: food);
-    final values = _allFoodNutrients(food);
-    final calories = values
-        .where((value) => value.nutrient == FoodNutrient.calories)
-        .toList(growable: false);
-    final premiumValues = values
-        .where((value) => value.nutrient != FoodNutrient.calories)
-        .toList(growable: false);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return Column(
+      key: const Key('food-catalog-nutrition-facts-glass'),
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final value in calories)
-          _NutrientValuePill(
-            food: food,
-            nutrientValue: value,
-            expanded: expanded,
-          ),
-        if (premiumValues.isNotEmpty)
-          PremiumNutritionGlass(
-            key: Key(
-              expanded
-                  ? 'food-catalog-nutrition-facts-glass'
-                  : 'food-catalog-macros-glass',
-            ),
-            compact: !expanded,
-            showLabel: false,
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: premiumValues
-                  .map(
-                    (value) => _NutrientValuePill(
-                      food: food,
-                      nutrientValue: value,
-                      expanded: expanded,
-                    ),
-                  )
-                  .toList(growable: false),
-            ),
-          ),
+        const PremiumNutritionGroupLabel(),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final value in _allFoodNutrients(food))
+              _NutrientValuePill(
+                food: food,
+                nutrientValue: value,
+                expanded: true,
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -68,132 +44,66 @@ class _FoodNutrientSummary extends StatelessWidget {
 
 class _CompactFoodNutrientSummary extends StatelessWidget {
   const _CompactFoodNutrientSummary({required this.food});
-
   final Food food;
 
   @override
-  Widget build(BuildContext context) {
-    final summary = _summaryNutrients(food);
-    final calories = summary.first;
-    final macros = summary
-        .where(
-          (value) => const {
-            FoodNutrient.protein,
-            FoodNutrient.carbohydrates,
-            FoodNutrient.fat,
-          }.contains(value.nutrient),
-        )
-        .toList(growable: false);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 88,
-          child: _CompactNutrientMetric(food: food, nutrientValue: calories),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: PremiumNutritionGlass(
-            key: const Key('food-catalog-macros-glass'),
-            compact: true,
-            showLabel: false,
-            borderRadius: 12,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: .56),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  children: [
-                    for (final macro in macros)
-                      Expanded(
-                        child: _CompactNutrientMetric(
-                          food: food,
-                          nutrientValue: macro,
-                          bare: true,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final summary = _summaryNutrients(food);
+      final wideText = MediaQuery.textScalerOf(context).scale(1) >= 1.4;
+      return Column(
+        key: const Key('food-catalog-macros-glass'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const PremiumNutritionGroupLabel(),
+          if (wideText || constraints.maxWidth < 280)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final value in summary)
+                  SizedBox(
+                    width: (constraints.maxWidth - 8) / 2,
+                    child: _CompactNutrientMetric(
+                      food: food,
+                      nutrientValue: value,
+                    ),
+                  ),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final value in summary)
+                  Expanded(
+                    child: _CompactNutrientMetric(
+                      food: food,
+                      nutrientValue: value,
+                    ),
+                  ),
+              ],
             ),
-          ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
+    },
+  );
 }
 
 class _CompactNutrientMetric extends StatelessWidget {
   const _CompactNutrientMetric({
     required this.food,
     required this.nutrientValue,
-    this.bare = false,
   });
-
   final Food food;
   final _FoodNutrientValue nutrientValue;
-  final bool bare;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final known = _foodNutrientKnown(food, nutrientValue.nutrient);
-    final label = _foodNutrientLabel(context, nutrientValue.nutrient);
-    final value = known
-        ? '${_localizedNutrientNumber(context, nutrientValue.value)} ${nutrientValue.unit}'
-        : '—';
-    final metric = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 48),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 2),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                maxLines: 1,
-                textDirection: TextDirection.ltr,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    return Semantics(
-      label: '$label, $value',
-      child: bare
-          ? metric
-          : DecoratedBox(
-              decoration: BoxDecoration(
-                color: scheme.primaryContainer.withValues(alpha: .42),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: scheme.primary.withValues(alpha: .16),
-                ),
-              ),
-              child: metric,
-            ),
-    );
-  }
+  Widget build(BuildContext context) => _NutrientValuePill(
+    food: food,
+    nutrientValue: nutrientValue,
+    expanded: false,
+  );
 }
 
 class _NutrientValuePill extends StatelessWidget {
@@ -202,7 +112,6 @@ class _NutrientValuePill extends StatelessWidget {
     required this.nutrientValue,
     required this.expanded,
   });
-
   final Food food;
   final _FoodNutrientValue nutrientValue;
   final bool expanded;
@@ -213,41 +122,57 @@ class _NutrientValuePill extends StatelessWidget {
     final known = _foodNutrientKnown(food, nutrientValue.nutrient);
     final label = _foodNutrientLabel(context, nutrientValue.nutrient);
     final value = known
-        ? '${_localizedNutrientNumber(context, nutrientValue.value)} ${nutrientValue.unit}'
+        ? _localizedNutrientNumber(context, nutrientValue.value)
         : _foodValueCopy(context, 'Not available');
-    return Semantics(
-      label: '$label, $value',
-      child: Container(
-        constraints: BoxConstraints(minWidth: expanded ? 126 : 0),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(
-          color: known
-              ? scheme.primaryContainer.withValues(alpha: 0.42)
-              : scheme.surfaceContainerHighest.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: known
-                ? scheme.primary.withValues(alpha: 0.16)
-                : scheme.outlineVariant,
-          ),
-        ),
-        child: RichText(
-          text: TextSpan(
+    final paid = known && nutrientValue.nutrient != FoodNutrient.calories;
+    final valueText = Text(
+      value,
+      textDirection: known ? TextDirection.ltr : null,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: scheme.onSurface,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+    return Container(
+      constraints: BoxConstraints(minWidth: expanded ? 126 : 0),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label · ${nutrientValue.unit}',
+            key: Key('food-nutrient-name-${nutrientValue.nutrient.name}'),
             style: Theme.of(
               context,
             ).textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
-            children: [
-              TextSpan(text: '$label  '),
-              TextSpan(
-                text: value,
-                style: TextStyle(
-                  color: known ? scheme.onSurface : scheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
           ),
-        ),
+          const SizedBox(height: 4),
+          if (paid)
+            PremiumNutritionGlass(
+              key: Key('food-nutrient-value-${nutrientValue.nutrient.name}'),
+              compact: true,
+              showLabel: false,
+              borderRadius: 8,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: valueText,
+              ),
+            )
+          else
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: valueText,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -315,9 +240,21 @@ List<_FoodNutrientValue> _allFoodNutrients(Food food) => [
     value: food.vitaminC,
     unit: 'mg',
   ),
+  for (final nutrient in FoodNutrient.values.where(
+    (n) => n.index > FoodNutrient.vitaminC.index,
+  ))
+    _FoodNutrientValue(
+      nutrient: nutrient,
+      value: FoodBasisEvidence.read(food).value(nutrient) ?? 0,
+      unit: CoachFoodNutrients.units[nutrient]!,
+    ),
 ];
 
 bool _foodNutrientKnown(Food food, FoodNutrient nutrient) {
+  if (food.foodEvidenceJson != null ||
+      nutrient.index > FoodNutrient.vitaminC.index) {
+    return FoodBasisEvidence.read(food).value(nutrient) != null;
+  }
   final value = switch (nutrient) {
     FoodNutrient.calories => food.calories,
     FoodNutrient.protein => food.protein,
@@ -332,6 +269,7 @@ bool _foodNutrientKnown(Food food, FoodNutrient nutrient) {
     FoodNutrient.phosphorus => food.phosphorus,
     FoodNutrient.iron => food.iron,
     FoodNutrient.vitaminC => food.vitaminC,
+    _ => 0,
   };
   final maskTracksNutrient =
       nutrient != FoodNutrient.iron && nutrient != FoodNutrient.vitaminC;
@@ -365,6 +303,12 @@ String _foodNutrientLabel(BuildContext context, FoodNutrient nutrient) {
     FoodNutrient.phosphorus => 'Phosphorus',
     FoodNutrient.iron => 'Iron',
     FoodNutrient.vitaminC => 'Vitamin C',
+    FoodNutrient.saturatedFat => 'Saturated fat',
+    FoodNutrient.polyunsaturatedFat => 'Polyunsaturated fat',
+    FoodNutrient.monounsaturatedFat => 'Monounsaturated fat',
+    FoodNutrient.transFat => 'Trans fat',
+    FoodNutrient.cholesterol => 'Cholesterol',
+    FoodNutrient.vitaminA => 'Vitamin A',
   };
   return _foodValueCopy(context, key);
 }

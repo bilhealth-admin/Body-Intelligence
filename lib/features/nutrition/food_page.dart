@@ -2,13 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' show NumberFormat;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/database/app_database.dart';
+import '../../data/database/food_basis_evidence.dart';
 import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/runtime_copy.dart';
+import '../../app/localization/bil_locale_policy.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../app/theme/bil_flagship_tokens.dart';
 import '../../app/theme/bil_semantic_icons.dart';
@@ -16,17 +21,24 @@ import '../foods/providers/food_provider.dart';
 import '../community/presentation/product_review_submission_dialog.dart';
 import '../commerce/presentation/premium_barcode_access.dart';
 import '../commerce/presentation/premium_nutrition_glass.dart';
+import '../commerce/presentation/premium_label_badge.dart';
+import '../commerce/domain/commerce_plan.dart';
+import '../commerce/domain/subscription_state.dart';
+import '../commerce/providers/commerce_providers.dart';
 import 'services/food_runtime_search_authority.dart';
 import 'services/food_search_assistance.dart';
 import 'services/food_presentation_localizer.dart';
 import 'domain/unified_food.dart';
+import '../intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'presentation/food_barcode_scanner_page.dart';
 import 'presentation/product_identity_copy.dart';
 import 'presentation/barcode_runtime_copy.dart';
 import 'presentation/nutrition_copy.dart';
+import 'presentation/nutrition_entry_fields.dart';
 import 'presentation/meal_image_guide_page.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../../shared/widgets/bil_modal_bottom_sheet.dart';
 
 part 'presentation/food_catalog_overview.dart';
 part 'presentation/food_catalog_tile.dart';
@@ -71,6 +83,20 @@ class FoodPage extends ConsumerStatefulWidget {
 }
 
 class _FoodPageState extends ConsumerState<FoodPage> {
+  Widget _accessibleCatalogHeader(Widget child) {
+    final metrics = MediaQuery.of(context);
+    if (metrics.textScaler.scale(1) <= 1.3 &&
+        metrics.viewInsets.bottom == 0 &&
+        metrics.size.height >= 700) {
+      return child;
+    }
+    return Flexible(
+      flex: 2,
+      fit: FlexFit.loose,
+      child: SingleChildScrollView(child: child),
+    );
+  }
+
   final search = TextEditingController();
   List<Food>? results;
   Timer? debounce;
@@ -140,7 +166,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       });
     }
 
-    await _progressiveSearch?.cancel();
+    final previousSearch = _progressiveSearch;
+    _progressiveSearch = null;
+    if (previousSearch != null) unawaited(previousSearch.cancel());
     if (!current()) return;
     if (widget.userOwnedOnly) {
       try {
@@ -176,7 +204,6 @@ class _FoodPageState extends ConsumerState<FoodPage> {
 
   void _scheduleSearch(String value) {
     debounce?.cancel();
-    _progressiveSearch?.cancel();
     final trimmed = value.trim();
     // Rebuild immediately. Waiting for the debounce left the browse filters
     // and a false empty state visible underneath an active search.
@@ -189,6 +216,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     });
     if (trimmed.isEmpty) {
       searchGeneration++;
+      final previousSearch = _progressiveSearch;
+      _progressiveSearch = null;
+      if (previousSearch != null) unawaited(previousSearch.cancel());
       return;
     }
     unawaited(_runSearch(value));
@@ -229,293 +259,309 @@ class _FoodPageState extends ConsumerState<FoodPage> {
               icon: const Icon(Icons.add),
               label: Text(context.strings.text('Add food')),
             ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              widget.embedded ? 16 : 20,
-              widget.embedded ? 10 : 12,
-              widget.embedded ? 16 : 20,
-              8,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!widget.embedded && search.text.trim().isEmpty) ...[
-                  _NutritionHero(
-                    languageCode: Localizations.localeOf(context).languageCode,
-                  ),
-                  const SizedBox(height: 14),
-                  _NutritionQuickActions(
-                    languageCode: Localizations.localeOf(context).languageCode,
-                    onScan: _cameraBarcodeLookup,
-                    onManualBarcode: _barcodeLookup,
-                    onCustomFood: _createFood,
-                  ),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: () => context.push('/wellness-library'),
-                    icon: const Icon(Icons.explore_outlined),
-                    label: Text(
-                      nutritionText(
-                        context,
-                        'Explore sleep, movement, and daily rhythm',
-                        'استكشف النوم والحركة والإيقاع اليومي',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (widget.embedded && widget.userOwnedOnly) ...[
-                  Text(
-                    nutritionText(
-                      context,
-                      'My foods stores individual foods with their label values. Meals combine foods; recipes calculate ingredients per serving.',
-                      'أطعمتي تحفظ الطعام المفرد بقيم ملصقه. الوجبة تجمع أطعمة، والوصفة تحسب مكوّناتها لكل حصة.',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    key: const Key('my-foods-create-custom'),
-                    onPressed: _createFood,
-                    icon: const Icon(Icons.add),
-                    label: Text(
-                      nutritionText(
-                        context,
-                        'Create custom food',
-                        'إنشاء طعام مخصص',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                _NutritionTaskBar(
-                  searchField: SearchBar(
-                    key: const Key('food-primary-search'),
-                    controller: search,
-                    hintText: nutritionText(
-                      context,
-                      'Search foods',
-                      'البحث عن الأطعمة',
-                    ),
-                    leading: const Icon(Icons.search),
-                    elevation: const WidgetStatePropertyAll(0),
-                    backgroundColor: WidgetStatePropertyAll(
-                      Theme.of(context).colorScheme.surface,
-                    ),
-                    side: WidgetStatePropertyAll(
-                      BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
-                    ),
-                    shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    trailing: search.text.trim().isEmpty
-                        ? const <Widget>[]
-                        : <Widget>[
-                            IconButton(
-                              key: const Key('food-search-clear'),
-                              tooltip: t('Clear'),
-                              onPressed: () {
-                                search.clear();
-                                _scheduleSearch('');
-                              },
-                              icon: const Icon(Icons.close_rounded),
-                            ),
-                          ],
-                    onChanged: _scheduleSearch,
-                  ),
-                  onAddFood: _showAddFoodActions,
+      body: BilPearlBackdrop(
+        child: Column(
+          children: [
+            _accessibleCatalogHeader(
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  widget.embedded ? 16 : 20,
+                  widget.embedded ? 10 : 12,
+                  widget.embedded ? 16 : 20,
+                  8,
                 ),
-                if (runtimeSearchState != _RuntimeSearchUiState.idle) ...[
-                  const SizedBox(height: 8),
-                  _RuntimeSearchStatus(
-                    state: runtimeSearchState,
-                    languageCode: Localizations.localeOf(context).languageCode,
-                  ),
-                ],
-                if (correction != null) ...[
-                  const SizedBox(height: 8),
-                  ActionChip(
-                    avatar: const Icon(Icons.auto_fix_high, size: 18),
-                    label: Text(
-                      '${nutritionText(context, 'Did you mean:', 'هل تقصد:')} $correction?',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!widget.embedded && search.text.trim().isEmpty) ...[
+                      _NutritionHero(
+                        languageCode: Localizations.localeOf(
+                          context,
+                        ).languageCode,
+                      ),
+                      const SizedBox(height: 14),
+                      _NutritionQuickActions(
+                        languageCode: Localizations.localeOf(
+                          context,
+                        ).languageCode,
+                        onScan: _cameraBarcodeLookup,
+                        onManualBarcode: _barcodeLookup,
+                        onCustomFood: _createFood,
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: () => context.push('/wellness-library'),
+                        icon: const Icon(Icons.explore_outlined),
+                        label: Text(
+                          nutritionText(
+                            context,
+                            'Explore sleep, movement, and daily rhythm',
+                            'استكشف النوم والحركة والإيقاع اليومي',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    if (widget.embedded && widget.userOwnedOnly) ...[
+                      Text(
+                        nutritionText(
+                          context,
+                          'My foods stores individual foods with their label values. Meals combine foods; recipes calculate ingredients per serving.',
+                          'أطعمتي تحفظ الطعام المفرد بقيم ملصقه. الوجبة تجمع أطعمة، والوصفة تحسب مكوّناتها لكل حصة.',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        key: const Key('my-foods-create-custom'),
+                        onPressed: _createFood,
+                        icon: const Icon(Icons.add),
+                        label: Text(
+                          nutritionText(
+                            context,
+                            'Create custom food',
+                            'إنشاء طعام مخصص',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    _NutritionTaskBar(
+                      searchField: SearchBar(
+                        key: const Key('food-primary-search'),
+                        controller: search,
+                        hintText: nutritionText(
+                          context,
+                          'Search foods',
+                          'البحث عن الأطعمة',
+                        ),
+                        leading: const Icon(Icons.search),
+                        elevation: const WidgetStatePropertyAll(0),
+                        backgroundColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.surface,
+                        ),
+                        side: WidgetStatePropertyAll(
+                          BorderSide(
+                            color: Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                        ),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        trailing: search.text.trim().isEmpty
+                            ? const <Widget>[]
+                            : <Widget>[
+                                IconButton(
+                                  key: const Key('food-search-clear'),
+                                  tooltip: t('Clear'),
+                                  onPressed: () {
+                                    search.clear();
+                                    _scheduleSearch('');
+                                  },
+                                  icon: const Icon(Icons.close_rounded),
+                                ),
+                              ],
+                        onChanged: _scheduleSearch,
+                      ),
+                      onAddFood: _showAddFoodActions,
                     ),
-                    onPressed: () {
-                      search.text = correction!;
-                      _runSearch(correction!);
-                    },
-                  ),
-                ],
-                if (search.text.trim().isEmpty) ...[
-                  const SizedBox(height: 12),
-                  SegmentedButton<_CatalogView>(
-                    key: const Key('food-browse-filters'),
-                    showSelectedIcon: false,
-                    segments: [
-                      ButtonSegment(
-                        value: _CatalogView.all,
-                        label: Text(nutritionText(context, 'All', 'الكل')),
-                      ),
-                      ButtonSegment(
-                        value: _CatalogView.favorites,
-                        label: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            nutritionText(context, 'Favorites', 'المفضلة'),
-                            maxLines: 1,
-                          ),
-                        ),
-                        icon: const Icon(Icons.favorite_outline),
-                      ),
-                      ButtonSegment(
-                        value: _CatalogView.recent,
-                        label: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            nutritionText(context, 'Recent', 'الأخيرة'),
-                            maxLines: 1,
-                          ),
-                        ),
-                        icon: const Icon(Icons.history),
+                    if (runtimeSearchState != _RuntimeSearchUiState.idle) ...[
+                      const SizedBox(height: 8),
+                      _RuntimeSearchStatus(
+                        state: runtimeSearchState,
+                        languageCode: Localizations.localeOf(
+                          context,
+                        ).languageCode,
                       ),
                     ],
-                    selected: {catalogView},
-                    onSelectionChanged: (selection) =>
-                        setState(() => catalogView = selection.first),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Expanded(
-            child: allFoods.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => ActionableErrorState(
-                title: t('Could not load foods'),
-                onRetry: () => ref.invalidate(foodsProvider),
-              ),
-              data: (foods) {
-                final selectedAsync = switch (catalogView) {
-                  _CatalogView.all => allFoods,
-                  _CatalogView.favorites => favorites,
-                  _CatalogView.recent => recent,
-                };
-                if (search.text.trim().isEmpty && selectedAsync.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (search.text.trim().isEmpty && selectedAsync.hasError) {
-                  return ActionableErrorState(
-                    title: nutritionText(
-                      context,
-                      'This local food list could not be loaded.',
-                      'تعذر تحميل هذه القائمة المحلية.',
-                    ),
-                    onRetry: () {
-                      ref.invalidate(foodsProvider);
-                      ref.invalidate(favoriteFoodsProvider);
-                      ref.invalidate(recentFoodsProvider);
-                    },
-                  );
-                }
-                final selectedRows = _foodsInScope(switch (catalogView) {
-                  _CatalogView.all => foods,
-                  _CatalogView.favorites => favorites.value ?? const <Food>[],
-                  _CatalogView.recent => recent.value ?? const <Food>[],
-                });
-                final activeQuery = search.text.trim();
-                final resultLocale =
-                    FoodPresentationLocalizer.resultLocaleForQuery(
-                      query: activeQuery,
-                      interfaceLocaleTag: Localizations.localeOf(
-                        context,
-                      ).toLanguageTag(),
-                    );
-                final visible = activeQuery.isNotEmpty
-                    ? _foodsInScope(results ?? const <Food>[])
-                          .where(
-                            (food) =>
-                                FoodPresentationLocalizer.hasSafeSearchDisplayName(
-                                  name: food.name,
-                                  arabicName: food.arabicName,
-                                  localeTag: resultLocale,
-                                  isCustom: food.isCustom,
-                                  source: food.source,
-                                ),
-                          )
-                          .toList(growable: false)
-                    : selectedRows;
-                if (search.text.trim().isNotEmpty &&
-                    runtimeSearchState == _RuntimeSearchUiState.searching) {
-                  return const Center(
-                    key: Key('food-search-results-loading'),
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if (visible.isEmpty) {
-                  final favoritesEmpty = catalogView == _CatalogView.favorites;
-                  final recentEmpty = catalogView == _CatalogView.recent;
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: widget.embedded ? 0 : 96),
-                    child: ActionableEmptyState(
-                      key: const Key('food-search-empty-state'),
-                      compact: widget.embedded,
-                      icon: favoritesEmpty
-                          ? Icons.favorite_outline
-                          : recentEmpty
-                          ? Icons.history
-                          : Icons.search_off,
-                      title: favoritesEmpty || recentEmpty
-                          ? t(
-                              favoritesEmpty
-                                  ? 'Your favorites will stay one tap away'
-                                  : 'Recent foods appear after your first log',
-                            )
-                          : _foodSearchText(
-                              context,
-                              'No local food matches this search',
-                            ),
-                      body: favoritesEmpty || recentEmpty
-                          ? t(
-                              favoritesEmpty
-                                  ? 'Favorite any food you trust to make future logging faster.'
-                                  : 'BIL ranks foods you actually use without uploading your history.',
-                            )
-                          : _foodSearchText(
-                              context,
-                              'BIL will not invent a match. Create a custom food from verified label evidence.',
-                            ),
-                      actionLabel: t(
-                        widget.embedded
-                            ? 'Custom food'
-                            : favoritesEmpty || recentEmpty
-                            ? 'Browse all foods'
-                            : 'Custom food',
+                    if (correction != null) ...[
+                      const SizedBox(height: 8),
+                      ActionChip(
+                        avatar: const Icon(Icons.auto_fix_high, size: 18),
+                        label: Text(
+                          '${nutritionText(context, 'Did you mean:', 'هل تقصد:')} $correction?',
+                        ),
+                        onPressed: () {
+                          search.text = correction!;
+                          _runSearch(correction!);
+                        },
                       ),
-                      onAction: widget.embedded
-                          ? _createFood
-                          : favoritesEmpty || recentEmpty
-                          ? () => setState(() => catalogView = _CatalogView.all)
-                          : _createFood,
+                    ],
+                    if (search.text.trim().isEmpty) ...[
+                      const SizedBox(height: 12),
+                      SegmentedButton<_CatalogView>(
+                        key: const Key('food-browse-filters'),
+                        showSelectedIcon: false,
+                        segments: [
+                          ButtonSegment(
+                            value: _CatalogView.all,
+                            label: Text(nutritionText(context, 'All', 'الكل')),
+                          ),
+                          ButtonSegment(
+                            value: _CatalogView.favorites,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                nutritionText(context, 'Favorites', 'المفضلة'),
+                                maxLines: 1,
+                              ),
+                            ),
+                            icon: const Icon(Icons.favorite_outline),
+                          ),
+                          ButtonSegment(
+                            value: _CatalogView.recent,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                nutritionText(context, 'Recent', 'الأخيرة'),
+                                maxLines: 1,
+                              ),
+                            ),
+                            icon: const Icon(Icons.history),
+                          ),
+                        ],
+                        selected: {catalogView},
+                        onSelectionChanged: (selection) =>
+                            setState(() => catalogView = selection.first),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: allFoods.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) => ActionableErrorState(
+                  title: t('Could not load foods'),
+                  onRetry: () => ref.invalidate(foodsProvider),
+                ),
+                data: (foods) {
+                  final selectedAsync = switch (catalogView) {
+                    _CatalogView.all => allFoods,
+                    _CatalogView.favorites => favorites,
+                    _CatalogView.recent => recent,
+                  };
+                  if (search.text.trim().isEmpty && selectedAsync.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (search.text.trim().isEmpty && selectedAsync.hasError) {
+                    return ActionableErrorState(
+                      title: nutritionText(
+                        context,
+                        'This local food list could not be loaded.',
+                        'تعذر تحميل هذه القائمة المحلية.',
+                      ),
+                      onRetry: () {
+                        ref.invalidate(foodsProvider);
+                        ref.invalidate(favoriteFoodsProvider);
+                        ref.invalidate(recentFoodsProvider);
+                      },
+                    );
+                  }
+                  final selectedRows = _foodsInScope(switch (catalogView) {
+                    _CatalogView.all => foods,
+                    _CatalogView.favorites => favorites.value ?? const <Food>[],
+                    _CatalogView.recent => recent.value ?? const <Food>[],
+                  });
+                  final activeQuery = search.text.trim();
+                  final resultLocale =
+                      FoodPresentationLocalizer.resultLocaleForQuery(
+                        query: activeQuery,
+                        interfaceLocaleTag: Localizations.localeOf(
+                          context,
+                        ).toLanguageTag(),
+                      );
+                  final visible = activeQuery.isNotEmpty
+                      ? _foodsInScope(results ?? const <Food>[])
+                            .where(
+                              (food) =>
+                                  FoodPresentationLocalizer.hasSafeSearchDisplayName(
+                                    name: food.name,
+                                    arabicName: food.arabicName,
+                                    localeTag: resultLocale,
+                                    isCustom: food.isCustom,
+                                    source: food.source,
+                                  ),
+                            )
+                            .toList(growable: false)
+                      : selectedRows;
+                  if (search.text.trim().isNotEmpty &&
+                      runtimeSearchState == _RuntimeSearchUiState.searching) {
+                    return const Center(
+                      key: Key('food-search-results-loading'),
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (visible.isEmpty) {
+                    final favoritesEmpty =
+                        catalogView == _CatalogView.favorites;
+                    final recentEmpty = catalogView == _CatalogView.recent;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: widget.embedded ? 0 : 96,
+                      ),
+                      child: ActionableEmptyState(
+                        key: const Key('food-search-empty-state'),
+                        compact: widget.embedded,
+                        icon: favoritesEmpty
+                            ? Icons.favorite_outline
+                            : recentEmpty
+                            ? Icons.history
+                            : Icons.search_off,
+                        title: favoritesEmpty || recentEmpty
+                            ? t(
+                                favoritesEmpty
+                                    ? 'Your favorites will stay one tap away'
+                                    : 'Recent foods appear after your first log',
+                              )
+                            : _foodSearchText(
+                                context,
+                                'No local food matches this search',
+                              ),
+                        body: favoritesEmpty || recentEmpty
+                            ? t(
+                                favoritesEmpty
+                                    ? 'Favorite any food you trust to make future logging faster.'
+                                    : 'BIL ranks foods you actually use without uploading your history.',
+                              )
+                            : _foodSearchText(
+                                context,
+                                'BIL will not invent a match. Create a custom food from verified label evidence.',
+                              ),
+                        actionLabel: t(
+                          widget.embedded
+                              ? 'Custom food'
+                              : favoritesEmpty || recentEmpty
+                              ? 'Browse all foods'
+                              : 'Custom food',
+                        ),
+                        onAction: widget.embedded
+                            ? _createFood
+                            : favoritesEmpty || recentEmpty
+                            ? () =>
+                                  setState(() => catalogView = _CatalogView.all)
+                            : _createFood,
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 96),
+                    itemCount: visible.length,
+                    itemBuilder: (_, index) => _FoodTile(
+                      food: visible[index],
+                      displayLocaleTag: activeQuery.isEmpty
+                          ? null
+                          : resultLocale,
+                      onChanged: () => _runSearch(search.text),
                     ),
                   );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 96),
-                  itemCount: visible.length,
-                  itemBuilder: (_, index) => _FoodTile(
-                    food: visible[index],
-                    displayLocaleTag: activeQuery.isEmpty ? null : resultLocale,
-                    onChanged: () => _runSearch(search.text),
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -543,6 +589,7 @@ class _ManualBarcodeDialogState extends State<_ManualBarcodeDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
+    scrollable: true,
     title: Text(widget.t('Manual barcode lookup')),
     content: TextField(
       autofocus: true,

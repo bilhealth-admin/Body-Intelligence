@@ -25,73 +25,74 @@ class _MacroMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      key: percentKey,
-      value: loading
-          ? '—'
-          : grams == null
-          ? context.strings.text('Unavailable')
-          : percent == null
-          ? '—'
-          : '${percent!.round()}%',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label · g',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
           ),
-          const SizedBox(height: 6),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
+        ),
+        const SizedBox(height: 6),
+        PremiumNutritionGlass(
+          compact: true,
+          showLabel: false,
+          child: Semantics(
+            key: percentKey,
+            value: loading
+                ? '—'
+                : percent == null
+                ? '—'
+                : '${percent!.round()}%',
+            child: Column(
               mainAxisSize: MainAxisSize.min,
-              textDirection: TextDirection.ltr,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  loading || grams == null
-                      ? '—'
-                      : '${formatDiaryMacroGrams(grams!)} g',
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: loading || grams == null
+                            ? '—'
+                            : formatDiaryMacroGrams(grams!),
+                      ),
+                      if (goal != null && goal!.isFinite && goal! > 0)
+                        TextSpan(
+                          text: ' / ${formatDiaryMacroGrams(goal!)}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
                   key: gramsKey,
-                  maxLines: 1,
                   textDirection: TextDirection.ltr,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                if (goal != null && goal!.isFinite && goal! > 0)
-                  Text(
-                    ' / ${formatDiaryMacroGrams(goal!)}',
-                    textDirection: TextDirection.ltr,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(99),
+                  child: ExcludeSemantics(
+                    excluding: loading || grams == null || percent == null,
+                    child: LinearProgressIndicator(
+                      minHeight: 6,
+                      value: loading ? 0 : progress,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      color: color,
                     ),
                   ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: ExcludeSemantics(
-              excluding: loading || grams == null || percent == null,
-              child: LinearProgressIndicator(
-                minHeight: 6,
-                value: loading ? 0 : progress,
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                color: color,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -118,27 +119,29 @@ class NutrientMetric extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
         decoration: BoxDecoration(
           color: scheme.surface,
-          borderRadius: BorderRadius.circular(99),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: scheme.outlineVariant),
         ),
-        child: Row(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.science_outlined,
-              size: 16,
-              color: scheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                value == null
-                    ? '$label: ${context.strings.text('Unavailable')}'
-                    : '$label ${value!.toStringAsFixed(1)} $localizedUnit',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            Text('$label · $localizedUnit'),
+            const SizedBox(height: 4),
+            if (value == null)
+              Text(context.strings.text('Unavailable'))
+            else
+              PremiumNutritionGlass(
+                compact: true,
+                showLabel: false,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    value!.toStringAsFixed(1),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),

@@ -91,11 +91,25 @@ CoachConversationHistoryArchive decodeCoachConversationHistory(String? raw) {
 String encodeCoachConversationHistory({
   required List<Map<String, Object?>> conversations,
   required String? activeConversationId,
-}) => jsonEncode(<String, Object?>{
-  'version': _conversationHistoryStorageVersion,
-  'activeConversationId': _nonEmptyConversationId(activeConversationId),
-  'conversations': conversations,
-});
+  String? originalRaw,
+}) {
+  final original = originalRaw == null
+      ? <String, Object?>{}
+      : coachConversationArchiveForMutation(originalRaw);
+  final opaque = <Object?>[
+    for (final entry in (original['conversations'] as List?) ?? const [])
+      if (entry is! Map ||
+          _nonEmptyConversationId(entry['id']) == null ||
+          entry['messages'] is! List)
+        entry,
+  ];
+  return jsonEncode(<String, Object?>{
+    ...original,
+    'version': _conversationHistoryStorageVersion,
+    'activeConversationId': _nonEmptyConversationId(activeConversationId),
+    'conversations': [...conversations, ...opaque],
+  });
+}
 
 /// Delete only the selected conversation. Unlike the tolerant display decoder,
 /// this mutation preserves unrecognized rows and metadata and refuses a broken
@@ -128,6 +142,11 @@ String deleteCoachConversationFromArchive(String? raw, String? id) {
         ? null
         : archive['activeConversationId'],
     'conversations': entries,
+    if (id != null)
+      'deletedConversationIds': <Object?>{
+        ...?archive['deletedConversationIds'] as List?,
+        id,
+      }.toList(),
   });
 }
 
@@ -200,7 +219,7 @@ List<Map<String, Object?>> upsertCoachConversationHistory({
   next.insert(0, <String, Object?>{
     ...?existing,
     'id': id,
-    'title': title,
+    'title': existing?['titleSource'] == 'manual' ? existing!['title'] : title,
     'createdAt': existing?['createdAt'] ?? createdAt,
     'messages': List<Object?>.from(messages),
   });
@@ -271,98 +290,124 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
     if (!mounted) return;
     final selection = await showModalBottomSheet<String>(
       context: context,
+      backgroundColor: Colors.transparent,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(18, 2, 18, 18),
-          children: [
-            Text(
-              deleteMode
-                  ? tr('Clear conversation', 'مسح المحادثة')
-                  : tr('Conversations', 'المحادثات'),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              deleteMode
-                  ? tr(
-                      'Choose the conversation to delete',
-                      'اختر المحادثة التي تريد حذفها',
-                    )
-                  : tr(
-                      'Conversation history is stored locally on this device.',
-                      'يُحفظ سجل المحادثات محليًا على هذا الجهاز.',
-                    ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+      builder: (sheetContext) => BilFrostedPanel(
+        radius: const BorderRadius.vertical(top: Radius.circular(24)),
+        child: SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(18, 2, 18, 18),
+            children: [
+              Text(
+                deleteMode
+                    ? tr('Clear conversation', 'مسح المحادثة')
+                    : tr('Conversations', 'المحادثات'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
-            ),
-            const SizedBox(height: 8),
-            for (final entry in history)
-              ListTile(
-                key: Key('ai-coach-conversation-${entry['id']}'),
-                leading: const BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.messages,
-                ),
-                title: Text(
-                  '${entry['title'] ?? tr('Conversation', 'محادثة')}',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text('${entry['createdAt'] ?? ''}'),
-                selected: entry['id'] == activeConversationId,
-                trailing: deleteMode
-                    ? Icon(
-                        Icons.delete_outline,
-                        semanticLabel: tr('Delete', 'حذف'),
+              const SizedBox(height: 8),
+              Text(
+                deleteMode
+                    ? tr(
+                        'Choose the conversation to delete',
+                        'اختر المحادثة التي تريد حذفها',
                       )
-                    : entry['id'] == activeConversationId
-                    ? Icon(
-                        Icons.check_circle_rounded,
-                        semanticLabel: tr(
-                          'Current conversation',
-                          'المحادثة الحالية',
+                    : tr(
+                        'Conversation history is stored locally on this device.',
+                        'يُحفظ سجل المحادثات محليًا على هذا الجهاز.',
+                      ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (final entry in history)
+                ListTile(
+                  key: Key('ai-coach-conversation-${entry['id']}'),
+                  leading: const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 22,
+                  ),
+                  title: Text(
+                    '${entry['title'] ?? tr('Conversation', 'محادثة')}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text('${entry['createdAt'] ?? ''}'),
+                  selected: entry['id'] == activeConversationId,
+                  trailing: deleteMode
+                      ? Icon(
+                          Icons.delete_outline,
+                          semanticLabel: tr('Delete', 'حذف'),
+                        )
+                      : PopupMenuButton<String>(
+                          key: Key(
+                            'ai-coach-conversation-actions-${entry['id']}',
+                          ),
+                          tooltip: tr(
+                            'Conversation actions',
+                            'إجراءات المحادثة',
+                          ),
+                          icon: const Icon(Icons.more_horiz_rounded),
+                          onSelected: (action) => Navigator.pop(
+                            sheetContext,
+                            '__rename__:${entry['id']}',
+                          ),
+                          itemBuilder: (_) => [
+                            PopupMenuItem(
+                              value: 'rename',
+                              child: Text(
+                                tr(
+                                  'Rename conversation',
+                                  'إعادة تسمية المحادثة',
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    : null,
-                onTap: () => Navigator.pop(sheetContext, '${entry['id']}'),
-              ),
-            if (history.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  tr(
-                    'No previous conversations yet.',
-                    'لا توجد محادثات سابقة بعد.',
+                  onTap: () => Navigator.pop(sheetContext, '${entry['id']}'),
+                ),
+              if (history.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    tr(
+                      'No previous conversations yet.',
+                      'لا توجد محادثات سابقة بعد.',
+                    ),
                   ),
                 ),
-              ),
-            if (!deleteMode) const Divider(height: 20),
-            if (!deleteMode)
-              ListTile(
-                leading: const BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.messages,
-                  iconOverride: Icons.add_comment_outlined,
-                  appleIconOverride: Icons.add_comment_outlined,
-                ),
-                title: Text(tr('New conversation', 'محادثة جديدة')),
-                subtitle: Text(
-                  tr(
-                    'Keep this chat in history and start an empty one.',
-                    'احفظ هذه المحادثة في السجل وابدأ محادثة فارغة.',
+              if (!deleteMode) const Divider(height: 20),
+              if (!deleteMode)
+                ListTile(
+                  leading: const BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.messages,
+                    iconOverride: Icons.add_comment_outlined,
+                    appleIconOverride: Icons.add_comment_outlined,
                   ),
+                  title: Text(tr('New conversation', 'محادثة جديدة')),
+                  subtitle: Text(
+                    tr(
+                      'Keep this chat in history and start an empty one.',
+                      'احفظ هذه المحادثة في السجل وابدأ محادثة فارغة.',
+                    ),
+                  ),
+                  onTap: () => Navigator.pop(sheetContext, '__new__'),
                 ),
-                onTap: () => Navigator.pop(sheetContext, '__new__'),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
     if (!mounted || selection == null) return;
+    if (selection.startsWith('__rename__:')) {
+      await _renameConversation(selection.substring('__rename__:'.length));
+      if (mounted) await _showConversationHistory(deleteMode: false);
+      return;
+    }
     if (deleteMode) {
       final selected = history.firstWhere((entry) => entry['id'] == selection);
       await _deleteConversation(selection, title: '${selected['title'] ?? ''}');
@@ -383,6 +428,7 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
           _conversationHistoryKey: encodeCoachConversationHistory(
             conversations: history,
             activeConversationId: null,
+            originalRaw: await repository.get(_conversationHistoryKey),
           ),
         },
         remove: const <String>{
@@ -413,6 +459,7 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
       _conversationHistoryKey: encodeCoachConversationHistory(
         conversations: history,
         activeConversationId: selection,
+        originalRaw: await repository.get(_conversationHistoryKey),
       ),
     });
     await _loadConversation();
@@ -421,62 +468,76 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
   Future<void> _archiveCurrentConversation(
     List<Map<String, Object?>> history,
   ) async {
-    if (!mounted) return;
+    if (!mounted || activeConversationId == null) return;
     final repository = conversationPreferences;
-    final fallbackTitle = tr('Conversation', 'محادثة');
-    final idBeforeSave = activeConversationId;
-    await _saveConversation();
-    if (!mounted) return;
-    final raw = await repository.get('intelligenceConversationV1');
-    if (!mounted) return;
-    if (raw == null || raw.trim().isEmpty) return;
-    List<Object?> messages;
+    final database = ref.read(databaseProvider);
+    final id = activeConversationId!;
+    final epoch = conversationPersistenceEpoch;
+    final witness = ref.read(coachNativeOwnerWitnessProvider);
+    var retired = false;
+    final subscription = witness?.changes.listen((owner) {
+      if (owner != database.localOwnerId) retired = true;
+    }, onError: (Object _, StackTrace _) => retired = true);
+    bool current() =>
+        mounted &&
+        !retired &&
+        epoch == conversationPersistenceEpoch &&
+        id == activeConversationId &&
+        identical(ref.read(databaseProvider), database) &&
+        (witness == null || witness.readOwner() == database.localOwnerId);
     try {
-      final decoded = jsonDecode(raw);
-      if (decoded is! List || decoded.isEmpty) return;
-      messages = decoded;
-    } on Object {
-      return;
-    }
-    var conversationId = activeConversationId;
-    if (idBeforeSave == null) {
-      final encodedMessages = jsonEncode(messages);
-      for (final entry in history) {
-        if (jsonEncode(entry['messages']) == encodedMessages &&
-            entry['id'] is String) {
-          conversationId = entry['id']! as String;
-          break;
+      await _saveConversation();
+      if (!current()) return;
+      final previous = conversationPersistenceTail;
+      Future<void> archive() async {
+        try {
+          await previous;
+        } on Object {
+          /* Read the latest local snapshot below. */
         }
+        if (!current()) return;
+        final encoded = await repository.update(_conversationHistoryKey, (
+          latest,
+        ) {
+          final persistent = messages
+              .where((message) => !message.id.startsWith('welcome'))
+              .map((message) => message.toJson())
+              .toList(growable: false);
+          if (persistent.isEmpty) throw StateError('empty_conversation');
+          final firstUser = persistent
+              .where((entry) => entry['role'] == 'user')
+              .firstOrNull;
+          final automaticTitle = abbreviatedCoachConversationTitle(
+            '${firstUser?['text'] ?? tr('Conversation', 'محادثة')}'
+                .replaceAll(RegExp(r'\s+'), ' ')
+                .trim(),
+          );
+          return upsertCoachConversationArchive(
+            raw: latest,
+            id: id,
+            automaticTitle: automaticTitle,
+            createdAt: DateTime.now().toIso8601String(),
+            messages: persistent,
+            activeId: id,
+          );
+        }, isCurrent: current);
+        if (!current()) return;
+        final latest = decodeCoachConversationHistory(encoded).conversations;
+        history
+          ..clear()
+          ..addAll(latest);
+        final title = latest
+            .where((entry) => entry['id'] == id)
+            .firstOrNull?['title']
+            ?.toString();
+        _updateState(() => activeConversationTitle = title);
       }
+
+      final saving = archive();
+      conversationPersistenceTail = saving;
+      await saving;
+    } finally {
+      await subscription?.cancel();
     }
-    if (conversationId == null || conversationId.trim().isEmpty) return;
-    activeConversationId = conversationId;
-    final firstUser = messages.whereType<Map>().firstWhere(
-      (entry) => entry['role'] == 'user',
-      orElse: () => const <String, Object?>{},
-    );
-    final rawTitle = '${firstUser['text'] ?? fallbackTitle}'
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-    final title = rawTitle.length > 52
-        ? '${rawTitle.substring(0, 52).trim()}…'
-        : rawTitle;
-    final updated = upsertCoachConversationHistory(
-      history: history,
-      id: conversationId,
-      title: title.isEmpty ? fallbackTitle : title,
-      createdAt: DateTime.now().toIso8601String(),
-      messages: messages,
-    );
-    history
-      ..clear()
-      ..addAll(updated);
-    await repository.setMany({
-      _conversationHistoryKey: encodeCoachConversationHistory(
-        conversations: history,
-        activeConversationId: conversationId,
-      ),
-      _activeConversationIdKey: conversationId,
-    });
   }
 }

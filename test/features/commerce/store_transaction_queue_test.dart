@@ -5,6 +5,10 @@ import 'package:body_intelligence_log/features/commerce/domain/store_catalog_con
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_term.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
+import 'package:body_intelligence_log/features/commerce/providers/app_purchase_providers.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/features/commerce/providers/verified_purchase_handoff.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +29,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   Duration? restoreCallbackDelay;
   Future<void> Function()? appleSync;
   bool failCompletion = false;
+  Future<void> Function()? finish;
   int completionCalls = 0;
   int restoreCalls = 0;
   int appleSyncCalls = 0;
@@ -46,6 +51,7 @@ class _NativeStore extends Fake implements InAppPurchase {
     completionCalls++;
     if (!completionAttempted.isCompleted) completionAttempted.complete();
     if (failCompletion) throw StateError('local acknowledgement failed');
+    await finish?.call();
   }
 
   @override
@@ -124,7 +130,7 @@ class _NativeStore extends Fake implements InAppPurchase {
 }
 
 class _ConfiguredStore extends VerifiedStorePurchaseService {
-  _ConfiguredStore(_NativeStore native)
+  _ConfiguredStore(_NativeStore native, {super.pendingTimeout})
     : super(purchase: native, appleStoreSync: native.syncAppleStore);
   @override
   bool get configured => true;
@@ -237,6 +243,297 @@ void main() {
     expect(store.canStartPurchase, isTrue);
   }
 
+  Future<void> drain() async {
+    for (var i = 0; i < 15; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  test(
+    'subscription callback timeout stays unresolved and cannot open a second charge',
+    () async {
+      store.dispose();
+      store = _ConfiguredStore(
+        native,
+        pendingTimeout: const Duration(milliseconds: 1),
+      );
+      await ready();
+      native.purchaseLaunch.complete(true);
+      await store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 8));
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'purchase_status_unknown');
+      expect(store.canStartPurchase, isFalse);
+      await store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      expect(native.launches, 1);
+      expect(native.completionCalls, 0);
+    },
+  );
+
+  test(
+    'receipt rejection survives app initialization without a second checkout',
+    () async {
+      await ready();
+      native.purchaseLaunch.complete(true);
+      await store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      native.updates.add([
+        _receipt(productId: StoreCatalogConfiguration.premiumMonthly),
+      ]);
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await drain();
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'verification_failed');
+      await store.initialize();
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'verification_failed');
+      expect(store.canStartPurchase, isFalse);
+      await store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      expect(native.launches, 1);
+      expect(native.completionCalls, 0);
+    },
+  );
+  test(
+    'durable active subscription is published before slow native finish',
+    () async {
+      await ready();
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      final finish = Completer<void>();
+      native.finish = () => finish.future;
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'slow-finish-current',
+        ),
+      ]);
+      await verificationStarted.future;
+      verification.complete(_verifiedSubscriptionResponse());
+      await native.completionAttempted.future;
+      await drain();
+      final stateBeforeFinish = store.state;
+      final paidBeforeFinish = store.entitlement?.grantsPaidAccess;
+      finish.complete();
+      await drain();
+      expect(paidBeforeFinish, isTrue);
+      expect(stateBeforeFinish, VerifiedStoreState.verified);
+      expect(native.completionCalls, 1);
+    },
+  );
+
+  test(
+    'verified native finish cannot block a distinct receipt in the same batch',
+    () async {
+      await ready();
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      verificationResponse = (_) => _verifiedSubscriptionResponse();
+      final finish = Completer<void>();
+      native.finish = () => finish.future;
+      var verifiedBeforeFinish = 0;
+      try {
+        native.updates.add([
+          _receipt(
+            productId: StoreCatalogConfiguration.premiumMonthly,
+            purchaseId: 'held-verified-acknowledgement',
+          ),
+          _receipt(
+            productId: StoreCatalogConfiguration.premiumMonthly,
+            purchaseId: 'next-distinct-transaction',
+          ),
+        ]);
+        await native.completionAttempted.future.timeout(
+          const Duration(seconds: 2),
+        );
+        final deadline = DateTime.now().add(const Duration(milliseconds: 500));
+        while (verificationCalls < 2 && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        }
+        native.updates.add([
+          _receipt(
+            productId: StoreCatalogConfiguration.premiumMonthly,
+            purchaseId: 'held-verified-acknowledgement',
+          ),
+          _receipt(
+            productId: StoreCatalogConfiguration.premiumMonthly,
+            purchaseId: 'next-distinct-transaction',
+          ),
+        ]);
+        await drain();
+        verifiedBeforeFinish = verificationCalls;
+      } finally {
+        finish.complete();
+        final deadline = DateTime.now().add(const Duration(seconds: 2));
+        while (store.busy && DateTime.now().isBefore(deadline)) {
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        }
+        expect(store.busy, isFalse);
+      }
+      expect(
+        verifiedBeforeFinish,
+        2,
+        reason:
+            'Server verification stays serialized, but a verified native acknowledgement must not hold the next distinct receipt.',
+      );
+      expect(native.completionCalls, 2);
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      expect(native.launches, 0);
+    },
+  );
+
+  test(
+    'older native finish failure preserves newer success and remains retryable',
+    () async {
+      await ready();
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      verificationResponse = (_) => _verifiedSubscriptionResponse();
+      final oldFinish = Completer<void>();
+      native.finish = () =>
+          native.completionCalls == 1 ? oldFinish.future : Future<void>.value();
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'old-native-failure',
+        ),
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumAnnual,
+          purchaseId: 'new-native-success',
+        ),
+      ]);
+      await native.completionAttempted.future.timeout(
+        const Duration(seconds: 2),
+      );
+      await drain();
+      expect(verificationCalls, 2);
+      expect(
+        store.lastVerifiedProductId,
+        StoreCatalogConfiguration.premiumAnnual,
+      );
+      oldFinish.completeError(StateError('fixture delayed native failure'));
+      await drain();
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.messageCode, 'subscription_verified');
+      expect(store.hasPendingVerifiedFinish, isTrue);
+      await store.continueVerification();
+      expect(store.hasPendingVerifiedFinish, isFalse);
+      expect(
+        verificationCalls,
+        2,
+        reason:
+            'Retry acknowledges the verified receipt without another server credit.',
+      );
+      expect(native.completionCalls, 3);
+      expect(
+        store.lastVerifiedProductId,
+        StoreCatalogConfiguration.premiumAnnual,
+      );
+    },
+  );
+
+  test(
+    'simultaneous verified finish retries share one native acknowledgement',
+    () async {
+      await ready();
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now.toIso8601String(),
+          'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      native.failCompletion = true;
+      native.restoreReceipt = _receipt(
+        productId: StoreCatalogConfiguration.premiumMonthly,
+      );
+      final restoring = store.restore();
+      await verificationStarted.future;
+      verification.complete(_verifiedSubscriptionResponse());
+      await restoring;
+      expect(store.hasPendingVerifiedFinish, isTrue);
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      final held = Completer<void>();
+      native.failCompletion = false;
+      native.finish = () => held.future;
+      final first = store.continueVerification();
+      final second = store.continueVerification();
+      try {
+        await drain();
+        expect(
+          native.completionCalls,
+          2,
+          reason: 'one failed attempt plus one shared retry',
+        );
+        expect(verificationCalls, 1);
+        expect(native.launches, 0);
+        expect(store.entitlement?.grantsPaidAccess, isTrue);
+      } finally {
+        held.complete();
+        await Future.wait([first, second]);
+      }
+      expect(store.hasPendingVerifiedFinish, isFalse);
+    },
+  );
+
   for (final product in [
     StoreCatalogConfiguration.premiumMonthly,
     StoreCatalogConfiguration.aiBoost,
@@ -304,12 +601,6 @@ void main() {
       expect(store.entitlement, isNull);
     },
   );
-
-  Future<void> drain() async {
-    for (var i = 0; i < 15; i++) {
-      await Future<void>.delayed(Duration.zero);
-    }
-  }
 
   Future<void> waitForStoreIdle() async {
     final deadline = DateTime.now().add(const Duration(seconds: 2));
@@ -465,7 +756,8 @@ void main() {
       );
       expect(native.completionCalls, 1);
       await drain();
-      expect(store.messageCode, 'verification_failed');
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.messageCode, 'store_finish_pending');
       expect(store.canStartPurchase, isFalse);
     },
   );
@@ -839,6 +1131,20 @@ void main() {
       await ready();
       expect(store.entitlement?.grantsPaidAccess, isTrue);
 
+      final container = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            '00000000-0000-4000-8000-000000000001',
+          ),
+          appSubscriptionPurchaseFactoryProvider.overrideWithValue(() => store),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(appSubscriptionPurchaseProvider, (_, _) {});
+      container.listen(verifiedPurchaseHandoffProvider, (_, _) {});
+      final nativeFinish = Completer<void>();
+      native.finish = () => nativeFinish.future;
+
       final restoring = store.restore();
       await verificationStarted.future;
       verification.complete(
@@ -852,9 +1158,18 @@ void main() {
           headers: {'content-type': 'application/json'},
         ),
       );
-      await restoring;
-
+      await native.completionAttempted.future;
+      await drain();
+      expect(nativeFinish.isCompleted, isFalse);
+      expect(
+        container.read(verifiedPurchaseHandoffProvider)?.plan,
+        CommercePlan.free,
+        reason:
+            'authoritative revocation must reach readers before native finish',
+      );
       expect(native.completionCalls, 1);
+      nativeFinish.complete();
+      await restoring;
       expect(store.entitlement?.grantsPaidAccess, isNot(true));
       expect(store.state, VerifiedStoreState.ready);
       expect(store.messageCode, 'no_restorable_purchases');

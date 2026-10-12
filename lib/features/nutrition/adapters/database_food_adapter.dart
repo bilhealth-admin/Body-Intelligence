@@ -44,13 +44,15 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
       },
       // The legacy source enum cannot grant a modern snapshot foundation or
       // verified status. Its exact provenance stays in the validated envelope.
-      source: evidence.isModern ? FoodDataSource.unknown : sourceFor(food),
-      sourceLabel: evidence.isModern
+      source: evidence.isModern && !evidence.isCatalog
+          ? FoodDataSource.unknown
+          : sourceFor(food),
+      sourceLabel: evidence.isModern && !evidence.isCatalog
           ? snapshot == null
                 ? 'unknown'
                 : FoodBasisEvidence.sourceLabel(snapshot)
           : food.source,
-      verified: !evidence.isModern && food.verified,
+      verified: (!evidence.isModern || evidence.isCatalog) && food.verified,
       isCustom: food.isCustom,
       updatedAt: food.updatedAt,
     );

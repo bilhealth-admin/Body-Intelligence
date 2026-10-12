@@ -60,6 +60,8 @@ class SpeechRecognitionError {
 /// legacy Kotlin Gradle Plugin. This class exposes partial text only; the
 /// owning screen decides when an intentional voice capture is submitted.
 class SpeechToText {
+  static SpeechToText? _activeRecognizer;
+  static final Map<String, Stream<Object?>> _eventStreams = {};
   SpeechToText({MethodChannel? methods, EventChannel? events})
     : _methods = methods ?? const MethodChannel('bil/speech'),
       _events = events ?? const EventChannel('bil/speech/events');
@@ -75,17 +77,40 @@ class SpeechToText {
   var _cancelRequested = false;
   bool _isListening = false;
 
+  /// Actual native status, final result, error, or explicit teardown.
+  void Function(bool listening)? onListeningChanged;
+
+  void _setListening(bool value) {
+    _isListening = value;
+    onListeningChanged?.call(value);
+  }
+
   bool get isListening => _isListening;
 
   Future<bool> initialize({
     void Function(SpeechRecognitionError error)? onError,
   }) async {
+    if (_activeRecognizer != null && !identical(_activeRecognizer, this)) {
+      throw PlatformException(code: 'speech_recognizer_busy');
+    }
     _onError = onError;
     await _subscription?.cancel();
-    _subscription = _events.receiveBroadcastStream().listen(
+    // One native EventChannel subscription, with independent Dart consumers.
+    // Disposing an old voice surface must not detach another surface's sink.
+    final stream = _eventStreams.putIfAbsent(
+      _events.name,
+      () => _events.receiveBroadcastStream(),
+    );
+    _subscription = stream.listen(
       _handleEvent,
       onError: (Object error) {
-        _isListening = false;
+        if (_cancelRequested ||
+            (_activeRecognizer != null &&
+                !identical(_activeRecognizer, this))) {
+          return;
+        }
+        _setListening(false);
+        if (identical(_activeRecognizer, this)) _activeRecognizer = null;
         _onError?.call(SpeechRecognitionError(error.toString()));
       },
     );
@@ -104,13 +129,22 @@ class SpeechToText {
     required void Function(SpeechRecognitionResult result) onResult,
     required SpeechListenOptions listenOptions,
   }) async {
+    if (_activeRecognizer != null) {
+      throw PlatformException(code: 'speech_recognizer_busy');
+    }
+    _activeRecognizer = this;
     _onResult = onResult;
     _lastListenOptions = listenOptions;
     _transientRetryCount = 0;
     _cancelRequested = false;
     _transientRetry?.cancel();
     _transientRetry = null;
-    await _startNativeListening(listenOptions);
+    try {
+      await _startNativeListening(listenOptions);
+    } on Object {
+      if (identical(_activeRecognizer, this)) _activeRecognizer = null;
+      rethrow;
+    }
   }
 
   Future<void> _startNativeListening(SpeechListenOptions listenOptions) async {
@@ -126,7 +160,7 @@ class SpeechToText {
         'allowedLocaleIds': listenOptions.allowedLocaleIds,
       });
     } on Object catch (error) {
-      _isListening = false;
+      _setListening(false);
       final code = _platformErrorCode(error);
       if (_shouldRetryTransiently(code)) {
         _transientRetryCount += 1;
@@ -140,21 +174,35 @@ class SpeechToText {
   }
 
   Future<void> stop() async {
+    if (_activeRecognizer != null && !identical(_activeRecognizer, this)) {
+      return;
+    }
     _cancelRequested = true;
     _lastListenOptions = null;
     _transientRetry?.cancel();
     _transientRetry = null;
-    await _methods.invokeMethod<void>('stop');
-    _isListening = false;
+    try {
+      await _methods.invokeMethod<void>('stop');
+    } finally {
+      _setListening(false);
+      if (identical(_activeRecognizer, this)) _activeRecognizer = null;
+    }
   }
 
   Future<void> cancel() async {
+    if (_activeRecognizer != null && !identical(_activeRecognizer, this)) {
+      return;
+    }
     _cancelRequested = true;
     _lastListenOptions = null;
     _transientRetry?.cancel();
     _transientRetry = null;
-    await _methods.invokeMethod<void>('cancel');
-    _isListening = false;
+    try {
+      await _methods.invokeMethod<void>('cancel');
+    } finally {
+      _setListening(false);
+      if (identical(_activeRecognizer, this)) _activeRecognizer = null;
+    }
   }
 
   Future<void> dispose() async {
@@ -167,13 +215,18 @@ class SpeechToText {
     _subscription = null;
     _onError = null;
     _onResult = null;
+    onListeningChanged = null;
     _lastListenOptions = null;
     _transientRetry?.cancel();
     _transientRetry = null;
   }
 
   void _handleEvent(Object? raw) {
-    if (raw is! Map) return;
+    if (raw is! Map ||
+        _cancelRequested ||
+        !identical(_activeRecognizer, this)) {
+      return;
+    }
     final event = Map<String, Object?>.from(raw);
     switch (event['type']) {
       case 'result':
@@ -185,23 +238,25 @@ class SpeechToText {
           ),
         );
         if (event['final'] == true) {
-          _isListening = false;
+          _setListening(false);
+          if (identical(_activeRecognizer, this)) _activeRecognizer = null;
           _lastListenOptions = null;
           _transientRetry?.cancel();
           _transientRetry = null;
         }
       case 'error':
-        _isListening = false;
+        _setListening(false);
         final code = event['code']?.toString() ?? 'unavailable';
         if (_shouldRetryTransiently(code)) {
           _scheduleTransientRetry();
         } else {
           _lastListenOptions = null;
+          if (identical(_activeRecognizer, this)) _activeRecognizer = null;
           _onError?.call(SpeechRecognitionError(code));
         }
       case 'status':
         if (event['listening'] is bool) {
-          _isListening = event['listening']! as bool;
+          _setListening(event['listening']! as bool);
         }
     }
   }
@@ -232,6 +287,8 @@ class SpeechToText {
         await _startNativeListening(options);
       } on Object catch (error) {
         _lastListenOptions = null;
+        _setListening(false);
+        if (identical(_activeRecognizer, this)) _activeRecognizer = null;
         _onError?.call(SpeechRecognitionError(_platformErrorCode(error)));
       }
     });

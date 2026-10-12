@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme/bil_pearl_finish.dart';
 
 final _activeBilSheets = Expando<bool>('active-bil-sheet');
 
@@ -12,6 +13,7 @@ Future<T?> showBilModalBottomSheet<T>({
   bool useSafeArea = false,
   bool? showDragHandle,
   Color? backgroundColor,
+  BoxConstraints? constraints,
   AnimationStyle? sheetAnimationStyle,
 }) async {
   final navigator = Navigator.of(context, rootNavigator: true);
@@ -19,7 +21,12 @@ Future<T?> showBilModalBottomSheet<T>({
   _activeBilSheets[navigator] = true;
   try {
     final route = ModalBottomSheetRoute<T>(
-      builder: builder,
+      builder: (context) => backgroundColor == null
+          ? BilFrostedPanel(
+              radius: const BorderRadius.vertical(top: Radius.circular(24)),
+              child: builder(context),
+            )
+          : builder(context),
       capturedThemes: InheritedTheme.capture(
         from: context,
         to: navigator.context,
@@ -27,7 +34,8 @@ Future<T?> showBilModalBottomSheet<T>({
       isScrollControlled: isScrollControlled,
       useSafeArea: useSafeArea,
       showDragHandle: showDragHandle,
-      backgroundColor: backgroundColor,
+      backgroundColor: backgroundColor ?? Colors.transparent,
+      constraints: constraints,
       sheetAnimationStyle: sheetAnimationStyle,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       modalBarrierColor:

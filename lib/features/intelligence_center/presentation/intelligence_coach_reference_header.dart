@@ -14,6 +14,7 @@ class _CoachHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final compact =
         MediaQuery.textScalerOf(context).scale(1) > 1.3 ||
         MediaQuery.sizeOf(context).width < 380;
@@ -47,13 +48,10 @@ class _CoachHero extends StatelessWidget {
     );
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0C1B2B), Color(0xFF07111B)],
-        ),
-        border: Border(bottom: BorderSide(color: Color(0xFF1F344B), width: .6)),
+      decoration: BilPearlFinish.panel(
+        context,
+        radius: BorderRadius.zero,
+        shadow: false,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -75,7 +73,7 @@ class _CoachHero extends StatelessWidget {
                     Directionality.of(context) == TextDirection.rtl
                         ? Icons.chevron_right_rounded
                         : Icons.chevron_left_rounded,
-                    color: const Color(0xFFB1C5E0),
+                    color: scheme.onSurfaceVariant,
                     size: 24,
                   ),
                 ),
@@ -91,10 +89,10 @@ class _CoachHero extends StatelessWidget {
                   children: [
                     Text(
                       intelligenceText(context, 'AI Coach', 'المدرب الذكي'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 19,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFFF1F6FF),
+                        color: scheme.onSurface,
                       ),
                     ),
                     if (!compact)
@@ -104,9 +102,9 @@ class _CoachHero extends StatelessWidget {
                           'Your health partner, always with you',
                           'شريك صحتك، معك دائمًا',
                         ),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 9,
-                          color: Color(0xFFB8C6D8),
+                          color: scheme.onSurfaceVariant,
                           height: 1.4,
                         ),
                       ),
@@ -128,9 +126,9 @@ class _CoachHero extends StatelessWidget {
                       'Your health partner, always with you',
                       'شريك صحتك، معك دائمًا',
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
-                      color: Color(0xFFB8C6D8),
+                      color: scheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -167,15 +165,10 @@ class _CoachHeaderAction extends StatelessWidget {
       onPressed: onPressed,
       padding: const EdgeInsets.all(5),
       constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-      icon: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: const Color(0xFF142335),
-          borderRadius: BorderRadius.circular(11),
-          border: Border.all(color: const Color(0xFF304359), width: .7),
-        ),
-        child: Icon(icon, size: 19, color: const Color(0xFFB4C5DA)),
+      icon: Icon(
+        icon,
+        size: 19,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     ),
   );

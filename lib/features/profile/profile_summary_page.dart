@@ -116,12 +116,11 @@ class ProfileSummaryPage extends ConsumerWidget {
     final systemState = ref.watch(measurementSystemProvider);
     final friendsState = ref.watch(profileFriendsCountProvider);
     final nameState = ref.watch(displayNameProvider);
-    final photoState = ref.watch(profilePhotoProvider);
-    final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+    final photoUrl = ref.watch(profileAvatarStateProvider).url;
     final profile = profileState.value;
     final weights = weightsState.value;
     final storedName = nameState.value;
-    final photo = photoState.value;
+    final photo = ref.watch(profileAvatarStateProvider).bytes;
     final memberSince = ref.watch(profileMemberSinceProvider);
     final friends = friendsState.value;
     final subscription = ref.watch(verifiedSubscriptionAccessProvider);
@@ -152,8 +151,7 @@ class ProfileSummaryPage extends ConsumerWidget {
         weightsState.hasError ||
         systemState.hasError ||
         friendsState.hasError ||
-        nameState.hasError ||
-        photoState.hasError) {
+        nameState.hasError) {
       return BilCalmVisualScope(
         builder: (context) => Scaffold(
           appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
@@ -189,12 +187,11 @@ class ProfileSummaryPage extends ConsumerWidget {
         ),
       );
     }
-    if (profileState.isLoading ||
-        weightsState.isLoading ||
-        systemState.isLoading ||
-        friendsState.isLoading ||
-        nameState.isLoading ||
-        photoState.isLoading) {
+    if ((profileState.isLoading && !profileState.hasValue) ||
+        (weightsState.isLoading && !weightsState.hasValue) ||
+        (systemState.isLoading && !systemState.hasValue) ||
+        (friendsState.isLoading && !friendsState.hasValue) ||
+        (nameState.isLoading && !nameState.hasValue)) {
       return BilCalmVisualScope(
         builder: (context) => Scaffold(
           appBar: AppBar(title: Text(_copy(context, 'BIL member'))),

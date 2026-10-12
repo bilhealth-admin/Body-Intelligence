@@ -456,7 +456,7 @@ class _WorkoutRoutineCard extends StatelessWidget {
         margin: EdgeInsets.zero,
         child: InkWell(
           key: ValueKey('workout-card-${item.stableId}'),
-          onTap: onOpen,
+          onTap: locked ? null : onOpen,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

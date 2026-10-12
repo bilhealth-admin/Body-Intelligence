@@ -1,0 +1,52 @@
+{
+  "label": "food-add-keyboard-indicator-repaired-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/food_add_access_indicator_test.dart",
+    "--plain-name",
+    "Food Add honest badge and free custom action free Arabic 320 2x keyboard"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791758704.6191273,
+  "files": {
+    "test/features/nutrition/food_add_access_indicator_test.dart": "143e860d6978985f59437d7fb9ad1a687f91427dcb9ac494942fa782b5b6cf59"
+  },
+  "source_fingerprint": "8fa3a07deeb6d68776c19c4d915cd62bacdb85f1bf80c5fba860d26d33c75ab3",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/food_add_access_indicator_test.dart",
+    "--plain-name",
+    "Food Add honest badge and free custom action free Arabic 320 2x keyboard"
+  ],
+  "pid": 5888,
+  "exit_code": 0,
+  "finished": 1791758711.821371,
+  "end_fingerprint": "8fa3a07deeb6d68776c19c4d915cd62bacdb85f1bf80c5fba860d26d33c75ab3",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "Food Add honest badge and free custom action free Arabic 320 2x keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_add_access_indicator_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

@@ -11,6 +11,7 @@ import '../../../app/environment/app_environment.dart';
 import '../../../app/services/recoverable_image_picker.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../providers/user_profile_provider.dart';
+import 'profile_photo_validation.dart';
 
 /// Photos above this budget are compressed automatically before local storage
 /// and upload. It is deliberately a target, not a rejection limit.
@@ -47,6 +48,9 @@ Future<_PreparedProfilePhoto> _prepareProfilePhoto(
   required String contentType,
 }) async {
   if (bytes.lengthInBytes <= profilePhotoCompressionTargetBytes) {
+    if (!await compute(isDecodableProfilePhoto, bytes)) {
+      throw const ProfilePhotoCompressionException();
+    }
     return _PreparedProfilePhoto(bytes: bytes, contentType: contentType);
   }
   final compressed = await compute(_compressProfilePhoto, bytes);
@@ -192,10 +196,14 @@ class ProfilePhotoService {
         expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
       );
     }
-    await _preferences.removeMany(const [
-      'profilePhoto',
-      'profilePhotoPublicUrl',
-    ]);
+    await _preferences.mutate(
+      set: const {'profilePhotoDeleted': 'true'},
+      remove: const [
+        'profilePhoto',
+        'profilePhotoPublicUrl',
+        'profilePhotoPending',
+      ],
+    );
   }
 
   Future<ProfilePhotoSaveResult> _saveForOwner(
@@ -228,8 +236,11 @@ class ProfilePhotoService {
     // prevents a Community save from reusing or repeatedly refreshing a stale
     // avatar URL while the new upload is still pending.
     await _preferences.mutate(
-      set: {'profilePhoto': base64Encode(prepared.bytes)},
-      remove: const ['profilePhotoPublicUrl'],
+      set: {
+        'profilePhoto': base64Encode(prepared.bytes),
+        'profilePhotoPending': 'true',
+      },
+      remove: const ['profilePhotoPublicUrl', 'profilePhotoDeleted'],
     );
     _requireUnchangedOwners(
       expectedStorageOwnerId: expectedStorageOwnerId,
@@ -355,7 +366,10 @@ class ProfilePhotoService {
       // profile. Do not report cross-device sync until the public profile row
       // actually references the uploaded object; Community save retries it.
       if (updated == null || updated['avatar_url'] != publicUrl) return null;
-      await _preferences.set('profilePhotoPublicUrl', publicUrl);
+      await _preferences.mutate(
+        set: {'profilePhotoPublicUrl': publicUrl},
+        remove: const ['profilePhotoPending', 'profilePhotoDeleted'],
+      );
       _requireActiveOwner(isCurrentOwner);
       return publicUrl;
     } on ProfilePhotoIdentityChangedException {

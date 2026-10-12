@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
@@ -185,92 +186,96 @@ class _MealBuilderPageState extends ConsumerState<MealBuilderPage> {
       canPop: !_saving,
       child: Scaffold(
         appBar: AppBar(title: Text(t('Create meal', 'إنشاء وجبة'))),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Text(
-              t(
-                'Choose foods and weights, then save to the selected diary date. This meal will appear in My meals for reuse.',
-                'اختر الأطعمة وأوزانها، ثم احفظها في تاريخ اليوميات المحدد. ستظهر الوجبة في «وجباتي» لإعادة استخدامها.',
+        body: BilPearlBackdrop(
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Text(
+                t(
+                  'Choose foods and weights, then save to the selected diary date. This meal will appear in My meals for reuse.',
+                  'اختر الأطعمة وأوزانها، ثم احفظها في تاريخ اليوميات المحدد. ستظهر الوجبة في «وجباتي» لإعادة استخدامها.',
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _name,
-              enabled: enabled,
-              maxLength: 120,
-              decoration: InputDecoration(
-                labelText: t('Meal name', 'اسم الوجبة'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _name,
+                enabled: enabled,
+                maxLength: 120,
+                decoration: InputDecoration(
+                  labelText: t('Meal name', 'اسم الوجبة'),
+                ),
               ),
-            ),
-            nutritionDestinationFields(
-              context,
-              date: _date,
-              type: _type,
-              enabled: enabled,
-              onDate: (date) {
-                if (mounted) setState(() => _date = date);
-              },
-              onType: (type) => setState(() => _type = type),
-            ),
-            const SizedBox(height: 16),
-            for (var i = 0; i < _items.length; i++)
-              Card(
-                child: ListTile(
-                  title: Text(_label(_items[i].food)),
-                  subtitle: Text('${_items[i].grams} ${t('g', 'جم')}'),
-                  trailing: IconButton(
-                    tooltip: t('Remove', 'إزالة'),
-                    icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: enabled
-                        ? () => setState(() => _items.removeAt(i))
-                        : null,
+              nutritionDestinationFields(
+                context,
+                date: _date,
+                type: _type,
+                enabled: enabled,
+                onDate: (date) {
+                  if (mounted) setState(() => _date = date);
+                },
+                onType: (type) => setState(() => _type = type),
+              ),
+              const SizedBox(height: 16),
+              for (var i = 0; i < _items.length; i++)
+                BilPearlCard(
+                  child: ListTile(
+                    title: Text(_label(_items[i].food)),
+                    subtitle: Text('${_items[i].grams} ${t('g', 'جم')}'),
+                    trailing: IconButton(
+                      tooltip: t('Remove', 'إزالة'),
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: enabled
+                          ? () => setState(() => _items.removeAt(i))
+                          : null,
+                    ),
+                  ),
+                ),
+              OutlinedButton.icon(
+                key: const Key('meal-builder-add-food'),
+                onPressed: enabled && _items.length < 100 ? _addFood : null,
+                icon: const Icon(Icons.add),
+                label: Text(t('Choose food', 'اختيار طعام')),
+              ),
+              CheckboxListTile(
+                value: _append,
+                onChanged: enabled
+                    ? (value) => setState(() => _append = value == true)
+                    : null,
+                title: Text(
+                  t(
+                    'Append to an existing meal at this destination',
+                    'ضمّ الأطعمة إلى الوجبة الموجودة في الوجهة عند وجودها',
+                  ),
+                ),
+                subtitle: Text(
+                  t(
+                    'Existing food and its nutrition are never replaced.',
+                    'لن تُستبدل الأطعمة القائمة أو قيمها الغذائية.',
                   ),
                 ),
               ),
-            OutlinedButton.icon(
-              key: const Key('meal-builder-add-food'),
-              onPressed: enabled && _items.length < 100 ? _addFood : null,
-              icon: const Icon(Icons.add),
-              label: Text(t('Choose food', 'اختيار طعام')),
-            ),
-            CheckboxListTile(
-              value: _append,
-              onChanged: enabled
-                  ? (value) => setState(() => _append = value == true)
-                  : null,
-              title: Text(
-                t(
-                  'Append to an existing meal at this destination',
-                  'ضمّ الأطعمة إلى الوجبة الموجودة في الوجهة عند وجودها',
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    _error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              FilledButton.icon(
+                key: const Key('meal-builder-save'),
+                onPressed: enabled ? _save : null,
+                icon: const Icon(Icons.check),
+                label: Text(
+                  _saving
+                      ? t('Saving…', 'جارٍ الحفظ…')
+                      : t('Confirm and save meal', 'تأكيد وحفظ الوجبة'),
                 ),
               ),
-              subtitle: Text(
-                t(
-                  'Existing food and its nutrition are never replaced.',
-                  'لن تُستبدل الأطعمة القائمة أو قيمها الغذائية.',
-                ),
-              ),
-            ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ),
-            FilledButton.icon(
-              key: const Key('meal-builder-save'),
-              onPressed: enabled ? _save : null,
-              icon: const Icon(Icons.check),
-              label: Text(
-                _saving
-                    ? t('Saving…', 'جارٍ الحفظ…')
-                    : t('Confirm and save meal', 'تأكيد وحفظ الوجبة'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

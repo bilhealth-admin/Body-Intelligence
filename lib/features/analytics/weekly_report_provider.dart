@@ -10,12 +10,12 @@ import '../../data/database/app_database.dart';
 import '../../engine/body_profile.dart';
 import '../../engine/plan_engine.dart';
 import '../dashboard/providers/dashboard_provider.dart';
-import '../dashboard/providers/dashboard_preferences_provider.dart';
 import '../daily_log/providers/daily_log_provider.dart';
 import '../daily_log/domain/daily_body_context_codec.dart';
 import '../connected_health/providers/connected_health_provider.dart';
 import '../exercise_calorie_controls/providers/exercise_calorie_providers.dart';
 import '../nutrition/domain/percentage_nutrition_goals.dart';
+import '../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 import '../wellness/domain/fasting_session.dart';
@@ -74,12 +74,12 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
         ? null
         : await ref.watch(planSettingProvider(profile.uuid).future);
     final goalSchedule = await ref.watch(nutritionGoalScheduleProvider.future);
-    Future<double?> savedGoal(String key) =>
-        ref.watch(dashboardNutrientGoalProvider(key).future);
-    final savedCalorieGoal = await savedGoal('goal.calories');
-    final savedCarbsPercent = await savedGoal('goal.carbsPercent');
-    final savedProteinPercent = await savedGoal('goal.proteinPercent');
-    final savedFatPercent = await savedGoal('goal.fatPercent');
+    final goalsSnapshot = await ref.watch(nutritionGoalSnapshotProvider.future);
+    final savedCalorieGoal = goalsSnapshot.goals['goal.calories']?.value;
+    final savedCarbsPercent = goalsSnapshot.goals['goal.carbsPercent']?.value;
+    final savedProteinPercent =
+        goalsSnapshot.goals['goal.proteinPercent']?.value;
+    final savedFatPercent = goalsSnapshot.goals['goal.fatPercent']?.value;
     final savedPercentageGoals = PercentageNutritionGoals.resolve(
       calories: savedCalorieGoal ?? 0,
       carbohydratesPercent: savedCarbsPercent ?? 0,
@@ -109,10 +109,11 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
               hipCm: bodyMeasurements.firstOrNull?.hipsCm,
             ),
           ).targets.calories.toDouble();
-    final fallbackCalorieGoal =
-        savedPercentageGoals?.calories ??
-        plan?.overrideCalories?.toDouble() ??
-        recommendedCalorieGoal;
+    final fallbackCalorieGoal = ref.watch(nutritionMacroGoalsNeedReviewProvider)
+        ? null
+        : savedPercentageGoals?.calories ??
+              plan?.overrideCalories?.toDouble() ??
+              recommendedCalorieGoal;
     final reportEnd = DateTime(asOf.year, asOf.month, asOf.day);
     final reportDays = [
       for (var offset = 0; offset < 7; offset++)

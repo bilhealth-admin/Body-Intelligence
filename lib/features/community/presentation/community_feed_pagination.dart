@@ -10,6 +10,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   set _feedGeneration(int value);
   bool get _feedRefreshing;
   set _feedRefreshing(bool value);
+  bool get _cacheRefreshing;
+  set _cacheRefreshing(bool value);
+  set _cacheRefreshFailed(bool value);
   Map<String, CommunityPostReferenceMetadata> get _referenceByPost;
   Map<String, int> get _viewCountByPost;
   Map<String, CommunityComment> get _commentPreviewByPost;
@@ -33,6 +36,8 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     repository.invalidateCommunityModeratorStatus();
     final generation = ++_feedGeneration;
     _feedRefreshing = true;
+    _cacheRefreshing = false;
+    _cacheRefreshFailed = false;
     _loadingMore = false;
     _feedCursorPriority = null;
     _feedCursorCreatedAt = null;
@@ -41,8 +46,45 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
       late CommunityFeedModeBatch page;
       await visit.run(() async {
         page = await repository
-            .loadCommunityFeedMode(
+            .loadCommunityFeedCachedFirst(
               mode: _selectedFeedMode,
+              locale: Localizations.localeOf(context).toLanguageTag(),
+              current: () =>
+                  mounted && visit.isCurrent() && generation == _feedGeneration,
+              onRefresh: (updated) {
+                if (!mounted ||
+                    !visit.isCurrent() ||
+                    generation != _feedGeneration) {
+                  return;
+                }
+                setState(() {
+                  _cacheRefreshing = false;
+                  _cacheRefreshFailed = false;
+                  _feed = Future.value(updated.posts);
+                  _hasMore = updated.hasMore;
+                  _feedCursorPriority = updated.nextPriority;
+                  _feedCursorCreatedAt = updated.nextBefore;
+                  _feedCursorPostId = updated.nextBeforeId;
+                });
+                unawaited(_loadFeedExtras(visit, generation, updated.posts));
+              },
+              onRefreshing: () {
+                if (mounted &&
+                    visit.isCurrent() &&
+                    generation == _feedGeneration) {
+                  setState(() => _cacheRefreshing = true);
+                }
+              },
+              onRefreshError: (_) {
+                if (mounted &&
+                    visit.isCurrent() &&
+                    generation == _feedGeneration) {
+                  setState(() {
+                    _cacheRefreshing = false;
+                    _cacheRefreshFailed = true;
+                  });
+                }
+              },
               limit: _FeedTabState._pageSize,
             )
             .timeout(const Duration(seconds: 15));
@@ -126,6 +168,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     if (visit == null ||
         _loadingMore ||
         _feedRefreshing ||
+        _cacheRefreshing ||
         !_hasMore ||
         visiblePosts.isEmpty ||
         _feedCursorPriority == null ||

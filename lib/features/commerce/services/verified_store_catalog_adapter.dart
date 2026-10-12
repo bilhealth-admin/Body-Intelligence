@@ -307,9 +307,10 @@ GooglePlayOfferMetadata? googlePlayOfferMetadata(ProductDetails product) {
 /// Adapts the existing verified store transport to provider-neutral UI
 /// metadata. It cannot grant access; receipt verification remains server-side.
 final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
-  VerifiedStoreCatalogAdapter(this.store);
+  VerifiedStoreCatalogAdapter(this.store, {this.boostCheckout});
 
   final VerifiedStorePurchaseService store;
+  final Future<void> Function(BilStoreOfferMetadata)? boostCheckout;
 
   @override
   Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) async {
@@ -389,6 +390,7 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
   @override
   Future<void> requestPurchase(BilStoreOfferMetadata offer) async {
     if (offer.kind == BilStoreProductKind.aiBoostConsumable) {
+      if (boostCheckout != null) return boostCheckout!(offer);
       await store.purchaseBoost(offerToken: offer.purchaseOfferToken);
       return;
     }

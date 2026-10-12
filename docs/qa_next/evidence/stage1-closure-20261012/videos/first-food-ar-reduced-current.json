@@ -1,0 +1,352 @@
+{
+  "method": "painted Flutter WidgetTester frames at 10 test-clock fps",
+  "not_device_latency": true,
+  "frames": 68,
+  "dimensions": [
+    390,
+    844
+  ],
+  "sha256": "c762f1331d6d8e3fb18c5d6042bde18373a1e5f92b32f88f5ea0a68c35b7c969",
+  "steps": [
+    {
+      "frame": 0,
+      "step": "00-menu-ar",
+      "pumpedMs": 100
+    },
+    {
+      "frame": 1,
+      "step": "00-menu-ar",
+      "pumpedMs": 200
+    },
+    {
+      "frame": 2,
+      "step": "00-menu-ar",
+      "pumpedMs": 300
+    },
+    {
+      "frame": 3,
+      "step": "00-menu-ar",
+      "pumpedMs": 400
+    },
+    {
+      "frame": 4,
+      "step": "00-menu-ar",
+      "pumpedMs": 500
+    },
+    {
+      "frame": 5,
+      "step": "00-menu-ar",
+      "pumpedMs": 600
+    },
+    {
+      "frame": 6,
+      "step": "00-menu-ar",
+      "pumpedMs": 700
+    },
+    {
+      "frame": 7,
+      "step": "00-menu-ar",
+      "pumpedMs": 800
+    },
+    {
+      "frame": 8,
+      "step": "01-search-ar",
+      "pumpedMs": 900
+    },
+    {
+      "frame": 9,
+      "step": "01-search-ar",
+      "pumpedMs": 1000
+    },
+    {
+      "frame": 10,
+      "step": "01-search-ar",
+      "pumpedMs": 1100
+    },
+    {
+      "frame": 11,
+      "step": "01-search-ar",
+      "pumpedMs": 1200
+    },
+    {
+      "frame": 12,
+      "step": "01-search-ar",
+      "pumpedMs": 1300
+    },
+    {
+      "frame": 13,
+      "step": "01-search-ar",
+      "pumpedMs": 1400
+    },
+    {
+      "frame": 14,
+      "step": "01-search-ar",
+      "pumpedMs": 1500
+    },
+    {
+      "frame": 15,
+      "step": "01-search-ar",
+      "pumpedMs": 1600
+    },
+    {
+      "frame": 16,
+      "step": "02-choose-ar",
+      "pumpedMs": 1700
+    },
+    {
+      "frame": 17,
+      "step": "02-choose-ar",
+      "pumpedMs": 1800
+    },
+    {
+      "frame": 18,
+      "step": "02-choose-ar",
+      "pumpedMs": 1900
+    },
+    {
+      "frame": 19,
+      "step": "02-choose-ar",
+      "pumpedMs": 2000
+    },
+    {
+      "frame": 20,
+      "step": "02-choose-ar",
+      "pumpedMs": 2100
+    },
+    {
+      "frame": 21,
+      "step": "02-choose-ar",
+      "pumpedMs": 2200
+    },
+    {
+      "frame": 22,
+      "step": "02-choose-ar",
+      "pumpedMs": 2300
+    },
+    {
+      "frame": 23,
+      "step": "02-choose-ar",
+      "pumpedMs": 2400
+    },
+    {
+      "frame": 24,
+      "step": "03-quantity-ar",
+      "pumpedMs": 2500
+    },
+    {
+      "frame": 25,
+      "step": "03-quantity-ar",
+      "pumpedMs": 2600
+    },
+    {
+      "frame": 26,
+      "step": "03-quantity-ar",
+      "pumpedMs": 2700
+    },
+    {
+      "frame": 27,
+      "step": "03-quantity-ar",
+      "pumpedMs": 2800
+    },
+    {
+      "frame": 28,
+      "step": "03-quantity-ar",
+      "pumpedMs": 2900
+    },
+    {
+      "frame": 29,
+      "step": "03-quantity-ar",
+      "pumpedMs": 3000
+    },
+    {
+      "frame": 30,
+      "step": "03-quantity-ar",
+      "pumpedMs": 3100
+    },
+    {
+      "frame": 31,
+      "step": "03-quantity-ar",
+      "pumpedMs": 3200
+    },
+    {
+      "frame": 32,
+      "step": "04-ready-ar",
+      "pumpedMs": 3300
+    },
+    {
+      "frame": 33,
+      "step": "04-ready-ar",
+      "pumpedMs": 3400
+    },
+    {
+      "frame": 34,
+      "step": "04-ready-ar",
+      "pumpedMs": 3500
+    },
+    {
+      "frame": 35,
+      "step": "04-ready-ar",
+      "pumpedMs": 3600
+    },
+    {
+      "frame": 36,
+      "step": "04-ready-ar",
+      "pumpedMs": 3700
+    },
+    {
+      "frame": 37,
+      "step": "04-ready-ar",
+      "pumpedMs": 3800
+    },
+    {
+      "frame": 38,
+      "step": "04-ready-ar",
+      "pumpedMs": 3900
+    },
+    {
+      "frame": 39,
+      "step": "04-ready-ar",
+      "pumpedMs": 4000
+    },
+    {
+      "frame": 40,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4100
+    },
+    {
+      "frame": 41,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4200
+    },
+    {
+      "frame": 42,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4300
+    },
+    {
+      "frame": 43,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4400
+    },
+    {
+      "frame": 44,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4500
+    },
+    {
+      "frame": 45,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4600
+    },
+    {
+      "frame": 46,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4700
+    },
+    {
+      "frame": 47,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4800
+    },
+    {
+      "frame": 48,
+      "step": "05-celebration-ar",
+      "pumpedMs": 4900
+    },
+    {
+      "frame": 49,
+      "step": "05-celebration-ar",
+      "pumpedMs": 5000
+    },
+    {
+      "frame": 50,
+      "step": "05-celebration-ar",
+      "pumpedMs": 5100
+    },
+    {
+      "frame": 51,
+      "step": "05-celebration-ar",
+      "pumpedMs": 5200
+    },
+    {
+      "frame": 52,
+      "step": "06-success-ar",
+      "pumpedMs": 5300
+    },
+    {
+      "frame": 53,
+      "step": "06-success-ar",
+      "pumpedMs": 5400
+    },
+    {
+      "frame": 54,
+      "step": "06-success-ar",
+      "pumpedMs": 5500
+    },
+    {
+      "frame": 55,
+      "step": "06-success-ar",
+      "pumpedMs": 5600
+    },
+    {
+      "frame": 56,
+      "step": "06-success-ar",
+      "pumpedMs": 5700
+    },
+    {
+      "frame": 57,
+      "step": "06-success-ar",
+      "pumpedMs": 5800
+    },
+    {
+      "frame": 58,
+      "step": "06-success-ar",
+      "pumpedMs": 5900
+    },
+    {
+      "frame": 59,
+      "step": "06-success-ar",
+      "pumpedMs": 6000
+    },
+    {
+      "frame": 60,
+      "step": "06-streak-ar",
+      "pumpedMs": 6100
+    },
+    {
+      "frame": 61,
+      "step": "06-streak-ar",
+      "pumpedMs": 6200
+    },
+    {
+      "frame": 62,
+      "step": "06-streak-ar",
+      "pumpedMs": 6300
+    },
+    {
+      "frame": 63,
+      "step": "06-streak-ar",
+      "pumpedMs": 6400
+    },
+    {
+      "frame": 64,
+      "step": "06-streak-ar",
+      "pumpedMs": 6500
+    },
+    {
+      "frame": 65,
+      "step": "06-streak-ar",
+      "pumpedMs": 6600
+    },
+    {
+      "frame": 66,
+      "step": "06-streak-ar",
+      "pumpedMs": 6700
+    },
+    {
+      "frame": 67,
+      "step": "06-streak-ar",
+      "pumpedMs": 6800
+    }
+  ]
+}

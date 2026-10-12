@@ -108,7 +108,7 @@ class _NutrientsTab extends ConsumerWidget {
       (
         _t(context, 'Fiber'),
         TrackedNutrient.fiber,
-        nutrientGoal('goal.fiber') ?? targets.fiber,
+        nutrientGoal('goal.fiber'),
         'g',
       ),
       (
@@ -207,25 +207,41 @@ class _NutrientsTab extends ConsumerWidget {
           ),
         ),
         for (final extra in const [
-          ('Saturated fat', 'goal.saturatedFat', 'g'),
-          ('Polyunsaturated fat', 'goal.polyunsaturatedFat', 'g'),
-          ('Monounsaturated fat', 'goal.monounsaturatedFat', 'g'),
-          ('Trans fat', 'goal.transFat', 'g'),
-          ('Cholesterol', 'goal.cholesterol', 'mg'),
-          ('Vitamin A', 'goal.vitaminAMcg', 'mcg RAE'),
+          (
+            FoodNutrient.saturatedFat,
+            'Saturated fat',
+            'goal.saturatedFat',
+            'g',
+          ),
+          (
+            FoodNutrient.polyunsaturatedFat,
+            'Polyunsaturated fat',
+            'goal.polyunsaturatedFat',
+            'g',
+          ),
+          (
+            FoodNutrient.monounsaturatedFat,
+            'Monounsaturated fat',
+            'goal.monounsaturatedFat',
+            'g',
+          ),
+          (FoodNutrient.transFat, 'Trans fat', 'goal.transFat', 'g'),
+          (FoodNutrient.cholesterol, 'Cholesterol', 'goal.cholesterol', 'mg'),
+          (FoodNutrient.vitaminA, 'Vitamin A', 'goal.vitaminAMcg', 'mcg RAE'),
         ])
           _NutrientRow(
-            label: '${_t(context, extra.$1)} *',
-            total: null,
-            goal: nutrientGoal(extra.$2),
-            unit: extra.$3,
+            label:
+                '${_t(context, extra.$2)}${totals.fullComplete(extra.$1) ? '' : ' *'}',
+            total: totals.fullTotal(extra.$1),
+            goal: nutrientGoal(extra.$3),
+            unit: extra.$4,
           ),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
             Localizations.localeOf(context).languageCode == 'ar'
-                ? 'سجل الطعام الحالي لا يحفظ تفصيل أنواع الدهون أو الكوليسترول أو فيتامين A. تُعرض أهدافها، لكن إجمالياتها غير متاحة بدل اختلاق أرقام.'
-                : 'Current food snapshots do not store fat subtypes, cholesterol or vitamin A. Their targets are shown, but totals remain unavailable rather than invented.',
+                ? 'تُجمع أنواع الدهون والكوليسترول وفيتامين أ من لقطة الطعام المسجلة فقط. المغذّي المفقود يبقى غير متاح، والصفر الموثق يبقى صفرًا.'
+                : 'Fat subtypes, cholesterol and vitamin A use the recorded food snapshot. Missing values stay unavailable; a recorded zero stays zero.',
           ),
         ),
       ],

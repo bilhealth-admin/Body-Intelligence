@@ -48,6 +48,9 @@ Map<String, Object?> scopeCoachHealthForFocus({
   }
 
   if (includeNutrition) {
+    for (final key in ['dailyNutrientTargets', 'dailyGoalReview']) {
+      if (health[key] != null) scoped[key] = health[key];
+    }
     if (health['dailyTargets'] != null) {
       scoped['dailyTargets'] = health['dailyTargets'];
     }

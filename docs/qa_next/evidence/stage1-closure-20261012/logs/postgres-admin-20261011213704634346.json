@@ -1,0 +1,52 @@
+{
+  "baseline": false,
+  "postgres": "17.6",
+  "host": "127.0.0.1",
+  "database": "bil_qa_admin_20261011213704634346",
+  "files": {
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_consume_rate_limit.sql": "d80c5227b81b022761ff9be29347cbc503732e2767d18c4a9cd8ebd89f29edfa",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_get_ai_usage_status.sql": "d1ad335b86969d901b2bcf4bdd97fba0ade740cb4ac2305c653ba3b7309cc803",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_has_active_premium.sql": "81cac66b7d76409c51e13b0bc22b4ffbe09a8d272becc68e57470a2e45b02452",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_reserve_ai_usage.sql": "c1b1755a7f81571a693b4269f70b71e8dceb8f4f6d33b86ba4627b8b3b171a8a",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_resolve_ai_allowance_plan.sql": "361e3c4fee5c016e31fd6fce968c1512303b1ab39ea7682e6947f99b12519d48",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_resolve_ai_trial_anchor.sql": "fd4ebc8d1c3fbec9cca37cb8538ce9d1b310d0df09a620d5f3083b03f7cdb450",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_settle_ai_usage.sql": "4dcc8c5538b4ad4fd11eb0d82bccc5499459cb7a57cd320b015fec1f73c59c77",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\bil_sync_ai_monthly_usage.sql": "9f87df2f75e544b20127a2200f8567e3b4b4e54e6ffdb4649cde49f4b52e4fe3",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\functions.sql": "1ed9fc32bee7c1c7613129d2dd2a27b19729def6d79b6e9d396b3d233a1e794d",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\public_functions.sql": "df09be4483f5d211f4b8d7f82cfda536b10c317f903cd3ca188892959e451a76",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\schema.sql": "d581186a0068b4c3b582eeb957fbd54ea26732d4b6323291a971fc0c4f2d2f8b",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\store_subscription_table.sql": "49506ac60d3f7a27bcf4eba0b9370a96b07704c4c12a4eb91ab71158cb1fdf07",
+    "supabase\\tests\\fixtures\\admin_subscription_baseline\\tables.sql": "a5a8def35b7b00211be44b29adea8b355010d04618b4eab2055f99076c3a4248",
+    "supabase\\migrations\\20261011211500_admin_authority_transaction_lock.sql": "e10b82d4b2abbfab9f3c558be344cc20b18e4ca890cf62851d0e3e05b1a6c93d"
+  },
+  "cases": [
+    {
+      "name": "role withdrawal is serialized with an admitted financial operation",
+      "result": "PASS"
+    },
+    {
+      "name": "ordinary and content-only identities cannot invoke the financial API",
+      "result": "PASS"
+    },
+    {
+      "name": "simultaneous same-key grants and timeout replay create one receipt",
+      "result": "PASS"
+    },
+    {
+      "name": "email lookup resolves a stable owner and ambiguous or changed emails cannot retarget",
+      "result": "PASS"
+    },
+    {
+      "name": "existing durations and plans are enforced with no renewal or downgrade on repeated grants",
+      "result": "PASS"
+    },
+    {
+      "name": "revoking or expiring an admin grant cannot change an existing store purchase",
+      "result": "PASS"
+    },
+    {
+      "name": "old 32/35 RPC signatures and response keys are unchanged and owner scoped",
+      "result": "PASS"
+    }
+  ]
+}

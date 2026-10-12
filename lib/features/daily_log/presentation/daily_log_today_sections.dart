@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,27 +25,9 @@ class DailyLogTodayBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!enabled) return child;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final canvas = theme.brightness == Brightness.light
-        ? const Color(0xFFEBECF1)
-        : scheme.surfaceContainerLow;
+
     return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0, .44, 1],
-          colors: [
-            Color.alphaBlend(
-              scheme.primary.withValues(alpha: .10),
-              scheme.surface,
-            ),
-            canvas,
-            canvas,
-          ],
-        ),
-      ),
+      decoration: BoxDecoration(gradient: BilPearlFinish.background(context)),
       child: Material(type: MaterialType.transparency, child: child),
     );
   }
@@ -54,11 +37,17 @@ class DailyLogTodayCard extends StatelessWidget {
   const DailyLogTodayCard({super.key, required this.child});
   final Widget child;
   @override
-  Widget build(BuildContext context) => Material(
-    clipBehavior: Clip.antiAlias,
-    color: Theme.of(context).colorScheme.surface,
-    borderRadius: BorderRadius.circular(18),
-    child: child,
+  Widget build(BuildContext context) => Container(
+    decoration: BilPearlFinish.panel(
+      context,
+      radius: BorderRadius.circular(18),
+    ),
+    child: Material(
+      type: MaterialType.transparency,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: child,
+    ),
   );
 }
 

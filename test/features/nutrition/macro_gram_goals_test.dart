@@ -12,10 +12,12 @@ void main() {
 
   test('missing or corrupt persisted goals fail closed to plan targets', () {
     expect(MacroGramGoals.parse(null), isNull);
-    expect(MacroGramGoals.parse('0'), isNull);
+    expect(MacroGramGoals.parse('0'), 0);
     expect(MacroGramGoals.parse('-1'), isNull);
     expect(MacroGramGoals.parse('NaN'), isNull);
-    expect(MacroGramGoals.parse('1001'), isNull);
+    expect(MacroGramGoals.parse('2500'), 2500);
+    expect(MacroGramGoals.parse('2501'), isNull);
+    expect(const MacroGramGoals(protein: 0).proteinOr(120), 0);
     expect(MacroGramGoals.parse('125.5'), 125.5);
 
     const goals = MacroGramGoals();

@@ -53,11 +53,18 @@ void main() {
     );
     for (final nutrient in FoodNutrient.values) {
       expect(actual.knownValue(nutrient), basisNutrients[nutrient]);
-      expect(portion.knownValue(nutrient), basisNutrients[nutrient]! * 3);
+      expect(
+        portion.knownValue(nutrient),
+        basisNutrients[nutrient] == null ? null : basisNutrients[nutrient]! * 3,
+      );
     }
   });
 
-  for (final nutrient in FoodNutrient.values) {
+  // Only the original thirteen nutrients have compatibility columns. The six
+  // extended values are tested in their immutable JSON journey separately.
+  for (final nutrient in FoodNutrient.values.where(
+    (n) => n.index <= FoodNutrient.vitaminC.index,
+  )) {
     test(
       'a conflicting ${nutrient.name} column invalidates the whole modern row',
       () {

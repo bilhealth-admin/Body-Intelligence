@@ -151,6 +151,10 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
       }
       _updateState(() {
         activeConversationId = resolvedConversationId;
+        activeConversationTitle = historyArchive.conversations
+            .where((entry) => entry['id'] == resolvedConversationId)
+            .firstOrNull?['title']
+            ?.toString();
         lastClearWritingLanguageTag = restoredWritingLanguage;
         introVisible = restored.isEmpty;
         conversationReady = true;
@@ -193,6 +197,7 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
               _conversationHistoryKey: encodeCoachConversationHistory(
                 conversations: historyArchive.conversations,
                 activeConversationId: resolvedConversationId,
+                originalRaw: storedValues[3],
               ),
             _activeConversationIdKey: ?resolvedConversationId,
           });

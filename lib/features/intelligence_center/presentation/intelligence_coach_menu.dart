@@ -1,7 +1,13 @@
 part of 'intelligence_center_page.dart';
 
+@visibleForTesting
+Widget buildCoachMenuEvidenceSurface() =>
+    const _CoachMenuSheet(currentTitle: 'خطة التغذية 🥗', canRename: true);
+
 class _CoachMenuSheet extends StatelessWidget {
-  const _CoachMenuSheet();
+  const _CoachMenuSheet({this.currentTitle, this.canRename = false});
+  final String? currentTitle;
+  final bool canRename;
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +35,21 @@ class _CoachMenuSheet extends StatelessWidget {
             Text(
               intelligenceText(
                 context,
-                'Memory and preferences stay one tap away.',
-                'ذاكرتك وتفضيلاتك على بُعد لمسة.',
+                'Conversations, context, privacy and usage.',
+                'المحادثات والسياق والخصوصية والاستخدام.',
               ),
               style: TextStyle(color: scheme.onSurfaceVariant),
             ),
+            if (currentTitle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  currentTitle!,
+                  key: const Key('ai-coach-current-conversation-title'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             const SizedBox(height: 16),
             _CoachMenuTile(
               icon: Icons.dashboard_outlined,
@@ -80,17 +96,33 @@ class _CoachMenuSheet extends StatelessWidget {
               icon: Icons.tune_rounded,
               title: intelligenceText(
                 context,
-                'Coach preferences',
-                'تفضيلات المدرب',
+                'Coach settings',
+                'إعدادات المدرب',
               ),
               subtitle: intelligenceText(
                 context,
-                'Personal AI, voice, and response style',
-                'الذكاء الشخصي والصوت وأسلوب الرد',
+                'Context, privacy and balance',
+                'السياق والخصوصية والرصيد',
               ),
               onTap: () => Navigator.of(context).pop('settings'),
             ),
             const SizedBox(height: 9),
+            if (canRename)
+              _CoachMenuTile(
+                icon: Icons.edit_outlined,
+                title: intelligenceText(
+                  context,
+                  'Rename conversation',
+                  'إعادة تسمية المحادثة',
+                ),
+                subtitle: intelligenceText(
+                  context,
+                  'Change this conversation’s name',
+                  'غيّر اسم هذه المحادثة',
+                ),
+                onTap: () => Navigator.of(context).pop('rename'),
+              ),
+            const Divider(height: 24),
             _CoachMenuTile(
               icon: Icons.delete_sweep_outlined,
               title: intelligenceText(
@@ -131,52 +163,33 @@ class _CoachMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final accent = destructive ? scheme.error : const Color(0xFF12394E);
-    return Material(
-      color: destructive
-          ? scheme.errorContainer.withValues(alpha: .22)
-          : const Color(0xFFF2F7FA),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: .1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: accent, size: 21),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: scheme.outline),
-            ],
-          ),
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      minLeadingWidth: 24,
+      leading: Icon(
+        icon,
+        color: destructive ? scheme.error : scheme.onSurfaceVariant,
+        size: 22,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: destructive ? scheme.error : scheme.onSurface,
         ),
       ),
+      subtitle: Text(
+        subtitle,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+      ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: scheme.outline,
+        size: 20,
+      ),
+      onTap: onTap,
     );
   }
 }
@@ -207,13 +220,16 @@ extension _CoachPermissionMenu on _IntelligenceCenterPageState {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: const Color(0xFF15283D),
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF3D536D), width: .8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: .8,
+          ),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.add_rounded,
-          color: Color(0xFFBFD0E5),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           size: 25,
         ),
       ),

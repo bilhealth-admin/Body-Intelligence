@@ -32,6 +32,7 @@ final class EntitlementResolver {
       currentPeriodEndsAt: record.currentPeriodEndsAt,
       trialEndsAt: record.trialEndsAt,
       gracePeriodEndsAt: record.gracePeriodEndsAt,
+      verifiedAt: record.verifiedAt,
       isPurchasable: false,
       canRestorePurchases: record.authorityVerified && record.provider != null,
     );

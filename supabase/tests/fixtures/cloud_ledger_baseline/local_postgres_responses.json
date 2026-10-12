@@ -1,0 +1,290 @@
+[
+  {
+    "client": "32-35",
+    "schema": "current",
+    "operation": {
+      "operation_id": "32-35-current",
+      "mutation": "upsert",
+      "record": {
+        "entity_kind": "nutrition",
+        "record_id": "32-35-current",
+        "revision_device_id": "synthetic-device-01",
+        "revision_sequence": 1,
+        "updated_at": "2026-10-11T00:00:00Z",
+        "deleted_at": null,
+        "schema_version": 1,
+        "payload": {
+          "ciphertext": "jbWmpKL0BHaOIrJ7nkCmx7MpDr_zJZFGbZoMqZaf64kXZhbnW6bTnM6xKC_KcGNfD6MEzbvSyCmRLFAYH05D85_hojd86bR51pyni2XabCc_nbMguC0eG-rxMhhq9b-51kL_-SS8J-bVaJlE633sqHi3uBNcbhRu6dtM5HcyKQOc7IiEYpuIbHpx8YojTD66W4qdT1QB_BbldWQ0_YeTTXkBkH1wRJ-RSAuuMzJdeAcMGRx9rUoHPWcw8BVUd--GwFHHHYH3sVDl56VXBt_3Thb0-j77k1e-KS3_fM8dtYyI2rwndSBTIC0lUbfmwLVrL-AMM3reQ5IQ8TWxE7cM_C4fGUHVClhinv9gV-6stt6YGnYxgC5baY7JH_vrlKxswYLchVNuPsNjBS9ForZ0bIZghKBX6V6OpjypCq6B8Bzbkzro2dkJ3dghNko43js3FDpopLsj4Mi_GkW645G5Ft1_-AiWWS-XR1M8Nh6Yvw==",
+          "alg": "A256GCM",
+          "nonce": "QR87JOvlbyvWDMET",
+          "_bil_cipher_v": 1
+        }
+      }
+    },
+    "response": {
+      "cursor": 1,
+      "records": [
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "QR87JOvlbyvWDMET",
+            "ciphertext": "jbWmpKL0BHaOIrJ7nkCmx7MpDr_zJZFGbZoMqZaf64kXZhbnW6bTnM6xKC_KcGNfD6MEzbvSyCmRLFAYH05D85_hojd86bR51pyni2XabCc_nbMguC0eG-rxMhhq9b-51kL_-SS8J-bVaJlE633sqHi3uBNcbhRu6dtM5HcyKQOc7IiEYpuIbHpx8YojTD66W4qdT1QB_BbldWQ0_YeTTXkBkH1wRJ-RSAuuMzJdeAcMGRx9rUoHPWcw8BVUd--GwFHHHYH3sVDl56VXBt_3Thb0-j77k1e-KS3_fM8dtYyI2rwndSBTIC0lUbfmwLVrL-AMM3reQ5IQ8TWxE7cM_C4fGUHVClhinv9gV-6stt6YGnYxgC5baY7JH_vrlKxswYLchVNuPsNjBS9ForZ0bIZghKBX6V6OpjypCq6B8Bzbkzro2dkJ3dghNko43js3FDpopLsj4Mi_GkW645G5Ft1_-AiWWS-XR1M8Nh6Yvw==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "32-35-current",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        }
+      ],
+      "has_more": false,
+      "acknowledged": [
+        "32-35-current"
+      ]
+    }
+  },
+  {
+    "client": "new",
+    "schema": "current",
+    "operation": {
+      "operation_id": "new-current",
+      "mutation": "upsert",
+      "record": {
+        "entity_kind": "nutrition",
+        "record_id": "new-current",
+        "revision_device_id": "synthetic-device-01",
+        "revision_sequence": 1,
+        "updated_at": "2026-10-11T00:00:00Z",
+        "deleted_at": null,
+        "schema_version": 1,
+        "payload": {
+          "nonce": "4lCFHYenbrwDFLL6",
+          "_bil_cipher_v": 1,
+          "alg": "A256GCM",
+          "ciphertext": "MU3QKEOK2XN-T_IZ35ZD_3skBt5IMJ9xhAKHiHr4bEQr99tR0BZ9xR724R8EpMUFC0E8nrTLbUmPUcfkGB-K6cAggr-RJJz3uE_Xx8MTJ3r7gdc2mYEMb2lCps00vA0NkRJBr_ITawRH3KkVHwhdyRQgxWo1bXId-i2gIk-ZiQbCR1mkpRlHYODZfohmpIc44tmxqIcAfuCH5NLgTaQx54Eb2ZWbipkXkmVnQu4tuJXVoklKyDb9rzejwjohBCTGmqLKSB6zv4Yxe9syDHjWlP7oX6SEeCD_d6TqcWRLgyC6f0CrnKJdYK_YaWmUMRPX0iIY9G0VbSGTweCZJp2-fnEhPw4NKVnO_OUrvL2_AafNdeqxRkZ9nHwadz8mhhuWyfbwFn7STP9eUamsleaCba2AMUkuRJQmoin7he9CWdAq2dwENJkoNHrPsFFQjIfLEoBsHVvRKgZ9U8ntsGOx3RRu5G1-reJW_7mBV54QiS_46wFUzOukIoWaZfx27SLen-Xn5S5eBf0loP9gsOZ_JPqoYgHeiLVqChOq_Z-Qb2nL3QEo4jXLdb7VYizyKCZwUuT6PE8ca3uUWLY245V6Kfi5xawBVD0H449UPVW1BccQZUSirxSuBg2dBuu0S8EnYg=="
+        }
+      }
+    },
+    "response": {
+      "cursor": 2,
+      "records": [
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "QR87JOvlbyvWDMET",
+            "ciphertext": "jbWmpKL0BHaOIrJ7nkCmx7MpDr_zJZFGbZoMqZaf64kXZhbnW6bTnM6xKC_KcGNfD6MEzbvSyCmRLFAYH05D85_hojd86bR51pyni2XabCc_nbMguC0eG-rxMhhq9b-51kL_-SS8J-bVaJlE633sqHi3uBNcbhRu6dtM5HcyKQOc7IiEYpuIbHpx8YojTD66W4qdT1QB_BbldWQ0_YeTTXkBkH1wRJ-RSAuuMzJdeAcMGRx9rUoHPWcw8BVUd--GwFHHHYH3sVDl56VXBt_3Thb0-j77k1e-KS3_fM8dtYyI2rwndSBTIC0lUbfmwLVrL-AMM3reQ5IQ8TWxE7cM_C4fGUHVClhinv9gV-6stt6YGnYxgC5baY7JH_vrlKxswYLchVNuPsNjBS9ForZ0bIZghKBX6V6OpjypCq6B8Bzbkzro2dkJ3dghNko43js3FDpopLsj4Mi_GkW645G5Ft1_-AiWWS-XR1M8Nh6Yvw==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "32-35-current",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        },
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "4lCFHYenbrwDFLL6",
+            "ciphertext": "MU3QKEOK2XN-T_IZ35ZD_3skBt5IMJ9xhAKHiHr4bEQr99tR0BZ9xR724R8EpMUFC0E8nrTLbUmPUcfkGB-K6cAggr-RJJz3uE_Xx8MTJ3r7gdc2mYEMb2lCps00vA0NkRJBr_ITawRH3KkVHwhdyRQgxWo1bXId-i2gIk-ZiQbCR1mkpRlHYODZfohmpIc44tmxqIcAfuCH5NLgTaQx54Eb2ZWbipkXkmVnQu4tuJXVoklKyDb9rzejwjohBCTGmqLKSB6zv4Yxe9syDHjWlP7oX6SEeCD_d6TqcWRLgyC6f0CrnKJdYK_YaWmUMRPX0iIY9G0VbSGTweCZJp2-fnEhPw4NKVnO_OUrvL2_AafNdeqxRkZ9nHwadz8mhhuWyfbwFn7STP9eUamsleaCba2AMUkuRJQmoin7he9CWdAq2dwENJkoNHrPsFFQjIfLEoBsHVvRKgZ9U8ntsGOx3RRu5G1-reJW_7mBV54QiS_46wFUzOukIoWaZfx27SLen-Xn5S5eBf0loP9gsOZ_JPqoYgHeiLVqChOq_Z-Qb2nL3QEo4jXLdb7VYizyKCZwUuT6PE8ca3uUWLY245V6Kfi5xawBVD0H449UPVW1BccQZUSirxSuBg2dBuu0S8EnYg==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "new-current",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        }
+      ],
+      "has_more": false,
+      "acknowledged": [
+        "new-current"
+      ]
+    }
+  },
+  {
+    "client": "32-35",
+    "schema": "proposed",
+    "operation": {
+      "operation_id": "32-35-proposed",
+      "mutation": "upsert",
+      "record": {
+        "entity_kind": "nutrition",
+        "record_id": "32-35-proposed",
+        "revision_device_id": "synthetic-device-01",
+        "revision_sequence": 1,
+        "updated_at": "2026-10-11T00:00:00Z",
+        "deleted_at": null,
+        "schema_version": 1,
+        "payload": {
+          "_bil_cipher_v": 1,
+          "ciphertext": "FGrOiFFz_ETojZx9xCSDb-A5j20-bNhjri1kse_ASXeu66sjhJ1MOtnTdDT99Kat8B8tNcKwDXULdqLd3yvzrUUpgKypG7__8iMztKWz0MipbWpSTUDazd8mulb_rqyG5ecm_3gw4USpUlVf8rD68Gdi_lHAZ_QkNtslRt38Xt6FUm56NyqMMGmnIyFHW2De7pqnzWIp7FNCSB-S5Wlye5CocVrWkyVkTaFokjKxaDg6T1JsW0uBWXu2hdLKiQCOAFMUSGwkYxstw6JI2Simu9LWE1gdC7nkm6lm95zsd-jsBPTgcH2Z5jk4ff3yabYv6cJutFiRApHHdjhN7sGwX8HjWz_LferTEDKxmOcjMaz4_USysv4q01N0KvH3WR_yL7mYYe8-bBMAIPMjtinCVjplSgq2cu3SgSeMUYVp4R_pKPmtHRdqQw7kwfcqcp_jq5jWMo-2oM_hjh9XJP1rhpSv2krmLStXF4f2xFLzLg==",
+          "nonce": "fUOQrpG7arWeKag8",
+          "alg": "A256GCM"
+        }
+      }
+    },
+    "response": {
+      "cursor": 3,
+      "records": [
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "QR87JOvlbyvWDMET",
+            "ciphertext": "jbWmpKL0BHaOIrJ7nkCmx7MpDr_zJZFGbZoMqZaf64kXZhbnW6bTnM6xKC_KcGNfD6MEzbvSyCmRLFAYH05D85_hojd86bR51pyni2XabCc_nbMguC0eG-rxMhhq9b-51kL_-SS8J-bVaJlE633sqHi3uBNcbhRu6dtM5HcyKQOc7IiEYpuIbHpx8YojTD66W4qdT1QB_BbldWQ0_YeTTXkBkH1wRJ-RSAuuMzJdeAcMGRx9rUoHPWcw8BVUd--GwFHHHYH3sVDl56VXBt_3Thb0-j77k1e-KS3_fM8dtYyI2rwndSBTIC0lUbfmwLVrL-AMM3reQ5IQ8TWxE7cM_C4fGUHVClhinv9gV-6stt6YGnYxgC5baY7JH_vrlKxswYLchVNuPsNjBS9ForZ0bIZghKBX6V6OpjypCq6B8Bzbkzro2dkJ3dghNko43js3FDpopLsj4Mi_GkW645G5Ft1_-AiWWS-XR1M8Nh6Yvw==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "32-35-current",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        },
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "4lCFHYenbrwDFLL6",
+            "ciphertext": "MU3QKEOK2XN-T_IZ35ZD_3skBt5IMJ9xhAKHiHr4bEQr99tR0BZ9xR724R8EpMUFC0E8nrTLbUmPUcfkGB-K6cAggr-RJJz3uE_Xx8MTJ3r7gdc2mYEMb2lCps00vA0NkRJBr_ITawRH3KkVHwhdyRQgxWo1bXId-i2gIk-ZiQbCR1mkpRlHYODZfohmpIc44tmxqIcAfuCH5NLgTaQx54Eb2ZWbipkXkmVnQu4tuJXVoklKyDb9rzejwjohBCTGmqLKSB6zv4Yxe9syDHjWlP7oX6SEeCD_d6TqcWRLgyC6f0CrnKJdYK_YaWmUMRPX0iIY9G0VbSGTweCZJp2-fnEhPw4NKVnO_OUrvL2_AafNdeqxRkZ9nHwadz8mhhuWyfbwFn7STP9eUamsleaCba2AMUkuRJQmoin7he9CWdAq2dwENJkoNHrPsFFQjIfLEoBsHVvRKgZ9U8ntsGOx3RRu5G1-reJW_7mBV54QiS_46wFUzOukIoWaZfx27SLen-Xn5S5eBf0loP9gsOZ_JPqoYgHeiLVqChOq_Z-Qb2nL3QEo4jXLdb7VYizyKCZwUuT6PE8ca3uUWLY245V6Kfi5xawBVD0H449UPVW1BccQZUSirxSuBg2dBuu0S8EnYg==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "new-current",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        },
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "fUOQrpG7arWeKag8",
+            "ciphertext": "FGrOiFFz_ETojZx9xCSDb-A5j20-bNhjri1kse_ASXeu66sjhJ1MOtnTdDT99Kat8B8tNcKwDXULdqLd3yvzrUUpgKypG7__8iMztKWz0MipbWpSTUDazd8mulb_rqyG5ecm_3gw4USpUlVf8rD68Gdi_lHAZ_QkNtslRt38Xt6FUm56NyqMMGmnIyFHW2De7pqnzWIp7FNCSB-S5Wlye5CocVrWkyVkTaFokjKxaDg6T1JsW0uBWXu2hdLKiQCOAFMUSGwkYxstw6JI2Simu9LWE1gdC7nkm6lm95zsd-jsBPTgcH2Z5jk4ff3yabYv6cJutFiRApHHdjhN7sGwX8HjWz_LferTEDKxmOcjMaz4_USysv4q01N0KvH3WR_yL7mYYe8-bBMAIPMjtinCVjplSgq2cu3SgSeMUYVp4R_pKPmtHRdqQw7kwfcqcp_jq5jWMo-2oM_hjh9XJP1rhpSv2krmLStXF4f2xFLzLg==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "32-35-proposed",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        }
+      ],
+      "has_more": false,
+      "acknowledged": [
+        "32-35-proposed"
+      ]
+    }
+  },
+  {
+    "client": "new",
+    "schema": "proposed",
+    "operation": {
+      "operation_id": "new-proposed",
+      "mutation": "upsert",
+      "record": {
+        "entity_kind": "nutrition",
+        "record_id": "new-proposed",
+        "revision_device_id": "synthetic-device-01",
+        "revision_sequence": 1,
+        "updated_at": "2026-10-11T00:00:00Z",
+        "deleted_at": null,
+        "schema_version": 1,
+        "payload": {
+          "alg": "A256GCM",
+          "_bil_cipher_v": 1,
+          "ciphertext": "4Zqx2zOkaWDG-haE9EEdaMzUBlZXU8fs1dF2CsxcjGhWpPe_8zRcgtkgVoxtnGKiXNHFAcPR5JPWc58i5kGavHqhv5-BFBJJDR8i39h8HPwz2ixzyWc-m_OsVG7sLxa9Q5KsVT47tgMOOa73sUB6W4ZmYZuuV8k8P9RJ14ub6KuvIgr65KVKlrmsGN_4LRbLIQZZgVGzMm43PI3aICbRGQ_GTjgPpW5CCP2X2xX3xGbh5_4llvj0m9CJB3dove0MeHpMVbpN4v4MUfxtcAl93hEXZDe_NULpR0Qp0mJ0JmXIqV35rOqcTSJLFVP89bSTon4vumP_XORzDFXf1IzqVBkCotL1IGA3WFozlFJSMsrHRSMWzMA2vxQUOoBOEiOYq23J4StPH5mPXyyLajQ-stF3_aaTnc1JuimfDoUbsTV_UMSVc-d0n4Q9xS82r0MqidOfHWy4lH6UOnD3AYIjdzGyAwyfmnACPCfS4GduiL8HKPm7-BKfZ2H85KYws1DchUHprCcjYl4o5hcXZ9SpRrgqExGEqamkYjwb6VHByLr8cCl33iXVU9IzNQPgypeg-ihU-KkfD9Dn7skn_eb7UrV_NKVs6bFsNYtIG0chYni5mr3FAOKQQ1d0t6-Gnnd3Sw==",
+          "nonce": "sbb9x-Ko4fvj3E3S"
+        }
+      }
+    },
+    "response": {
+      "cursor": 4,
+      "records": [
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "QR87JOvlbyvWDMET",
+            "ciphertext": "jbWmpKL0BHaOIrJ7nkCmx7MpDr_zJZFGbZoMqZaf64kXZhbnW6bTnM6xKC_KcGNfD6MEzbvSyCmRLFAYH05D85_hojd86bR51pyni2XabCc_nbMguC0eG-rxMhhq9b-51kL_-SS8J-bVaJlE633sqHi3uBNcbhRu6dtM5HcyKQOc7IiEYpuIbHpx8YojTD66W4qdT1QB_BbldWQ0_YeTTXkBkH1wRJ-RSAuuMzJdeAcMGRx9rUoHPWcw8BVUd--GwFHHHYH3sVDl56VXBt_3Thb0-j77k1e-KS3_fM8dtYyI2rwndSBTIC0lUbfmwLVrL-AMM3reQ5IQ8TWxE7cM_C4fGUHVClhinv9gV-6stt6YGnYxgC5baY7JH_vrlKxswYLchVNuPsNjBS9ForZ0bIZghKBX6V6OpjypCq6B8Bzbkzro2dkJ3dghNko43js3FDpopLsj4Mi_GkW645G5Ft1_-AiWWS-XR1M8Nh6Yvw==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "32-35-current",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        },
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "4lCFHYenbrwDFLL6",
+            "ciphertext": "MU3QKEOK2XN-T_IZ35ZD_3skBt5IMJ9xhAKHiHr4bEQr99tR0BZ9xR724R8EpMUFC0E8nrTLbUmPUcfkGB-K6cAggr-RJJz3uE_Xx8MTJ3r7gdc2mYEMb2lCps00vA0NkRJBr_ITawRH3KkVHwhdyRQgxWo1bXId-i2gIk-ZiQbCR1mkpRlHYODZfohmpIc44tmxqIcAfuCH5NLgTaQx54Eb2ZWbipkXkmVnQu4tuJXVoklKyDb9rzejwjohBCTGmqLKSB6zv4Yxe9syDHjWlP7oX6SEeCD_d6TqcWRLgyC6f0CrnKJdYK_YaWmUMRPX0iIY9G0VbSGTweCZJp2-fnEhPw4NKVnO_OUrvL2_AafNdeqxRkZ9nHwadz8mhhuWyfbwFn7STP9eUamsleaCba2AMUkuRJQmoin7he9CWdAq2dwENJkoNHrPsFFQjIfLEoBsHVvRKgZ9U8ntsGOx3RRu5G1-reJW_7mBV54QiS_46wFUzOukIoWaZfx27SLen-Xn5S5eBf0loP9gsOZ_JPqoYgHeiLVqChOq_Z-Qb2nL3QEo4jXLdb7VYizyKCZwUuT6PE8ca3uUWLY245V6Kfi5xawBVD0H449UPVW1BccQZUSirxSuBg2dBuu0S8EnYg==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "new-current",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        },
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "fUOQrpG7arWeKag8",
+            "ciphertext": "FGrOiFFz_ETojZx9xCSDb-A5j20-bNhjri1kse_ASXeu66sjhJ1MOtnTdDT99Kat8B8tNcKwDXULdqLd3yvzrUUpgKypG7__8iMztKWz0MipbWpSTUDazd8mulb_rqyG5ecm_3gw4USpUlVf8rD68Gdi_lHAZ_QkNtslRt38Xt6FUm56NyqMMGmnIyFHW2De7pqnzWIp7FNCSB-S5Wlye5CocVrWkyVkTaFokjKxaDg6T1JsW0uBWXu2hdLKiQCOAFMUSGwkYxstw6JI2Simu9LWE1gdC7nkm6lm95zsd-jsBPTgcH2Z5jk4ff3yabYv6cJutFiRApHHdjhN7sGwX8HjWz_LferTEDKxmOcjMaz4_USysv4q01N0KvH3WR_yL7mYYe8-bBMAIPMjtinCVjplSgq2cu3SgSeMUYVp4R_pKPmtHRdqQw7kwfcqcp_jq5jWMo-2oM_hjh9XJP1rhpSv2krmLStXF4f2xFLzLg==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "32-35-proposed",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        },
+        {
+          "payload": {
+            "alg": "A256GCM",
+            "nonce": "sbb9x-Ko4fvj3E3S",
+            "ciphertext": "4Zqx2zOkaWDG-haE9EEdaMzUBlZXU8fs1dF2CsxcjGhWpPe_8zRcgtkgVoxtnGKiXNHFAcPR5JPWc58i5kGavHqhv5-BFBJJDR8i39h8HPwz2ixzyWc-m_OsVG7sLxa9Q5KsVT47tgMOOa73sUB6W4ZmYZuuV8k8P9RJ14ub6KuvIgr65KVKlrmsGN_4LRbLIQZZgVGzMm43PI3aICbRGQ_GTjgPpW5CCP2X2xX3xGbh5_4llvj0m9CJB3dove0MeHpMVbpN4v4MUfxtcAl93hEXZDe_NULpR0Qp0mJ0JmXIqV35rOqcTSJLFVP89bSTon4vumP_XORzDFXf1IzqVBkCotL1IGA3WFozlFJSMsrHRSMWzMA2vxQUOoBOEiOYq23J4StPH5mPXyyLajQ-stF3_aaTnc1JuimfDoUbsTV_UMSVc-d0n4Q9xS82r0MqidOfHWy4lH6UOnD3AYIjdzGyAwyfmnACPCfS4GduiL8HKPm7-BKfZ2H85KYws1DchUHprCcjYl4o5hcXZ9SpRrgqExGEqamkYjwb6VHByLr8cCl33iXVU9IzNQPgypeg-ihU-KkfD9Dn7skn_eb7UrV_NKVs6bFsNYtIG0chYni5mr3FAOKQQ1d0t6-Gnnd3Sw==",
+            "_bil_cipher_v": 1
+          },
+          "owner_id": "31000000-0000-4000-8000-000000000001",
+          "record_id": "new-proposed",
+          "deleted_at": null,
+          "updated_at": "2026-10-11T03:00:00+03:00",
+          "entity_kind": "nutrition",
+          "schema_version": 1,
+          "revision_sequence": 1,
+          "revision_device_id": "synthetic-device-01"
+        }
+      ],
+      "has_more": false,
+      "acknowledged": [
+        "new-proposed"
+      ]
+    }
+  }
+]

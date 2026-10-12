@@ -10,6 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 
 void main() {
   test(
@@ -164,6 +168,25 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWithValue(
+            AsyncData(
+              SubscriptionState(
+                plan: CommercePlan.premium,
+                entitlements: PaidPlanCatalog.composedEntitlementsFor(
+                  CommercePlan.premium,
+                ),
+                authority: EntitlementAuthority.verifiedServer,
+                startedAt: DateTime.now().subtract(const Duration(days: 1)),
+                currentPeriodEndsAt: DateTime.now().add(
+                  const Duration(days: 1),
+                ),
+                isPurchasable: false,
+                canRestorePurchases: false,
+              ),
+            ),
+          ),
+        ],
         child: _localizedApp(
           Scaffold(
             body: DailyLogSnapshot(
@@ -188,12 +211,16 @@ void main() {
     expect(progress('carbs'), '50%');
     expect(progress('protein'), '50%');
     expect(progress('fat'), '40%');
-    expect(_textBelow(tester, const Key('daily-summary-carbs-grams')), '40 g');
+    expect(
+      _textBelow(tester, const Key('daily-summary-carbs-grams')),
+      '40 / 80',
+    );
+    expect(find.text('Carbs · g'), findsOneWidget);
     expect(
       _textBelow(tester, const Key('daily-summary-protein-grams')),
-      '25 g',
+      '25 / 50',
     );
-    expect(_textBelow(tester, const Key('daily-summary-fat-grams')), '10 g');
+    expect(_textBelow(tester, const Key('daily-summary-fat-grams')), '10 / 25');
   });
 }
 

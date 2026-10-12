@@ -71,18 +71,22 @@ class _FoodMacroValue extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '${value.round()} g',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w900,
+        PremiumNutritionGlass(
+          compact: true,
+          showLabel: false,
+          child: Text(
+            '${value.round()}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
         const SizedBox(height: 2),
         Text(
-          label,
+          '$label · g',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.labelSmall,

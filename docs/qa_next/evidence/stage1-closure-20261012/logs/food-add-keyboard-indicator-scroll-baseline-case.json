@@ -1,0 +1,61 @@
+{
+  "label": "food-add-keyboard-indicator-scroll-baseline-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/food_add_access_indicator_test.dart",
+    "--plain-name",
+    "Food Add honest badge and free custom action free Arabic 320 2x keyboard"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791758677.7211177,
+  "files": {
+    "test/features/nutrition/food_add_access_indicator_test.dart": "143e860d6978985f59437d7fb9ad1a687f91427dcb9ac494942fa782b5b6cf59"
+  },
+  "source_fingerprint": "5d551284dcd8ac29505ea63557d91ad6d101a0294df5ff820ef6ea6dec78b2b1",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/nutrition/food_add_access_indicator_test.dart",
+    "--plain-name",
+    "Food Add honest badge and free custom action free Arabic 320 2x keyboard"
+  ],
+  "pid": 14536,
+  "exit_code": 1,
+  "finished": 1791758684.468587,
+  "end_fingerprint": "5d551284dcd8ac29505ea63557d91ad6d101a0294df5ff820ef6ea6dec78b2b1",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "Food Add honest badge and free custom action free Arabic 320 2x keyboard",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_add_access_indicator_test.dart",
+      "result": "error"
+    }
+  ],
+  "counts": {
+    "success": 0,
+    "failure": 0,
+    "error": 1,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 4,
+      "error": "Test failed. See exception logs above.\nThe test description was: Food Add honest badge and free custom action free Arabic 320 2x keyboard",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 4305
+    }
+  ],
+  "incomplete_tests": []
+}

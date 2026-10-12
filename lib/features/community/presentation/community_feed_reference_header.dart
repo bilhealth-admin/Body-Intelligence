@@ -122,6 +122,9 @@ class _CommunityFeedReferenceHeaderState
                       builder: (context, snapshot) => BilAccountAvatar(
                         radius: 18,
                         networkUrl: snapshot.data?.avatarUrl,
+                        ownerId: widget.repository.currentUserId,
+                        loading:
+                            snapshot.connectionState != ConnectionState.done,
                       ),
                     ),
                     const SizedBox(width: 10),

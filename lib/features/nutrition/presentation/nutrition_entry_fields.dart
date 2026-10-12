@@ -6,17 +6,21 @@ String nutritionEntryText(BuildContext context, String en, String ar) =>
     ? ar
     : context.strings.text(en);
 
-double? parseNutritionNumber(String input) {
+String canonicalNutritionNumberInput(String input) {
   const arabic = '٠١٢٣٤٥٦٧٨٩', persian = '۰۱۲۳۴۵۶۷۸۹';
-  final normalized = input
+  return input
       .trim()
       .replaceAll('٫', '.')
       .replaceAll(',', '.')
+      .replaceAll('٬', '')
       .replaceAllMapped(RegExp(r'[٠-٩۰-۹]'), (match) {
         final digit = match[0]!;
         return '${arabic.contains(digit) ? arabic.indexOf(digit) : persian.indexOf(digit)}';
       });
-  final number = double.tryParse(normalized);
+}
+
+double? parseNutritionNumber(String input) {
+  final number = double.tryParse(canonicalNutritionNumberInput(input));
   return number != null && number.isFinite ? number : null;
 }
 

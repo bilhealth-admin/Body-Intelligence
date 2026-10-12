@@ -3,13 +3,19 @@ import 'dart:convert';
 import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'app_database.dart';
 import 'nutrient_evidence.dart';
+import 'catalog_nutrient_evidence.dart';
 
 enum FoodBasisEvidenceState { legacy, valid, invalid }
 
 /// Reads a modern immutable basis only when its complete database projection
 /// agrees. Invalid modern data is unavailable, never a legacy macro fallback.
 final class FoodBasisEvidence {
-  const FoodBasisEvidence._(this.row, this.state, this.snapshot);
+  const FoodBasisEvidence._(
+    this.row,
+    this.state,
+    this.snapshot, [
+    this.catalog,
+  ]);
 
   factory FoodBasisEvidence.read(Food row, {String? ownerKey}) {
     FoodBasisEvidence invalid() =>
@@ -27,6 +33,20 @@ final class FoodBasisEvidence {
     try {
       if (utf8.encode(raw).length > 65536) return invalid();
       final envelope = jsonDecode(raw);
+      if (envelope is Map &&
+          envelope['schema'] == CatalogNutrientEvidence.schema) {
+        final catalog = CatalogNutrientEvidence.decode(
+          row,
+          envelope,
+          expectedOwner: ownerKey,
+        );
+        return FoodBasisEvidence._(
+          row,
+          FoodBasisEvidenceState.valid,
+          catalog.snapshot,
+          catalog,
+        );
+      }
       if (envelope is! Map ||
           envelope.length != 2 ||
           envelope['schema'] != schema ||
@@ -46,10 +66,14 @@ final class FoodBasisEvidence {
           !row.verified &&
           row.source == sourceLabel(food) &&
           row.nutrientEvidenceMask == mask(food) &&
-          FoodNutrient.values.every(
-            (nutrient) =>
-                _near(_rowValue(row, nutrient), food.nutrients[nutrient] ?? 0),
-          );
+          FoodNutrient.values
+              .where((n) => n.index <= FoodNutrient.vitaminC.index)
+              .every(
+                (nutrient) => _near(
+                  _rowValue(row, nutrient),
+                  food.nutrients[nutrient] ?? 0,
+                ),
+              );
       return matches
           ? FoodBasisEvidence._(row, FoodBasisEvidenceState.valid, food)
           : invalid();
@@ -61,12 +85,17 @@ final class FoodBasisEvidence {
   }
 
   static const schema = 'bil.food.basis.v1';
+  static bool _near(double a, double b) =>
+      a.isFinite && b.isFinite && (a - b).abs() <= 1e-9 * (1 + b.abs());
+  static const catalogSchema = 'bil.catalog.nutrition.v1';
 
   final Food row;
   final FoodBasisEvidenceState state;
   final CoachFoodSnapshot? snapshot;
+  final CatalogNutrientEvidence? catalog;
 
   bool get isModern => state != FoodBasisEvidenceState.legacy;
+  bool get isCatalog => catalog != null;
   bool get isValid => state != FoodBasisEvidenceState.invalid;
 
   /// Only a valid immutable modern snapshot proves this gram basis. Legacy
@@ -75,9 +104,11 @@ final class FoodBasisEvidence {
 
   double? value(FoodNutrient nutrient) {
     if (state == FoodBasisEvidenceState.invalid) return null;
+    if (catalog != null) return catalog!.nutrients[nutrient];
     final food = snapshot;
     if (food != null) return food.nutrients[nutrient];
     final raw = _rowValue(row, nutrient);
+    if (nutrient.index > FoodNutrient.vitaminC.index) return null;
     if (!raw.isFinite || raw < 0) return null;
     if (nutrient == FoodNutrient.iron || nutrient == FoodNutrient.vitaminC) {
       // Old Food rows defaulted these columns to zero without evidence bits.
@@ -152,11 +183,15 @@ final class FoodBasisEvidence {
         FoodNutrient.phosphorus => row.phosphorus,
         FoodNutrient.iron => row.iron,
         FoodNutrient.vitaminC => row.vitaminC,
+        _ => 0,
       };
 
-  static bool _near(double actual, double expected) =>
-      actual.isFinite &&
-      actual >= 0 &&
-      expected.isFinite &&
-      (actual - expected).abs() <= 1e-9 * (1 + expected.abs());
+  /// The catalog's complete nutrient vector fits the existing nullable JSON
+  /// column. Older rows are not rewritten and missing extended values are not
+  /// synthesized. The compatibility columns stay bound to the new snapshot.
+  static String encodeCatalog(
+    Food row,
+    Map<FoodNutrient, double?> incoming, {
+    String? ownerKey,
+  }) => CatalogNutrientEvidence.encode(row, incoming, ownerKey: ownerKey);
 }

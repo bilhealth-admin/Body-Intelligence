@@ -1,0 +1,11 @@
+{
+  "case": "uses exact local art and verified nutrition on a real card",
+  "reason": "Owner requested Pearl polish; trusted card retains exact local art, verified source and serving nutrition; paid values protected, title visible. Reviewed Master/Actual/Diff individually; no threshold change.",
+  "images": {
+    "master": "fcebd53c01d4262204761f9af10b01186be81db566f6e362b902c00bb4ebece6",
+    "actual": "1e62e577bc61577c5eb69bf5ce9bc10376b551c2190f4ba9d054dbec20c8e656",
+    "diff": "cecbe040cf9fb03c5ca95bbe76b20643c5ebb9391b948fc0d6fcbf48d33f2260"
+  },
+  "normal_validation": "recipe-individually-reviewed-golden-case",
+  "final_validation": "see ../../results.json"
+}

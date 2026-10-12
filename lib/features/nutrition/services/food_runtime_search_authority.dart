@@ -1,3 +1,5 @@
+import 'food_runtime_search_models.dart';
+export 'food_runtime_search_models.dart';
 import 'dart:async';
 
 import '../../../data/database/app_database.dart';
@@ -17,53 +19,7 @@ import 'food_search_text_matcher.dart';
 import 'regional_barcode_network_resolver.dart';
 import 'trusted_food_network_search_resolver.dart';
 
-typedef MobileCatalogRepositoryResolver =
-    Future<UnifiedFoodRepository?> Function();
-typedef CommunityFoodSearchResolver =
-    Future<List<UnifiedFood>> Function(String query, {int limit});
-
-enum FoodRuntimeSearchSource { localOnly, catalogAndLocal, localFallback }
-
-enum FoodRuntimeBarcodeStatus {
-  invalid,
-  found,
-  identifiedProduct,
-  notFound,
-  degraded,
-}
-
-class FoodRuntimeBarcodeResult {
-  final FoodRuntimeBarcodeStatus status;
-  final List<Food> foods;
-  final FoodRuntimeSearchSource source;
-  final String normalizedBarcode;
-  final ProductIdentity? product;
-  final String? ingredients;
-
-  const FoodRuntimeBarcodeResult({
-    required this.status,
-    required this.foods,
-    required this.source,
-    required this.normalizedBarcode,
-    this.product,
-    this.ingredients,
-  });
-
-  bool get found => status == FoodRuntimeBarcodeStatus.found;
-  bool get invalid => status == FoodRuntimeBarcodeStatus.invalid;
-  bool get degraded => status == FoodRuntimeBarcodeStatus.degraded;
-}
-
-class FoodRuntimeSearchResult {
-  final List<Food> foods;
-  final FoodRuntimeSearchSource source;
-
-  const FoodRuntimeSearchResult({required this.foods, required this.source});
-
-  bool get catalogUsed => source == FoodRuntimeSearchSource.catalogAndLocal;
-
-  bool get degraded => source == FoodRuntimeSearchSource.localFallback;
-}
+part 'food_runtime_search_ranking.dart';
 
 class FoodRuntimeSearchAuthority {
   static const FoodSearchAssistance _searchAssistance = FoodSearchAssistance();
@@ -140,8 +96,13 @@ class FoodRuntimeSearchAuthority {
     Duration remoteDebounce = const Duration(milliseconds: 180),
   }) => Stream<FoodRuntimeSearchResult>.multi((sink) {
     var cancelled = false;
+    Timer? remoteTimer;
+    Completer<void>? remoteReady;
     sink.onCancel = () {
       cancelled = true;
+      remoteTimer?.cancel();
+      final ready = remoteReady;
+      if (ready != null && !ready.isCompleted) ready.complete();
     };
     unawaited(() async {
       var emitted = false;
@@ -165,7 +126,9 @@ class FoodRuntimeSearchAuthority {
         );
         if (cancelled) return;
         sink.add(installed);
-        await Future<void>.delayed(remoteDebounce);
+        remoteReady = Completer<void>();
+        remoteTimer = Timer(remoteDebounce, remoteReady!.complete);
+        await remoteReady!.future;
         if (cancelled) return;
         final enriched = await searchDetailed(
           query,
@@ -709,67 +672,5 @@ class FoodRuntimeSearchAuthority {
       foods: outcome.foods,
       source: outcome.source,
     );
-  }
-
-  FoodSearchTextMatch _matchesSearchText({
-    required String query,
-    required String primaryName,
-    String? arabicName,
-    String? category,
-    Iterable<String> keywords = const <String>[],
-  }) {
-    return _textMatcher.match(
-      query: query,
-      queryVariants: _searchAssistance.expand(query),
-      primaryName: primaryName,
-      arabicName: arabicName,
-      category: category,
-      keywords: keywords,
-    );
-  }
-
-  FoodSearchTextMatch _matchQuery(UnifiedFood food, String query) =>
-      _matchesSearchText(
-        query: query,
-        primaryName: food.name,
-        arabicName: food.arabicName,
-        category: food.category,
-        keywords: food.keywords,
-      );
-
-  FoodSearchTextMatch _matchLocalFood(Food food, String query) =>
-      _matchesSearchText(
-        query: query,
-        primaryName: food.name,
-        arabicName: food.arabicName,
-        category: food.category,
-        keywords: food.keywords.split(','),
-      );
-
-  List<UnifiedFood> _rankUnifiedFoods(
-    Iterable<UnifiedFood> foods,
-    String query,
-  ) {
-    final matched = foods
-        .map((food) => (food: food, match: _matchQuery(food, query)))
-        .where((entry) => entry.match.matches)
-        .toList(growable: false);
-    final ranked = _textMatcher.suppressIncompleteTokenPrefixes(
-      matched,
-      (entry) => entry.match,
-    )..sort((left, right) => right.match.rank.compareTo(left.match.rank));
-    return ranked.map((entry) => entry.food).toList(growable: false);
-  }
-
-  List<Food> _rankLocalFoods(Iterable<Food> foods, String query) {
-    final matched = foods
-        .map((food) => (food: food, match: _matchLocalFood(food, query)))
-        .where((entry) => entry.match.matches)
-        .toList(growable: false);
-    final ranked = _textMatcher.suppressIncompleteTokenPrefixes(
-      matched,
-      (entry) => entry.match,
-    )..sort((left, right) => right.match.rank.compareTo(left.match.rank));
-    return ranked.map((entry) => entry.food).toList(growable: false);
   }
 }

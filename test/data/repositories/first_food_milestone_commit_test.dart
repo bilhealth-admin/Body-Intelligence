@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/first_meal_milestone.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
@@ -7,6 +8,110 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final deleted in [false, true]) {
+    test(
+      'restored legacy food with deleted=$deleted is done before another insert',
+      () async {
+        final database = AppDatabase.forTesting(
+          NativeDatabase.memory(),
+          localOwnerId: 'owner-a',
+        );
+        addTearDown(database.close);
+        final preferences = PreferencesRepository(database);
+        final meals = MealRepository(database);
+        final food = await FoodRepository(database).addFood(
+          name: 'Legacy fixture',
+          category: 'test',
+          calories: 80,
+          protein: 1,
+          carbs: 18,
+          fats: 0,
+          servingSize: 100,
+          servingUnit: 'g',
+        );
+        final meal = await meals.createMeal(
+          date: DateTime(2026, 10, 10),
+          name: 'breakfast',
+          type: 'breakfast',
+        );
+        await meals.addMealItem(mealId: meal, foodId: food, quantity: 100);
+        if (deleted) {
+          await meals.deleteMealItem(
+            (await database.select(database.mealItems).getSingle()).id,
+          );
+        }
+        // Synthetic old snapshot: no v1 marker. No real account flags are reset.
+        await preferences.remove(firstMealCelebrationPreferenceKey);
+        final before = (await database.select(database.mealItems).get())
+            .map((row) => row.toJson())
+            .toList();
+        expect(
+          await meals.prepareFirstFoodMilestone(isCurrent: () => true),
+          'done',
+        );
+        expect(
+          await meals.prepareFirstFoodMilestone(isCurrent: () => true),
+          'done',
+        );
+        expect(
+          (await database.select(database.mealItems).get())
+              .map((row) => row.toJson())
+              .toList(),
+          before,
+        );
+        final other = AppDatabase.forTesting(
+          NativeDatabase.memory(),
+          localOwnerId: 'owner-b',
+        );
+        addTearDown(other.close);
+        expect(
+          await MealRepository(
+            other,
+          ).prepareFirstFoodMilestone(isCurrent: () => true),
+          isNull,
+        );
+      },
+    );
+  }
+  test(
+    'owner retires while legacy diary preparation is awaiting SQLite',
+    () async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final preferences = PreferencesRepository(database);
+      final foods = FoodRepository(database);
+      final meals = MealRepository(database);
+      final food = await foods.addFood(
+        name: 'Restored owner fixture',
+        category: 'test',
+        calories: 80,
+        protein: 1,
+        carbs: 18,
+        fats: 0,
+        servingSize: 100,
+        servingUnit: 'g',
+      );
+      final meal = await meals.createMeal(
+        date: DateTime(2026, 10, 10),
+        name: 'breakfast',
+        type: 'breakfast',
+      );
+      await meals.addMealItem(mealId: meal, foodId: food, quantity: 100);
+      await preferences.remove(firstMealCelebrationPreferenceKey);
+      final entered = Completer<void>();
+      var current = true;
+      final preparing = MealRepository(database).prepareFirstFoodMilestone(
+        isCurrent: () {
+          if (!entered.isCompleted) entered.complete();
+          return current;
+        },
+      );
+      await entered.future;
+      current = false;
+      expect(await preparing, isNull);
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), isNull);
+    },
+  );
   test('a meal bucket alone is not a first committed food', () async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);

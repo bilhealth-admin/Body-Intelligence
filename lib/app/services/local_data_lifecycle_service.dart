@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import '../../data/database/app_database.dart';
+import '../../data/database/meal_food_evidence.dart';
+import '../../features/nutrition/domain/unified_food.dart';
 
 class LocalDataLifecycleService {
   const LocalDataLifecycleService(this.database);
@@ -110,12 +112,62 @@ class LocalDataLifecycleService {
               'mealId': row.mealId,
               'foodId': row.foodId,
               'quantity': row.quantity,
-              'calories': row.calories,
-              'proteinG': row.protein,
-              'carbohydratesG': row.carbs,
-              'fatG': row.fats,
-              'fiberG': row.fiber,
-              'sodiumMg': row.sodium,
+              'calories': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.calories),
+              'proteinG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.protein),
+              'carbohydratesG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.carbohydrates),
+              'fatG': MealFoodEvidence.read(row).fullValue(FoodNutrient.fat),
+              'fiberG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.fiber),
+              'sodiumMg': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.sodium),
+              'sugarG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.sugar),
+              'potassiumMg': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.potassium),
+              'calciumMg': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.calcium),
+              'ironMg': MealFoodEvidence.read(row).fullValue(FoodNutrient.iron),
+              'magnesiumMg': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.magnesium),
+              'phosphorusMg': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.phosphorus),
+              'vitaminCMg': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.vitaminC),
+              'saturatedFatG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.saturatedFat),
+              'polyunsaturatedFatG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.polyunsaturatedFat),
+              'monounsaturatedFatG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.monounsaturatedFat),
+              'transFatG': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.transFat),
+              'cholesterolMg': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.cholesterol),
+              'vitaminAMcgRae': MealFoodEvidence.read(
+                row,
+              ).fullValue(FoodNutrient.vitaminA),
+              'quantityUnit': row.servingUnitSnapshot,
+              'foodName': MealFoodEvidence.read(row).foodName,
+              'foodEvidenceJson': row.foodEvidenceJson,
               'nutrientEvidenceMask': row.nutrientEvidenceMask,
               'foodSource': row.foodSourceSnapshot,
               'foodVerified': row.foodVerifiedSnapshot,
@@ -137,6 +189,22 @@ class LocalDataLifecycleService {
           'fatG',
           'fiberG',
           'sodiumMg',
+          'sugarG',
+          'potassiumMg',
+          'calciumMg',
+          'ironMg',
+          'magnesiumMg',
+          'phosphorusMg',
+          'vitaminCMg',
+          'saturatedFatG',
+          'polyunsaturatedFatG',
+          'monounsaturatedFatG',
+          'transFatG',
+          'cholesterolMg',
+          'vitaminAMcgRae',
+          'quantityUnit',
+          'foodName',
+          'foodEvidenceJson',
           'nutrientEvidenceMask',
           'foodSource',
           'foodVerified',

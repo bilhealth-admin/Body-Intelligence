@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../app/environment/app_environment.dart';
-import '../../../app/security/bil_mobile_integrity_service.dart';
+import 'admin_owner_operation.dart';
 
 abstract interface class CommunityMemberAccessAdminGateway {
   Future<List<CommunitySuspendedMemberEntry>> listSuspendedMembers();
@@ -114,12 +114,11 @@ final class SupabaseCommunityMemberAccessAdminGateway
       'idempotency_key': _uuid.v4(),
       ...fields,
     };
-    final protectedBody = await BilMobileIntegrityService.instance
-        .protect(action: integrityAction, payload: body)
-        .timeout(const Duration(seconds: 12));
-    final response = await _client.functions
-        .invoke('ai-coach-global-reset', body: protectedBody)
-        .timeout(const Duration(seconds: 20));
+    final response = await AdminOwnerOperation.invoke(
+      _client,
+      integrityAction: integrityAction,
+      body: body,
+    );
     if (response.status != 200) {
       throw StateError('community_member_admin_failed');
     }

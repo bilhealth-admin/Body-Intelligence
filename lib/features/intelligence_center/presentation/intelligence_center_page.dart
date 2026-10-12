@@ -14,6 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/services/app_settings_provider.dart';
 import '../../../app/services/app_settings_service.dart';
@@ -27,6 +28,8 @@ import '../../../data/database/database_scope.dart';
 import '../../../data/repositories/daily_log_repository.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
+import '../domain/coach_conversation_titles.dart';
+import 'coach_conversation_rename_dialog.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../../shared/widgets/bil_premium_trust_surface.dart';
@@ -118,6 +121,7 @@ part 'intelligence_center_message_widgets.dart';
 part 'intelligence_center_voice_widgets.dart';
 part 'intelligence_conversation_persistence.dart';
 part 'intelligence_conversation_history.dart';
+part 'intelligence_conversation_rename.dart';
 part 'intelligence_conversation_viewport.dart';
 part 'intelligence_reference_chat_body.dart';
 part 'intelligence_conversation_voice.dart';
@@ -229,6 +233,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   bool coachMenuOpening = false;
   bool entryWelcomeVisible = true;
   String? activeConversationId;
+  String? activeConversationTitle;
   Future<void> conversationPersistenceTail = Future<void>.value();
   int conversationPersistenceEpoch = 0;
   ProviderSubscription<AppDatabase>? healthEffectOwnerSubscription;
@@ -444,7 +449,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     _scrollToLatest();
   }
 
-  Future<void> _openCoachMenuSheet() async {
+  Future<void> _openCoachMenuSheet(BuildContext anchor) async {
     if (!mounted ||
         !conversationReady ||
         coachMenuOpening ||
@@ -453,7 +458,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     }
     coachMenuOpening = true;
     try {
-      await _showCoachMenuSheet();
+      await _showCoachMenuSheet(anchor);
     } finally {
       coachMenuOpening = false;
     }

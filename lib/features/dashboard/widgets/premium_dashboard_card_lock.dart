@@ -1,14 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
-import '../../commerce/presentation/premium_label_badge.dart';
+import '../../commerce/presentation/premium_value_mask.dart';
 
-/// A compact, truthful Premium marker for protected dashboard cards.
-///
-/// The real card stays visible behind a light scrim. The overlay only marks
-/// the card as Premium; it never authorizes access, and the destination route
-/// repeats the server-verified entitlement check.
+/// A value-region guard. The actual card heading belongs outside this region.
 class PremiumDashboardCardLock extends StatelessWidget {
   const PremiumDashboardCardLock({
     required this.locked,
@@ -20,6 +14,7 @@ class PremiumDashboardCardLock extends StatelessWidget {
     this.revealPreview = false,
     this.showLabel = true,
     this.checking = false,
+    this.onRetry,
     super.key,
   });
 
@@ -32,62 +27,25 @@ class PremiumDashboardCardLock extends StatelessWidget {
   final bool revealPreview;
   final bool showLabel;
   final bool checking;
+  final VoidCallback? onRetry;
 
   @override
-  Widget build(BuildContext context) {
-    if (!locked && !checking) return child;
-    return Stack(
-      fit: StackFit.passthrough,
-      children: [
-        ExcludeSemantics(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: AbsorbPointer(child: child),
-          ),
-        ),
-        Positioned.fill(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
-              child: Material(
-                color: Theme.of(context).brightness == Brightness.light
-                    ? const Color(0x2AFFFFFF)
-                    : const Color(0x42000000),
-                child: InkWell(
-                  key: Key(
-                    checking
-                        ? 'dashboard-premium-access-checking'
-                        : 'dashboard-premium-lock',
-                  ),
-                  onTap: checking ? null : onTap,
-                  child: Center(
-                    child: Semantics(
-                      button: !checking,
-                      label: title,
-                      child: ExcludeSemantics(
-                        child: checking
-                            ? const SizedBox.square(
-                                key: Key('dashboard-premium-checking-spinner'),
-                                dimension: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : showLabel
-                            ? const PremiumLabelBadge(
-                                key: Key('dashboard-premium-label'),
-                              )
-                            : const SizedBox.expand(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => PremiumValueMask(
+    locked: locked,
+    checking: checking,
+    onRetry: onRetry,
+    onUpgrade: onTap,
+    borderRadius: borderRadius,
+    showLabel: showLabel,
+    reserveSpace: false,
+    actionKey: Key(
+      checking ? 'dashboard-premium-access-checking' : 'dashboard-premium-lock',
+    ),
+    statusKey: Key(
+      checking
+          ? 'dashboard-premium-checking-spinner'
+          : 'dashboard-premium-label',
+    ),
+    child: child,
+  );
 }

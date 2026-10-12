@@ -91,8 +91,11 @@ void main() {
       arabic: false,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Voice input unavailable'), findsOneWidget);
-    await tester.tap(find.text('OK'));
+    expect(
+      find.text('This device has no available speech recognition service.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('cancel-voice-food-candidate')));
     await tester.pumpAndSettle();
 
     expect(await capture, isNull);
@@ -107,6 +110,9 @@ final class _UnavailableSpeechToText extends SpeechToText {
   Future<bool> initialize({
     void Function(SpeechRecognitionError error)? onError,
   }) async => false;
+
+  @override
+  Future<void> cancel() async {}
 
   @override
   Future<void> dispose() async {

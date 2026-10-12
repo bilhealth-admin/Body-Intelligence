@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../app/theme/premium_design_tokens.dart';
 import '../../app/theme/premium_motion_tokens.dart';
+import '../../app/theme/bil_pearl_finish.dart';
 
 enum PremiumSurfaceLevel { primary, supporting, detail }
 
@@ -116,46 +117,61 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                   context,
                   PremiumMotionTokens.stateChangeDuration,
                 ),
-                decoration: BoxDecoration(
-                  color: widget.dashboardGlass ? null : colorScheme.surface,
-                  gradient: widget.dashboardGlass
-                      ? LinearGradient(
-                          begin: AlignmentDirectional.topStart,
-                          end: AlignmentDirectional.bottomEnd,
-                          colors: dark
-                              ? <Color>[
-                                  colorScheme.surfaceContainerHigh,
-                                  colorScheme.surfaceContainer,
-                                ]
-                              : <Color>[
-                                  Colors.white,
-                                  colorScheme.surfaceContainerLowest,
-                                ],
-                        )
-                      : null,
-                  borderRadius: radius,
-                  border: Border.all(
-                    color: highContrast
-                        ? colorScheme.outline
-                        : PremiumDesignTokens.dashboardCardBorderColor(
-                            Theme.of(context).brightness,
-                            hovered: hovered,
-                          ),
-                    width: highContrast
-                        ? PremiumDesignTokens
-                              .dashboardCardHighContrastBorderWidth
-                        : PremiumDesignTokens.dashboardCardBorderWidth,
-                  ),
-                  boxShadow: dark || highContrast
-                      ? const []
-                      : const [
-                          BoxShadow(
-                            color: Color(0x0D000000),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                ),
+                decoration: widget.dashboardGlass
+                    ? BoxDecoration(
+                        color: widget.dashboardGlass
+                            ? null
+                            : colorScheme.surface,
+                        gradient: widget.dashboardGlass
+                            ? LinearGradient(
+                                begin: AlignmentDirectional.topStart,
+                                end: AlignmentDirectional.bottomEnd,
+                                colors: dark
+                                    ? <Color>[
+                                        colorScheme.surfaceContainerHigh,
+                                        colorScheme.surfaceContainer,
+                                      ]
+                                    : <Color>[
+                                        Colors.white,
+                                        colorScheme.surfaceContainerLowest,
+                                      ],
+                              )
+                            : null,
+                        borderRadius: radius,
+                        border: Border.all(
+                          color: highContrast
+                              ? colorScheme.outline
+                              : PremiumDesignTokens.dashboardCardBorderColor(
+                                  Theme.of(context).brightness,
+                                  hovered: hovered,
+                                ),
+                          width: highContrast
+                              ? PremiumDesignTokens
+                                    .dashboardCardHighContrastBorderWidth
+                              : PremiumDesignTokens.dashboardCardBorderWidth,
+                        ),
+                        boxShadow: dark || highContrast
+                            ? const []
+                            : const [
+                                BoxShadow(
+                                  color: Color(0x0D000000),
+                                  blurRadius: 12,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                      )
+                    : BilPearlFinish.panel(context, radius: radius).copyWith(
+                        border: Border.all(
+                          color: focused
+                              ? colorScheme.primary
+                              : highContrast
+                              ? colorScheme.onSurface
+                              : dark
+                              ? BilPearlFinish.darkEdge
+                              : BilPearlFinish.lightEdge,
+                          width: focused || highContrast ? 1.5 : .8,
+                        ),
+                      ),
                 child: Material(
                   type: MaterialType.transparency,
                   child: content,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_wordmark.dart';
+import '../../nutrition/presentation/nutrition_entry_fields.dart';
 
 typedef QuickMacroCopy = String Function(String english, String arabic);
 
@@ -87,7 +88,7 @@ class _QuickMacroEntryDialogState extends State<_QuickMacroEntryDialog> {
     final onSave = widget.onSave;
     final dialogContext = context;
     String? validateNumber(String? raw, double maximum) {
-      final normalized = (raw ?? '').trim().replaceAll(',', '.');
+      final normalized = canonicalNutritionNumberInput(raw ?? '');
       if (normalized.isEmpty) return null;
       final parsed = double.tryParse(normalized);
       if (parsed == null ||
@@ -120,7 +121,9 @@ class _QuickMacroEntryDialogState extends State<_QuickMacroEntryDialog> {
       final values = controllers
           .map((entry) {
             final raw = entry.text.trim();
-            return raw.isEmpty ? 0.0 : double.parse(raw.replaceAll(',', '.'));
+            return raw.isEmpty
+                ? 0.0
+                : double.parse(canonicalNutritionNumberInput(raw));
           })
           .toList(growable: false);
       if (values.every((entry) => entry == 0)) {

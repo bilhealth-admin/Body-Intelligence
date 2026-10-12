@@ -200,7 +200,7 @@ void main() {
         final serialized = jsonDecode(saved.item.foodEvidenceJson!) as Map;
         expect(
           ((serialized['portion'] as Map)['food'] as Map)['nutrients'],
-          hasLength(13),
+          hasLength(19),
         );
       }
       final replay = await MealRepository(f.db).commitCoachMeal(

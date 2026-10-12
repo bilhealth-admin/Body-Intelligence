@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'bil_pearl_finish.dart';
 
 abstract final class BilFlagshipTokens {
   static const Color navy950 = Color(0xFF071120);
@@ -15,21 +16,20 @@ abstract final class BilFlagshipTokens {
   static const Color orange500 = Color(0xFFF59E0B);
   static const Color red500 = Color(0xFFEF4444);
 
-  static const Color canvasLight = Color(0xFFF5F5F8);
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceMutedLight = Color(0xFFF7F7FA);
-  static const Color outlineLight = Color(0xFFE5E5EA);
-  static const Color textPrimaryLight = Color(0xFF101114);
-  static const Color textSecondaryLight = Color(0xFF6C6D73);
+  static const Color canvasLight = BilPearlFinish.lightCanvas;
+  static const Color surfaceLight = BilPearlFinish.lightSurface;
+  static const Color surfaceMutedLight = BilPearlFinish.lightInset;
+  static const Color outlineLight = BilPearlFinish.lightEdge;
+  static const Color textPrimaryLight = BilPearlFinish.lightInk;
+  static const Color textSecondaryLight = BilPearlFinish.lightSecondary;
 
-  // Premium black theme: near-black canvas with subtle neutral elevation.
-  // Navy remains a brand/hero color, but no longer tints every dark surface.
-  static const Color canvasDark = Color(0xFF030405);
-  static const Color surfaceDark = Color(0xFF0B0D10);
-  static const Color surfaceMutedDark = Color(0xFF11151A);
-  static const Color outlineDark = Color(0xFF2A3038);
-  static const Color textPrimaryDark = Color(0xFFF7F9FC);
-  static const Color textSecondaryDark = Color(0xFFAEB7C4);
+  // Refined blue-silver elevation with restrained, non-glowing text.
+  static const Color canvasDark = BilPearlFinish.darkCanvas;
+  static const Color surfaceDark = BilPearlFinish.darkSurface;
+  static const Color surfaceMutedDark = BilPearlFinish.darkInset;
+  static const Color outlineDark = BilPearlFinish.darkEdge;
+  static const Color textPrimaryDark = BilPearlFinish.darkInk;
+  static const Color textSecondaryDark = BilPearlFinish.darkSecondary;
 
   static const double space2 = 2;
   static const double space4 = 4;
@@ -74,10 +74,10 @@ abstract final class BilFlagshipTokens {
 
   static const List<BoxShadow> shadowFloating = [
     BoxShadow(
-      color: Color(0x2606B6D4),
-      blurRadius: 36,
-      spreadRadius: -8,
-      offset: Offset(0, 16),
+      color: Color(0x1A24415B),
+      blurRadius: 24,
+      spreadRadius: -10,
+      offset: Offset(0, 10),
     ),
   ];
 }

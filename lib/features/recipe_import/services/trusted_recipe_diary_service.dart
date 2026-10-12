@@ -53,6 +53,7 @@ final class TrustedRecipeDiaryService {
         FoodNutrient.phosphorus: nutrition.phosphorusMg,
         FoodNutrient.iron: nutrition.ironMg,
         FoodNutrient.vitaminC: nutrition.vitaminCMg,
+        ...nutrition.additionalNutrients,
       }),
       source: CoachFoodSourceEvidence(
         kind: CoachFoodSourceKind.calculatedRecipe,
@@ -145,6 +146,7 @@ final class TrustedRecipeDiaryService {
       phosphorus: nutrition.phosphorusMg,
       iron: nutrition.ironMg,
       vitaminC: nutrition.vitaminCMg,
+      additionalNutrients: nutrition.additionalNutrients,
     );
   }
 }

@@ -211,8 +211,8 @@ class DashboardPage extends ConsumerWidget {
     // process-wide fallback may still be English during the first frame.
     AppLocalizations.activate(resolvedLocale);
     final locale = resolvedLocale.languageCode.toLowerCase();
-    final profilePhoto = ref.watch(profilePhotoProvider).value;
-    final profilePhotoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+    final profilePhoto = ref.watch(profileAvatarStateProvider).bytes;
+    final profilePhotoUrl = ref.watch(profileAvatarStateProvider).url;
     final identity = ref.watch(profileAuthIdentityProvider);
     final guidePreferences = ref.watch(preferencesRepositoryProvider);
     final guideOwner = identity.asData?.value.ownerId;

@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
-import '../../nutrition/services/meal_voice_candidate.dart';
+import '../../nutrition/services/meal_voice_session.dart';
+import '../../nutrition/presentation/bil_meal_voice_session_panel.dart';
+import '../../nutrition/presentation/bil_meal_voice_capture_dialog.dart';
 import '../domain/community_text_limits.dart';
 import '../presentation/community_body_counter.dart';
 import '../presentation/community_copy.dart';
@@ -26,197 +27,95 @@ final class CommunityComposerVoiceInputService {
   final CommunityVoicePermissionGate? permissionGate;
 
   Future<String?> capture(BuildContext context) async {
-    final interfaceLocale = BilLocalePolicy.canonicalTag(
-      Localizations.localeOf(context),
-    );
-    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale
-        .toLanguageTag();
-    final gate = permissionGate;
-    final allowed = gate == null
-        ? await _ensurePermission(context)
-        : await gate(context);
-    if (!allowed || !context.mounted) return null;
-
-    var transcript = '';
-    var finalResult = false;
-    var failed = false;
-    var captureClosed = false;
-    String? acceptedText;
-    DialogRoute<void>? activeRoute;
-    StateSetter? refresh;
-    Timer? timeout;
-    final editor = TextEditingController();
+    if (!VoiceCaptureLease.acquire(this)) return null;
+    MealVoiceSession? session;
     try {
-      final available = await _speech.initialize(
-        onError: (_) {
-          if (captureClosed) return;
-          failed = true;
-          refresh?.call(() {});
-        },
-      );
-      if (!context.mounted) return null;
-      if (!available) {
-        _showUnavailable(context);
-        return null;
-      }
-
-      final locales = await _speech.locales();
-      if (!context.mounted) return null;
-      final localeId = MealVoiceLocaleResolver.resolve(
-        appLanguage: interfaceLocale,
-        deviceLocale: deviceLocale,
-        availableLocales: locales.map((value) => value.localeId),
-      );
-      if (localeId == null) {
-        _showUnavailable(context);
-        return null;
-      }
-
-      await _speech.listen(
-        onResult: (result) {
-          if (captureClosed) return;
-          transcript = result.recognizedWords.trim();
-          finalResult = result.isFinal;
-          editor.value = TextEditingValue(
-            text: transcript,
-            selection: TextSelection.collapsed(offset: transcript.length),
-          );
-          refresh?.call(() {});
-        },
-        listenOptions: SpeechListenOptions(
-          localeId: localeId,
-          listenFor: const Duration(seconds: 45),
-          pauseFor: const Duration(seconds: 4),
-          listenMode: ListenMode.confirmation,
-          partialResults: true,
-          cancelOnError: true,
+      final gate = permissionGate;
+      final allowed = gate == null
+          ? await _ensurePermission(context)
+          : await gate(context);
+      if (!allowed || !context.mounted) return null;
+      final model = MealVoiceSession(
+        speech: _speech,
+        appLocale: BilLocalePolicy.canonicalTag(
+          Localizations.localeOf(context),
         ),
+        deviceLocale: WidgetsBinding.instance.platformDispatcher.locale
+            .toLanguageTag(),
       );
-
-      timeout = Timer(const Duration(seconds: 46), () async {
-        if (captureClosed) return;
-        if (_speech.isListening) {
-          await _speech.stop();
-        }
-        finalResult = true;
-        refresh?.call(() {});
-      });
-
-      if (!context.mounted) return null;
-
+      session = model;
+      String? acceptedText;
       final route = DialogRoute<void>(
         context: context,
         barrierDismissible: false,
-        builder: (dialogContext) => StatefulBuilder(
-          builder: (context, setDialogState) {
-            refresh = setDialogState;
-            final hasText = editor.text.trim().isNotEmpty;
-            final tooLong = CommunityTextLimits.exceedsBodyLimit(editor.text);
-            return AlertDialog(
-              icon: Icon(
-                failed
-                    ? Icons.mic_off_outlined
-                    : finalResult
-                    ? Icons.mic_none_rounded
-                    : Icons.graphic_eq_rounded,
+        builder: (dialogContext) => BilMealVoiceSessionPanel(
+          session: model,
+          builder: (context) {
+            final tooLong = CommunityTextLimits.exceedsBodyLimit(
+              model.editor.text,
+            );
+            return BilMealVoiceCaptureDialog(
+              title: _copy(context, 'Voice input', 'الإدخال الصوتي'),
+              instructions: _copy(
+                context,
+                'Review the text before adding it to your draft.',
+                'راجع النص قبل إضافته إلى مسودة المنشور.',
               ),
-              title: Text(_copy(context, 'Voice input', 'الإدخال الصوتي')),
-              content: TextField(
-                key: const Key('community-voice-transcript'),
-                controller: editor,
-                minLines: 3,
-                maxLines: 8,
-                maxLength: CommunityTextLimits.bodyCodePointLimit,
-                maxLengthEnforcement: MaxLengthEnforcement.none,
-                buildCounter: communityBodyCounter(editor),
-                onChanged: (_) => setDialogState(() {}),
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  labelText: _copy(
-                    context,
-                    finalResult ? 'Review transcript' : 'Listening…',
-                    finalResult ? 'راجع النص' : 'جارٍ الاستماع…',
-                  ),
-                  errorText: failed
-                      ? _copy(
-                          context,
-                          'Voice input is unavailable right now.',
-                          'الإدخال الصوتي غير متاح حاليًا.',
-                        )
-                      : tooLong
-                      ? communityBodyLimitText(context)
-                      : null,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    unawaited(() async {
-                      captureClosed = true;
-                      refresh = null;
-                      await _speech.cancel();
-                      if (dialogContext.mounted) {
-                        Navigator.pop(dialogContext);
-                      }
-                    }());
-                  },
-                  child: Text(_copy(context, 'Cancel', 'إلغاء')),
-                ),
-                FilledButton.icon(
-                  key: const Key('community-use-voice-transcript'),
-                  onPressed: failed || !hasText || tooLong
-                      ? null
-                      : () {
-                          unawaited(() async {
-                            if (editor.text.trim().isEmpty ||
-                                CommunityTextLimits.exceedsBodyLimit(
-                                  editor.text,
-                                )) {
-                              return;
-                            }
-                            acceptedText = editor.text.trim();
-                            captureClosed = true;
-                            refresh = null;
-                            if (_speech.isListening) await _speech.stop();
-                            if (dialogContext.mounted) {
-                              Navigator.pop(dialogContext);
-                            }
-                          }());
-                        },
-                  icon: const Icon(Icons.done_rounded),
-                  label: Text(_copy(context, 'Use text', 'استخدام النص')),
-                ),
-              ],
+              transcript: model.editor.text,
+              editor: model.editor,
+              editing: true,
+              phase: model.phase,
+              reviewLabel: _copy(context, 'Review transcript', 'راجع النص'),
+              textFieldKey: const Key('community-voice-transcript'),
+              useKey: const Key('community-use-voice-transcript'),
+              useIcon: Icons.done_rounded,
+              maxLength: CommunityTextLimits.bodyCodePointLimit,
+              buildCounter: communityBodyCounter(model.editor),
+              error: tooLong
+                  ? communityBodyLimitText(context)
+                  : model.failure == null
+                  ? null
+                  : _copy(
+                      context,
+                      'Voice input is unavailable right now. You can edit the text or retry.',
+                      'الإدخال الصوتي غير متاح حاليًا. يمكنك تعديل النص أو إعادة المحاولة.',
+                    ),
+              cancelLabel: _copy(context, 'Cancel', 'إلغاء'),
+              useLabel: _copy(context, 'Use text', 'استخدام النص'),
+              onEdit: model.beginManualEdit,
+              onTextChanged: (_) => model.textChanged(),
+              onRetry: model.starting ? null : () => unawaited(model.start()),
+              onStop: () => unawaited(model.stop()),
+              onCancel: () {
+                unawaited(model.close());
+                Navigator.pop(dialogContext);
+              },
+              onUse: !model.canAccept || tooLong
+                  ? null
+                  : () {
+                      acceptedText = model.editor.text.trim();
+                      unawaited(model.close());
+                      Navigator.pop(dialogContext);
+                    },
             );
           },
         ),
       );
       final popped = Navigator.of(context, rootNavigator: true).push(route);
-      activeRoute = route;
-      await popped;
+      await Future.any<void>([popped, route.completed.then<void>((_) {})]);
+      await model.close();
+      await route.completed;
       return acceptedText;
     } on Object {
       if (context.mounted) _showUnavailable(context);
       return null;
     } finally {
-      captureClosed = true;
-      refresh = null;
-      timeout?.cancel();
-      if (_speech.isListening) {
-        try {
-          await _speech.cancel();
-        } on Object {
-          // Native recognizer may already have completed.
-        }
-      }
       try {
+        await session?.close();
         await _speech.dispose();
       } finally {
-        // The pop result precedes the route's reverse transition. A focused
-        // TextField still owns controller listeners until that route is gone.
-        if (activeRoute != null) await activeRoute.completed;
-        editor.dispose();
+        session?.dispose();
+        VoiceCaptureLease.release(this);
       }
     }
   }

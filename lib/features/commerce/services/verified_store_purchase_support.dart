@@ -49,6 +49,7 @@ bool canStartStorePurchase({
   String? messageCode,
 }) {
   if (!productAvailable) return false;
+  if (messageCode == 'store_finish_pending') return false;
   return switch (state) {
     VerifiedStoreState.ready ||
     VerifiedStoreState.verified ||

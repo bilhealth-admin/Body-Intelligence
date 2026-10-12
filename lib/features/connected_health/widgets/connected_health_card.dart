@@ -328,7 +328,7 @@ class _ConnectedHealthContent extends StatelessWidget {
     ConnectedHealthSignalView signal, {
     required bool showPremiumLabel,
   }) {
-    final slide = HealthSlide(
+    return HealthSlide(
       title: connectedHealthDataTypeText(context, signal.key),
       result: '${_formatValue(signal.value)} ${signal.unit}',
       explanation: tr(
@@ -337,12 +337,15 @@ class _ConnectedHealthContent extends StatelessWidget {
       ),
       footer: _displaySource(signal.source),
       icon: _signalIcon(signal.key),
-    );
-    if (!signal.key.startsWith('nutrition')) return slide;
-    return PremiumNutritionGlass(
-      key: Key('connected-health-${signal.key}-premium-glass'),
-      showLabel: showPremiumLabel,
-      child: slide,
+      publicUnit: signal.unit,
+      protectValues: signal.key.startsWith('nutrition')
+          ? (values) => PremiumNutritionGlass(
+              key: Key('connected-health-${signal.key}-premium-glass'),
+              showLabel: showPremiumLabel,
+              compact: true,
+              child: values,
+            )
+          : null,
     );
   }
 

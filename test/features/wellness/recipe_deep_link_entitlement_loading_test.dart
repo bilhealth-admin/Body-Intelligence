@@ -229,7 +229,7 @@ void main() {
             reason: 'Unresolved authority must not mount recipe detail content',
           );
           expect(
-            find.byKey(const ValueKey('premium-route-glass-veil')),
+            find.byKey(const ValueKey('premium-route-upgrade-cta')),
             findsNothing,
           );
           final initialLibraryState = tester.state(
@@ -262,16 +262,20 @@ void main() {
           );
           if (plan == CommercePlan.free) {
             expect(
-              find.byKey(const ValueKey('premium-route-glass-veil')),
+              find.byKey(const ValueKey('premium-route-upgrade-cta')),
               findsOneWidget,
             );
             expect(
-              find.byKey(const ValueKey('premium-route-protected-content')),
-              findsOneWidget,
+              find.descendant(
+                of: find.byKey(const ValueKey('recipe-detail-access-gate')),
+                matching: find.byType(ListView),
+              ),
+              findsNothing,
+              reason: 'Verified Free must not mount or expose paid recipe data',
             );
           } else {
             expect(
-              find.byKey(const ValueKey('premium-route-glass-veil')),
+              find.byKey(const ValueKey('premium-route-upgrade-cta')),
               findsNothing,
             );
             expect(
@@ -341,7 +345,7 @@ void main() {
           expect(detail, findsOneWidget);
           expect(find.byType(BilStorePlansPage), findsNothing);
           expect(
-            find.byKey(const ValueKey('premium-route-glass-veil')),
+            find.byKey(const ValueKey('premium-route-upgrade-cta')),
             findsNothing,
           );
           releaseLookup.complete();
@@ -362,7 +366,7 @@ void main() {
           expect(plansVisits, intentionalPlansVisits);
           expect(detail, findsOneWidget);
           expect(
-            find.byKey(const ValueKey('premium-route-glass-veil')),
+            find.byKey(const ValueKey('premium-route-upgrade-cta')),
             plan == CommercePlan.free ? findsOneWidget : findsNothing,
           );
           expect(tester.takeException(), isNull);
@@ -395,7 +399,7 @@ bool _detailResolved(CommercePlan plan) {
   if (detail.evaluate().length != 1) return false;
   if (plan == CommercePlan.free) {
     return find
-            .byKey(const ValueKey('premium-route-glass-veil'))
+            .byKey(const ValueKey('premium-route-upgrade-cta'))
             .evaluate()
             .length ==
         1;

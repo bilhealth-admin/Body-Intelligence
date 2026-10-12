@@ -8,9 +8,10 @@ import '../../../app/localization/app_localizations.dart';
 /// calm and the marker does not imply that an entire free collection is
 /// unavailable.
 class PremiumLabelBadge extends StatelessWidget {
-  const PremiumLabelBadge({super.key, this.semanticLabel});
+  const PremiumLabelBadge({super.key, this.semanticLabel, this.large = false});
 
   final String? semanticLabel;
+  final bool large;
 
   @override
   Widget build(BuildContext context) {
@@ -19,35 +20,29 @@ class PremiumLabelBadge extends StatelessWidget {
       AppLocalizations,
     );
     final label = semanticLabel ?? strings?.text('Premium') ?? 'Premium';
+    final scheme = Theme.of(context).colorScheme;
     return Semantics(
       label: label,
       child: ExcludeSemantics(
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFFE7A0), Color(0xFFF4C451)],
+            gradient: LinearGradient(
+              colors: [scheme.surface, scheme.surfaceContainerLow],
             ),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFF8D878)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x2ED69B27),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
+            border: Border.all(color: scheme.outlineVariant),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Text(
               label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Color(0xFF332300),
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: .2,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'BILDisplay',
+                fontFamilyFallback: const ['BILArabic'],
+                color: scheme.onSurface,
+                fontSize: large ? 16 : 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

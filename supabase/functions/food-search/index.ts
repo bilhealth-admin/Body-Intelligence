@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { FoodSearchMemo, searchMemoKey } from "./search_memo.ts";
 
 const maxRequestBytes = 4096;
 const minuteQuota = 10;
@@ -43,7 +44,7 @@ const reviewedHintForQuery = (value: string) => {
 type QuotaResult = "allowed" | "rate_limited" | "unavailable";
 
 type AccessResult =
-  | { ok: true; consumeQuota: () => Promise<QuotaResult> }
+  | { ok: true; consumeQuota: () => Promise<QuotaResult>; ownerId?: string }
   | {
     ok: false;
     error: "invalid_session" | "server_not_configured";
@@ -67,7 +68,10 @@ export interface FoodSearchRuntime {
   fetch: typeof fetch;
   translate?: TranslationFunction;
   localizeFoodNames?: FoodNameLocalizationFunction;
+  observe?: (stage: string, milliseconds: number) => void;
 }
+
+const searchMemos = new WeakMap<FoodSearchRuntime, FoodSearchMemo>();
 
 type BoundedJsonResult =
   | { status: "ok"; value: Record<string, unknown> }
@@ -149,6 +153,7 @@ async function productionAuthorize(request: Request): Promise<AccessResult> {
 
   return {
     ok: true,
+    ownerId: data.user.id,
     consumeQuota: async () => {
       const perMinute = await consume("food_search_minute", minuteQuota, 60);
       if (perMinute !== "allowed") return perMinute;
@@ -173,6 +178,11 @@ const productionRuntime: FoodSearchRuntime = {
     ),
   localizeFoodNames: (values, targetLocale) =>
     localizeFoodNamesWithCache(values, targetLocale, fetch),
+  observe: (stage, milliseconds) =>
+    console.info(JSON.stringify({
+      stage,
+      milliseconds: Math.round(milliseconds),
+    })),
 };
 
 const supportedLocales = new Set([
@@ -208,7 +218,9 @@ const canonicalLocale = (raw: string) => {
   if (normalized === "pt-br") return "pt-BR";
   if (normalized === "pt-pt") return "pt-PT";
   if (normalized === "zh-hans" || normalized === "zh-cn") return "zh-Hans";
-  if (normalized === "zh-hant" || normalized === "zh-tw" || normalized === "zh-hk") {
+  if (
+    normalized === "zh-hant" || normalized === "zh-tw" || normalized === "zh-hk"
+  ) {
     return "zh-Hant";
   }
   const base = normalized.split("-")[0];
@@ -307,7 +319,6 @@ async function translateWithGoogle(
   }
 }
 
-
 const decodeTranslatedText = (value: string) =>
   value
     .replaceAll("&quot;", '"')
@@ -336,7 +347,9 @@ async function translateManyWithGoogle(
   targetLocale: string,
   fetcher: typeof fetch,
 ): Promise<Map<string, string>> {
-  const unique = [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+  const unique = [
+    ...new Set(values.map((value) => value.trim()).filter(Boolean)),
+  ];
   const result = new Map<string, string>();
   if (unique.length === 0 || targetLocale === "en") return result;
   const key = firstEnv("BIL_TRANSLATION_API_KEY", "Translation");
@@ -346,7 +359,9 @@ async function translateManyWithGoogle(
   const timer = setTimeout(() => controller.abort(), 3500);
   try {
     const response = await fetcher(
-      `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(key)}`,
+      `https://translation.googleapis.com/language/translate/v2?key=${
+        encodeURIComponent(key)
+      }`,
       {
         method: "POST",
         signal: controller.signal,
@@ -390,7 +405,9 @@ async function localizeFoodNamesWithCache(
   targetLocale: string,
   fetcher: typeof fetch,
 ): Promise<Map<string, string>> {
-  const unique = [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+  const unique = [
+    ...new Set(values.map((value) => value.trim()).filter(Boolean)),
+  ];
   const result = new Map<string, string>();
   if (unique.length === 0 || targetLocale === "en") return result;
 
@@ -455,6 +472,7 @@ export async function handleFoodSearchRequest(
   request: Request,
   runtime: FoodSearchRuntime = productionRuntime,
 ) {
+  const started = performance.now();
   if (request.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405);
   }
@@ -464,6 +482,7 @@ export async function handleFoodSearchRequest(
   }
 
   const access = await runtime.authorize(request);
+  runtime.observe?.("authorize", performance.now() - started);
   if (!access.ok) return json({ error: access.error }, access.status);
   const usdaKey = runtime.apiKey().trim();
   if (!usdaKey) return json({ error: "server_not_configured" }, 503);
@@ -484,92 +503,127 @@ export async function handleFoodSearchRequest(
   const limit = Math.max(1, Math.min(requestedLimit, 20));
   const locale = canonicalLocale(text(body.locale));
 
+  const quotaStarted = performance.now();
   const quota = await access.consumeQuota();
+  runtime.observe?.("quota", performance.now() - quotaStarted);
   if (quota === "rate_limited") return json({ error: "rate_limited" }, 429);
   if (quota !== "allowed") return json({ error: "quota_unavailable" }, 503);
 
-  // The mobile app already expands the reviewed offline lexicon. This server
-  // step closes the remaining gap for arbitrary food phrases in any supported
-  // language before USDA's English-centric catalog is queried. If the optional
-  // provider is not configured, keep the old deterministic USDA request.
-  const searchHint = text(body.search_hint);
-  // The mobile app may provide a reviewed English concept for a known
-  // multilingual food term (for example Arabic "بطيخ" -> "watermelon").
-  // It is bounded and syntax-checked here, then used as the authoritative
-  // USDA query so a compound phrase cannot make a known food disappear when
-  // the optional translation provider is unavailable.
-  const serverReviewedHint = reviewedHintForQuery(query);
-  const translatedQuery = locale === "en"
-    ? isSafeSearchHint(searchHint)
+  const load = async () => {
+    // The mobile app already expands the reviewed offline lexicon. This server
+    // step closes the remaining gap for arbitrary food phrases in any supported
+    // language before USDA's English-centric catalog is queried. If the optional
+    // provider is not configured, keep the old deterministic USDA request.
+    const searchHint = text(body.search_hint);
+    // The mobile app may provide a reviewed English concept for a known
+    // multilingual food term (for example Arabic "بطيخ" -> "watermelon").
+    // It is bounded and syntax-checked here, then used as the authoritative
+    // USDA query so a compound phrase cannot make a known food disappear when
+    // the optional translation provider is unavailable.
+    const serverReviewedHint = reviewedHintForQuery(query);
+    const translateStarted = performance.now();
+    const translatedQuery = locale === "en"
+      ? isSafeSearchHint(searchHint)
+        ? searchHint
+        : isSafeSearchHint(serverReviewedHint)
+        ? serverReviewedHint
+        : query
+      : isSafeSearchHint(searchHint)
       ? searchHint
       : isSafeSearchHint(serverReviewedHint)
       ? serverReviewedHint
-      : query
-    : isSafeSearchHint(searchHint)
-    ? searchHint
-    : isSafeSearchHint(serverReviewedHint)
-    ? serverReviewedHint
-    : ((await runtime.translate?.(
-      query,
-      providerLocale(locale),
-      "en",
-    ))?.trim() || query);
+      : ((await runtime.translate?.(
+        query,
+        providerLocale(locale),
+        "en",
+      ))?.trim() || query);
+    runtime.observe?.("translate", performance.now() - translateStarted);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
-  try {
-    const response = await runtime.fetch(
-      `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${
-        encodeURIComponent(usdaKey)
-      }`,
-      {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          "content-type": "application/json",
-          "accept-language": locale,
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    try {
+      const usdaStarted = performance.now();
+      const response = await runtime.fetch(
+        `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${
+          encodeURIComponent(usdaKey)
+        }`,
+        {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "content-type": "application/json",
+            "accept-language": locale,
+          },
+          body: JSON.stringify({
+            query: translatedQuery,
+            pageSize: limit,
+            pageNumber: 1,
+            requireAllWords: true,
+          }),
         },
-        body: JSON.stringify({
-          query: translatedQuery,
-          pageSize: limit,
-          pageNumber: 1,
-          requireAllWords: true,
-        }),
-      },
-    );
-    if (!response.ok) {
-      return json({ error: `usda_${response.status}` }, 503);
-    }
-    const root = await response.json() as Record<string, unknown>;
-    const foods = ((Array.isArray(root.foods) ? root.foods : []) as Array<
-      Record<string, unknown>
-    >)
-      .map(normalizedUsda)
-      .filter((food) => food.fdc_id !== null && food.name.length > 0);
-    const localizedNames = locale === "en" || foods.length === 0
-      ? new Map<string, string>()
-      : await runtime.localizeFoodNames?.(
-        foods.map((food) => food.name),
+      );
+      if (!response.ok) {
+        return json({ error: `usda_${response.status}` }, 503);
+      }
+      const root = await response.json() as Record<string, unknown>;
+      runtime.observe?.("usda", performance.now() - usdaStarted);
+      const foods = ((Array.isArray(root.foods) ? root.foods : []) as Array<
+        Record<string, unknown>
+      >)
+        .map(normalizedUsda)
+        .filter((food) => food.fdc_id !== null && food.name.length > 0);
+      const namesStarted = performance.now();
+      const localizedNames = locale === "en" || foods.length === 0
+        ? new Map<string, string>()
+        : await runtime.localizeFoodNames?.(
+          foods.map((food) => food.name),
+          locale,
+        ) ?? new Map<string, string>();
+      runtime.observe?.("localize", performance.now() - namesStarted);
+      const localizedFoods = foods.map((food) => ({
+        ...food,
+        localized_name: localizedNames.get(food.name) ?? null,
+        localized_locale: localizedNames.has(food.name) ? locale : null,
+      }));
+      return json({
+        status: foods.length === 0 ? "unresolved" : "found",
+        source: "usda",
+        query,
+        search_query: translatedQuery,
         locale,
-      ) ?? new Map<string, string>();
-    const localizedFoods = foods.map((food) => ({
-      ...food,
-      localized_name: localizedNames.get(food.name) ?? null,
-      localized_locale: localizedNames.has(food.name) ? locale : null,
-    }));
-    return json({
-      status: foods.length === 0 ? "unresolved" : "found",
-      source: "usda",
-      query,
-      search_query: translatedQuery,
-      locale,
-      foods: localizedFoods,
-    }, foods.length === 0 ? 404 : 200);
-  } catch {
-    return json({ error: "food_provider_unavailable" }, 503);
-  } finally {
-    clearTimeout(timer);
+        foods: localizedFoods,
+      }, foods.length === 0 ? 404 : 200);
+    } catch {
+      return json({ error: "food_provider_unavailable" }, 503);
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  let memo = searchMemos.get(runtime);
+  if (!memo) {
+    memo = new FoodSearchMemo();
+    searchMemos.set(runtime, memo);
   }
+  // Every hit still requires live authentication and BOTH quota checks. A test
+  // runtime without an owner has no cache; production always supplies its ID.
+  const country = /^[A-Za-z]{2}$/.test(text(body.country))
+    ? text(body.country).toUpperCase()
+    : "";
+  const response = access.ownerId
+    ? await memo.run(
+      await searchMemoKey(
+        access.ownerId,
+        query,
+        locale,
+        country,
+        limit,
+        text(body.search_hint),
+      ),
+      load,
+    )
+    : await load();
+  runtime.observe?.("total", performance.now() - started);
+  return response;
 }
 
 if (import.meta.main) {

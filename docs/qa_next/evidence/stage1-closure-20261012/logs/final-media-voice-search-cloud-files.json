@@ -1,0 +1,1663 @@
+{
+  "label": "final-media-voice-search-cloud-files",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/profile/profile_avatar_state_test.dart",
+    "test/features/profile/profile_photo_account_isolation_test.dart",
+    "test/shared/widgets/bil_account_avatar_test.dart",
+    "test/shared/widgets/bil_avatar_lifecycle_test.dart",
+    "test/shared/widgets/bil_private_image_renewal_test.dart",
+    "test/app/services/scoped_media_access_test.dart",
+    "test/app/services/scoped_media_file_cache_test.dart",
+    "test/features/community/community_feed_cache_test.dart",
+    "test/features/community/community_cached_feed_refresh_test.dart",
+    "test/features/nutrition/food_basis_adapter_test.dart",
+    "test/features/nutrition/food_search_ui_state_test.dart",
+    "test/features/nutrition/meal_search_journey_integration_test.dart",
+    "test/features/nutrition/meal_voice_session_test.dart",
+    "test/features/nutrition/meal_voice_panel_behavior_test.dart",
+    "test/features/nutrition/speech_bridge_capture_ownership_test.dart",
+    "test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+    "test/features/nutrition/barcode_food_review_dialog_test.dart",
+    "test/features/weight/weight_voice_input_test.dart",
+    "test/features/nutrition/voice_logging_review_contract_test.dart",
+    "test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+    "test/parallel/bil03/memory_selective_delete_test.dart",
+    "test/parallel/bil03/unit_command_test.dart",
+    "test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+    "test/features/cloud_platform/cloud_release_wire_compatibility_test.dart",
+    "test/features/cloud_platform/supabase_cloud_transport_contract_test.dart",
+    "test/features/cloud_platform/supabase_startup_cloud_restore_reader_test.dart",
+    "test/features/cloud_platform/cloud_account_key_repository_test.dart",
+    "test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+    "test/localization/bil_25_locale_fallback_closure_test.dart",
+    "test/features/admin/admin_owner_operation_test.dart",
+    "test/features/admin/ai_coach_global_reset_test.dart",
+    "test/features/community/community_post_review_reason_test.dart",
+    "test/localization/closure_interfaces_runtime_copy_test.dart"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791758363.516897,
+  "files": {
+    "test/features/profile/profile_avatar_state_test.dart": "958e784d80e41f45629d7ddb346a87fa4a58258c30e4f0ad90ac1b3037dc1bf2",
+    "test/features/profile/profile_photo_account_isolation_test.dart": "dde1aeedb4e61b613e52b904b92e77388a82a75acd9981a59bd46a302d93efd8",
+    "test/shared/widgets/bil_account_avatar_test.dart": "7f10f36b2f7a2f08e28d926bc30ab4a7dea027748d3deee465b1d47376b7f6c9",
+    "test/shared/widgets/bil_avatar_lifecycle_test.dart": "3110b8a9ca663c1f1d19ea6ec9bc3c0ea28eb5d67f986462a038a47ee25b7d3a",
+    "test/shared/widgets/bil_private_image_renewal_test.dart": "0cd6fb8bb40c0574f58e79f21fa46ddacaa871fc8c23f1029d880451779382c6",
+    "test/app/services/scoped_media_access_test.dart": "1ec863e56324f7dda8cfb89844aa22191e874afdcb9abf4612fb8c129fd2cb13",
+    "test/app/services/scoped_media_file_cache_test.dart": "9cb812ede4c6ce557f7bfe9d9fda2503aba2c94d36ec2a1c70bd5b9df4be2b6e",
+    "test/features/community/community_feed_cache_test.dart": "c448c70e07706664ab9b73c92c547a2f806950cfe97ce8b4ff7bea6726c3c7c1",
+    "test/features/community/community_cached_feed_refresh_test.dart": "e204fcd2185ded1a018153be3f87699360eb64ceb71d435c1b138e01a9cc0442",
+    "test/features/nutrition/food_basis_adapter_test.dart": "036a76b480757ba5b5ff2ab9d9537522158461d0e03c9e5a2acc022b3ac62acc",
+    "test/features/nutrition/food_search_ui_state_test.dart": "bf111f23976bbbf2a8425daf687b2d880691d4f56d27970197f99de395f942e8",
+    "test/features/nutrition/meal_search_journey_integration_test.dart": "176a5429eb1ccd04396383a7f325f01fee662a6d06e2ba5ad91aa2e77d345a70",
+    "test/features/nutrition/meal_voice_session_test.dart": "f93c176e25122791ddfd45e76ff73edc1aae365a79ee58e2689b79248a78ed21",
+    "test/features/nutrition/meal_voice_panel_behavior_test.dart": "fd6e9959cf55e78b616ce12dab17a2d92dfffed4d51ff73ae333b1c0f2f5ccc8",
+    "test/features/nutrition/speech_bridge_capture_ownership_test.dart": "2f4cdf1fc72f9281ed12c0eeb37dad3d5b162d12190ae179aa43ffcf63105cfc",
+    "test/features/nutrition/voice_shared_purpose_behavior_test.dart": "5314a91520ff8bb0895cf9f1ebab041209e4cbbd1153946abe2ac01a2f287c4d",
+    "test/features/nutrition/barcode_food_review_dialog_test.dart": "f975e3828279055ee3de67485ece7e5eabe3d659151ed012722c63af4aac23e7",
+    "test/features/weight/weight_voice_input_test.dart": "43cbf620213780e8f3a6ba981094a76fdcd626483940cfccf21efc51ad7067c2",
+    "test/features/nutrition/voice_logging_review_contract_test.dart": "833875e416cea1c97f82de522d1ae39599249fa71699bc00a94082152d86423a",
+    "test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart": "caef8f200d519244d9b90ff29511147e7e538bbf6f0e62354eee7a6b954b3c95",
+    "test/parallel/bil03/memory_selective_delete_test.dart": "2229462eb850f9694cad53aff89736988d4af6fd8a1c4376b4f5dd6aa844907c",
+    "test/parallel/bil03/unit_command_test.dart": "f25941dac7469fd4eb4fc59c849148bc7d4bc1f8631b56bff7f87548efdc0036",
+    "test/features/cloud_platform/cloud_transport_owner_epoch_test.dart": "7253ce078b3670ebefe45962de13e6fc4e20fb07309548625143905f1f6dda61",
+    "test/features/cloud_platform/cloud_release_wire_compatibility_test.dart": "fd0a4fe970875eac9604653f1fcca345bc0a93841cfb46499aceb2f7e51e8a5d",
+    "test/features/cloud_platform/supabase_cloud_transport_contract_test.dart": "25df2f05a32c7cec22bc2069a62d09c8969e3477a16c7fa126dda2e3704c1277",
+    "test/features/cloud_platform/supabase_startup_cloud_restore_reader_test.dart": "55a6893c6615d7f854a83e697b95299df6b3ae6e0c04e131b040da53592fd1d1",
+    "test/features/cloud_platform/cloud_account_key_repository_test.dart": "f97e055bbf41dd1df1eaf99c0d591d6255846029516367f1bfd7585c28b20799",
+    "test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart": "7c10d65335d85b8b81a0b53d5642ef29f056fed117eb7ed8b913b308c446db50",
+    "test/localization/bil_25_locale_fallback_closure_test.dart": "9f33f1b5f9bf78bdec6dc99bca60365e741ec282c9541edd06817234084221dc",
+    "test/features/admin/admin_owner_operation_test.dart": "d7e89f4c2fcd5a5f40f83a5420cd84330f6c8dbac0bed67715c2d8dacd4763b1",
+    "test/features/admin/ai_coach_global_reset_test.dart": "f44845ca5c0984358ef8082926c15fc6d4cf124ef8bccc289c635655a638572a",
+    "test/features/community/community_post_review_reason_test.dart": "390d7e9ad585afeedb41cc5cbdcd84506c3e4eb0dac180f64f62ce0901d02046",
+    "test/localization/closure_interfaces_runtime_copy_test.dart": "2492aca994ec9535aeb0722002847dd026f07303e1003ac3c8d0101b6b982196"
+  },
+  "source_fingerprint": "b17a872bc09c5c85249e720ec335f925262154166c0898f0b773ccb250bf3849",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/profile/profile_avatar_state_test.dart",
+    "test/features/profile/profile_photo_account_isolation_test.dart",
+    "test/shared/widgets/bil_account_avatar_test.dart",
+    "test/shared/widgets/bil_avatar_lifecycle_test.dart",
+    "test/shared/widgets/bil_private_image_renewal_test.dart",
+    "test/app/services/scoped_media_access_test.dart",
+    "test/app/services/scoped_media_file_cache_test.dart",
+    "test/features/community/community_feed_cache_test.dart",
+    "test/features/community/community_cached_feed_refresh_test.dart",
+    "test/features/nutrition/food_basis_adapter_test.dart",
+    "test/features/nutrition/food_search_ui_state_test.dart",
+    "test/features/nutrition/meal_search_journey_integration_test.dart",
+    "test/features/nutrition/meal_voice_session_test.dart",
+    "test/features/nutrition/meal_voice_panel_behavior_test.dart",
+    "test/features/nutrition/speech_bridge_capture_ownership_test.dart",
+    "test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+    "test/features/nutrition/barcode_food_review_dialog_test.dart",
+    "test/features/weight/weight_voice_input_test.dart",
+    "test/features/nutrition/voice_logging_review_contract_test.dart",
+    "test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+    "test/parallel/bil03/memory_selective_delete_test.dart",
+    "test/parallel/bil03/unit_command_test.dart",
+    "test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+    "test/features/cloud_platform/cloud_release_wire_compatibility_test.dart",
+    "test/features/cloud_platform/supabase_cloud_transport_contract_test.dart",
+    "test/features/cloud_platform/supabase_startup_cloud_restore_reader_test.dart",
+    "test/features/cloud_platform/cloud_account_key_repository_test.dart",
+    "test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+    "test/localization/bil_25_locale_fallback_closure_test.dart",
+    "test/features/admin/admin_owner_operation_test.dart",
+    "test/features/admin/ai_coach_global_reset_test.dart",
+    "test/features/community/community_post_review_reason_test.dart",
+    "test/localization/closure_interfaces_runtime_copy_test.dart"
+  ],
+  "pid": 18272,
+  "exit_code": 1,
+  "finished": 1791758444.2094245,
+  "end_fingerprint": "b17a872bc09c5c85249e720ec335f925262154166c0898f0b773ccb250bf3849",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "shared avatar retains loading data across surfaces and retires A B A; explicit deletion wins",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_avatar_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "guest photo save stays local and succeeds without cloud identity",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "offline owner-scoped photo save and sync stay local without auth",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "large valid photo is compressed instead of being rejected",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "guest removal clears local photo and cached public URL",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "authenticated removal clears cloud before local profile photo",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cloud removal failure preserves both local profile keys",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "mismatched authenticated owner performs no local mutation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account switch while picker is open performs no mutation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "recovery-only profile save never falls back to a new picker",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "recovery-only profile save persists the recovered file once",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "gallery Cancel prevents all local and cloud photo mutations",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "gallery explicit confirmation persists only reviewed original bytes",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/profile/profile_photo_account_isolation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "uses a neutral account fallback and never the AI Coach",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/shared/widgets/bil_account_avatar_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "changing the member photo leaves the approved coach unchanged",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/shared/widgets/bil_account_avatar_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a chosen member photo takes precedence over the fallback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/shared/widgets/bil_account_avatar_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "local member photo takes precedence over cached cloud fallback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/shared/widgets/bil_account_avatar_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same-owner loading and corrupt replacement retain decoded photo; deletion clears; ABA does not inherit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/shared/widgets/bil_avatar_lifecycle_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "visible pixels survive a permitted renewal; access denial deletes bytes and account changes cannot inherit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/shared/widgets/bil_private_image_renewal_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "visible token renews before expiry and concurrent consumers share authorization",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "denied visibility cannot extend access or reuse a CDN token",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a long-lived signed URL from another session is not a viewer authorization",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "A B A retires the first authorization even if account IDs match again",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "backend cannot substitute another object or an expired capability",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_access_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "signed token rotation does not change content identity; owner does",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "wrong host, credential URL and cleartext are never cached",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cached fresh bytes survive cache recreation without starting HTTP",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "corrupt bytes and another viewer never satisfy a local read",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "private cache requires an unexpired capability and a viewer",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account retirement purges previous photos",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "corrupt metadata and crash partial cleanup do not stop bounded LRU eviction",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "byte budget is enforced independently from the entry budget",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unwritable cache directory rejects without publishing a partial image",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "real loopback downloads coalesce, survive first consumer exit and never exceed three",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/app/services/scoped_media_file_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "disk content requires fresh visible IDs; filters, locale, tombstones, and tokens remain safe",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_feed_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "restart keeps permitted data but A B A purges the first visit; disk is bounded",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_feed_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "corrupt feed metadata fails closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_feed_cache_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cached authorized content precedes held refresh; failure is visible unless retired false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_cached_feed_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cached authorized content precedes held refresh; failure is visible unless retired true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_cached_feed_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "refresh failure copy covers every released locale",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_cached_feed_refresh_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "zero modern evidence is unknown for all thirteen nutrients",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "modern known zero and unknown are distinct for iron and vitamin C",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all thirteen values scale from the immutable gram basis",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting calories column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting protein column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting carbohydrates column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting fat column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting fiber column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting sugar column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting sodium column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting potassium column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting calcium column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting magnesium column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting phosphorus column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting iron column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a conflicting vitaminC column invalidates the whole modern row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an invalid envelope never falls back to legacy macros: ",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an invalid envelope never falls back to legacy macros: {invalid",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an invalid envelope never falls back to legacy macros: []",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an invalid envelope never falls back to legacy macros: {\"schema\":\"bil.food.basis.v2\",\"food\":{\"identity\":\"fixture-food-identity\",\"name\":\"Cooked food\",\"preparedState\":\"cooked\",\"basisGrams\":40.0,\"nutrients\":{\"calories\":123.0,\"protein\":10.0,\"carbohydrates\":12.0,\"fat\":3.0,\"fiber\":4.0,\"sugar\":5.0,\"sodium\":200.0,\"potassium\":300.0,\"calcium\":100.0,\"magnesium\":50.0,\"phosphorus\":80.0,\"iron\":2.0,\"vitaminC\":8.0,\"saturatedFat\":null,\"polyunsaturatedFat\":null,\"monounsaturatedFat\":null,\"transFat\":null,\"cholesterol\":null,\"vitaminA\":null},\"source\":{\"kind\":\"label\",\"ref\":\"fixture://nutrition-label\",\"revision\":\"label-2\",\"confidence\":{\"score\":0.8,\"basis\":\"fixture source audit\"}}}}",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "an invalid envelope never falls back to legacy macros: {\"schema\":\"bil.food.basis.v1\",\"food\":{\"identity\":\"fixture-food-identity\",\"name\":\"Cooked food\",\"preparedState\":\"cooked\",\"basisGrams\":40.0,\"nutrients\":{\"calories\":123.0,\"protein\":10.0,\"carbohydrates\":12.0,\"fat\":3.0,\"fiber\":4.0,\"sugar\":5.0,\"sodium\":200.0,\"potassium\":300.0,\"calcium\":100.0,\"magnesium\":50.0,\"phosphorus\":80.0,\"iron\":2.0,\"vitaminC\":8.0,\"saturatedFat\":null,\"polyunsaturatedFat\":null,\"monounsaturatedFat\":null,\"transFat\":null,\"cholesterol\":null,\"vitaminA\":null},\"source\":{\"kind\":\"label\",\"ref\":\"fixture://nutrition-label\",\"revision\":\"label-2\",\"confidence\":{\"score\":0.8,\"basis\":\"fixture source audit\"}}},\"trusted\":true}",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a missing modern envelope cannot acquire legacy known-zero values",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "conflicting serving amount is unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "conflicting serving unit is unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "conflicting evidence mask is unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "conflicting source is unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "conflicting verification is unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "conflicting food name is unavailable",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "estimated source never grants verification or a foundation label",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy shared values keep their original required-core and mask semantics",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy default-zero iron and vitamin C carry no evidence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy positive iron and vitamin C remain usable evidence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy ml without a gram basis cannot become grams by assumption",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy liter without a gram basis cannot become grams by assumption",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy cup without a gram basis cannot become grams by assumption",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy serving without a gram basis cannot become grams by assumption",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy piece without a gram basis cannot become grams by assumption",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy unknown without a gram basis cannot become grams by assumption",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy mass conversion remains exact for g",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy mass conversion remains exact for gram",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy mass conversion remains exact for grams",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy mass conversion remains exact for kg",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy mass conversion remains exact for mg",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy mass conversion remains exact for oz",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "legacy mass conversion remains exact for lb",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_basis_adapter_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "embedded My foods is task-first and consolidates capture methods",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "error"
+    },
+    {
+      "name": "avocado search separates loading, results, and empty states",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "My foods excludes materialized catalog rows and searches owned foods only",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ar at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits en at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits fr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits es at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits tr at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits de at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits it at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits pt-BR at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits pt-PT at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ur at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits fa at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits hi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits id at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ms at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ja at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ko at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits zh-Hans at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits zh-Hant at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits ru at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits bn at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits vi at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits th at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits pl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits nl at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "food browse fits uk at 390x844 and 160%",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/food_search_ui_state_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "incremental text uses local plus bundled SQLite core and trusted gateway only on miss",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_search_journey_integration_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "manual localized digits and decoded image value converge on one GTIN journey",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_search_journey_integration_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all four meal types use the same latest-query search surface",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_search_journey_integration_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "camera and gallery captures share the same raw-value callback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_search_journey_integration_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "silence timeout stops the microphone; retry ignores an earlier final result",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_session_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "delayed initialization is visible; cancellation cannot start a late microphone",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_session_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "partial final manual edit and late speech retain only reviewed text",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_session_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "native failure and silence allow manual review and explicit retry",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_session_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "double start keeps one session; stopped and closed states have no live microphone",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_session_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "panel appears during delayed native initialization and double tap cannot open two recordings",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "denied permission never listens or returns a candidate",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "system back and background stop microphone without confirming",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only ar Brightness.dark 320.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only ar Brightness.dark 800.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only ar Brightness.light 320.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only ar Brightness.light 800.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only en Brightness.dark 320.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only en Brightness.dark 800.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only en Brightness.light 320.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reviewed search only en Brightness.light 800.0 keyboard 2x real taps and late speech",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/meal_voice_panel_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "native event sink and microphone remain owned when a second voice surface closes",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/speech_bridge_capture_ownership_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "community voice permission denial cannot return or persist a value",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "community delayed preparation cancels early and rejects cross-purpose double capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "community reviewed Arabic edit survives late voice at 320 keyboard 2x and confirms only a draft",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "community background and navigator disposal do not confirm a recording",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weight voice permission denial cannot return or persist a value",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weight delayed preparation cancels early and rejects cross-purpose double capture",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weight reviewed Arabic edit survives late voice at 320 keyboard 2x and confirms only a draft",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weight background and navigator disposal do not confirm a recording",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_shared_purpose_behavior_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review ar 320 keyboard 2x preserves explicit selection source and serving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review en 320 keyboard 2x preserves explicit selection source and serving",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review copy covers every production locale exactly",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in ar",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in en",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in fr",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in es",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in tr",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in de",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in it",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in pt-BR",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in pt-PT",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in ur",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in fa",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in hi",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in id",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in ms",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in ja",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in ko",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in zh-Hans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in zh-Hant",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in ru",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in bn",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in vi",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in th",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in pl",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in nl",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "barcode review renders ingredients and evidenced nutrition in uk",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/barcode_food_review_dialog_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser accepts localized digits and units for every supported BIL locale",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser accepts pounds across every supported BIL locale",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser accepts Arabic speech and Arabic-Indic digits",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser accepts English number words and pounds",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser preserves a spoken English decimal instead of summing digits",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser accepts Arabic number words and a spoken decimal",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser accepts localized number words from representative language families",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser uses the selected measurement system when unit is omitted",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser rejects implausible values instead of changing the field",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser uses the same reviewed range as manual entry and persistence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser rejects signed, ambiguous, date-like, and conflicting input",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser handles locale mismatch and safe pound conversion",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser all release locales have safe invalid-weight feedback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser iOS microphone and speech disclosures include weight entry",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "SpokenWeightParser voice review contract never puts raw speech in the weight field",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/weight/weight_voice_input_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "voice logging requires editable review and never writes a meal",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_logging_review_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "native bridges expose explicit permission timeout and no-match paths",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_logging_review_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "each meal voice capture releases its speech subscription",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/nutrition/voice_logging_review_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud outbox producer nutrition envelope retains all nineteen fields and immutable evidence without expanding live consent",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud outbox producer adopted guest health data becomes durable owner-scoped envelopes",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud outbox producer owner mismatch fails before any health row is enqueued",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud outbox producer selective policy skips disallowed kinds without consuming batch room",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud outbox producer deleted rows are emitted as tombstones with no health payload",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_outbox_producer_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "deleteSelected removes only explicitly reviewed memory",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/memory_selective_delete_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "version mismatch rejects deletion without touching any memory",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/memory_selective_delete_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner change during reviewed delete cancels before persistence",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/memory_selective_delete_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "weight unit commit updates display preferences only",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/unit_command_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "unit Undo restores exact prior values after verified readback",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/unit_command_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "newer unit edit blocks stale Undo",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/unit_command_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner change before mutation rejects command",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/unit_command_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "write permission revoked before Undo leaves unit unchanged",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/parallel/bil03/unit_command_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a pending cloud response is retired on account transition startup=false ABA=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a pending cloud response is retired on account transition startup=false ABA=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a pending cloud response is retired on account transition startup=true ABA=false",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "a pending cloud response is retired on account transition startup=true ABA=true",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same-owner token restoration retains a valid pending response",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_transport_owner_epoch_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual release parser and current SDK preserve native PostgreSQL 32-35/current reply",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_release_wire_compatibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual release parser and current SDK preserve native PostgreSQL new/current reply",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_release_wire_compatibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual release parser and current SDK preserve native PostgreSQL 32-35/proposed reply",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_release_wire_compatibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "actual release parser and current SDK preserve native PostgreSQL new/proposed reply",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_release_wire_compatibility_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cloud ledger migration is owner scoped and RPC authenticated",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/supabase_cloud_transport_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Supabase transport implements the real CloudTransport boundary",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/supabase_cloud_transport_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "production schema compatibility keeps both cloud column pairs valid",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/supabase_cloud_transport_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "cloud download is paged and sequence allocation is serialized",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/supabase_cloud_transport_contract_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reader decodes only latest profile plus weight and hydration",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/supabase_startup_cloud_restore_reader_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reader rejects cross-owner and unsupported rows",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/supabase_startup_cloud_restore_reader_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "production reader remains paged, owner-scoped and remote read-only",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/supabase_startup_cloud_restore_reader_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "local cached key is used and skips RPC call",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "new device reads key from bil_get_existing_cloud_key and caches it",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "missing cloud key resolves to null without creating or writing",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "owner mismatch is rejected before reading cache",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "corrupt local key is rejected and not cached",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account switch during secure-store read fails closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account switch during cloud RPC cannot cache returned key",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account switch during secure write removes the stale key",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "same owner with a replaced auth session fails closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/cloud_account_key_repository_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier applies a newer remote weight to an empty local store",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier profile restore also restores onboarding identity preferences",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier selective startup batch rolls back when one payload is invalid",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier own echoed weight marks queued row synced and preserves photo path",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier newer local pending edit is never overwritten by older remote",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier remote hydration tombstone soft deletes matching local row",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier cross-account inbox is rejected before local mutation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "AppDatabase cloud inbox applier nutrition remains unsupported until relational merge is closed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Coach literal audit includes new part helpers and Dart quote forms",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "all tracked 25-locale surfaces close English fallback paths",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "release closure is complete, translated, and placeholder-safe",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Gemini remains a product name in every release locale",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "platform and conversation labels close all 25 locale paths",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "community moderation copy is native and placeholder-safe",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "community social copy is native and placeholder-safe",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "accessibility and wellness labels never fall back to English",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "sleep schedule copy is complete and placeholder-safe",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/bil_25_locale_fallback_closure_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "original JWT is explicit and no client actor is added",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/admin_owner_operation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account transition during integrity preparation cancels ABA=false before send",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/admin_owner_operation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late administrative receipt is retired ABA=false and original JWT stays fixed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/admin_owner_operation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account transition during integrity preparation cancels ABA=true before send",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/admin_owner_operation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "late administrative receipt is retired ABA=true and original JWT stays fixed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/admin_owner_operation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "sign out retires a pending preparation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/admin_owner_operation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "missing session and denied server response are explicit failures",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/admin_owner_operation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "global reset response rejects malformed success payloads",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reset gift copy is complete for all 25 production locales",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ordinary account cannot discover the admin deep link",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "global reset requires confirmation before one mutation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "individual reset validates and requires confirmation",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "individual no-match gives admin a clear no-change result",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reset completes safely after leaving admin (global=true)",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reset completes safely after leaving admin (global=false)",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root notice loads after sign-in and dismisses exactly once",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reset gift is centered and the acknowledgement dismisses once",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "opening a reset notice refreshes server balance and credit access",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "account switch cannot surface or dismiss the previous notice",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "admin visibility is recomputed and hidden on account switch",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "migration is atomic, idempotent, audited, and service-only",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "audit survives actor and target account deletion",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "global and individual reset used only in current week and month",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "live plan authority preserves trial and closed-test boundaries",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "monthly trigger allows decreases while preserving reservations",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "notice is own-row RLS, DB-time dismissed, and delivered once",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "only safe gift copy bypasses private push previews",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "trial allowance resets then locks at production 1000 limit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reset top-up opens true Free until its 2,500 tokens are consumed",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "reset preserves reservations and adds nothing to a full Boost balance",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "user counter shows both unchanged current-period boundaries",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "admin route is gated and gift link opens ordinary AI Coach",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/admin/ai_coach_global_reset_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "confirmed author explanation is visible with its real reading direction",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_review_reason_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ABA ownership signals hide an explanation arriving after the visit retired",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_review_reason_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "failed explanation stays unavailable and explicit retry starts a new read",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/community/community_post_review_reason_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in ar",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in en",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in fr",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in es",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in tr",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in de",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in it",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in pt-BR",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in pt-PT",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in ur",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in fa",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in hi",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in id",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in ms",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in ja",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in ko",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in zh-Hans",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in zh-Hant",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in ru",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in bn",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in vi",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in th",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in pl",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in nl",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "closure controls and review copy resolve in uk",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/localization/closure_interfaces_runtime_copy_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 302,
+    "failure": 0,
+    "error": 1,
+    "skip": 0
+  },
+  "errors": [
+    {
+      "testID": 120,
+      "error": "Test failed. See exception logs above.\nThe test description was: embedded My foods is task-first and consolidates capture methods",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 25124
+    }
+  ],
+  "incomplete_tests": []
+}

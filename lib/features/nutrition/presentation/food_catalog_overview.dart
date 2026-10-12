@@ -50,75 +50,91 @@ class _NutritionTaskBar extends StatelessWidget {
   }
 }
 
-class _FoodAddActionSheet extends StatelessWidget {
-  const _FoodAddActionSheet({required this.showPremiumLabel});
-
-  final bool showPremiumLabel;
+class _FoodAddActionSheet extends ConsumerWidget {
+  const _FoodAddActionSheet();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = context.strings.text;
+    final access = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
+    final verifiedDenied =
+        access?.authority == EntitlementAuthority.verifiedServer &&
+        !const {
+          CommercePlan.pro,
+          CommercePlan.premium,
+          CommercePlan.premiumAiCoach,
+        }.contains(access!.plan);
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              t('Add food'),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            PremiumNutritionGlass(
-              key: const Key('food-add-barcode-premium-group'),
-              compact: true,
-              showLabel: showPremiumLabel,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _FoodAddActionTile(
-                    actionKey: const Key('food-add-scan-barcode'),
-                    kind: BilSemanticIconKind.barcode,
-                    label: nutritionText(
-                      context,
-                      'Scan barcode',
-                      'مسح الباركود',
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          16 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                t('Add food'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              KeyedSubtree(
+                key: const Key('food-add-barcode-premium-group'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (verifiedDenied)
+                      const Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: PremiumLabelBadge(),
+                      ),
+                    _FoodAddActionTile(
+                      actionKey: const Key('food-add-scan-barcode'),
+                      kind: BilSemanticIconKind.barcode,
+                      label: nutritionText(
+                        context,
+                        'Scan barcode',
+                        'مسح الباركود',
+                      ),
+                      onTap: () =>
+                          Navigator.pop(context, _FoodAddMethod.scanBarcode),
                     ),
-                    onTap: () =>
-                        Navigator.pop(context, _FoodAddMethod.scanBarcode),
-                  ),
-                  _FoodAddActionTile(
-                    actionKey: const Key('food-add-manual-barcode'),
-                    kind: BilSemanticIconKind.barcode,
-                    iconOverride: Icons.dialpad_rounded,
-                    label: t('Enter barcode manually'),
-                    onTap: () =>
-                        Navigator.pop(context, _FoodAddMethod.manualBarcode),
-                  ),
-                ],
+                    _FoodAddActionTile(
+                      actionKey: const Key('food-add-manual-barcode'),
+                      kind: BilSemanticIconKind.barcode,
+                      iconOverride: Icons.dialpad_rounded,
+                      label: t('Enter barcode manually'),
+                      onTap: () =>
+                          Navigator.pop(context, _FoodAddMethod.manualBarcode),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            _FoodAddActionTile(
-              actionKey: const Key('food-add-meal-photo'),
-              kind: BilSemanticIconKind.mealPhoto,
-              label: nutritionText(
-                context,
-                'Analyze meal photo',
-                'تحليل صورة الوجبة',
+              _FoodAddActionTile(
+                actionKey: const Key('food-add-meal-photo'),
+                kind: BilSemanticIconKind.mealPhoto,
+                label: nutritionText(
+                  context,
+                  'Analyze meal photo',
+                  'تحليل صورة الوجبة',
+                ),
+                onTap: () => Navigator.pop(context, _FoodAddMethod.mealPhoto),
               ),
-              onTap: () => Navigator.pop(context, _FoodAddMethod.mealPhoto),
-            ),
-            _FoodAddActionTile(
-              actionKey: const Key('food-add-custom-food'),
-              kind: BilSemanticIconKind.notes,
-              label: customFoodText(context, 'Create custom food'),
-              onTap: () => Navigator.pop(context, _FoodAddMethod.customFood),
-            ),
-          ],
+              _FoodAddActionTile(
+                actionKey: const Key('food-add-custom-food'),
+                kind: BilSemanticIconKind.notes,
+                label: customFoodText(context, 'Create custom food'),
+                onTap: () => Navigator.pop(context, _FoodAddMethod.customFood),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -186,31 +202,33 @@ class _NutritionHero extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(BilFlagshipTokens.radiusLg),
-        child: SizedBox(
-          height: 188,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 188),
           child: Stack(
-            fit: StackFit.expand,
+            fit: StackFit.passthrough,
             children: [
-              Image.asset(
-                'assets/images/flagship/bil_meal_discovery_v1.png',
-                fit: BoxFit.cover,
-                alignment: const Alignment(0, -.08),
-                cacheWidth: 720,
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/flagship/bil_meal_discovery_v1.png',
+                  fit: BoxFit.cover,
+                  alignment: const Alignment(0, -.08),
+                  cacheWidth: 720,
+                ),
               ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0x12071120), Color(0xE6071120)],
-                    stops: [0.28, 1],
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0x12071120), Color(0xE6071120)],
+                      stops: [0.28, 1],
+                    ),
                   ),
                 ),
               ),
-              PositionedDirectional(
-                start: 18,
-                end: 18,
-                bottom: 16,
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(18, 88, 18, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -284,10 +302,8 @@ class _NutritionQuickActions extends StatelessWidget {
       children: [
         Expanded(
           flex: 2,
-          child: PremiumNutritionGlass(
+          child: KeyedSubtree(
             key: const Key('food-barcode-premium-group'),
-            compact: true,
-            borderRadius: BilFlagshipTokens.radiusMd,
             child: Row(
               children: [
                 for (var index = 0; index < 2; index++) ...[

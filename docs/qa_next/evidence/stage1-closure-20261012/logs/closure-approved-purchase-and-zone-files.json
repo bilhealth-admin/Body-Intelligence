@@ -1,0 +1,86 @@
+{
+  "label": "closure-approved-purchase-and-zone-files",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/purchase_notification_zone_test.dart",
+    "test/features/commerce/app_purchase_confirmation_test.dart",
+    "test/features/commerce/app_subscription_confirmation_test.dart",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791768214.128774,
+  "files": {
+    "test/features/commerce/purchase_notification_zone_test.dart": "37fad741ba333b126f18b21dede171afc8b66999282de8edfa942da484da60db",
+    "test/features/commerce/app_purchase_confirmation_test.dart": "b89ca8c87f9b588fec082f4d0ec820120709961529d2e760f76d32c72353f7f5",
+    "test/features/commerce/app_subscription_confirmation_test.dart": "e8ff2d353ca85216bde929175b55091a55f72fd55afd00748c9091f0ee37de6b"
+  },
+  "fingerprint_version": 2,
+  "source_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/purchase_notification_zone_test.dart",
+    "test/features/commerce/app_purchase_confirmation_test.dart",
+    "test/features/commerce/app_subscription_confirmation_test.dart",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+  ],
+  "pid": 15960,
+  "exit_code": 0,
+  "finished": 1791768226.7838771,
+  "end_fingerprint": "0794fc547138e7eb57e8b7e40796d983b5db81c301901a06baf327e87d99f60a",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "subscription UI continuation survives a completed HTTP guard, guard work stays fenced",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/purchase_notification_zone_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Boost UI continuation survives a completed HTTP guard, guard work stays fenced",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/purchase_notification_zone_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Boost confirmation after route exit before native finish at 390.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_purchase_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "Boost confirmation after route exit before native finish at 320.0",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_purchase_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription active proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "root subscription trial proof unlocks before native finish after route exit",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/app_subscription_confirmation_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 6,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

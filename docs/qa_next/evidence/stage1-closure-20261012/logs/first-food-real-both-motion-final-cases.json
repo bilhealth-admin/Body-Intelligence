@@ -1,0 +1,57 @@
+{
+  "label": "first-food-real-both-motion-final-cases",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_use_reference_journey_test.dart",
+    "--plain-name",
+    "ar real food journey: cancel, edit 80g, commit once, celebrate, streak"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791758956.2412784,
+  "files": {
+    "test/features/dashboard/first_use_reference_journey_test.dart": "6fd6548dd4389a14cb9e86f797dbcde2661cd0b8cc7bc6bff1de622283b1542a"
+  },
+  "source_fingerprint": "28d8e5c67a91144e25d15738c89142a522ec4c4f5c170faadb4eb99cfb5cc55f",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/dashboard/first_use_reference_journey_test.dart",
+    "--plain-name",
+    "ar real food journey: cancel, edit 80g, commit once, celebrate, streak"
+  ],
+  "pid": 5296,
+  "exit_code": 0,
+  "finished": 1791758974.9107819,
+  "end_fingerprint": "28d8e5c67a91144e25d15738c89142a522ec4c4f5c170faadb4eb99cfb5cc55f",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    },
+    {
+      "name": "ar real food journey: cancel, edit 80g, commit once, celebrate, streak reduced motion",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/dashboard/first_use_reference_journey_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 2,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

@@ -14,6 +14,7 @@ import '../../../engine/one_best_action_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
 import '../../commerce/domain/commerce_plan.dart';
+import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../exercise_calorie_controls/domain/exercise_calorie_policy.dart';
 import '../../exercise_calorie_controls/providers/exercise_calorie_providers.dart';
@@ -22,6 +23,7 @@ import '../../profile/providers/user_profile_provider.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../nutrition/domain/macro_gram_goals.dart';
+import '../../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import '../../nutrition/domain/percentage_nutrition_goals.dart';
 import '../dashboard_five_locale_copy.dart';
 import '../../weight/providers/weight_provider.dart';
@@ -91,7 +93,9 @@ class DashboardGrid extends ConsumerWidget {
     // Today is local-first. A slow/offline commerce refresh must never hide
     // weight, meals, water, goals, or other SQLite-backed dashboard truth.
     // Unresolved access is kept neutral instead of being rendered as Free.
-    final premiumAccessResolved = verifiedSubscription.hasValue;
+    final premiumAccessResolved =
+        verifiedSubscription.asData?.value.authority ==
+        EntitlementAuthority.verifiedServer;
     final verifiedPlan = verifiedSubscription.value?.plan;
     final premiumUnlocked =
         premiumAccessResolved &&
@@ -269,6 +273,9 @@ class DashboardGrid extends ConsumerWidget {
     final fats = hasItems ? dashboardSnapshot.fats : 0.0;
     final effectiveTargets = dashboardSnapshot.effectiveTargets;
     final savedMacroGramGoals = ref.watch(dashboardMacroGramGoalsProvider);
+    final goalsNeedReview =
+        scheduledTarget == null &&
+        ref.watch(nutritionMacroGoalsNeedReviewProvider);
     final macroGramGoals = scheduledTarget == null
         ? savedMacroGramGoals
         : MacroGramGoals(
@@ -588,23 +595,34 @@ class DashboardGrid extends ConsumerWidget {
                 ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط.'
                 : '${primaryInsight.explanation} ${primaryInsight.suggestedAction}',
             caloriesConsumed: calories?.round(),
-            caloriesGoal: exerciseAdjustedTargets.effectiveCalorieGoal.round(),
-            baseCaloriesGoal: exerciseAdjustedTargets.baseCalorieGoal.round(),
+            caloriesGoal: goalsNeedReview
+                ? 0
+                : exerciseAdjustedTargets.effectiveCalorieGoal.round(),
+            baseCaloriesGoal: goalsNeedReview
+                ? 0
+                : exerciseAdjustedTargets.baseCalorieGoal.round(),
             caloriesBurned: exerciseEnergy?.kcal.round() ?? 0,
             netCalories: calories == null
                 ? null
                 : (calories - (exerciseEnergy?.kcal ?? 0)).round(),
-            remainingCalories: exerciseAdjustedTargets.remainingCalories
-                ?.round(),
+            remainingCalories: goalsNeedReview
+                ? null
+                : exerciseAdjustedTargets.remainingCalories?.round(),
             burnedCaloriesApplied:
                 exerciseAdjustedTargets.availability ==
                 ExerciseCalorieAvailability.applied,
             proteinConsumed: protein?.round(),
-            proteinGoal: exerciseAdjustedTargets.proteinGoal.round(),
+            proteinGoal: goalsNeedReview
+                ? null
+                : exerciseAdjustedTargets.proteinGoal.round(),
             carbohydratesConsumed: carbohydrates?.round(),
-            carbohydratesGoal: exerciseAdjustedTargets.carbohydrateGoal.round(),
+            carbohydratesGoal: goalsNeedReview
+                ? null
+                : exerciseAdjustedTargets.carbohydrateGoal.round(),
             fatConsumed: fats?.round(),
-            fatGoal: exerciseAdjustedTargets.fatGoal.round(),
+            fatGoal: goalsNeedReview
+                ? null
+                : exerciseAdjustedTargets.fatGoal.round(),
             carbohydratesEvidenceValue: evidenced(
               TrackedNutrient.carbohydrates,
             ),
@@ -642,6 +660,9 @@ class DashboardGrid extends ConsumerWidget {
             visibleSections: visibleSections,
             premiumUnlocked: premiumUnlocked,
             premiumAccessResolved: premiumAccessResolved,
+            premiumAccessChecking: verifiedSubscription.isLoading,
+            onPremiumRetry: () =>
+                ref.invalidate(verifiedSubscriptionStateProvider),
           ),
         ),
         if (visibleNutrientGoalCards.isNotEmpty)

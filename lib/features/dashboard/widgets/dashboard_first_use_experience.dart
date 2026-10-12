@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/first_meal_milestone.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../foods/providers/food_provider.dart';
+import '../../../data/repositories/meal_repository.dart';
 import '../providers/dashboard_provider.dart';
 import 'first_meal_celebration.dart';
+import '../../../shared/widgets/bil_experience_presentation.dart';
 import 'first_use_context_coachmark.dart';
 import '../../../shared/widgets/first_use_guide_anchor.dart';
 
@@ -34,11 +37,13 @@ class DashboardFirstUseExperience extends ConsumerStatefulWidget {
 }
 
 class _DashboardFirstUseExperienceState
-    extends ConsumerState<DashboardFirstUseExperience> {
+    extends ConsumerState<DashboardFirstUseExperience>
+    with WidgetsBindingObserver {
   bool _ready = false;
   bool _canGuide = false;
   bool _saving = false;
   int _step = 0;
+  int _visit = 0;
 
   String get _guideKey =>
       'experience.dashboard_food_guide.v1.${widget.ownerScope}';
@@ -46,7 +51,42 @@ class _DashboardFirstUseExperienceState
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    BilExperiencePresentation.occupied.addListener(_retryPresentation);
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  void _retryPresentation() {
+    if (mounted && !BilExperiencePresentation.occupied.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _load();
+      });
+      // Returning from inactive may not schedule a new frame by itself.
+      // A post-frame retry must request one, without creating a timer loop.
+      WidgetsBinding.instance.ensureVisualUpdate();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (ModalRoute.of(context)?.isCurrent != false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _load();
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _retryPresentation();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    BilExperiencePresentation.occupied.removeListener(_retryPresentation);
+    super.dispose();
   }
 
   @override
@@ -54,6 +94,7 @@ class _DashboardFirstUseExperienceState
     super.didUpdateWidget(oldWidget);
     if (oldWidget.ownerScope != widget.ownerScope ||
         oldWidget.ownerReady != widget.ownerReady) {
+      _visit++;
       _ready = false;
       _canGuide = false;
       _saving = false;
@@ -65,20 +106,45 @@ class _DashboardFirstUseExperienceState
   Future<void> _load() async {
     if (!mounted || !widget.ownerReady) return;
     final scope = widget.ownerScope;
+    final visit = _visit;
     final preferences = ref.read(preferencesRepositoryProvider);
     String? prior;
+    String? milestone;
+    bool current() =>
+        mounted &&
+        _visit == visit &&
+        widget.ownerScope == scope &&
+        widget.ownerReady &&
+        identical(ref.read(preferencesRepositoryProvider), preferences);
     try {
       prior = await preferences.get(_guideKey);
+      milestone = await ref
+          .read(mealRepositoryProvider)
+          .prepareFirstFoodMilestone(isCurrent: current);
     } catch (_) {
       prior = 'unavailable';
     }
-    if (!mounted || widget.ownerScope != scope || !widget.ownerReady) return;
+    if (!mounted ||
+        _visit != visit ||
+        widget.ownerScope != scope ||
+        !widget.ownerReady) {
+      return;
+    }
     setState(() {
       _ready = true;
-      _canGuide = prior == null;
+      _canGuide = prior == null && milestone == null;
     });
     if (mounted && widget.ownerScope == scope) {
-      await FirstMealCelebration.showIfPending(context, preferences);
+      await FirstMealCelebration.showIfPending(
+        context,
+        preferences,
+        ownerIsCurrent: () =>
+            mounted &&
+            _visit == visit &&
+            widget.ownerReady &&
+            widget.ownerScope == scope &&
+            identical(ref.read(preferencesRepositoryProvider), preferences),
+      );
     }
   }
 
@@ -86,6 +152,7 @@ class _DashboardFirstUseExperienceState
     if (expectedScope != null && widget.ownerScope != expectedScope) return;
     if (_saving) return;
     final scope = widget.ownerScope;
+    final visit = _visit;
     final key = _guideKey;
     final preferences = ref.read(preferencesRepositoryProvider);
     setState(() {
@@ -93,12 +160,27 @@ class _DashboardFirstUseExperienceState
       _canGuide = false;
     });
     try {
-      await preferences.set(key, openFood ? 'started' : 'dismissed');
+      final prior = await preferences.get(key);
+      await preferences.mutateIfUnchanged(
+        expected: {key: prior},
+        set: {key: openFood ? 'started' : 'dismissed'},
+        isCurrent: () =>
+            mounted &&
+            _visit == visit &&
+            widget.ownerReady &&
+            widget.ownerScope == scope &&
+            identical(ref.read(preferencesRepositoryProvider), preferences),
+      );
     } catch (_) {
       // Skip always works for this visit when persistence is unavailable.
     }
     // A stale callback must never navigate a different signed-in owner.
-    if (!mounted || !widget.ownerReady || widget.ownerScope != scope) return;
+    if (!mounted ||
+        _visit != visit ||
+        !widget.ownerReady ||
+        widget.ownerScope != scope) {
+      return;
+    }
     setState(() => _saving = false);
     if (openFood) context.go('/daily-log?foodLog=1&guide=1&from=%2Fdashboard');
   }

@@ -1,0 +1,52 @@
+{
+  "label": "native-finish-concurrent-retry-repaired-case",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "--plain-name",
+    "simultaneous verified finish retries share one native acknowledgement"
+  ],
+  "head": "da6022802112811b8aa8ece7c7c07fe010867ce1",
+  "started": 1791758315.5322986,
+  "files": {
+    "test/features/commerce/store_transaction_queue_test.dart": "290639689519e739ef70c3ed5087474bcf5faa609e103ada4e19e59650b97a60"
+  },
+  "source_fingerprint": "b17a872bc09c5c85249e720ec335f925262154166c0898f0b773ccb250bf3849",
+  "invocation": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\dart-sdk\\bin\\dart.exe",
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\cache\\flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/commerce/store_transaction_queue_test.dart",
+    "--plain-name",
+    "simultaneous verified finish retries share one native acknowledgement"
+  ],
+  "pid": 20388,
+  "exit_code": 0,
+  "finished": 1791758327.3942823,
+  "end_fingerprint": "b17a872bc09c5c85249e720ec335f925262154166c0898f0b773ccb250bf3849",
+  "stable_source": true,
+  "tests": [
+    {
+      "name": "simultaneous verified finish retries share one native acknowledgement",
+      "url": "file:///G:/BIL_Project/worktrees/bil-stage1-closure-20261011/test/features/commerce/store_transaction_queue_test.dart",
+      "result": "success"
+    }
+  ],
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "errors": [],
+  "incomplete_tests": []
+}

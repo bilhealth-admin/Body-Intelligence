@@ -1,0 +1,23 @@
+[
+  {
+    "path": "G:\\BIL_Project\\body_intelligence_log",
+    "head": "2a5cbb3f48fd64347cc2dbb79228d99772acb5cc",
+    "status_entries": 66,
+    "status_sha256": "e8db7094e28f71cfbe007263b16450c6f3105ef2f4523fa7cfa4cab42e11806b",
+    "note": "Read-only; no reset, checkout replacement, cleanup, archive, or edits by this stage."
+  },
+  {
+    "path": "G:\\BIL_Project\\worktrees\\bil-first-use-recovery-20261011",
+    "head": "f8693133cfc042ce34718dab9f078bdd488f3cbf",
+    "status_entries": 0,
+    "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "note": "Read-only; no reset, checkout replacement, cleanup, archive, or edits by this stage."
+  },
+  {
+    "path": "G:\\BIL_Project\\worktrees\\bil-full-preflight-20261011",
+    "head": "23a9378f2ed1553b045d77a0119655ea18d5bde3",
+    "status_entries": 8,
+    "status_sha256": "70b9e72bfd37ef0b99d0b3d6d81a6143e467fe719453c3d85a1841205f70539a",
+    "note": "Read-only; no reset, checkout replacement, cleanup, archive, or edits by this stage."
+  }
+]

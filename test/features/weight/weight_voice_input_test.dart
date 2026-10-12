@@ -352,13 +352,22 @@ void main() {
         'lib/features/weight/services/spoken_weight_parser.dart',
       ).readAsStringSync();
 
-      expect(source, contains('text: reviewedNumber'));
+      expect(source, contains('reviewTextForResult: (result)'));
+      expect(
+        source,
+        contains(
+          "return parsed == null ? '' : _formatReviewedNumber(parsed.value)",
+        ),
+      );
       expect(source, isNot(contains('text: transcript')));
       expect(
         source,
         contains("CheckInRuntimeCopy.resolve('Enter a valid weight.'"),
       );
-      expect(source, contains('localeId: preferredLocale'));
+      expect(
+        source,
+        contains('localeId: _preferredSpeechLocale(allowed, interfaceLocale)'),
+      );
       expect(candidateSource, isNot(contains('final String transcript')));
     });
   });
