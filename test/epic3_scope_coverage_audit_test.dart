@@ -59,6 +59,7 @@ void main() {
     '/community/channels': 'community',
     '/community/channels/:channelId': 'community',
     '/community/post/:postId': 'community',
+    '/community/content/:postId': 'community',
     '/food-libraries': 'nutrition',
     '/meal-image-guide': 'nutrition',
     '/notification-settings': 'notifications',

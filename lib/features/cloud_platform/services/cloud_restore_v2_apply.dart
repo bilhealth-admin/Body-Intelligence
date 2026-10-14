@@ -58,7 +58,11 @@ extension _CloudRestoreApplication on CloudRestoreV2Engine {
         );
     final revision = record['server_revision']! as int;
     if (revision < row.revision) return false;
-    final current = await codec.capture(scopes: {scope});
+    final current = await codec.capture(
+      scopes: {scope},
+      recordType: snapshot.type,
+      recordId: snapshot.id,
+    );
     final matches = current.where((value) => value.key == snapshot.key);
     final local = matches.isEmpty ? null : matches.single;
     final localFingerprint = local != null
@@ -114,7 +118,11 @@ extension _CloudRestoreApplication on CloudRestoreV2Engine {
       await codec.apply(snapshot);
     }
     _guard();
-    final after = await codec.capture(scopes: {scope});
+    final after = await codec.capture(
+      scopes: {scope},
+      recordType: snapshot.type,
+      recordId: snapshot.id,
+    );
     final restored = after.where((value) => value.key == snapshot.key);
     row.revision = revision;
     // The codec can retain a newer shared catalog dependency. Its immutable

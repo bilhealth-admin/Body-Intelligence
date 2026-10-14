@@ -1,0 +1,17 @@
+{
+  "label": "format-qr-runtime-and-case",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib\\features\\community\\presentation\\community_bil_code_page.dart",
+    "test/features/community/community_code_invite_earn_account_test.dart"
+  ],
+  "started_utc": "2026-10-13T08:34:12.495125+00:00",
+  "runner_pid": 19632,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "feb3a2d6715ee90ea4c34df299beea87246ccba1482eabe244dabed3d230ddc9",
+  "fingerprint_version": 4,
+  "pid": 9648
+}

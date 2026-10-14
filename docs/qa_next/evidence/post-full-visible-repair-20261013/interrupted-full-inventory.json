@@ -1,0 +1,226 @@
+{
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "source_fingerprint": "2d016a6d67df3199d13ccd613d2eb039b6f9eeb7d1ff0f39bdeffd26ebafb4ed",
+  "phase": "failed_runner",
+  "counts": {
+    "success": 359,
+    "failure": 2,
+    "error": 11,
+    "skip": 0
+  },
+  "files_expected": 1330,
+  "files_loaded": 76,
+  "files_with_test_outcomes": 76,
+  "runner_error": "PermissionError: [WinError 5] Access is denied: 'G:\\\\BIL_Project\\\\worktrees\\\\bil-stage1-closure-20261011\\\\build\\\\owner-full\\\\owner-full-closure-20261013\\\\status.tmp' -> 'G:\\\\BIL_Project\\\\worktrees\\\\bil-stage1-closure-20261011\\\\build\\\\owner-full\\\\owner-full-closure-20261013\\\\status.json'",
+  "protocol_done_observed": false,
+  "failures": [
+    {
+      "test_id": 183,
+      "name": "real loopback downloads coalesce, survive first consumer exit and never exceed three",
+      "result": "error"
+    },
+    {
+      "test_id": 218,
+      "name": "default cloud and AI are ready while paid commerce fails closed",
+      "result": "failure"
+    },
+    {
+      "test_id": 570,
+      "name": "Flutter and AI server use the same citation allow-list",
+      "result": "failure"
+    },
+    {
+      "test_id": 556,
+      "name": "iOS/ar/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 578,
+      "name": "iOS/en/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 587,
+      "name": "iOS/fr/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 593,
+      "name": "iOS/es/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 597,
+      "name": "iOS/tr/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 598,
+      "name": "iOS/de/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 599,
+      "name": "iOS/it/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 600,
+      "name": "iOS/pt-BR/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 601,
+      "name": "iOS/pt-PT/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    },
+    {
+      "test_id": 602,
+      "name": "iOS/ur/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "result": "error"
+    }
+  ],
+  "errors": [
+    {
+      "testID": 183,
+      "error": "PathAccessException: Deletion failed, path = 'C:\\Users\\HP1040~1\\AppData\\Local\\Temp\\bil-cache-test-da015016' (OS Error: The process cannot access the file because it is being used by another process, errno = 32)",
+      "stackTrace": "dart:io                                                    FileSystemEntity.delete\ntest\\app\\services\\scoped_media_file_cache_test.dart 44:51  main.<fn>\n===== asynchronous gap ===========================\ndart:async                                                 _CustomZone.registerUnaryCallback\ntest\\app\\services\\scoped_media_file_cache_test.dart 41:5   main.<fn>\n",
+      "isFailure": false,
+      "type": "error",
+      "time": 73342
+    },
+    {
+      "testID": 218,
+      "error": "Expected: false\n  Actual: <true>\n",
+      "stackTrace": "package:matcher                                     expect\npackage:flutter_test/src/widget_tester.dart 473:18  expect\ntest\\app_foundation_services_test.dart 15:5         main.<fn>\n",
+      "isFailure": true,
+      "type": "error",
+      "time": 82305
+    },
+    {
+      "testID": 570,
+      "error": "Expected: contains '\"fda_label_daily_values\"'\n  Actual: 'export const allowedHealthCitationIds = new Set([\\n'\n            '  \"cdc_weight_loss\",\\n'\n            '  \"wishnofsky_weight_energy\",\\n'\n            '  \"national_academies_dri\",\\n'\n            '  \"cdc_healthy_eating\",\\n'\n            '  \"who_sodium_potassium\",\\n'\n            '  \"mifflin_st_jeor\",\\n'\n            '  \"issn_protein_exercise\",\\n'\n            '  \"cdc_adult_bmi\",\\n'\n            '  \"nice_waist_to_height\",\\n'\n            '  \"deurenberg_body_fat\",\\n'\n            '  \"hodgdon_beckett_circumference\",\\n'\n            '  \"who_pregnancy_iron_folate\",\\n'\n            '  \"who_pregnancy_calcium\",\\n'\n            '  \"who_unicef_pregnancy_iodine\",\\n'\n            '  \"national_academies_pregnancy_energy\",\\n'\n            '  \"sleep_foundation_adult_duration\",\\n'\n            '  \"hhs_physical_activity_guidelines\",\\n'\n            '  \"adult_compendium_met_2024\",\\n'\n            '  \"niddk_intermittent_fasting_safety\",\\n'\n            '  \"nhlbi_dash\",\\n'\n            '  \"predimed_2018\",\\n'\n            '  \"niddk_vlcd_supervision\",\\n'\n            ''\n   Which: does not contain '\"fda_label_daily_values\"'\n",
+      "stackTrace": "package:matcher                                     expect\npackage:flutter_test/src/widget_tester.dart 473:18  expect\ntest\\core\\health_evidence_catalog_test.dart 53:7    main.<fn>\n",
+      "isFailure": true,
+      "type": "error",
+      "time": 137279
+    },
+    {
+      "testID": 556,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/ar/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 138016
+    },
+    {
+      "testID": 578,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/en/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 139381
+    },
+    {
+      "testID": 587,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/fr/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 140971
+    },
+    {
+      "testID": 593,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/es/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 142229
+    },
+    {
+      "testID": 597,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/tr/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 143388
+    },
+    {
+      "testID": 598,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/de/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 144524
+    },
+    {
+      "testID": 599,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/it/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 145553
+    },
+    {
+      "testID": 600,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/pt-BR/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 146718
+    },
+    {
+      "testID": 601,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/pt-PT/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 147786
+    },
+    {
+      "testID": 602,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/ur/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 148998
+    },
+    {
+      "testID": 606,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/fa/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 150178
+    }
+  ],
+  "owned_process_termination": {
+    "method": "owned PID tree taskkill",
+    "returncode": 0,
+    "exit_code": 1,
+    "confirmed_exited": true
+  },
+  "original_artifacts": [
+    {
+      "path": "build/owner-full/owner-full-closure-20261013/status.json",
+      "bytes": 3410,
+      "sha256": "f244da9f9341a062ef509f6453949757048fa99cef730c9dd8c67ab1ea65684e"
+    },
+    {
+      "path": "build/owner-full/owner-full-closure-20261013/flutter.jsonl",
+      "bytes": 270111,
+      "sha256": "18baa69007d25c2d071fdeb907346c95a547c305bf4222e100c56d7f74b57b3b"
+    },
+    {
+      "path": "build/owner-full/owner-full-closure-20261013/progress.log",
+      "bytes": 91660,
+      "sha256": "2f79cf865bbf00ebfa2c4f9cbb8c7068cbb6cacd1a81118738b4c33a7b1fb79c"
+    },
+    {
+      "path": "build/owner-full/launch-owner-full-closure-20261013.stderr.log",
+      "bytes": 381,
+      "sha256": "803af5e0ca83ae37036b14b8b9f013a715ff9a192d31708dca942f50cacba0b9"
+    }
+  ],
+  "files_not_loaded_in_interrupted_run": 1254
+}

@@ -1,0 +1,16 @@
+{
+  "label": "format-qr-regression-case",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "test\\features\\community\\community_code_invite_earn_account_test.dart"
+  ],
+  "started_utc": "2026-10-13T08:31:50.391983+00:00",
+  "runner_pid": 4416,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "8c51754ec6cb616b1d5a975a2ef1cfa1ca8f27b16780a746be6f092c0c97c9b5",
+  "fingerprint_version": 4,
+  "pid": 1176
+}

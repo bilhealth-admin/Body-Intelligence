@@ -22,6 +22,67 @@ class _LoopbackPhotoClient implements HttpClient {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Delegates every used operation to a real test-owned directory. Only the
+/// first native listing is paused, so clear/prune ordering needs no sleeps.
+class _GatedRealDirectory implements Directory {
+  _GatedRealDirectory(this.inner);
+  final Directory inner;
+  final listingStarted = Completer<void>();
+  final releaseListing = Completer<void>();
+  final listingFinished = Completer<void>();
+  bool _firstListing = true;
+  int deletes = 0;
+  bool deletedDuringListing = false;
+
+  @override
+  String get path => inner.path;
+
+  @override
+  Future<Directory> create({bool recursive = false}) async {
+    await inner.create(recursive: recursive);
+    return this;
+  }
+
+  @override
+  Future<bool> exists() => Future<bool>.value(inner.existsSync());
+
+  @override
+  Future<Directory> delete({bool recursive = false}) async {
+    deletes++;
+    deletedDuringListing |= !listingFinished.isCompleted;
+    await inner.delete(recursive: recursive);
+    return this;
+  }
+
+  @override
+  Stream<FileSystemEntity> list({
+    bool recursive = false,
+    bool followLinks = true,
+  }) async* {
+    final gated = _firstListing;
+    _firstListing = false;
+    var firstEntry = true;
+    try {
+      await for (final entry in inner.list(
+        recursive: recursive,
+        followLinks: followLinks,
+      )) {
+        if (gated && firstEntry) {
+          firstEntry = false;
+          listingStarted.complete();
+          await releaseListing.future;
+        }
+        yield entry;
+      }
+    } finally {
+      if (gated && !listingFinished.isCompleted) listingFinished.complete();
+    }
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   late Directory directory;
   late ScopedMediaFileCache cache;
@@ -168,6 +229,53 @@ void main() {
       expect(await File('${directory.path}/old-0.img').exists(), isFalse);
     },
   );
+  test(
+    'clear waits for an open real directory prune before deleting cache data',
+    () async {
+      final retained = await seed(photo());
+      final root = _GatedRealDirectory(directory);
+      final maintenanceCache = ScopedMediaFileCache(
+        directory: root,
+        client: client,
+      )..bindViewer('A');
+      final trimming = maintenanceCache.trimForTesting();
+      Future<void>? clearing;
+      var cleared = false;
+      try {
+        await root.listingStarted.future;
+        clearing = maintenanceCache.clear().then((_) {
+          cleared = true;
+        });
+        // The previous clear and exists probe are completed futures. Drain
+        // their microtasks while the real listing remains explicitly blocked.
+        for (var turn = 0; turn < 4; turn++) {
+          await Future<void>.value();
+        }
+        expect(root.listingFinished.isCompleted, isFalse);
+        expect(cleared, isFalse);
+        expect(root.deletes, 0);
+        expect(await retained.exists(), isTrue);
+        root.releaseListing.complete();
+        await trimming;
+        await clearing;
+        expect(root.listingFinished.isCompleted, isTrue);
+        expect(cleared, isTrue);
+        expect(root.deletes, 1);
+        expect(root.deletedDuringListing, isFalse);
+        expect(await directory.exists(), isFalse);
+      } finally {
+        if (!root.releaseListing.isCompleted) root.releaseListing.complete();
+        await trimming;
+        if (clearing != null) {
+          await clearing;
+        } else {
+          await maintenanceCache.clear();
+        }
+        maintenanceCache.dispose();
+      }
+    },
+  );
+
   test('byte budget is enforced independently from the entry budget', () async {
     for (var i = 0; i < 28; i++) {
       final file = await File(
@@ -278,6 +386,7 @@ void main() {
         await subscription.cancel();
         await server.close(force: true);
         transport.close(force: true);
+        await ioCache.clear();
         ioCache.dispose();
       }
     },

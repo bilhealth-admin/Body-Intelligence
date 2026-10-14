@@ -1,0 +1,23 @@
+{
+  "label": "notification-real-reply-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/community/community_notification_content_route_test.dart",
+    "--plain-name",
+    "actual notification tap opens and focuses its real reply beyond the first page"
+  ],
+  "started_utc": "2026-10-13T07:36:35.317424+00:00",
+  "runner_pid": 22856,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "34a646b58ecc6bafac13586e59bd447bec3fb5cdc60c503d5fc2f9533ac7afeb",
+  "fingerprint_version": 4,
+  "pid": 4232
+}

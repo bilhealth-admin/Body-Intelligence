@@ -62,6 +62,20 @@ void main() {
       final source = File(entry.key).readAsStringSync();
       final count = appBars.allMatches(source).length;
       final backed = explicitReturn.allMatches(source).length;
+      if (entry.key ==
+          'lib/features/community/presentation/new_community_message_page.dart') {
+        // Three route branches share the same AppBar builder. Count the real
+        // call sites, then verify that the shared builder owns its safe Back.
+        expect(
+          RegExp(r'appBar:\s*_messageHeader\(').allMatches(source).length,
+          entry.value,
+          reason: 'Every message-page branch needs the shared header',
+        );
+        expect(count, 1, reason: 'The shared header owns one AppBar');
+        expect(backed, 1, reason: 'The shared header owns one safe Back');
+        expect(source, contains('child: const CommunityReturnButton()'));
+        continue;
+      }
       expect(
         count,
         entry.value,

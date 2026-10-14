@@ -41,9 +41,19 @@ void main() {
       'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
       'lib/features/intelligence_center/presentation/intelligence_center_widgets.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
+    final welcome = File(
+      'lib/shared/widgets/bil_pearl_feature_welcome.dart',
+    ).readAsStringSync();
 
-    expect(page, contains('Duration(milliseconds: 2200)'));
+    expect(page, contains('bilFeatureEntryDuration'));
+    expect(
+      welcome,
+      contains('const bilFeatureEntryDuration = Duration(milliseconds: 2200);'),
+    );
+    expect(page, contains('BilPearlFeatureWelcome('));
     expect(page, contains("'Welcome to AI Coach'"));
-    expect(page, contains('strokeCap: StrokeCap.round'));
+    expect(welcome, contains('BilFeatureWelcomeStatus('));
+    expect(welcome, contains('CupertinoActivityIndicator('));
+    expect(welcome, contains('animating: !reduced'));
   });
 }

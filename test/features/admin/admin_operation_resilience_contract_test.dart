@@ -13,27 +13,40 @@ void main() {
     final members = File(
       'lib/features/admin/services/community_member_access_admin_service.dart',
     ).readAsStringSync();
+    final ownerOperation = File(
+      'lib/features/admin/services/admin_owner_operation.dart',
+    ).readAsStringSync();
 
-    expect(RegExp(r'\.protect\(').allMatches(aiCoach), hasLength(3));
     expect(
-      RegExp(r'\.timeout\(const Duration\(seconds: 12\)\)').allMatches(aiCoach),
+      RegExp(r'AdminOwnerOperation\.invoke\(').allMatches(aiCoach),
       hasLength(3),
     );
     expect(
-      RegExp(r'\.timeout\(const Duration\(seconds: 20\)\)').allMatches(aiCoach),
-      hasLength(3),
+      RegExp(
+        r'\.timeout\(const Duration\(seconds: 12\)\)',
+      ).allMatches(ownerOperation),
+      hasLength(1),
     );
+    expect(
+      RegExp(
+        r'\.timeout\(const Duration\(seconds: 20\)\)',
+      ).allMatches(ownerOperation),
+      hasLength(1),
+    );
+    expect(
+      ownerOperation,
+      contains('BilMobileIntegrityService.instance.protect('),
+    );
+    expect(ownerOperation, contains('client.auth.currentUser?.id != owner'));
     for (final source in [moderator, members]) {
-      expect(source, contains('.protect('));
-      expect(source, contains('.timeout(const Duration(seconds: 12))'));
-      expect(source, contains('.timeout(const Duration(seconds: 20))'));
+      expect(source, contains('AdminOwnerOperation.invoke('));
     }
   });
 
   test('the deployed contract is explicit about the shared admin function', () {
     final source = File(
-      'lib/features/admin/services/ai_coach_admin_service.dart',
+      'lib/features/admin/services/admin_owner_operation.dart',
     ).readAsStringSync();
-    expect(source, contains("invoke('ai-coach-global-reset'"));
+    expect(source, contains("'ai-coach-global-reset'"));
   });
 }

@@ -65,6 +65,7 @@ void main() {
     final purchaseService = [
       'lib/features/commerce/services/verified_store_purchase_service.dart',
       'lib/features/commerce/services/verified_store_purchase_processing.dart',
+      'lib/features/commerce/services/verified_store_receipt_verification.dart',
     ].map(read).join('\n');
 
     expect(pubspec, contains('in_app_purchase:'));

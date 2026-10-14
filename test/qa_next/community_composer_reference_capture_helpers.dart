@@ -106,6 +106,53 @@ Future<void> _tapComposer(WidgetTester tester, String key) async {
     reason: '$key must be an actual reachable control.',
   );
   await tester.tap(target);
+  if (key == 'community-post-add-photo') {
+    // Selecting a photo intentionally leaves the composer busy behind the
+    // review sheet. pumpAndSettle would wait on that spinner forever, so drive
+    // the real preview-ready and explicit-confirm steps with bounded frames.
+    final reviewBody = find.byKey(const Key('bil-media-review-body'));
+    for (var frame = 0; frame < 40 && reviewBody.evaluate().isEmpty; frame++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+    }
+    expect(reviewBody, findsOneWidget);
+
+    final confirm = find.byKey(const Key('bil-media-review-confirm'));
+    for (var frame = 0; frame < 90; frame++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      if (confirm.evaluate().isNotEmpty) {
+        final route = ModalRoute.of(tester.element(confirm));
+        final entered = route?.animation?.status == AnimationStatus.completed;
+        if (entered && tester.widget<FilledButton>(confirm).onPressed != null) {
+          break;
+        }
+      }
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+    }
+    expect(find.byKey(const Key('bil-media-review-error')), findsNothing);
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+    await tester.tap(confirm);
+    for (
+      var frame = 0;
+      frame < 40 && reviewBody.evaluate().isNotEmpty;
+      frame++
+    ) {
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+    }
+    expect(reviewBody, findsNothing);
+    await tester.pumpAndSettle();
+    return;
+  }
   await tester.pumpAndSettle();
 }
 

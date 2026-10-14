@@ -14,6 +14,7 @@ import 'package:body_intelligence_log/features/intelligence_center/domain/coach_
 import 'package:body_intelligence_log/features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/life_context/providers/life_context_provider.dart';
+import 'package:body_intelligence_log/features/nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -230,10 +231,16 @@ void main() {
         insightLifeContextProvider,
         (_, _) {},
       );
+      final nutritionGoalsSubscription = current.listen(
+        nutritionGoalSnapshotProvider,
+        (_, _) {},
+      );
       addTearDown(latestLogSubscription.close);
       addTearDown(lifeContextSubscription.close);
+      addTearDown(nutritionGoalsSubscription.close);
       expect(await current.read(latestDailyLogProvider.future), isNull);
       expect(await current.read(insightLifeContextProvider.future), isEmpty);
+      await current.read(nutritionGoalSnapshotProvider.future);
       await current.read(connectedHealthProvider.notifier).refresh();
 
       final snapshot = await current.read(coachContextSnapshotProvider.future);

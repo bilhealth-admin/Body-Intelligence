@@ -20,7 +20,7 @@ void main() {
       'lib/shared/widgets/bil_premium_trust_surface.dart',
     ).readAsStringSync();
     final settings = File(
-      'lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart',
+      'lib/features/intelligence_center/presentation/ai_coach_settings_body.dart',
     ).readAsStringSync();
 
     expect(onboarding, contains('showBilPremiumAiConsentSheet('));
@@ -32,7 +32,9 @@ void main() {
     expect(vision, contains("Key('meal-vision-consent-accept')"));
     expect(privacy, contains('BilPremiumConsentToggle('));
     expect(privacy, contains("Key('meal-vision-ai-consent')"));
-    expect(settings, contains('BilPremiumConsentToggle('));
+    expect(settings, contains('_ConsentTile('));
+    expect(settings, contains("value: data['remote_ai_consent'] == true"));
+    expect(settings, contains('onChanged: _setRemoteAiConsent'));
     expect(shared, contains('class _BilPremiumAiConsentSheet'));
     expect(shared, contains('SingleChildScrollView('));
     expect(shared, contains('Color(0xFF64D8FF)'));

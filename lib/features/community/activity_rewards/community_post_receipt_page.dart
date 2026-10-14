@@ -46,7 +46,7 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
     _bindOwner();
-    _post = _load();
+    _post = _loadObserved();
   }
 
   @override
@@ -57,7 +57,7 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
       _repository = widget.repository ?? _productionRepository();
       _generation++;
       _bindOwner();
-      _post = _load();
+      _post = _loadObserved();
     }
   }
 
@@ -101,7 +101,9 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
       if (!changed && _owner() == _visitOwner) return;
       _generation++;
       _visitOwner = _owner();
-      setState(() => _post = _load());
+      setState(() {
+        _post = _loadObserved();
+      });
     }, onError: (Object _, StackTrace _) {});
   }
 
@@ -115,6 +117,15 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
       _owner() == owner &&
       _visitOwner == owner &&
       _generation == generation;
+
+  Future<CommunityPost> _loadObserved() {
+    final pending = _load();
+    // An account boundary can supersede this future before FutureBuilder
+    // attaches. Observe that discarded result without replacing the future;
+    // the active builder still receives its original error and Retry state.
+    pending.ignore();
+    return pending;
+  }
 
   Future<CommunityPost> _load() async {
     final repository = _repository;
@@ -162,7 +173,9 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
     );
   }
 
-  void _retry() => setState(() => _post = _load());
+  void _retry() => setState(() {
+    _post = _loadObserved();
+  });
 
   @override
   void dispose() {

@@ -1,0 +1,24 @@
+{
+  "label": "format-citation-server",
+  "kind": "format-edit",
+  "command": [
+    "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+    "fmt",
+    "supabase/functions/ai-coach/server.ts",
+    "supabase/functions/ai-coach/server_test.ts",
+    "build\\stage1-closure\\visible-validation-20261013\\legacy_citation_interop_test.ts"
+  ],
+  "started_utc": "2026-10-13T06:16:22.935562+00:00",
+  "runner_pid": 10600,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "da22dff47a01416447985bf764ab615dc4ee970b206e0e1a5170ebdc9ef1f086",
+  "fingerprint_version": 4,
+  "pid": 620,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T06:16:27.783560+00:00",
+  "seconds": 4.74,
+  "end_fingerprint": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb",
+  "stable_source": false,
+  "accepted": true
+}

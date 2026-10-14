@@ -52,7 +52,7 @@ void main() {
     expect(tokens, contains('static const double radiusMd = 12'));
     expect(
       tokens,
-      contains('static const Color canvasLight = Color(0xFFF5F5F8)'),
+      contains('static const Color canvasLight = BilPearlFinish.lightCanvas;'),
     );
   });
 }

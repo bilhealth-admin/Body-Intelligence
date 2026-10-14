@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../app/localization/runtime_copy.dart';
@@ -22,7 +23,8 @@ import '../services/contact_picker_service.dart';
 import '../services/community_owner_operation.dart';
 import 'community_visible_activity_scope.dart';
 import 'community_return_button.dart';
-import 'community_messages_page.dart' show showCommunityMessagingPolicy;
+import 'community_messages_page.dart'
+    show showCommunityMessagingPolicy, CommunityMessageOwnerVisit;
 import 'community_chat_runtime_copy.dart';
 import 'community_copy.dart';
 import 'community_sapphire.dart';
@@ -42,6 +44,7 @@ class CommunityPeoplePage extends StatefulWidget {
 
 class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
   CommunityRepository? _repository;
+  CommunityMessageOwnerVisit? _relationshipVisit;
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
   Future<List<Map<String, dynamic>>> _results = Future.value(const []);
@@ -231,7 +234,9 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
     final repository = _repository;
     if (repository == null) return;
     _lastQuery = value;
-    final results = repository.searchProfiles(value);
+    final visit = _relationshipVisit;
+    if (visit?.isCurrent != true) return;
+    final results = visit!.run(() => repository.searchProfiles(value));
     setState(() {
       _results = results;
     });
@@ -239,15 +244,16 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
 
   Future<void> _requestFriend(String userId) async {
     final repository = _repository;
-    if (repository == null) return;
+    final visit = _relationshipVisit;
+    if (repository == null || visit?.isCurrent != true) return;
     if (_pendingRequests.contains(userId) ||
         _sendingRequests.contains(userId)) {
       return;
     }
     setState(() => _sendingRequests.add(userId));
     try {
-      final status = await repository.requestFriend(userId);
-      if (!mounted) return;
+      final status = await visit!.run(() => repository.requestFriend(userId));
+      if (!mounted || !visit.isCurrent) return;
       setState(() {
         _relationshipStates[userId] = status;
         if (status == CommunityFriendRequestStatus.pending) {
@@ -293,7 +299,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
         ),
       );
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !visit!.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -309,7 +315,9 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _sendingRequests.remove(userId));
+      if (mounted && visit!.isCurrent) {
+        setState(() => _sendingRequests.remove(userId));
+      }
     }
   }
 
@@ -318,7 +326,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
     super.initState();
     if (widget.repository != null) {
       _repository = widget.repository;
-      _results = _repository!.searchProfiles('');
+      _bindRelationshipVisit();
       return;
     }
     if (!AppEnvironment.cloudConfigured) return;
@@ -328,7 +336,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
         return;
       }
       _repository = CommunityRepository(supabase.client);
-      _results = _repository!.searchProfiles('');
+      _bindRelationshipVisit();
     } on AssertionError {
       return;
     } on StateError {
@@ -336,8 +344,41 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
     }
   }
 
+  void _bindRelationshipVisit() {
+    final repository = _repository!;
+    _relationshipVisit = CommunityMessageOwnerVisit(
+      repository,
+      () => mounted,
+      () {
+        _pendingRequests.clear();
+        _sendingRequests.clear();
+        _relationshipStates.clear();
+        if (mounted) setState(() {});
+      },
+    );
+    if (_relationshipVisit!.isCurrent) {
+      _results = _relationshipVisit!.run(() => repository.searchProfiles(''));
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityPeoplePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _relationshipVisit?.dispose();
+      _repository = widget.repository;
+      _pendingRequests.clear();
+      _sendingRequests.clear();
+      _relationshipStates.clear();
+      _search.clear();
+      _results = Future.value(const []);
+      if (_repository != null) _bindRelationshipVisit();
+    }
+  }
+
   @override
   void dispose() {
+    _relationshipVisit?.dispose();
     _search.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -345,6 +386,10 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
 
   @override
   Widget build(BuildContext context) {
+    final visit = _relationshipVisit;
+    if (visit != null && !visit.isCurrent) {
+      return visit.guard(const SizedBox.shrink());
+    }
     return Scaffold(
       appBar: AppBar(
         leading: const CommunityReturnButton(),

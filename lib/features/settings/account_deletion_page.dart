@@ -8,6 +8,7 @@ import '../../app/environment/app_environment.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../auth/apple_credential_lifecycle.dart';
+import '../connected_health/services/connected_health_account_deletion_cleanup.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'account_deletion_copy.dart';
@@ -137,6 +138,18 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
       // worker finishes later. Clear the requesting account locally before
       // any interactive dialog so an app termination cannot leave its session
       // or Apple subject behind. Never sign out a replacement account.
+      var localHealthCacheCleared = false;
+      try {
+        await clearConnectedHealthCacheForAccountDeletion(
+          ownerId: accountOwnerId,
+          readCurrentOwnerId: () => client.auth.currentUser?.id,
+        );
+        localHealthCacheCleared = true;
+      } on Object {
+        // Keep the accepted deletion request moving. The owner-scoped cache
+        // remains inaccessible to the next account, and the dialog explains
+        // that local cleanup needs a retry.
+      }
       final appleIdentifierStore = usedAppleSignIn
           ? SecureAppleCredentialIdentifierStore()
           : null;
@@ -183,6 +196,14 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
               if (effectiveStatus != 'completed') ...[
                 const SizedBox(height: 8),
                 Text(copy.pendingTimingNotice),
+              ],
+              if (!localHealthCacheCleared) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _localHealthCacheCleanupPendingCopy(
+                    Localizations.localeOf(context),
+                  ),
+                ),
               ],
               const SizedBox(height: 16),
               Text('${copy.statusLabel}: ${copy.statusFor(effectiveStatus)}'),
@@ -311,4 +332,14 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
       ),
     );
   }
+}
+
+String _localHealthCacheCleanupPendingCopy(Locale locale) {
+  final code = BilLocalePolicy.canonicalTag(locale);
+  return switch (code) {
+    'ar' =>
+      'تعذّر تأكيد مسح ذاكرة BIL الصحية المحلية من هذا الجهاز. لم تُحذف أي سجلات من Apple Health. ولم تُحذف سجلات المصدر من Health Connect. وتبقى بيانات BIL معزولة عن الحسابات الأخرى على هذا الجهاز.',
+    _ =>
+      'BIL could not confirm removal of its local health cache from this device. No Apple Health records were deleted. No Health Connect source records were deleted. The remaining BIL cache stays isolated from other accounts on this device.',
+  };
 }

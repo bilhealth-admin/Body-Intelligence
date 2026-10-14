@@ -45,8 +45,8 @@ void main() {
         reason: path,
       );
       final expectedSourceBinding = path.contains('ios')
-          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}'
-          : r'BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}';
+          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}'
+          : r'BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}';
       expect(source, contains(expectedSourceBinding), reason: path);
       expect(
         source,
@@ -70,15 +70,39 @@ void main() {
 
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
-    expect(android, contains('BIL_ANDROID_V31_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_IOS_V34_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_ANDROID_V31_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V34_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_ANDROID_V31_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V34_STAGING_MANIFEST_SHA256'));
+    expect(android, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_IOS_V36_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_ANDROID_V33_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V36_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V36_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
+
+  test(
+    'signed build workflows stay blocked by incomplete release manifests',
+    () {
+      final androidWorkflow = _read(workflows.first);
+      final iosWorkflow = _read(workflows.last);
+      final androidManifest = _read(
+        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+      );
+      final iosManifest = _read(
+        'docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+      );
+
+      expect(androidManifest, contains('STAGING_MANIFEST_COMPLETE: NO'));
+      expect(androidManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: NO'));
+      expect(iosManifest, contains('STAGING_MANIFEST_COMPLETE: NO'));
+      expect(iosManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: NO'));
+      for (final workflow in <String>[androidWorkflow, iosWorkflow]) {
+        expect(workflow, contains('grep -Fqx'));
+        expect(workflow, contains('STAGING_MANIFEST_COMPLETE: YES'));
+        expect(workflow, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+      }
+    },
+  );
 
   test('Android validator consumes the current frozen-source manifest', () {
     final source = _read(workflows.first);
@@ -86,7 +110,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V31_FROZEN_SOURCE_MANIFEST_2026-10-02.md',
+        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
       ),
     );
     expect(
@@ -100,13 +124,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 34 release manifest', () {
+  test('iOS validator consumes only the build 36 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md',
+        'docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
       ),
     );
     expect(
@@ -118,8 +142,8 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 34 ))'));
-    expect(source, isNot(contains('(( BUILD_NUMBER == 32 ))')));
+    expect(source, contains('(( BUILD_NUMBER == 36 ))'));
+    expect(source, isNot(contains('(( BUILD_NUMBER == 35 ))')));
   });
 
   test('signed workflows pin actions and stable runner families', () {

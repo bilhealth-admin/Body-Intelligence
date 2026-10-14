@@ -16,6 +16,7 @@ import '../activity_rewards/community_post_moderation_receipt.dart';
 import '../data/community_repository.dart';
 import '../domain/community_attention.dart';
 import 'community_copy.dart';
+import 'community_notification_destination.dart';
 
 part 'community_notifications_filters.dart';
 part 'community_notifications_rendering.dart';
@@ -535,6 +536,10 @@ class _CommunityNotificationsPageState
   String _routeFor(CommunityNotification notification) {
     final moderationReceipt = _postModerationReceipt(notification);
     if (moderationReceipt != null) return moderationReceipt.route;
+    final contentRoute = CommunityNotificationDestination.contentRoute(
+      notification,
+    );
+    if (contentRoute != null) return contentRoute;
     const liveRoutes = {
       '/community',
       '/community/connections',

@@ -63,7 +63,9 @@ class _RuntimeNutritionFixture {
       fats: 65,
       sodium: 2100,
       potassium: 3200,
-      servingSize: 100,
+      // These values describe a daily portion, not 100 g of a single food.
+      // Keep the fixture within the catalog evidence bounds.
+      servingSize: 1000,
       servingUnit: 'g',
       source: 'label',
     );
@@ -88,7 +90,7 @@ class _RuntimeNutritionFixture {
         await meals.addMealItem(
           mealId: id,
           foodId: completeFood,
-          quantity: 100,
+          quantity: 1000,
         );
       }
       if (evidence != _DailyEvidence.complete) {

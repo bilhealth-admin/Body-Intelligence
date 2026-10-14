@@ -1,4 +1,8 @@
-import { mealVisionConsentIsCurrent } from "./consent.ts";
+import {
+  mealVisionConsentIsCurrent,
+  mealVisionConsentProvider,
+  mealVisionProviderMatchesConsent,
+} from "./consent.ts";
 
 Deno.test("meal vision requires an explicit current consent grant", () => {
   const rejected = [
@@ -15,5 +19,18 @@ Deno.test("meal vision requires an explicit current consent grant", () => {
   }
   if (!mealVisionConsentIsCurrent({ granted: true, policy_version: "1" })) {
     throw new Error("current explicit consent was rejected");
+  }
+});
+
+Deno.test("meal vision accepts only the provider named by current consent", () => {
+  if (
+    mealVisionConsentProvider !== "gemini" ||
+    !mealVisionProviderMatchesConsent(" Gemini ") ||
+    mealVisionProviderMatchesConsent("openai") ||
+    mealVisionProviderMatchesConsent("mistral") ||
+    mealVisionProviderMatchesConsent("legacy_gateway") ||
+    mealVisionProviderMatchesConsent(undefined)
+  ) {
+    throw new Error("meal vision provider is not pinned to current consent");
   }
 });

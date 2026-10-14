@@ -126,10 +126,8 @@ void main() {
             "'/daily-log?foodLog=1&action=voice&from=\$cancelledTaskReturn'",
           ),
         );
-        expect(
-          shell,
-          contains('showBilQuickAdd(context, originPath: paths[index])'),
-        );
+        expect(shell, contains('await showBilQuickAdd('));
+        expect(shell, contains('originPath: paths[index]'));
         expect(quickAdd, contains("'/quick-add/meal-camera?from=\$origin'"));
         expect(shell, isNot(contains('vision=capture&from=\$origin')));
         expect(quickAdd, isNot(contains('vision=capture&from=\$origin')));
@@ -243,7 +241,7 @@ void main() {
       expect(plans, contains('BilDynamicStoreOffers('));
       expect(components, contains('PremiumCrownEmblem('));
       expect(copy, contains("'premium': 'Premium'"));
-      expect(copy, contains("'premium_ai_coach': 'AI Coach'"));
+      expect(copy, contains("'premium_ai_coach': 'Premium AI Coach'"));
       expect(copy, isNot(contains("'premium_ai_coach': 'Premium + AI Coach'")));
       expect(copy, contains("'trial_7_days': '7 days free'"));
       expect(copy, contains("'premium_benefit_trial'"));
@@ -272,8 +270,18 @@ void main() {
       expect(glass, contains('ImageFilter.blur(sigmaX: 8, sigmaY: 8)'));
       expect(glass, contains('PremiumCrownEmblem('));
       expect(glass, contains("ValueKey('premium-route-upgrade-cta')"));
-      expect(glass, isNot(contains('ImageFiltered(')));
-      expect(glass, isNot(contains('Opacity(')));
+      final retainedStart = glass.indexOf('class _RetainedAiCoachSurfaceState');
+      final gateStart = glass.indexOf('class _PremiumRouteGateContents');
+      expect(retainedStart, greaterThanOrEqualTo(0));
+      expect(gateStart, greaterThan(retainedStart));
+      final retainedCoach = glass.substring(retainedStart, gateStart);
+      final upgradeGate = glass.substring(gateStart);
+      expect(retainedCoach, contains('AbsorbPointer('));
+      expect(retainedCoach, contains('absorbing: !allowed'));
+      expect(retainedCoach, contains('Opacity('));
+      expect(retainedCoach, contains('opacity: allowed ? 1 : 0'));
+      expect(upgradeGate, isNot(contains('Opacity(')));
+      expect(upgradeGate, isNot(contains('ImageFiltered(')));
     });
   });
 }

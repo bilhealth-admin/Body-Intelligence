@@ -1,4 +1,6 @@
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import 'dart:async';
+import 'community_messages_page.dart' show CommunityMessageOwnerVisit;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,6 +10,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
+import '../domain/community_attention.dart';
 import 'community_attention_scope.dart';
 import 'community_return_button.dart';
 
@@ -35,97 +38,221 @@ class CommunityConnectionsPage extends StatefulWidget {
       _CommunityConnectionsPageState();
 }
 
-class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
+class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
+    with WidgetsBindingObserver {
   CommunityRepository? _repository;
   Future<List<Map<String, dynamic>>> _connections = Future.value(const []);
+  CommunityMessageOwnerVisit? _visit;
+  StreamSubscription<void>? _changes;
+  CommunityAttentionController? _attention;
+  bool _refreshing = false, _refreshQueued = false;
   int _tab = 0;
   final Set<String> _busyConnections = <String>{};
 
   @override
   void initState() {
     super.initState();
-    if (widget.repository != null) {
-      _repository = widget.repository;
-      _reload();
-      return;
-    }
+    WidgetsBinding.instance.addObserver(this);
+    _bind();
+  }
+
+  void _bind() {
+    _repository = widget.repository;
     final client = _initializedConnectionsClient();
-    if (client?.auth.currentUser == null) return;
-    _repository = CommunityRepository(client!);
+    if (_repository == null && client?.auth.currentUser != null) {
+      _repository = CommunityRepository(client!);
+    }
+    final repository = _repository;
+    if (repository == null) return;
+    _visit = CommunityMessageOwnerVisit(repository, () => mounted, () {
+      unawaited(_changes?.cancel());
+      _changes = null;
+      if (mounted) setState(() {});
+    });
     _reload();
+    if (_visit!.isCurrent) {
+      _changes = repository.watchConnectionChanges().listen(
+        (_) => unawaited(_refreshConnections()),
+        onError: (Object _, StackTrace _) {},
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityConnectionsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _visit?.dispose();
+      unawaited(_changes?.cancel());
+      _busyConnections.clear();
+      _refreshQueued = false;
+      _bind();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = CommunityAttentionScope.controllerOf(context);
+    if (identical(next, _attention)) return;
+    _attention?.removeListener(_attentionChanged);
+    _attention = next;
+    next?.addListener(_attentionChanged);
+  }
+
+  void _attentionChanged() => unawaited(_refreshConnections());
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_refreshConnections());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _attention?.removeListener(_attentionChanged);
+    _visit?.dispose();
+    unawaited(_changes?.cancel());
+    super.dispose();
   }
 
   void _reload() {
-    _connections = _repository!.loadFriendshipsWithProfiles();
+    final visit = _visit;
+    _connections = visit?.isCurrent == true
+        ? visit!.run(visit.repository.loadFriendshipsWithProfiles)
+        : Future.value(const []);
   }
 
-  Future<void> _respond(String id, {required bool accept}) async {
-    if (!_busyConnections.add(id)) return;
-    setState(() {});
+  Future<void> _refreshConnections() async {
+    final visit = _visit;
+    if (visit?.isCurrent != true) return;
+    if (_refreshing) {
+      _refreshQueued = true;
+      return;
+    }
+    _refreshing = true;
     try {
-      await _repository!.respondToFriendship(id, accept: accept);
-      if (mounted) {
+      do {
+        _refreshQueued = false;
+        if (!visit!.isCurrent) return;
         setState(_reload);
-        await CommunityAttentionScope.refresh(context);
-      }
-    } catch (_) {
-      if (mounted) _showFailure();
+        try {
+          await _connections;
+        } on Object {
+          // The original future exposes the failure with its explicit retry.
+        }
+      } while (_refreshQueued && mounted && visit.isCurrent);
     } finally {
-      if (mounted) setState(() => _busyConnections.remove(id));
+      _refreshing = false;
     }
   }
 
-  Future<void> _remove(String id) async {
-    if (!_busyConnections.add(id)) return;
+  Future<void> _findPeople() async {
+    final visit = _visit;
+    if (visit?.isCurrent != true) return;
+    await context.push('/community/people');
+    if (mounted && visit!.isCurrent) await _refreshConnections();
+  }
+
+  Future<void> _respond(String id, {required bool accept}) async {
+    final visit = _visit;
+    if (visit?.isCurrent != true || !_busyConnections.add(id)) return;
     setState(() {});
     try {
-      await _repository!.removeFriendship(id);
-      if (mounted) {
+      await visit!.run(
+        () => visit.repository.respondToFriendship(id, accept: accept),
+      );
+      if (mounted && visit.isCurrent) {
         setState(_reload);
         await CommunityAttentionScope.refresh(context);
       }
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && visit!.isCurrent) {
+        _showFailure();
+        unawaited(_refreshConnections());
+      }
     } finally {
-      if (mounted) setState(() => _busyConnections.remove(id));
+      if (mounted && visit!.isCurrent) {
+        setState(() => _busyConnections.remove(id));
+      }
+    }
+  }
+
+  Future<void> _remove(String id, {bool cancelRequest = false}) async {
+    final visit = _visit;
+    if (visit?.isCurrent != true || !_busyConnections.add(id)) return;
+    setState(() {});
+    try {
+      await visit!.run(
+        () => cancelRequest
+            ? visit.repository.cancelFriendRequest(id)
+            : visit.repository.removeFriendship(id),
+      );
+      if (mounted && visit.isCurrent) {
+        setState(_reload);
+        await CommunityAttentionScope.refresh(context);
+      }
+    } catch (_) {
+      if (mounted && visit!.isCurrent) {
+        _showFailure();
+        unawaited(_refreshConnections());
+      }
+    } finally {
+      if (mounted && visit!.isCurrent) {
+        setState(() => _busyConnections.remove(id));
+      }
     }
   }
 
   Future<void> _block(String operationId, String userId) async {
-    if (!_busyConnections.add(operationId)) return;
+    final visit = _visit;
+    if (visit?.isCurrent != true || !_busyConnections.add(operationId)) return;
     setState(() {});
     try {
-      await _repository!.blockMember(userId);
-      if (mounted) {
+      await visit!.run(() => visit.repository.blockMember(userId));
+      if (mounted && visit.isCurrent) {
         setState(_reload);
         await CommunityAttentionScope.refresh(context);
       }
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && visit!.isCurrent) {
+        _showFailure();
+        unawaited(_refreshConnections());
+      }
     } finally {
-      if (mounted) setState(() => _busyConnections.remove(operationId));
+      if (mounted && visit!.isCurrent) {
+        setState(() => _busyConnections.remove(operationId));
+      }
     }
   }
 
   Future<void> _reportUser(String operationId, String userId) async {
-    if (!_busyConnections.add(operationId)) return;
+    final visit = _visit;
+    if (visit?.isCurrent != true || !_busyConnections.add(operationId)) return;
     setState(() {});
     try {
-      await _repository!.report(
-        targetKind: 'profile',
-        targetId: userId,
-        reason: 'user_reported_from_connections',
+      await visit!.run(
+        () => visit.repository.report(
+          targetKind: 'profile',
+          targetId: userId,
+          reason: 'user_reported_from_connections',
+        ),
       );
-      if (mounted) {
+      if (mounted && visit.isCurrent) {
         final copy = _ConnectionsCopy.of(context);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(copy.reportSubmitted)));
       }
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && visit!.isCurrent) {
+        _showFailure();
+        unawaited(_refreshConnections());
+      }
     } finally {
-      if (mounted) setState(() => _busyConnections.remove(operationId));
+      if (mounted && visit!.isCurrent) {
+        setState(() => _busyConnections.remove(operationId));
+      }
     }
   }
 
@@ -139,6 +266,10 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
   @override
   Widget build(BuildContext context) {
     final copy = _ConnectionsCopy.of(context);
+    final visit = _visit;
+    if (visit != null && !visit.isCurrent) {
+      return visit.guard(const SizedBox.shrink());
+    }
     return Scaffold(
       appBar: AppBar(
         leading: const CommunityReturnButton(),
@@ -146,9 +277,7 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
         actions: [
           IconButton(
             tooltip: copy.findPeople,
-            onPressed: _repository == null
-                ? null
-                : () => context.push('/community/people'),
+            onPressed: _repository == null ? null : _findPeople,
             icon: const Icon(Icons.person_search_rounded),
           ),
         ],
@@ -209,13 +338,21 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
                     })
                     .toList(growable: false);
                 if (visibleRows.isEmpty) {
-                  return _EmptyConnections(copy: copy);
+                  return RefreshIndicator(
+                    onRefresh: _refreshConnections,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        _EmptyConnections(
+                          copy: copy,
+                          onFindPeople: _findPeople,
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 return RefreshIndicator(
-                  onRefresh: () async {
-                    setState(_reload);
-                    await _connections;
-                  },
+                  onRefresh: _refreshConnections,
                   child: ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: visibleRows.length + 1,
@@ -316,7 +453,18 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
                                     ),
                                   ],
                                 )
-                              : null,
+                              : IconButton(
+                                  tooltip: context.strings.text(
+                                    'Cancel request',
+                                  ),
+                                  onPressed: busy
+                                      ? null
+                                      : () => _remove(
+                                          row.id,
+                                          cancelRequest: true,
+                                        ),
+                                  icon: const Icon(Icons.close_rounded),
+                                ),
                         ),
                       );
                     },
@@ -546,8 +694,9 @@ class _ConnectionsLoading extends StatelessWidget {
 }
 
 class _EmptyConnections extends StatelessWidget {
-  const _EmptyConnections({required this.copy});
+  const _EmptyConnections({required this.copy, required this.onFindPeople});
   final _ConnectionsCopy copy;
+  final VoidCallback onFindPeople;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -561,7 +710,7 @@ class _EmptyConnections extends StatelessWidget {
           Text(copy.empty, textAlign: TextAlign.center),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: () => context.push('/community/people'),
+            onPressed: onFindPeople,
             icon: const Icon(Icons.person_search_rounded),
             label: Text(copy.findPeople),
           ),

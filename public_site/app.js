@@ -397,6 +397,16 @@ async function render() {
   const path = pathKey();
   setShellLanguage(lang);
   document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('active', a.getAttribute('data-nav') === (path === '/' ? 'home' : path.slice(1))));
+  if (path === '/download' || path.startsWith('/invite/')) {
+    const { renderCommunityLanding } = await import('/community_links.mjs');
+    const appleStoreUrl = document.querySelector('meta[name="bil-app-store-url"]')?.content;
+    renderCommunityLanding(document, location.href, lang, { appleStoreUrl });
+    updateDocumentMetadata(path, lang, {
+      title: lang === 'ar' ? 'تواصل عبر BIL' : 'Connect on BIL',
+      intro: lang === 'ar' ? 'رابط مجتمع BIL.' : 'BIL Community link.',
+    });
+    return;
+  }
   if (path === '/auth/reset-password') { updateDocumentMetadata(path, lang, { title: lang === 'ar' ? 'إعادة تعيين كلمة المرور' : 'Reset password', intro: 'Secure BIL account recovery.' }); await renderPasswordReset(lang); return; }
   if (path === '/auth/callback') { renderAuthCallbackFallback(lang); updateDocumentMetadata(path, lang, { title: lang === 'ar' ? 'العودة إلى تطبيق BIL' : 'Return to the BIL app', intro: 'Secure BIL sign-in callback.' }); return; }
   const page = legal[lang][path];

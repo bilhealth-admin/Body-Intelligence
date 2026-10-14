@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
 import 'package:body_intelligence_log/features/exercise_calorie_controls/providers/exercise_calorie_providers.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
+import 'package:body_intelligence_log/features/global_platform/persistence/owner_scoped_health_store.dart';
 import 'package:body_intelligence_log/features/global_platform/runtime/global_product_composition_root.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -75,7 +76,13 @@ void main() {
       );
       addTearDown(host.close);
       final flows = host.productFlows!;
-      await flows.store.put('connected_health_consent', source, {
+      const ownerId = OwnerScopedHealthStore.localDeviceOwner;
+      final healthStore = OwnerScopedHealthStore(
+        inner: flows.store,
+        ownerId: ownerId,
+        readCurrentOwnerId: () => ownerId,
+      );
+      await healthStore.put('connected_health_consent', source, {
         'readRequested': true,
       });
       final original = GlobalHealthSignal(
@@ -113,13 +120,17 @@ void main() {
               ),
             ).toMap(),
       ];
-      await flows.store.put('health_signals', 'preserved-raw-sample', original);
-      await flows.store.put('connected_health_ui', 'snapshot', {
+      await healthStore.put('health_signals', 'preserved-raw-sample', original);
+      await healthStore.put('connected_health_ui', 'snapshot', {
         'importedCount': 42,
         'signals': [original, ...otherSignals],
         'stepHistory': <Object?>[],
       });
-      final gateway = NativeConnectedHealthGateway(flows);
+      final gateway = NativeConnectedHealthGateway(
+        flows,
+        ownerId: ownerId,
+        currentOwnerId: () => ownerId,
+      );
       for (var refresh = 0; refresh < 2; refresh++) {
         final result = await gateway.loadDailyActivity();
         expect(result.failureCode, isNull);
@@ -199,7 +210,7 @@ void main() {
       );
       expect(authoritativeExerciseEnergyForDay(afterFailure, now)?.kcal, 321);
       expect(
-        await flows.store.get('health_signals', 'preserved-raw-sample'),
+        await healthStore.get('health_signals', 'preserved-raw-sample'),
         original,
       );
 
@@ -224,7 +235,7 @@ void main() {
       // native daily totals returned an empty list alongside other metrics.
       for (final row in otherSignals) {
         final signal = GlobalHealthSignal.fromMap(row);
-        await flows.store.put('health_signals', signal.identity, row);
+        await healthStore.put('health_signals', signal.identity, row);
       }
       final synced = await gateway.synchronize();
       expect(

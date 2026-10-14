@@ -6,20 +6,23 @@ import {
 import {
   acceptedWeightHistoryNavigation,
   actionExecutionContract,
+  allowedHealthCitationIds,
   answerNeedsHealthCitation,
   boundedMessages,
-  boundedVoiceAudio,
   extractModelText,
   geminiAttemptTimeoutMs,
   geminiCall,
   geminiCallWithFallback,
   geminiSafetySettings,
   handler,
+  healthCitationCatalogVersion,
+  healthCitationIdsForVersion,
   isFallbackEligibleGeminiError,
   isRetryableGeminiError,
   isRetryableGeminiStatus,
   parseModelJson,
   recoverExactUserAction,
+  rejectRawVoiceAudio,
   requireSafeGeminiCandidate,
   responseLanguage,
   spokenWithinComfortableTurn,
@@ -97,25 +100,21 @@ Deno.test("message contract is bounded and ends with a user message", () => {
   );
 });
 
-Deno.test("voice payload is WAV-only, short-lived, and size bounded", () => {
+Deno.test("raw voice audio is rejected while transcript-only requests remain supported", () => {
   const data = btoa(String.fromCharCode(...new Uint8Array(48)));
-  assertEquals(
-    boundedVoiceAudio({
-      mime_type: "audio/wav",
-      data,
-      duration_seconds: 7,
-    })?.durationSeconds,
-    7,
+  assertEquals(rejectRawVoiceAudio(null), undefined);
+  assertThrows(
+    () =>
+      rejectRawVoiceAudio({
+        mime_type: "audio/wav",
+        data,
+        duration_seconds: 7,
+      }),
+    Error,
+    "raw_voice_audio_not_supported",
   );
   assertThrows(() =>
-    boundedVoiceAudio({
-      mime_type: "audio/mp3",
-      data,
-      duration_seconds: 7,
-    })
-  );
-  assertThrows(() =>
-    boundedVoiceAudio({
+    rejectRawVoiceAudio({
       mime_type: "audio/wav",
       data,
       duration_seconds: 46,
@@ -266,6 +265,31 @@ Deno.test("health citations keep only trusted registry identifiers", () => {
   }));
 
   assertEquals(parsed.citations, ["cdc_adult_bmi"]);
+});
+
+Deno.test("FDA label references survive parsing without admitting unknown citations", () => {
+  const parsed = parseModelJson(
+    JSON.stringify({
+      reply: "FDA Daily Values are general nutrition label references.",
+      spoken_reply: "FDA Daily Values are general nutrition label references.",
+      reason: "Label education, not an individual nutrient prescription.",
+      confidence: 0.9,
+      evidence: [],
+      citations: [
+        "fda_label_daily_values",
+        "https://untrusted.example/fake-study",
+        "invented_fda_reference",
+        "fda_label_daily_values",
+      ],
+      requires_health_citation: true,
+      missing_data: [],
+      proposed_actions: [],
+    }),
+    false,
+    2,
+  );
+  assertEquals(parsed.citations, ["fda_label_daily_values"]);
+  assertEquals(parsed.proposed_actions, []);
 });
 
 Deno.test("uncited health recommendations fail closed", () => {
@@ -1251,9 +1275,9 @@ Deno.test("missing remote AI consent blocks before reservation and provider", as
   assertEquals(providerCalls, 0);
 });
 
-Deno.test("voice uses current consent and one voice-seconds reservation", async () => {
+Deno.test("raw voice audio is rejected before consent, reservation, or Gemini", async () => {
   const calls: Array<{ name: string; params: Record<string, unknown> }> = [];
-  let providerContents: unknown[] = [];
+  let providerCalls = 0;
   const audioData = btoa(String.fromCharCode(...new Uint8Array(48)));
   const request = new Request("https://example.test", {
     method: "POST",
@@ -1317,45 +1341,308 @@ Deno.test("voice uses current consent and one voice-seconds reservation", async 
         },
       },
     })) as never,
-    geminiCall: (_model, contents) => {
-      providerContents = contents;
-      return Promise.resolve({
-        attempts: 1,
-        data: {
-          candidates: [{
-            finishReason: "STOP",
-            content: {
-              parts: [{
-                text: JSON.stringify({
-                  transcript: "اشرح لي لماذا وزني ثابت هذا الأسبوع",
-                  reply: "سأراجع اتجاه الوزن والالتزام خلال الأسبوع.",
-                  spoken_reply: "سأراجع اتجاه وزنك وبيانات هذا الأسبوع.",
-                  reason: "السؤال يطلب تفسير ثبات الوزن.",
-                  confidence: 0.8,
-                  evidence: [],
-                  citations: [],
-                  requires_health_citation: false,
-                  missing_data: [],
-                  proposed_actions: [],
-                }),
-              }],
-            },
-          }],
-          usageMetadata: { promptTokenCount: 20, candidatesTokenCount: 10 },
-        },
-      });
+    geminiCall: () => {
+      providerCalls += 1;
+      return Promise.reject(new Error("must_not_run"));
     },
   });
-  assertEquals(response.status, 200);
-  const body = await response.json();
-  assertEquals(body.transcript, "اشرح لي لماذا وزني ثابت هذا الأسبوع");
-  assertEquals(calls[0].name, "bil_reserve_ai_voice");
-  assertEquals(calls[0].params.p_estimated_seconds, 7);
-  assertEquals(calls[1].name, "bil_settle_ai_voice");
-  assertEquals(calls[1].params.p_actual_seconds, 7);
-  assertEquals(JSON.stringify(providerContents).includes("inlineData"), true);
+  assertEquals(response.status, 400);
+  assertEquals(await response.json(), {
+    error: "raw_voice_audio_not_supported",
+  });
+  assertEquals(calls.length, 0);
+  assertEquals(providerCalls, 0);
+});
+
+function citationContractReply(citations: string[]) {
+  const reply = citations.includes("fda_label_daily_values")
+    ? "FDA Daily Values are label references, not personal requirements."
+    : "Include vegetables in a varied diet.";
+  return {
+    reply,
+    spoken_reply: reply,
+    reason: "Use only the client's supported in-app reference catalog.",
+    confidence: 0.8,
+    evidence: [],
+    citations,
+    requires_health_citation: true,
+    missing_data: [],
+    proposed_actions: [],
+  };
+}
+
+// The exact preserved 3f0085 handler/provider exports can be passed here.
+// This exercises original code with isolated dependencies, not an old-server stub.
+export async function exerciseHealthCitationHandlerContract({
+  handlerUnderTest = handler,
+  geminiUnderTest = geminiCall,
+  version,
+  citations = ["cdc_healthy_eating"],
+  failPrimaryOnce = false,
+}: {
+  handlerUnderTest?: typeof handler;
+  geminiUnderTest?: typeof geminiCall;
+  version?: unknown;
+  citations?: string[];
+  failPrimaryOnce?: boolean;
+} = {}) {
+  const rpcCalls: Array<{ name: string; params: Record<string, unknown> }> = [];
+  const providerRequests: Array<Record<string, unknown>> = [];
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+  const baseRequest = requestBody("coach-citation-contract-fixture");
+  const body = await baseRequest.json() as Record<string, unknown>;
+  if (version !== undefined) body.health_citation_catalog_version = version;
+  const request = new Request(baseRequest.url, {
+    method: "POST",
+    headers: baseRequest.headers,
+    body: JSON.stringify(body),
+  });
+  return await withGeminiTestKey(async () => {
+    const response = await handlerUnderTest(request, {
+      clients: ((authorization: string) => {
+        const client = fake.create(authorization);
+        const rpc = client.admin.rpc;
+        client.admin.rpc = (name, params) => {
+          rpcCalls.push({ name, params });
+          return rpc(name, params);
+        };
+        return client;
+      }) as never,
+      requireIntegrity: async ({ body }) => body,
+      geminiCall: (
+        model,
+        contents,
+        system,
+        maxOutputTokens,
+        requireTranscript,
+        thinkingLevel,
+        _fetcher,
+        catalogVersion,
+      ) =>
+        geminiUnderTest(
+          model,
+          contents,
+          system,
+          maxOutputTokens,
+          requireTranscript,
+          thinkingLevel,
+          (_url, init) => {
+            providerRequests.push(
+              JSON.parse(String(init?.body)) as Record<string, unknown>,
+            );
+            if (failPrimaryOnce && providerRequests.length === 1) {
+              return Promise.resolve(
+                new Response(
+                  JSON.stringify({
+                    error: { status: "UNAVAILABLE" },
+                  }),
+                  { status: 503 },
+                ),
+              );
+            }
+            return Promise.resolve(
+              new Response(
+                JSON.stringify({
+                  candidates: [{
+                    finishReason: "STOP",
+                    content: {
+                      parts: [{
+                        text: JSON.stringify(citationContractReply(citations)),
+                      }],
+                    },
+                  }],
+                  usageMetadata: {
+                    promptTokenCount: 20,
+                    candidatesTokenCount: 10,
+                  },
+                }),
+                { status: 200 },
+              ),
+            );
+          },
+          catalogVersion,
+        ),
+    });
+    return {
+      response,
+      payload: await response.json() as Record<string, unknown>,
+      providerRequests,
+      rpcCalls,
+      settlements: fake.settlements,
+    };
+  });
+}
+
+function requestedCitationIds(request: Record<string, unknown>) {
+  const config = request.generationConfig as Record<string, unknown>;
+  const schema = config.responseSchema as Record<string, unknown>;
+  const properties = schema.properties as Record<string, unknown>;
+  const citations = properties.citations as Record<string, unknown>;
+  return (citations.items as Record<string, unknown>).enum as string[];
+}
+
+function requestedCitationPrompt(request: Record<string, unknown>) {
+  const instruction = request.systemInstruction as Record<string, unknown>;
+  const parts = instruction.parts as Array<Record<string, unknown>>;
+  return String(parts[0].text);
+}
+
+Deno.test("citation catalog versions retain legacy22 and explicit current23", () => {
+  assertEquals(healthCitationCatalogVersion(undefined), 1);
+  assertEquals(healthCitationCatalogVersion(1), 1);
+  assertEquals(healthCitationCatalogVersion(2), 2);
+  assertEquals(healthCitationIdsForVersion().size, 22);
+  assertEquals(healthCitationIdsForVersion(1).size, 22);
+  assertEquals(healthCitationIdsForVersion(2).size, 23);
+  assertEquals(allowedHealthCitationIds.size, 23);
   assertEquals(
-    calls.some((call) => call.name === "bil_reserve_ai_usage"),
+    healthCitationIdsForVersion().has("fda_label_daily_values"),
     false,
   );
+  assertEquals(
+    healthCitationIdsForVersion(2).has("fda_label_daily_values"),
+    true,
+  );
+  for (
+    const invalid of [null, 0, -1, 3, 2.1, "2", true, [], {}, NaN, Infinity]
+  ) {
+    assertThrows(
+      () => healthCitationCatalogVersion(invalid),
+      Error,
+      "invalid_health_citation_catalog_version",
+    );
+  }
+});
+
+Deno.test("legacy parser never aliases FDA to DRI or delivers an uncited health reply", () => {
+  const raw = JSON.stringify(citationContractReply(["fda_label_daily_values"]));
+  assertThrows(() => parseModelJson(raw), Error, "missing_health_citation");
+  assertThrows(
+    () => parseModelJson(raw, false, 1),
+    Error,
+    "missing_health_citation",
+  );
+  assertEquals(parseModelJson(raw, false, 2).citations, [
+    "fda_label_daily_values",
+  ]);
+  assertThrows(
+    () =>
+      parseModelJson(
+        JSON.stringify(citationContractReply([
+          "unknown_id",
+          "https://example.invalid/reference",
+        ])),
+        false,
+        2,
+      ),
+    Error,
+    "missing_health_citation",
+  );
+});
+
+Deno.test("legacy request keeps prompt schema parser on 22 supported references", async () => {
+  const result = await exerciseHealthCitationHandlerContract();
+  assertEquals(result.response.status, 200);
+  assertEquals(result.payload.citations, ["cdc_healthy_eating"]);
+  assertEquals(result.providerRequests.length, 1);
+  assertEquals(requestedCitationIds(result.providerRequests[0]).length, 22);
+  assertEquals(
+    requestedCitationIds(result.providerRequests[0]).includes(
+      "fda_label_daily_values",
+    ),
+    false,
+  );
+  assertEquals(
+    requestedCitationPrompt(result.providerRequests[0]).includes(
+      "fda_label_daily_values",
+    ),
+    false,
+  );
+  assertEquals(result.settlements.length, 1);
+  assertEquals(result.settlements[0].p_succeeded, true);
+  assertEquals(
+    Object.hasOwn(result.payload, "health_citation_catalog_version"),
+    false,
+  );
+});
+
+Deno.test("version2 request permits FDA through actual handler fetch schema and parser", async () => {
+  const result = await exerciseHealthCitationHandlerContract({
+    version: 2,
+    citations: [
+      "fda_label_daily_values",
+      "invented_study",
+      "fda_label_daily_values",
+    ],
+  });
+  assertEquals(result.response.status, 200);
+  assertEquals(result.payload.citations, ["fda_label_daily_values"]);
+  assertEquals(result.providerRequests.length, 1);
+  assertEquals(requestedCitationIds(result.providerRequests[0]).length, 23);
+  assertEquals(
+    requestedCitationIds(result.providerRequests[0]).includes(
+      "fda_label_daily_values",
+    ),
+    true,
+  );
+  assertEquals(
+    requestedCitationPrompt(result.providerRequests[0]).includes(
+      "fda_label_daily_values",
+    ),
+    true,
+  );
+  assertEquals(result.settlements.length, 1);
+  assertEquals(result.settlements[0].p_succeeded, true);
+  const legacy = await exerciseHealthCitationHandlerContract();
+  assertEquals(
+    Object.keys(result.payload).sort(),
+    Object.keys(legacy.payload).sort(),
+  );
+});
+
+Deno.test("unexpected FDA response for a legacy request refunds instead of delivering health text", async () => {
+  const result = await exerciseHealthCitationHandlerContract({
+    citations: ["fda_label_daily_values"],
+  });
+  assertEquals(result.response.status, 503);
+  assertEquals(result.payload, { error: "missing_health_citation" });
+  assertEquals(result.settlements.length, 1);
+  assertEquals(result.settlements[0].p_succeeded, false);
+});
+
+Deno.test("invalid citation catalog version fails before reservation provider or settlement", async () => {
+  for (const version of [null, 0, 3, 2.1, "2", true, [], {}]) {
+    const result = await exerciseHealthCitationHandlerContract({ version });
+    assertEquals(result.response.status, 400);
+    assertEquals(result.payload, {
+      error: "invalid_health_citation_catalog_version",
+    });
+    assertEquals(result.rpcCalls, []);
+    assertEquals(result.providerRequests, []);
+    assertEquals(result.settlements, []);
+  }
+});
+
+Deno.test("version2 fallback preserves the same citation catalog across both real fetch calls", async () => {
+  const result = await exerciseHealthCitationHandlerContract({
+    version: 2,
+    citations: ["fda_label_daily_values"],
+    failPrimaryOnce: true,
+  });
+  assertEquals(result.response.status, 200);
+  assertEquals(result.payload.citations, ["fda_label_daily_values"]);
+  assertEquals(result.providerRequests.length, 2);
+  for (const request of result.providerRequests) {
+    assertEquals(requestedCitationIds(request).length, 23);
+    assertEquals(
+      requestedCitationIds(request).includes("fda_label_daily_values"),
+      true,
+    );
+    assertEquals(
+      requestedCitationPrompt(request).includes("fda_label_daily_values"),
+      true,
+    );
+  }
+  assertEquals(result.settlements.length, 1);
+  assertEquals(result.settlements[0].p_succeeded, true);
 });

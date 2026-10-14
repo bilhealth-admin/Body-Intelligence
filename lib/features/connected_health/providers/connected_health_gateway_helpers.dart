@@ -5,12 +5,9 @@ extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
     String field, {
     ConnectedHealthTombstoneIndex? tombstones,
   }) async {
-    final consent = await _flows.store.get(
-      'connected_health_consent',
-      _source!,
-    );
+    final consent = await _store.get('connected_health_consent', _source!);
     if (consent?['readRequested'] != true) return const [];
-    final stored = await _flows.store.get('connected_health_ui', 'snapshot');
+    final stored = await _store.get('connected_health_ui', 'snapshot');
     final allowed = connectedHealthReadTypesForPlatform(
       defaultTargetPlatform,
     ).map((type) => type.name).toSet();
@@ -45,7 +42,7 @@ extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
   // A daily mean may represent thousands of readings. Keep deletions honored
   // without introducing thousands of serial SQLite calls on dashboard resume.
   Future<ConnectedHealthTombstoneIndex> _loadTombstones() =>
-      ConnectedHealthTombstoneIndex.load(_flows.store);
+      ConnectedHealthTombstoneIndex.load(_store);
 
   Future<bool> _isTombstoned(
     GlobalHealthSignal signal, {

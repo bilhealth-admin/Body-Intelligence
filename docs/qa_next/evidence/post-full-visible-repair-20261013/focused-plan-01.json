@@ -1,0 +1,224 @@
+[
+  {
+    "label": "format-edited-dart",
+    "kind": "format-edit",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "format",
+      "lib/app/environment/app_environment.dart",
+      "lib/app/services/scoped_media_file_cache.dart",
+      "test/app_foundation_services_test.dart",
+      "test/app/services/scoped_media_file_cache_test.dart",
+      "test/connected_health/health_devices_review_regression_test.dart"
+    ]
+  },
+  {
+    "label": "format-edited-deno",
+    "kind": "format-edit",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "fmt",
+      "supabase/functions/ai-coach/server.ts",
+      "supabase/functions/ai-coach/server_test.ts"
+    ]
+  },
+  {
+    "label": "runner-windows-contention-case",
+    "kind": "python",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "-m",
+      "unittest",
+      "tools.qa.test_bil_owner_full_test_runner.StatusPublicationTests.test_live_progress_keeps_ledger_and_os_lock_after_real_windows_status_contention",
+      "-v"
+    ]
+  },
+  {
+    "label": "runner-all-unit-cases",
+    "kind": "python",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "-m",
+      "unittest",
+      "tools.qa.test_bil_owner_full_test_runner",
+      "-v"
+    ]
+  },
+  {
+    "label": "cache-open-directory-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app/services/scoped_media_file_cache_test.dart",
+      "--plain-name",
+      "clear waits for an open real directory prune before deleting cache data"
+    ]
+  },
+  {
+    "label": "cache-real-loopback-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app/services/scoped_media_file_cache_test.dart",
+      "--plain-name",
+      "real loopback downloads coalesce, survive first consumer exit and never exceed three"
+    ]
+  },
+  {
+    "label": "foundation-fail-closed-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app_foundation_services_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+      "--plain-name",
+      "omitted payment opt-in fails closed with ready dependencies"
+    ]
+  },
+  {
+    "label": "citation-shared-registry-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/core/health_evidence_catalog_test.dart",
+      "--plain-name",
+      "Flutter and AI server use the same citation allow-list"
+    ]
+  },
+  {
+    "label": "health-real-back-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/connected_health/health_devices_review_regression_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+      "--plain-name",
+      "iOS/ar/premium manual refresh, phone steps, navigation and uncluttered readings"
+    ]
+  },
+  {
+    "label": "fda-actual-parser-case",
+    "kind": "deno",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "test",
+      "--allow-env",
+      "--allow-net",
+      "--allow-read",
+      "--filter",
+      "FDA label references survive parsing without admitting unknown citations",
+      "supabase/functions/ai-coach/server_test.ts"
+    ]
+  },
+  {
+    "label": "changed-flutter-files-default",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app/services/scoped_media_file_cache_test.dart",
+      "test/app_foundation_services_test.dart",
+      "test/core/health_evidence_catalog_test.dart",
+      "test/connected_health/health_devices_review_regression_test.dart"
+    ]
+  },
+  {
+    "label": "foundation-compiled-commerce-file",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app_foundation_services_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+    ]
+  },
+  {
+    "label": "coach-server-and-integrity-files",
+    "kind": "deno",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "test",
+      "--allow-env",
+      "--allow-net",
+      "--allow-read",
+      "supabase/functions/ai-coach/server_test.ts",
+      "supabase/functions/ai-coach/mobile_integrity_test.ts"
+    ]
+  },
+  {
+    "label": "affected-media-health-and-commerce",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app/services/scoped_media_access_test.dart",
+      "test/features/profile/profile_avatar_state_test.dart",
+      "test/connected_health/dashboard_health_cache_startup_contract_test.dart",
+      "test/connected_health/connected_health_contract_test.dart",
+      "test/connected_health/connected_health_guidance_localization_test.dart",
+      "test/features/global_platform/global_health_evidence_graph_test.dart",
+      "test/features/commerce/store_catalog_configuration_test.dart",
+      "test/features/commerce/app_purchase_confirmation_test.dart",
+      "test/features/commerce/app_subscription_confirmation_test.dart",
+      "test/features/commerce/verified_entitlement_session_cache_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+    ]
+  }
+]

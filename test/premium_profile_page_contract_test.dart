@@ -15,6 +15,7 @@ void main() {
       'lib/features/profile/premium_profile_editors.dart',
       'lib/features/profile/dietary_system_labels.dart',
       'lib/features/profile/goal_timeline_card.dart',
+      'lib/features/profile/providers/profile_avatar_state.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(
@@ -27,7 +28,8 @@ void main() {
     expect(source, contains("Key('premium-profile-list')"));
     expect(source, isNot(contains("Key('profile-settings-save')")));
     expect(source, contains('showSuccess: false'));
-    expect(source, contains('profilePhotoProvider'));
+    expect(source, contains('profileAvatarStateProvider'));
+    expect(source, contains('ref.watch(profilePhotoProvider)'));
     expect(source, contains('userProfileRepositoryProvider'));
     expect(source, contains('goalRepositoryProvider'));
     expect(source, contains("context.push('/plan?origin=profile')"));

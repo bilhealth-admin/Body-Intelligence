@@ -245,6 +245,16 @@ extension _IntelligenceConversationVoiceTranscript
       _finishVoiceMediaRequest(request);
       return;
     }
+    if (errorCode == 'speech_on_device_unavailable') {
+      _showActionCompleted(
+        tr(
+          'On-device speech recognition is unavailable for this language. You can type your question instead.',
+          'التعرّف على الكلام على الجهاز غير متاح لهذه اللغة. يمكنك كتابة سؤالك بدلًا من ذلك.',
+        ),
+      );
+      _finishVoiceMediaRequest(request);
+      return;
+    }
     if (voiceMode == _CoachVoiceMode.liveCall) {
       _updateState(() => liveCallPaused = true);
     }

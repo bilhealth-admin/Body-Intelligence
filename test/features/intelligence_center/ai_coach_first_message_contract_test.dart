@@ -30,8 +30,11 @@ void main() {
     expect(flow, contains('repeatedServiceNotice'));
     expect(
       page,
-      contains(
-        'child: !conversationReady\n                              ? ColoredBox',
+      allOf(
+        contains('absorbing: !conversationReady'),
+        contains('child: !conversationReady'),
+        contains('? ColoredBox(color: scheme.surface)'),
+        contains(': visibleMessages.isEmpty'),
       ),
       reason:
           'The provisional greeting must not flash before the restored transcript.',

@@ -110,13 +110,6 @@
 	<string>1041595138122-1bpu2k7vs1fjkkm1d3tg6o0rnn4i15fh.apps.googleusercontent.com</string>
 	<key>GIDServerClientID</key>
 	<string>1041595138122-hpe2ke9c5rpphijvmk2ssvsbggvbp14j.apps.googleusercontent.com</string>
-	<!-- Meta's native iOS SDK exchanges its short-lived proof directly with Supabase. -->
-	<key>FacebookAppID</key>
-	<string>1384055070498598</string>
-	<key>FacebookClientToken</key>
-	<string>511dd100843bb0cee6b0bbc6af140ebf</string>
-	<key>FacebookDisplayName</key>
-	<string>Body Intelligence Log™</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<!-- BIL's existing authenticated callback scheme. -->
@@ -135,15 +128,6 @@
 				<string>com.googleusercontent.apps.1041595138122-1bpu2k7vs1fjkkm1d3tg6o0rnn4i15fh</string>
 			</array>
 		</dict>
-		<!-- Meta's native app callback. The plugin owns the iOS scene callback. -->
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>fb1384055070498598</string>
-			</array>
-		</dict>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
@@ -160,11 +144,6 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>fbapi</string>
-		<string>fb-messenger-share-api</string>
-	</array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
@@ -174,9 +153,9 @@
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>BIL writes weight records only after you separately approve Health write access.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>BIL uses the microphone only when you choose voice input for weight, a meal, a Community post, or BIL AI Coach. You can review the text before saving, posting, or sending it.</string>
+	<string>BIL uses the microphone only when you start voice input for weight, meals, a Community post, or AI Coach. It transcribes speech on this device and stops if on-device recognition is unavailable. Voice text is shown for review before saving, posting, or sending it. Raw audio is not sent to Gemini. Gemini processes text you send to AI Coach only after you enable Personalized Intelligence and send it.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>BIL converts speech you initiate for weight, meals, Community posts, or BIL AI Coach into text so you can review it before saving, posting, or sending it.</string>
+	<string>BIL transcribes voice on this device for weight, meals, Community posts, or AI Coach, and stops if on-device recognition is unavailable. Raw audio is never sent to Gemini; AI Coach text reaches Gemini only after you enable Personalized Intelligence and send it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

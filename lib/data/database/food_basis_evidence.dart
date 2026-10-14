@@ -86,7 +86,11 @@ final class FoodBasisEvidence {
 
   static const schema = 'bil.food.basis.v1';
   static bool _near(double a, double b) =>
-      a.isFinite && b.isFinite && (a - b).abs() <= 1e-9 * (1 + b.abs());
+      a >= 0 &&
+      b >= 0 &&
+      a.isFinite &&
+      b.isFinite &&
+      (a - b).abs() <= 1e-9 * (1 + b.abs());
   static const catalogSchema = 'bil.catalog.nutrition.v1';
 
   final Food row;

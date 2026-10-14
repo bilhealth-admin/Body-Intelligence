@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,9 +14,21 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../core/units/measurement_units.dart';
+import '../domain/coach_message_presentation.dart';
+import '../domain/coach_context_preferences.dart';
+import '../app_commands/coach_meal_read_parser.dart';
+import '../app_commands/coach_message_nutrition_reader.dart';
+import '../app_commands/coach_verified_message_projection.dart';
+import 'coach_message_plain_copy.dart';
+import 'coach_message_presentation_view.dart';
+import 'ai_coach_report_confirmation_sheet.dart';
+import 'workspace/coach_food_receipt_content.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
+import '../../../app/theme/bil_flagship_tokens.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/services/app_settings_provider.dart';
 import '../../../app/services/app_settings_service.dart';
@@ -33,12 +46,14 @@ import '../domain/coach_conversation_titles.dart';
 import 'coach_conversation_rename_dialog.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_premium_trust_surface.dart';
 import '../../../shared/widgets/chat_history_viewport.dart';
 import '../../../shared/widgets/bil_camera_capture_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../community/presentation/community_gold_balance_action.dart';
+import '../../community/services/community_owner_operation.dart';
 import '../../foods/providers/food_provider.dart';
 import '../domain/intelligence_action.dart';
 import '../domain/food_v2/coach_food_v2.dart';
@@ -96,6 +111,7 @@ import '../services/local_model_gateway.dart';
 import '../services/coach_catalog_grounding.dart';
 import '../services/coach_action_presentation_policy.dart';
 import '../services/ai_coach_feedback_service.dart';
+import '../services/ai_coach_safety_report_service.dart';
 import '../../nutrition/domain/barcode_identity.dart';
 import '../../nutrition/services/food_search_normalizer.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
@@ -106,6 +122,7 @@ import '../../nutrition/presentation/meal_vision_consent_gate.dart';
 import '../intelligence_locale_copy.dart';
 import '../ai_coach_chat_copy.dart';
 import 'coach_message_text.dart';
+import 'coach_reply_arrival.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
 import '../../../app/router/bil_quick_add_presenter.dart';
 import 'workspace/coach_reference_workspace.dart';
@@ -144,7 +161,20 @@ part 'intelligence_action_runtime.dart';
 part 'intelligence_action_confirmation.dart';
 part '../food_flow/intelligence_food_flow.dart';
 part '../app_commands/coach_health_flow.dart';
+part '../app_commands/coach_message_read_flow.dart';
 part '../app_commands/coach_health_recovery.dart';
+
+TextStyle? _coachConversationBodyStyle(BuildContext context, {Color? color}) =>
+    Theme.of(context).textTheme.bodySmall?.copyWith(color: color, height: 1.4);
+
+TextStyle? _coachConversationActionStyle(BuildContext context, {Color? color}) {
+  final bodyStyle = _coachConversationBodyStyle(context, color: color);
+  if (bodyStyle == null) return null;
+  return bodyStyle.copyWith(
+    fontSize: (bodyStyle.fontSize ?? 14) + 1,
+    height: 1.25,
+  );
+}
 
 /// Single injectable wall clock for conversation copy and seeded messages.
 ///
@@ -187,6 +217,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     with WidgetsBindingObserver {
   final question = TextEditingController();
   final conversationScroll = ScrollController();
+  final coachMessageReadingAnchors = <String, GlobalKey>{};
+  String? coachMessageReadingAnchorScope;
   final speech = SpeechToText();
   final catalogGrounding = CoachCatalogGrounding();
   final messages = <IntelligenceMessage>[];
@@ -240,6 +272,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   ProviderSubscription<AppDatabase>? healthEffectOwnerSubscription;
   final healthEffectCancellers = <VoidCallback>{};
   int conversationLoadGeneration = 0;
+  bool coachMessageVisitCancelled = false;
+  StreamSubscription<String?>? coachMessageOwnerSubscription;
+  CoachNativeOwnerWitness? coachMessageOwnerWitness;
   late final PreferencesRepository conversationPreferences;
   late final WeightRepository conversationWeightRepository;
   late final DailyLogRepository conversationDailyLogRepository;
@@ -273,7 +308,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void initState() {
     super.initState();
-    entryWelcomeTimer = Timer(const Duration(milliseconds: 2200), () {
+    entryWelcomeTimer = Timer(bilFeatureEntryDuration, () {
       if (mounted) setState(() => entryWelcomeVisible = false);
     });
     // Riverpod refs are unavailable from dispose. Retain the stable,
@@ -283,11 +318,24 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     conversationWeightRepository = ref.read(weightRepositoryProvider);
     conversationDailyLogRepository = ref.read(dailyLogRepositoryProvider);
     WidgetsBinding.instance.addObserver(this);
+    coachMessageOwnerWitness = ref.read(coachNativeOwnerWitnessProvider);
+    void cancelMessageVisit() {
+      if (coachMessageVisitCancelled) return;
+      coachMessageVisitCancelled = true;
+      if (mounted) _updateState(() {});
+    }
+
+    coachMessageOwnerSubscription = coachMessageOwnerWitness?.changes.listen((
+      owner,
+    ) {
+      if (owner != conversationPreferences.localOwnerId) cancelMessageVisit();
+    }, onError: (Object _, StackTrace _) => cancelMessageVisit());
     healthEffectOwnerSubscription = ref.listenManual(databaseProvider, (
       previous,
       next,
     ) {
       if (!identical(previous, next)) {
+        cancelMessageVisit();
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) unawaited(_resumeCoachFastingEffects());
         });
@@ -467,9 +515,12 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   @override
   void dispose() {
+    coachMessageReadingAnchors.clear();
     _cancelCoachMediaRequests(notify: false);
     voiceTranscriptBridge.dispose();
     healthEffectOwnerSubscription?.close();
+    coachMessageVisitCancelled = true;
+    unawaited(coachMessageOwnerSubscription?.cancel());
     for (final cancel in healthEffectCancellers.toList()) {
       cancel();
     }

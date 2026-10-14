@@ -11,6 +11,9 @@ void main() {
     final inputSections = File(
       'lib/features/daily_log/presentation/daily_log_input_sections.dart',
     ).readAsStringSync();
+    final page = File(
+      'lib/features/daily_log/daily_log_page.dart',
+    ).readAsStringSync();
     final actions = [
       'lib/features/daily_log/daily_log_page_actions.dart',
       'lib/features/daily_log/daily_log_mutation_actions.dart',
@@ -26,11 +29,14 @@ void main() {
     expect(mealEntry, contains('quantity.text = amount.toStringAsFixed'));
     expect(inputSections, contains("Key('daily-log-note-field')"));
     expect(inputSections, contains("Key('daily-log-exercise-section')"));
-    // Dart Formatter can wrap the argument after the colon. Preserve
-    // the behavioral source guard without depending on whitespace layout.
+    expect(actions, contains('exerciseNotesDraftDate'));
+    expect(actions, contains('DailyExerciseNotesCodec.decode('));
+    expect(actions, contains('compose(manualText: exerciseNotes.text)'));
+    expect(actions, contains('nextExerciseNotes'));
     expect(
-      actions,
-      contains(RegExp(r'exerciseNotes:\s*exerciseNotes\.text\.trim\(\)')),
+      page,
+      contains('onNotesChanged: (_) {'),
+      reason: 'Manual exercise drafts are tracked for the selected diary day.',
     );
     expect(
       actions.indexOf('final quantityValue = _parsePositiveQuantity'),

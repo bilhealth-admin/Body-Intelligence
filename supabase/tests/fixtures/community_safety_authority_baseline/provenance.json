@@ -1,0 +1,8 @@
+{
+  "scope": "Read-only published function catalog; no user data and no Production execution",
+  "captured_at": "2026-10-13 09:01:26.438096+00",
+  "project_reference": "tgmanzhqulksykhslrzb",
+  "functions": 8,
+  "acl_owner_mapping": "postgres to isolated database creator",
+  "definitions_verified_by_sha256": true
+}

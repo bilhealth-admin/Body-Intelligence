@@ -1,6 +1,14 @@
 part of 'intelligence_locale_copy.dart';
 
 const _serviceAuthored = <String, Map<String, String>>{
+  'Your device or platform speech service may process microphone audio under its own terms. When you submit a Coach request, BIL sends Gemini only recognized text, never raw microphone audio.': {
+    'fr':
+        'Le service vocal de votre appareil ou de votre plateforme peut traiter l’audio du microphone selon ses propres conditions. Lorsque vous envoyez une demande au Coach, BIL transmet à Gemini uniquement le texte reconnu, jamais l’audio brut du microphone.',
+    'es':
+        'El servicio de voz de tu dispositivo o plataforma puede procesar el audio del micrófono según sus propios términos. Cuando envías una solicitud al Coach, BIL transmite a Gemini solo el texto reconocido, nunca el audio sin procesar del micrófono.',
+    'tr':
+        'Cihazınızdaki veya platformdaki konuşma hizmeti mikrofon sesini kendi koşullarına göre işleyebilir. Koç isteğinizi gönderdiğinizde BIL, Gemini’ye yalnızca tanınan metni iletir; ham mikrofon sesini hiçbir zaman göndermez.',
+  },
   'Ready': {'fr': 'Prêt', 'es': 'Listo', 'tr': 'Hazır'},
   'Hello, I’m BIL Coach.': {
     'fr': 'Bonjour, je suis BIL Coach.',

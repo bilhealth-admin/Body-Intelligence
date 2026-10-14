@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 
 const legalPublicationStatus =
-    'LIVE_HTTP_200_LOCAL_CONTENT_SHA256_MATCH_VERIFIED_2026_10_04_'
-    'LEGAL_APPROVAL_NOT_CLAIMED';
+    'HISTORICAL_LIVE_MATCH_2026_10_04_CURRENT_LOCAL_ASSET_CHANGED_'
+    'REVERIFY_BEFORE_RELEASE_LEGAL_APPROVAL_NOT_CLAIMED';
 const legalPublicationEvidencePath =
     'docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-10-04.json';
 
@@ -102,20 +102,10 @@ void validateLegalPublicationVerification({
   final localPath = _string(localAsset, 'path');
   _expect(localPath == 'public_site/app.js', 'unexpected local legal asset');
   final localSha = _string(localAsset, 'sha256').toLowerCase();
+  final recordedLocalBytes = _integer(localAsset, 'bytes');
   _expect(
     RegExp(r'^[0-9a-f]{64}$').hasMatch(localSha),
     'local asset SHA-256 is malformed',
-  );
-  final actualBytes = readBytes == null
-      ? File(localPath).readAsBytesSync()
-      : readBytes(localPath);
-  _expect(
-    _integer(localAsset, 'bytes') == actualBytes.length,
-    'checked-in local asset byte count mismatch',
-  );
-  _expect(
-    sha256.convert(actualBytes).toString() == localSha,
-    'checked-in local asset SHA-256 mismatch',
   );
 
   final remoteAsset = _map(proof, 'remote_asset');
@@ -134,7 +124,7 @@ void validateLegalPublicationVerification({
     'remote legal asset content type mismatch',
   );
   _expect(
-    _integer(remoteAsset, 'bytes') == actualBytes.length,
+    _integer(remoteAsset, 'bytes') == recordedLocalBytes,
     'remote/local legal asset byte count mismatch',
   );
   _expect(
@@ -208,12 +198,29 @@ void validateLegalPublicationVerification({
     rawAssertions.length == _requiredContentAssertions.length,
     'content assertion set must be exact',
   );
-  final localText = utf8.decode(actualBytes);
   for (final entry in _requiredContentAssertions.entries) {
     _expect(
       rawAssertions[entry.key] == entry.value,
       'content assertion ${entry.key} is missing or changed',
     );
+  }
+
+  // Validate the evidence internally before comparing it with today's source.
+  // That preserves useful failure reasons for route/hash tampering while the
+  // final local comparison remains a strict release gate.
+  final actualBytes = readBytes == null
+      ? File(localPath).readAsBytesSync()
+      : readBytes(localPath);
+  _expect(
+    recordedLocalBytes == actualBytes.length,
+    'checked-in local asset byte count mismatch',
+  );
+  _expect(
+    sha256.convert(actualBytes).toString() == localSha,
+    'checked-in local asset SHA-256 mismatch',
+  );
+  final localText = utf8.decode(actualBytes);
+  for (final entry in _requiredContentAssertions.entries) {
     _expect(
       localText.contains(entry.value),
       'local legal asset does not contain ${entry.key}',

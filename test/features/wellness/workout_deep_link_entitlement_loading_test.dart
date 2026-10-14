@@ -78,7 +78,7 @@ void main() {
     (CommercePlan.free, '/wellness/workouts/routines'),
   ]) {
     final (plan, route) = scenario;
-    testWidgets('$plan genuine workout deep link waits before Plans', (
+    testWidgets('$plan genuine workout deep link waits before revealing paid content', (
       tester,
     ) async {
       // Do not reuse a Future cached by the previous widget test's fake async
@@ -288,12 +288,7 @@ void main() {
           () =>
               lookupFinished &&
               container.read(verifiedSubscriptionStateProvider).hasValue &&
-              (plan == CommercePlan.free
-                  ? find.byType(BilStorePlansPage).evaluate().isNotEmpty
-                  : find
-                        .byType(BilWorkoutRoutineDetailsPage)
-                        .evaluate()
-                        .isNotEmpty),
+              find.byType(BilWorkoutRoutineDetailsPage).evaluate().isNotEmpty,
           'resolved actual paid or Free item destination',
         );
         final state = container
@@ -302,9 +297,24 @@ void main() {
         expect(state.authority, EntitlementAuthority.verifiedServer);
         expect(state.plan, plan);
         if (plan == CommercePlan.free) {
-          expect(plansVisits, greaterThan(0));
-          expect(plansFocus, 'subscription');
+          // A deep link does not open a paywall by itself. The verified Free
+          // member sees the locked detail and chooses whether to view plans.
+          expect(plansVisits, 0);
+          expect(find.byType(BilStorePlansPage), findsNothing);
+          expect(
+            find.byKey(const ValueKey('unlock-workout-cta')),
+            findsOneWidget,
+          );
           expect(find.byKey(const ValueKey('log-workout-cta')), findsNothing);
+          await tester.tap(find.byKey(const ValueKey('unlock-workout-cta')));
+          await _waitUntil(
+            tester,
+            () =>
+                plansVisits > 0 &&
+                find.byType(BilStorePlansPage).evaluate().isNotEmpty,
+            'member-selected subscription plans',
+          );
+          expect(plansFocus, 'subscription');
         } else {
           expect(plansVisits, 0);
           expect(find.byType(BilStorePlansPage), findsNothing);

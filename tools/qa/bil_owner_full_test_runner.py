@@ -13,6 +13,7 @@ import re
 import shutil
 import sys
 import subprocess
+import tempfile
 import time
 from urllib.parse import unquote
 
@@ -87,12 +88,15 @@ def inputs():
     selected = {}
     for name in sorted(set(files)):
         generated = generated_comparison(name)
-        prefixes = ('lib/', 'test/', 'assets/', 'shaders/', 'android/app/',
-                    'ios/Runner/', 'ios/Runner.xcodeproj/', 'supabase/',
-                    'tools/qa/', 'tool/release/')
+        prefixes = ('.github/', 'lib/', 'test/', 'integration_test/', 'assets/',
+                    'shaders/', 'android/', 'ios/', 'macos/', 'windows/',
+                    'linux/', 'web/', 'supabase/', 'tool/', 'tools/',
+                    'public_site/', 'docs/release/')
         path = ROOT / name
         if not generated and path.is_file() and (name.startswith(prefixes) or
-                name in ('pubspec.yaml', 'pubspec.lock', 'analysis_options.yaml')):
+                name in ('pubspec.yaml', 'pubspec.lock', 'analysis_options.yaml',
+                         'l10n.yaml', 'package.json', 'package-lock.json',
+                         'deno.json', 'deno.lock', 'wrangler.site.jsonc')):
             selected[name] = digest(path)
     return selected
 
@@ -101,10 +105,119 @@ def fingerprint(values):
     return hashlib.sha256('\n'.join(f'{name}:{sha}' for name, sha in sorted(values.items())).encode()).hexdigest()
 
 
-def atomic_json(path, value):
-    tmp = path.with_suffix('.tmp')
-    tmp.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding='utf-8')
-    os.replace(tmp, path)
+def console_safe_text(message, encoding):
+    """Keep localized test names from terminating progress output on Windows."""
+    try:
+        message.encode(encoding)
+        return message
+    except UnicodeEncodeError:
+        return message.encode(encoding, errors='backslashreplace').decode(encoding)
+
+
+def console_print(message, *, stream=None):
+    stream = stream or sys.stdout
+    encoding = getattr(stream, 'encoding', None) or 'utf-8'
+    print(console_safe_text(message, encoding), file=stream, flush=True)
+
+
+def retryable_windows_publication_error(error):
+    return os.name == 'nt' and getattr(error, 'winerror', None) in (5, 32, 33)
+
+
+def atomic_json(path, value, retry_timeout=0.25):
+    # The retry budget is for replacement contention, not a new test run.
+    # Close the unique temporary file before Windows tries to replace it.
+    deadline = time.monotonic() + retry_timeout
+    descriptor, name = tempfile.mkstemp(prefix=f'.{path.name}.', suffix='.tmp',
+                                        dir=path.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(descriptor, 'w', encoding='utf-8') as stream:
+            stream.write(json.dumps(value, ensure_ascii=False, indent=2))
+        delay = 0.01
+        while True:
+            try:
+                os.replace(temporary, path)
+                return
+            except OSError as error:
+                remaining = deadline - time.monotonic()
+                if not retryable_windows_publication_error(error) or remaining <= 0:
+                    raise
+                time.sleep(min(delay, remaining))
+                delay = min(delay * 2, 0.05)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+class LiveStatusPublisher:
+    """Presentation failures must not interrupt the owned test event stream."""
+    def __init__(self, path, progress):
+        self.path = path
+        self.progress = progress
+        self.failures = 0
+        self.degraded = False
+        self.last_success = None
+        self.last_error = None
+
+    def metadata(self, *, degraded, last_success):
+        return {'degraded': degraded, 'failures': self.failures,
+                'last_success_utc': last_success, 'last_error': self.last_error}
+
+    def publish(self, state):
+        candidate = dict(state)
+        published_at = utc()
+        candidate['status_publication'] = self.metadata(
+            degraded=False, last_success=published_at)
+        try:
+            atomic_json(self.path, candidate)
+        except OSError as error:
+            if not retryable_windows_publication_error(error):
+                raise
+            self.failures += 1
+            self.degraded = True
+            self.last_error = f'{type(error).__name__}: {error}'
+            state['status_publication'] = self.metadata(
+                degraded=True, last_success=self.last_success)
+            diagnostic = {'event': 'status_publication_degraded', 'utc': utc(),
+                          'runner_pid': os.getpid(),
+                          'flutter_pid': state.get('flutter_pid'),
+                          'winerror': error.winerror,
+                          **state['status_publication']}
+            message = json.dumps(diagnostic, ensure_ascii=True)
+            # Failures of either real log still propagate; this only tolerates
+            # the recognized replacement/presentation failure above.
+            self.progress.write(message + '\n')
+            self.progress.flush()
+            console_print(message, stream=sys.stderr)
+            return False
+        self.degraded = False
+        self.last_success = published_at
+        state['status_publication'] = candidate['status_publication']
+        return True
+
+
+def write_final_result(folder, state):
+    # The child has already exited and its outcomes have been saved. Keep a
+    # separately named final artifact even if a status viewer blocks replace.
+    candidate = dict(state)
+    publication = state.get('status_publication')
+    if publication is not None:
+        candidate['status_publication'] = dict(
+            publication, degraded=False, last_success_utc=utc())
+    try:
+        atomic_json(folder / 'status.json', candidate)
+    except OSError as error:
+        state.update(phase='failed_runner', accepted=False,
+                     final_status_error=f'{type(error).__name__}: {error}')
+        if publication is not None:
+            state['status_publication'] = dict(
+                publication, degraded=True,
+                failures=publication['failures'] + 1,
+                last_error=state['final_status_error'])
+        atomic_json(folder / 'final-result.json', state)
+        raise
+    state.update(candidate)
+    atomic_json(folder / 'final-result.json', state)
 
 
 class Ledger:
@@ -306,8 +419,6 @@ def root_test_command(dart, snapshot):
     return [str(dart), str(snapshot), 'test', '--no-pub', '--concurrency=2',
             '--timeout=3m', '--reporter=json',
             '--dart-define=BIL_PAYMENTS_ENABLED=true',
-            '--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms',
-            '--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy',
             '--dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true']
 
 
@@ -315,12 +426,13 @@ def execute(args, folder, state, owned):
     head, branch = git('rev-parse', 'HEAD'), git('branch', '--show-current')
     if head != args.expect_head or branch != ALLOWED_BRANCH:
         raise RuntimeError('the frozen SHA and authorized integration branch must match')
-    # Generated failure comparisons may be preserved untracked. Every real
-    # application/test/asset input must still match the frozen commit.
+    # Freeze the exact local working source, including intentional edits that
+    # have not been committed yet. The input manifest below, not a clean-tree
+    # requirement, defines what this run tested.
     dirty = git('status', '--porcelain=v1', '--untracked-files=all').splitlines()
-    unexpected = [line for line in dirty if not generated_comparison(line[3:].strip('\"'))]
-    if unexpected:
-        raise RuntimeError('working tree changed after freezing; do not run a different source')
+    state.update(working_tree_status_entries=len(dirty),
+                 working_tree_status_fingerprint=hashlib.sha256(
+                     '\n'.join(dirty).encode()).hexdigest())
     machine = resources()
     if machine['ram_available_bytes'] is not None and machine['ram_available_bytes'] < 4 * 1024**3:
         raise RuntimeError('less than4GiB free RAM; do not start an unstable two-worker run')
@@ -347,12 +459,15 @@ def execute(args, folder, state, owned):
     atomic_json(folder / 'status.json', state)
     ledger, started = Ledger(), time.monotonic()
     with (folder / 'flutter.jsonl').open('w', encoding='utf-8', buffering=1) as raw, (folder / 'progress.log').open('w', encoding='utf-8', buffering=1) as progress:
-        progress.write(f'{utc()} START SHA={head} root test concurrency=2; no shards or automatic retries\n')
+        start_message = f'{utc()} START SHA={head} root test concurrency=2; no shards or automatic retries'
+        progress.write(start_message + '\n')
+        console_print(start_message)
         process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', errors='replace', bufsize=1)
         owned.append(process)
         state.update(phase='running', flutter_pid=process.pid, flutter_started=True)
-        atomic_json(folder / 'status.json', state)
-        last_written = 0.0
+        publisher = LiveStatusPublisher(folder / 'status.json', progress)
+        publisher.publish(state)
+        last_written = time.monotonic()
         for line in process.stdout:
             raw.write(line)
             try:
@@ -367,12 +482,23 @@ def execute(args, folder, state, owned):
                 name = ledger.tests.get(event['testID'], {}).get('name', '?')
                 result = 'SKIP' if event.get('skipped') else event['result'].upper()
                 progress.write(f'{utc()} {result} {name}\n')
+                completed = len(ledger.outcomes)
+                if completed % 25 == 0 or result != 'SUCCESS':
+                    counts = ledger.snapshot()['counts']
+                    visible = (f'{utc()} PROGRESS completed={completed} '
+                               f'passed={counts["success"]} failed={counts["failure"]} '
+                               f'errors={counts["error"]} skipped={counts["skip"]} '
+                               f'latest={result} {name}')
+                    progress.write(visible + '\n')
+                    console_print(visible)
             elif event.get('type') == 'error':
-                progress.write(f'{utc()} ERROR {event.get("error", "")}\n')
+                error_message = f'{utc()} ERROR {event.get("error", "")}'
+                progress.write(error_message + '\n')
+                console_print(error_message)
             now = time.monotonic()
-            if now - last_written >= 1 or event.get('type') in ('error', 'done'):
+            if now - last_written >= 1 or (not publisher.degraded and event.get('type') in ('error', 'done')):
                 state.update(ledger.snapshot(), elapsed_seconds=round(now-started, 1), last_event_utc=utc())
-                atomic_json(folder / 'status.json', state)
+                publisher.publish(state)
                 last_written = now
         exit_code = process.wait()
         progress.write(f'{utc()} PROCESS_EXIT {exit_code}\n')
@@ -388,8 +514,8 @@ def execute(args, folder, state, owned):
     state['accepted'] = accepted(state)
     atomic_json(folder / 'errors.json', ledger.errors)
     atomic_json(folder / 'test-outcomes.json', [{'id': key, 'name': ledger.tests.get(key, {}).get('name'), 'file': ledger.file_for(ledger.tests.get(key, {})), 'result': result} for key, result in ledger.outcomes.items()])
-    atomic_json(folder / 'status.json', state)
-    print(json.dumps({key: state[key] for key in ('head', 'exit_code', 'counts', 'accepted', 'stable_source')}, ensure_ascii=True), flush=True)
+    write_final_result(folder, state)
+    console_print(json.dumps({key: state[key] for key in ('head', 'exit_code', 'counts', 'accepted', 'stable_source')}, ensure_ascii=True))
     return 0 if state['accepted'] else (exit_code or 79)
 
 

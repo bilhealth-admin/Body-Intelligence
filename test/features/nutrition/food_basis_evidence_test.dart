@@ -11,7 +11,7 @@ import 'food_basis_fixtures.dart';
 
 void main() {
   test(
-    'basis codec preserves full snapshot provenance and thirteen values',
+    'basis codec preserves full snapshot provenance and all nineteen values',
     () {
       final snapshot = basisSnapshot();
       final raw = FoodBasisEvidence.encode(snapshot);
@@ -30,8 +30,8 @@ void main() {
       expect(evidence.snapshot!.source.ref, 'fixture://nutrition-label');
       expect(evidence.snapshot!.source.revision, 'label-2');
       expect(evidence.snapshot!.source.confidence!.score, .8);
-      expect(evidence.values, basisNutrients);
-      expect(FoodBasisEvidence.projection(snapshot), basisNutrients);
+      expect(evidence.values, snapshot.nutrients.values);
+      expect(FoodBasisEvidence.projection(snapshot), snapshot.nutrients.values);
       expect(FoodBasisEvidence.mask(snapshot), 2047);
       expect(FoodBasisEvidence.sourceLabel(snapshot), 'coach_food_v2:label');
     },
@@ -47,7 +47,7 @@ void main() {
     expect(evidence.value(FoodNutrient.iron), 0);
     expect(evidence.value(FoodNutrient.vitaminC), 8);
     expect(evidence.value(FoodNutrient.calories), isNull);
-    expect(evidence.values, hasLength(13));
+    expect(evidence.values, hasLength(19));
   });
 
   test(
@@ -187,7 +187,15 @@ void main() {
       final stored = await database.select(database.foods).getSingle();
       final evidence = FoodBasisEvidence.read(stored);
       expect(stored.foodEvidenceJson, original.foodEvidenceJson);
-      expect(evidence.values, basisNutrients);
+      expect(evidence.values.keys, unorderedEquals(FoodNutrient.values));
+      for (final entry in basisNutrients.entries) {
+        expect(evidence.value(entry.key), entry.value);
+      }
+      for (final nutrient in FoodNutrient.values.where(
+        (nutrient) => !basisNutrients.containsKey(nutrient),
+      )) {
+        expect(evidence.value(nutrient), isNull);
+      }
       expect(evidence.snapshot!.source.revision, 'label-2');
       await (database.update(database.foods)
             ..where((row) => row.id.equals(stored.id)))

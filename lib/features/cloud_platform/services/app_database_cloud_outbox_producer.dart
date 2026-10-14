@@ -11,11 +11,17 @@ final class CloudOutboxProductionReport {
     required this.enqueued,
     required this.skippedByPolicy,
     required this.remainingDirty,
+    this.remainingEligibleDirty,
   });
 
   final int enqueued;
   final int skippedByPolicy;
   final int remainingDirty;
+
+  /// Unqueued rows allowed by this pass's existing consent policy. Excluded
+  /// nutrition rows remain local and cannot trigger an automatic upload loop.
+  final int? remainingEligibleDirty;
+  int get eligibleRemaining => remainingEligibleDirty ?? remainingDirty;
 }
 
 /// Converts authoritative local BIL health rows into owner-scoped cloud
@@ -160,24 +166,29 @@ final class AppDatabaseCloudOutboxProducer {
       enqueued: enqueued,
       skippedByPolicy: skippedByPolicy,
       remainingDirty: await countDirtyRows(),
+      remainingEligibleDirty: await countDirtyRows(eligibleOnly: true),
     );
   }
 
-  Future<int> countDirtyRows() async {
-    Future<int> count(String table) async {
+  Future<int> countDirtyRows({bool eligibleOnly = false}) async {
+    var total = 0;
+    const tables = <String, CloudEntityKind>{
+      'user_profile': CloudEntityKind.profile,
+      'weight_entries': CloudEntityKind.weight,
+      'water_entries': CloudEntityKind.hydration,
+      'meals': CloudEntityKind.nutrition,
+      'meal_items': CloudEntityKind.nutrition,
+    };
+    for (final entry in tables.entries) {
+      if (eligibleOnly && !_sink.allows(entry.value)) continue;
       final row = await _database
           .customSelect(
-            "SELECT COUNT(*) AS c FROM $table WHERE sync_status IN ('local','pending','pendingDelete')",
+            "SELECT COUNT(*) AS c FROM ${entry.key} WHERE sync_status IN ('local','pending','pendingDelete')",
           )
           .getSingle();
-      return row.read<int>('c');
+      total += row.read<int>('c');
     }
-
-    return await count('user_profile') +
-        await count('weight_entries') +
-        await count('water_entries') +
-        await count('meals') +
-        await count('meal_items');
+    return total;
   }
 
   Expression<bool> _dirty(GeneratedColumn<String> status) =>

@@ -19,44 +19,36 @@ Future<void> showOptionalAccessOffer(
 }) async {
   if (!context.mounted) return;
   final owner = ref.read(verifiedEntitlementOwnerIdProvider);
-  final arabic = Localizations.localeOf(context).languageCode == 'ar';
-  String tr(String en, String ar) => arabic ? ar : context.strings.text(en);
   final choice = await showDialog<String>(
     context: context,
     builder: (dialogContext) => AlertDialog(
       title: Text(
-        tr(
+        context.strings.text(
           verifiedDenied
               ? 'This feature needs access'
               : 'Access check unavailable',
-          verifiedDenied
-              ? 'هذه الميزة تحتاج إلى صلاحية'
-              : 'تعذر التحقق من الصلاحية',
         ),
       ),
       content: Text(
-        tr(
+        context.strings.text(
           verifiedDenied
               ? 'You can continue using the app. View plans only if you wish to change your access.'
               : 'Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.',
-          verifiedDenied
-              ? 'يمكنك متابعة استخدام التطبيق. افتح الخطط فقط إن رغبت في تغيير صلاحية هذه الميزة.'
-              : 'لم نصنف اشتراكك كمجاني. تحقق من الاتصال وأعد المحاولة؛ تظل بقية وظائف التطبيق متاحة.',
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: Text(tr('Continue', 'متابعة')),
+          child: Text(dialogContext.strings.text('Continue')),
         ),
         TextButton(
           onPressed: () => Navigator.pop(dialogContext, 'retry'),
-          child: Text(tr('Refresh access', 'تحديث الصلاحية')),
+          child: Text(dialogContext.strings.text('Refresh access')),
         ),
         if (verifiedDenied)
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, 'plans'),
-            child: Text(tr('View plans', 'عرض الخطط')),
+            child: Text(dialogContext.strings.text('View plans')),
           ),
       ],
     ),
@@ -72,10 +64,7 @@ Future<void> showOptionalAccessOffer(
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
         content: Text(
-          tr(
-            'Access is refreshing. Try the feature again.',
-            'جارٍ تحديث الصلاحية. أعد فتح الميزة.',
-          ),
+          context.strings.text('Access is refreshing. Try the feature again.'),
         ),
       ),
     );

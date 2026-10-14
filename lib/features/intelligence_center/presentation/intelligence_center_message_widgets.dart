@@ -15,12 +15,17 @@ class _MessageBubble extends StatelessWidget {
     this.actionPhases = const <String, _CoachActionExecutionPhase>{},
     this.animateReveal = false,
     this.richContent,
+    required this.expectedOwnerKey,
+    required this.ownerVisitIsCurrent,
+    this.presentationCopy,
+    this.onCopy,
+    this.onShare,
   });
   final IntelligenceMessage message;
   final bool? feedbackValue;
   final bool reported;
   final ValueChanged<bool>? onFeedback;
-  final ValueChanged<String>? onReport;
+  final ValueChanged<AiCoachAnswerReportDraft>? onReport;
   final VoidCallback? onSpeak;
   final VoidCallback? onRetry;
   final VoidCallback? onUndo;
@@ -29,6 +34,11 @@ class _MessageBubble extends StatelessWidget {
   final Map<String, _CoachActionExecutionPhase> actionPhases;
   final bool animateReveal;
   final Widget? richContent;
+  final String expectedOwnerKey;
+  final bool Function() ownerVisitIsCurrent;
+  final CoachMessagePlainCopy? presentationCopy;
+  final VoidCallback? onCopy;
+  final ValueChanged<BuildContext>? onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +48,8 @@ class _MessageBubble extends StatelessWidget {
       return Align(
         alignment: Alignment.centerRight,
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 560),
-          margin: const EdgeInsets.only(left: 48, bottom: 18),
+          constraints: const BoxConstraints(maxWidth: 720),
+          margin: const EdgeInsets.only(left: 32, bottom: 18),
           padding: const EdgeInsetsDirectional.fromSTEB(16, 11, 16, 12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -67,10 +77,10 @@ class _MessageBubble extends StatelessWidget {
             createdAt: message.createdAt,
             alignEnd: true,
             textDirection: _messageTextDirection(message.text),
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              height: 1.4,
+            style: _coachConversationActionStyle(
+              context,
               color: scheme.onPrimaryContainer,
-            ),
+            )?.copyWith(height: 1.4),
           ),
         ),
       );
@@ -82,201 +92,302 @@ class _MessageBubble extends StatelessWidget {
     final trustedActions = message.actionLinks
         .where((action) => action.isTrusted)
         .toList(growable: false);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(13),
-      decoration: BilPearlFinish.panel(
-        context,
-        radius: BorderRadius.circular(18),
-        shadow: false,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CoachMessageText(
-                  key: ValueKey('coach-message-text-${message.id}'),
-                  text: message.text,
-                  createdAt: message.createdAt,
-                  textDirection: _messageTextDirection(message.text),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(height: 1.55),
-                  animateReveal: animateReveal,
-                  showTime: false,
-                ),
-                ?richContent,
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CoachMessageTime(createdAt: message.createdAt),
-                    const Spacer(),
-                    if (onSpeak != null)
-                      IconButton(
-                        key: Key('ai-coach-speak-${message.id}'),
-                        tooltip: intelligenceText(
-                          context,
-                          'Read answer aloud',
-                          'اقرأ الإجابة بصوت عالٍ',
-                        ),
-                        onPressed: onSpeak,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(
-                          width: 40,
-                          height: 40,
-                        ),
-                        icon: const Icon(Icons.volume_up_rounded, size: 19),
-                      ),
-                    if (onFeedback != null)
-                      _QuickFeedbackBar(
-                        value: feedbackValue,
-                        onChanged: onFeedback!,
-                        compact: true,
-                      ),
-                    if (onReport != null)
-                      IconButton(
-                        key: Key('ai-coach-report-${message.id}'),
-                        tooltip: intelligenceText(
-                          context,
-                          'Report answer',
-                          'الإبلاغ عن الإجابة',
-                        ),
-                        onPressed: () =>
-                            _showAiAnswerReportSheet(context, onReport!),
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(
-                          width: 40,
-                          height: 40,
-                        ),
-                        style: IconButton.styleFrom(
-                          foregroundColor: reported
-                              ? scheme.error
-                              : scheme.onSurfaceVariant,
-                          backgroundColor: reported
-                              ? scheme.error.withValues(alpha: .14)
-                              : Colors.transparent,
-                        ),
-                        icon: Icon(
-                          reported ? Icons.flag_rounded : Icons.flag_outlined,
-                          size: 18,
-                        ),
-                      ),
-                  ],
-                ),
-                if (message.citationIds.isNotEmpty)
-                  TextButton.icon(
-                    key: Key('ai-coach-health-sources-${message.id}'),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    onPressed: () => context.push(
-                      Uri(
-                        path: '/health-information-sources',
-                        queryParameters: {
-                          'sources': message.citationIds.join(','),
-                        },
-                      ).toString(),
-                    ),
-                    icon: const Icon(Icons.menu_book_outlined, size: 17),
-                    label: Text(
-                      '${intelligenceText(context, 'Source', 'المصدر')} '
-                      '(${message.citationIds.length})',
+    return CoachReplyArrival(
+      messageId: message.id,
+      animate: animateReveal,
+      child: Container(
+        key: ValueKey('ai-coach-reply-card-${message.id}'),
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(13),
+        decoration: BilPearlFinish.panel(
+          context,
+          radius: BorderRadius.circular(18),
+          shadow: false,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CoachMessageBody(
+                    text: message.text,
+                    presentation: message.presentation,
+                    archive:
+                        message.presentation == null &&
+                            message.presentationOwnerKey != null
+                        ? {'ownerKey': message.presentationOwnerKey}
+                        : null,
+                    expectedOwnerKey: expectedOwnerKey,
+                    ownerVisitIsCurrent: ownerVisitIsCurrent,
+                    copy: presentationCopy,
+                    textBuilder: (text) => CoachMessageText(
+                      key: ValueKey('coach-message-text-${message.id}'),
+                      text: text,
+                      createdAt: message.createdAt,
+                      textDirection: _messageTextDirection(text),
+                      style: _coachConversationBodyStyle(context),
+                      animateReveal: false,
+                      showTime: false,
                     ),
                   ),
-                if (onRetry != null) ...[
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      key: const Key('ai-coach-retry'),
-                      onPressed: onRetry,
-                      icon: const BilGlassPressFeedback(
-                        child: Icon(Icons.refresh_rounded, size: 18),
-                      ),
-                      label: Text(
-                        intelligenceText(context, 'Retry', 'إعادة المحاولة'),
-                      ),
-                    ),
-                  ),
-                ],
-                if (onUndo != null) ...[
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: OutlinedButton.icon(
-                      key: Key('ai-coach-undo-${message.id}'),
-                      onPressed: undoInProgress ? null : onUndo,
-                      icon: undoInProgress
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const BilGlassPressFeedback(
-                              child: Icon(Icons.undo_rounded, size: 18),
+                  ?richContent,
+                  const SizedBox(height: 4),
+                  Builder(
+                    builder: (context) {
+                      final actions = <Widget>[
+                        if (onSpeak != null)
+                          IconButton(
+                            key: Key('ai-coach-speak-${message.id}'),
+                            tooltip: intelligenceText(
+                              context,
+                              'Read answer aloud',
+                              'اقرأ الإجابة بصوت عالٍ',
                             ),
-                      label: Text(intelligenceText(context, 'Undo', 'تراجع')),
+                            onPressed: onSpeak,
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints.tightFor(
+                              width: 36,
+                              height: 36,
+                            ),
+                            icon: const Icon(Icons.volume_up_rounded, size: 19),
+                          ),
+                        if (onCopy != null)
+                          IconButton(
+                            key: Key('ai-coach-copy-${message.id}'),
+                            tooltip: intelligenceText(
+                              context,
+                              'Copy answer',
+                              'نسخ الرد',
+                            ),
+                            onPressed: onCopy,
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints.tightFor(
+                              width: 36,
+                              height: 36,
+                            ),
+                            icon: const Icon(Icons.copy_rounded, size: 18),
+                          ),
+                        if (onShare != null)
+                          Builder(
+                            builder: (anchor) => IconButton(
+                              key: Key('ai-coach-share-${message.id}'),
+                              tooltip: intelligenceText(
+                                context,
+                                'Share answer',
+                                'مشاركة الرد',
+                              ),
+                              onPressed: () => onShare!(anchor),
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints.tightFor(
+                                width: 36,
+                                height: 36,
+                              ),
+                              icon: const Icon(
+                                Icons.ios_share_rounded,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        if (onFeedback != null)
+                          _QuickFeedbackBar(
+                            messageId: message.id,
+                            value: feedbackValue,
+                            onChanged: onFeedback!,
+                            compact: true,
+                          ),
+                        if (onReport != null)
+                          IconButton(
+                            key: Key('ai-coach-report-${message.id}'),
+                            tooltip: intelligenceText(
+                              context,
+                              'Report answer',
+                              'الإبلاغ عن الإجابة',
+                            ),
+                            onPressed: reported
+                                ? null
+                                : () => showAiCoachAnswerReportSheet(
+                                    context,
+                                    onReport!,
+                                  ),
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints.tightFor(
+                              width: 36,
+                              height: 36,
+                            ),
+                            style: IconButton.styleFrom(
+                              foregroundColor: reported
+                                  ? scheme.error
+                                  : scheme.onSurfaceVariant,
+                              backgroundColor: reported
+                                  ? scheme.error.withValues(alpha: .14)
+                                  : Colors.transparent,
+                            ),
+                            icon: Icon(
+                              reported
+                                  ? Icons.flag_rounded
+                                  : Icons.flag_outlined,
+                              size: 18,
+                            ),
+                          ),
+                      ];
+                      final time = CoachMessageTime(
+                        createdAt: message.createdAt,
+                        style: _coachConversationActionStyle(
+                          context,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      );
+                      final textScale = MediaQuery.textScalerOf(
+                        context,
+                      ).scale(1);
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          if (constraints.maxWidth < 360 || textScale > 1.2) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: time,
+                                ),
+                                Align(
+                                  alignment: AlignmentDirectional.centerEnd,
+                                  child: Wrap(
+                                    alignment: WrapAlignment.end,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 2,
+                                    children: actions,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [time, const Spacer(), ...actions],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  if (message.citationIds.isNotEmpty)
+                    TextButton.icon(
+                      key: Key('ai-coach-health-sources-${message.id}'),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => context.push(
+                        Uri(
+                          path: '/health-information-sources',
+                          queryParameters: {
+                            'sources': message.citationIds.join(','),
+                          },
+                        ).toString(),
+                      ),
+                      icon: const Icon(Icons.menu_book_outlined, size: 17),
+                      label: Text(
+                        '${intelligenceText(context, 'Source', 'المصدر')} '
+                        '(${message.citationIds.length})',
+                      ),
                     ),
-                  ),
-                ],
-                if (trustedLinks.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final link in trustedLinks)
-                        ActionChip(
-                          key: Key(
-                            'ai-coach-link-${link.kind.name}-${link.id}',
-                          ),
-                          avatar: Icon(
-                            link.kind == IntelligenceMessageLinkKind.recipe
-                                ? Icons.restaurant_menu_rounded
-                                : Icons.play_circle_outline_rounded,
-                            size: 18,
-                          ),
-                          label: Text(link.label),
-                          tooltip: intelligenceText(
-                            context,
-                            'Open {label}',
-                            'افتح {label}',
-                          ).replaceAll('{label}', link.label),
-                          onPressed: () => context.push(link.route),
+                  if (onRetry != null) ...[
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(
+                        key: const Key('ai-coach-retry'),
+                        onPressed: onRetry,
+                        icon: const BilGlassPressFeedback(
+                          child: Icon(Icons.refresh_rounded, size: 18),
                         ),
-                    ],
-                  ),
-                ],
-                if (trustedActions.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final action in trustedActions)
-                        _CoachMessageActionControl(
-                          action: action,
-                          phase:
-                              actionPhases['${action.type.name}:${action.id}'] ??
-                              _CoachActionExecutionPhase.idle,
-                          onPressed: onAction == null
-                              ? null
-                              : () => onAction!(action.toAction()),
+                        label: Text(
+                          intelligenceText(context, 'Retry', 'إعادة المحاولة'),
                         ),
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
+                  if (onUndo != null) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: OutlinedButton.icon(
+                        key: Key('ai-coach-undo-${message.id}'),
+                        onPressed: undoInProgress ? null : onUndo,
+                        icon: undoInProgress
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const BilGlassPressFeedback(
+                                child: Icon(Icons.undo_rounded, size: 18),
+                              ),
+                        label: Text(intelligenceText(context, 'Undo', 'تراجع')),
+                      ),
+                    ),
+                  ],
+                  if (trustedLinks.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final link in trustedLinks)
+                          ActionChip(
+                            key: Key(
+                              'ai-coach-link-${link.kind.name}-${link.id}',
+                            ),
+                            avatar: Icon(
+                              link.kind == IntelligenceMessageLinkKind.recipe
+                                  ? Icons.restaurant_menu_rounded
+                                  : Icons.play_circle_outline_rounded,
+                              size: 18,
+                            ),
+                            label: Text(link.label),
+                            tooltip: intelligenceText(
+                              context,
+                              'Open {label}',
+                              'افتح {label}',
+                            ).replaceAll('{label}', link.label),
+                            onPressed: () => context.push(link.route),
+                          ),
+                      ],
+                    ),
+                  ],
+                  if (trustedActions.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final action in trustedActions)
+                          _CoachMessageActionControl(
+                            action: action,
+                            phase:
+                                actionPhases['${action.type.name}:${action.id}'] ??
+                                _CoachActionExecutionPhase.idle,
+                            onPressed: onAction == null
+                                ? null
+                                : () => onAction!(action.toAction()),
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -357,67 +468,6 @@ class _CoachMessageActionControl extends StatelessWidget {
   }
 }
 
-Future<void> _showAiAnswerReportSheet(
-  BuildContext context,
-  ValueChanged<String> onReport,
-) async {
-  await showModalBottomSheet<void>(
-    context: context,
-    useSafeArea: true,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (sheetContext) => SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            intelligenceText(
-              sheetContext,
-              'Report this AI answer?',
-              'الإبلاغ عن إجابة الذكاء الاصطناعي؟',
-            ),
-            style: Theme.of(
-              sheetContext,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            intelligenceText(
-              sheetContext,
-              'Use this for unsafe, offensive, hateful, sexual, deceptive, or otherwise harmful content. BIL records the response ID and safety category, not your question or the answer text.',
-              'استخدم هذا للمحتوى غير الآمن أو المسيء أو الذي يحض على الكراهية أو الجنسي أو المخادع أو الضار. يسجل BIL معرّف الرد وفئة السلامة فقط، وليس سؤالك أو نص الإجابة.',
-            ),
-          ),
-          const SizedBox(height: 22),
-          FilledButton.icon(
-            key: const Key('ai-coach-confirm-report'),
-            onPressed: () {
-              Navigator.of(sheetContext).pop();
-              onReport('unsafe');
-            },
-            icon: const Icon(Icons.flag_rounded),
-            label: Text(
-              intelligenceText(
-                sheetContext,
-                'Report unsafe or offensive answer',
-                'الإبلاغ عن إجابة غير آمنة أو مسيئة',
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(sheetContext).pop(),
-            child: Text(
-              MaterialLocalizations.of(sheetContext).cancelButtonLabel,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
 TextDirection _messageTextDirection(String text) {
   for (final rune in text.runes) {
     final rtl =
@@ -439,11 +489,13 @@ TextDirection _messageTextDirection(String text) {
 
 class _QuickFeedbackBar extends StatelessWidget {
   const _QuickFeedbackBar({
+    required this.messageId,
     required this.value,
     required this.onChanged,
     this.compact = false,
   });
 
+  final String messageId;
   final bool? value;
   final ValueChanged<bool> onChanged;
   final bool compact;
@@ -457,12 +509,14 @@ class _QuickFeedbackBar extends StatelessWidget {
           selected: value == true,
           positive: true,
           compact: compact,
+          messageId: messageId,
           onTap: () => onChanged(true),
         ),
         _FeedbackReaction(
           selected: value == false,
           positive: false,
           compact: compact,
+          messageId: messageId,
           onTap: () => onChanged(false),
         ),
       ],
@@ -475,63 +529,70 @@ class _FeedbackReaction extends StatelessWidget {
     required this.selected,
     required this.positive,
     required this.compact,
+    required this.messageId,
     required this.onTap,
   });
 
   final bool selected;
   final bool positive;
   final bool compact;
+  final String messageId;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final selectedColor = positive ? scheme.primary : scheme.error;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: intelligenceText(
+    final emojiFontFamily = switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => 'Apple Color Emoji',
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux => 'Noto Color Emoji',
+      TargetPlatform.windows => 'Segoe UI Emoji',
+    };
+    final selectedColor = positive
+        ? BilFlagshipTokens.emerald500
+        : scheme.error;
+    final dimension = compact ? 36.0 : 44.0;
+    return IconButton(
+      key: Key(
+        'ai-coach-feedback-${positive ? 'helpful' : 'not-helpful'}-$messageId',
+      ),
+      tooltip: intelligenceText(
         context,
         positive ? 'Helpful' : 'Not helpful',
         positive ? 'مفيد' : 'غير مفيد',
       ),
-      child: Tooltip(
-        message: intelligenceText(
-          context,
-          positive ? 'Helpful' : 'Not helpful',
-          positive ? 'مفيد' : 'غير مفيد',
-        ),
-        child: InkWell(
-          onTap: () {
-            unawaited(HapticFeedback.selectionClick());
-            onTap();
-          },
-          customBorder: const CircleBorder(),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selected
-                  ? selectedColor.withValues(alpha: .14)
-                  : Colors.transparent,
-            ),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 150),
-              child: Icon(
-                positive
-                    ? selected
-                          ? Icons.thumb_up_alt_rounded
-                          : Icons.thumb_up_alt_outlined
-                    : selected
-                    ? Icons.thumb_down_alt_rounded
-                    : Icons.thumb_down_alt_outlined,
-                key: ValueKey((positive, selected)),
-                size: compact ? 18 : 20,
-                color: selected ? selectedColor : scheme.onSurfaceVariant,
-              ),
-            ),
+      isSelected: selected,
+      onPressed: () {
+        unawaited(HapticFeedback.selectionClick());
+        onTap();
+      },
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: BoxConstraints.tightFor(width: dimension, height: dimension),
+      style: IconButton.styleFrom(
+        foregroundColor: selectedColor,
+        backgroundColor: selectedColor.withValues(alpha: selected ? .20 : .09),
+        shape: const CircleBorder(),
+        overlayColor: selectedColor.withValues(alpha: .12),
+      ),
+      iconSize: compact ? 18 : 20,
+      icon: AnimatedScale(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        scale: selected ? 1.08 : 1,
+        child: Text(
+          positive ? '👍' : '👎',
+          textScaler: TextScaler.noScaling,
+          style: TextStyle(
+            fontSize: 20,
+            height: 1,
+            fontFamily: emojiFontFamily,
+            fontFamilyFallback: const <String>[
+              'Segoe UI Emoji',
+              'Apple Color Emoji',
+              'Noto Color Emoji',
+            ],
           ),
         ),
       ),

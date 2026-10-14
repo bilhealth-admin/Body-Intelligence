@@ -1,0 +1,23 @@
+{
+  "label": "gold-refresh-retry-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/community/community_code_invite_earn_account_test.dart",
+    "--plain-name",
+    "same-account failed Gold refresh retains its verified balance and exposes retry"
+  ],
+  "started_utc": "2026-10-13T07:51:39.771725+00:00",
+  "runner_pid": 24264,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917",
+  "fingerprint_version": 4,
+  "pid": 9476
+}

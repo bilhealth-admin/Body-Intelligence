@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import time
+import threading
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +21,15 @@ def main():
     parser.add_argument('--flutter', required=True)
     parser.add_argument('--label', required=True)
     args = parser.parse_args()
+    if os.name == 'nt':
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL('kernel32')
+        user = ctypes.WinDLL('user32')
+        kernel.GetConsoleWindow.restype = wintypes.HWND
+        user.IsWindowVisible.argtypes = [wintypes.HWND]
+        if not user.IsWindowVisible(kernel.GetConsoleWindow()):
+            parser.error('A visible native console is required for this test cycle.')
     if not args.label.replace('-', '').isalnum(): parser.error('plain label required')
     out = ROOT/'build/cloud-restore-v2'/args.label
     out.mkdir(parents=True, exist_ok=False)
@@ -45,15 +55,34 @@ def main():
                        str(flutter_bin/'cache/flutter_tools.snapshot'),'test','--no-pub','--concurrency=1',
                        '--timeout=5m','--reporter=json','tools/qa/flutter/cloud_restore_postgres_cycle_test.dart']
             record['command'] = command
-            with (out/'flutter.log').open('wb') as result:
-                process = subprocess.Popen(command,cwd=ROOT,env=environment,stdout=result,stderr=subprocess.STDOUT)
+            with (out/'flutter.log').open('w',encoding='utf-8') as result:
+                process = subprocess.Popen(command,cwd=ROOT,env=environment,
+                    stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,
+                    encoding='utf-8',errors='replace',bufsize=1)
                 record['pid'] = process.pid
                 (out/'result.json').write_text(json.dumps(record,indent=2),encoding='utf-8')
-                try: record['exit_code'] = process.wait(timeout=600)
-                except subprocess.TimeoutExpired:
-                    subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],capture_output=True)
-                    record['exit_code'] = 124
+                def bound_owned_child():
+                    if process.poll() is not None: return
                     record['wall_timeout'] = True
+                    if os.name == 'nt':
+                        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],capture_output=True)
+                    else:
+                        process.terminate()
+                deadline = threading.Timer(600,bound_owned_child)
+                deadline.daemon = True
+                deadline.start()
+                try:
+                    # The visible parent renders each Flutter JSON test event.
+                    # The original private log keeps the same complete stream.
+                    for line in process.stdout:
+                        result.write(line)
+                        result.flush()
+                        print(line,end='',flush=True)
+                    record['exit_code'] = process.wait()
+                    if record.get('wall_timeout'): record['exit_code'] = 124
+                finally:
+                    deadline.cancel()
+            protocol_success = None
             outcomes, errors, started, done = [], [], {}, set()
             for line in (out/'flutter.log').read_text(encoding='utf-8',errors='replace').splitlines():
                 try: event=json.loads(line)
@@ -63,10 +92,15 @@ def main():
                 if event.get('type')=='testStart': started[event['test']['id']]=event['test']['name']
                 if event.get('type')=='testDone': done.add(event['testID'])
                 if event.get('type')=='error': errors.append(event)
+                if event.get('type')=='done': protocol_success = event.get('success')
+            record['protocol_success'] = protocol_success
             record['counts']={x:outcomes.count(x) for x in ['success','failure','error','skip']}
             record['errors']=errors
             record['incomplete_tests']=[name for key,name in started.items() if key not in done]
-            if not outcomes and record['exit_code']==0: record['exit_code']=79
+            if record['exit_code']==0 and (
+                not outcomes or protocol_success is not True or errors or
+                record['incomplete_tests'] or any(x != 'success' for x in outcomes)
+            ): record['exit_code']=79
         finally:
             if config.exists():
                 request=urllib.request.Request(json.loads(config.read_text())['url']+'/__test__/shutdown',data=b'',method='POST')
@@ -78,6 +112,7 @@ def main():
     record['finished']=time.time()
     record['end_fingerprint']=focused.fingerprint()
     record['stable_source']=record['end_fingerprint']==record['source_fingerprint']
+    if not record['stable_source'] and record['exit_code']==0: record['exit_code']=79
     (out/'result.json').write_text(json.dumps(record,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({k:record[k] for k in ['exit_code','counts','stable_source']},ensure_ascii=False))
     return record['exit_code']

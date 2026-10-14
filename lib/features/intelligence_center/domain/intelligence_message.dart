@@ -1,5 +1,6 @@
 import '../../../core/health_evidence/health_evidence_catalog.dart';
 import 'bil_navigation_registry.dart';
+import 'coach_message_presentation.dart';
 import 'coach_action_admission.dart';
 import 'intelligence_action.dart';
 import '../settings_commands/coach_settings_tool_catalog.dart';
@@ -470,6 +471,8 @@ class IntelligenceMessage {
     this.modality = IntelligenceMessageModality.text,
     this.links = const <IntelligenceMessageLink>[],
     this.actionLinks = const <IntelligenceMessageAction>[],
+    this.presentation,
+    this.archivedPresentationOwnerKey,
   });
 
   final String id;
@@ -488,6 +491,12 @@ class IntelligenceMessage {
   final List<IntelligenceMessageLink> links;
   final List<IntelligenceMessageAction> actionLinks;
 
+  /// Optional local display/archive facts, excluded from remote AI context.
+  final CoachMessagePresentation? presentation;
+  final String? archivedPresentationOwnerKey;
+  String? get presentationOwnerKey =>
+      presentation?.ownerKey ?? archivedPresentationOwnerKey;
+
   IntelligenceMessage copyWith({
     IntelligenceMessageRole? role,
     IntelligenceMessageKind? kind,
@@ -503,6 +512,8 @@ class IntelligenceMessage {
     IntelligenceMessageModality? modality,
     List<IntelligenceMessageLink>? links,
     List<IntelligenceMessageAction>? actionLinks,
+    CoachMessagePresentation? presentation,
+    String? archivedPresentationOwnerKey,
   }) => IntelligenceMessage(
     id: id,
     role: role ?? this.role,
@@ -519,9 +530,15 @@ class IntelligenceMessage {
     modality: modality ?? this.modality,
     links: links ?? this.links,
     actionLinks: actionLinks ?? this.actionLinks,
+    presentation: presentation ?? this.presentation,
+    archivedPresentationOwnerKey:
+        archivedPresentationOwnerKey ?? this.archivedPresentationOwnerKey,
   );
 
   Map<String, Object?> toJson() => {
+    if (presentation != null) 'localPresentation': presentation!.toJson(),
+    if (presentation == null && archivedPresentationOwnerKey != null)
+      'localPresentation': {'ownerKey': archivedPresentationOwnerKey},
     'id': id,
     'role': role.name,
     'kind': kind.name,
@@ -542,47 +559,57 @@ class IntelligenceMessage {
         .toList(growable: false),
   };
 
-  factory IntelligenceMessage.fromJson(Map<String, Object?> json) =>
-      IntelligenceMessage(
-        id: json['id'] as String,
-        role: IntelligenceMessageRole.values.byName(json['role'] as String),
-        kind: IntelligenceMessageKind.values.byName(json['kind'] as String),
-        text: json['text'] as String,
-        createdAt: DateTime.parse(json['createdAt'] as String),
-        evidence: (json['evidence'] as List<Object?>? ?? const [])
-            .whereType<String>()
-            .toList(growable: false),
-        citationIds: HealthEvidenceCatalog.validateIds(
-          json['citationIds'] is List
-              ? json['citationIds']! as List
-              : const <Object?>[],
-        ),
-        confidence: (json['confidence'] as num?)?.toDouble(),
-        actionId: json['actionId'] as String?,
-        memoryCandidate: json['memoryCandidate'] as String?,
-        reason: json['reason'] as String?,
-        missingData: (json['missingData'] as List<Object?>? ?? const [])
-            .whereType<String>()
-            .toList(growable: false),
-        modality: IntelligenceMessageModality.values.firstWhere(
-          (value) => value.name == json['modality'],
-          orElse: () => IntelligenceMessageModality.text,
-        ),
-        links: (json['links'] as List<Object?>? ?? const <Object?>[])
-            .whereType<Map>()
-            .map(
-              (value) => IntelligenceMessageLink.fromJson(
-                Map<String, Object?>.from(value),
-              ),
-            )
-            .where((link) => link.isTrustedLocalRoute)
-            .toList(growable: false),
-        // Missing actionLinks is the V1 conversation shape and intentionally
-        // migrates to an empty list. `suggestedActions` is accepted as a
-        // short-lived pre-release alias so no tester transcript is lost.
-        actionLinks: _decodeMessageActionLinks(
-          json['actionLinks'] ?? json['suggestedActions'],
-          '${json['id']}:${json['createdAt']}',
-        ),
-      );
+  factory IntelligenceMessage.fromJson(Map<String, Object?> json) {
+    final raw = json['localPresentation'];
+    final rawOwner = raw is Map ? raw['ownerKey'] : null;
+    final owner = rawOwner is String && rawOwner.isNotEmpty ? rawOwner : null;
+    // Structural parsing preserves ownership. Real visit checked before output.
+    final visual = owner == null
+        ? null
+        : CoachMessagePresentation.tryFromArchive(raw, expectedOwnerKey: owner);
+    return IntelligenceMessage(
+      presentation: visual,
+      archivedPresentationOwnerKey: owner,
+      id: json['id'] as String,
+      role: IntelligenceMessageRole.values.byName(json['role'] as String),
+      kind: IntelligenceMessageKind.values.byName(json['kind'] as String),
+      text: json['text'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      evidence: (json['evidence'] as List<Object?>? ?? const [])
+          .whereType<String>()
+          .toList(growable: false),
+      citationIds: HealthEvidenceCatalog.validateIds(
+        json['citationIds'] is List
+            ? json['citationIds']! as List
+            : const <Object?>[],
+      ),
+      confidence: (json['confidence'] as num?)?.toDouble(),
+      actionId: json['actionId'] as String?,
+      memoryCandidate: json['memoryCandidate'] as String?,
+      reason: json['reason'] as String?,
+      missingData: (json['missingData'] as List<Object?>? ?? const [])
+          .whereType<String>()
+          .toList(growable: false),
+      modality: IntelligenceMessageModality.values.firstWhere(
+        (value) => value.name == json['modality'],
+        orElse: () => IntelligenceMessageModality.text,
+      ),
+      links: (json['links'] as List<Object?>? ?? const <Object?>[])
+          .whereType<Map>()
+          .map(
+            (value) => IntelligenceMessageLink.fromJson(
+              Map<String, Object?>.from(value),
+            ),
+          )
+          .where((link) => link.isTrustedLocalRoute)
+          .toList(growable: false),
+      // Missing actionLinks is the V1 conversation shape and intentionally
+      // migrates to an empty list. `suggestedActions` is accepted as a
+      // short-lived pre-release alias so no tester transcript is lost.
+      actionLinks: _decodeMessageActionLinks(
+        json['actionLinks'] ?? json['suggestedActions'],
+        '${json['id']}:${json['createdAt']}',
+      ),
+    );
+  }
 }

@@ -37,8 +37,76 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
       }
       _refreshCommittedCoachNative(result.kind);
       _syncCommittedCoachMemory(prepared, result, undo: false);
+      final measurementReceipt =
+          result.kind == CoachNativeCommandKind.weight ||
+          result.kind == CoachNativeCommandKind.measurements;
+      CoachMessagePresentation? presentation;
+      if (measurementReceipt &&
+          result.state == CoachNativeResultState.committed) {
+        final copy = CoachMessagePlainCopy(
+          context,
+          system:
+              ref.read(measurementSystemProvider).value ??
+              MeasurementSystem.metric,
+        );
+        CoachHealthReadGuard? previousReadGuard;
+        try {
+          try {
+            previousReadGuard = await CoachHealthReadGuard.capture(
+              preferences: prepared.repository.preferences,
+              focus: CoachContextFocus.analytics,
+              checkOwner: () => prepared.scope.check(
+                prepared.database.localOwnerId,
+                committed: true,
+              ),
+            );
+          } on CoachHealthContextUnavailable {
+            // Explicitly disabled analytics does not hide the current saved
+            // receipt or change write permission. Only omit prior history.
+          }
+          presentation =
+              await CoachVerifiedMessageProjection(
+                prepared.database,
+                clock: ref.read(intelligenceConversationClockProvider),
+              ).committedMeasurement(
+                result,
+                checkAccess: () => prepared.scope.check(
+                  prepared.database.localOwnerId,
+                  committed: true,
+                ),
+                savedNote: result.kind == CoachNativeCommandKind.weight
+                    ? tr('Weight saved.', 'تم حفظ الوزن.')
+                    : tr('Body measurements saved.', 'تم حفظ قياسات الجسم.'),
+                previousReadGuard: previousReadGuard,
+                previousWeightNote: copy.previousWeightNote,
+                previousMeasurementNote: copy.previousMeasurementNote,
+              );
+          // Verify outside the SQLite read transaction as well, so a queued
+          // preference revoke cannot be hidden by its earlier read snapshot.
+          await previousReadGuard?.verify();
+        } on Object {
+          presentation = null;
+          // Display enrichment cannot roll back or repeat a committed command.
+          // A withdrawn history guard must not leave a previously assigned
+          // comparison visible. The original current receipt stays available.
+        } finally {
+          // Match the existing health-read lifecycle: subscription cleanup
+          // cannot turn a verified save into another failed/retried command.
+          unawaited(previousReadGuard?.close().catchError((Object _) {}));
+        }
+      }
+      if (!mounted ||
+          conversationPersistenceEpoch != prepared.conversationEpoch ||
+          !prepared.scope.isCurrent) {
+        return true;
+      }
+      prepared.scope.check(prepared.database.localOwnerId, committed: true);
       _appendToolReceipt(
         _coachNativeResultText(result),
+        presentation: presentation,
+        presentationOwnerKey: measurementReceipt
+            ? LocalDatabaseScope.keyForOwner(prepared.database.localOwnerId)
+            : null,
         receipt: _coachNativeReceipt(action.id, result),
         undoReadback: result.canUndo
             ? (checkWritePermission) async {

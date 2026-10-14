@@ -79,6 +79,9 @@ void main() {
       final captureActions = File(
         'lib/features/daily_log/daily_log_capture_actions.dart',
       ).readAsStringSync();
+      final accessOffer = File(
+        'lib/features/commerce/presentation/optional_access_offer.dart',
+      ).readAsStringSync();
       expect(page, contains("case 'photo':"));
       expect(
         page,
@@ -88,7 +91,15 @@ void main() {
       );
       expect(captureActions, contains('aiBoostVisionAccessProvider.future'));
       expect(captureActions, contains('hasVisionTokens'));
-      expect(captureActions, contains("context.push('/plans?focus=boost')"));
+      expect(
+        captureActions,
+        contains('await explainVisionAccess(context, ref);'),
+      );
+      expect(accessOffer, contains("focus: 'boost'"));
+      expect(
+        accessOffer,
+        contains("push('/plans?focus=\${Uri.encodeQueryComponent(focus)}')"),
+      );
       expect(captureActions, contains('showModalBottomSheet<ImageSource>'));
       expect(captureActions, contains('ImageSource.camera'));
       expect(captureActions, contains('ImageSource.gallery'));

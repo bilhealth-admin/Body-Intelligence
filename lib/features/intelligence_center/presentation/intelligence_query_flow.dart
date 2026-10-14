@@ -140,6 +140,11 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       // clarification) must not be eaten by Food V2's generic "log"/"سجل"
       // prefix. Both hosts validate their own payload and ask for human review;
       // do not let the food host reinterpret exercise duration as a portion.
+      localHealthHandled = await _tryCoachMealRead(
+        text,
+        locale: questionLocale,
+      );
+      if (localHealthHandled) return;
       localHealthHandled = await _answerLocalHealthIntent(
         text,
         locale: questionLocale,
@@ -204,6 +209,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               )
             : immediateEngine;
         final conversation = messages
+            // Local render facts do not silently extend cloud/history context.
+            .where((message) => message.presentationOwnerKey == null)
             .map(
               (message) => CoachConversationTurn(
                 role: message.role == IntelligenceMessageRole.user
@@ -255,6 +262,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         );
         final conversation = messages
             .take(messages.length)
+            .where((message) => message.presentationOwnerKey == null)
             .map(
               (message) => CoachConversationTurn(
                 role: message.role == IntelligenceMessageRole.user
@@ -620,56 +628,87 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     }
     consentPromptVisible = true;
     try {
-      final enabled = await showBilPremiumAiConsentSheet(
-        context: context,
-        title: tr(
-          'Send selected personal data to Google Gemini?',
-          'إرسال بيانات شخصية محددة إلى Google Gemini؟',
-        ),
-        intro: tr(
-          'BIL uses Google Gemini, a third-party AI service operated by Google, only to generate the answer you request.',
-          'يستخدم BIL خدمة Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، فقط لإنشاء الإجابة التي تطلبها.',
-        ),
-        points: [
-          BilPremiumAiConsentPoint(
-            icon: Icons.tune_rounded,
-            title: tr('Only the context you choose', 'فقط السياق الذي تختاره'),
-            body: tr(
-              'Your question; selected weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns.',
-              'سؤالك؛ وما تختاره من الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 رسالة.',
-            ),
-          ),
-          BilPremiumAiConsentPoint(
-            icon: Icons.mic_off_rounded,
+      final client = Supabase.instance.client;
+      final owner = client.auth.currentUser?.id;
+      final database = ref.read(databaseProvider);
+      final preferences = ref.read(preferencesRepositoryProvider);
+      final generation = requestGeneration;
+      final epoch = conversationPersistenceEpoch;
+      final conversationId = activeConversationId;
+      if (owner == null || database.localOwnerId != owner) {
+        return _RemoteAiConsentChoice.failed;
+      }
+      return await CommunityOwnerOperation.run<_RemoteAiConsentChoice>(
+        client: client,
+        ownerId: owner,
+        isCurrentOwner: () =>
+            mounted &&
+            identical(Supabase.instance.client, client) &&
+            generation == requestGeneration &&
+            epoch == conversationPersistenceEpoch &&
+            conversationId == activeConversationId &&
+            identical(ref.read(databaseProvider), database) &&
+            identical(ref.read(preferencesRepositoryProvider), preferences) &&
+            identical(conversationPreferences, preferences),
+        action: (ownerVisit) async {
+          final enabled = await showBilPremiumAiConsentSheet(
+            context: context,
             title: tr(
-              'Raw microphone audio is not sent',
-              'لا يتم إرسال صوت الميكروفون الخام',
+              'Send selected personal data to Google Gemini?',
+              'إرسال بيانات شخصية محددة إلى Google Gemini؟',
             ),
-            body: tr(
-              'Voice recognition stays separate from this Remote AI consent.',
-              'يبقى التعرف على الصوت منفصلًا عن موافقة الذكاء الاصطناعي عن بُعد.',
+            intro: tr(
+              'BIL uses Google Gemini, a third-party AI service operated by Google, only to generate the answer you request.',
+              'يستخدم BIL خدمة Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، فقط لإنشاء الإجابة التي تطلبها.',
             ),
-          ),
-          BilPremiumAiConsentPoint(
-            icon: Icons.verified_user_outlined,
-            title: tr('You stay in control', 'التحكم يبقى بيدك'),
-            body: tr(
-              'You can decline and keep using local BIL features, or withdraw this consent later in AI Coach settings.',
-              'يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، أو سحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
-            ),
-          ),
-        ],
-        allowLabel: tr('Allow & Continue', 'السماح والمتابعة'),
-        declineLabel: tr("Don't Allow", 'عدم السماح'),
-        allowKey: const Key('ai-coach-remote-consent-accept'),
-        declineKey: const Key('ai-coach-remote-consent-decline'),
+            points: [
+              BilPremiumAiConsentPoint(
+                icon: Icons.tune_rounded,
+                title: tr(
+                  'Only the context you choose',
+                  'فقط السياق الذي تختاره',
+                ),
+                body: tr(
+                  'Your question; selected weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns.',
+                  'سؤالك؛ وما تختاره من الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 رسالة.',
+                ),
+              ),
+              BilPremiumAiConsentPoint(
+                icon: Icons.mic_off_rounded,
+                title: tr(
+                  'Your platform handles speech recognition',
+                  'يتولى جهازك أو نظامه التعرّف على الكلام',
+                ),
+                body: tr(
+                  'Your device or platform speech service may process microphone audio under its own terms. When you submit a Coach request, BIL sends Gemini only recognized text, never raw microphone audio.',
+                  'قد تعالج خدمة التعرّف على الكلام في جهازك أو منصتك صوت الميكروفون وفق شروطها. عند إرسال طلب إلى Coach، يرسل BIL إلى Gemini النص المتعرّف عليه فقط، ولا يرسل صوت الميكروفون الخام.',
+                ),
+              ),
+              BilPremiumAiConsentPoint(
+                icon: Icons.verified_user_outlined,
+                title: tr('You stay in control', 'التحكم يبقى بيدك'),
+                body: tr(
+                  'You can decline and keep using local BIL features, or withdraw this consent later in AI Coach settings.',
+                  'يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، أو سحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
+                ),
+              ),
+            ],
+            allowLabel: tr('Allow & Continue', 'السماح والمتابعة'),
+            declineLabel: tr("Don't Allow", 'عدم السماح'),
+            allowKey: const Key('ai-coach-remote-consent-accept'),
+            declineKey: const Key('ai-coach-remote-consent-decline'),
+          );
+          ownerVisit.check();
+          if (enabled != true) return _RemoteAiConsentChoice.declined;
+          final verified = await sharedRemoteAiConsentCoordinator(
+            client,
+          ).grantAndVerify();
+          ownerVisit.check();
+          return verified
+              ? _RemoteAiConsentChoice.granted
+              : _RemoteAiConsentChoice.failed;
+        },
       );
-      if (enabled != true) return _RemoteAiConsentChoice.declined;
-      final verified = await sharedRemoteAiConsentCoordinator()
-          .grantAndVerify();
-      return verified
-          ? _RemoteAiConsentChoice.granted
-          : _RemoteAiConsentChoice.failed;
     } on Object {
       return _RemoteAiConsentChoice.failed;
     } finally {

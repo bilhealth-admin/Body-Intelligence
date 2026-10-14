@@ -59,6 +59,9 @@ void main() {
         final repository = RecipeReleaseRepository();
         final loader = BundledRecipeThumbnailManifestLoader();
         final cache = _RecordingMediaResolver((asset, {required online}) async {
+          if (asset.mimeType != 'image/webp') {
+            return const WellnessMediaCacheResult.unavailableOffline();
+          }
           return WellnessMediaCacheResult.ready(
             File('${asset.sha256}.webp'),
             fromCache: true,
@@ -83,10 +86,10 @@ void main() {
           manifest.sourceImageManifestSha256,
           await repository.loadImageManifestSha256(),
         );
-        expect(cache.assets, hasLength(1));
-        expect(cache.assets.single.mimeType, 'image/webp');
+        expect(cache.assets, hasLength(2));
+        expect(cache.assets.last.mimeType, 'image/webp');
         expect(
-          cache.assets.single.url.path,
+          cache.assets.last.url.path,
           startsWith('/v4/recipes/thumbnails/aji-gallina-ligero/'),
         );
       },
@@ -100,6 +103,9 @@ void main() {
         digest: _digest('3'),
       );
       final cache = _RecordingMediaResolver((asset, {required online}) async {
+        if (asset.sha256 == original.sha256 && !online) {
+          return const WellnessMediaCacheResult.unavailableOffline();
+        }
         return WellnessMediaCacheResult.ready(
           File('thumbnail.webp'),
           fromCache: false,
@@ -120,13 +126,13 @@ void main() {
 
       expect(result.isReady, isTrue);
       expect(detailResult.isReady, isTrue);
-      expect(cache.assets, hasLength(2));
-      expect(cache.assets.first.sha256, thumbnail.asset.sha256);
-      expect(cache.assets.first.mimeType, 'image/webp');
-      expect(cache.assets.last.sha256, original.sha256);
-      expect(cache.assets.last.mimeType, original.mimeType);
-      expect(cache.assets.last.url.path, contains('/v3/recipes/images/'));
-      expect(cache.onlineValues, [isTrue, isTrue]);
+      expect(cache.assets, hasLength(3));
+      expect(cache.assets[1].sha256, thumbnail.asset.sha256);
+      expect(cache.assets[1].mimeType, 'image/webp');
+      expect(cache.assets[2].sha256, original.sha256);
+      expect(cache.assets[2].mimeType, original.mimeType);
+      expect(cache.assets[2].url.path, contains('/v3/recipes/images/'));
+      expect(cache.onlineValues, [isFalse, isTrue, isTrue]);
       expect(loader.calls, 1);
     });
 
@@ -138,6 +144,9 @@ void main() {
         digest: _digest('3'),
       );
       final cache = _RecordingMediaResolver((asset, {required online}) async {
+        if (asset.sha256 == original.sha256 && !online) {
+          return const WellnessMediaCacheResult.unavailableOffline();
+        }
         if (asset.sha256 == thumbnail.asset.sha256) {
           throw const FormatException('corrupt thumbnail');
         }
@@ -158,14 +167,48 @@ void main() {
 
       expect(result.isReady, isTrue);
       expect(cache.assets.map((asset) => asset.sha256), [
+        original.sha256,
         thumbnail.asset.sha256,
         original.sha256,
       ]);
       expect(cache.assets.last.url.path, original.url.path);
       expect(cache.assets.last.mimeType, original.mimeType);
+      expect(cache.onlineValues, [isFalse, isTrue, isTrue]);
     });
 
-    test('falls back offline when the thumbnail is not cached', () async {
+    test(
+      'uses a ready cached v3 original without waiting for thumbnails',
+      () async {
+        final original = _original('recipe-one', _digest('1'));
+        final thumbnail = _thumbnail(
+          'recipe-one',
+          sourceSha256: original.sha256,
+          digest: _digest('3'),
+        );
+        final cache = _RecordingMediaResolver((asset, {required online}) async {
+          return WellnessMediaCacheResult.ready(
+            File('cached-original.jpg'),
+            fromCache: true,
+          );
+        });
+        final loader = _FakeThumbnailLoader(_thumbnailManifest([thumbnail]));
+        final client = RecipeImageDeliveryClient(
+          repository: _FakeImageCatalog([original]),
+          cache: cache,
+          thumbnailManifestLoader: loader,
+        );
+
+        final result = await client.resolve('recipe-one', online: false);
+
+        expect(result.isReady, isTrue);
+        expect(result.fromCache, isTrue);
+        expect(cache.onlineValues, [isFalse]);
+        expect(cache.assets.map((asset) => asset.sha256), [original.sha256]);
+        expect(loader.calls, 0);
+      },
+    );
+
+    test('uses a cached v4 thumbnail offline when v3 is not cached', () async {
       final original = _original('recipe-one', _digest('1'));
       final thumbnail = _thumbnail(
         'recipe-one',
@@ -173,11 +216,11 @@ void main() {
         digest: _digest('3'),
       );
       final cache = _RecordingMediaResolver((asset, {required online}) async {
-        if (asset.sha256 == thumbnail.asset.sha256) {
+        if (asset.mimeType != 'image/webp') {
           return const WellnessMediaCacheResult.unavailableOffline();
         }
         return WellnessMediaCacheResult.ready(
-          File('cached-original.jpg'),
+          File('cached-thumbnail.webp'),
           fromCache: true,
         );
       });
@@ -193,11 +236,12 @@ void main() {
 
       expect(result.isReady, isTrue);
       expect(result.fromCache, isTrue);
-      expect(cache.onlineValues, [isFalse, isFalse]);
+      expect(result.file?.path, 'cached-thumbnail.webp');
       expect(cache.assets.map((asset) => asset.sha256), [
-        thumbnail.asset.sha256,
         original.sha256,
+        thumbnail.asset.sha256,
       ]);
+      expect(cache.onlineValues, [isFalse, isFalse]);
     });
 
     test(
@@ -209,7 +253,11 @@ void main() {
           sourceSha256: _digest('9'),
           digest: _digest('3'),
         );
+        final loader = _FakeThumbnailLoader(_thumbnailManifest([thumbnail]));
         final cache = _RecordingMediaResolver((asset, {required online}) async {
+          if (asset.sha256 == original.sha256 && !online) {
+            return const WellnessMediaCacheResult.unavailableOffline();
+          }
           return WellnessMediaCacheResult.ready(
             File('original.jpg'),
             fromCache: true,
@@ -218,16 +266,18 @@ void main() {
         final client = RecipeImageDeliveryClient(
           repository: _FakeImageCatalog([original]),
           cache: cache,
-          thumbnailManifestLoader: _FakeThumbnailLoader(
-            _thumbnailManifest([thumbnail]),
-          ),
+          thumbnailManifestLoader: loader,
         );
 
         await client.resolve('recipe-one', online: true);
 
-        expect(cache.assets, hasLength(1));
-        expect(cache.assets.single.sha256, original.sha256);
-        expect(cache.assets.single.url.path, contains('/v3/recipes/images/'));
+        expect(cache.assets, hasLength(2));
+        expect(cache.assets.map((asset) => asset.sha256), [
+          original.sha256,
+          original.sha256,
+        ]);
+        expect(cache.assets.last.url.path, contains('/v3/recipes/images/'));
+        expect(loader.calls, 1);
       },
     );
 
@@ -253,6 +303,9 @@ void main() {
         final catalog = _FakeImageCatalog(originals);
         final loader = _FakeThumbnailLoader(_thumbnailManifest(thumbnails));
         final cache = _RecordingMediaResolver((asset, {required online}) async {
+          if (asset.mimeType != 'image/webp' && !online) {
+            return const WellnessMediaCacheResult.unavailableOffline();
+          }
           return WellnessMediaCacheResult.ready(
             File('${asset.sha256}.webp'),
             fromCache: true,
@@ -273,7 +326,10 @@ void main() {
         expect(catalog.allAssetsCalls, 1);
         expect(catalog.manifestShaCalls, 1);
         expect(
-          cache.assets.map((asset) => asset.sha256).toSet(),
+          cache.assets
+              .where((asset) => asset.mimeType == 'image/webp')
+              .map((asset) => asset.sha256)
+              .toSet(),
           thumbnails.map((entry) => entry.asset.sha256).toSet(),
         );
       },

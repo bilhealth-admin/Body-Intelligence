@@ -1,0 +1,59 @@
+[
+  {
+    "label": "final-full-dart-format-check",
+    "kind": "check",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "format",
+      "--output=none",
+      "--set-exit-if-changed",
+      "integration_test",
+      "lib",
+      "test",
+      "test_driver",
+      "tool",
+      "tools"
+    ]
+  },
+  {
+    "label": "final-deno-format-check",
+    "kind": "check",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "fmt",
+      "--check",
+      "supabase/functions/ai-coach/server.ts",
+      "supabase/functions/ai-coach/server_test.ts"
+    ]
+  },
+  {
+    "label": "final-python-compilation",
+    "kind": "check",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "-m",
+      "py_compile",
+      "tools/qa/bil_owner_full_test_runner.py",
+      "tools/qa/test_bil_owner_full_test_runner.py"
+    ]
+  },
+  {
+    "label": "final-full-flutter-analyze",
+    "kind": "check",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "--verbose",
+      "analyze",
+      "--no-pub",
+      "--fatal-infos",
+      "--fatal-warnings",
+      "--protocol-traffic-log=build/stage1-closure/visible-validation-20261013/analyzer-protocol.log"
+    ],
+    "environment": {
+      "ANALYZER_STATE_LOCATION_OVERRIDE": "G:\\BIL_Project\\worktrees\\bil-stage1-closure-20261011\\build\\stage1-closure\\visible-validation-20261013\\analyzer-state"
+    }
+  }
+]

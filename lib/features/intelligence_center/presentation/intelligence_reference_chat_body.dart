@@ -1,5 +1,7 @@
 part of 'intelligence_center_page.dart';
 
+const _coachComposerActionInk = Color(0xFF14243A);
+
 extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
   Widget _buildReferenceChat(BuildContext context) {
     if (entryWelcomeVisible) {
@@ -51,23 +53,33 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
               alignment: Alignment.topCenter,
               child: Container(
                 width: double.infinity,
-                constraints: const BoxConstraints(maxWidth: 760),
+                constraints: const BoxConstraints(maxWidth: 920),
                 clipBehavior: Clip.antiAlias,
                 decoration: const BoxDecoration(),
                 child: Column(
                   children: [
-                    _CoachHero(
-                      key: const ValueKey('ai-coach-hero'),
-                      interactionEnabled: conversationReady,
-                      onBack: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go('/dashboard');
-                        }
-                      },
-                      onHistory: () => unawaited(_openConversationHistory()),
-                      onMenu: () => unawaited(_openCoachMenuSheet(context)),
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 760),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: _CoachHero(
+                            key: const ValueKey('ai-coach-hero'),
+                            interactionEnabled: conversationReady,
+                            onBack: () {
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go('/dashboard');
+                              }
+                            },
+                            onHistory: () =>
+                                unawaited(_openConversationHistory()),
+                            onMenu: () =>
+                                unawaited(_openCoachMenuSheet(context)),
+                          ),
+                        ),
+                      ),
                     ),
                     if (conversationLoadFailed)
                       _CoachReplyFailure(
@@ -85,6 +97,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                             ? null
                             : visibleMessages.last.id,
                         centerJumpButton: true,
+                        latestTargetOffset: _coachLatestReadingOffset,
                         child: AbsorbPointer(
                           absorbing: !conversationReady,
                           // Do not paint a provisional greeting and replace it
@@ -111,168 +124,200 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                         ),
                       ),
                     ),
-                    SafeArea(
-                      top: false,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        margin: const EdgeInsets.fromLTRB(12, 5, 12, 12),
-                        padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
-                        decoration: BoxDecoration(
-                          gradient: BilPearlFinish.panel(context).gradient,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: listening
-                                ? scheme.primary.withValues(alpha: .62)
-                                : scheme.outlineVariant.withValues(alpha: .55),
-                            width: listening ? 1.5 : .8,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: scheme.shadow.withValues(alpha: .07),
-                              blurRadius: 22,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            _buildCoachPermissionMenu(),
-                            Expanded(
-                              child: listening
-                                  ? _ListeningComposerLabel(
-                                      label: tr(
-                                        'Listening — pause when you’re done',
-                                        'أستمع — اسكت عندما تنتهي',
-                                      ),
-                                      transcript: pendingVoiceTranscript,
-                                    )
-                                  : TextField(
-                                      key: const Key('ai-coach-question-field'),
-                                      controller: question,
-                                      enabled: conversationReady,
-                                      minLines: 1,
-                                      maxLines:
-                                          MediaQuery.viewInsetsOf(
-                                                    context,
-                                                  ).bottom >
-                                                  0 &&
-                                              MediaQuery.sizeOf(
-                                                    context,
-                                                  ).height <
-                                                  740
-                                          ? 2
-                                          : 4,
-                                      textAlignVertical:
-                                          TextAlignVertical.center,
-                                      textInputAction: TextInputAction.send,
-                                      onTap: _scrollToLatest,
-                                      onSubmitted: (_) => ask(),
-                                      scrollPadding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                      ),
-                                      onChanged: (_) => _updateState(() {}),
-                                      decoration: InputDecoration(
-                                        hintMaxLines: 1,
-                                        hintText: tr(
-                                          'Ask BIL anything about your day…',
-                                          'اسأل BIL أي شيء عن يومك…',
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 760),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: SafeArea(
+                            top: false,
+                            child: AnimatedContainer(
+                              key: const Key('ai-coach-composer-surface'),
+                              duration: const Duration(milliseconds: 220),
+                              margin: const EdgeInsets.fromLTRB(12, 5, 12, 12),
+                              padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
+                              decoration: BoxDecoration(
+                                gradient: BilPearlFinish.panel(
+                                  context,
+                                ).gradient,
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                  color: listening
+                                      ? (Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? BilPearlFinish.darkEdge
+                                            : BilPearlFinish.lightEdge)
+                                      : scheme.outlineVariant.withValues(
+                                          alpha: .55,
                                         ),
-                                        border: InputBorder.none,
-                                        enabledBorder: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
-                                        filled: false,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 8,
+                                  width: listening ? 1.5 : .8,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: scheme.shadow.withValues(alpha: .07),
+                                    blurRadius: 22,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  _buildCoachPermissionMenu(),
+                                  Expanded(
+                                    child: listening
+                                        ? _ListeningComposerLabel(
+                                            label: tr(
+                                              'Listening — pause when you’re done',
+                                              'أستمع — اسكت عندما تنتهي',
                                             ),
+                                            transcript: pendingVoiceTranscript,
+                                          )
+                                        : TextField(
+                                            key: const Key(
+                                              'ai-coach-question-field',
+                                            ),
+                                            controller: question,
+                                            enabled: conversationReady,
+                                            minLines: 1,
+                                            maxLines:
+                                                MediaQuery.viewInsetsOf(
+                                                          context,
+                                                        ).bottom >
+                                                        0 &&
+                                                    MediaQuery.sizeOf(
+                                                          context,
+                                                        ).height <
+                                                        740
+                                                ? 2
+                                                : 4,
+                                            textAlignVertical:
+                                                TextAlignVertical.center,
+                                            textInputAction:
+                                                TextInputAction.send,
+                                            onTap: _scrollToLatest,
+                                            onSubmitted: (_) => ask(),
+                                            scrollPadding:
+                                                const EdgeInsets.symmetric(
+                                                  vertical: 8,
+                                                ),
+                                            onChanged: (_) =>
+                                                _updateState(() {}),
+                                            decoration: InputDecoration(
+                                              hintMaxLines: 1,
+                                              hintText: tr(
+                                                'Ask BIL anything about your day…',
+                                                'اسأل BIL أي شيء عن يومك…',
+                                              ),
+                                              border: InputBorder.none,
+                                              enabledBorder: InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                              filled: false,
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 8,
+                                                  ),
+                                            ),
+                                          ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  if (sending)
+                                    _buildCoachComposerAction(
+                                      actionKey: const Key(
+                                        'ai-coach-send-button',
                                       ),
-                                    ),
-                            ),
-                            const SizedBox(width: 4),
-                            if (sending)
-                              IconButton.filled(
-                                key: const Key('ai-coach-send-button'),
-                                tooltip: tr('Sending', 'جارٍ الإرسال'),
-                                onPressed: null,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: scheme.primary,
-                                  foregroundColor: scheme.onPrimary,
-                                  disabledBackgroundColor: scheme.primary
-                                      .withValues(alpha: .58),
-                                  disabledForegroundColor: scheme.onPrimary
-                                      .withValues(alpha: .58),
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: const BilGlassPressFeedback(
-                                  child: Icon(Icons.arrow_upward_rounded),
-                                ),
-                              )
-                            else if (question.text.trim().isEmpty || listening)
-                              IconButton.filled(
-                                key: const Key('ai-coach-voice-button'),
-                                tooltip: voiceMode == _CoachVoiceMode.liveCall
-                                    ? tr('End live call', 'إنهاء المكالمة')
-                                    : tr('Talk to BIL', 'تحدث مع BIL'),
-                                onPressed: !conversationReady
-                                    ? null
-                                    : voiceMode == _CoachVoiceMode.liveCall
-                                    ? _stopLiveCall
-                                    : _toggleLiveCall,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: scheme.primary,
-                                  foregroundColor: scheme.onPrimary,
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: listening
-                                    ? _VoiceListeningWave(
-                                        color: scheme.onPrimary,
-                                        compact: true,
-                                      )
-                                    : const Icon(Icons.graphic_eq_rounded),
-                              )
-                            else
-                              IconButton.filled(
-                                key: const Key('ai-coach-send-button'),
-                                tooltip: tr('Send', 'إرسال'),
-                                onPressed: !conversationReady ? null : ask,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: scheme.primary,
-                                  foregroundColor: scheme.onPrimary,
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: const BilGlassPressFeedback(
-                                  child: Icon(Icons.arrow_upward_rounded),
-                                ),
-                              ),
-                            const SizedBox(width: 2),
-                            IconButton(
-                              key: const Key('ai-coach-food-image-button'),
-                              tooltip: tr('Open camera', 'افتح الكاميرا'),
-                              onPressed:
-                                  !conversationReady ||
-                                      foodImageFlowOpening ||
-                                      sending
-                                  ? null
-                                  : _analyzeFoodImageInChat,
-                              style: IconButton.styleFrom(
-                                foregroundColor: scheme.onSurfaceVariant,
-                                minimumSize: const Size.square(44),
-                              ),
-                              icon: analyzingFoodImage
-                                  ? SizedBox.square(
-                                      dimension: 19,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
+                                      label: tr('Sending', 'جارٍ الإرسال'),
+                                      onPressed: null,
+                                      icon: Icon(
+                                        Icons.arrow_upward_rounded,
+                                        size: 25,
+                                        color: _coachComposerActionInk
+                                            .withValues(alpha: .38),
                                       ),
                                     )
-                                  : const Icon(
-                                      Icons.camera_alt_outlined,
-                                      size: 22,
+                                  else if (question.text.trim().isEmpty ||
+                                      listening)
+                                    _buildCoachComposerAction(
+                                      actionKey: const Key(
+                                        'ai-coach-voice-button',
+                                      ),
+                                      label:
+                                          voiceMode == _CoachVoiceMode.liveCall
+                                          ? tr(
+                                              'End live call',
+                                              'إنهاء المكالمة',
+                                            )
+                                          : tr('Talk to BIL', 'تحدث مع BIL'),
+                                      onPressed: !conversationReady
+                                          ? null
+                                          : voiceMode ==
+                                                _CoachVoiceMode.liveCall
+                                          ? _stopLiveCall
+                                          : _toggleLiveCall,
+                                      icon: listening
+                                          ? const _VoiceListeningWave(
+                                              color: _coachComposerActionInk,
+                                              compact: true,
+                                            )
+                                          : Icon(
+                                              Icons.graphic_eq_rounded,
+                                              color: conversationReady
+                                                  ? _coachComposerActionInk
+                                                  : _coachComposerActionInk
+                                                        .withValues(alpha: .38),
+                                            ),
+                                    )
+                                  else
+                                    _buildCoachComposerAction(
+                                      actionKey: const Key(
+                                        'ai-coach-send-button',
+                                      ),
+                                      label: tr('Send', 'إرسال'),
+                                      onPressed: !conversationReady
+                                          ? null
+                                          : ask,
+                                      icon: Icon(
+                                        Icons.arrow_upward_rounded,
+                                        size: 25,
+                                        color: conversationReady
+                                            ? _coachComposerActionInk
+                                            : _coachComposerActionInk
+                                                  .withValues(alpha: .38),
+                                      ),
                                     ),
+                                  const SizedBox(width: 2),
+                                  IconButton(
+                                    key: const Key(
+                                      'ai-coach-food-image-button',
+                                    ),
+                                    tooltip: tr('Open camera', 'افتح الكاميرا'),
+                                    onPressed:
+                                        !conversationReady ||
+                                            foodImageFlowOpening ||
+                                            sending
+                                        ? null
+                                        : _analyzeFoodImageInChat,
+                                    style: IconButton.styleFrom(
+                                      foregroundColor: scheme.onSurfaceVariant,
+                                      minimumSize: const Size.square(44),
+                                    ),
+                                    icon: analyzingFoodImage
+                                        ? SizedBox.square(
+                                            dimension: 19,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.camera_alt_outlined,
+                                            size: 22,
+                                          ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -282,6 +327,57 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCoachComposerAction({
+    required Key actionKey,
+    required String label,
+    required VoidCallback? onPressed,
+    required Widget icon,
+  }) {
+    final contrast = MediaQuery.highContrastOf(context);
+    return DecoratedBox(
+      key: const Key('ai-coach-composer-action-finish'),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white, Color(0xFFECF3F8), Color(0xFFD7E4EF)],
+        ),
+        border: Border.all(
+          color: contrast ? _coachComposerActionInk : const Color(0xFFBCCDDD),
+          width: contrast ? 1.5 : .8,
+        ),
+        boxShadow: contrast
+            ? const []
+            : const [
+                BoxShadow(
+                  color: Color(0x14223F58),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+      ),
+      child: IconButton(
+        key: actionKey,
+        tooltip: label,
+        onPressed: onPressed,
+        style: IconButton.styleFrom(
+          minimumSize: const Size.square(48),
+          fixedSize: const Size.square(48),
+          foregroundColor: _coachComposerActionInk,
+          disabledForegroundColor: _coachComposerActionInk.withValues(
+            alpha: .38,
+          ),
+          backgroundColor: Colors.transparent,
+          shape: const CircleBorder(),
+          visualDensity: VisualDensity.standard,
+        ),
+        // Plain solid glyph, as in Community: no inherited primary tint.
+        icon: icon,
       ),
     );
   }

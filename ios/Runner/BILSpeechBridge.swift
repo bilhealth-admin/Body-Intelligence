@@ -107,10 +107,15 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
       fail("speech_unavailable", result: result)
       return
     }
+    guard recognizer.supportsOnDeviceRecognition else {
+      fail("speech_on_device_unavailable", result: result)
+      return
+    }
 
     let engine = AVAudioEngine()
     let request = SFSpeechAudioBufferRecognitionRequest()
     request.shouldReportPartialResults = true
+    request.requiresOnDeviceRecognition = true
     audioEngine = engine
     recognitionRequest = request
     let session = AVAudioSession.sharedInstance()

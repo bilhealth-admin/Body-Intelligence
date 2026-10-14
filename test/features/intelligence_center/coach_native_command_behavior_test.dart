@@ -16,6 +16,8 @@ import 'package:body_intelligence_log/features/daily_log/providers/daily_log_pro
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_action_permission.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_preferences.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_presentation_view.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_memory_repository.dart';
@@ -25,6 +27,7 @@ import 'package:body_intelligence_log/features/intelligence_center/services/loca
 import 'package:drift/drift.dart' hide Column, isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,6 +38,22 @@ part 'coach_native_recovery_lifecycle_cases.dart';
 part 'coach_native_undo_permission_cases.dart';
 
 void main() {
+  // Host widget tests have no native TTS plugin. Preserve the real stop call
+  // made when changing conversations; do not fake synthesis or its permission.
+  const tts = MethodChannel('bil/tts');
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(tts, (call) async {
+          if (call.method == 'stop') return null;
+          throw MissingPluginException(
+            'Unexpected TTS operation in this fixture',
+          );
+        });
+  });
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(tts, null);
+  });
   _nativeCommandCases();
   _nativeRecoveryCases();
   _nativeRecoveryLifecycleCases();

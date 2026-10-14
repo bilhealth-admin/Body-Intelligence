@@ -18,39 +18,46 @@ class CoachFoodCardSurface extends StatelessWidget {
   const CoachFoodCardSurface({
     required this.child,
     this.maxWidth = 366,
+    this.fillAvailableWidth = false,
     this.padding = const EdgeInsets.all(12),
     super.key,
   });
   final Widget child;
   final double maxWidth;
+  final bool fillAvailableWidth;
   final EdgeInsetsGeometry padding;
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-    constraints: BoxConstraints(maxWidth: maxWidth),
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: CoachFoodCardPalette.border),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF172330), Color(0xFF101A26), Color(0xFF16212C)],
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: DefaultTextStyle.merge(
-          style: const TextStyle(
-            color: CoachFoodCardPalette.white,
-            fontSize: 13,
-            height: 1.4,
+  Widget build(BuildContext context) {
+    final surface = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: CoachFoodCardPalette.border),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF172330), Color(0xFF101A26), Color(0xFF16212C)],
           ),
-          child: Padding(padding: padding, child: child),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(
+              color: CoachFoodCardPalette.white,
+              fontSize: 13,
+              height: 1.4,
+            ),
+            child: Padding(padding: padding, child: child),
+          ),
         ),
       ),
-    ),
-  );
+    );
+    return fillAvailableWidth
+        ? SizedBox(width: double.infinity, child: surface)
+        : surface;
+  }
 }
 
 class CoachFoodThumbnail extends StatelessWidget {

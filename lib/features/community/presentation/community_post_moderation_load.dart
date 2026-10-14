@@ -20,6 +20,27 @@ extension _ModerationQueueLoading on _CommunityPostModerationPageState {
       final posts = values[0] as List<CommunityPost>;
       final hiddenPosts = values[1] as List<CommunityPost>;
       final reports = values[2] as List<Map<String, dynamic>>;
+      var aiCoachReportReviewUnavailable = false;
+      List<AiCoachSafetyReport> aiCoachReports;
+      try {
+        aiCoachReports = await repository.loadAiCoachSafetyReports();
+      } on PostgrestException catch (error) {
+        if (error.code != 'PGRST202' && error.code != '42883') rethrow;
+        aiCoachReports = const [];
+        aiCoachReportReviewUnavailable = true;
+      }
+      if (!visit.isCurrent) {
+        throw const AuthException('Moderator session changed');
+      }
+      var commentReviewUnavailable = false;
+      List<CommunityCommentReport> commentReports;
+      try {
+        commentReports = await repository.loadOpenCommentReports();
+      } on PostgrestException catch (error) {
+        if (error.code != 'PGRST202' && error.code != '42883') rethrow;
+        commentReports = const [];
+        commentReviewUnavailable = true;
+      }
       var reviewUnavailable = false;
       List<CommunityReviewSnapshot> reviewed;
       List<CommunityRewardReview> rewards;
@@ -53,6 +74,10 @@ extension _ModerationQueueLoading on _CommunityPostModerationPageState {
         ],
         hiddenPosts: [for (final post in hiddenPosts) byId[post.id] ?? post],
         reports: reports,
+        commentReports: commentReports,
+        commentReviewUnavailable: commentReviewUnavailable,
+        aiCoachReports: aiCoachReports,
+        aiCoachReportReviewUnavailable: aiCoachReportReviewUnavailable,
         rewards: rewards,
         reviewUnavailable: reviewUnavailable,
       );

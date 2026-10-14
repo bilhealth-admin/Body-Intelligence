@@ -40,6 +40,13 @@ class _ChatRepository extends CommunityRepository {
   Future<Set<String>> loadReadMessageIds(String peer, List<String> ids) async =>
       ids.toSet();
   @override
+  Future<void> sendMessageOperation(
+    String recipientId,
+    String body, {
+    required String requestId,
+  }) => sendMessage(recipientId, body);
+
+  @override
   Future<void> sendMessage(String id, String body) =>
       pendingSend?.future ?? Future.value();
 }
@@ -149,7 +156,7 @@ void main() {
       await tester.pumpAndSettle();
       final composer = find.byType(TextField);
       await tester.enterText(composer, 'First message');
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.send_rounded));
+      await tester.tap(find.byKey(const Key('community-chat-send')));
       await tester.pump();
       await tester.enterText(composer, 'Next unsent draft');
       repository.pendingSend!.complete();
@@ -170,7 +177,7 @@ void main() {
     await tester.pumpWidget(_chat(repository));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Test outgoing message');
-    final send = find.widgetWithIcon(IconButton, Icons.send_rounded);
+    final send = find.byKey(const Key('community-chat-send'));
     await tester.tap(send);
     await tester.pump();
     await tester.pumpWidget(const SizedBox.shrink());

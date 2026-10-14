@@ -7,8 +7,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../data/database/database_provider.dart';
+import '../../../data/database/app_database.dart';
 import '../providers/cloud_sync_providers.dart';
 import '../services/cloud_manual_sync_service.dart';
+
+/// The guarded production service remains the sole transport implementation.
+/// Keeping its trigger as a provider lets isolated SQLite scheduling tests hold
+/// a run without replacing account authorization or the platform service.
+final cloudAutoSyncRunnerProvider =
+    Provider<Future<CloudManualSyncResult> Function()>((ref) {
+      return ref.watch(cloudManualSyncServiceProvider).runOnce;
+    });
+
+final cloudAutoSyncConnectivityChangesProvider =
+    Provider<Stream<List<ConnectivityResult>>>((ref) {
+      return Connectivity().onConnectivityChanged;
+    });
 
 /// Process-wide bridge used by explicit sign-out entry points.
 ///
@@ -53,6 +67,12 @@ class _CloudAutoSyncCoordinatorState
   StreamSubscription<List<ConnectivityResult>>? _connectivity;
   Timer? _debounce;
   bool _running = false;
+  bool _queuedMutation = false;
+  int _visit = 0;
+  int _automaticContinuations = 0;
+  AppDatabase? _boundDatabase;
+  ProviderSubscription<AppDatabase>? _databaseBinding;
+  static const _maximumAutomaticContinuations = 3;
 
   @override
   void initState() {
@@ -60,7 +80,29 @@ class _CloudAutoSyncCoordinatorState
     WidgetsBinding.instance.addObserver(this);
     CloudBeforeSignOutSync.install(_sync);
     if (!AppEnvironment.supabaseRuntimeReady) return;
-    final database = ref.read(databaseProvider);
+    _databaseBinding = ref.listenManual<AppDatabase>(
+      databaseProvider,
+      (_, database) => _bindDatabase(database),
+      fireImmediately: true,
+    );
+    _connectivity = ref.read(cloudAutoSyncConnectivityChangesProvider).listen((
+      results,
+    ) {
+      if (results.any((value) => value != ConnectivityResult.none)) _schedule();
+    });
+  }
+
+  void _bindDatabase(AppDatabase database) {
+    if (identical(database, _boundDatabase)) return;
+    _boundDatabase = database;
+    _visit++;
+    _debounce?.cancel();
+    _queuedMutation = false;
+    _automaticContinuations = 0;
+    for (final subscription in _subscriptions) {
+      unawaited(subscription.cancel());
+    }
+    _subscriptions.clear();
     _watch(database.select(database.userProfile).watch());
     _watch(database.select(database.weightEntries).watch());
     _watch(database.select(database.waterEntries).watch());
@@ -86,15 +128,14 @@ class _CloudAutoSyncCoordinatorState
           )
           .distinct(mapEquals),
     );
-    _connectivity = Connectivity().onConnectivityChanged.listen((results) {
-      if (results.any((value) => value != ConnectivityResult.none)) _schedule();
-    });
   }
 
   void _watch(Stream<Object?> stream) {
+    final visit = _visit;
     var initial = true;
     _subscriptions.add(
       stream.listen((_) {
+        if (!mounted || visit != _visit) return;
         if (initial) {
           initial = false;
           return;
@@ -104,24 +145,65 @@ class _CloudAutoSyncCoordinatorState
     );
   }
 
-  void _schedule() {
+  void _schedule({bool continuation = false}) {
+    if (!mounted) return;
+    if (!continuation) _automaticContinuations = 0;
+    if (_running) {
+      _queuedMutation = true;
+      return;
+    }
+    final visit = _visit;
     _debounce?.cancel();
-    _debounce = Timer(const Duration(seconds: 2), () => unawaited(_sync()));
+    _debounce = Timer(const Duration(seconds: 2), () {
+      if (mounted && visit == _visit) unawaited(_sync());
+    });
   }
 
   Future<void> _sync() async {
-    if (_running || !mounted) return;
+    if (!mounted) return;
+    if (_running) {
+      _queuedMutation = true;
+      return;
+    }
+    _debounce?.cancel();
     _running = true;
+    _queuedMutation = false;
+    final operation = _runForVisit(_visit);
     try {
-      final result = await ref
-          .read(cloudManualSyncServiceProvider)
-          .runOnce()
-          .timeout(const Duration(seconds: 12));
-      if (result.disposition == CloudManualSyncDisposition.partial) _schedule();
+      await operation.timeout(const Duration(seconds: 12));
     } on Object {
-      // Durable dirty/outbox state remains owner-bound for the next retry.
+      // The caller is bounded; SDK work retains the fence until it settles.
+    }
+  }
+
+  Future<void> _runForVisit(int visit) async {
+    var continuePending = false;
+    try {
+      final result = await ref.read(cloudAutoSyncRunnerProvider).call();
+      if (mounted &&
+          visit == _visit &&
+          result.ownerId == _boundDatabase?.localOwnerId) {
+        continuePending =
+            result.disposition == CloudManualSyncDisposition.partial &&
+            result.conflicts == 0 &&
+            (result.reason == 'pending_local_changes' ||
+                result.reason == 'page_limit') &&
+            (result.pending > 0 || result.pushed > 0 || result.pulled > 0) &&
+            _automaticContinuations < _maximumAutomaticContinuations;
+      }
+    } on Object {
+      // Durable state remains available for a fresh mutation or user retry.
     } finally {
       _running = false;
+      if (mounted) {
+        if (_queuedMutation) {
+          _queuedMutation = false;
+          _schedule();
+        } else if (continuePending && visit == _visit) {
+          _automaticContinuations++;
+          _schedule(continuation: true);
+        }
+      }
     }
   }
 
@@ -134,6 +216,9 @@ class _CloudAutoSyncCoordinatorState
   void dispose() {
     CloudBeforeSignOutSync.uninstall();
     WidgetsBinding.instance.removeObserver(this);
+    _visit++;
+    _queuedMutation = false;
+    _databaseBinding?.close();
     _debounce?.cancel();
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());

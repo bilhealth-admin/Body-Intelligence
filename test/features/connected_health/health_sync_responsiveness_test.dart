@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
 import 'package:body_intelligence_log/features/global_platform/runtime/global_product_composition_root.dart';
+import 'package:body_intelligence_log/features/global_platform/persistence/owner_scoped_health_store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,12 +75,22 @@ void main() {
       );
       addTearDown(host.close);
       final flows = host.productFlows!;
-      await flows.store.put('connected_health_consent', 'Apple Health', {
+      const ownerId = OwnerScopedHealthStore.localDeviceOwner;
+      final healthStore = OwnerScopedHealthStore(
+        inner: flows.store,
+        ownerId: ownerId,
+        readCurrentOwnerId: () => ownerId,
+      );
+      await healthStore.put('connected_health_consent', 'Apple Health', {
         'readRequested': true,
         'historicalReadResetAt': asOf.toIso8601String(),
       });
       final controller = ConnectedHealthController(
-        NativeConnectedHealthGateway(flows),
+        NativeConnectedHealthGateway(
+          flows,
+          ownerId: ownerId,
+          currentOwnerId: () => ownerId,
+        ),
       );
       addTearDown(controller.dispose);
       await controller.refresh();
@@ -95,7 +106,7 @@ void main() {
 
       expect(pageAnchors, [null, 'page-1']);
       expect(eventTurnsDuringSync, greaterThan(8));
-      expect((await flows.store.list('health_signals')), hasLength(256));
+      expect((await healthStore.list('health_signals')), hasLength(256));
       expect(controller.state.value!.isBusy, isFalse);
       expect(controller.state.value!.failureCode, isNull);
       expect(

@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../global_platform/core/global_platform_core.dart';
 import '../../global_platform/health_data/unified_health_data_integration.dart';
 import '../../global_platform/intelligence/global_health_evidence_graph.dart';
+import '../../global_platform/persistence/owner_scoped_health_store.dart';
 import '../../global_platform/product/global_product_access.dart';
 import '../../global_platform/product/global_product_coordinators.dart';
 import '../../global_platform/runtime/global_product_composition_root.dart';
@@ -54,11 +56,53 @@ abstract interface class ConnectedHealthCancellableSyncGateway {
   Future<void> cancelSynchronization();
 }
 
+String _connectedHealthOwnerId() {
+  try {
+    if (!Supabase.instance.isInitialized) {
+      return OwnerScopedHealthStore.localDeviceOwner;
+    }
+    final ownerId = Supabase.instance.client.auth.currentUser?.id.trim();
+    return ownerId == null || ownerId.isEmpty
+        ? OwnerScopedHealthStore.localDeviceOwner
+        : ownerId;
+  } on Object {
+    return OwnerScopedHealthStore.localDeviceOwner;
+  }
+}
+
 final connectedHealthGatewayProvider = Provider<ConnectedHealthGateway>((ref) {
+  final ownerId = _connectedHealthOwnerId();
+  var activeOwnerId = ownerId;
+  StreamSubscription<dynamic>? authSubscription;
+  try {
+    if (Supabase.instance.isInitialized) {
+      authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen(
+        (_) {
+          final nextOwnerId = _connectedHealthOwnerId();
+          if (nextOwnerId == activeOwnerId) return;
+          activeOwnerId = nextOwnerId;
+          ref.invalidateSelf();
+        },
+      );
+    }
+  } on Object {
+    // Widget tests and local-only sessions can run without Supabase startup.
+  }
+  ref.onDispose(() {
+    final subscription = authSubscription;
+    if (subscription != null) unawaited(subscription.cancel());
+  });
   final ready = GlobalNativeIntegrationHost.instance.productFlows;
   return ready == null
-      ? DeferredConnectedHealthGateway()
-      : NativeConnectedHealthGateway(ref.read(globalProductFlowsProvider));
+      ? DeferredConnectedHealthGateway(
+          ownerId: ownerId,
+          currentOwnerId: _connectedHealthOwnerId,
+        )
+      : NativeConnectedHealthGateway(
+          ref.read(globalProductFlowsProvider),
+          ownerId: ownerId,
+          currentOwnerId: _connectedHealthOwnerId,
+        );
 });
 
 /// Keeps the expensive optional global SQLite/runtime host off the launch
@@ -71,12 +115,24 @@ final class DeferredConnectedHealthGateway
         ConnectedHealthCachedSnapshotGateway,
         ConnectedHealthStartupPermissionGateway,
         ConnectedHealthCancellableSyncGateway {
+  DeferredConnectedHealthGateway({
+    required this.ownerId,
+    required this.currentOwnerId,
+  });
+
+  final String ownerId;
+  final String Function() currentOwnerId;
+
   Future<NativeConnectedHealthGateway> _native() async {
     final host = GlobalNativeIntegrationHost.instance;
     await host.initialize();
     final flows = host.productFlows;
     if (flows == null) throw StateError('global_product_flows_not_initialized');
-    return NativeConnectedHealthGateway(flows);
+    return NativeConnectedHealthGateway(
+      flows,
+      ownerId: ownerId,
+      currentOwnerId: currentOwnerId,
+    );
   }
 
   @override
@@ -132,7 +188,7 @@ final connectedHealthProvider =
       AsyncValue<ConnectedHealthSnapshot>
     >((ref) {
       return ConnectedHealthController(
-        ref.read(connectedHealthGatewayProvider),
+        ref.watch(connectedHealthGatewayProvider),
       );
     }, dependencies: [connectedHealthGatewayProvider]);
 

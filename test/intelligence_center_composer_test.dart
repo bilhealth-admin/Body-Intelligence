@@ -14,6 +14,8 @@ import 'package:body_intelligence_log/features/intelligence_center/domain/coach_
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/ai_coach_safety_report_service.dart';
+import 'package:body_intelligence_log/features/safety_moderation/domain/ai_coach_safety_report.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
 import 'package:drift/native.dart';
@@ -30,6 +32,7 @@ Widget _app(
   PreferencesRepository? preferences,
   WeightRepository? weightRepository,
   LocalModelGateway? gateway,
+  AiCoachSafetyReportService? reportService,
 }) {
   return ProviderScope(
     overrides: [
@@ -40,6 +43,8 @@ Widget _app(
         weightRepositoryProvider.overrideWithValue(weightRepository),
       if (gateway != null)
         intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),
+      if (reportService != null)
+        aiCoachSafetyReportServiceProvider.overrideWithValue(reportService),
       coachContextSnapshotProvider.overrideWith(
         (ref) async => CoachContextSnapshot.empty(),
       ),
@@ -634,6 +639,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final db = await database(tester);
+    final reportService = _RecordingAiCoachSafetyReportService();
     await PreferencesRepository(db).set(
       'intelligenceConversationV1',
       jsonEncode([
@@ -654,6 +660,7 @@ void main() {
         db,
         locale: const Locale('ar'),
         textScaler: const TextScaler.linear(1.6),
+        reportService: reportService,
       ),
     );
     await tester.pumpAndSettle();
@@ -666,20 +673,85 @@ void main() {
     await tester.tap(report);
     await tester.pumpAndSettle();
 
-    final title = find.text('الإبلاغ عن إجابة الذكاء الاصطناعي؟');
+    final title = find.text('الإبلاغ عن إجابة AI Coach');
     expect(title, findsOneWidget);
     expect(Directionality.of(tester.element(title)), TextDirection.rtl);
     expect(find.byKey(const Key('ai-coach-confirm-report')), findsOneWidget);
+    expect(find.textContaining('وأي ملاحظة تضيفها'), findsOneWidget);
+    expect(reportService.answerTexts, isEmpty);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.byKey(const Key('ai-coach-confirm-report')));
+    for (final key in const [
+      'unsafe',
+      'medical_accuracy',
+      'offensive',
+      'other',
+    ]) {
+      expect(find.byKey(Key('ai-coach-report-reason-$key')), findsOneWidget);
+    }
+    expect(
+      find.byKey(const Key('ai-coach-report-reason-privacy')),
+      findsNothing,
+    );
+    final otherReason = find.byKey(
+      const Key('ai-coach-report-reason-tap-other'),
+    );
+    await Scrollable.ensureVisible(tester.element(otherReason), alignment: .5);
+    await tester.pumpAndSettle();
+    await tester.tap(otherReason);
+    await tester.pumpAndSettle();
+
+    final confirm = find.byKey(const Key('ai-coach-confirm-report'));
+    await Scrollable.ensureVisible(tester.element(confirm), alignment: .8);
+    await tester.pumpAndSettle();
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+    final consent = find.byKey(const Key('ai-coach-report-consent'));
+    await Scrollable.ensureVisible(tester.element(consent), alignment: .8);
+    await tester.pumpAndSettle();
+    await tester.tap(consent);
+    await tester.pumpAndSettle();
+    await Scrollable.ensureVisible(tester.element(confirm), alignment: .8);
+    await tester.pumpAndSettle();
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+    await tester.tap(confirm);
     await tester.pumpAndSettle();
     expect(title, findsNothing);
+    expect(reportService.answerTexts, [
+      'إجابة قابلة للإبلاغ لاختبار واجهة الأمان.',
+    ]);
+    expect(reportService.reasons, ['other']);
+    expect(reportService.consentAccepted, [true]);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
+}
+
+class _RecordingAiCoachSafetyReportService extends AiCoachSafetyReportService {
+  final answerTexts = <String>[];
+  final reasons = <String>[];
+  final consentAccepted = <bool>[];
+
+  @override
+  Future<AiCoachSafetyReportReceipt> submit({
+    required String responseId,
+    required String answerText,
+    required String reason,
+    required bool explicitConsentAccepted,
+    required String locale,
+    required CoachAnswerRuntime runtime,
+    String? userNote,
+  }) async {
+    answerTexts.add(answerText);
+    reasons.add(reason);
+    consentAccepted.add(explicitConsentAccepted);
+    return const AiCoachSafetyReportReceipt(
+      reportId: '00000000-0000-4000-8000-000000000001',
+      status: 'open',
+      duplicate: false,
+    );
+  }
 }
 
 final class _DelayedConversationPreferences extends PreferencesRepository {

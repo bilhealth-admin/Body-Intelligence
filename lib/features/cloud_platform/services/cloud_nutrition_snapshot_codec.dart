@@ -113,29 +113,85 @@ final class CloudNutritionSnapshotCodec {
 
   Future<List<CloudNutritionSnapshot>> capture({
     required Set<String> scopes,
+    String? recordType,
+    String? recordId,
   }) async {
+    if ((recordType == null) != (recordId == null) ||
+        (recordType != null &&
+            !const {'meal', 'food', 'recipe', 'goals'}.contains(recordType))) {
+      throw const FormatException('Invalid nutrition snapshot selector.');
+    }
     await _checkOwner();
     return database.transaction(() async {
       await _checkOwner();
       final output = <CloudNutritionSnapshot>[];
       if (scopes.contains('nutrition')) {
-        final meals = await database.select(database.meals).get();
-        final items = await database.select(database.mealItems).get();
-        final recipes = await TrustedRecipeRepository(
-          PreferencesRepository(database),
-        ).load();
+        final meals = recordType == null
+            ? await database.select(database.meals).get()
+            : recordType == 'meal'
+            ? await (database.select(
+                database.meals,
+              )..where((row) => row.uuid.equals(recordId!))).get()
+            : const <Meal>[];
+        final items = recordType == null
+            ? await database.select(database.mealItems).get()
+            : recordType == 'meal'
+            ? await (database.select(database.mealItems)..where(
+                    (row) => row.mealId.isIn(meals.map((meal) => meal.id)),
+                  ))
+                  .get()
+            : const <MealItem>[];
+        final allRecipes = recordType == 'meal'
+            ? const <SavedTrustedRecipe>[]
+            : await TrustedRecipeRepository(
+                PreferencesRepository(database),
+              ).load();
+        final recipes = allRecipes
+            .where(
+              (recipe) =>
+                  recordType == null ||
+                  (recordType == 'recipe' && recipe.id == recordId),
+            )
+            .toList();
+        final recipeFoodIds = <String>{
+          for (final recipe in allRecipes)
+            for (final ingredient in recipe.recipe.ingredients)
+              if (ingredient.sourceRecordId != null)
+                ingredient.sourceRecordId!.startsWith('local:')
+                    ? ingredient.sourceRecordId!.substring(6)
+                    : ingredient.sourceRecordId!,
+        };
         // The installed search catalog may contain hundreds of thousands of
         // foods. Backup reads only user foods and actual diary dependencies.
-        final foods =
-            await (database.select(database.foods)..where(
-                  (food) =>
-                      food.isCustom.equals(true) |
-                      food.id.isInQuery(
-                        database.selectOnly(database.mealItems)
-                          ..addColumns([database.mealItems.foodId]),
-                      ),
-                ))
-                .get();
+        final foodQuery = database.select(database.foods);
+        if (recordType == null) {
+          foodQuery.where(
+            (food) =>
+                food.isCustom.equals(true) |
+                food.id.isInQuery(
+                  database.selectOnly(database.mealItems)
+                    ..addColumns([database.mealItems.foodId]),
+                ),
+          );
+        } else if (recordType == 'meal') {
+          foodQuery.where(
+            (food) => food.id.isIn(items.map((item) => item.foodId)),
+          );
+        } else if (recordType == 'food') {
+          foodQuery.where(
+            (food) =>
+                food.uuid.equals(recordId!) &
+                (food.isCustom.equals(true) |
+                    food.id.isInQuery(
+                      database.selectOnly(database.mealItems)
+                        ..addColumns([database.mealItems.foodId]),
+                    ) |
+                    food.uuid.isIn(recipeFoodIds)),
+          );
+        } else {
+          foodQuery.where((food) => food.id.isIn(const <int>[]));
+        }
+        final foods = await foodQuery.get();
         final byUuid = {for (final food in foods) food.uuid: food};
         final recipeReferences = {
           for (final recipe in recipes)
@@ -161,6 +217,7 @@ final class CloudNutritionSnapshotCodec {
         }
         final includedFoods = <String>{
           for (final food in foods.where((row) => row.isCustom)) food.uuid,
+          if (recordType == 'food') ...foods.map((row) => row.uuid),
         };
         for (final meal in meals) {
           final children = [...?byMeal[meal.id]]
@@ -249,13 +306,18 @@ final class CloudNutritionSnapshotCodec {
           );
         }
       }
-      if (scopes.contains('nutrition')) {
+      if (scopes.contains('nutrition') &&
+          (recordType == null || recordType == 'food')) {
         // A fresh device may receive the deletion before any food definition.
         // Keep that identity durable without inventing a zero-valued catalog
         // row. Historical dependencies may supply evidence later, not revive it.
-        final markers = await (database.select(
-          database.preferences,
-        )..where((row) => row.key.like('$_foodDeletionPrefix%'))).get();
+        final markers =
+            await (database.select(database.preferences)..where(
+                  (row) => recordType == 'food'
+                      ? row.key.equals(_foodDeletionKey(recordId!))
+                      : row.key.like('$_foodDeletionPrefix%'),
+                ))
+                .get();
         final capturedFoodIds = output
             .where((row) => row.type == 'food')
             .map((row) => row.id)
@@ -293,6 +355,11 @@ final class CloudNutritionSnapshotCodec {
         }
       }
       await _checkOwner();
+      if (recordType != null) {
+        output.removeWhere(
+          (record) => record.type != recordType || record.id != recordId,
+        );
+      }
       output.sort((a, b) => a.key.compareTo(b.key));
       return List.unmodifiable(output);
     });

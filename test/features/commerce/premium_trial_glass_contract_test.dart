@@ -30,34 +30,61 @@ void main() {
     }
   });
 
-  test('watch sync is free while fitness devices remain behind glass', () {
-    final dashboard = File(
-      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
-    ).readAsStringSync();
-    final healthCard = File(
-      'lib/features/connected_health/widgets/connected_health_card.dart',
-    ).readAsStringSync();
-    final health = File(
-      'lib/features/connected_health/connected_health_page.dart',
-    ).readAsStringSync();
+  test(
+    'watch sync stays free and fitness-device actions require verified Premium',
+    () {
+      final dashboard = File(
+        'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+      ).readAsStringSync();
+      final healthCard = File(
+        'lib/features/connected_health/widgets/connected_health_card.dart',
+      ).readAsStringSync();
+      final health = File(
+        'lib/features/connected_health/connected_health_page.dart',
+      ).readAsStringSync();
+      final deviceSection = File(
+        'lib/features/connected_health/connected_health_components.dart',
+      ).readAsStringSync();
 
-    expect(
-      dashboard,
-      contains('visibleSections.contains(DashboardSectionIds.connectedHealth)'),
-    );
-    expect(dashboard, contains('connectedHealth!'));
-    expect(
-      dashboard,
-      isNot(contains("Key('dashboard-connected-health-premium-lock')")),
-    );
-    expect(healthCard, contains('onSync:'));
-    expect(healthCard, contains('.synchronize()'));
-    expect(healthCard, isNot(contains('PremiumDashboardCardLock')));
-    expect(health, contains('PremiumDashboardCardLock'));
-    expect(health, contains("Key('fitness-devices-premium-gate')"));
-    expect(health, contains('Premium fitness device connections'));
-    expect(health, contains('Weight, body composition, and heart rate'));
-  });
+      expect(
+        dashboard,
+        contains(
+          'visibleSections.contains(DashboardSectionIds.connectedHealth)',
+        ),
+      );
+      expect(dashboard, contains('connectedHealth!'));
+      expect(
+        dashboard,
+        isNot(contains("Key('dashboard-connected-health-premium-lock')")),
+      );
+      expect(healthCard, contains('onSync:'));
+      expect(healthCard, contains('.synchronize()'));
+      expect(healthCard, isNot(contains('PremiumDashboardCardLock')));
+      expect(
+        health,
+        contains('verified?.authority == EntitlementAuthority.verifiedServer'),
+      );
+      expect(health, contains('verified?.plan != CommercePlan.free'));
+      expect(health, contains('accessGranted: fitnessDevicesUnlocked'));
+      expect(deviceSection, contains("Key('fitness-bluetooth-section')"));
+      expect(
+        deviceSection,
+        matches(
+          RegExp(
+            r'accessGranted\s*\?\s*controller\.scan\s*:\s*onRequestAccess',
+          ),
+        ),
+      );
+      expect(
+        deviceSection,
+        matches(
+          RegExp(
+            r'accessGranted\s*\?\s*\(\)\s*=>\s*controller\.connect\(device\)\s*:\s*onRequestAccess',
+          ),
+        ),
+      );
+    },
+  );
 
   test(
     'destination glass names the hidden feature without inventing a trial',
@@ -68,9 +95,16 @@ void main() {
       final routeGate = File(
         'lib/features/commerce/presentation/premium_route_glass_gate.dart',
       ).readAsStringSync();
+      final valueMask = File(
+        'lib/features/commerce/presentation/premium_value_mask.dart',
+      ).readAsStringSync();
 
-      expect(lock, contains('PremiumLabelBadge'));
-      expect(lock, contains('label: title'));
+      expect(lock, contains('PremiumValueMask('));
+      expect(lock, contains('onUpgrade: onTap'));
+      expect(lock, contains('actionKey: Key('));
+      expect(lock, contains('showLabel: showLabel'));
+      expect(valueMask, contains('PremiumLabelBadge('));
+      expect(valueMask, contains('semanticLabel: label'));
       expect(lock, isNot(contains("RuntimeCopy.resolve('7 days free'")));
       expect(lock, contains('detail'));
       expect(routeGate, contains('1,500 nutrition-aware recipes'));

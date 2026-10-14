@@ -4,6 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  registerCoachReducedMotionCases();
+  registerCoachNativeMotionCase();
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     for (final arabic in [false, true]) {
       testWidgets(
@@ -260,4 +262,140 @@ void main() {
       reply,
     );
   });
+}
+
+void registerCoachReducedMotionCases() {
+  testWidgets(
+    'fresh reveal is complete immediately when reduced motion is enabled',
+    (tester) async {
+      const reply =
+          'A complete reply that must be readable immediately without animation.';
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: child!,
+          ),
+          home: Scaffold(
+            body: CoachMessageText(
+              key: const ValueKey('coach-reduce-motion-fresh-negative'),
+              text: reply,
+              createdAt: DateTime(2026, 10, 13, 9),
+              textDirection: TextDirection.ltr,
+              animateReveal: true,
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        reply,
+      );
+      await tester.pump();
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'enabling reduced motion completes an in-flight reveal without changing geometry',
+    (tester) async {
+      const reply =
+          'This reply begins animated and must become complete when reduced motion changes.';
+      var reduced = false;
+      late StateSetter update;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              update = setState;
+              return MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(disableAnimations: reduced),
+                child: Scaffold(
+                  body: CoachMessageText(
+                    key: const ValueKey(
+                      'coach-reduce-motion-changing-negative',
+                    ),
+                    text: reply,
+                    createdAt: DateTime(2026, 10, 13, 9),
+                    textDirection: TextDirection.ltr,
+                    animateReveal: true,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      final before = tester.getSize(find.byType(CoachMessageText));
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        isNot(reply),
+      );
+      await tester.pump(const Duration(milliseconds: 96));
+      update(() => reduced = true);
+      await tester.pump();
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        reply,
+      );
+      expect(tester.getSize(find.byType(CoachMessageText)), before);
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+}
+
+void registerCoachNativeMotionCase() {
+  testWidgets(
+    'native iOS reduceMotion completes the reply and never replays it',
+    (tester) async {
+      const reply =
+          'This complete answer is available locally and its display respects native motion settings.';
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures();
+      addTearDown(
+        tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CoachMessageText(
+              key: const ValueKey('coach-native-motion-change'),
+              text: reply,
+              createdAt: DateTime(2026, 10, 13),
+              textDirection: TextDirection.ltr,
+              animateReveal: true,
+            ),
+          ),
+        ),
+      );
+      final before = tester.getSize(find.byType(CoachMessageText));
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        isNot(reply),
+      );
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(reduceMotion: true);
+      await tester.pump();
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        reply,
+      );
+      expect(tester.getSize(find.byType(CoachMessageText)), before);
+      expect(tester.binding.transientCallbackCount, 0);
+      tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        reply,
+      );
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 }

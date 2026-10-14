@@ -26,13 +26,15 @@ void main() {
     proof = _readJson(legalPublicationEvidencePath);
   });
 
-  test('checked-in live publication proof matches local 18+ legal asset', () {
+  test('changed local legal asset blocks reuse of historical live proof', () {
+    final legal = metadata['legal_and_support'] as Map<String, Object?>;
+    expect(legal['status'], legalPublicationStatus);
     expect(
       () => validateLegalPublicationVerification(
         metadata: metadata,
         proof: proof,
       ),
-      returnsNormally,
+      throwsA(_invalidWith('checked-in local asset byte count mismatch')),
     );
   });
 
@@ -99,26 +101,26 @@ void main() {
   });
 
   test('changed local asset length invalidates stored publication proof', () {
+    final local = proof['local_asset'] as Map<String, Object?>;
+    final recordedBytes = local['bytes'] as int;
     expect(
       () => validateLegalPublicationVerification(
         metadata: metadata,
         proof: proof,
-        readBytes: (path) => [...File(path).readAsBytesSync(), 32],
+        readBytes: (_) => List<int>.filled(recordedBytes + 1, 0),
       ),
       throwsA(_invalidWith('checked-in local asset byte count mismatch')),
     );
   });
 
   test('same-length local asset changes invalidate stored proof', () {
+    final local = proof['local_asset'] as Map<String, Object?>;
+    final recordedBytes = local['bytes'] as int;
     expect(
       () => validateLegalPublicationVerification(
         metadata: metadata,
         proof: proof,
-        readBytes: (path) {
-          final changed = File(path).readAsBytesSync();
-          changed[0] ^= 1;
-          return changed;
-        },
+        readBytes: (_) => List<int>.filled(recordedBytes, 0),
       ),
       throwsA(_invalidWith('checked-in local asset SHA-256 mismatch')),
     );

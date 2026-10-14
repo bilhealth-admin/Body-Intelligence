@@ -1,0 +1,26 @@
+{
+  "label": "watch-large-clock-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/connected_health/health_devices_review_regression_test.dart",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+    "--plain-name",
+    "iOS/ar_narrow_320_2x_light/premium manual refresh, phone steps, navigation and uncluttered readings"
+  ],
+  "started_utc": "2026-10-13T05:43:41.489528+00:00",
+  "runner_pid": 5964,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 3996
+}

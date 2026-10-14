@@ -111,10 +111,10 @@ void main() {
   );
 
   test(
-    'validator targets the current non-self-referential Android 31 manifest',
+    'validator targets the current non-self-referential Android 33 preparation manifest',
     () {
       const currentManifestPath =
-          'docs/release/BIL_ANDROID_V31_FROZEN_SOURCE_MANIFEST_2026-10-02.md';
+          'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md';
       final validator = File(
         'tool/release/validate_release_configuration.dart',
       ).readAsStringSync();
@@ -126,18 +126,20 @@ void main() {
         validator,
         isNot(contains('BIL_PLUS8_STAGING_MANIFEST_2026-09-05.md')),
       );
-      expect(metadata.unresolvedReviewCount, 0);
+      expect(metadata.unresolvedReviewCount, 5);
       expect(metadata.releaseVersion, '1.0.0');
-      expect(metadata.releaseBuildNumber, 31);
+      expect(metadata.releaseBuildNumber, 33);
       expect(
         metadata.stagingManifestComplete,
-        metadata.candidateFrozenOrAccepted,
-        reason: 'The current manifest must transition from NO/NO to YES/YES.',
+        isFalse,
+        reason:
+            'This Android 33 manifest is a preparation record, not an accepted freeze.',
       );
-      expect(manifestSource, contains('BIL_ANDROID_V31_AUDITED_SOURCE_SHA'));
+      expect(metadata.candidateFrozenOrAccepted, isFalse);
+      expect(manifestSource, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
       expect(
         manifestSource,
-        contains('BIL_ANDROID_V31_STAGING_MANIFEST_SHA256'),
+        contains('BIL_ANDROID_V33_STAGING_MANIFEST_SHA256'),
       );
       expect(manifestSource, contains("this file's committed-byte"));
     },

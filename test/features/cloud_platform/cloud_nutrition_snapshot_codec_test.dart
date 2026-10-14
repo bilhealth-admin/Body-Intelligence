@@ -296,6 +296,49 @@ void main() {
     },
   );
 
+  for (final tombstones in [false, true]) {
+    test(
+      'record selector exactly preserves full snapshot content and deletion evidence $tombstones',
+      () async {
+        final fixture = await seedCloudNutritionFixture(a, ownerId: owner);
+        if (tombstones) {
+          final food = (await a.select(a.foods).get()).singleWhere(
+            (row) => row.uuid == fixture.foodUuid,
+          );
+          await FoodRepository(a).deleteCustomFood(food.id);
+        }
+        final full = await source.capture(scopes: scopes);
+        expect(full, isNotEmpty);
+        for (final record in full) {
+          final single = await source.capture(
+            scopes: {record.scope},
+            recordType: record.type,
+            recordId: record.id,
+          );
+          expect(single, hasLength(1));
+          expect(
+            single.single.toJson(),
+            record.toJson(),
+            reason:
+                'Selection may reduce reads, never units, nutrition evidence, goals or relationships.',
+          );
+        }
+        expect(
+          await source.capture(
+            scopes: {'nutrition'},
+            recordType: 'meal',
+            recordId: 'unknown-synthetic-meal',
+          ),
+          isEmpty,
+        );
+        expect(
+          () => source.capture(scopes: scopes, recordType: 'meal'),
+          throwsFormatException,
+        );
+      },
+    );
+  }
+
   test('empty capture produces no default goal or unrelated record', () async {
     expect(await source.capture(scopes: scopes), isEmpty);
     expect(await source.capture(scopes: const {}), isEmpty);

@@ -40,7 +40,14 @@ class _WatchTimeText extends StatelessWidget {
             maxLines: 1,
           )..layout();
           if (painter.width > constraints.maxWidth) {
-            var lower = 1.0, upper = requestedScale;
+            // The inherited font can be wider than the approved face font.
+            // Keep the existing 1x lower bound whenever the complete time fits;
+            // otherwise fit this enlarged-text paragraph below that bound.
+            // The unchanged 1x branch above never enters this adjustment.
+            painter.textScaler = TextScaler.noScaling;
+            painter.layout();
+            var lower = painter.width <= constraints.maxWidth - .5 ? 1.0 : 0.0;
+            var upper = requestedScale;
             // Rich spans have different font sizes/letter spacing, so their
             // combined width is not a strictly proportional scalar ratio.
             for (var iteration = 0; iteration < 18; iteration++) {

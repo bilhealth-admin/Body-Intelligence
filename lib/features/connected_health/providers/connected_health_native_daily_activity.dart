@@ -3,7 +3,13 @@ part of 'connected_health_provider.dart';
 Future<ConnectedHealthSnapshot> _loadNativeDailyActivity(
   NativeConnectedHealthGateway gateway,
 ) async {
+  if (!gateway._store.isOwnerCurrent) {
+    return const ConnectedHealthSnapshot.unavailable();
+  }
   final cached = await gateway.load();
+  if (!gateway._store.isOwnerCurrent) {
+    return const ConnectedHealthSnapshot.unavailable();
+  }
   final source = gateway._source;
   final bridge = gateway._bridge;
   if (source == null ||
@@ -11,10 +17,7 @@ Future<ConnectedHealthSnapshot> _loadNativeDailyActivity(
       bridge is! NativeHealthDailyTotalsBridge) {
     return cached;
   }
-  final consent = await gateway._flows.store.get(
-    'connected_health_consent',
-    source,
-  );
+  final consent = await gateway._store.get('connected_health_consent', source);
   if (consent?['readRequested'] != true) return cached;
   try {
     final now = DateTime.now();
@@ -53,15 +56,12 @@ Future<ConnectedHealthSnapshot> _loadNativeDailyActivity(
     final signalHistory = energyHistory
         .map(ConnectedHealthSignalView.fromSignal)
         .toList(growable: false);
-    final stored = await gateway._flows.store.get(
-      'connected_health_ui',
-      'snapshot',
-    );
+    final stored = await gateway._store.get('connected_health_ui', 'snapshot');
     final storedSignals = [
       for (final raw in stored?['signals'] as List<Object?>? ?? const [])
         if (raw is Map) raw,
     ];
-    await gateway._flows.store.put('connected_health_ui', 'snapshot', {
+    await gateway._store.put('connected_health_ui', 'snapshot', {
       ...?stored,
       'lastSyncAt': now.toUtc().toIso8601String(),
       'importedCount': cached.importedCount,
@@ -90,6 +90,9 @@ Future<ConnectedHealthSnapshot> _loadNativeDailyActivity(
       clearFailure: true,
     );
   } on Object {
+    if (!gateway._store.isOwnerCurrent) {
+      return const ConnectedHealthSnapshot.unavailable();
+    }
     return cached.copyWith(
       status: ConnectedHealthStatus.degraded,
       failureCode: 'daily_activity_refresh_failed_cache_preserved',

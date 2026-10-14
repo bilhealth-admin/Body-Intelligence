@@ -1,0 +1,43 @@
+{
+  "label": "watch-visibility-and-unchanged-golden",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/dashboard_polish/live_health_watch_visibility_test.dart",
+    "test/dashboard_polish/dashboard_watch_compact_connection_test.dart",
+    "test/dashboard_polish/live_health_watch_layout_golden_test.dart"
+  ],
+  "started_utc": "2026-10-13T05:45:53.668069+00:00",
+  "runner_pid": 5964,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 9748,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T05:46:07.287720+00:00",
+  "seconds": 13.54,
+  "end_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "stable_source": true,
+  "accepted": true,
+  "counts": {
+    "success": 26,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "tests_completed": 26,
+  "files_loaded": 3,
+  "files_with_test_outcomes": 3,
+  "harness_pid": 22368,
+  "protocol_success": true,
+  "in_progress": [],
+  "error_events": 0,
+  "errors": []
+}

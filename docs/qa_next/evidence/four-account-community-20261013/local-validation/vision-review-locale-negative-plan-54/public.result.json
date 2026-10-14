@@ -1,0 +1,26 @@
+{
+  "runner_pid": 23464,
+  "jobs_requested": 2,
+  "jobs_completed": 1,
+  "accepted": false,
+  "started_utc": "2026-10-13T13:28:52.563462+00:00",
+  "finished_utc": "2026-10-13T13:29:02.424947+00:00",
+  "records": [
+    {
+      "job_index": 1,
+      "exit_code": 65,
+      "seconds": 5.06,
+      "pid": 18572,
+      "runner_pid": 23464,
+      "accepted": false,
+      "stable_source": true,
+      "additional_stable_source": true,
+      "source_fingerprint": "ca8dd0c09b76eafbccb774479e7e56b89897c39641a7cef8efffdbbcb2ac1cd3",
+      "end_fingerprint": "ca8dd0c09b76eafbccb774479e7e56b89897c39641a7cef8efffdbbcb2ac1cd3",
+      "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+      "started_utc": "2026-10-13T13:28:57.276237+00:00",
+      "finished_utc": "2026-10-13T13:29:02.413159+00:00"
+    }
+  ],
+  "scope": "synthetic-local-validation-summary-no-content-no-tokens"
+}

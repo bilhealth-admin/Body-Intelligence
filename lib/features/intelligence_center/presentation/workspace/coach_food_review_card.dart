@@ -128,7 +128,8 @@ class _CoachFoodReviewCardState extends State<CoachFoodReviewCard> {
     if (!_ownerCurrent) {
       return CoachFoodCardSurface(
         key: CoachFoodCardKeys.review(widget.operationId),
-        maxWidth: 290,
+        maxWidth: 520,
+        fillAvailableWidth: true,
         child: CoachFoodStatusLine(text: copy.ownerChanged),
       );
     }
@@ -136,7 +137,8 @@ class _CoachFoodReviewCardState extends State<CoachFoodReviewCard> {
         _conflict || widget.status == CoachFoodReviewStatus.conflict;
     return CoachFoodCardSurface(
       key: CoachFoodCardKeys.review(widget.operationId),
-      maxWidth: 290,
+      maxWidth: 520,
+      fillAvailableWidth: true,
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,

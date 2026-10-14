@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "run_file": "session-cleanup-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "acknowledge only first Realtime setup test message",
+      "state": "PASS"
+    },
+    {
+      "index": 2,
+      "static_case_label": "admin verifies identity before local logout",
+      "state": "PASS"
+    },
+    {
+      "index": 3,
+      "static_case_label": "admin revokes only task-created session scope=local",
+      "state": "PASS"
+    },
+    {
+      "index": 4,
+      "static_case_label": "admin revoked temporary refresh cannot reopen session",
+      "state": "PASS"
+    },
+    {
+      "index": 5,
+      "static_case_label": "publisher verifies identity before local logout",
+      "state": "PASS"
+    },
+    {
+      "index": 6,
+      "static_case_label": "publisher revokes only task-created session scope=local",
+      "state": "PASS"
+    },
+    {
+      "index": 7,
+      "static_case_label": "publisher revoked temporary refresh cannot reopen session",
+      "state": "PASS"
+    },
+    {
+      "index": 8,
+      "static_case_label": "sender verifies identity before local logout",
+      "state": "PASS"
+    },
+    {
+      "index": 9,
+      "static_case_label": "sender revokes only task-created session scope=local",
+      "state": "PASS"
+    },
+    {
+      "index": 10,
+      "static_case_label": "sender revoked temporary refresh cannot reopen session",
+      "state": "PASS"
+    },
+    {
+      "index": 11,
+      "static_case_label": "receiver verifies identity before local logout",
+      "state": "PASS"
+    },
+    {
+      "index": 12,
+      "static_case_label": "receiver revokes only task-created session scope=local",
+      "state": "PASS"
+    },
+    {
+      "index": 13,
+      "static_case_label": "receiver revoked temporary refresh cannot reopen session",
+      "state": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 13,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T07:06:19Z",
+  "finished_utc": "2026-10-13T07:06:22Z",
+  "pid": 22292
+}

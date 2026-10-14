@@ -1,0 +1,22 @@
+{
+  "label": "push-dispatch-and-provider-affected",
+  "kind": "deno",
+  "command": [
+    "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+    "test",
+    "--allow-env",
+    "--allow-net",
+    "--allow-read",
+    "supabase/functions/community-push-dispatch/server_test.ts",
+    "supabase/functions/community-push-dispatch/index_test.ts",
+    "supabase/functions/push-provider-gateway/server_test.ts",
+    "supabase/functions/push-provider-gateway/badge_test.ts"
+  ],
+  "started_utc": "2026-10-13T08:40:40.123072+00:00",
+  "runner_pid": 15804,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247",
+  "fingerprint_version": 4,
+  "pid": 9964
+}

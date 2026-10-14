@@ -23,6 +23,7 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_fitness_watc
 import 'package:body_intelligence_log/app/localization/runtime_copy_connected_health.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_ai_safety_reports.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_expansion.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_reference.dart';
@@ -152,6 +153,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...PlatformConversationRuntimeCopy.sources,
     ...CommunityModerationRuntimeCopy.sources,
     ...CommunityModerationRuntimeCopy.supplementalSources,
+    ...AiSafetyReportRuntimeCopy.sources,
     ...CommunitySocialRuntimeCopy.sources,
     ...CommunityReferenceRuntimeCopy.sources,
     ...ReferenceDeltaRuntimeCopy.sources,
@@ -168,6 +170,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...AdminNotificationRuntimeCopy.values.keys,
     ...SleepScheduleRuntimeCopy.sources,
     ...CoachReviewRuntimeCopy.keys,
+    ...CoachReviewRuntimeCopy.answerActionKeys,
     CoachReviewRuntimeCopy.deleteSelection,
     CoachReviewRuntimeCopy.cameraRationale,
     CoachReviewRuntimeCopy.settingsRecovery,

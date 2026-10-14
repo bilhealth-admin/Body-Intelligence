@@ -7,7 +7,8 @@ import '../domain/nutrition_pathway_access_policy.dart';
 /// Static route classification for a nutrition pathway deep link.
 ///
 /// Unknown IDs continue to the editor's explicit not-found state. Premium
-/// IDs retain the real editor as a visible preview beneath the shared glass.
+/// editors are mounted only after the shared route gate confirms current,
+/// server-verified access; locked users see the shared feature gate instead.
 class NutritionPathwayAccessGate extends StatelessWidget {
   const NutritionPathwayAccessGate({
     required this.pathwayId,

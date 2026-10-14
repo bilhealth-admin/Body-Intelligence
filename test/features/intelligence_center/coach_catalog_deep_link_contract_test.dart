@@ -24,6 +24,9 @@ void main() {
     final workouts = File(
       'lib/features/wellness/presentation/bil_workout_routines_page.dart',
     ).readAsStringSync();
+    final workoutDetails = File(
+      'lib/features/wellness/presentation/bil_workout_routine_details.dart',
+    ).readAsStringSync();
     final gate = File(
       'lib/features/commerce/presentation/premium_route_glass_gate.dart',
     ).readAsStringSync();
@@ -47,7 +50,18 @@ void main() {
     expect(recipes, isNot(contains('subscription.plan == CommercePlan.free')));
     expect(recipes, contains('_open(recipe);'));
     expect(workouts, contains('item.stableId == requested'));
-    expect(workouts, contains('if (_isLocked(item))'));
     expect(workouts, contains('_openDetails(item);'));
+    expect(
+      workouts,
+      contains(
+        'A deep link opens its requested detail, never an unsolicited paywall.',
+      ),
+    );
+    expect(
+      workoutDetails,
+      contains('final locked = !workoutItemAccessGranted'),
+    );
+    expect(workoutDetails, contains('if (locked)'));
+    expect(workoutDetails, contains('_LockedWorkoutPanel'));
   });
 }

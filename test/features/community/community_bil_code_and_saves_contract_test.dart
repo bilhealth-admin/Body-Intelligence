@@ -19,6 +19,9 @@ final class _CodeRepository extends CommunityRepository {
         ),
       );
 
+  @override
+  String get currentUserId => userId;
+
   static const userId = '22222222-2222-4222-8222-222222222222';
   static const firstCode = '0123456789abcdef0123456789abcdef';
   static const secondCode = 'fedcba9876543210fedcba9876543210';

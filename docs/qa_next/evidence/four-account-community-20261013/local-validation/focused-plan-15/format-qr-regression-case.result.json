@@ -1,0 +1,38 @@
+{
+  "label": "format-qr-regression-case",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "test\\features\\community\\community_code_invite_earn_account_test.dart"
+  ],
+  "started_utc": "2026-10-13T08:31:50.391983+00:00",
+  "runner_pid": 4416,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "8c51754ec6cb616b1d5a975a2ef1cfa1ca8f27b16780a746be6f092c0c97c9b5",
+  "fingerprint_version": 4,
+  "pid": 1176,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T08:31:56.955321+00:00",
+  "seconds": 6.42,
+  "end_fingerprint": "7e870d01866f79c8d00a3f04e19c9f272495a2c992533261a5c855d56b00f739",
+  "stable_source": false,
+  "additional_source_sha256": {
+    "public_site/.assetsignore": "5eaeeadca1b89f30d6b5a39fb2c4ea48dd23b6f626285e317a4a657aca7f544b",
+    "public_site/app-ads.txt": "f8043dbc228db374437c11be71a2fcb39c749798422c4f8521af4e766c45142c",
+    "public_site/app.js": "aa8ded500d2e2bf7144267823b8c458c2aeb2ac76521c893362f5c9e058f61c9",
+    "public_site/community_links.mjs": "d2c6807ecfeb56f48eabb0057f1d8e1d6db3867a346059ab32dfd1a6ed6591df",
+    "public_site/favicon.svg": "bf5928b8a948956062ab588f5484ec654be9a0377b84aca9f6980fe412669e6b",
+    "public_site/index.html": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2",
+    "public_site/README.md": "80835520dc90ebb18d1879567bafa1ef23dc49c88ca88868b191b3c645973ce9",
+    "public_site/robots.txt": "8f6fe05326c4c7167746ff2780c2df283902c0bb20b9c95abf3d32f1a2d71568",
+    "public_site/site.webmanifest": "230e49f2f994fceb3bbad093ac452f686d641e602d9a264490c9a294aa052a91",
+    "public_site/sitemap.xml": "f439da63f40feab2c9e419e0ea0a9e727128ab9aec2ad3fdd7de815a0c0cfd25",
+    "public_site/styles.css": "3667982d35546c51d09a30edd1f20914d16365b2a57c505094318dd3a27cf01a",
+    "public_site/_headers": "33838571e78e44550895680a120d336c4eddeb4e67b1007d98ecbd330f852743",
+    "public_site/_redirects": "a77cb5910084dfe39d7060075c92b9d9c9c55bbb1188722f113bc1d6f2714dd8"
+  },
+  "additional_stable_source": true,
+  "accepted": true
+}

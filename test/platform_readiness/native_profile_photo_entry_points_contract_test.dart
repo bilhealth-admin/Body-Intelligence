@@ -12,7 +12,7 @@ void main() {
     ).readAsStringSync();
 
     expect(dashboard, contains('profilePhotoServiceProvider'));
-    expect(dashboard, contains('.chooseAndSave()'));
+    expect(dashboard, contains('.chooseAndSave('));
     expect(dashboard, isNot(contains('openFile(acceptedTypeGroups:')));
     expect(service, contains('TargetPlatform.iOS'));
     expect(service, contains('TargetPlatform.android'));

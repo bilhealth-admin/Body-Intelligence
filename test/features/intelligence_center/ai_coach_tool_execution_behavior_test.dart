@@ -139,7 +139,7 @@ void main() {
         tester,
         type: IntelligenceActionType.addWeight,
         id: 'log_weight',
-        expectedReceipt: 'Logged weight: 82.4 kg.',
+        expectedReceipt: 'Weight saved.',
       );
       final weights = await WeightRepository(database).getAll();
       expect(weights, hasLength(1));
@@ -169,7 +169,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Logged weight: 82.4 kg.'), findsOneWidget);
+      expect(find.text('Weight saved.'), findsOneWidget);
+      expect(find.text('82.4 kg'), findsOneWidget);
       expect(await WaterRepository(database).totalForDay(DateTime.now()), 375);
       expect(await WeightRepository(database).getAll(), hasLength(1));
       expect(gateway.calls, 2, reason: 'restoring receipts must be read-only');
@@ -220,7 +221,7 @@ void main() {
         tester,
         type: IntelligenceActionType.saveMeasurements,
         id: 'save_measurements',
-        expectedReceipt: 'Body measurements saved for 2026-09-05.',
+        expectedReceipt: 'Body measurements saved.',
       );
       final measurements = await BodyMeasurementRepository(
         database,
@@ -812,7 +813,7 @@ void main() {
       tester,
       type: IntelligenceActionType.addWeight,
       id: 'log_weight',
-      expectedReceipt: 'Logged weight: 81.2 kg.',
+      expectedReceipt: 'Weight saved.',
     );
     expect(await WeightRepository(database).getAll(), hasLength(1));
     await tester.enterText(

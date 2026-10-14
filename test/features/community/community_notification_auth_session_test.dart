@@ -195,6 +195,10 @@ Future<void> _mount(WidgetTester tester, _ActivityRepository repository) async {
         builder: (_, _) => const Scaffold(body: Text('Community destination')),
       ),
       GoRoute(
+        path: '/community/content/:postId',
+        builder: (_, _) => const Scaffold(body: Text('Community destination')),
+      ),
+      GoRoute(
         path: '/dashboard',
         builder: (_, _) => const Scaffold(body: Text('Dashboard')),
       ),

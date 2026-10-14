@@ -40,9 +40,15 @@ try {
     create function auth.uid() returns uuid language sql stable as $$select (auth.jwt()->>'sub')::uuid$$;
     grant usage on schema auth, public to authenticated, service_role, anon;
   `);
+  // tables.sql contains the pre-migration public baseline. The private admin
+  // schema and its functions are created by the migration under test.
   await db.exec(read(`${fixture}/tables.sql`));
+  // Use the latest deployed subscription table snapshot instead of the older
+  // copy embedded in tables.sql.
+  await db.exec(read(`${fixture}/store_subscription_table.sql`));
   const ordered = ['bil_resolve_ai_allowance_plan', 'bil_resolve_ai_trial_anchor', 'bil_has_active_premium'];
-  for (const file of [...ordered.map(n => `${n}.sql`), ...readdirSync(fixture).filter(n => n.endsWith('.sql') && n !== 'tables.sql' && !ordered.some(x => n === `${x}.sql`))]) {
+  const migrationOwnedFiles = new Set(['schema.sql', 'functions.sql', 'public_functions.sql']);
+  for (const file of [...ordered.map(n => `${n}.sql`), ...readdirSync(fixture).filter(n => n.endsWith('.sql') && n !== 'tables.sql' && n !== 'store_subscription_table.sql' && !migrationOwnedFiles.has(n) && !ordered.some(x => n === `${x}.sql`))]) {
     await db.exec(read(`${fixture}/${file}`));
   }
   await db.exec(`create trigger bil_ai_credit_monthly_usage_sync after insert or update or delete

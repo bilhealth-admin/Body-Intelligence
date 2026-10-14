@@ -1,0 +1,23 @@
+{
+  "label": "stale-report-fresh-review-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/community/community_safety_review_repository_test.dart",
+    "--plain-name",
+    "proven stale report rejection requires a fresh review before retry"
+  ],
+  "started_utc": "2026-10-13T07:18:35.896363+00:00",
+  "runner_pid": 9976,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "ad2eeebbf65a0f75b1222ae1cafb1df5846057f3007dad3c9ce9c53cd5ba3e55",
+  "fingerprint_version": 4,
+  "pid": 4756
+}

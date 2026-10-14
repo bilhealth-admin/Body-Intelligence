@@ -1,0 +1,23 @@
+{
+  "before_reference": "docs/qa_next/evidence/stage1-closure-20261012/images/approved-health-iOS_ar_narrow_320_2x_light_premium_devices.png",
+  "after_capture": "build/diagnostics/health_devices_review_20260909/ios_ar_narrow_320_2x_light_premium_devices.png",
+  "same_dimensions": true,
+  "image_dimensions": [
+    320,
+    844
+  ],
+  "difference_bounds": [
+    286,
+    82,
+    299,
+    94
+  ],
+  "watch_region": [
+    25,
+    300,
+    300,
+    650
+  ],
+  "watch_region_pixel_identical": true,
+  "note": "The previous approved image predates the already-committed E27 back-glyph polish. Its only pixel difference is that glyph; watch-region pixels match. These are Flutter fixture captures, not phone/store evidence."
+}

@@ -18,6 +18,7 @@ void main() {
     tester,
   ) async {
     final weightUpdates = StreamController<List<WeightEntry>>();
+    addTearDown(weightUpdates.close);
     final now = DateTime.utc(2026, 8, 1);
     final profile = UserProfileData(
       id: 1,
@@ -37,7 +38,6 @@ void main() {
     final baseline = _weight(id: 1, day: 1, kilograms: 100);
     final second = _weight(id: 2, day: 2, kilograms: 95);
     final latest = _weight(id: 3, day: 3, kilograms: 92);
-
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -54,7 +54,16 @@ void main() {
           displayNameProvider.overrideWith((_) => Stream.value('BIL member')),
           profilePhotoProvider.overrideWith((_) => Stream.value(null)),
           profilePhotoPublicUrlProvider.overrideWith((_) async => null),
+          profileAvatarStateProvider.overrideWith(
+            () => _ProfileAvatarStateForTest(),
+          ),
+          verifiedEntitlementOwnerProvider.overrideWith(
+            (_) => Stream.value(null),
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
+            AsyncData(FreePlan.createState()),
+          ),
+          verifiedSubscriptionAccessProvider.overrideWithValue(
             AsyncData(FreePlan.createState()),
           ),
         ],
@@ -70,21 +79,26 @@ void main() {
       ),
     );
     await _pumpUntilFound(tester, '-5.0 kg');
+    await tester.pumpAndSettle();
 
     expect(find.text('-5.0 kg'), findsOneWidget);
     expect(find.bySemanticsLabel('Weight change, -5.0 kg'), findsOneWidget);
 
     weightUpdates.add([latest, second, baseline]);
     await _pumpUntilFound(tester, '-8.0 kg');
+    await tester.pumpAndSettle();
 
     expect(find.text('-8.0 kg'), findsOneWidget);
     expect(find.text('-5.0 kg'), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-    unawaited(weightUpdates.close());
-    await tester.pump();
+    await tester.pumpAndSettle();
   });
+}
+
+class _ProfileAvatarStateForTest extends ProfileAvatarStateNotifier {
+  @override
+  ProfileAvatarState build() => const ProfileAvatarState(null, null, null);
 }
 
 Future<void> _pumpUntilFound(WidgetTester tester, String text) async {

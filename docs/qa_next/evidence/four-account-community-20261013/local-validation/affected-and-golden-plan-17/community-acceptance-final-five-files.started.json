@@ -1,0 +1,25 @@
+{
+  "label": "community-acceptance-final-five-files",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/community/community_safety_review_repository_test.dart",
+    "test/features/community/community_chat_auth_session_test.dart",
+    "test/features/community/community_code_invite_earn_account_test.dart",
+    "test/features/community/community_notification_content_route_test.dart",
+    "test/features/intelligence_center/cloud_voice_privacy_contract_test.dart"
+  ],
+  "started_utc": "2026-10-13T08:42:22.032836+00:00",
+  "runner_pid": 9256,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247",
+  "fingerprint_version": 4,
+  "pid": 4864
+}

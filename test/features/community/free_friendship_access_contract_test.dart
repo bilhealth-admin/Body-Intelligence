@@ -79,6 +79,7 @@ void main() {
       '/community/code/scan',
       '/community/member/:code',
       '/community/notifications',
+      '/community/content/:postId',
       '/community/post/:postId',
       '/community/drafts',
       '/community/compose',

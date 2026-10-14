@@ -15,8 +15,14 @@ final class StoreCatalogConfiguration {
   static const appleSubscriptionGroup = String.fromEnvironment(
     'BIL_APPLE_SUBSCRIPTION_GROUP',
   );
-  static const termsUrl = String.fromEnvironment('BIL_TERMS_URL');
-  static const privacyUrl = String.fromEnvironment('BIL_PRIVACY_URL');
+  static const termsUrl = String.fromEnvironment(
+    'BIL_TERMS_URL',
+    defaultValue: 'https://www.bilhealth.com/terms',
+  );
+  static const privacyUrl = String.fromEnvironment(
+    'BIL_PRIVACY_URL',
+    defaultValue: 'https://www.bilhealth.com/privacy',
+  );
 
   static bool get legalLinksConfigured =>
       _isHttps(termsUrl) && _isHttps(privacyUrl);

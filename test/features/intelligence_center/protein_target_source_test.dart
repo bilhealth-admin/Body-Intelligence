@@ -53,4 +53,58 @@ void main() {
       expect(reply.message.text, isNot(contains('saved in your BIL plan')));
     },
   );
+
+  test(
+    'calorie answer names body-profile source without a saved-plan claim',
+    () async {
+      final context = CoachContextSnapshot(
+        generatedAt: DateTime.utc(2026, 10, 13),
+        profile: const {},
+        weights: const [],
+        nutritionDays: const [],
+        waterHistory: const [],
+        computedHealth: const {
+          'dailyTargets': {'caloriesKcal': 1980.0},
+          'dailyTargetSources': {'caloriesKcal': 'body_profile_calculation'},
+        },
+      );
+      final reply = await const IntelligenceCenterEngine().answer(
+        question: 'calories',
+        arabic: false,
+        coachContext: context,
+      );
+      expect(reply.message.text, contains('1980'));
+      expect(reply.message.text, contains('body-profile calculation'));
+      expect(reply.message.text, isNot(contains('saved in your BIL plan')));
+      expect(reply.message.evidence, contains('dailyTargets.caloriesKcal'));
+      expect(reply.message.evidence, contains('body_profile_calculation'));
+    },
+  );
+  test(
+    'calorie answer ignores NaN target safely without fabricating zero',
+    () async {
+      final context = CoachContextSnapshot(
+        generatedAt: DateTime.utc(2026, 10, 13),
+        profile: const {},
+        weights: const [],
+        nutritionDays: const [],
+        waterHistory: const [],
+        computedHealth: {
+          'dailyTargets': {'caloriesKcal': double.nan},
+          'dailyTargetSources': {'caloriesKcal': 'saved_plan_override'},
+        },
+      );
+      final reply = await const IntelligenceCenterEngine().answer(
+        question: 'calories',
+        arabic: false,
+        coachContext: context,
+      );
+      expect(reply.message.text, isNot(contains('NaN')));
+      expect(reply.message.text, isNot(contains('0 kcal')));
+      expect(
+        reply.message.evidence,
+        isNot(contains('dailyTargets.caloriesKcal')),
+      );
+    },
+  );
 }

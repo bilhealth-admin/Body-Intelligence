@@ -1,0 +1,43 @@
+{
+  "label": "cache-real-loopback-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/app/services/scoped_media_file_cache_test.dart",
+    "--plain-name",
+    "real loopback downloads coalesce, survive first consumer exit and never exceed three"
+  ],
+  "started_utc": "2026-10-13T05:36:31.643644+00:00",
+  "runner_pid": 13376,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "d3a072678039bbb621425183ffa42cc899b040fae2abfc3832f8510251a3b8db",
+  "fingerprint_version": 4,
+  "pid": 21980,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T05:36:38.904114+00:00",
+  "seconds": 7.19,
+  "end_fingerprint": "d3a072678039bbb621425183ffa42cc899b040fae2abfc3832f8510251a3b8db",
+  "stable_source": true,
+  "accepted": true,
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "tests_completed": 1,
+  "files_loaded": 1,
+  "files_with_test_outcomes": 1,
+  "harness_pid": 14804,
+  "protocol_success": true,
+  "in_progress": [],
+  "error_events": 0,
+  "errors": []
+}

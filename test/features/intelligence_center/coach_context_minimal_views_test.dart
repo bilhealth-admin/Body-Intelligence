@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_action_admission.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_action_permission.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_center_engine.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_speech_policy.dart';
@@ -172,6 +174,114 @@ void main() {
       isTrue,
     );
   });
+  for (final scenario in const [
+    ('Record my weight 180 lb on 2026-10-13', 81.6466266),
+    ('My weight is 82.4 kg on 2026-10-13', 82.4),
+    ('record my weight 82.4 kg on 2026-10-13', 82.4),
+  ]) {
+    test(
+      'actual Engine weight command precedes recorded lookup ${scenario.$1}',
+      () async {
+        final reply = await const IntelligenceCenterEngine().answer(
+          question: scenario.$1,
+          arabic: false,
+          localeCode: 'en',
+          coachContext: _weightRegressionContext(),
+        );
+        final writes = reply.actions.where((a) => a.toolId == 'log_weight');
+        expect(writes, hasLength(1));
+        expect(writes.single.payload['weightKg'], closeTo(scenario.$2, 1e-7));
+        expect(writes.single.payload['date'], '2026-10-13');
+        expect(writes.single.requiresConfirmation, isTrue);
+        expect(
+          const CoachActionAdmission()
+              .bind(writes.single)!
+              .allows(CoachActionPermissionMode.readOnly),
+          isFalse,
+        );
+        expect(reply.message.evidence, contains('local-command-engine'));
+        expect(reply.message.evidence, isNot(contains('local latest weight')));
+        expect(reply.usedExternalKnowledge, isFalse);
+      },
+    );
+  }
+  test(
+    'actual Engine read still uses latest recorded weight without an action',
+    () async {
+      final reply =
+          await const IntelligenceCenterEngine(
+            localApi: _FailIfCalledLocalApi(),
+          ).answer(
+            question: 'What is my weight?',
+            arabic: false,
+            localeCode: 'en',
+            coachContext: _weightRegressionContext(),
+          );
+      expect(reply.message.text, contains('82.7'));
+      expect(reply.message.evidence, contains('local latest weight'));
+      expect(reply.actions, isEmpty);
+    },
+  );
+  test(
+    'actual Engine unknown weight stays unknown without a command',
+    () async {
+      final reply =
+          await const IntelligenceCenterEngine(
+            localApi: _FailIfCalledLocalApi(),
+          ).answer(
+            question: 'What is my weight?',
+            arabic: false,
+            localeCode: 'en',
+            coachContext: CoachContextSnapshot.empty(
+              generatedAt: DateTime.utc(2026, 10, 13),
+            ),
+          );
+      expect(reply.message.missingData, contains('currentWeightKg'));
+      expect(reply.message.text, isNot(contains('0 kg')));
+      expect(reply.actions, isEmpty);
+    },
+  );
+  for (final question in const [
+    'Record my weight 250 grams',
+    'Record my weight -180 lb',
+    'Record my weight 82 kg on 2026-10-12 and 2026-10-13',
+    'What is my weight, 82 kg?',
+  ]) {
+    test(
+      'actual Engine invalid ambiguous or queried weight has no write $question',
+      () async {
+        final reply = await const IntelligenceCenterEngine().answer(
+          question: question,
+          arabic: false,
+          localeCode: 'en',
+          coachContext: _weightRegressionContext(),
+        );
+        expect(
+          reply.actions.where(
+            (a) => const CoachActionAdmission().bind(a)?.writesData == true,
+          ),
+          isEmpty,
+        );
+      },
+    );
+  }
+  test(
+    'actual Engine urgent symptoms still precede a weight command',
+    () async {
+      final reply =
+          await const IntelligenceCenterEngine(
+            localApi: _FailIfCalledLocalApi(),
+          ).answer(
+            question:
+                'Chest pain and difficulty breathing, record my weight 82 kg',
+            arabic: false,
+            localeCode: 'en',
+            coachContext: _weightRegressionContext(),
+          );
+      expect(reply.message.text, contains('immediate'));
+      expect(reply.actions, isEmpty);
+    },
+  );
 }
 
 class _AnsweringLocalApi implements LocalCoachApi {
@@ -193,3 +303,12 @@ class _FailIfCalledLocalApi implements LocalCoachApi {
   Future<LocalCoachResult> understand(LocalCoachRequest request) =>
       throw StateError('Sleep must be answered before any model gateway call.');
 }
+
+CoachContextSnapshot _weightRegressionContext() => CoachContextSnapshot(
+  generatedAt: DateTime.utc(2026, 10, 13),
+  profile: const {'currentWeightKg': 83.4},
+  weights: [CoachWeightPoint(at: DateTime.utc(2026, 10, 13), kg: 82.7)],
+  nutritionDays: const [],
+  waterHistory: const [],
+  computedHealth: const {},
+);

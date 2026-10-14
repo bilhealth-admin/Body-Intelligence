@@ -1,14 +1,17 @@
 """The ledger counts real Flutter events, including loading errors and skips."""
 import importlib.util
+import io
 from pathlib import Path
 import unittest
 from unittest.mock import patch
 import argparse
+import hashlib
 import json
 import os
 import subprocess
 import sys
 import tempfile
+import time
 
 spec = importlib.util.spec_from_file_location('owner_runner', Path(__file__).with_name('bil_owner_full_test_runner.py'))
 runner = importlib.util.module_from_spec(spec)
@@ -64,7 +67,42 @@ class LedgerTests(unittest.TestCase):
         self.assertTrue(runner.generated_comparison('test/failures/a_testImage.png'))
         self.assertFalse(runner.generated_comparison('lib/failures/a_testImage.png'))
 
-    def test_real_git_status_preserves_first_modified_comparison_and_rejects_dart(self):
+    def test_source_fingerprint_covers_workflows_native_builds_and_test_tools(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            included = (
+                '.github/workflows/verify.yml',
+                'integration_test/native_test.dart',
+                'android/settings.gradle',
+                'ios/Runner.xcodeproj/project.pbxproj',
+                'macos/Runner/AppDelegate.swift',
+                'tool/prebuild/check.py',
+                'tools/qa/runner.py',
+                'public_site/app.js',
+                'docs/release/frozen-manifest.md',
+                'test/visual_closure/goldens/page.png',
+                'test/visual_closure/failures/page_testImage.png',
+                'docs/qa_next/report.md',
+            )
+            for relative in included:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(relative.encode())
+
+            with patch.object(runner, 'ROOT', root), patch.object(
+                runner, 'git', return_value='\n'.join(included)
+            ):
+                values = runner.inputs()
+
+            self.assertEqual(
+                set(values),
+                set(included) - {
+                    'test/visual_closure/failures/page_testImage.png',
+                    'docs/qa_next/report.md',
+                },
+            )
+
+    def test_real_git_status_records_dirty_source_without_rejecting_it(self):
         # A real porcelain record begins with an index/worktree status pair.
         # Trimming its leading space corrupts the first path sliced at [3:].
         environment = os.environ.copy()
@@ -118,6 +156,10 @@ class LedgerTests(unittest.TestCase):
                     with self.assertRaisesRegex(RuntimeError, '^passed frozen Git preflight$'):
                         runner.execute(args, repository / 'not-created', state, owned)
                     machine.assert_called_once_with()
+                self.assertEqual(state['working_tree_status_entries'], 1)
+                self.assertEqual(
+                    state['working_tree_status_fingerprint'],
+                    hashlib.sha256('\n'.join(dirty).encode()).hexdigest())
                 self.assertFalse(state['flutter_started'])
                 self.assertEqual(owned, [])
                 self.assertFalse((repository / 'not-created').exists())
@@ -128,10 +170,15 @@ class LedgerTests(unittest.TestCase):
                                    '--untracked-files=all').splitlines()
                 self.assertEqual(dirty[0], ' M ' + dart_name)
                 self.assertFalse(runner.generated_comparison(dirty[0][3:]))
-                with patch.object(runner, 'resources') as machine:
-                    with self.assertRaisesRegex(RuntimeError, 'working tree changed after freezing'):
+                with patch.object(runner, 'resources',
+                                  side_effect=RuntimeError('passed frozen Git preflight')) as machine:
+                    with self.assertRaisesRegex(RuntimeError, '^passed frozen Git preflight$'):
                         runner.execute(args, repository / 'not-created', state, owned)
-                    machine.assert_not_called()
+                    machine.assert_called_once_with()
+                self.assertEqual(state['working_tree_status_entries'], 2)
+                self.assertEqual(
+                    state['working_tree_status_fingerprint'],
+                    hashlib.sha256('\n'.join(dirty).encode()).hexdigest())
                 self.assertFalse(state['flutter_started'])
                 self.assertEqual(owned, [])
                 self.assertFalse((repository / 'not-created').exists())
@@ -156,6 +203,16 @@ class LedgerTests(unittest.TestCase):
         self.assertNotIn('--plain-name', command)
         self.assertNotIn('--update-goldens', command)
         self.assertFalse(any(item.endswith('_test.dart') for item in command))
+        self.assertFalse(any('BIL_TERMS_URL=https://billing-fixture.invalid' in item for item in command))
+        self.assertFalse(any('BIL_PRIVACY_URL=https://billing-fixture.invalid' in item for item in command))
+
+    def test_localized_progress_name_cannot_crash_windows_console_output(self):
+        message = 'PROGRESS latest=SUCCESS CommunityTextPolicy напиши мне в Signal'
+        rendered = runner.console_safe_text(message, 'cp1252')
+        self.assertIn('PROGRESS latest=SUCCESS CommunityTextPolicy', rendered)
+        self.assertIn(r'\u', rendered)
+        rendered_utf8 = runner.console_safe_text(message, 'utf-8')
+        self.assertEqual(rendered_utf8, message)
 
     def test_preflight_failure_has_no_flutter_process(self):
         with tempfile.TemporaryDirectory() as name, patch.object(runner, 'ROOT', Path(name)), patch.object(runner, 'git', return_value='wrong-sha'), patch.object(runner.subprocess, 'Popen') as launch, patch.object(sys, 'argv', ['runner', 'wrong-head', '--expect-head', 'frozen', '--flutter', 'fake/flutter.bat']):
@@ -236,6 +293,240 @@ class LedgerTests(unittest.TestCase):
                 if child.poll() is None:
                     child.kill()
                     child.wait(timeout=5)
+
+
+class _WindowsStatusLock:
+    # This child owns only the provided temporary file. It deliberately grants
+    # read/write sharing but denies delete/rename sharing until told to release.
+    def __init__(self, path):
+        self.path = path
+        self.process = None
+        self.release_sent = False
+
+    def __enter__(self):
+        if os.name != 'nt':
+            raise RuntimeError('this regression requires a real Windows sharing lock')
+        code = r'''import ctypes, sys, time
+from ctypes import wintypes
+kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+kernel.CreateFileW.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                              wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                              wintypes.HANDLE)
+kernel.CreateFileW.restype = wintypes.HANDLE
+kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
+kernel.CloseHandle.restype = wintypes.BOOL
+handle = kernel.CreateFileW(sys.argv[1], 0x80000000, 3, None, 3, 0, None)
+if handle == ctypes.c_void_p(-1).value:
+    raise ctypes.WinError(ctypes.get_last_error())
+print('locked', flush=True)
+try:
+    delay = sys.stdin.readline().strip()
+    if delay:
+        time.sleep(float(delay))
+finally:
+    if not kernel.CloseHandle(handle):
+        raise ctypes.WinError(ctypes.get_last_error())
+print('released', flush=True)
+'''
+        self.process = subprocess.Popen([sys.executable, '-c', code, str(self.path)],
+                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, text=True)
+        if self.process.stdout.readline().strip() != 'locked':
+            _, error = self.process.communicate(timeout=3)
+            raise RuntimeError('Windows fixture did not acquire its file: ' + error)
+        return self
+
+    def release_after(self, seconds=0):
+        if self.release_sent:
+            raise RuntimeError('the owned Windows holder was already released')
+        self.release_sent = True
+        self.process.stdin.write(str(seconds) + '\n')
+        self.process.stdin.flush()
+
+    def wait_released(self):
+        code = self.process.wait(timeout=3)
+        if code != 0:
+            raise RuntimeError('Windows fixture release failed: ' + self.process.stderr.read())
+
+    def __exit__(self, *_):
+        try:
+            if self.process.poll() is None and not self.release_sent:
+                self.release_after()
+            self.wait_released()
+        finally:
+            if self.process.poll() is None:
+                self.process.kill()
+                self.process.wait(timeout=3)
+            self.process.stdin.close()
+            self.process.stdout.close()
+            self.process.stderr.close()
+
+
+class StatusPublicationTests(unittest.TestCase):
+    def test_atomic_json_uses_unique_closed_temporary_files(self):
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            path = folder / 'status.json'
+            sources = []
+            replace = runner.os.replace
+
+            def actual_replace(source, destination):
+                source = Path(source)
+                sources.append(source)
+                self.assertEqual(destination, path)
+                self.assertNotEqual(source, path.with_suffix('.tmp'))
+                with source.open(encoding='utf-8') as stream:
+                    self.assertIn(json.load(stream), ({'value': 1}, {'value': 2}))
+                return replace(source, destination)
+
+            with patch.object(runner.os, 'replace', side_effect=actual_replace):
+                runner.atomic_json(path, {'value': 1})
+                runner.atomic_json(path, {'value': 2})
+            self.assertEqual(len(set(sources)), 2)
+            self.assertEqual(json.loads(path.read_text(encoding='utf-8')), {'value': 2})
+            self.assertFalse(any(folder.glob('*.tmp')))
+
+    def test_real_windows_replace_lock_releases_within_retry_budget(self):
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            path = folder / 'status.json'
+            old, new = {'sequence': 1}, {'sequence': 2, 'complete': True}
+            runner.atomic_json(path, old)
+            replace = runner.os.replace
+            failures = []
+            with _WindowsStatusLock(path) as holder:
+                def actual_replace(source, destination):
+                    try:
+                        return replace(source, destination)
+                    except OSError as error:
+                        failures.append(error.winerror)
+                        self.assertIn(error.winerror, (5, 32, 33))
+                        self.assertEqual(json.loads(path.read_text(encoding='utf-8')), old)
+                        if len(failures) == 1:
+                            holder.release_after(0.03)
+                        raise
+
+                started = time.monotonic()
+                with patch.object(runner.os, 'replace', side_effect=actual_replace):
+                    runner.atomic_json(path, new)
+                self.assertLess(time.monotonic() - started, 1)
+                holder.wait_released()
+            self.assertTrue(failures)
+            self.assertEqual(json.loads(path.read_text(encoding='utf-8')), new)
+            self.assertFalse(any(folder.glob('*.tmp')))
+
+    def test_real_windows_replace_lock_outlasts_bounded_retry_then_recovers(self):
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            path = folder / 'status.json'
+            old, new = {'sequence': 1}, {'sequence': 2}
+            runner.atomic_json(path, old)
+            with _WindowsStatusLock(path) as holder:
+                started = time.monotonic()
+                with self.assertRaises(OSError) as failure:
+                    runner.atomic_json(path, new, retry_timeout=0.06)
+                self.assertIn(failure.exception.winerror, (5, 32, 33))
+                self.assertLess(time.monotonic() - started, 1)
+                self.assertEqual(json.loads(path.read_text(encoding='utf-8')), old)
+                self.assertFalse(any(folder.glob('*.tmp')))
+                holder.release_after()
+                holder.wait_released()
+            runner.atomic_json(path, new)
+            self.assertEqual(json.loads(path.read_text(encoding='utf-8')), new)
+
+    def test_live_progress_keeps_ledger_and_os_lock_after_real_windows_status_contention(self):
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            path = folder / 'status.json'
+            old = {'phase': 'starting', 'accepted': False}
+            runner.atomic_json(path, old)
+            lock_path = folder / 'active.lock'
+            runner_path = str(Path(runner.__file__))
+            contender_code = (
+                'import importlib.util; from pathlib import Path; '
+                f's=importlib.util.spec_from_file_location("r", {runner_path!r}); '
+                'm=importlib.util.module_from_spec(s); s.loader.exec_module(m); '
+                f'm.ExclusiveRun(Path({str(lock_path)!r})).__enter__()')
+            ledger = runner.Ledger()
+            state = dict(phase='running', accepted=False, automatic_retry=False,
+                         flutter_pid=123, **ledger.snapshot())
+            stderr = io.StringIO()
+            with (folder / 'progress.log').open('a', encoding='utf-8') as progress:
+                publisher = runner.LiveStatusPublisher(path, progress)
+                with runner.ExclusiveRun(lock_path), _WindowsStatusLock(path) as holder:
+                    with patch.object(sys, 'stderr', stderr):
+                        self.assertFalse(publisher.publish(state))
+                    self.assertTrue(state['status_publication']['degraded'])
+                    self.assertEqual(state['status_publication']['failures'], 1)
+                    self.assertEqual(json.loads(path.read_text(encoding='utf-8')), old)
+                    for key in (1, 2):
+                        ledger.event({'type': 'testStart', 'test': {'id': key, 'name': str(key)}})
+                        ledger.event({'type': 'testDone', 'testID': key, 'result': 'success',
+                                      'hidden': False})
+                    state.update(ledger.snapshot())
+                    contender = subprocess.run([sys.executable, '-c', contender_code],
+                                               capture_output=True, text=True, timeout=5)
+                    self.assertNotEqual(contender.returncode, 0)
+                    self.assertIn('Flutter was not started', contender.stderr)
+                    holder.release_after()
+                    holder.wait_released()
+                    self.assertTrue(publisher.publish(state))
+                    self.assertFalse(state['status_publication']['degraded'])
+                    self.assertEqual(state['status_publication']['failures'], 1)
+            published = json.loads(path.read_text(encoding='utf-8'))
+            self.assertEqual(published['counts']['success'], 2)
+            self.assertFalse(published['automatic_retry'])
+            self.assertIn('status_publication_degraded', stderr.getvalue())
+            self.assertIn('status_publication_degraded',
+                          (folder / 'progress.log').read_text(encoding='utf-8'))
+
+    def test_final_status_remains_strict_with_real_windows_lock_and_preserves_results(self):
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            path = folder / 'status.json'
+            old = {'phase': 'running', 'accepted': False}
+            runner.atomic_json(path, old)
+            ledger = runner.Ledger()
+            events = [{'type': 'testStart', 'test': {'id': 1, 'name': 'unit fixture'}},
+                      {'type': 'testDone', 'testID': 1, 'result': 'success', 'hidden': False},
+                      {'type': 'done', 'success': True}]
+            for event in events:
+                ledger.event(event)
+            state = dict(phase='completed', exit_code=0, automatic_retry=False,
+                         files_not_loaded=[], files_without_test_outcome=[],
+                         stable_source=True, head_unchanged=True, branch_unchanged=True,
+                         **ledger.snapshot())
+            state['accepted'] = runner.accepted(state)
+            self.assertTrue(state['accepted'])
+            outcomes = [{'id': 1, 'result': 'success'}]
+            runner.atomic_json(folder / 'errors.json', [])
+            runner.atomic_json(folder / 'test-outcomes.json', outcomes)
+            raw = ''.join(json.dumps(event) + '\n' for event in events)
+            (folder / 'flutter.jsonl').write_text(raw, encoding='utf-8')
+            with _WindowsStatusLock(path):
+                with self.assertRaises(OSError) as failure:
+                    runner.write_final_result(folder, state)
+                self.assertIn(failure.exception.winerror, (5, 32, 33))
+                self.assertEqual(json.loads(path.read_text(encoding='utf-8')), old)
+                final = json.loads((folder / 'final-result.json').read_text(encoding='utf-8'))
+                self.assertEqual(final['phase'], 'failed_runner')
+                self.assertFalse(final['accepted'])
+                self.assertFalse(final['automatic_retry'])
+                self.assertEqual(final['counts']['success'], 1)
+                self.assertTrue(final['protocol_success'])
+            self.assertEqual(json.loads((folder / 'test-outcomes.json').read_text(encoding='utf-8')),
+                             outcomes)
+            self.assertEqual((folder / 'flutter.jsonl').read_text(encoding='utf-8'), raw)
+
+    def test_live_progress_does_not_swallow_an_unknown_os_error(self):
+        state = {'phase': 'running', 'accepted': False}
+        publisher = runner.LiveStatusPublisher(Path('not-opened.json'), io.StringIO())
+        with patch.object(runner, 'atomic_json', side_effect=OSError(5, 'synthetic I/O failure')):
+            with self.assertRaisesRegex(OSError, 'synthetic I/O failure'):
+                publisher.publish(state)
+        self.assertFalse(publisher.degraded)
+        self.assertEqual(publisher.failures, 0)
+        self.assertNotIn('status_publication', state)
 
 
 if __name__ == '__main__':

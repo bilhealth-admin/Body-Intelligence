@@ -401,6 +401,13 @@ final class _CommunityInteractionRepository extends CommunityRepository {
       confirmedMessageReads.intersection(ids.toSet());
 
   @override
+  Future<void> sendMessageOperation(
+    String recipientId,
+    String body, {
+    required String requestId,
+  }) => sendMessage(recipientId, body);
+
+  @override
   Future<void> sendMessage(String recipientId, String body) async {
     expect(recipientId, otherId);
     sentMessageCalls++;
@@ -1002,7 +1009,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'رسالة واضحة');
-    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.tap(find.byKey(const Key('community-chat-send')));
     await tester.pumpAndSettle();
 
     expect(repository.sentMessageCalls, 1);

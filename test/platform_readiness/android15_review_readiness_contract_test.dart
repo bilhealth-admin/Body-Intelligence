@@ -6,11 +6,14 @@ String _read(String path) => File(path).readAsStringSync();
 
 void main() {
   test(
-    'Android 31 release identity and modern Android package gates are exact',
+    'Android 33 release identity and modern Android package gates are exact',
     () {
       final gradle = _read('android/app/build.gradle.kts');
       final workflow = _read(
         '.github/workflows/bil_android_release_candidate.yml',
+      );
+      final manifest = _read(
+        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
       );
 
       expect(gradle, contains('compileSdk = 36'));
@@ -20,13 +23,14 @@ void main() {
       expect(gradle, contains('isShrinkResources = true'));
       expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
 
-      expect(workflow, contains('(( BUILD_NUMBER == 31 ))'));
+      expect(workflow, contains('(( BUILD_NUMBER == 33 ))'));
       expect(workflow, isNot(contains('(( BUILD_NUMBER == 29 ))')));
-      expect(workflow, contains('BIL_ANDROID_V31_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_ANDROID_V31_STAGING_MANIFEST_SHA256'));
+      expect(workflow, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_IOS_V36_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_ANDROID_V33_STAGING_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V31_FROZEN_SOURCE_MANIFEST_2026-10-02.md'),
+        contains('BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));
@@ -40,6 +44,9 @@ void main() {
           'and ELF alignment',
         ),
       );
+      expect(manifest, contains('RELEASE_BUILD_NUMBER: 33'));
+      expect(manifest, contains('STAGING_MANIFEST_COMPLETE: NO'));
+      expect(manifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: NO'));
     },
   );
 
@@ -58,6 +65,18 @@ void main() {
       ]) {
         expect(manifest, contains('android:name="$permission"'));
       }
+      for (final rejectedPermission in <String>[
+        'android.permission.health.READ_BODY_FAT',
+        'android.permission.health.READ_RESTING_HEART_RATE',
+        'android.permission.health.READ_SLEEP',
+        'android.permission.health.READ_SLEEP_SESSION',
+      ]) {
+        expect(
+          manifest,
+          isNot(contains(rejectedPermission)),
+          reason: 'Rejected Health Connect scope must stay absent.',
+        );
+      }
 
       expect(
         manifest,
@@ -65,16 +84,25 @@ void main() {
       );
       expect(manifest, contains('android.intent.action.VIEW_PERMISSION_USAGE'));
 
-      for (final metaKey in <String>[
-        'com.facebook.sdk.AutoLogAppEventsEnabled',
-        'com.facebook.sdk.AdvertiserIDCollectionEnabled',
+      // Meta's native Android SDK has been removed. Browser-based Supabase
+      // OAuth does not need native SDK metadata; keep both the manifest and
+      // dependency graph free of a dormant SDK configuration.
+      expect(manifest, isNot(contains('com.facebook.sdk.')));
+      final androidDependencies = [
+        _read('pubspec.yaml'),
+        _read('pubspec.lock'),
+        _read('android/app/build.gradle.kts'),
+        _read('android/settings.gradle.kts'),
+      ].join('\n');
+      for (final nativeMetaDependency in <String>[
+        'com.facebook.android',
+        'flutter_facebook_auth',
+        'facebook_app_events',
       ]) {
         expect(
-          RegExp(
-            'android:name="$metaKey"[\\s\\S]{0,180}?android:value="false"',
-          ).hasMatch(manifest),
-          isTrue,
-          reason: '$metaKey must remain disabled in production.',
+          androidDependencies,
+          isNot(contains(nativeMetaDependency)),
+          reason: 'Native Meta SDK dependency must stay absent.',
         );
       }
 

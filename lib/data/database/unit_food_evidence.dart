@@ -21,16 +21,12 @@ final class UnitFoodEvidence {
         source.length > 4096 ||
         ownerKey.isEmpty ||
         ownerKey.length > 200 ||
-        !const {
-          'ml',
-          'l',
-          'serving',
-          'piece',
-          'cup',
-          'tbsp',
-          'tsp',
-          'entry',
-        }.contains(unit) ||
+        // Match the technical label contract accepted by custom foods.
+        // Preserve the exact volume/count label; never infer a gram weight.
+        unit != unit.trim() ||
+        unit.isEmpty ||
+        unit.length > 24 ||
+        !_declaredUnitLabel.hasMatch(unit) ||
         !basisQuantity.isFinite ||
         basisQuantity <= 0 ||
         basisQuantity > 100000 ||
@@ -45,6 +41,10 @@ final class UnitFoodEvidence {
       }
     }
   }
+  static final _declaredUnitLabel = RegExp(
+    r'^[\p{L}][\p{L}\p{N} ._-]*$',
+    unicode: true,
+  );
   static const schema = 'bil.food.unit.v1', sourcePrefix = 'unit_food_v1:';
   final String identity, name, source, ownerKey, unit;
   final double basisQuantity, quantity;

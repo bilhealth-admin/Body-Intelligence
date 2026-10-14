@@ -1,0 +1,23 @@
+{
+  "label": "format-time-and-foundation",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib/features/connected_health/widgets/live_health_watch_time.dart",
+    "test/app_foundation_services_test.dart"
+  ],
+  "started_utc": "2026-10-13T05:43:36.017771+00:00",
+  "runner_pid": 5964,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 2944,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T05:43:39.116978+00:00",
+  "seconds": 3.03,
+  "end_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "stable_source": true,
+  "accepted": true
+}

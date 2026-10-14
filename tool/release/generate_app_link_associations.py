@@ -76,6 +76,11 @@ def _documents(*, team_id: str, fingerprint: str) -> tuple[object, object]:
                             {"/": path, "comment": "BIL Community invitation"}
                             for path in PUBLIC_COMMUNITY_PATHS
                         ],
+                        {
+                            '/': '/download',
+                            '?': {'member': '?' * 32},
+                            'comment': 'BIL opaque public member code; app validates exact hexadecimal value',
+                        },
                     ],
                 }
             ]

@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "run_file": "connections-human-text-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "sender completes create-only non-discoverable community entry",
+      "state": "RUN"
+    },
+    {
+      "index": 2,
+      "static_case_label": "sender completes create-only non-discoverable community entry",
+      "state": "PASS"
+    },
+    {
+      "index": 3,
+      "static_case_label": "receiver completes create-only non-discoverable community entry",
+      "state": "RUN"
+    },
+    {
+      "index": 4,
+      "static_case_label": "receiver completes create-only non-discoverable community entry",
+      "state": "PASS"
+    },
+    {
+      "index": 5,
+      "static_case_label": "invalid member code returns no identity (enumeration-safe null)",
+      "state": "RUN"
+    },
+    {
+      "index": 6,
+      "static_case_label": "invalid member code returns no identity (enumeration-safe null)",
+      "state": "PASS"
+    },
+    {
+      "index": 7,
+      "static_case_label": "capture only sender/receiver pre-existing connection",
+      "state": "RUN"
+    },
+    {
+      "index": 8,
+      "static_case_label": "capture only sender/receiver pre-existing connection",
+      "state": "PASS"
+    },
+    {
+      "index": 9,
+      "static_case_label": "sender requests / receiver lists exact request",
+      "state": "RUN"
+    },
+    {
+      "index": 10,
+      "static_case_label": "sender requests / receiver lists exact request",
+      "state": "PASS"
+    },
+    {
+      "index": 11,
+      "static_case_label": "two concurrent repeated friend requests preserve one row",
+      "state": "RUN"
+    },
+    {
+      "index": 12,
+      "static_case_label": "two concurrent repeated friend requests preserve one row",
+      "state": "PASS"
+    },
+    {
+      "index": 13,
+      "static_case_label": "sender cancels only new pending request",
+      "state": "RUN"
+    },
+    {
+      "index": 14,
+      "static_case_label": "sender cancels only new pending request",
+      "state": "PASS"
+    },
+    {
+      "index": 15,
+      "static_case_label": "receiver cannot accept cancelled request",
+      "state": "RUN"
+    },
+    {
+      "index": 16,
+      "static_case_label": "receiver cannot accept cancelled request",
+      "state": "PASS"
+    },
+    {
+      "index": 17,
+      "static_case_label": "fresh request for rejection",
+      "state": "RUN"
+    },
+    {
+      "index": 18,
+      "static_case_label": "fresh request for rejection",
+      "state": "PASS"
+    },
+    {
+      "index": 19,
+      "static_case_label": "receiver rejects / sender removes its new rejected request",
+      "state": "RUN"
+    },
+    {
+      "index": 20,
+      "static_case_label": "receiver rejects / sender removes its new rejected request",
+      "state": "PASS"
+    },
+    {
+      "index": 21,
+      "static_case_label": "fresh request for acceptance",
+      "state": "RUN"
+    },
+    {
+      "index": 22,
+      "static_case_label": "fresh request for acceptance",
+      "state": "PASS"
+    },
+    {
+      "index": 23,
+      "static_case_label": "receiver accepts / sender reads accepted receipt",
+      "state": "RUN"
+    },
+    {
+      "index": 24,
+      "static_case_label": "receiver accepts / sender reads accepted receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 25,
+      "static_case_label": "Forqan sends actual message to Haya",
+      "state": "RUN"
+    },
+    {
+      "index": 26,
+      "static_case_label": "Forqan sends actual message to Haya",
+      "state": "PASS"
+    },
+    {
+      "index": 27,
+      "static_case_label": "Haya receives message with correct sender identity",
+      "state": "RUN"
+    },
+    {
+      "index": 28,
+      "static_case_label": "Haya receives message with correct sender identity",
+      "state": "PASS"
+    },
+    {
+      "index": 29,
+      "static_case_label": "unrelated publisher cannot read the message",
+      "state": "RUN"
+    },
+    {
+      "index": 30,
+      "static_case_label": "unrelated publisher cannot read the message",
+      "state": "PASS"
+    },
+    {
+      "index": 31,
+      "static_case_label": "sender cannot set recipient read receipt",
+      "state": "RUN"
+    },
+    {
+      "index": 32,
+      "static_case_label": "sender cannot set recipient read receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 33,
+      "static_case_label": "recipient marks only created message read",
+      "state": "RUN"
+    },
+    {
+      "index": 34,
+      "static_case_label": "recipient marks only created message read",
+      "state": "FAIL"
+    },
+    {
+      "index": 35,
+      "static_case_label": "Haya replies using her own session",
+      "state": "RUN"
+    },
+    {
+      "index": 36,
+      "static_case_label": "Haya replies using her own session",
+      "state": "PASS"
+    },
+    {
+      "index": 37,
+      "static_case_label": "Forqan receives exact reply",
+      "state": "RUN"
+    },
+    {
+      "index": 38,
+      "static_case_label": "Forqan receives exact reply",
+      "state": "PASS"
+    },
+    {
+      "index": 39,
+      "static_case_label": "Haya blocks only test sender and reads proof",
+      "state": "RUN"
+    },
+    {
+      "index": 40,
+      "static_case_label": "Haya blocks only test sender and reads proof",
+      "state": "PASS"
+    },
+    {
+      "index": 41,
+      "static_case_label": "blocked sender cannot send a new message",
+      "state": "RUN"
+    },
+    {
+      "index": 42,
+      "static_case_label": "blocked sender cannot send a new message",
+      "state": "PASS"
+    },
+    {
+      "index": 43,
+      "static_case_label": "sender cannot delete the receiver block",
+      "state": "RUN"
+    },
+    {
+      "index": 44,
+      "static_case_label": "sender cannot delete the receiver block",
+      "state": "PASS"
+    },
+    {
+      "index": 45,
+      "static_case_label": "Haya unblocks only its created block with readback",
+      "state": "RUN"
+    },
+    {
+      "index": 46,
+      "static_case_label": "Haya unblocks only its created block with readback",
+      "state": "PASS"
+    },
+    {
+      "index": 47,
+      "static_case_label": "sender reads activity and attention after message flow",
+      "state": "RUN"
+    },
+    {
+      "index": 48,
+      "static_case_label": "sender reads activity and attention after message flow",
+      "state": "PASS"
+    },
+    {
+      "index": 49,
+      "static_case_label": "receiver reads activity and attention after message flow",
+      "state": "RUN"
+    },
+    {
+      "index": 50,
+      "static_case_label": "receiver reads activity and attention after message flow",
+      "state": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 24,
+    "FAIL": 1,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T06:44:59Z",
+  "finished_utc": "2026-10-13T06:45:09Z",
+  "pid": 22160
+}

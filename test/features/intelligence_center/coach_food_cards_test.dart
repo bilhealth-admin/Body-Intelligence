@@ -52,6 +52,15 @@ void main() {
     expect(find.textContaining('1 Tomato (~123 g)'), findsOneWidget);
   });
 
+  testWidgets('meal review uses the available conversation width', (
+    tester,
+  ) async {
+    await mountFoodCard(tester, _review(fixture), evidenceFont: true);
+
+    final card = find.byKey(CoachFoodCardKeys.review('food-card-breakfast'));
+    expect(tester.getSize(card).width, closeTo(366, .5));
+  });
+
   testWidgets(
     'Yes commits four real Drift rows and never changes reviewed values',
     (tester) async {

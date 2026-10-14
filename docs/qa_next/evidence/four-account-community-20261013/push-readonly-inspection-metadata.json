@@ -1,0 +1,29 @@
+{
+  "scope": "production-read-only-metadata-not-handset-delivery-proof",
+  "inspection_date": "2026-10-13",
+  "source": "Authorized read-only tool outputs retained in this task; raw account responses and device tokens are not exported.",
+  "registered_devices": 6,
+  "enabled_devices": 2,
+  "enabled_provider": "apns",
+  "eligible_test_role": "admin",
+  "other_three_roles_with_device_registration": 0,
+  "outbox_window_utc": [
+    "2026-10-13T06:25:00Z",
+    "2026-10-13T07:07:00Z"
+  ],
+  "outbox_no_eligible_tokens": 21,
+  "provider_acknowledged_community_attempts": 4,
+  "functions": [
+    {
+      "name": "community-push-dispatch",
+      "version": 56
+    },
+    {
+      "name": "push-provider-gateway",
+      "version": 29
+    }
+  ],
+  "android_provider_protocol": "FCM HTTP v1",
+  "handset_display_or_tap_verified": false,
+  "configuration_or_secrets_mutated": false
+}

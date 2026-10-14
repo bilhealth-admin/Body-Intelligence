@@ -21,6 +21,7 @@ import '../domain/community_rewards.dart';
 import '../domain/community_review_snapshot.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_text_limits.dart';
+import '../../safety_moderation/domain/ai_coach_safety_report.dart';
 import '../domain/community_topics.dart';
 import '../services/community_post_image_picker.dart';
 import '../services/community_owner_operation.dart';
@@ -37,12 +38,14 @@ part 'community_repository_reference_parity_mixin.dart';
 part 'community_repository_publishing_mixin.dart';
 part 'community_repository_cached_feed.dart';
 part 'community_repository_review_v2.dart';
+part 'community_repository_safety_review.dart';
 
 class CommunityRepository
     with
         CommunitySocialRepositoryMixin,
         CommunityFeedRepositoryMixin,
         _CommunityReviewV2RepositoryMixin,
+        _CommunitySafetyReviewRepositoryMixin,
         _CommunityComposerPersistenceRepositoryMixin,
         _CommunityDiscoveryRepositoryMixin,
         _CommunityProfileModerationRepositoryMixin,
@@ -263,6 +266,30 @@ class CommunityRepository
   Future<List<Map<String, dynamic>>> loadOpenModerationReports() async {
     final response = await _client.rpc('bil_list_open_community_reports');
     return (response as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<List<AiCoachSafetyReport>> loadAiCoachSafetyReports() async {
+    final response = await _client.rpc('bil_list_ai_coach_safety_reports_v1');
+    if (response is! List) {
+      throw const FormatException('invalid_ai_coach_safety_report_queue');
+    }
+    return response.map(AiCoachSafetyReport.fromJson).toList(growable: false);
+  }
+
+  Future<AiCoachSafetyReviewReceipt> reviewAiCoachSafetyReport({
+    required String reportId,
+    required String decision,
+    required String operationId,
+  }) async {
+    final response = await _client.rpc(
+      'bil_review_ai_coach_safety_report_v1',
+      params: {
+        'p_report_id': reportId,
+        'p_decision': decision,
+        'p_operation_id': operationId,
+      },
+    );
+    return AiCoachSafetyReviewReceipt.fromJson(response);
   }
 
   Future<void> moderateReport({

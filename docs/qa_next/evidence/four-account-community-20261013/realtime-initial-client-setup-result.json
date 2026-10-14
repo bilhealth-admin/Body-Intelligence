@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "run_file": "realtime-initial-client-setup-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "real sender and receiver identities verified",
+      "state": "FAIL"
+    }
+  ],
+  "counts": {
+    "PASS": 0,
+    "FAIL": 1,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T06:59:37.056Z",
+  "finished_utc": "2026-10-13T06:59:37.058Z"
+}

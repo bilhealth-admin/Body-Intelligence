@@ -115,7 +115,16 @@ void main() {
         await tester.pump();
         await tester.pump(Duration.zero);
         await tester.pumpWidget(h.app());
-        await tester.pumpAndSettle();
+        // The Coach keeps an ambient animation alive after restoring a
+        // verified receipt. Wait for the restored receipt itself rather than
+        // requiring every unrelated animation to settle.
+        await _pumpUntil(
+          tester,
+          () => find
+              .byKey(CoachFoodCardKeys.receipt(operationId))
+              .evaluate()
+              .isNotEmpty,
+        );
         expect(
           await h.database.select(h.database.mealItems).get(),
           hasLength(2),
@@ -224,7 +233,10 @@ void main() {
 }
 
 final class _FoodWidgetHarness {
-  _FoodWidgetHarness({CoachNativeOwnerWitness? ownerWitness}) {
+  _FoodWidgetHarness({
+    required this.database,
+    CoachNativeOwnerWitness? ownerWitness,
+  }) {
     container = ProviderContainer(
       overrides: [
         databaseProvider.overrideWithValue(database),
@@ -255,10 +267,7 @@ final class _FoodWidgetHarness {
     );
   }
 
-  final database = AppDatabase.forTesting(
-    NativeDatabase.memory(),
-    localOwnerId: 'food-widget-owner',
-  );
+  final AppDatabase database;
   final gateway = _NoFoodGateway();
   late final ProviderContainer container;
 
@@ -382,20 +391,94 @@ Future<void> _withFoodCoach(
   CoachNativeOwnerWitness? ownerWitness,
 }) async {
   await tester.binding.setSurfaceSize(const Size(430, 932));
-  final harness = _FoodWidgetHarness(ownerWitness: ownerWitness);
+  final openedDatabase = await tester.runAsync(() async {
+    final database = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+      localOwnerId: 'food-widget-owner',
+    );
+    try {
+      final rows = await database
+          .customSelect('SELECT 1 AS opened')
+          .get()
+          .timeout(const Duration(seconds: 15));
+      if (rows.length != 1 || rows.single.read<int>('opened') != 1) {
+        throw StateError('Coach widget SQLite fixture failed to open');
+      }
+      return database;
+    } catch (error, stack) {
+      try {
+        await database.close().timeout(const Duration(seconds: 5));
+      } catch (_) {
+        // Preserve the fixture-open error; the test runner reports its cause.
+      }
+      Error.throwWithStackTrace(error, stack);
+    }
+  });
+  if (openedDatabase == null) {
+    throw StateError('Coach widget SQLite fixture did not open');
+  }
+  final harness = _FoodWidgetHarness(
+    database: openedDatabase,
+    ownerWitness: ownerWitness,
+  );
   try {
     await tester.pumpWidget(harness.app());
-    await tester.pumpAndSettle();
+    await _pumpUntil(
+      tester,
+      () => find
+          .byKey(const Key('ai-coach-question-field'))
+          .evaluate()
+          .isNotEmpty,
+    );
     await body(harness);
   } finally {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
     await tester.pump(Duration.zero);
     harness.container.dispose();
-    await tester.runAsync(harness.database.close);
-    await tester.pump(Duration.zero);
-    await tester.binding.setSurfaceSize(null);
+    try {
+      await _closeCoachWidgetDatabase(tester, harness.database);
+    } finally {
+      await tester.pump(Duration.zero);
+      await tester.binding.setSurfaceSize(null);
+    }
   }
+}
+
+Future<void> _closeCoachWidgetDatabase(
+  WidgetTester tester,
+  AppDatabase database,
+) async {
+  var completed = false;
+  Object? failure;
+  StackTrace? failureStack;
+  final closing = database.close();
+  unawaited(
+    closing.then<void>(
+      (_) => completed = true,
+      onError: (Object error, StackTrace stack) {
+        failure = error;
+        failureStack = stack;
+        completed = true;
+      },
+    ),
+  );
+  final watch = Stopwatch()..start();
+  while (!completed && watch.elapsed < const Duration(seconds: 5)) {
+    await tester.pump(Duration.zero);
+    if (!completed) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+    }
+  }
+  if (!completed) {
+    throw TimeoutException(
+      'Coach widget SQLite fixture close did not complete',
+      const Duration(seconds: 5),
+    );
+  }
+  if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
 }
 
 Future<void> _send(WidgetTester tester, String text) async {

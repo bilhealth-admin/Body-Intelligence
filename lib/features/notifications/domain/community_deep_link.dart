@@ -58,6 +58,25 @@ class CommunityDeepLink {
     'legal/health-disclaimer': '/legal/health-disclaimer',
   };
 
+  static final _uuid = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  );
+
+  static bool isContentId(String value) => _uuid.hasMatch(value);
+
+  static String? contentRoute({required String postId, String? commentId}) {
+    if (!isContentId(postId) ||
+        (commentId != null && !isContentId(commentId))) {
+      return null;
+    }
+    return Uri(
+      path: '/community/content/${postId.toLowerCase()}',
+      queryParameters: commentId == null
+          ? null
+          : {'comment': commentId.toLowerCase()},
+    ).toString();
+  }
+
   static String? routeFor(Uri uri) {
     // Only this verified public download-link shape can navigate to a member.
     // Never trust lookalike hosts, login/redirect URLs or extra query fields.
@@ -100,6 +119,19 @@ class CommunityDeepLink {
     }
 
     if (segments.first == 'community') {
+      if (segments.length == 3 && segments[1] == 'content') {
+        if (uri.userInfo.isNotEmpty ||
+            uri.hasPort ||
+            uri.fragment.isNotEmpty ||
+            uri.queryParametersAll.keys.any((key) => key != 'comment') ||
+            (uri.queryParametersAll['comment']?.length ?? 1) != 1) {
+          return null;
+        }
+        return contentRoute(
+          postId: segments[2],
+          commentId: uri.queryParametersAll['comment']?.single,
+        );
+      }
       if (segments.length == 1) return '/community';
       if (segments.length == 2 && segments[1] == 'connections') {
         return '/community/connections';

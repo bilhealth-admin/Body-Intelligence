@@ -169,6 +169,9 @@ const _invalidLink =
 const _legalMediaDisclosure =
     'A meal image is sent only when you choose analysis and the secure server gateway is configured. Apple or another platform speech service may process audio you initiate under its terms, but BIL’s backend and Gemini receive only the recognized transcript—not raw microphone audio. Device permissions can be withdrawn in system settings.';
 
+const _coachVoicePrivacyDisclosure =
+    'Your device or platform speech service may process microphone audio under its own terms. When you submit a Coach request, BIL sends Gemini only recognized text, never raw microphone audio.';
+
 // Human-reviewed translations for the precise privacy boundary. These must not
 // regress to the obsolete claim that voice is sent to BIL as raw audio.
 const _privacyReviewedOverrides = <(String, String), String>{
@@ -252,6 +255,86 @@ const _privacyReviewedOverrides = <(String, String), String>{
     'uk',
     _legalMediaDisclosure,
   ): 'Зображення страви надсилається лише тоді, коли ви обираєте аналіз і налаштовано захищений серверний шлюз. Apple або інша мовна служба платформи може обробляти ініційоване вами аудіо за власними умовами, але сервер BIL і Gemini отримують лише розпізнану транскрипцію, а не необроблений звук із мікрофона. Дозволи пристрою можна відкликати в системних налаштуваннях.',
+  (
+    'de',
+    _coachVoicePrivacyDisclosure,
+  ): 'Der Sprachdienst Ihres Geräts oder Ihrer Plattform kann Mikrofon-Audio gemäß seinen eigenen Bedingungen verarbeiten. Wenn Sie eine Anfrage an den Coach senden, übermittelt BIL nur erkannten Text an Gemini, niemals rohes Mikrofon-Audio.',
+  (
+    'it',
+    _coachVoicePrivacyDisclosure,
+  ): 'Il servizio vocale del dispositivo o della piattaforma può elaborare l’audio del microfono secondo i propri termini. Quando invii una richiesta al Coach, BIL invia a Gemini solo il testo riconosciuto, mai l’audio grezzo del microfono.',
+  (
+    'pt-BR',
+    _coachVoicePrivacyDisclosure,
+  ): 'O serviço de fala do seu dispositivo ou plataforma pode processar o áudio do microfone conforme os próprios termos. Ao enviar uma solicitação ao Coach, o BIL envia ao Gemini apenas o texto reconhecido, nunca o áudio bruto do microfone.',
+  (
+    'pt-PT',
+    _coachVoicePrivacyDisclosure,
+  ): 'O serviço de voz do dispositivo ou da plataforma pode tratar o áudio do microfone segundo os respetivos termos. Ao submeter um pedido ao Coach, o BIL envia ao Gemini apenas o texto reconhecido, nunca o áudio bruto do microfone.',
+  (
+    'ur',
+    _coachVoicePrivacyDisclosure,
+  ): 'آپ کے آلے یا پلیٹ فارم کی تقریر سروس مائیکروفون آڈیو کو اپنی شرائط کے مطابق پراسیس کر سکتی ہے۔ Coach کی درخواست بھیجنے پر BIL Gemini کو صرف شناخت شدہ متن بھیجتا ہے، خام مائیکروفون آڈیو نہیں۔',
+  (
+    'fa',
+    _coachVoicePrivacyDisclosure,
+  ): 'سرویس گفتار دستگاه یا پلتفرم شما ممکن است صدای میکروفون را طبق شرایط خود پردازش کند. هنگام ارسال درخواست به Coach، BIL فقط متن تشخیص‌داده‌شده را برای Gemini می‌فرستد، نه صدای خام میکروفون را.',
+  (
+    'hi',
+    _coachVoicePrivacyDisclosure,
+  ): 'आपके डिवाइस या प्लेटफ़ॉर्म की वाक् सेवा अपनी शर्तों के अनुसार माइक्रोफ़ोन ऑडियो संसाधित कर सकती है। Coach अनुरोध भेजने पर BIL Gemini को केवल पहचाना गया पाठ भेजता है, कच्चा माइक्रोफ़ोन ऑडियो नहीं।',
+  (
+    'id',
+    _coachVoicePrivacyDisclosure,
+  ): 'Layanan ucapan di perangkat atau platform Anda dapat memproses audio mikrofon sesuai ketentuannya sendiri. Saat Anda mengirim permintaan Coach, BIL hanya mengirim teks yang dikenali ke Gemini, bukan audio mikrofon mentah.',
+  (
+    'ms',
+    _coachVoicePrivacyDisclosure,
+  ): 'Perkhidmatan pertuturan pada peranti atau platform anda boleh memproses audio mikrofon mengikut terma mereka sendiri. Apabila anda menghantar permintaan Coach, BIL hanya menghantar teks yang dikenal pasti kepada Gemini, bukan audio mikrofon mentah.',
+  (
+    'ja',
+    _coachVoicePrivacyDisclosure,
+  ): 'デバイスまたはプラットフォームの音声サービスは、独自の利用条件に従ってマイク音声を処理する場合があります。Coach へのリクエストを送信すると、BIL は認識されたテキストのみを Gemini に送信し、生のマイク音声は送信しません。',
+  (
+    'ko',
+    _coachVoicePrivacyDisclosure,
+  ): '기기 또는 플랫폼의 음성 서비스는 자체 약관에 따라 마이크 오디오를 처리할 수 있습니다. Coach 요청을 제출하면 BIL은 인식된 텍스트만 Gemini에 보내며 원본 마이크 오디오는 보내지 않습니다.',
+  (
+    'zh-Hans',
+    _coachVoicePrivacyDisclosure,
+  ): '您的设备或平台语音服务可能会根据其自身条款处理麦克风音频。提交 Coach 请求时，BIL 只会向 Gemini 发送识别后的文字，不会发送原始麦克风音频。',
+  (
+    'zh-Hant',
+    _coachVoicePrivacyDisclosure,
+  ): '您的裝置或平台語音服務可能會依其自身條款處理麥克風音訊。提交 Coach 請求時，BIL 只會將辨識後的文字傳送給 Gemini，不會傳送原始麥克風音訊。',
+  (
+    'ru',
+    _coachVoicePrivacyDisclosure,
+  ): 'Служба распознавания речи на устройстве или платформе может обрабатывать звук микрофона на своих условиях. При отправке запроса Coach BIL передает Gemini только распознанный текст, а не исходный звук микрофона.',
+  (
+    'bn',
+    _coachVoicePrivacyDisclosure,
+  ): 'আপনার ডিভাইস বা প্ল্যাটফর্মের স্পিচ পরিষেবা তাদের নিজস্ব শর্ত অনুযায়ী মাইক্রোফোনের অডিও প্রক্রিয়া করতে পারে। Coach অনুরোধ পাঠালে BIL Gemini-কে শুধু শনাক্ত করা লেখা পাঠায়, কাঁচা মাইক্রোফোন অডিও নয়।',
+  (
+    'vi',
+    _coachVoicePrivacyDisclosure,
+  ): 'Dịch vụ nhận dạng giọng nói trên thiết bị hoặc nền tảng của bạn có thể xử lý âm thanh micrô theo điều khoản riêng. Khi gửi yêu cầu cho Coach, BIL chỉ gửi văn bản đã nhận dạng đến Gemini, không gửi âm thanh micrô thô.',
+  (
+    'th',
+    _coachVoicePrivacyDisclosure,
+  ): 'บริการรู้จำเสียงของอุปกรณ์หรือแพลตฟอร์มอาจประมวลผลเสียงไมโครโฟนตามข้อกำหนดของตนเอง เมื่อส่งคำขอถึง Coach, BIL จะส่งให้ Gemini เฉพาะข้อความที่รู้จำได้ ไม่ส่งเสียงไมโครโฟนดิบ',
+  (
+    'pl',
+    _coachVoicePrivacyDisclosure,
+  ): 'Usługa rozpoznawania mowy na urządzeniu lub platformie może przetwarzać dźwięk z mikrofonu na własnych warunkach. Po wysłaniu prośby do Coach BIL przekazuje Gemini tylko rozpoznany tekst, nigdy surowy dźwięk z mikrofonu.',
+  (
+    'nl',
+    _coachVoicePrivacyDisclosure,
+  ): 'De spraakdienst van uw apparaat of platform kan microfoonaudio verwerken volgens de eigen voorwaarden. Wanneer u een Coach-verzoek verzendt, stuurt BIL alleen herkende tekst naar Gemini, nooit ruwe microfoonaudio.',
+  (
+    'uk',
+    _coachVoicePrivacyDisclosure,
+  ): 'Служба розпізнавання мовлення на вашому пристрої або платформі може обробляти звук мікрофона за власними умовами. Надсилаючи запит Coach, BIL передає Gemini лише розпізнаний текст, а не необроблений звук мікрофона.',
 };
 
 Future<void> main(List<String> args) async {
@@ -370,6 +453,7 @@ const _corePageBaseSources = <String>{
   'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
   'Save log',
   'Checking subscription',
+  'Cholesterol',
   'AI Coach',
   'AI Coach settings',
   'Advertising privacy',
@@ -378,19 +462,107 @@ const _corePageBaseSources = <String>{
   'Good morning',
   'Good afternoon',
   'Good evening',
+  'Global multilingual voice',
   'Close',
   'Serving unit',
   'Fiber',
+  'Saturated fat',
   'Sodium',
   'I’m ready for your next useful decision.',
+  'Vitamin A',
   'Coach controls',
   'Your BIL Coach',
   'Talk now',
   'BIL Coach',
   'FOR TODAY',
+  'This feature needs access',
+  'Access check unavailable',
+  'You can continue using the app. View plans only if you wish to change your access.',
+  'Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.',
+  'Continue',
+  'Refresh access',
+  'View plans',
+  'Access is refreshing. Try the feature again.',
 };
 
 const _corePageReviewedOverrides = <(String, String), String>{
+  ('ar', 'Cholesterol'): 'الكوليسترول',
+  ('fr', 'Cholesterol'): 'Cholestérol',
+  ('es', 'Cholesterol'): 'Colesterol',
+  ('tr', 'Cholesterol'): 'Kolesterol',
+  ('ar', 'Global multilingual voice'): 'صوت عالمي متعدد اللغات',
+  ('fr', 'Global multilingual voice'): 'Voix mondiale multilingue',
+  ('es', 'Global multilingual voice'): 'Voz global multilingüe',
+  ('tr', 'Global multilingual voice'): 'Küresel çok dilli ses',
+  ('ar', 'Saturated fat'): 'الدهون المشبعة',
+  ('fr', 'Saturated fat'): 'Acides gras saturés',
+  ('es', 'Saturated fat'): 'Grasas saturadas',
+  ('tr', 'Saturated fat'): 'Doymuş yağ',
+  ('ar', 'Vitamin A'): 'فيتامين أ',
+  ('fr', 'Vitamin A'): 'Vitamine A',
+  ('es', 'Vitamin A'): 'Vitamina A',
+  ('tr', 'Vitamin A'): 'A vitamini',
+  ('ar', 'This feature needs access'): 'هذه الميزة تحتاج إلى صلاحية',
+  ('fr', 'This feature needs access'):
+      'Cette fonctionnalité nécessite un accès',
+  ('es', 'This feature needs access'): 'Esta función requiere acceso',
+  ('tr', 'This feature needs access'): 'Bu özellik için erişim gerekiyor',
+  ('ar', 'Access check unavailable'): 'تعذر التحقق من الصلاحية',
+  ('fr', 'Access check unavailable'): 'Vérification de l’accès indisponible',
+  ('es', 'Access check unavailable'): 'No se puede comprobar el acceso',
+  ('tr', 'Access check unavailable'): 'Erişim kontrolü kullanılamıyor',
+  (
+    'ar',
+    'You can continue using the app. View plans only if you wish to change your access.',
+  ): 'يمكنك متابعة استخدام التطبيق. افتح الخطط فقط إن رغبت في تغيير صلاحية هذه الميزة.',
+  (
+    'fr',
+    'You can continue using the app. View plans only if you wish to change your access.',
+  ): 'Vous pouvez continuer à utiliser l’application. Consultez les offres uniquement si vous souhaitez modifier votre accès.',
+  (
+    'es',
+    'You can continue using the app. View plans only if you wish to change your access.',
+  ): 'Puedes seguir usando la aplicación. Consulta los planes solo si quieres cambiar tu acceso.',
+  (
+    'tr',
+    'You can continue using the app. View plans only if you wish to change your access.',
+  ): 'Uygulamayı kullanmaya devam edebilirsiniz. Erişiminizi değiştirmek isterseniz planları görüntüleyin.',
+  (
+    'ar',
+    'Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.',
+  ): 'لم نصنف اشتراكك كمجاني. تحقق من الاتصال وأعد المحاولة؛ تظل بقية وظائف التطبيق متاحة.',
+  (
+    'fr',
+    'Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.',
+  ): 'Votre abonnement n’a pas été identifié comme gratuit. Vérifiez votre connexion et réessayez ; le reste de l’application reste disponible.',
+  (
+    'es',
+    'Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.',
+  ): 'No se pudo clasificar tu suscripción como gratuita. Comprueba tu conexión e inténtalo de nuevo; el resto de la aplicación seguirá disponible.',
+  (
+    'tr',
+    'Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.',
+  ): 'Aboneliğiniz ücretsiz olarak sınıflandırılamadı. Bağlantınızı kontrol edip tekrar deneyin; uygulamanın geri kalanı kullanılabilir durumda.',
+  ('ar', 'Continue'): 'متابعة',
+  ('fr', 'Continue'): 'Continuer',
+  ('es', 'Continue'): 'Continuar',
+  ('tr', 'Continue'): 'Devam',
+  ('ar', 'Refresh access'): 'تحديث الصلاحية',
+  ('fr', 'Refresh access'): 'Actualiser l’accès',
+  ('es', 'Refresh access'): 'Actualizar acceso',
+  ('tr', 'Refresh access'): 'Erişimi yenile',
+  ('ar', 'View plans'): 'عرض الخطط',
+  ('fr', 'View plans'): 'Voir les offres',
+  ('es', 'View plans'): 'Ver planes',
+  ('tr', 'View plans'): 'Planları görüntüle',
+  ('ar', 'Access is refreshing. Try the feature again.'):
+      'جارٍ تحديث الصلاحية. أعد فتح الميزة.',
+  ('fr', 'Access is refreshing. Try the feature again.'):
+      'L’accès est en cours d’actualisation. Réessayez la fonctionnalité.',
+  ('es', 'Access is refreshing. Try the feature again.'):
+      'Se está actualizando el acceso. Vuelve a probar la función.',
+  ('tr', 'Access is refreshing. Try the feature again.'):
+      'Erişim yenileniyor. Özelliği yeniden deneyin.',
   ('ar', 'Good morning'): 'صباح الخير',
   ('fr', 'Good morning'): 'Bonjour',
   ('es', 'Good morning'): 'Buenos días',
@@ -1490,16 +1662,31 @@ Future<void> _mergeMissingSources(List<String> sources) async {
     return;
   }
   stdout.writeln('Translating ${missing.length} missing release-surface keys.');
-  final translated = <String, List<String>>{};
+  final translatedByTag = <String, Map<String, String>>{};
   for (final entry in _targets.entries) {
-    translated[entry.key] = await _translateCatalog(missing, entry.value);
+    final unresolved = missing
+        .where(
+          (source) =>
+              _privacyReviewedOverrides[(entry.key, source)] == null &&
+              _reviewedOverrides[(entry.key, source)] == null,
+        )
+        .toList(growable: false);
+    final translations = await _translateCatalog(unresolved, entry.value);
+    translatedByTag[entry.key] = {
+      for (var index = 0; index < unresolved.length; index += 1)
+        unresolved[index]: translations[index],
+    };
   }
   final addition = StringBuffer();
   for (var index = 0; index < missing.length; index += 1) {
     addition.writeln('    ${_dartString(missing[index])}: {');
     for (final tag in _targets.keys) {
+      final translated =
+          _privacyReviewedOverrides[(tag, missing[index])] ??
+          _reviewedOverrides[(tag, missing[index])] ??
+          translatedByTag[tag]![missing[index]]!;
       addition.writeln(
-        '      ${_dartString(tag)}: ${_dartString(translated[tag]![index])},',
+        '      ${_dartString(tag)}: ${_dartString(translated)},',
       );
     }
     addition.writeln('    },');

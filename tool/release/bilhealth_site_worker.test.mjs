@@ -11,6 +11,7 @@ const productionShapeAasa = {
         { '/': '/auth/callback' },
         { '/': '/auth/reset-password' },
         { '/': '/invite/*' },
+        { '/': '/download', '?': { member: '?'.repeat(32) } },
       ],
     }],
   },
@@ -101,4 +102,15 @@ test('rejects every unknown well-known path', async () => {
     environment(JSON.stringify(productionShapeAasa)),
   );
   assert.equal(response.status, 404);
+});
+
+test('rejects member shares if download association lacks its bounded query', async () => {
+  const invalid = structuredClone(productionShapeAasa);
+  const components = invalid.applinks.details[0].components;
+  components.find((entry) => entry['/'] === '/download')['?'] = { member: '*' };
+  const response = await worker.fetch(
+    new Request('https://www.bilhealth.com/.well-known/apple-app-site-association'),
+    environment(JSON.stringify(invalid)),
+  );
+  assert.equal(response.status, 503);
 });

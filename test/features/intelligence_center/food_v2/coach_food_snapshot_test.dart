@@ -6,30 +6,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'coach_food_v2_fixtures.dart';
 
 void main() {
-  test(
-    'the strict contract preserves the exact thirteen native nutrient units',
-    () {
-      expect(FoodNutrient.values, hasLength(13));
-      expect(
-        CoachFoodNutrients.units.keys.toSet(),
-        FoodNutrient.values.toSet(),
-      );
-      expect(CoachFoodNutrients.units[FoodNutrient.calories], 'kcal');
-      expect(
-        CoachFoodNutrients.units.values.where((unit) => unit == 'g'),
-        hasLength(5),
-      );
-      expect(
-        CoachFoodNutrients.units.values.where((unit) => unit == 'mg'),
-        hasLength(7),
-      );
-      final scaled = CoachFoodNutrition.scale(syntheticFood(), 150);
-      expect(scaled[FoodNutrient.calories], 240);
-      expect(scaled[FoodNutrient.iron], closeTo(1.8, 1e-12));
-      expect(scaled[FoodNutrient.vitaminC], 18);
-      expect(scaled[FoodNutrient.potassium], 195);
-    },
-  );
+  test('the strict contract preserves all nineteen native nutrient units', () {
+    expect(FoodNutrient.values, hasLength(19));
+    expect(CoachFoodNutrients.units.keys.toSet(), FoodNutrient.values.toSet());
+    expect(CoachFoodNutrients.units[FoodNutrient.calories], 'kcal');
+    expect(
+      CoachFoodNutrients.units.values.where((unit) => unit == 'g'),
+      hasLength(9),
+    );
+    expect(
+      CoachFoodNutrients.units.values.where((unit) => unit == 'mg'),
+      hasLength(8),
+    );
+    expect(CoachFoodNutrients.units[FoodNutrient.cholesterol], 'mg');
+    expect(CoachFoodNutrients.units[FoodNutrient.vitaminA], 'mcg RAE');
+    final scaled = CoachFoodNutrition.scale(syntheticFood(), 150);
+    expect(scaled[FoodNutrient.calories], 240);
+    expect(scaled[FoodNutrient.iron], closeTo(1.8, 1e-12));
+    expect(scaled[FoodNutrient.vitaminC], 18);
+    expect(scaled[FoodNutrient.potassium], 195);
+  });
 
   for (final nutrient in FoodNutrient.values) {
     test(
@@ -194,30 +190,27 @@ void main() {
     },
   );
 
-  test(
-    'cholesterol and extra source/food fields are rejected, not discarded',
-    () {
-      final nutrient = syntheticFood().toJson();
-      (nutrient['nutrients']! as Map)['cholesterol'] = 5;
-      expect(
-        () => CoachFoodSnapshot.fromJson(nutrient),
-        throwsA(foodError('unknown_field')),
-      );
-      final source = syntheticFood().toJson();
-      (source['source']! as Map)['verified'] = true;
-      expect(
-        () => CoachFoodSnapshot.fromJson(source),
-        throwsA(foodError('unknown_field')),
-      );
-      expect(
-        () => CoachFoodSnapshot.fromJson({
-          ...syntheticFood().toJson(),
-          'confidence': 1,
-        }),
-        throwsA(foodError('unknown_field')),
-      );
-    },
-  );
+  test('unknown nutrient and extra source/food fields are rejected', () {
+    final nutrient = syntheticFood().toJson();
+    (nutrient['nutrients']! as Map)['untrackedNutrient'] = 5;
+    expect(
+      () => CoachFoodSnapshot.fromJson(nutrient),
+      throwsA(foodError('unknown_field')),
+    );
+    final source = syntheticFood().toJson();
+    (source['source']! as Map)['verified'] = true;
+    expect(
+      () => CoachFoodSnapshot.fromJson(source),
+      throwsA(foodError('unknown_field')),
+    );
+    expect(
+      () => CoachFoodSnapshot.fromJson({
+        ...syntheticFood().toJson(),
+        'confidence': 1,
+      }),
+      throwsA(foodError('unknown_field')),
+    );
+  });
 
   for (final invalid in [double.nan, double.infinity, -1.0, '100', true]) {
     test('invalid nutrient payload rejected: $invalid', () {
@@ -332,7 +325,16 @@ void main() {
       grams.reduce((a, b) => a + b),
     );
     for (final nutrient in FoodNutrient.values) {
-      expect(total[nutrient].value, closeTo(expected[nutrient]!, 1e-7));
+      final expectedValue = expected[nutrient];
+      if (expectedValue == null) {
+        expect(total[nutrient].value, isNull, reason: nutrient.name);
+      } else {
+        expect(
+          total[nutrient].value,
+          closeTo(expectedValue, 1e-7),
+          reason: nutrient.name,
+        );
+      }
     }
   });
 

@@ -1,20 +1,14 @@
 import 'dart:io';
 
-import 'package:body_intelligence_log/features/auth/supabase_auth_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
-  test('Android uses native Google and Supabase OAuth for Meta', () {
+  test('Android uses native Google and external Supabase Facebook OAuth', () {
     final service = File(
       'lib/features/auth/supabase_auth_service.dart',
     ).readAsStringSync();
     final nativeGoogle = File(
       'lib/features/auth/native_google_sign_in.dart',
-    ).readAsStringSync();
-    final nativeFacebook = File(
-      'lib/features/auth/native_facebook_sign_in.dart',
     ).readAsStringSync();
     final manifest = File(
       'android/app/src/main/AndroidManifest.xml',
@@ -28,9 +22,10 @@ void main() {
     final gradle = File('android/app/build.gradle.kts').readAsStringSync();
 
     expect(service, contains('usesNativeAndroidGoogleSignIn'));
-    expect(service, contains('usesNativeAndroidFacebookSignIn'));
     expect(service, contains('usesNativeGoogleSignIn('));
-    expect(service, contains('usesNativeFacebookSignIn('));
+    expect(service, contains('client.auth.signInWithOAuth('));
+    expect(service, isNot(contains('FacebookSignIn')));
+    expect(service, isNot(contains('BilNativeFacebook')));
     expect(service, isNot(contains('getOAuthSignInUrl')));
     expect(service, isNot(contains('BilGoogleOAuthLauncher')));
     expect(service, isNot(contains('BilFacebookOAuthLauncher')));
@@ -48,49 +43,17 @@ void main() {
     expect(nativeGoogle, contains('authorizationForScopes'));
     expect(nativeGoogle, contains('authorizeScopes'));
 
-    // Meta Android returns a ClassicToken whose tokenString is a Graph API
-    // access token. flutter_facebook_auth 7.2.0 exposes the separate,
-    // nonce-bound OIDC proof as authenticationToken. The JWT is the identity
-    // proof and tokenString is supplied separately for at_hash validation.
-    expect(
-      SupabaseAuthService.usesNativeAndroidFacebookSignIn(
-        OAuthProvider.facebook,
-        isWeb: false,
-        platform: TargetPlatform.android,
-      ),
-      isFalse,
-    );
-    expect(nativeFacebook, contains('FacebookAuth.instance.login('));
-    expect(nativeFacebook, contains('ClassicToken('));
-    expect(nativeFacebook, contains(':final authenticationToken'));
-    expect(nativeFacebook, contains(':final tokenString'));
-    expect(nativeFacebook, contains('LimitedToken(:final tokenString)'));
-    expect(nativeFacebook, contains("'public_profile', 'email', 'openid'"));
-    expect(nativeFacebook, contains('LoginBehavior.webOnly'));
-    expect(nativeFacebook, contains('LoginTracking.enabled'));
-    expect(nativeFacebook, contains('nonce: nonce'));
-    expect(service, contains('accessToken: token.accessToken'));
-    expect(service, contains('nonce: token.nonce'));
-
-    expect(manifest, contains('com.facebook.sdk.ApplicationId'));
-    expect(manifest, contains('com.facebook.sdk.ClientToken'));
-    expect(manifest, contains('com.facebook.sdk.AutoLogAppEventsEnabled'));
-    expect(
-      manifest,
-      contains('com.facebook.sdk.AdvertiserIDCollectionEnabled'),
-    );
+    // Facebook stays available through the same Supabase OAuth provider on
+    // Android and iOS; no Meta SDK config is packaged by the app.
+    expect(manifest, isNot(contains('com.facebook.sdk')));
+    expect(strings, isNot(contains('facebook_app_id')));
+    expect(strings, isNot(contains('facebook_client_token')));
     expect(
       manifest,
       contains('android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE'),
     );
     expect(strings, contains('Body Intelligence Log™'));
-    expect(strings, contains('name="facebook_app_id"'));
-    expect(strings, contains('name="facebook_client_token"'));
-    expect(strings, contains('1384055070498598'));
     expect(gradle, contains('com.bilhealth.bodyintelligencelog'));
-    expect(nativeFacebook, isNot(contains('print(')));
-    expect(nativeFacebook, isNot(contains('debugPrint(')));
-
     expect(activity, isNot(contains('BILGoogleOAuthBridge')));
     expect(activity, isNot(contains('BILFacebookOAuthBridge')));
     expect(gradle, isNot(contains('androidx.browser:browser')));

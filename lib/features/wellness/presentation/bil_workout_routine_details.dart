@@ -93,7 +93,7 @@ class _BilWorkoutRoutineDetailsPageState
       );
       return;
     }
-    await context.push('/plans');
+    await context.push('/plans?focus=subscription');
     if (!mounted) return;
     // Purchase and restore complete at the verified server boundary. Discard
     // the pre-paywall snapshot before deciding whether paid media can render.

@@ -1,0 +1,24 @@
+{
+  "label": "final-deno-format-check",
+  "kind": "check",
+  "command": [
+    "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+    "fmt",
+    "--check",
+    "supabase/functions/ai-coach/server.ts",
+    "supabase/functions/ai-coach/server_test.ts"
+  ],
+  "started_utc": "2026-10-13T05:47:31.160203+00:00",
+  "runner_pid": 7668,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 22548,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T05:47:34.551333+00:00",
+  "seconds": 3.32,
+  "end_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "stable_source": true,
+  "accepted": true
+}

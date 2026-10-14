@@ -1,0 +1,43 @@
+{
+  "label": "citation-client-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/intelligence_center/coach_remote_consent_preflight_test.dart",
+    "--plain-name",
+    "cloud response keeps only allow-listed health citation IDs"
+  ],
+  "started_utc": "2026-10-13T06:16:47.864118+00:00",
+  "runner_pid": 10600,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb",
+  "fingerprint_version": 4,
+  "pid": 21804,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T06:17:12.246712+00:00",
+  "seconds": 24.27,
+  "end_fingerprint": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb",
+  "stable_source": true,
+  "accepted": true,
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "tests_completed": 1,
+  "files_loaded": 1,
+  "files_with_test_outcomes": 1,
+  "harness_pid": 20496,
+  "protocol_success": true,
+  "in_progress": [],
+  "error_events": 0,
+  "errors": []
+}

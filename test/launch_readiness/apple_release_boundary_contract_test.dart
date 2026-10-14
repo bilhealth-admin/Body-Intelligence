@@ -153,6 +153,7 @@ void main() {
     final purchase = [
       'lib/features/commerce/services/verified_store_purchase_service.dart',
       'lib/features/commerce/services/verified_store_purchase_processing.dart',
+      'lib/features/commerce/services/verified_store_receipt_verification.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     final voice = File(
       'lib/features/intelligence_center/presentation/intelligence_conversation_voice_transcript.dart',

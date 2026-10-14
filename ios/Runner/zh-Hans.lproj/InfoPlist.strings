@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "BIL 只会连接您明确配对的健身设备，以便在本地导入测量数据。";
 "NSCameraUsageDescription" = "仅当您选择扫描条形码、查看用餐照片或添加私人个人资料或进度照片时才使用相机。";
 "NSPhotoLibraryUsageDescription" = "BIL 只会访问您为膳食、个人资料、进度记录、社区帖子或食品提交所选择的照片，以便您在保存或上传前查看。";
-"NSMicrophoneUsageDescription" = "BIL 仅在您选择为体重、餐食、社区帖子或 BIL AI Coach 使用语音输入时使用麦克风。您可以在保存、发布或发送前检查文本。";
-"NSSpeechRecognitionUsageDescription" = "BIL 将您为体重、餐食、社区帖子或 BIL AI Coach 主动发起的语音转换为文本。您可以在保存、发布或发送前检查文本。";
+"NSMicrophoneUsageDescription" = "BIL 仅在您开始语音输入时使用麦克风。语音会在此设备上转成文字；如果设备端识别不可用，输入会停止。原始音频不会发送给 Gemini。只有在您启用 Personalized Intelligence 并发送给 AI Coach 后，Gemini 才会处理该文字。 语音输入包括体重、餐食和社区帖子。";
+"NSSpeechRecognitionUsageDescription" = "BIL 会在此设备上将体重、餐食、社区帖子或 AI Coach 的语音转成文字；设备端识别不可用时会停止。原始音频不会发送给 Gemini；只有在您启用 Personalized Intelligence 并发送后，AI Coach 文字才会传给 Gemini。";

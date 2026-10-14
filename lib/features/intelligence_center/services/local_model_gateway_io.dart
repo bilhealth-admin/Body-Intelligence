@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../../../core/health_evidence/health_evidence_catalog.dart';
+import '../../community/services/community_owner_operation.dart';
 import '../domain/coach_context_snapshot.dart';
 import '../app_commands/coach_health_tools.dart' show coachHealthToolProtocol;
 import 'coach_cloud_privacy_boundary.dart';
@@ -55,10 +56,11 @@ abstract interface class CoachCloudAccess {
 }
 
 class _SupabaseCoachCloudAccess implements CoachCloudAccess {
-  _SupabaseCoachCloudAccess(this.client)
+  _SupabaseCoachCloudAccess(this.client, {this.mobileIntegrityService})
     : _ownerId = client.auth.currentUser?.id;
 
   final SupabaseClient client;
+  final BilMobileIntegrityService? mobileIntegrityService;
   final String? _ownerId;
 
   @override
@@ -80,18 +82,25 @@ class _SupabaseCoachCloudAccess implements CoachCloudAccess {
   }
 
   @override
-  Future<CoachCloudFunctionResponse> invokeCoach(
-    Map<String, Object?> body,
-  ) async {
-    await _refreshIfExpired();
-    try {
-      return await _invokeCoach(body);
-    } on FunctionException catch (error) {
-      if (error.status != 401) rethrow;
-      await _refreshSession();
-      return _invokeCoach(body);
-    }
-  }
+  Future<CoachCloudFunctionResponse> invokeCoach(Map<String, Object?> body) =>
+      CommunityOwnerOperation.run(
+        client: client,
+        ownerId: _ownerId,
+        isCurrentOwner: () => hasAuthenticatedSession,
+        action: (operation) async {
+          await _refreshIfExpired();
+          operation.check();
+          try {
+            return await _invokeCoach(body);
+          } on FunctionException catch (error) {
+            if (error.status != 401) rethrow;
+            operation.check();
+            await _refreshSession();
+            operation.check();
+            return await _invokeCoach(body);
+          }
+        },
+      );
 
   Future<CoachCloudFunctionResponse> _invokeCoach(
     Map<String, Object?> body,
@@ -105,10 +114,9 @@ class _SupabaseCoachCloudAccess implements CoachCloudAccess {
         details: {'error': 'ai_consent_required'},
       );
     }
-    final protectedBody = await BilMobileIntegrityService.instance.protect(
-      action: 'ai_coach.request',
-      payload: body,
-    );
+    final protectedBody =
+        await (mobileIntegrityService ?? BilMobileIntegrityService.instance)
+            .protect(action: 'ai_coach.request', payload: body);
     // Withdrawal may happen while integrity work awaits the native boundary.
     if (!hasAuthenticatedSession ||
         !await consent.isGranted() ||
@@ -155,6 +163,7 @@ class LlamaCppLocalGateway implements LocalModelGateway {
     ),
     this.apiKey = const String.fromEnvironment('BIL_LOCAL_AI_API_KEY'),
     this.cloudAccess,
+    this.mobileIntegrityService,
     this.cloudContextProjector =
         const QuestionScopedCoachCloudContextProjector(),
   });
@@ -162,6 +171,7 @@ class LlamaCppLocalGateway implements LocalModelGateway {
   final String endpoint;
   final String apiKey;
   final CoachCloudAccess? cloudAccess;
+  final BilMobileIntegrityService? mobileIntegrityService;
   final CoachCloudContextProjector cloudContextProjector;
 
   @override
@@ -268,7 +278,11 @@ class LlamaCppLocalGateway implements LocalModelGateway {
     late final CoachCloudAccess access;
     try {
       access =
-          cloudAccess ?? _SupabaseCoachCloudAccess(Supabase.instance.client);
+          cloudAccess ??
+          _SupabaseCoachCloudAccess(
+            Supabase.instance.client,
+            mobileIntegrityService: mobileIntegrityService,
+          );
       if (!access.hasAuthenticatedSession) {
         return const LocalModelResult(
           status: CoachServiceStatus.signedOut,
@@ -331,6 +345,7 @@ class LlamaCppLocalGateway implements LocalModelGateway {
       final response = await access
           .invokeCoach(<String, Object?>{
             'request_id': requestId,
+            'health_citation_catalog_version': 2,
             'locale': locale,
             if (languageDetected) 'language_hint': locale,
             'messages': cloudMessages,

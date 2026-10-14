@@ -1,0 +1,20 @@
+{
+  "label": "coach-server-and-integrity-files-final",
+  "kind": "deno",
+  "command": [
+    "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+    "test",
+    "--allow-env",
+    "--allow-net",
+    "--allow-read",
+    "supabase/functions/ai-coach/server_test.ts",
+    "supabase/functions/ai-coach/mobile_integrity_test.ts"
+  ],
+  "started_utc": "2026-10-13T05:45:14.904178+00:00",
+  "runner_pid": 5964,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 19044
+}

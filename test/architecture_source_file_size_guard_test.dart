@@ -48,6 +48,38 @@ void main() {
       // Repository and localized copy remain in separate sources.
       'lib/features/community/presentation/community_post_moderation_page.dart':
           725,
+      // The repository mixin serializes profile search, relationship writes,
+      // thread creation, and message delivery under the same owner/ABA guard;
+      // splitting it would separate retry and identity checks from the RPCs.
+      'lib/features/community/data/community_repository_connections_messaging_mixin.dart':
+          750,
+      // QR/code scanning, verification, sharing, and profile handoff are one
+      // short-lived scanner lifecycle; all repository and route contracts are
+      // already external, and the allowance is only seven lines.
+      'lib/features/community/presentation/community_bil_code_page.dart': 800,
+      // Search, relationship state, and the people-list visit guard share one
+      // page lifecycle; data access and profile widgets are separate.
+      'lib/features/community/presentation/community_people_page.dart': 750,
+      // Post detail, comments, replies, and focus-to-comment share a single
+      // detail route state; persistence and post rendering are sibling parts.
+      'lib/features/community/presentation/community_post_detail_page.dart':
+          825,
+      // Topic discovery, membership, and composition callbacks are one page
+      // lifecycle; taxonomy, RPCs, and localized copy are separate contracts.
+      'lib/features/community/presentation/community_topics_page.dart': 975,
+      // Recipient lookup and composing the first message are one guarded form
+      // lifecycle; delivery policy and message transport live in the repository.
+      'lib/features/community/presentation/new_community_message_page.dart':
+          750,
+      // Render-only Coach bubbles, structured cards, and their accessibility
+      // semantics are one visual component family; state and actions are parts.
+      'lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart':
+          750,
+      // Query submission coordinates input, cancellation, streamed response,
+      // and scroll anchoring as one conversation transition; persistence and
+      // message rendering are separate parts.
+      'lib/features/intelligence_center/presentation/intelligence_query_flow.dart':
+          775,
       // Analytics presentation is already separated from report engines,
       // providers, and chart components; retain a narrow render-only margin.
       'lib/features/analytics/analytics_page.dart': 725,
@@ -58,12 +90,10 @@ void main() {
       // rollback, and user-visible receipts in one auditable state machine.
       'lib/features/intelligence_center/presentation/intelligence_action_flow.dart':
           1100,
-      // These two root surfaces coordinate already-separated widgets, query,
+      // The Coach route surface coordinates already-separated widget, query,
       // voice, action, and persistence parts; keep only a narrow UI margin.
       'lib/features/intelligence_center/presentation/intelligence_center_page.dart':
           750,
-      'lib/features/intelligence_center/presentation/intelligence_query_flow.dart':
-          725,
       // Voice capture is one seek-safe conversation lifecycle. Recognition,
       // silence detection, placeholder reconciliation, and cancellation must
       // remain in the same State extension to preserve ordering guarantees.

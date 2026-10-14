@@ -553,6 +553,35 @@ abstract final class CoachReviewRuntimeCopy {
     ],
   };
 
+  static const answerActionKeys = <String>['Copy answer', 'Share answer'];
+  static const answerActionTranslations = <String, List<String>>{
+    'en': answerActionKeys,
+    'ar': <String>['نسخ الرد', 'مشاركة الرد'],
+    'fr': <String>['Copier la réponse', 'Partager la réponse'],
+    'es': <String>['Copiar respuesta', 'Compartir respuesta'],
+    'tr': <String>['Yanıtı kopyala', 'Yanıtı paylaş'],
+    'de': <String>['Antwort kopieren', 'Antwort teilen'],
+    'it': <String>['Copia la risposta', 'Condividi la risposta'],
+    'pt-BR': <String>['Copiar resposta', 'Compartilhar resposta'],
+    'pt-PT': <String>['Copiar resposta', 'Partilhar resposta'],
+    'ur': <String>['جواب کاپی کریں', 'جواب شیئر کریں'],
+    'fa': <String>['کپی پاسخ', 'اشتراک پاسخ'],
+    'hi': <String>['जवाब कॉपी करें', 'जवाब साझा करें'],
+    'id': <String>['Salin jawaban', 'Bagikan jawaban'],
+    'ms': <String>['Salin jawapan', 'Kongsi jawapan'],
+    'bn': <String>['উত্তর কপি করুন', 'উত্তর শেয়ার করুন'],
+    'ru': <String>['Скопировать ответ', 'Поделиться ответом'],
+    'ja': <String>['回答をコピー', '回答を共有'],
+    'ko': <String>['답변 복사', '답변 공유'],
+    'zh-Hans': <String>['复制回答', '分享回答'],
+    'zh-Hant': <String>['複製回答', '分享回答'],
+    'th': <String>['คัดลอกคำตอบ', 'แชร์คำตอบ'],
+    'vi': <String>['Sao chép câu trả lời', 'Chia sẻ câu trả lời'],
+    'pl': <String>['Kopiuj odpowiedź', 'Udostępnij odpowiedź'],
+    'nl': <String>['Antwoord kopiëren', 'Antwoord delen'],
+    'uk': <String>['Копіювати відповідь', 'Поділитися відповіддю'],
+  };
+
   static String localeTag(String tag) {
     final normalized = tag.trim().replaceAll('_', '-').toLowerCase();
     for (final key in translations.keys) {
@@ -583,6 +612,10 @@ abstract final class CoachReviewRuntimeCopy {
         locale,
       )]![english == cameraRationale ? 0 : 1];
     }
+    final answerActionIndex = answerActionKeys.indexOf(english);
+    if (answerActionIndex >= 0) {
+      return answerActionTranslations[localeTag(locale)]?[answerActionIndex];
+    }
     final index = keys.indexOf(english);
     if (index < 0) return null;
     return translations[localeTag(locale)]![index];
@@ -607,6 +640,14 @@ abstract final class CoachReviewRuntimeCopy {
         permissionTranslations.values.every(
           (row) =>
               row.length == 2 && row.every((value) => value.trim().isNotEmpty),
+        ) &&
+        answerActionKeys.toSet().length == 2 &&
+        answerActionTranslations.keys.toSet().containsAll(supported) &&
+        supported.containsAll(answerActionTranslations.keys) &&
+        answerActionTranslations.values.every(
+          (row) =>
+              row.length == answerActionKeys.length &&
+              row.every((value) => value.trim().isNotEmpty),
         );
   }
 }

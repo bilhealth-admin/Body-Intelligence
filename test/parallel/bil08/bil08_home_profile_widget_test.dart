@@ -180,6 +180,9 @@ class _Repository extends CommunityRepository {
   bool get useServerCommunityReferenceParity => false;
 
   @override
+  bool get useServerRankedCommunityFeed => false;
+
+  @override
   void invalidateCommunityModeratorStatus() {}
 
   @override
@@ -355,12 +358,14 @@ Future<void> _visible(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
     final page = find.byType(CustomScrollView);
     expect(page, findsWidgets);
+    final scrollable = find
+        .descendant(of: page.first, matching: find.byType(Scrollable))
+        .first;
+    expect(scrollable, findsOneWidget);
     await tester.scrollUntilVisible(
       finder,
       180,
-      scrollable: find
-          .descendant(of: page.first, matching: find.byType(Scrollable))
-          .first,
+      scrollable: scrollable,
       maxScrolls: 40,
     );
   }

@@ -21,6 +21,10 @@ class _MessagesCopy {
   String get signInRequired => v['signInRequired']!;
   String get signIn => v['signIn']!;
   String get retry => v['retry']!;
+  String get olderMessages => v['olderMessages']!;
+  String get deliveryRemoved => v['deliveryRemoved']!;
+  String get replacementBody => v['replacementBody']!;
+  String get sendNewMessage => v['sendNewMessage']!;
   static _MessagesCopy of(BuildContext context) => _MessagesCopy(
     _catalog[Localizations.localeOf(context).languageCode] ??
         _extended(context),
@@ -35,6 +39,12 @@ class _MessagesCopy {
 
   static const _catalog = <String, Map<String, String>>{
     'en': {
+      'deliveryRemoved':
+          'This message was previously delivered and then removed. Your text is kept; no new message was sent.',
+      'replacementBody':
+          'The previous request was delivered and then removed. Sending again creates a new message.',
+      'sendNewMessage': 'Send new message',
+      'olderMessages': 'Load older messages',
       'messages': 'Messages',
       'inbox': 'Inbox',
       'sent': 'Sent',
@@ -55,6 +65,12 @@ class _MessagesCopy {
       'retry': 'Retry',
     },
     'ar': {
+      'deliveryRemoved':
+          'أُرسلت هذه الرسالة سابقًا ثم أُزيلت. النص محفوظ؛ لم نرسل رسالة أخرى.',
+      'replacementBody':
+          'أُرسلت الرسالة السابقة ثم أُزيلت. الإرسال مرة أخرى ينشئ رسالة جديدة.',
+      'sendNewMessage': 'إرسال رسالة جديدة',
+      'olderMessages': 'تحميل الرسائل الأقدم',
       'messages': 'الرسائل',
       'inbox': 'الوارد',
       'sent': 'المرسلة',
@@ -75,6 +91,12 @@ class _MessagesCopy {
       'retry': 'إعادة المحاولة',
     },
     'fr': {
+      'deliveryRemoved':
+          'Ce message a été envoyé puis supprimé. Votre texte est conservé ; aucun nouveau message n’a été envoyé.',
+      'replacementBody':
+          'La demande précédente a été transmise puis supprimée. Un nouvel envoi crée un nouveau message.',
+      'sendNewMessage': 'Envoyer un nouveau message',
+      'olderMessages': 'Charger les messages précédents',
       'messages': 'Messages',
       'inbox': 'Boîte de réception',
       'sent': 'Envoyés',
@@ -95,6 +117,12 @@ class _MessagesCopy {
       'retry': 'Réessayer',
     },
     'es': {
+      'deliveryRemoved':
+          'Este mensaje se envió y luego se eliminó. Conservamos tu texto; no se envió otro mensaje.',
+      'replacementBody':
+          'La solicitud anterior se entregó y luego se eliminó. Enviar de nuevo crea un mensaje nuevo.',
+      'sendNewMessage': 'Enviar un nuevo mensaje',
+      'olderMessages': 'Cargar mensajes anteriores',
       'messages': 'Mensajes',
       'inbox': 'Recibidos',
       'sent': 'Enviados',
@@ -115,6 +143,12 @@ class _MessagesCopy {
       'retry': 'Reintentar',
     },
     'tr': {
+      'deliveryRemoved':
+          'Bu mesaj daha önce iletildi ve ardından kaldırıldı. Metniniz korundu; yeni mesaj gönderilmedi.',
+      'replacementBody':
+          'Önceki istek iletildi ve ardından kaldırıldı. Yeniden göndermek yeni bir mesaj oluşturur.',
+      'sendNewMessage': 'Yeni mesaj gönder',
+      'olderMessages': 'Eski mesajları yükle',
       'messages': 'Mesajlar',
       'inbox': 'Gelen kutusu',
       'sent': 'Gönderilenler',

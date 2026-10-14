@@ -1,11 +1,7 @@
 name: BIL guarded functional source preparation
-# Only the authorized integration branch. No builds, deploy, Full8, or stores.
+# Manual-only because this workflow can write and push source changes.
+# No builds, deploy, Full8, or stores.
 on:
-  push:
-    branches: [integration/bil-qa-media-policy-20261011]
-    paths:
-      - .github/workflows/bil_candidate_prepare_20261011.yml
-      - docs/qa_next/candidate_20261011/**
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,7 +16,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Verify complete patch and protected source before apply
@@ -74,7 +70,7 @@ jobs:
         run: |
           mkdir -p build/bil-candidate-20261011
           git diff --binary HEAD -- lib test > build/bil-candidate-20261011/current.patch
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: bil-functional-preparation-${{ github.run_id }}

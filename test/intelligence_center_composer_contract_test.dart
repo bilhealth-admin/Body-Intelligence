@@ -16,6 +16,7 @@ void main() {
             'intelligence_reference_workspace_flow.dart',
             'intelligence_coach_menu.dart',
             'intelligence_center_message_widgets.dart',
+            'ai_coach_report_confirmation_sheet.dart',
             'intelligence_center_voice_widgets.dart',
             'intelligence_conversation_persistence.dart',
             'intelligence_conversation_history.dart',
@@ -31,18 +32,33 @@ void main() {
             ).readAsStringSync(),
           )
           .join('\n');
+  // Source formatting may split a const widget key across lines. Keep the
+  // contract focused on its stable identifier rather than Dart whitespace.
+  final compactPage = page.replaceAll(RegExp(r'\s+'), '');
+  bool containsSource(String snippet) =>
+      compactPage.contains(snippet.replaceAll(RegExp(r'\s+'), ''));
+  bool hasWidgetKey(String identifier) =>
+      containsSource("Key('$identifier')") ||
+      containsSource("Key('$identifier',)");
   final shell = File(
     'lib/app/router/responsive_app_shell.dart',
   ).readAsStringSync();
+  final coachHeader = File(
+    'lib/features/intelligence_center/presentation/'
+    'intelligence_coach_reference_header.dart',
+  ).readAsStringSync();
+  final safetyReportService = File(
+    'lib/features/intelligence_center/services/ai_coach_safety_report_service.dart',
+  ).readAsStringSync();
 
   test('AI Coach has direct text, voice, camera, and send contracts', () {
-    expect(page, contains("Key('ai-coach-question-field')"));
-    expect(page, contains('textInputAction: TextInputAction.send'));
+    expect(hasWidgetKey('ai-coach-question-field'), isTrue);
+    expect(containsSource('textInputAction: TextInputAction.send'), isTrue);
     expect(page, contains('onSubmitted: (_) => ask()'));
-    expect(page, contains("Key('ai-coach-voice-button')"));
-    expect(page, contains("Key('ai-coach-send-button')"));
-    expect(page, contains("Key('ai-coach-food-image-button')"));
-    expect(page, contains("Key('ai-coach-conversation-history-button')"));
+    expect(hasWidgetKey('ai-coach-voice-button'), isTrue);
+    expect(hasWidgetKey('ai-coach-send-button'), isTrue);
+    expect(hasWidgetKey('ai-coach-food-image-button'), isTrue);
+    expect(hasWidgetKey('ai-coach-conversation-history-button'), isTrue);
     expect(page, contains("part 'intelligence_conversation_history.dart'"));
     expect(page, contains("'intelligenceConversationHistoryV1'"));
     expect(page, contains("selection == '__new__'"));
@@ -99,12 +115,12 @@ void main() {
     expect(page, contains("'Conversation history'"));
     expect(page, contains('size: 48'));
     expect(page, isNot(contains("Key('ai-coach-hero-start')")));
-    expect(page, contains("Key('ai-coach-voice-button')"));
+    expect(hasWidgetKey('ai-coach-voice-button'), isTrue);
     expect(page, contains('Icons.graphic_eq_rounded'));
     expect(page, contains('minLines: 1'));
     expect(page, contains('maxLines: 1'));
     expect(page, contains('TextAlignVertical.center'));
-    expect(page, contains('scrollPadding: const EdgeInsets.symmetric'));
+    expect(containsSource('scrollPadding: const EdgeInsets.symmetric'), isTrue);
   });
 
   test('voice opening and ending cues stay restrained and non-blocking', () {
@@ -118,10 +134,10 @@ void main() {
 
   test('slow and failed replies remain visible and actionable', () {
     expect(page, contains('enum _CoachReplyPhase'));
-    expect(page, contains("Key('ai-coach-reply-progress')"));
-    expect(page, contains("Key('ai-coach-thinking-indicator')"));
-    expect(page, contains("Key('ai-coach-cancel-request')"));
-    expect(page, contains("Key('ai-coach-retry')"));
+    expect(hasWidgetKey('ai-coach-reply-progress'), isTrue);
+    expect(hasWidgetKey('ai-coach-thinking-indicator'), isTrue);
+    expect(hasWidgetKey('ai-coach-cancel-request'), isTrue);
+    expect(hasWidgetKey('ai-coach-retry'), isTrue);
     // The transient "Searching your BIL context" banner was removed from the
     // Coach surface so a provider delay cannot freeze or clutter the chat.
     expect(page, isNot(contains('Searching your BIL context')));
@@ -135,7 +151,7 @@ void main() {
       page,
       contains('message.modality == IntelligenceMessageModality.voice'),
     );
-    expect(page, contains("Key('ai-coach-speak-\${message.id}')"));
+    expect(containsSource("Key('ai-coach-speak-\${message.id}')"), isTrue);
     expect(page, contains('Read answer aloud'));
     expect(page, contains('onSpeak:'));
     expect(page, contains(': null,'));
@@ -153,7 +169,15 @@ void main() {
     expect(page, contains('BilCoachPortrait('));
     expect(page, isNot(contains('BilAccountAvatar(')));
     expect(page, isNot(contains('profilePhotoProvider')));
-    expect(page, contains('colors: [Color(0xFF0C1B2B), Color(0xFF07111B)]'));
+    // The coach uses the shared pearl canvas now; keep the greeting attached to
+    // that current theme instead of pinning the former dark-gradient palette.
+    expect(page, contains('body: BilPearlBackdrop('));
+    expect(
+      page,
+      contains(
+        'final coachCanvas = Theme.of(context).scaffoldBackgroundColor;',
+      ),
+    );
     expect(page, contains('final showReplyThinking = sending;'));
     expect(page, contains('Thinking…'));
     expect(page, isNot(contains('Preparing your answer')));
@@ -175,7 +199,9 @@ void main() {
     expect(page, contains('void didChangeMetrics()'));
     expect(page, contains('_scrollToLatest();'));
     expect(page, contains('reverse: true'));
-    expect(page, contains('conversationScroll.position.minScrollExtent'));
+    expect(page, contains('latestMessageId: visibleMessages.isEmpty'));
+    expect(page, contains('latestTargetOffset: _coachLatestReadingOffset'));
+    expect(page, contains('centerJumpButton: true'));
     expect(page, contains('if (!conversationReady)'));
     expect(page, contains('sessionWelcomeMessage'));
   });
@@ -196,10 +222,16 @@ void main() {
   });
 
   test('every generated answer exposes an in-app safety report path', () {
-    expect(page, contains("Key('ai-coach-report-\${message.id}')"));
-    expect(page, contains("Key('ai-coach-confirm-report')"));
-    expect(page, contains('Report unsafe or offensive answer'));
-    expect(page, contains("onReport('unsafe')"));
+    expect(containsSource("Key('ai-coach-report-\${message.id}')"), isTrue);
+    expect(hasWidgetKey('ai-coach-confirm-report'), isTrue);
+    expect(page, contains('I agree to send this answer for safety review.'));
+    expect(page, contains('The answer may include health information.'));
+    expect(page, contains('answerText: message.text'));
+    expect(page, contains('aiCoachSafetyReportServiceProvider'));
+    expect(
+      safetyReportService,
+      contains('bil_submit_ai_coach_safety_report_v1'),
+    );
     expect(page, contains('reason: reason'));
   });
 
@@ -218,16 +250,25 @@ void main() {
     expect(page, isNot(contains('ExpansionTile(')));
     expect(page, isNot(contains("'Why this answer'")));
     expect(page, contains('reportedMessages.contains(message.id)'));
-    expect(page, contains('reported ? Icons.flag_rounded'));
+    expect(containsSource('reported ? Icons.flag_rounded'), isTrue);
     expect(page, contains('_messageTextDirection(message.text)'));
   });
 
   test('coach voice and controls use the premium in-conversation surface', () {
-    expect(page, contains('const _CoachMenuSheet()'));
-    expect(page, contains('_openCoachMenuSheet()'));
+    expect(page, contains('const _CoachMenuSheet(currentTitle:'));
+    expect(page, contains('_openCoachMenuSheet(context)'));
     expect(page, contains('Icons.graphic_eq_rounded'));
     expect(page, contains('_VoiceListeningWave('));
-    expect(page, isNot(contains('PopupMenuButton<String>')));
+    expect(
+      coachHeader,
+      isNot(contains('PopupMenuButton<String>')),
+      reason: 'Header actions use the in-conversation sheet surface.',
+    );
+    expect(
+      page,
+      contains('PopupMenuButton<String>'),
+      reason: 'Conversation-specific rename remains available in history.',
+    );
     expect(page, isNot(contains('Icons.stop_rounded')));
     expect(page, isNot(contains('Icons.mic_rounded')));
     expect(page, isNot(contains('_CoachConversationHeader')));

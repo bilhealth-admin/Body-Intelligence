@@ -369,7 +369,19 @@ void main() {
           await tester.pump(const Duration(milliseconds: 1));
           expect(gateway.syncs, 2);
           // Back must work while the native operation is still unresolved.
-          await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);
+          // Select the actual localized action, independently of the approved
+          // platform/theme arrow glyph.
+          final appBar = find.byType(AppBar);
+          final backTooltip = MaterialLocalizations.of(
+            tester.element(appBar),
+          ).backButtonTooltip;
+          final back = find.descendant(
+            of: appBar,
+            matching: find.byTooltip(backTooltip),
+          );
+          expect(back, findsOneWidget);
+          expect(back.hitTestable(), findsOneWidget);
+          await tester.tap(back);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 600));
           expect(find.byType(ConnectedHealthPage), findsNothing);

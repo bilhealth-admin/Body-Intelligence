@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/community/channels/presentation/c
 import 'package:body_intelligence_log/features/community/circle_management/circle_management_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_circles.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
+import 'package:body_intelligence_log/features/safety_moderation/domain/ai_coach_safety_report.dart';
 import 'package:body_intelligence_log/features/community/services/community_post_image_picker.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
@@ -1050,6 +1051,10 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
   }) async => const [];
 
   @override
+  Future<List<CommunityCommentReport>> loadOpenCommentReports() async =>
+      const [];
+
+  @override
   Future<List<Map<String, dynamic>>> loadOpenModerationReports() async =>
       const [];
 
@@ -1069,6 +1074,10 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         canPublishOnly: false,
       ),
   ];
+
+  @override
+  Future<List<AiCoachSafetyReport>> loadAiCoachSafetyReports() async =>
+      const [];
 
   @override
   Future<List<CommunityRewardReview>> loadRewardReviewQueue() async => const [];
@@ -1372,6 +1381,7 @@ void main() {
               'safety': CommunitySafetyPage(repository: repository),
               'find_people': CommunityPeoplePage(repository: repository),
               'messages': CommunityMessagesPage(repository: repository),
+              'new_message': NewCommunityMessagePage(repository: repository),
               'friends': CommunityConnectionsPage(repository: repository),
               'chat': CommunityChatPage(
                 userId: _VisualRepository.peer,
@@ -1566,16 +1576,22 @@ void main() {
                     'community-post-comments-66666666-6666-4666-8666-666666666666',
                   ),
                 );
+                final feed = find.byWidgetPredicate((widget) {
+                  final storage = widget.key;
+                  return storage is PageStorageKey<String> &&
+                      storage.value.startsWith(
+                        'community-feed-scroll-${_VisualRepository.owner}-',
+                      ) &&
+                      storage.value.endsWith(
+                        '-${locale.toLanguageTag()}-explore',
+                      );
+                });
+                expect(feed, findsOneWidget);
                 await tester.scrollUntilVisible(
                   comments.hitTestable(),
                   180,
                   scrollable: find
-                      .descendant(
-                        of: find.byKey(
-                          const PageStorageKey('community-feed-scroll-explore'),
-                        ),
-                        matching: find.byType(Scrollable),
-                      )
+                      .descendant(of: feed, matching: find.byType(Scrollable))
                       .first,
                 );
                 await tester.pumpAndSettle();
@@ -1611,12 +1627,7 @@ void main() {
                   composer,
                   -220,
                   scrollable: find
-                      .descendant(
-                        of: find.byKey(
-                          const PageStorageKey('community-feed-scroll-explore'),
-                        ),
-                        matching: find.byType(Scrollable),
-                      )
+                      .descendant(of: feed, matching: find.byType(Scrollable))
                       .first,
                 );
                 await tester.pumpAndSettle();

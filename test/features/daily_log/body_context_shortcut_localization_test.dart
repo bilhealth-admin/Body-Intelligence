@@ -8,6 +8,7 @@ import 'package:body_intelligence_log/features/daily_log/daily_body_context_copy
 import 'package:body_intelligence_log/features/daily_log/domain/daily_body_context_codec.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_today_sections.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_glass_press_feedback.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -140,7 +141,14 @@ void main() {
           ),
           findsNothing,
         );
-        expect(tile.trailing, isA<Icon>());
+        expect(tile.trailing, isA<BilGlassPressFeedback>());
+        expect(
+          find.descendant(
+            of: find.byWidget(tile.trailing!),
+            matching: find.byType(Icon),
+          ),
+          findsOneWidget,
+        );
         expect(tile.onTap, isNotNull);
         expect(tester.getSize(tileFinder).height, greaterThanOrEqualTo(48));
         for (final entry in dailyBodyContextEnglishCopy.entries) {

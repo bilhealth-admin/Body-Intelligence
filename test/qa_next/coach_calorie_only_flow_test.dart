@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -167,7 +168,7 @@ void main() {
 }
 
 class _CalorieHarness {
-  _CalorieHarness(CoachActionPermissionMode mode) {
+  _CalorieHarness(this.database, CoachActionPermissionMode mode) {
     container = ProviderContainer(
       overrides: [
         databaseProvider.overrideWithValue(database),
@@ -193,7 +194,7 @@ class _CalorieHarness {
     );
   }
 
-  final database = AppDatabase.forTesting(NativeDatabase.memory());
+  final AppDatabase database;
   final gateway = _NoCalorieGateway();
   late final ProviderContainer container;
 
@@ -238,7 +239,33 @@ Future<void> _withCoach(
   Future<void> Function(_CalorieHarness) body,
 ) async {
   await tester.binding.setSurfaceSize(const Size(430, 932));
-  final h = _CalorieHarness(mode);
+  final openedDatabase = await tester.runAsync(() async {
+    final database = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+      localOwnerId: 'coach-calorie-owner',
+    );
+    try {
+      final rows = await database
+          .customSelect('SELECT 1 AS opened')
+          .get()
+          .timeout(const Duration(seconds: 15));
+      if (rows.length != 1 || rows.single.read<int>('opened') != 1) {
+        throw StateError('Calorie-only Coach SQLite fixture failed to open');
+      }
+      return database;
+    } catch (error, stack) {
+      try {
+        await database.close().timeout(const Duration(seconds: 5));
+      } catch (_) {
+        // Preserve the fixture-open error; the test runner reports its cause.
+      }
+      Error.throwWithStackTrace(error, stack);
+    }
+  });
+  if (openedDatabase == null) {
+    throw StateError('Calorie-only Coach SQLite fixture did not open');
+  }
+  final h = _CalorieHarness(openedDatabase, mode);
   try {
     await tester.pumpWidget(h.app());
     await tester.pumpAndSettle();
@@ -248,10 +275,49 @@ Future<void> _withCoach(
     await tester.pump();
     await tester.pump(Duration.zero);
     h.container.dispose();
-    await tester.runAsync(h.database.close);
-    await tester.pump(Duration.zero);
-    await tester.binding.setSurfaceSize(null);
+    try {
+      await _closeCoachDatabase(tester, h.database);
+    } finally {
+      await tester.pump(Duration.zero);
+      await tester.binding.setSurfaceSize(null);
+    }
   }
+}
+
+Future<void> _closeCoachDatabase(
+  WidgetTester tester,
+  AppDatabase database,
+) async {
+  var completed = false;
+  Object? failure;
+  StackTrace? failureStack;
+  final closing = database.close();
+  unawaited(
+    closing.then<void>(
+      (_) => completed = true,
+      onError: (Object error, StackTrace stack) {
+        failure = error;
+        failureStack = stack;
+        completed = true;
+      },
+    ),
+  );
+  final watch = Stopwatch()..start();
+  while (!completed && watch.elapsed < const Duration(seconds: 5)) {
+    await tester.pump(Duration.zero);
+    if (!completed) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+    }
+  }
+  if (!completed) {
+    throw TimeoutException(
+      'Calorie-only Coach SQLite fixture close did not complete',
+      const Duration(seconds: 5),
+    );
+  }
+  if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
 }
 
 Future<void> _openEntry(WidgetTester tester, String prompt) async {

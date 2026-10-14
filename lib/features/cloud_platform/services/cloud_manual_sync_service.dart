@@ -81,6 +81,7 @@ final class CloudManualSyncResult {
     final complete =
         sync.availability == CloudPlatformAvailability.ready &&
         sync.pending == 0 &&
+        produce.eligibleRemaining == 0 &&
         sync.conflicts == 0 &&
         apply.unsupported == 0 &&
         apply.conflicts == 0 &&
@@ -98,7 +99,8 @@ final class CloudManualSyncResult {
       pulled: sync.pulled + (restore?.pulled ?? 0),
       applied: apply.applied + apply.acknowledged + (restore?.applied ?? 0),
       conflicts: sync.conflicts + apply.conflicts + (restore?.conflicts ?? 0),
-      pending: sync.pending + (restore?.pending ?? 0),
+      pending:
+          sync.pending + produce.eligibleRemaining + (restore?.pending ?? 0),
       unsupported: apply.unsupported,
       reason:
           restore?.reason ??

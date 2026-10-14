@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "run_file": "auth-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "Read authorized project keys into process memory",
+      "state": "RUN"
+    },
+    {
+      "index": 2,
+      "static_case_label": "Read authorized project keys into process memory",
+      "state": "PASS"
+    },
+    {
+      "index": 3,
+      "static_case_label": "Authenticate admin",
+      "state": "RUN"
+    },
+    {
+      "index": 4,
+      "static_case_label": "Authenticate admin",
+      "state": "PASS"
+    },
+    {
+      "index": 5,
+      "static_case_label": "Authenticate publisher",
+      "state": "RUN"
+    },
+    {
+      "index": 6,
+      "static_case_label": "Authenticate publisher",
+      "state": "PASS"
+    },
+    {
+      "index": 7,
+      "static_case_label": "Authenticate sender",
+      "state": "RUN"
+    },
+    {
+      "index": 8,
+      "static_case_label": "Authenticate sender",
+      "state": "PASS"
+    },
+    {
+      "index": 9,
+      "static_case_label": "Authenticate receiver",
+      "state": "RUN"
+    },
+    {
+      "index": 10,
+      "static_case_label": "Authenticate receiver",
+      "state": "PASS"
+    },
+    {
+      "index": 11,
+      "static_case_label": "Four independently bound test sessions",
+      "state": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 6,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T06:25:18Z",
+  "finished_utc": "2026-10-13T06:25:28Z",
+  "pid": 22304
+}

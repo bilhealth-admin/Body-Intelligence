@@ -122,11 +122,27 @@ class AppEnvironment {
   // AI Coach is served by the authenticated Supabase Edge Function. A legacy
   // standalone BIL_SERVER_URL is optional and must not disable the coach.
   static bool get aiConfigured => cloudConfigured;
-  static bool get commerceConfigured =>
+
+  /// The default payment gate is closed even when all dependencies are ready.
+  /// Keep the same readiness contract for compiled builds and isolated checks.
+  static bool isCommerceConfigurationReady({
+    required bool cloudConfigured,
+    bool paymentsEnabled = false,
+    required bool consumerProductsConfigured,
+    required bool legalLinksConfigured,
+  }) =>
       cloudConfigured &&
       paymentsEnabled &&
-      StoreCatalogConfiguration.consumerProductsConfigured &&
-      StoreCatalogConfiguration.legalLinksConfigured;
+      consumerProductsConfigured &&
+      legalLinksConfigured;
+
+  static bool get commerceConfigured => isCommerceConfigurationReady(
+    cloudConfigured: cloudConfigured,
+    paymentsEnabled: paymentsEnabled,
+    consumerProductsConfigured:
+        StoreCatalogConfiguration.consumerProductsConfigured,
+    legalLinksConfigured: StoreCatalogConfiguration.legalLinksConfigured,
+  );
   static bool get communityConfigured => cloudConfigured && communityEnabled;
   static bool get pushConfigured =>
       communityConfigured && pushEnabled && pushProviderReady;

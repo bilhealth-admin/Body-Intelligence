@@ -2,7 +2,9 @@ import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dar
 import 'package:body_intelligence_log/features/commerce/presentation/commerce_paywall.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/paywall_plan_view_model.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/paywall_state.dart';
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,6 +32,14 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: CommercePaywall(
           state: state,
           onPlanSelected: (value) => selected = value,
@@ -38,6 +48,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Plus'), findsOneWidget);
     expect(find.text('Recommended'), findsOneWidget);
@@ -53,6 +64,14 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: CommercePaywall(
           state: state,
           onPlanSelected: (_) {},
@@ -61,6 +80,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     final button = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Continue'),
     );

@@ -88,6 +88,13 @@ final class _EntryPointRepository extends CommunityRepository {
       const Stream<void>.empty();
 
   @override
+  Future<void> sendMessageOperation(
+    String recipientId,
+    String body, {
+    required String requestId,
+  }) => sendMessage(recipientId, body);
+
+  @override
   Future<void> sendMessage(String recipientId, String body) async {
     messageSendCalls += 1;
     final failure = messageFailure;
@@ -266,7 +273,7 @@ void main() {
 
     final composer = find.byKey(const Key('community-message-composer'));
     await tester.enterText(composer, 'A retained chat draft');
-    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.tap(find.byKey(const Key('community-chat-send')));
     await tester.pumpAndSettle();
 
     expect(repository.messageSendCalls, 1);

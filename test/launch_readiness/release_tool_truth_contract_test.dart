@@ -148,7 +148,7 @@ void main() {
             defines: {...baseDefines, 'BIL_MOBILE_INTEGRITY_REQUIRED=true'},
             productionMarker: 'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=PASS',
             nativeMarker:
-                'ADMOB_IOS_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED',
+                'ADMOB_IOS_UMP_CONFIGURATION_GATE=SOURCE_CONFIG_VALIDATED',
           ),
         };
     for (final entry in expectedByPlatform.entries) {
@@ -184,7 +184,9 @@ void main() {
       );
       expect(
         entry.value.source,
-        contains('FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY'),
+        contains(
+          'FACEBOOK_LOGIN_COMPILED_GATE=SUPABASE_BROWSER_OAUTH_SOURCE_PRESENT',
+        ),
         reason: entry.key,
       );
       expect(
@@ -211,19 +213,24 @@ void main() {
     expect(
       android,
       contains(
-        'Google Credential Manager sign-in and Meta native Facebook authorization with Supabase token exchange',
+        'Google Credential Manager sign-in and Facebook OAuth browser flow with Supabase token exchange',
       ),
     );
+    expect(
+      ios,
+      contains('Facebook OAuth browser flow and Supabase token exchange'),
+    );
+    expect(android, isNot(contains('Meta native Facebook authorization')));
     expect(
       ios,
       contains(
-        'Meta native Facebook authorization and Supabase token exchange',
+        'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=NOT_VERIFIED_IN_IPA_BY_THIS_JOB',
       ),
     );
-    expect(android, isNot(contains('Facebook OAuth via Supabase Custom Tabs')));
+    expect(ios, contains('ADMOB_IOS_NATIVE_SDK_GRAPH_GATE=PASS'));
     expect(
       ios,
-      isNot(contains('Facebook OAuth via Supabase SFSafariViewController')),
+      isNot(contains('ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=PRESENT_VERIFIED')),
     );
     expect(android, contains('BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID'));
     expect(ios, contains('BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID'));

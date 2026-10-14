@@ -75,7 +75,14 @@ export function validateVisionResponseLocale(
         item,
       ) => [item.name, item.evidence]),
     ];
-    if (strings.some((text) => text?.trim() && !script.test(text))) {
+    if (
+      strings.some((text) =>
+        text?.trim() &&
+        (!script.test(text) ||
+          (["ar", "fa", "ur"].includes(expected.split("-")[0]) &&
+            hasMixedArabicLatinWord(text)))
+      )
+    ) {
       throw new VisionProviderError(
         "language_mismatch",
         "Visible text has an unexpected script",
@@ -83,6 +90,20 @@ export function validateVisionResponseLocale(
     }
   }
   return expected;
+}
+
+// Validate human words without banning standalone units, brands, or source URLs.
+const arabicLetter =
+  /[\u0620-\u064a\u066e-\u06d3\u06fa-\u06ff\u0750-\u077f\u08a0-\u08c9]/;
+const latinLetter = /[A-Za-z]/;
+function hasMixedArabicLatinWord(text: string): boolean {
+  const humanText = text.replace(/(?:https?:\/\/|www\.)\S+/gi, " ");
+  const words = humanText.match(
+    /[A-Za-z\u0620-\u065f\u066e-\u06d3\u06fa-\u06ff\u0750-\u077f\u08a0-\u08c9]+/g,
+  ) ?? [];
+  return words.some((word) =>
+    arabicLetter.test(word) && latinLetter.test(word)
+  );
 }
 
 // The same photo in a different app language needs a separately localized

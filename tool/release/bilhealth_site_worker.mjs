@@ -22,7 +22,11 @@ function hasAasaContract(document) {
             .map((component) => component?.['/'])
         : [],
     );
-    return [...REQUIRED_RETURN_PATHS, ...REQUIRED_PUBLIC_PATHS].every(
+    const memberDownload = detail.components.some((component) =>
+      component?.exclude !== true
+      && component?.['/'] === '/download'
+      && component?.['?']?.member === '?'.repeat(32));
+    return memberDownload && [...REQUIRED_RETURN_PATHS, ...REQUIRED_PUBLIC_PATHS].every(
       (path) => paths.has(path),
     );
   });

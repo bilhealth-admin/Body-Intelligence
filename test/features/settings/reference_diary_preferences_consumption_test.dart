@@ -66,6 +66,6 @@ void main() {
     expect(validStoredNutritionGoal('goal.calories', '', '-5'), isFalse);
     expect(validStoredNutritionGoal('goal.carbsPercent', '%', '150'), isFalse);
     expect(validStoredNutritionGoal('goal.sodium', 'mg', '1000001'), isFalse);
-    expect(validStoredNutritionGoal('goal.fiber', 'g', '10001'), isFalse);
+    expect(validStoredNutritionGoal('goal.fiber', 'g', '1000001'), isFalse);
   });
 }

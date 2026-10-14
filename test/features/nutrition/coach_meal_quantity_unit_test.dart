@@ -134,7 +134,8 @@ Future<_QuantityFixture> _seed(String unit) async {
   final food = await FoodRepository(db).addFood(
     name: 'Explicit unit $unit',
     category: 'fixture',
-    servingSize: 1,
+    // Gram labels declare nutrition per 100 g; count/volume labels per unit.
+    servingSize: unit == 'g' ? 100 : 1,
     servingUnit: unit,
     calories: 50,
     protein: 2,

@@ -72,7 +72,7 @@ void main() {
 
     expect(find.text('free editor'), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('premium-route-glass-veil')),
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
     await tester.pumpWidget(const SizedBox.shrink());
@@ -93,32 +93,42 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        find.byKey(const ValueKey('premium-route-protected-content')),
+        find.text('premium editor preview'),
+        findsNothing,
+        reason: 'an undated subscription cannot mount paid editor content',
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-public-title')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
         findsOneWidget,
       );
     },
   );
 
-  testWidgets('Premium deep link keeps preview under glass for Free', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _premiumApp(
-        state: _state(authority: EntitlementAuthority.verifiedServer),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Free Premium deep link shows the shared gate without mounting editor content',
+    (tester) async {
+      await tester.pumpWidget(
+        _premiumApp(
+          state: _state(authority: EntitlementAuthority.verifiedServer),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('premium editor preview'), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('premium-route-glass-veil')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('premium-route-protected-content')),
-      findsOneWidget,
-    );
-  });
+      expect(find.text('premium editor preview'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('premium-route-public-title')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('verified premiumPrograms removes deep-link glass', (
     tester,
@@ -135,7 +145,11 @@ void main() {
 
     expect(find.text('premium editor preview'), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('premium-route-glass-veil')),
+      find.byKey(const ValueKey('premium-route-public-title')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
       findsNothing,
     );
   });

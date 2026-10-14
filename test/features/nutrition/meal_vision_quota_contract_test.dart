@@ -1,4 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_guide_page.dart';
 import 'package:body_intelligence_log/features/nutrition/providers/meal_vision_usage_provider.dart';
@@ -12,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   test(
     'usage contract exposes truthful used reserved and remaining values',
     () {
@@ -61,29 +70,126 @@ void main() {
     expect(usage.periodStart, DateTime(2026, 8, 10));
   });
 
-  test('production meal Vision reservation uses the shared AI Coach meter', () {
-    final legacySql = File(
-      'supabase/migrations/'
-      '20260821174122_require_paid_boost_for_meal_vision.sql',
-    ).readAsStringSync();
-    final sql = File(
-      'supabase/migrations/'
-      '20260918120000_meal_vision_uses_shared_ai_coach_tokens.sql',
-    ).readAsStringSync();
-    final client = File(
-      'lib/features/commerce/providers/commerce_providers.dart',
-    ).readAsStringSync();
-    expect(legacySql, contains('bil_reserve_paid_ai_vision_usage'));
-    expect(sql, contains('bil_reserve_ai_usage'));
-    expect(sql, contains("'billing_source'"));
-    expect(sql, contains("'ai_coach_then_paid_boost'"));
-    expect(sql, contains('weekly_tokens_reserved'));
-    expect(sql, contains('paid_tokens_reserved'));
-    expect(sql, contains("'vision'"));
-    expect(client, contains('final aiBoostVisionAccessProvider'));
-    expect(client, contains('totalRemaining'));
-    expect(client, contains('totalRemaining >= 100'));
-  });
+  test(
+    'production meal Vision reservation uses the shared AI Coach meter',
+    () async {
+      final legacySql = File(
+        'supabase/migrations/'
+        '20260821174122_require_paid_boost_for_meal_vision.sql',
+      ).readAsStringSync();
+      final sql = File(
+        'supabase/migrations/'
+        '20260918120000_meal_vision_uses_shared_ai_coach_tokens.sql',
+      ).readAsStringSync();
+      expect(legacySql, contains('bil_reserve_paid_ai_vision_usage'));
+      expect(sql, contains('bil_reserve_ai_usage'));
+      expect(sql, contains("'billing_source'"));
+      expect(sql, contains("'ai_coach_then_paid_boost'"));
+      expect(sql, contains('weekly_tokens_reserved'));
+      expect(sql, contains('paid_tokens_reserved'));
+      expect(sql, contains("'vision'"));
+      await _withRealVisionAccessSdk((fixture) async {
+        for (final example in <({String body, AiVisionCreditState state})>[
+          (body: _creditBody(99), state: AiVisionCreditState.insufficient),
+          (body: _creditBody(100), state: AiVisionCreditState.available),
+          (
+            body: _creditBody(0, plan: 'premium'),
+            state: AiVisionCreditState.insufficient,
+          ),
+          (
+            body: _creditBody(5000, plan: 'free'),
+            state: AiVisionCreditState.available,
+          ),
+          (body: _creditBody(-1), state: AiVisionCreditState.unavailable),
+          (body: _creditBody('100'), state: AiVisionCreditState.unavailable),
+          (
+            body: '{"credits":{"total_remaining":NaN}}',
+            state: AiVisionCreditState.unavailable,
+          ),
+          (
+            body: '{"credits":{"weekly_remaining":5000,"paid_remaining":5000}}',
+            state: AiVisionCreditState.unavailable,
+          ),
+        ]) {
+          fixture.ownerBodies[_visionOwnerA] = example.body;
+          fixture.container.invalidate(aiVisionCreditStateProvider);
+          expect(
+            await fixture.container.read(aiVisionCreditStateProvider.future),
+            example.state,
+          );
+          expect(
+            await fixture.container.read(aiBoostVisionAccessProvider.future),
+            example.state == AiVisionCreditState.available,
+          );
+        }
+        // Refresh failure cannot reuse the earlier positive result as new authority.
+        fixture.ownerBodies[_visionOwnerA] = _creditBody(100);
+        fixture.container.invalidate(aiVisionCreditStateProvider);
+        expect(
+          await fixture.container.read(aiBoostVisionAccessProvider.future),
+          isTrue,
+        );
+        fixture.statusCode = 503;
+        fixture.ownerBodies[_visionOwnerA] =
+            '{"code":"synthetic_unavailable","message":"Synthetic test outage"}';
+        fixture.container.invalidate(aiVisionCreditStateProvider);
+        expect(
+          await fixture.container.read(aiVisionCreditStateProvider.future),
+          AiVisionCreditState.unavailable,
+        );
+        expect(
+          await fixture.container.read(aiBoostVisionAccessProvider.future),
+          isFalse,
+        );
+        expect(fixture.owners, isNotEmpty);
+        expect(fixture.owners.every((owner) => owner == _visionOwnerA), isTrue);
+      });
+    },
+  );
+
+  for (final roundTrip in [false, true]) {
+    test(
+      'real SDK Vision credit gate fences pending ${roundTrip ? 'ABA' : 'AB'} reads',
+      () async {
+        await _withRealVisionAccessSdk((fixture) async {
+          fixture.ownerBodies[_visionOwnerA] = _creditBody(5000);
+          fixture.ownerBodies[_visionOwnerB] = _creditBody(0);
+          fixture.holdNext = true;
+          final oldRead = fixture.container.read(
+            aiVisionCreditStateProvider.future,
+          );
+          unawaited(oldRead.then((_) {}, onError: (Object _) {}));
+          await fixture.entered.future.timeout(const Duration(seconds: 5));
+          await fixture.moveOwner(_visionOwnerB);
+          expect(
+            await fixture.container.read(aiVisionCreditStateProvider.future),
+            AiVisionCreditState.insufficient,
+          );
+          if (roundTrip) {
+            fixture.ownerBodies[_visionOwnerA] = _creditBody(99);
+            await fixture.moveOwner(_visionOwnerA);
+            expect(
+              await fixture.container.read(aiVisionCreditStateProvider.future),
+              AiVisionCreditState.insufficient,
+            );
+          }
+          fixture.release.complete();
+          await Future<void>.delayed(Duration.zero);
+          await Future<void>.delayed(Duration.zero);
+          expect(
+            await fixture.container.read(aiVisionCreditStateProvider.future),
+            AiVisionCreditState.insufficient,
+          );
+          expect(
+            await fixture.container.read(aiBoostVisionAccessProvider.future),
+            isFalse,
+          );
+          expect(fixture.owners, contains(_visionOwnerA));
+          expect(fixture.owners, contains(_visionOwnerB));
+        });
+      },
+    );
+  }
 
   test(
     'migration is atomic, idempotent, metered, RLS protected and fail closed',
@@ -181,4 +287,118 @@ void main() {
       }
     }
   });
+}
+
+// Actual pinned Supabase/Auth/PostgREST and production Riverpod credit gate.
+// Only HTTP I/O is synthetic; no allowance provider or grant is overridden.
+const _visionOwnerA = '11111111-1111-4111-8111-111111111111';
+const _visionOwnerB = '22222222-2222-4222-8222-222222222222';
+String _creditBody(Object? remaining, {String plan = 'ai_coach'}) =>
+    jsonEncode({
+      'plan': plan,
+      'credits': {'total_remaining': remaining},
+    });
+String _visionSession(String owner) => jsonEncode({
+  'access_token':
+      'e30.${base64Url.encode(utf8.encode(jsonEncode({'sub': owner, 'exp': 4102444800}))).replaceAll('=', '')}.synthetic',
+  'refresh_token': 'synthetic-refresh',
+  'token_type': 'bearer',
+  'expires_in': 3600,
+  'user': {
+    'id': owner,
+    'aud': 'authenticated',
+    'app_metadata': {},
+    'user_metadata': {},
+    'created_at': '2026-10-13T00:00:00Z',
+  },
+});
+
+class _VisionAccessFixture {
+  late SupabaseClient client;
+  late ProviderContainer container;
+  final ownerBodies = <String, String>{
+    _visionOwnerA: _creditBody(99),
+    _visionOwnerB: _creditBody(0),
+  };
+  final owners = <String>[];
+  final entered = Completer<void>(), release = Completer<void>();
+  bool holdNext = false;
+  int statusCode = 200;
+  Future<http.Response> respond(http.Request request) async {
+    if (request.url.path != '/rest/v1/rpc/bil_get_ai_usage_status') {
+      throw StateError('Unexpected isolated credit route: ${request.url.path}');
+    }
+    final jwt = request.headers['authorization']!.split(' ').last;
+    final owner =
+        (jsonDecode(
+                  utf8.decode(
+                    base64Url.decode(base64Url.normalize(jwt.split('.')[1])),
+                  ),
+                )
+                as Map)['sub']
+            as String;
+    owners.add(owner);
+    final body = ownerBodies[owner]!;
+    final status = statusCode;
+    if (holdNext) {
+      holdNext = false;
+      entered.complete();
+      await release.future;
+    }
+    return http.Response(
+      body,
+      status,
+      request: request,
+      headers: {'content-type': 'application/json'},
+    );
+  }
+
+  Future<void> moveOwner(String owner) async {
+    final delivered = client.auth.onAuthStateChange.firstWhere(
+      (event) => event.session?.user.id == owner,
+    );
+    await client.auth.recoverSession(_visionSession(owner));
+    await delivered.timeout(const Duration(seconds: 5));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(verifiedEntitlementOwnerIdProvider), owner);
+  }
+}
+
+Future<void> _withRealVisionAccessSdk(
+  Future<void> Function(_VisionAccessFixture) action,
+) async {
+  SharedPreferences.setMockInitialValues({});
+  final fixture = _VisionAccessFixture();
+  final singleton = await Supabase.initialize(
+    url: 'https://bootstrap.invalid',
+    publishableKey: 'synthetic-bootstrap',
+    debug: false,
+    accessToken: () async => 'synthetic-bootstrap',
+    httpClient: MockClient(
+      (request) async => http.Response('{}', 200, request: request),
+    ),
+  );
+  await singleton.client.dispose();
+  fixture.client = SupabaseClient(
+    'https://vision-credits.invalid',
+    'synthetic-publishable',
+    authOptions: const AuthClientOptions(autoRefreshToken: false),
+    httpClient: MockClient(fixture.respond),
+  );
+  singleton.client = fixture.client;
+  await fixture.client.auth.recoverSession(_visionSession(_visionOwnerA));
+  fixture.container = ProviderContainer();
+  final listener = fixture.container.listen(
+    aiVisionCreditStateProvider,
+    (_, _) {},
+  );
+  try {
+    await action(fixture);
+  } finally {
+    if (!fixture.release.isCompleted) fixture.release.complete();
+    listener.close();
+    fixture.container.dispose();
+    await singleton.dispose();
+  }
 }

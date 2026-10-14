@@ -105,12 +105,7 @@ class _LoginPageState extends State<LoginPage> {
         isWeb: kIsWeb,
         platform: defaultTargetPlatform,
       );
-      final nativeFacebook = SupabaseAuthService.usesNativeFacebookSignIn(
-        provider,
-        isWeb: kIsWeb,
-        platform: defaultTargetPlatform,
-      );
-      final nativeSignIn = nativeApple || nativeGoogle || nativeFacebook;
+      final nativeSignIn = nativeApple || nativeGoogle;
       AuthResponse? nativeResponse;
       final completed = await (nativeApple
           ? (() async {
@@ -122,14 +117,9 @@ class _LoginPageState extends State<LoginPage> {
               nativeResponse = await authService.signInWithGoogleNative();
               return nativeResponse != null;
             })()
-          : nativeFacebook
-          ? (() async {
-              nativeResponse = await authService.signInWithFacebookNative();
-              return nativeResponse != null;
-            })()
           : authService.signInWithOAuth(provider));
-      // Native Apple, Google, and Facebook sign-in complete inside BIL, so
-      // there is no browser callback page to advance the authenticated journey.
+      // Native Apple and Google sign-in complete inside BIL. Facebook uses
+      // Supabase's external browser OAuth and the verified HTTPS callback.
       if (nativeSignIn && completed && mounted) {
         final sessionReady = await authService.waitForAuthenticatedSession(
           knownSession: nativeResponse?.session,
@@ -151,9 +141,9 @@ class _LoginPageState extends State<LoginPage> {
         }
         return;
       }
-      // Dismissing a native provider sheet is a deliberate cancellation, not a
+      // Dismissing a native Google sheet is a deliberate cancellation, not a
       // provider outage. Keep the polished sign-in page quietly ready.
-      if (!completed && mounted && !nativeGoogle && !nativeFacebook) {
+      if (!completed && mounted && !nativeGoogle) {
         setState(
           () => status = authEntryText(
             context,

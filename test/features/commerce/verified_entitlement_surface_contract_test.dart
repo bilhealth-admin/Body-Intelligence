@@ -66,14 +66,28 @@ void main() {
     final source = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final normalizedSource = source.replaceAll(RegExp(r'\s+'), ' ');
 
-    expect(source, contains('verifiedSubscriptionAccessProvider'));
+    expect(normalizedSource, contains('verifiedSubscriptionAccessProvider'));
     expect(
-      source,
-      contains('final premiumAccessResolved = verifiedSubscription.hasValue;'),
+      normalizedSource,
+      contains(
+        'verifiedSubscription.asData?.value.authority == '
+        'EntitlementAuthority.verifiedServer;',
+      ),
     );
-    expect(source, isNot(contains('verifiedSubscription.isLoading &&')));
-    expect(source, contains('premiumAccessResolved: premiumAccessResolved'));
+    expect(
+      normalizedSource,
+      contains('premiumAccessChecking: verifiedSubscription.isLoading'),
+    );
+    expect(
+      normalizedSource,
+      isNot(contains('verifiedSubscription.isLoading &&')),
+    );
+    expect(
+      normalizedSource,
+      contains('premiumAccessResolved: premiumAccessResolved'),
+    );
   });
 
   test('closed-test grant is a server-owned Premium AI Coach overlay', () {

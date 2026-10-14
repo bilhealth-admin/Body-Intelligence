@@ -1,0 +1,17 @@
+{
+  "label": "format-fresh-moderator-visit",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib/features/community/presentation/community_post_moderation_page.dart",
+    "test\\features\\community\\community_safety_review_repository_test.dart"
+  ],
+  "started_utc": "2026-10-13T08:10:11.842891+00:00",
+  "runner_pid": 8596,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "6c66f7a35f70a40b7614e04328890146f2c1a1c4cc3efbb6decc34312b824356",
+  "fingerprint_version": 4,
+  "pid": 11104
+}

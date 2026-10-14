@@ -41,13 +41,11 @@ void main() {
     expect(manifest, isNot(contains('android.permission.READ_MEDIA_VIDEO')));
     expect(manifest, isNot(contains('android.permission.READ_CONTACTS')));
     expect(manifest, contains('@style/HealthPermissionRationaleTheme'));
-    expect(
-      manifest,
-      contains('Android Facebook sign-in intentionally uses Supabase'),
-    );
+    expect(manifest, isNot(contains('com.facebook.sdk')));
 
     expect(auth, contains('usesNativeAndroidGoogleSignIn'));
-    expect(auth, contains('usesNativeAndroidFacebookSignIn'));
+    expect(auth, contains('client.auth.signInWithOAuth('));
+    expect(auth, isNot(contains('usesNativeFacebookSignIn')));
     expect(google, contains('Android Credential Manager'));
     expect(google, contains('serverClientId: _serverClientId'));
     expect(

@@ -1,0 +1,214 @@
+[
+  {
+    "file": ".github/workflows/android_debug_build.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - phase-3-product-excellence\n  pull_request:\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_activity_read_targeted.yml",
+    "trigger": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - lib/features/community/presentation/community_visible_activity_scope.dart\n      - lib/features/community/presentation/community_notification_read_receipts.dart\n      - lib/features/community/presentation/community_notifications_page.dart\n      - lib/features/community/presentation/community_notifications_rendering.dart\n      - test/features/community/community_visible_activity_scope_test.dart\n      - test/features/community/community_activity_auto_read_test.dart\n      - .github/workflows/bil_activity_read_targeted.yml"
+  },
+  {
+    "file": ".github/workflows/bil_activity_retry_diagnostic.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_activity_retry_diagnostic.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_apply_qa_handoff_20261008.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - '.github/workflows/bil_apply_qa_handoff_20261008.yml'\n      - 'docs/qa_handoffs/20261008/base64/**'"
+  },
+  {
+    "file": ".github/workflows/bil_calorie_only_qa.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - lib/features/intelligence_center/services/local_coach_calorie_command.dart\n      - lib/features/intelligence_center/services/local_coach_command_parser.dart\n      - test/qa_next/coach_calorie_only_command_test.dart\n      - test/qa_next/coach_calorie_only_flow_test.dart\n      - .github/workflows/bil_calorie_only_qa.yml"
+  },
+  {
+    "file": ".github/workflows/bil_candidate_prepare_20261011.yml",
+    "trigger": "on:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_candidate_prepare_20261011.yml\n      - docs/qa_next/candidate_20261011/**\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_community_3033_candidate_qa.yml",
+    "trigger": "on:\n  push:\n    branches: [fix/community-3033-ready, staging/community-final-qa-20261003, fix/community-acceptance-notifications-20261003]\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_community_acceptance_targeted_qa.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - fix/community-acceptance-notifications-20261003\n      - staging/community-final-qa-20261003"
+  },
+  {
+    "file": ".github/workflows/bil_community_entry_r5.yml",
+    "trigger": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - .github/workflows/bil_community_entry_r5.yml\n      - tool/prebuild/run_code_tests.py\n      - tool/qa_next/run_regression.py\n      - lib/features/community/**\n      - lib/features/profile/services/profile_photo_service.dart\n      - lib/main.dart\n      - lib/features/community/services/community_owner_http_client.dart\n      - lib/app/router/app_community_routes.dart\n      - lib/app/router/app_router.dart\n      - test/features/community/community_entry*\n      # Review/pagination tests are part of R5's portable matrix; edits must rerun R5.\n      - test/features/community/community_review_regression_test.dart\n      - test/features/community/community_polish_visual_test.dart\n      - test/qa_next/community_composer_reference_capture_test.dart\n      - test/qa_next/community_profile_drafts_reference_capture_test.dart\n      - test/features/community/community_composer_auth_session_test.dart\n      - test/features/community/community_post_moderation_test.dart\n      - test/features/community/community_publish_operation*\n      - test/features/community/community_owner_refresh_transport_test.dart\n      - test/features/community/community_unicode_body_boundary_test.dart\n      - test/features/community/community_voice_unicode_retention_test.dart\n      - test/features/community/community_drafts*\n      - test/features/community/community_activity*\n      - test/features/community/community_notification_auth_session_test.dart\n      - test/features/profile/profile_photo_entry_owner_test.dart\n      - test/qa_next/community_entry_capture_test.dart"
+  },
+  {
+    "file": ".github/workflows/bil_community_notification_resilience.yml",
+    "trigger": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - lib/features/community/presentation/community_notifications_page.dart\n      - test/features/community/community_notification_resilience_test.dart\n      - .github/workflows/bil_community_notification_resilience.yml\n  pull_request:\n    paths:\n      - lib/features/community/presentation/community_notifications_page.dart\n      - test/features/community/community_notification_resilience_test.dart\n      - .github/workflows/bil_community_notification_resilience.yml"
+  },
+  {
+    "file": ".github/workflows/bil_extended_prebuild_coverage.yml",
+    "trigger": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - .github/workflows/bil_extended_prebuild_coverage.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_extract_bounded_host_tooling.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_extract_bounded_host_tooling.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_final_release_certification.yml",
+    "trigger": "on:\n  push:\n    branches: [fix/community-sapphire-health-3033, fix/admob-clean-production-2026-10-02]\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_functional_finish_20261011.yml",
+    "trigger": "on:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_functional_finish_20261011.yml\n      - docs/qa_next/functional_finish_20261011/**\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_healthkit_cloud_simulator.yml",
+    "trigger": "on:\n  workflow_dispatch:\n  push:\n    branches:\n      - cloud/healthkit-4988-4991"
+  },
+  {
+    "file": ".github/workflows/bil_install_reference_revision_20261006.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - tool/qa_next/install_reference_revision_20261006.py\n      - .github/workflows/bil_install_reference_revision_20261006.yml"
+  },
+  {
+    "file": ".github/workflows/bil_instant_experience_qa.yml",
+    "trigger": "on:\n  push:\n    branches: [integration/bil-qa-media-policy-20261011]\n    paths:\n      - .github/workflows/bil_instant_experience_qa.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_integration_media_policy_focused.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - integration/bil-qa-media-policy-20261011\n    paths:\n      - .github/workflows/bil_integration_media_policy_focused.yml\n      - lib/**\n      - test/**\n      - tool/prebuild/**\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_isolated_host_toolchain.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_isolated_host_toolchain.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_local_visual_font_qa_20261008.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_local_visual_font_qa_20261008.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_next_coach_community_qa_only.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_next_offline_dart_tooling.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_next_offline_dart_tooling.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_next_source_snapshot_20261006.yml",
+    "trigger": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_next_source_snapshot_20261006.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_offline_qa_recovery.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_offline_qa_recovery.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_offline_sqlite_runtime.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_offline_sqlite_runtime.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_prebuild_store_backend_qa.yml",
+    "trigger": "on:\n  push:\n    branches: [staging/community-final-qa-20261003, fix/community-acceptance-notifications-20261003]\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_premium_keyboard_boundary.yml",
+    "trigger": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - lib/features/commerce/presentation/premium_route_glass_gate.dart\n      - test/features/commerce/premium_route_keyboard_access_test.dart\n      - .github/workflows/bil_premium_keyboard_boundary.yml\n  pull_request:\n    paths:\n      - lib/features/commerce/presentation/premium_route_glass_gate.dart\n      - test/features/commerce/premium_route_keyboard_access_test.dart\n      - .github/workflows/bil_premium_keyboard_boundary.yml"
+  },
+  {
+    "file": ".github/workflows/bil_public_dependency_sources_qa.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_public_dependency_sources_qa.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_public_site_deploy.yml",
+    "trigger": "on:\n  workflow_dispatch:\n  push:\n    branches:\n      - fix/community-sapphire-health-3033\n    paths:\n      - 'public_site/**'\n      - 'wrangler.site.jsonc'\n      - 'tool/release/bilhealth_site_worker.mjs'\n      - '.github/workflows/bil_public_site_deploy.yml'"
+  },
+  {
+    "file": ".github/workflows/bil_qa_binary_golden_restore_20261008.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_qa_binary_golden_restore_20261008.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_qa_contract_clusters_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_contract_clusters_20261010.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_qa_dashboard_overflow_probe_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_dashboard_overflow_probe_20261010.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_qa_focused_then_broad_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_focused_then_broad_20261010.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_qa_more_flat_contract_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_more_flat_contract_20261010.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_qa_p0_fast_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_p0_fast_20261010.yml\n      - lib/data/repositories/meal_repository.dart\n      - lib/data/repositories/meal_repository_validation.dart\n      - lib/data/repositories/meal_repository_vision_journal.dart\n      - lib/features/daily_log/food_log_actions.dart\n      - lib/features/daily_log/daily_log_capture_actions.dart\n      - lib/features/intelligence_center/presentation/intelligence_vision_flow.dart\n      - lib/features/nutrition/presentation/meal_image_review_dialog.dart\n      - test/features/nutrition/meal_vision_verified_commit_test.dart\n      - lib/features/daily_log/food_log_page.dart\n      - lib/features/daily_log/food_log_tile_widgets.dart\n      - lib/features/nutrition/services/meal_image_gateway_contract.dart\n      - test/features/nutrition/meal_image_unified_review_contract_test.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_review.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_match.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_visuals.dart\n      - test/features/nutrition/coach_food_commit_test.dart\n      - test/features/nutrition/coach_meal_commit_boundary_test.dart\n      - test/features/nutrition/meal_vision_premium_review_test.dart\n      - test/features/nutrition/meal_vision_flutter_capture_test.dart\n      - test/parallel/bil02/coach_media_page_overlay_test.dart\n      - test/features/intelligence_center/coach_image_source_regression_test.dart\n      - test/features/nutrition/meal_image_language_regression_test.dart\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_qa_reviewed_back_arrow_goldens_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_reviewed_back_arrow_goldens_20261010.yml"
+  },
+  {
+    "file": ".github/workflows/bil_qa_reviewed_golden_promotion_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_reviewed_golden_promotion_20261010.yml"
+  },
+  {
+    "file": ".github/workflows/bil_qa_scoped_sdk_format_20261010.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths:\n      - .github/workflows/bil_qa_scoped_sdk_format_20261010.yml"
+  },
+  {
+    "file": ".github/workflows/bil_qa_targeted_community_return.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - test/features/community/community_message_retry_cases.dart\n      - test/features/community/community_chat_auth_session_test.dart\n      - lib/features/community/presentation/community_return_button.dart\n      - lib/features/community/presentation/community_chat_rendering.dart\n      - .github/workflows/bil_qa_targeted_community_return.yml"
+  },
+  {
+    "file": ".github/workflows/bil_qa_vision_arabic_capture_20261010.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - qa/bil-quality-ux-integration-20261009\n    paths:\n      - .github/workflows/bil_qa_vision_arabic_capture_20261010.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_rc_mobile_test_build.yml",
+    "trigger": "on:\n  push:\n    branches: [fix/community-sapphire-health-3033]\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_reference_native_candidate.yml",
+    "trigger": "on:\n  workflow_dispatch:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths:\n      - lib/features/community/presentation/**\n      - lib/features/community/channels/presentation/**\n      - test/features/community/community_polish_visual_test.dart\n      - test/features/community/community_review_regression_test.dart\n      - lib/features/intelligence_center/presentation/**\n      - lib/shared/widgets/bil_reference_bottom_bar.dart\n      - test/qa_next/**\n      - .github/workflows/bil_reference_native_candidate.yml"
+  },
+  {
+    "file": ".github/workflows/bil_restore_epic3_qa_goldens_20261008.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_restore_epic3_qa_goldens_20261008.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_reviewer_access_preflight.yml",
+    "trigger": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - tool/prebuild/reviewer_access_preflight.mjs\n      - tool/prebuild/reviewer_access_preflight_test.mjs\n      - .github/workflows/bil_reviewer_access_preflight.yml\n  workflow_dispatch:\n    inputs:\n      google_reviewer_owner_id:\n        description: Owner-approved new Google reviewer UUID; blank keeps read-only mode\n        required: false\n        default: ''\n      google_reviewer_email:\n        description: Dedicated owner-controlled Google reviewer email\n        required: false\n        default: ''\n      owner_confirmation:\n        description: OWNER_APPROVED_GOOGLE_REVIEWER_CONFIRMATION\n        required: false\n        default: ''"
+  },
+  {
+    "file": ".github/workflows/bil_sapphire_history_qa.yml",
+    "trigger": "on:\n  push:\n    branches: [fix/community-sapphire-health-3033, fix/admob-clean-production-2026-10-02]\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_source_checkpoint_qa.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/coach-community-next-20261005]\n    paths: [.github/workflows/bil_source_checkpoint_qa.yml]"
+  },
+  {
+    "file": ".github/workflows/bil_store_lifecycle_adversarial_contracts.yml",
+    "trigger": "on:\n  push:\n    branches: [work/community-reference-parity-20261003]\n    paths:\n      - supabase/functions/verify-store-purchase/**\n      - .github/workflows/bil_store_lifecycle_adversarial_contracts.yml\n  pull_request:\n    paths:\n      - supabase/functions/verify-store-purchase/**\n      - .github/workflows/bil_store_lifecycle_adversarial_contracts.yml"
+  },
+  {
+    "file": ".github/workflows/bil_vision_formatter_once_20261010.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths:\n      - .github/workflows/bil_vision_formatter_once_20261010.yml"
+  },
+  {
+    "file": ".github/workflows/bil_vision_postintegration_20261010.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths:\n      - lib/features/nutrition/services/meal_image_gateway_contract.dart\n      - lib/data/repositories/meal_repository_vision_journal.dart\n      - lib/features/daily_log/food_log_actions.dart\n      - lib/features/daily_log/daily_log_capture_actions.dart\n      - test/features/nutrition/meal_image_unified_review_contract_test.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_review.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_visuals.dart\n      - lib/features/nutrition/presentation/meal_vision_premium_match.dart\n      - test/features/nutrition/meal_vision_premium_review_test.dart\n      - test/features/nutrition/meal_vision_flutter_capture_test.dart\n      - test/features/nutrition/meal_vision_verified_commit_test.dart\n      - .github/workflows/bil_vision_postintegration_20261010.yml\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/bil_vision_premium_20261010.yml",
+    "trigger": "on:\n  push:\n    branches: [qa/bil-quality-ux-integration-20261009]\n    paths: [.github/vision_payload.part09.txt]\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/build18_ai_coach_full_tests.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - codex/build18-ai-coach-no-loading-flash-20260913\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/build18_health_responsive_tests.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - codex/build18-ai-coach-no-loading-flash-20260913\n  workflow_dispatch:"
+  },
+  {
+    "file": ".github/workflows/verify.yml",
+    "trigger": "on:\n  push:\n    branches:\n      - phase-3-product-excellence\n      - fix/admob-clean-production-2026-10-02\n  pull_request:\n  workflow_dispatch:"
+  }
+]

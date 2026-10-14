@@ -11,12 +11,17 @@ class ChatHistoryViewport extends StatefulWidget {
     required this.child,
     required this.latestMessageId,
     this.centerJumpButton = false,
+    this.latestTargetOffset,
     super.key,
   });
   final ScrollController controller;
   final Widget child;
   final String? latestMessageId;
   final bool centerJumpButton;
+
+  /// Optional measured reading start for a newest item taller than the viewport.
+  /// Other chats retain their existing newest-end behavior by default.
+  final double Function(ScrollPosition position)? latestTargetOffset;
 
   @override
   State<ChatHistoryViewport> createState() => _ChatHistoryViewportState();
@@ -41,7 +46,18 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
     // viewport as following latest; the metrics notification will re-pin once
     // dimensions exist.
     if (!position.hasContentDimensions) return true;
-    return position.pixels - position.minScrollExtent <= _threshold;
+    return widget.latestTargetOffset == null
+        ? position.pixels - position.minScrollExtent <= _threshold
+        : (position.pixels - _latestTarget(position)).abs() <= _threshold;
+  }
+
+  double _latestTarget(ScrollPosition position) {
+    final measured = widget.latestTargetOffset?.call(position);
+    return measured != null && measured.isFinite
+        ? measured
+              .clamp(position.minScrollExtent, position.maxScrollExtent)
+              .toDouble()
+        : position.minScrollExtent;
   }
 
   @override
@@ -88,8 +104,9 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
       }
       final position = widget.controller.position;
       if (!position.hasContentDimensions) return;
-      if ((position.pixels - position.minScrollExtent).abs() > 0.5) {
-        widget.controller.jumpTo(position.minScrollExtent);
+      final target = _latestTarget(position);
+      if ((position.pixels - target).abs() > 0.5) {
+        widget.controller.jumpTo(target);
       }
     });
     WidgetsBinding.instance.ensureVisualUpdate();
@@ -167,7 +184,7 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
                           if (widget.controller.hasClients &&
                               widget.controller.position.hasContentDimensions) {
                             widget.controller.jumpTo(
-                              widget.controller.position.minScrollExtent,
+                              _latestTarget(widget.controller.position),
                             );
                           }
                           _queuePin(force: true);

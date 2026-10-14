@@ -624,6 +624,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     Future<BilActionReceipt> Function(void Function() checkWritePermission)?
     undoReadback,
     CoachMealCommit? mealCommit,
+    CoachMessagePresentation? presentation,
+    String? presentationOwnerKey,
     bool verifiedResult = true,
   }) {
     if (!mounted) return;
@@ -636,6 +638,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           kind: IntelligenceMessageKind.action,
           text: text,
           createdAt: DateTime.now(),
+          presentation: presentation,
+          archivedPresentationOwnerKey: presentationOwnerKey,
           evidence: [
             if (verifiedResult) 'BIL verified tool result',
             if (receipt != null) jsonEncode(receipt.toStructuredPayload()),
@@ -780,18 +784,10 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
 
   Future<void> _recordFeedback(
     IntelligenceMessage message,
-    bool helpful, {
-    String? reason,
-  }) async {
+    bool helpful,
+  ) async {
     final previous = messageFeedback[message.id];
-    final wasReported = reportedMessages.contains(message.id);
-    _updateState(() {
-      if (reason == 'unsafe') {
-        reportedMessages.add(message.id);
-      } else {
-        messageFeedback[message.id] = helpful;
-      }
-    });
+    _updateState(() => messageFeedback[message.id] = helpful);
     try {
       await const AiCoachFeedbackService().record(
         responseId: message.id,
@@ -799,35 +795,81 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
         locale: BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
         runtime:
             messageRuntimes[message.id] ?? CoachAnswerRuntime.localFallback,
-        reason: reason,
       );
       if (!mounted) return;
       _showActionCompleted(
-        reason == 'unsafe'
-            ? tr(
-                'Thanks — this answer was reported for safety review.',
-                'شكرًا — تم الإبلاغ عن هذه الإجابة لمراجعة السلامة.',
-              )
-            : tr(
-                'Thanks — your feedback was saved.',
-                'شكرًا — تم حفظ ملاحظتك.',
-              ),
+        tr('Thanks — your feedback was saved.', 'شكرًا — تم حفظ ملاحظتك.'),
       );
     } on Object {
       if (!mounted) return;
       _updateState(() {
-        if (reason == 'unsafe') {
-          if (!wasReported) reportedMessages.remove(message.id);
+        if (previous == null) {
+          messageFeedback.remove(message.id);
         } else {
-          if (previous == null) {
-            messageFeedback.remove(message.id);
-          } else {
-            messageFeedback[message.id] = previous;
-          }
+          messageFeedback[message.id] = previous;
         }
       });
       _showActionCompleted(
         tr('Feedback could not be saved right now.', 'تعذر حفظ الملاحظة الآن.'),
+      );
+    }
+  }
+
+  Future<void> _reportCoachAnswer(
+    IntelligenceMessage message,
+    AiCoachAnswerReportDraft draft,
+  ) async {
+    if (!_coachMessageVisitIsCurrent() ||
+        reportedMessages.contains(message.id)) {
+      return;
+    }
+    _updateState(() => reportedMessages.add(message.id));
+    try {
+      await ref
+          .read(aiCoachSafetyReportServiceProvider)
+          .submit(
+            responseId: message.id,
+            answerText: message.text,
+            reason: draft.reason,
+            explicitConsentAccepted: draft.explicitConsentAccepted,
+            userNote: draft.optionalNote,
+            locale: BilLocalePolicy.canonicalTag(
+              Localizations.localeOf(context),
+            ),
+            runtime:
+                messageRuntimes[message.id] ?? CoachAnswerRuntime.localFallback,
+          );
+      if (!mounted || !_coachMessageVisitIsCurrent()) return;
+      final scheme = Theme.of(context).colorScheme;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: scheme.surfaceContainerHighest,
+          content: Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: scheme.primary, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  tr(
+                    'Report submitted for safety review.',
+                    'تم إرسال البلاغ لمراجعة السلامة.',
+                  ),
+                  style: TextStyle(color: scheme.onSurface),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } on Object {
+      if (!mounted || !_coachMessageVisitIsCurrent()) return;
+      _updateState(() => reportedMessages.remove(message.id));
+      _showActionCompleted(
+        tr(
+          'The report could not be sent. Please try again.',
+          'تعذر إرسال البلاغ. حاول مرة أخرى.',
+        ),
       );
     }
   }

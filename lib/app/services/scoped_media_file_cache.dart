@@ -28,6 +28,9 @@ class ScopedMediaFileCache extends ChangeNotifier {
   final HttpClient _client;
   final Map<String, Future<File>> _inFlight = {};
   final Map<String, Future<File?>> _reads = {};
+  // These operations already own a directory and never await _clearing.
+  // Downloads remain nonblocking, but clear must let native listings close.
+  final Set<Future<void>> _maintenance = {};
   final Map<
     String,
     ({int size, DateTime modified, DateTime metadataModified, String digest})
@@ -319,7 +322,7 @@ class ScopedMediaFileCache extends ChangeNotifier {
       await temporary.rename(metadata.path);
       temporary = null;
       if (!current()) throw StateError('Photo request retired.');
-      unawaited(_prune(root, target.path));
+      unawaited(_trackPrune(root, target.path));
       return target;
     } on Object catch (error) {
       request?.abort();
@@ -412,6 +415,15 @@ class ScopedMediaFileCache extends ChangeNotifier {
     }
   }
 
+  Future<void> _trackPrune(Directory root, String keep) {
+    late final Future<void> operation;
+    operation = _prune(root, keep).whenComplete(() {
+      _maintenance.remove(operation);
+    });
+    _maintenance.add(operation);
+    return operation;
+  }
+
   Future<void> _prune(Directory root, String keep) async {
     try {
       final rows = <({File file, FileStat stat})>[];
@@ -461,17 +473,23 @@ class ScopedMediaFileCache extends ChangeNotifier {
   }
 
   @visibleForTesting
-  Future<void> trimForTesting() async => _prune(await _directory(), '');
+  Future<void> trimForTesting() async {
+    final root = await _directory();
+    await _trackPrune(root, '');
+  }
 
   /// Logout/account change retires queued writers before deleting account data.
   Future<void> clear() {
     _epoch++;
     _verified.clear();
     _invalidatedPost = null;
-    notifyListeners();
     final previous = _clearing;
+    final maintenance = _maintenance.toList(growable: false);
     _clearing = () async {
       await previous;
+      // Do not await _inFlight/_reads: they may be waiting for this clear via
+      // _directory. Only already-started maintenance owns a live disk listing.
+      await Future.wait(maintenance);
       final root =
           _root ??
           Directory(
@@ -479,6 +497,8 @@ class ScopedMediaFileCache extends ChangeNotifier {
           );
       if (await root.exists()) await root.delete(recursive: true);
     }().catchError((Object _) {});
+    // Install the barrier before listeners can start a read for the new epoch.
+    notifyListeners();
     return _clearing;
   }
 }

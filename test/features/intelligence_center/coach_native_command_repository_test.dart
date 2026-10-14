@@ -8,6 +8,10 @@ import 'package:body_intelligence_log/data/repositories/user_profile_repository.
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_memory_repository.dart';
+import 'package:body_intelligence_log/features/intelligence_center/app_commands/coach_verified_message_projection.dart';
+import 'package:body_intelligence_log/features/intelligence_center/app_commands/coach_health_read_guard.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_preferences.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_message_presentation.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';

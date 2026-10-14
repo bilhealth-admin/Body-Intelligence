@@ -14,6 +14,7 @@ import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dar
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
+import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
@@ -576,7 +577,11 @@ void main() {
         catalog: catalog,
         productIds: const {'bil.visual.monthly', 'bil.visual.annual'},
       ),
-      name: 'store_plans_phone_2',
+      // Keep the approved configured reference. The default source checkout
+      // has no compiled legal URLs; it needs its own exact visual contract.
+      name: StoreCatalogConfiguration.legalLinksConfigured
+          ? 'store_plans_phone_2'
+          : 'store_plans_without_legal_config_phone',
       interact: (tester) async {
         await tester.tap(find.textContaining(r'$4.79').first);
         await tester.pumpAndSettle();
@@ -598,6 +603,11 @@ void main() {
         await tester.pumpAndSettle();
         expect(catalog.restoreCalls, 1);
         expect(catalog.manageCalls, 1);
+        final legalExpectation = StoreCatalogConfiguration.legalLinksConfigured
+            ? findsOneWidget
+            : findsNothing;
+        expect(find.text('Terms of Use'), legalExpectation);
+        expect(find.text('Privacy Policy'), legalExpectation);
       },
     );
   });

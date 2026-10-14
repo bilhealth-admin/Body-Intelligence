@@ -1,6 +1,170 @@
 part of '../coach_page_lifecycle_regression_test.dart';
 
+void _expectCoachPearlAction(
+  WidgetTester tester,
+  Finder action, {
+  IconData? glyph,
+  bool enabled = true,
+}) {
+  expect(action.hitTestable(), findsOneWidget);
+  final size = tester.getSize(action);
+  expect(size.width, greaterThanOrEqualTo(48));
+  expect(size.height, greaterThanOrEqualTo(48));
+  final button = tester.widget<IconButton>(action);
+  expect(button.onPressed == null, !enabled);
+  final data = tester.getSemantics(action).getSemanticsData();
+  expect(data.flagsCollection.isButton, isTrue);
+  expect(data.flagsCollection.isEnabled.toBoolOrNull(), enabled);
+  expect(data.hasAction(ui.SemanticsAction.tap), enabled);
+  final finish = tester.widget<DecoratedBox>(
+    find.byKey(const Key('ai-coach-composer-action-finish')),
+  );
+  final decoration = finish.decoration as BoxDecoration;
+  expect(decoration.shape, BoxShape.circle);
+  final gradient = decoration.gradient as LinearGradient;
+  expect(gradient.colors, const [
+    Colors.white,
+    Color(0xFFECF3F8),
+    Color(0xFFD7E4EF),
+  ]);
+  const ink = Color(0xFF14243A);
+  for (final color in gradient.colors) {
+    expect(color.a, 1);
+    expect(
+      (color.computeLuminance() + .05) / (ink.computeLuminance() + .05),
+      greaterThanOrEqualTo(4.5),
+    );
+  }
+  if (glyph != null) {
+    final icon = tester.widget<Icon>(
+      find.descendant(of: action, matching: find.byIcon(glyph)),
+    );
+    expect(icon.color, enabled ? ink : ink.withValues(alpha: .38));
+  }
+}
+
+void _expectCoachPearlSemantics(
+  WidgetTester tester,
+  Finder action,
+  String expectedName,
+) {
+  final data = tester.getSemantics(action).getSemanticsData();
+  debugPrint(
+    'BIL_PEARL_SEMANTICS ${jsonEncode({'label': data.label, 'tooltip': data.tooltip, 'button': data.flagsCollection.isButton, 'enabled': data.flagsCollection.isEnabled.toBoolOrNull(), 'tap': data.hasAction(ui.SemanticsAction.tap)})}',
+  );
+  // Installed Material Tooltip publishes semanticsTooltip, a distinct field
+  // from label. Require the actual accessible name AND tooltip verbatim.
+  expect(data.tooltip, expectedName);
+  expect(data.label.isEmpty ? data.tooltip : data.label, expectedName);
+  expect(data.flagsCollection.isButton, isTrue);
+  expect(data.flagsCollection.isEnabled.toBoolOrNull(), isTrue);
+  expect(data.hasAction(ui.SemanticsAction.tap), isTrue);
+}
+
 void registerCoachRequestCases() {
+  for (final dark in [false, true]) {
+    for (final arabic in [false, true]) {
+      testWidgets(
+        'Coach pearl send keeps actual dispatch draft and pending gate dark=$dark Arabic=$arabic',
+        (tester) async {
+          final semantics = tester.ensureSemantics();
+          final database = AppDatabase.forTesting(NativeDatabase.memory());
+          final gateway = _HeldGateway();
+          try {
+            await _mount(
+              tester,
+              database: database,
+              gateway: gateway,
+              dark: dark,
+              highContrast: true,
+              arabic: arabic,
+              size: const Size(320, 700),
+              textScale: 2,
+              evidenceFonts: true,
+            );
+            const question = 'Explain balanced nutrition';
+            await tester.enterText(
+              find.byKey(const Key('ai-coach-question-field')),
+              question,
+            );
+            await tester.pump();
+            final send = find.byKey(const Key('ai-coach-send-button'));
+            _expectCoachPearlAction(
+              tester,
+              send,
+              glyph: Icons.arrow_upward_rounded,
+            );
+            _expectCoachPearlSemantics(tester, send, arabic ? 'إرسال' : 'Send');
+            await _send(tester, gateway, question: question);
+            expect(gateway.calls, 1);
+            _expectCoachPearlAction(
+              tester,
+              send,
+              glyph: Icons.arrow_upward_rounded,
+              enabled: false,
+            );
+            expect(
+              find.descendant(
+                of: send,
+                matching: find.byType(CircularProgressIndicator),
+              ),
+              findsNothing,
+            );
+            await tester.enterText(
+              find.byKey(const Key('ai-coach-question-field')),
+              'My next unsent message',
+            );
+            await tester.pump();
+            await tester.tap(send);
+            await tester.pump(const Duration(milliseconds: 100));
+            expect(
+              gateway.calls,
+              1,
+              reason:
+                  'A physical double send cannot duplicate the pending request.',
+            );
+            gateway.finish(text: 'A verified synthetic reply.');
+            await tester.pumpAndSettle();
+            expect(find.text('A verified synthetic reply.'), findsOneWidget);
+            expect(
+              tester
+                  .widget<TextField>(
+                    find.byKey(const Key('ai-coach-question-field')),
+                  )
+                  .controller!
+                  .text,
+              'My next unsent message',
+            );
+            _expectCoachPearlAction(
+              tester,
+              send,
+              glyph: Icons.arrow_upward_rounded,
+            );
+            expect(tester.takeException(), isNull);
+          } finally {
+            for (final pending in gateway.replies) {
+              if (!pending.isCompleted) {
+                pending.complete(
+                  LocalModelResult.answer(
+                    LocalModelAnswer(
+                      text: 'Synthetic fixture cancelled.',
+                      action: null,
+                    ),
+                  ),
+                );
+              }
+            }
+            try {
+              await _unmount(tester);
+            } finally {
+              semantics.dispose();
+              await tester.runAsync(database.close);
+            }
+          }
+        },
+      );
+    }
+  }
   testWidgets(
     'Arabic greeting completes locally without an incomplete reply card',
     (tester) async {

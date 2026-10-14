@@ -13,6 +13,7 @@ import '../data/community_public_code_failure.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_copy.dart';
+import 'community_account_visit.dart';
 import 'community_return_button.dart';
 import 'community_member_share.dart';
 import '../../notifications/domain/community_deep_link.dart';
@@ -42,24 +43,92 @@ class CommunityBilCodePage extends StatefulWidget {
 }
 
 class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
-  late final CommunityRepository? _repository =
-      widget.repository ?? _productionCodeRepository();
-  late Future<CommunityPublicCode>? _code = _repository?.loadPublicCode();
+  CommunityRepository? _repository;
+  CommunityAccountVisit? _visit;
+  Future<CommunityPublicCode>? _code;
+
+  @override
+  void initState() {
+    super.initState();
+    _bindAccount();
+  }
+
+  void _bindAccount() {
+    _rotating = false;
+    _rotationSubmitted = false;
+    _repository = widget.repository ?? _productionCodeRepository();
+    _visit = CommunityAccountVisit(
+      repository: _repository,
+      client: _repository?.communitySocialClient,
+      onChanged: () {
+        if (!mounted) return;
+        setState(() {
+          _rotating = false;
+          _rotationSubmitted = false;
+          _code = _loadCode();
+        });
+      },
+    );
+    _code = _loadCode();
+  }
+
+  Future<CommunityPublicCode>? _loadCode() {
+    final ticket = _visit?.capture();
+    final repository = _repository;
+    final pending = ticket == null || repository == null
+        ? null
+        : ticket.run(repository.loadPublicCode);
+    // An A -> B -> A boundary can retire B before FutureBuilder attaches.
+    // Observe that discarded future while keeping its original error available
+    // to the active FutureBuilder, which still renders the failure and Retry.
+    pending?.ignore();
+    return pending;
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityBilCodePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _visit?.dispose();
+      _bindAccount();
+    }
+  }
+
+  @override
+  void dispose() {
+    _visit?.dispose();
+    super.dispose();
+  }
+
   bool _rotating = false;
+  bool _rotationSubmitted = false;
   bool _sharing = false;
 
   void _retry() => setState(() {
-    _code = _repository?.loadPublicCode();
+    _code = _loadCode();
   });
 
   Future<void> _share(
     CommunityPublicCode code,
     BuildContext anchorContext,
+    CommunityAccountTicket? ticket,
+    Future<CommunityPublicCode>? displayedCodeFuture,
   ) async {
-    if (_sharing) return;
-    _sharing = true;
+    if (_sharing ||
+        _rotating ||
+        ticket == null ||
+        !ticket.isCurrent ||
+        displayedCodeFuture == null ||
+        !identical(displayedCodeFuture, _code)) {
+      return;
+    }
+    setState(() => _sharing = true);
     try {
       final box = anchorContext.findRenderObject() as RenderBox?;
+      ticket.check();
+      if (_rotating || !identical(displayedCodeFuture, _code)) {
+        return;
+      }
       await SharePlus.instance.share(
         ShareParams(
           text: CommunityMemberShare.messageFor(
@@ -72,65 +141,107 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
         ),
       );
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && ticket.isCurrent) _showFailure();
     } finally {
-      _sharing = false;
+      if (mounted) setState(() => _sharing = false);
     }
   }
 
-  Future<void> _rotate() async {
-    if (_rotating || _repository == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          communityText(context, 'Replace your BIL Code?', 'استبدال رمز BIL؟'),
-        ),
-        content: Text(
-          communityText(
-            context,
-            'Your old code will stop working. Friends will need the new one.',
-            'سيتوقف الرمز القديم عن العمل وسيحتاج الأصدقاء إلى الرمز الجديد.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(communityText(context, 'Cancel', 'إلغاء')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              communityText(context, 'Replace code', 'استبدال الرمز'),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
+  Future<void> _rotate(CommunityAccountTicket? ticket) async {
+    final repository = _repository;
+    if (_rotating ||
+        repository == null ||
+        ticket == null ||
+        !ticket.isCurrent) {
+      return;
+    }
     setState(() => _rotating = true);
     try {
-      final next = await _repository.rotatePublicCode();
-      if (mounted) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => ListenableBuilder(
+          listenable: ticket.visit,
+          builder: (_, _) => AlertDialog(
+            title: Text(
+              communityText(
+                dialogContext,
+                'Replace your BIL Code?',
+                'استبدال رمز BIL؟',
+              ),
+            ),
+            content: Text(
+              communityText(
+                dialogContext,
+                ticket.isCurrent
+                    ? 'Your old code will stop working. Friends will need the new one.'
+                    : 'Your account changed. Return to Community to continue.',
+                ticket.isCurrent
+                    ? 'سيتوقف الرمز القديم عن العمل وسيحتاج الأصدقاء إلى الرمز الجديد.'
+                    : 'تغير حسابك. ارجع إلى المجتمع للمتابعة.',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(communityText(dialogContext, 'Cancel', 'إلغاء')),
+              ),
+              FilledButton(
+                onPressed: ticket.isCurrent
+                    ? () {
+                        if (ticket.isCurrent) {
+                          Navigator.pop(dialogContext, true);
+                        }
+                      }
+                    : null,
+                child: Text(
+                  communityText(dialogContext, 'Replace code', 'استبدال الرمز'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (confirmed != true || !mounted || !ticket.isCurrent) return;
+      setState(() => _rotationSubmitted = true);
+      final next = await ticket.run(repository.rotatePublicCode);
+      if (mounted && ticket.isCurrent) {
         setState(() {
           _code = Future.value(next);
         });
       }
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && ticket.isCurrent) {
+        if (_rotationSubmitted) {
+          setState(() {
+            _code = _loadCode();
+          });
+          _showFailure(checkingCurrentCode: true);
+        } else {
+          _showFailure();
+        }
+      }
     } finally {
-      if (mounted) setState(() => _rotating = false);
+      if (mounted && ticket.isCurrent) {
+        setState(() {
+          _rotating = false;
+          _rotationSubmitted = false;
+        });
+      }
     }
   }
 
-  void _showFailure() {
+  void _showFailure({bool checkingCurrentCode = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           communityText(
             context,
-            'Your BIL Code is unavailable right now. Try again.',
-            'رمز BIL غير متاح الآن. حاول مجددًا.',
+            checkingCurrentCode
+                ? 'Rotation could not be confirmed. Checking your current BIL Code before sharing.'
+                : 'Your BIL Code is unavailable right now. Try again.',
+            checkingCurrentCode
+                ? 'لم يتأكد تغيير الرمز. نتحقق من رمز BIL الحالي قبل مشاركته.'
+                : 'رمز BIL غير متاح الآن. حاول مجددًا.',
           ),
         ),
       ),
@@ -150,6 +261,7 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
             forOwnCode: true,
           )
         : FutureBuilder<CommunityPublicCode>(
+            key: ValueKey(_visit?.epoch),
             future: _code,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
@@ -168,6 +280,8 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
                   onOpenProfile: () => context.push('/community/profile'),
                 );
               }
+              final displayedTicket = _visit?.capture();
+              final displayedCodeFuture = _code;
               return ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
@@ -209,7 +323,14 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
                   Builder(
                     builder: (shareContext) => FilledButton.icon(
                       key: const Key('community-bil-code-share'),
-                      onPressed: () => _share(code, shareContext),
+                      onPressed: _sharing || _rotating
+                          ? null
+                          : () => _share(
+                              code,
+                              shareContext,
+                              displayedTicket,
+                              displayedCodeFuture,
+                            ),
                       icon: const Icon(Icons.ios_share_rounded),
                       label: Text(
                         communityText(context, 'Share code', 'مشاركة الرمز'),
@@ -219,8 +340,10 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
                     key: const Key('community-bil-code-rotate'),
-                    onPressed: _rotating ? null : _rotate,
-                    icon: _rotating
+                    onPressed: _rotating
+                        ? null
+                        : () => _rotate(displayedTicket),
+                    icon: _rotationSubmitted
                         ? const SizedBox.square(
                             dimension: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
@@ -390,24 +513,84 @@ class CommunityMemberCodePage extends StatefulWidget {
 }
 
 class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
-  late final CommunityRepository? _repository =
-      widget.repository ?? _productionCodeRepository();
-  late Future<CommunityResolvedMember?>? _member = _repository
-      ?.resolvePublicCode(widget.code);
+  CommunityRepository? _repository;
+  CommunityAccountVisit? _visit;
+  Future<CommunityResolvedMember?>? _member;
+
+  @override
+  void initState() {
+    super.initState();
+    _bindAccount();
+  }
+
+  void _bindAccount() {
+    _repository = widget.repository ?? _productionCodeRepository();
+    _visit = CommunityAccountVisit(
+      repository: _repository,
+      client: _repository?.communitySocialClient,
+      onChanged: () {
+        if (!mounted) return;
+        setState(() {
+          _relationship = null;
+          _requesting = false;
+          _member = _loadMember();
+        });
+      },
+    );
+    _member = _loadMember();
+  }
+
+  Future<CommunityResolvedMember?>? _loadMember() {
+    final ticket = _visit?.capture();
+    final repository = _repository;
+    return ticket == null || repository == null
+        ? null
+        : ticket.run(() => repository.resolvePublicCode(widget.code));
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityMemberCodePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository) ||
+        oldWidget.code != widget.code) {
+      _visit?.dispose();
+      _relationship = null;
+      _requesting = false;
+      _bindAccount();
+    }
+  }
+
+  @override
+  void dispose() {
+    _visit?.dispose();
+    super.dispose();
+  }
+
   CommunityRelationshipStatus? _relationship;
   bool _requesting = false;
 
   void _retry() => setState(() {
     _relationship = null;
-    _member = _repository?.resolvePublicCode(widget.code);
+    _member = _loadMember();
   });
 
-  Future<void> _request(CommunityResolvedMember member) async {
-    if (_requesting || _repository == null) return;
+  Future<void> _request(
+    CommunityResolvedMember member,
+    CommunityAccountTicket? ticket,
+  ) async {
+    final repository = _repository;
+    if (_requesting ||
+        repository == null ||
+        ticket == null ||
+        !ticket.isCurrent) {
+      return;
+    }
     setState(() => _requesting = true);
     try {
-      final result = await _repository.requestFriend(member.userId);
-      if (!mounted) return;
+      final result = await ticket.run(
+        () => repository.requestFriend(member.userId),
+      );
+      if (!mounted || !ticket.isCurrent) return;
       setState(() {
         _relationship = switch (result) {
           CommunityFriendRequestStatus.pending =>
@@ -421,7 +604,7 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
         };
       });
     } catch (_) {
-      if (mounted) {
+      if (mounted && ticket.isCurrent) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -435,7 +618,7 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _requesting = false);
+      if (mounted && ticket.isCurrent) setState(() => _requesting = false);
     }
   }
 
@@ -451,6 +634,7 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
             onRetry: null,
           )
         : FutureBuilder<CommunityResolvedMember?>(
+            key: ValueKey(_visit?.epoch),
             future: _member,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
@@ -466,6 +650,7 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
               }
               final member = snapshot.data;
               if (member == null) return const _MemberCodeUnavailable();
+              final displayedTicket = _visit?.capture();
               final relationship = _relationship ?? member.relationship;
               return Center(
                 child: SingleChildScrollView(
@@ -495,13 +680,16 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
                           _MemberRelationshipAction(
                             relationship: relationship,
                             requesting: _requesting,
-                            onAdd: () => _request(member),
+                            onAdd: () => _request(member, displayedTicket),
                           ),
                           const SizedBox(height: 10),
                           OutlinedButton.icon(
-                            onPressed: () => context.push(
-                              '/community/profile/${member.userId}',
-                            ),
+                            onPressed: () {
+                              if (displayedTicket?.isCurrent != true) return;
+                              context.push(
+                                '/community/profile/${member.userId}',
+                              );
+                            },
                             icon: const Icon(Icons.account_circle_outlined),
                             label: Text(
                               communityText(

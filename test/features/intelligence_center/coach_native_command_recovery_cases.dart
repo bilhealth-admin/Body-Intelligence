@@ -171,7 +171,15 @@ void _nativeRecoveryCases() {
           await _confirmNative(tester);
           await _waitNativeReceipts(tester, fixture, 1);
           await _remountNativeCoach(tester, fixture);
-          expect(find.widgetWithText(OutlinedButton, 'Undo'), findsOneWidget);
+          final undo = find.widgetWithText(OutlinedButton, 'Undo');
+          expect(undo, findsOneWidget);
+          await Scrollable.ensureVisible(tester.element(undo), alignment: .5);
+          await tester.pump(const Duration(milliseconds: 350));
+          expect(undo.hitTestable(), findsOneWidget);
+          // Capture the real UI callback while the original visit is current.
+          // A queued gesture must still be rejected after this control is hidden.
+          final queuedUndo = tester.widget<OutlinedButton>(undo).onPressed;
+          expect(queuedUndo, isNotNull);
           if (invalid == 'later row edit') {
             await _reviseRecoveryWater(fixture);
           } else {
@@ -179,9 +187,36 @@ void _nativeRecoveryCases() {
             fixture.owners.add(fixture.owner);
             fixture.owner = 'owner-a';
             fixture.owners.add(fixture.owner);
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 16));
+            // Returning to A never revives the retired visit or its Undo.
+            expect(undo, findsNothing);
           }
           final before = await _nativeRecoverySnapshot(fixture);
-          await _undoNative(tester);
+          final writesBefore = await _nativeSqlTotalChanges(fixture);
+          if (invalid == 'later row edit') {
+            await _undoNative(tester);
+            expect(
+              find.text(
+                'This record changed since the action was prepared. Review it again.',
+              ),
+              findsOneWidget,
+            );
+          } else {
+            queuedUndo!();
+            await tester.pumpAndSettle();
+            expect(undo, findsNothing);
+            expect(
+              find.text(
+                'Your account changed. Prepare this action again for the current account.',
+              ),
+              findsOneWidget,
+            );
+          }
+          expect(find.text('The previous action was undone.'), findsNothing);
+          // total_changes also counts affected rows from a rolled-back write.
+          // Check it alongside the complete domain/journal readback below.
+          expect(await _nativeSqlTotalChanges(fixture), writesBefore);
           expect(await _nativeRecoverySnapshot(fixture), before);
           expect(
             (await fixture.receipts()).where((r) => r['undone_at'] != null),
@@ -320,4 +355,11 @@ Future<Map<String, Object?>> _nativeRecoverySnapshot(
         .map((r) => r.toJson())
         .toList(),
   };
+}
+
+Future<int> _nativeSqlTotalChanges(_NativeFixture fixture) async {
+  final row = await fixture.database
+      .customSelect('SELECT total_changes() AS changes')
+      .getSingle();
+  return row.read<int>('changes');
 }

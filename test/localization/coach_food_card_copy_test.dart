@@ -25,7 +25,7 @@ void main() {
       final source = File(
         'lib/features/intelligence_center/presentation/workspace/coach_food_card_copy.dart',
       ).readAsStringSync();
-      expect(rows, hasLength(60));
+      expect(rows, hasLength(66));
       expect(coachLiteralRuntimeSources(source), {
         for (final row in rows) row['english'] as String,
       });

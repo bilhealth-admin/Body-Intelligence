@@ -202,18 +202,43 @@ extension _CoachHealthFlow on _IntelligenceCenterPageState {
         // not be attached to this owner's answer without a verified scope.
       );
       final Map<String, Object?> result;
+      CoachMessagePresentation? presentation;
       switch (action.toolId) {
         case 'read_health_history':
         case 'read_health_progress':
-          result = await query.execute(
-            topic: action.toolId == 'read_health_progress'
-                ? 'progress'
-                : args['topic']! as String,
-            from: parseHealthDay(args['from']),
-            through: parseHealthDay(args['through']),
-            limit: args['limit'] as int? ?? 31,
-            checkAccess: access,
-          );
+          // The bounded query, detail projection and query annotations share
+          // one SQLite read transaction. A new save cannot splice old row
+          // counts together with a newer nutrient snapshot.
+          final snapshot = await owner.database.transaction(() async {
+            final result = await query.execute(
+              topic: action.toolId == 'read_health_progress'
+                  ? 'progress'
+                  : args['topic']! as String,
+              from: parseHealthDay(args['from']),
+              through: parseHealthDay(args['through']),
+              limit: args['limit'] as int? ?? 31,
+              checkAccess: access,
+            );
+            CoachMessagePresentation? visual;
+            try {
+              visual =
+                  await CoachVerifiedMessageProjection(
+                    owner.database,
+                    clock: ref.read(intelligenceConversationClockProvider),
+                  ).health(
+                    result,
+                    checkAccess: access,
+                    notes: copy.readAnnotations(result),
+                  );
+            } on FormatException {
+              // Verified legacy text remains usable if the optional block is
+              // not representable. No missing fact is manufactured.
+            }
+            access();
+            return (result: result, presentation: visual);
+          });
+          result = snapshot.result;
+          presentation = snapshot.presentation;
         case 'read_fasting':
           result = await CoachFastingCommandAdapter(
             preferences,
@@ -239,11 +264,29 @@ extension _CoachHealthFlow on _IntelligenceCenterPageState {
       }
       await guard.verify();
       access();
+      if (!mounted) return true;
+      final plain =
+          CoachMessagePlainCopy(
+            context,
+            system:
+                ref.read(measurementSystemProvider).value ??
+                MeasurementSystem.metric,
+          ).plain(
+            fallback: copy.read(action.toolId!, result),
+            presentation: presentation,
+            expectedOwnerKey: LocalDatabaseScope.keyForOwner(
+              owner.database.localOwnerId,
+            ),
+            ownerVisitIsCurrent: () => owner.scope.isCurrent,
+          );
+      access();
+      if (plain == null) return false;
       final message = IntelligenceMessage(
         id: 'tool-health-read-${DateTime.now().microsecondsSinceEpoch}',
         role: IntelligenceMessageRole.bil,
         kind: IntelligenceMessageKind.evidence,
-        text: copy.read(action.toolId!, result),
+        text: plain,
+        presentation: presentation,
         createdAt: ref.read(intelligenceConversationClockProvider)(),
         evidence: [
           jsonEncode({
@@ -255,7 +298,10 @@ extension _CoachHealthFlow on _IntelligenceCenterPageState {
         ],
         confidence: 1,
       );
-      _updateState(() => messages.add(message));
+      _updateState(() {
+        if (presentation != null) animatedResponseIds.add(message.id);
+        messages.add(message);
+      });
       _scrollToLatest();
       unawaited(_saveConversation());
       return true;

@@ -24,11 +24,9 @@ void main() {
     expect(service, contains('client.auth.signInWithOAuth'));
     expect(service, contains('signInWithGoogleNative'));
     expect(service, contains('nativeGoogleSignIn.authenticate()'));
-    expect(service, contains('signInWithFacebookNative'));
-    expect(
-      service,
-      contains('nativeFacebookSignIn.authenticate(nonce: rawNonce)'),
-    );
+    expect(service, isNot(contains('signInWithFacebookNative')));
+    expect(service, isNot(contains('native_facebook_sign_in.dart')));
+    expect(page, isNot(contains('nativeFacebook')));
     expect(service, contains('signInWithAppleNative'));
     expect(service, contains('client.auth.signInWithIdToken'));
     expect(service, contains('client.auth.generateRawNonce'));
@@ -95,7 +93,7 @@ void main() {
   });
 
   test(
-    'OAuth selects native mobile providers and an external browser fallback',
+    'OAuth keeps Facebook on an external browser and Google native on mobile',
     () {
       expect(
         SupabaseAuthService.oauthLaunchModeFor(
@@ -129,22 +127,24 @@ void main() {
         ),
         LaunchMode.externalApplication,
       );
-      expect(
-        SupabaseAuthService.usesNativeAndroidFacebookSignIn(
-          OAuthProvider.facebook,
-          isWeb: false,
-          platform: TargetPlatform.android,
-        ),
-        isFalse,
-      );
-      expect(
-        SupabaseAuthService.usesNativeAndroidFacebookSignIn(
-          OAuthProvider.facebook,
-          isWeb: false,
-          platform: TargetPlatform.iOS,
-        ),
-        isFalse,
-      );
+      for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+        expect(
+          SupabaseAuthService.oauthLaunchModeFor(
+            OAuthProvider.facebook,
+            isWeb: false,
+            platform: platform,
+          ),
+          LaunchMode.externalApplication,
+        );
+        expect(
+          SupabaseAuthService.oauthRedirectUriFor(
+            OAuthProvider.facebook,
+            isWeb: false,
+            platform: platform,
+          ),
+          SupabaseAuthService.oauthRedirectUri,
+        );
+      }
       expect(
         SupabaseAuthService.usesNativeAndroidGoogleSignIn(
           OAuthProvider.google,
@@ -173,38 +173,6 @@ void main() {
         SupabaseAuthService.usesNativeIosGoogleSignIn(
           OAuthProvider.google,
           isWeb: false,
-          platform: TargetPlatform.android,
-        ),
-        isFalse,
-      );
-      expect(
-        SupabaseAuthService.usesNativeIosFacebookSignIn(
-          OAuthProvider.facebook,
-          isWeb: false,
-          platform: TargetPlatform.iOS,
-        ),
-        isTrue,
-      );
-      expect(
-        SupabaseAuthService.usesNativeIosFacebookSignIn(
-          OAuthProvider.facebook,
-          isWeb: false,
-          platform: TargetPlatform.android,
-        ),
-        isFalse,
-      );
-      expect(
-        SupabaseAuthService.usesNativeAndroidFacebookSignIn(
-          OAuthProvider.google,
-          isWeb: false,
-          platform: TargetPlatform.android,
-        ),
-        isFalse,
-      );
-      expect(
-        SupabaseAuthService.usesNativeAndroidFacebookSignIn(
-          OAuthProvider.facebook,
-          isWeb: true,
           platform: TargetPlatform.android,
         ),
         isFalse,

@@ -26,6 +26,9 @@ void main() {
       'lib/features/settings/reference_preferences_numeric.dart',
       'lib/features/settings/reference_preferences_macros.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
+    final snapshot = File(
+      'lib/features/nutrition/domain/nutrition_goal_snapshot.dart',
+    ).readAsStringSync();
     for (final key in [
       'goal.calories',
       'goal.carbsPercent',
@@ -40,13 +43,19 @@ void main() {
       'goal.potassium',
       'goal.fiber',
       'goal.sugar',
-      'goal.vitaminA',
-      'goal.vitaminC',
-      'goal.calcium',
-      'goal.iron',
+      'goal.vitaminAMcg',
+      'goal.vitaminCMg',
+      'goal.calciumMg',
+      'goal.ironMg',
+      'goal.magnesium',
+      'goal.phosphorus',
     ]) {
       expect(nutrition, contains("'$key'"), reason: key);
     }
+    expect(snapshot, contains("'goal.vitaminAMcg': 'goal.vitaminA'"));
+    expect(snapshot, contains("'goal.vitaminCMg': 'goal.vitaminC'"));
+    expect(snapshot, contains("'goal.calciumMg': 'goal.calcium'"));
+    expect(snapshot, contains("'goal.ironMg': 'goal.iron'"));
     expect(nutrition, contains('if (editorOpen) return'));
     expect(nutrition, contains('preferencesRepositoryProvider'));
   });

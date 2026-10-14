@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/engine/ai_write_policy.dart';
 import 'package:body_intelligence_log/engine/sync_conflict_engine.dart';
 import 'package:body_intelligence_log/engine/update_policy_engine.dart';
+import 'package:body_intelligence_log/app/environment/app_environment.dart';
 import 'package:body_intelligence_log/app/services/external_capabilities.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,9 +21,14 @@ void main() {
       ExternalCapabilities.status(ExternalCapability.sync).reason,
       contains('No data is uploaded'),
     );
+    final commerce = ExternalCapabilities.status(ExternalCapability.commerce);
     expect(
-      ExternalCapabilities.status(ExternalCapability.commerce).reason,
-      contains('No payment details are collected'),
+      commerce.reason,
+      contains(
+        AppEnvironment.commerceConfigured
+            ? 'verified receipt/webhook activation is pending'
+            : 'No payment details are collected',
+      ),
     );
   });
   test('required update is distinguished from optional update', () {

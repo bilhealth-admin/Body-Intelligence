@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "run_file": "realtime-no-explicit-setauth-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "real sender and receiver identities verified",
+      "state": "PASS"
+    },
+    {
+      "index": 2,
+      "static_case_label": "create only isolated test friendship when none exists",
+      "state": "PASS"
+    },
+    {
+      "index": 3,
+      "static_case_label": "receiver subscribes to its own actual Realtime INSERT stream",
+      "state": "PASS"
+    },
+    {
+      "index": 4,
+      "static_case_label": "first message committed with actual server receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 5,
+      "static_case_label": "first actual Realtime event matches committed message and owner",
+      "state": "FAIL"
+    },
+    {
+      "index": 6,
+      "static_case_label": "cleanup only newly created test relationship",
+      "state": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 5,
+    "FAIL": 1,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T07:01:00.206Z",
+  "finished_utc": "2026-10-13T07:01:14.885Z"
+}

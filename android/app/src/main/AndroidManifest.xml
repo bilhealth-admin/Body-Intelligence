@@ -89,22 +89,6 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${bilAdMobAndroidAppId}" />
-        <!-- Android Facebook sign-in intentionally uses Supabase's external
-             browser OAuth callback. The Meta SDK metadata remains packaged for
-             the audited iOS/native integration surface and compatibility, while
-             automatic event and ad-ID collection stays disabled. -->
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
-        <meta-data
-            android:name="com.facebook.sdk.ClientToken"
-            android:value="@string/facebook_client_token" />
-        <meta-data
-            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
-            android:value="false" />
-        <meta-data
-            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
-            android:value="false" />
         <activity
             android:name=".PermissionsRationaleActivity"
             android:exported="true"
@@ -179,6 +163,15 @@
                     android:scheme="https"
                     android:host="www.bilhealth.com"
                     android:path="/auth/reset-password"/>
+            </intent-filter>
+            <!-- Opaque member shares use the browser fallback on older clients.
+                 Dart validates the member query before navigating. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="www.bilhealth.com"
+                    android:path="/download"/>
             </intent-filter>
             <!-- Public Community invites contain only an opaque referral token.
                  They are verified separately from credential-bearing auth returns. -->

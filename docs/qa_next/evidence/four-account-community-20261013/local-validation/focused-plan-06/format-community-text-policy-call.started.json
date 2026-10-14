@@ -1,0 +1,16 @@
+{
+  "label": "format-community-text-policy-call",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib\\features\\community\\data\\community_repository_connections_messaging_mixin.dart"
+  ],
+  "started_utc": "2026-10-13T07:22:23.999097+00:00",
+  "runner_pid": 17332,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "1eb0000208df21a394a0c78eb130052ab73bfe22b6351bac6ae574e0be153f83",
+  "fingerprint_version": 4,
+  "pid": 19044
+}

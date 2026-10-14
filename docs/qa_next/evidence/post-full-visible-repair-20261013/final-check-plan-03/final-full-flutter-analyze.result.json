@@ -1,0 +1,30 @@
+{
+  "label": "final-full-flutter-analyze",
+  "kind": "check",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "--verbose",
+    "analyze",
+    "--no-pub",
+    "--fatal-infos",
+    "--fatal-warnings",
+    "--protocol-traffic-log=build/stage1-closure/visible-validation-20261013/analyzer-protocol.log"
+  ],
+  "environment": {
+    "ANALYZER_STATE_LOCATION_OVERRIDE": "G:\\BIL_Project\\worktrees\\bil-stage1-closure-20261011\\build\\stage1-closure\\visible-validation-20261013\\analyzer-state"
+  },
+  "started_utc": "2026-10-13T05:47:43.733771+00:00",
+  "runner_pid": 7668,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 19808,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T05:49:52.087182+00:00",
+  "seconds": 128.29,
+  "end_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "stable_source": true,
+  "accepted": true
+}

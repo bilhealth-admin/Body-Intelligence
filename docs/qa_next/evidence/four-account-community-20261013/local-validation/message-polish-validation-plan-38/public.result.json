@@ -1,0 +1,51 @@
+{
+  "runner_pid": 16092,
+  "jobs_requested": 6,
+  "jobs_completed": 2,
+  "accepted": false,
+  "started_utc": "2026-10-13T12:36:35.191048+00:00",
+  "finished_utc": "2026-10-13T12:37:02.127166+00:00",
+  "records": [
+    {
+      "job_index": 1,
+      "exit_code": 0,
+      "seconds": 6.16,
+      "pid": 20092,
+      "runner_pid": 16092,
+      "accepted": true,
+      "stable_source": true,
+      "additional_stable_source": true,
+      "source_fingerprint": "e40e03a89ed41db235702bb3f6ff9d1ae369f213e3977736cdb01ff05d095f02",
+      "end_fingerprint": "e40e03a89ed41db235702bb3f6ff9d1ae369f213e3977736cdb01ff05d095f02",
+      "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+      "started_utc": "2026-10-13T12:36:37.827798+00:00",
+      "finished_utc": "2026-10-13T12:36:44.056134+00:00"
+    },
+    {
+      "job_index": 2,
+      "exit_code": 1,
+      "seconds": 14.0,
+      "pid": 25100,
+      "runner_pid": 16092,
+      "tests_completed": 5,
+      "files_loaded": 1,
+      "files_with_test_outcomes": 1,
+      "error_events": 1,
+      "accepted": false,
+      "stable_source": true,
+      "additional_stable_source": true,
+      "source_fingerprint": "e40e03a89ed41db235702bb3f6ff9d1ae369f213e3977736cdb01ff05d095f02",
+      "end_fingerprint": "e40e03a89ed41db235702bb3f6ff9d1ae369f213e3977736cdb01ff05d095f02",
+      "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+      "started_utc": "2026-10-13T12:36:48.054664+00:00",
+      "finished_utc": "2026-10-13T12:37:02.118978+00:00",
+      "counts": {
+        "success": 4,
+        "failure": 0,
+        "error": 1,
+        "skip": 0
+      }
+    }
+  ],
+  "scope": "synthetic-local-validation-summary-no-content-no-tokens"
+}

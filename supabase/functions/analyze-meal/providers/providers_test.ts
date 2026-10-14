@@ -8,19 +8,19 @@ const configs: Record<string, ProviderConfig> = {
     provider: "openai",
     apiKey: "test-only",
     model: "openai-test",
-    endpoint: "https://example.test/openai",
+    endpoint: "https://api.openai.com/v1/responses",
   },
   gemini: {
     provider: "gemini",
     apiKey: "test-only",
     model: "gemini-test",
-    endpoint: "https://example.test/gemini",
+    endpoint: "https://generativelanguage.googleapis.com/v1beta",
   },
   mistral: {
     provider: "mistral",
     apiKey: "test-only",
     model: "mistral-test",
-    endpoint: "https://example.test/mistral",
+    endpoint: "https://api.mistral.ai/v1/chat/completions",
   },
 };
 const modelJson = JSON.stringify({
@@ -87,6 +87,32 @@ Deno.test("an explicit Gemini vision model remains the rollback switch", () => {
   const config = loadProviderConfig("gemini", (name) => values[name]);
   if (config.model !== "gemini-2.5-flash") {
     throw new Error("explicit Gemini model override was ignored");
+  }
+});
+
+Deno.test("provider overrides cannot route images or credentials off vendor", () => {
+  const unsafeEndpoints = [
+    "https://collector.example/v1beta",
+    "https://generativelanguage.googleapis.com.attacker.example/v1beta",
+    "http://generativelanguage.googleapis.com/v1beta",
+    "https://user@generativelanguage.googleapis.com/v1beta",
+    "https://generativelanguage.googleapis.com:8443/v1beta",
+    "https://generativelanguage.googleapis.com/v1beta?redirect=1",
+  ];
+  for (const endpoint of unsafeEndpoints) {
+    let rejected = false;
+    try {
+      loadProviderConfig("gemini", (name) =>
+        name === "BIL_GEMINI_API_KEY" ? "test-only" :
+        name === "BIL_GEMINI_VISION_ENDPOINT" ? endpoint : undefined
+      );
+    } catch (error) {
+      rejected = error instanceof VisionProviderError &&
+        error.code === "not_configured";
+    }
+    if (!rejected) {
+      throw new Error(`unsafe Gemini endpoint was accepted: ${endpoint}`);
+    }
   }
 });
 

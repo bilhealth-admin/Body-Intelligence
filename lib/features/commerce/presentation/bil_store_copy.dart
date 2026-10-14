@@ -182,6 +182,8 @@ abstract final class BilStoreCopy {
       'ads_consent': 'Choose whether BIL may show contextual ads.',
     },
     'ar': {
+      'legal_terms': 'شروط الاستخدام',
+      'legal_privacy': 'سياسة الخصوصية',
       'free': 'مجاني',
       'plans': 'الخطط',
       'premium_store_title': 'افهم جسمك. تقدّم.',
@@ -275,6 +277,8 @@ abstract final class BilStoreCopy {
       'ads_consent': 'اختر ما إذا كان بإمكان BIL عرض إعلانات سياقية.',
     },
     'fr': {
+      'legal_terms': 'Conditions d’utilisation',
+      'legal_privacy': 'Politique de confidentialité',
       'free': 'Gratuit',
       'plans': 'Forfaits',
       'premium_store_title': 'Votre corps. Vos progrès.',
@@ -380,6 +384,8 @@ abstract final class BilStoreCopy {
           'Choisissez si BIL peut afficher des publicités contextuelles.',
     },
     'es': {
+      'legal_terms': 'Términos de uso',
+      'legal_privacy': 'Política de privacidad',
       'free': 'Gratis',
       'plans': 'Planes',
       'premium_store_title': 'Conoce tu cuerpo. Avanza.',
@@ -483,6 +489,8 @@ abstract final class BilStoreCopy {
       'ads_consent': 'Elige si BIL puede mostrar anuncios contextuales.',
     },
     'tr': {
+      'legal_terms': 'Kullanım Koşulları',
+      'legal_privacy': 'Gizlilik Politikası',
       'free': 'Ücretsiz',
       'plans': 'Planlar',
       'premium_store_title': 'Vücudunu tanı. İlerle.',

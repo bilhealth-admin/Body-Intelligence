@@ -1,5 +1,6 @@
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
+import 'package:body_intelligence_log/features/global_platform/persistence/owner_scoped_health_store.dart';
 import 'package:body_intelligence_log/features/global_platform/runtime/global_product_composition_root.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +14,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   final host = GlobalNativeIntegrationHost.instance;
   late NativeConnectedHealthGateway gateway;
+  late OwnerScopedHealthStore healthStore;
   late List<MethodCall> calls;
 
   setUp(() async {
@@ -36,6 +38,11 @@ void main() {
       configuration: const GlobalProductRuntimeConfiguration(
         localeCatalogs: [],
       ),
+    );
+    healthStore = OwnerScopedHealthStore(
+      inner: host.productFlows!.store,
+      ownerId: OwnerScopedHealthStore.localDeviceOwner,
+      readCurrentOwnerId: () => OwnerScopedHealthStore.localDeviceOwner,
     );
     gateway = NativeConnectedHealthGateway(host.productFlows!);
   });
@@ -70,10 +77,7 @@ void main() {
         isNot(contains('requestPermissions')),
       );
       expect(
-        await host.productFlows!.store.get(
-          'connected_health_consent',
-          'Health Connect',
-        ),
+        await healthStore.get('connected_health_consent', 'Health Connect'),
         isNull,
       );
     },
@@ -82,7 +86,7 @@ void main() {
   test(
     'obsolete imported types leave the display, not the underlying history',
     () async {
-      final store = host.productFlows!.store;
+      final store = healthStore;
       Map<String, Object?> row(String key, double value, String unit) =>
           GlobalHealthSignal(
             key: key,

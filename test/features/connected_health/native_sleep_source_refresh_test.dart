@@ -3,6 +3,7 @@
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
+import 'package:body_intelligence_log/features/global_platform/persistence/owner_scoped_health_store.dart';
 import 'package:body_intelligence_log/features/global_platform/runtime/global_product_composition_root.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -48,6 +49,12 @@ void main() {
         );
         addTearDown(host.close);
         final flows = host.productFlows!;
+        const ownerId = OwnerScopedHealthStore.localDeviceOwner;
+        final healthStore = OwnerScopedHealthStore(
+          inner: flows.store,
+          ownerId: ownerId,
+          readCurrentOwnerId: () => ownerId,
+        );
         final now = DateTime.now().toUtc();
         final started = now.subtract(const Duration(hours: 5));
         final native = GlobalHealthSignal(
@@ -71,7 +78,7 @@ void main() {
             if (watch) 'wearableKind': 'apple_watch',
           },
         );
-        await flows.store.put(
+        await healthStore.put(
           'health_signals',
           native.identity,
           native.toMap(),
@@ -85,11 +92,11 @@ void main() {
           'sourceSessionIds': fresh.attributes['sourceSessionIds'],
           'measuredStages': fresh.attributes['measuredStages'],
         };
-        await flows.store.put('connected_health_consent', 'Apple Health', {
+        await healthStore.put('connected_health_consent', 'Apple Health', {
           'readRequested': true,
           'historicalReadResetAt': now.toIso8601String(),
         });
-        await flows.store.put('connected_health_ui', 'snapshot', {
+        await healthStore.put('connected_health_ui', 'snapshot', {
           'lastSyncAt': now.toIso8601String(),
           'importedCount': 1,
           'signals': [legacy],
@@ -120,11 +127,13 @@ void main() {
           sleep.attributes['sourceProductType'],
           watch ? 'Watch6,2' : 'iPhone14,2',
         );
-        expect(await flows.store.list('health_signals'), [native.toMap()]);
+        expect(await healthStore.list('health_signals'), [native.toMap()]);
         expect(calls, contains('readChanges'));
         expect(calls, isNot(contains('requestPermissions')));
         final relaunched = await NativeConnectedHealthGateway(
           flows,
+          ownerId: ownerId,
+          currentOwnerId: () => ownerId,
         ).loadCachedSnapshot();
         expect(
           connectedHealthDisplaySource(relaunched.signals.single),

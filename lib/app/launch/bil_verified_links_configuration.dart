@@ -73,11 +73,17 @@ abstract final class BilVerifiedLinksConfiguration {
         'details': [
           {
             'appIDs': ['$team.$bundle'],
-            'components': <Map<String, String>>[
+            'components': <Map<String, Object>>[
               for (final path in authenticatedReturnPaths)
                 {'/': path, 'comment': 'BIL authenticated return'},
               for (final path in publicCommunityPaths)
                 {'/': path, 'comment': 'BIL Community invitation'},
+              {
+                '/': '/download',
+                '?': {'member': '????????????????????????????????'},
+                'comment':
+                    'BIL opaque public member code; app validates exact hexadecimal value',
+              },
             ],
           },
         ],

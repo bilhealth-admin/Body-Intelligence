@@ -1,0 +1,621 @@
+[
+  {
+    "phase": "focused-plan-04",
+    "accepted": false,
+    "jobs_completed": 6,
+    "jobs_requested": 6,
+    "started": "2026-10-13T06:16:06.021833+00:00",
+    "finished": "2026-10-13T06:18:00.110576+00:00",
+    "results": [
+      {
+        "job": "format-citation-client",
+        "accepted": true,
+        "counts": null,
+        "source": "1c9386d6665bb0cc772d8c7e7bfadf1ea2ebbf17aef5f131d47ae5aef66b8043"
+      },
+      {
+        "job": "format-citation-server",
+        "accepted": true,
+        "counts": null,
+        "source": "da22dff47a01416447985bf764ab615dc4ee970b206e0e1a5170ebdc9ef1f086"
+      },
+      {
+        "job": "citation-version2-handler-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "skip": 0
+        },
+        "source": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb"
+      },
+      {
+        "job": "citation-client-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb"
+      },
+      {
+        "job": "citation-server-and-legacy-interop",
+        "accepted": true,
+        "counts": {
+          "success": 84,
+          "failure": 0,
+          "skip": 0
+        },
+        "source": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb"
+      },
+      {
+        "job": "citation-client-affected-files",
+        "accepted": false,
+        "counts": {
+          "success": 76,
+          "failure": 1,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-05",
+    "accepted": false,
+    "jobs_completed": 3,
+    "jobs_requested": 14,
+    "started": "2026-10-13T07:18:12.849350+00:00",
+    "finished": "2026-10-13T07:18:46.011445+00:00",
+    "results": [
+      {
+        "job": "format-current-changed-dart",
+        "accepted": true,
+        "counts": null,
+        "source": "3828312354fcc7a40ccd1c8ddf4279b209f7c73a43114622718938e2c429b70c"
+      },
+      {
+        "job": "privacy-body-microphones-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "ad2eeebbf65a0f75b1222ae1cafb1df5846057f3007dad3c9ce9c53cd5ba3e55"
+      },
+      {
+        "job": "stale-report-fresh-review-case",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0,
+          "error": 1,
+          "skip": 0
+        },
+        "source": "ad2eeebbf65a0f75b1222ae1cafb1df5846057f3007dad3c9ce9c53cd5ba3e55"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-06",
+    "accepted": false,
+    "jobs_completed": 5,
+    "jobs_requested": 13,
+    "started": "2026-10-13T07:22:21.476303+00:00",
+    "finished": "2026-10-13T07:23:18.608049+00:00",
+    "results": [
+      {
+        "job": "format-community-text-policy-call",
+        "accepted": true,
+        "counts": null,
+        "source": "1eb0000208df21a394a0c78eb130052ab73bfe22b6351bac6ae574e0be153f83"
+      },
+      {
+        "job": "stale-report-fresh-review-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "f003ce1a6a99fffdda44283a500aebe140a10c427188a7e58b6cf044a8f2c499"
+      },
+      {
+        "job": "friend-real-cancel-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "f003ce1a6a99fffdda44283a500aebe140a10c427188a7e58b6cf044a8f2c499"
+      },
+      {
+        "job": "qr-real-share-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "f003ce1a6a99fffdda44283a500aebe140a10c427188a7e58b6cf044a8f2c499"
+      },
+      {
+        "job": "notification-real-reply-case",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0,
+          "error": 1,
+          "skip": 0
+        },
+        "source": "f003ce1a6a99fffdda44283a500aebe140a10c427188a7e58b6cf044a8f2c499"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-07",
+    "accepted": false,
+    "jobs_completed": 2,
+    "jobs_requested": 10,
+    "started": "2026-10-13T07:25:42.431271+00:00",
+    "finished": "2026-10-13T07:26:05.377335+00:00",
+    "results": [
+      {
+        "job": "format-notification-constructor-and-interface",
+        "accepted": true,
+        "counts": null,
+        "source": "8c7769b3abdf1c6bd0ed1fbd4499104b8840597aea283363d82b2bcf225d0c11"
+      },
+      {
+        "job": "notification-real-reply-case",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0,
+          "error": 1,
+          "skip": 0
+        },
+        "source": "1b982934e95103301a3e68cb053498978c0ce9ceae2b3cec8e462b1cfd2ffa62"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-08",
+    "accepted": false,
+    "jobs_completed": 2,
+    "jobs_requested": 10,
+    "started": "2026-10-13T07:28:46.175836+00:00",
+    "finished": "2026-10-13T07:29:05.655376+00:00",
+    "results": [
+      {
+        "job": "format-json-worker-ready-helper",
+        "accepted": true,
+        "counts": null,
+        "source": "10cbaec01e25ef313ceca52f2cc7ed84e14d865efe558d90493c61320513c8d8"
+      },
+      {
+        "job": "notification-real-reply-case",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0,
+          "error": 1,
+          "skip": 0
+        },
+        "source": "d306b5b6d3ecb342261c1214c57754bf4edbba0843675a0066ff9daa40dcdd9b"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-09",
+    "accepted": false,
+    "jobs_completed": 3,
+    "jobs_requested": 11,
+    "started": "2026-10-13T07:33:24.874812+00:00",
+    "finished": "2026-10-13T07:33:56.409631+00:00",
+    "results": [
+      {
+        "job": "format-focus-sdk-diagnostic-case",
+        "accepted": true,
+        "counts": null,
+        "source": "077fd93f5f92766a777143e8f90f6b971bf2e08a84cf75bff35acea8543936d6"
+      },
+      {
+        "job": "notification-sdk-focus-reader-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "b8790e1ccb0774ecebb9e761c97b3af963df6c8fb7e35402186e69cf5f2f3344"
+      },
+      {
+        "job": "notification-real-reply-case",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0,
+          "error": 1,
+          "skip": 0
+        },
+        "source": "b8790e1ccb0774ecebb9e761c97b3af963df6c8fb7e35402186e69cf5f2f3344"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-10",
+    "accepted": false,
+    "jobs_completed": 3,
+    "jobs_requested": 10,
+    "started": "2026-10-13T07:36:17.941702+00:00",
+    "finished": "2026-10-13T07:38:19.733041+00:00",
+    "results": [
+      {
+        "job": "format-independent-focus-owner-operation",
+        "accepted": true,
+        "counts": null,
+        "source": "a930f139fea255ce6968d7205f3cd6a512d584868cc600f1f5b091be39d76ba5"
+      },
+      {
+        "job": "notification-real-reply-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "34a646b58ecc6bafac13586e59bd447bec3fb5cdc60c503d5fc2f9533ac7afeb"
+      },
+      {
+        "job": "new-community-acceptance-files",
+        "accepted": false,
+        "counts": {
+          "success": 105,
+          "failure": 0,
+          "error": 12,
+          "skip": 0
+        },
+        "source": "34a646b58ecc6bafac13586e59bd447bec3fb5cdc60c503d5fc2f9533ac7afeb"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-12",
+    "accepted": false,
+    "jobs_completed": 8,
+    "jobs_requested": 14,
+    "started": "2026-10-13T07:49:16.264818+00:00",
+    "finished": "2026-10-13T07:55:02.794065+00:00",
+    "results": [
+      {
+        "job": "format-owner-confirmation-and-fixtures",
+        "accepted": true,
+        "counts": null,
+        "source": "ae0348e8572c15da5559d058f9e4d32c1f9e90217f6b5a9b2d60ad98c90dee3a"
+      },
+      {
+        "job": "moderator-retirement-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917"
+      },
+      {
+        "job": "chat-real-retry-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917"
+      },
+      {
+        "job": "chat-removed-confirmation-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917"
+      },
+      {
+        "job": "new-removed-confirmation-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917"
+      },
+      {
+        "job": "gold-refresh-retry-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917"
+      },
+      {
+        "job": "new-community-acceptance-files",
+        "accepted": true,
+        "counts": {
+          "success": 117,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917"
+      },
+      {
+        "job": "postgres-message-lock-order-case",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0
+        },
+        "source": "b156af0433603ded4d3b7b6b7388435508dbbb5074c6ca77bfb76832c24ce917"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-13",
+    "accepted": false,
+    "jobs_completed": 4,
+    "jobs_requested": 10,
+    "started": "2026-10-13T08:09:58.544514+00:00",
+    "finished": "2026-10-13T08:12:38.605776+00:00",
+    "results": [
+      {
+        "job": "format-fresh-moderator-visit",
+        "accepted": true,
+        "counts": null,
+        "source": "6c66f7a35f70a40b7614e04328890146f2c1a1c4cc3efbb6decc34312b824356"
+      },
+      {
+        "job": "moderator-fresh-visit-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "8a147bc5a25f3b954245e591016e309b82a8dff01f90714d70bf14d61311d5a1"
+      },
+      {
+        "job": "moderator-safety-affected-file",
+        "accepted": true,
+        "counts": {
+          "success": 12,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "8a147bc5a25f3b954245e591016e309b82a8dff01f90714d70bf14d61311d5a1"
+      },
+      {
+        "job": "postgres-message-lock-order-case",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0
+        },
+        "source": "8a147bc5a25f3b954245e591016e309b82a8dff01f90714d70bf14d61311d5a1"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-14",
+    "accepted": false,
+    "jobs_completed": 3,
+    "jobs_requested": 7,
+    "started": "2026-10-13T08:28:58.765984+00:00",
+    "finished": "2026-10-13T08:30:08.891699+00:00",
+    "results": [
+      {
+        "job": "postgres-message-lock-order-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0
+        },
+        "source": "ba9e9d053e5bd8b34118c945aa383f8bba7a76aee8eeb57ff3f0235500e73822"
+      },
+      {
+        "job": "postgres-report-changed-content-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0
+        },
+        "source": "ba9e9d053e5bd8b34118c945aa383f8bba7a76aee8eeb57ff3f0235500e73822"
+      },
+      {
+        "job": "postgres-message-contract-all",
+        "accepted": false,
+        "counts": {
+          "success": 15,
+          "failure": 1
+        },
+        "source": "ba9e9d053e5bd8b34118c945aa383f8bba7a76aee8eeb57ff3f0235500e73822"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-15",
+    "accepted": false,
+    "jobs_completed": 2,
+    "jobs_requested": 2,
+    "started": "2026-10-13T08:31:44.311838+00:00",
+    "finished": "2026-10-13T08:32:31.288240+00:00",
+    "results": [
+      {
+        "job": "format-qr-regression-case",
+        "accepted": true,
+        "counts": null,
+        "source": "8c51754ec6cb616b1d5a975a2ef1cfa1ca8f27b16780a746be6f092c0c97c9b5"
+      },
+      {
+        "job": "qr-submitted-aba-spinner-before-fix",
+        "accepted": false,
+        "counts": {
+          "success": 0,
+          "failure": 0,
+          "error": 1,
+          "skip": 0
+        },
+        "source": "7e870d01866f79c8d00a3f04e19c9f272495a2c992533261a5c855d56b00f739"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-16",
+    "accepted": false,
+    "jobs_completed": 6,
+    "jobs_requested": 9,
+    "started": "2026-10-13T08:34:02.875656+00:00",
+    "finished": "2026-10-13T08:37:36.403444+00:00",
+    "results": [
+      {
+        "job": "format-qr-runtime-and-case",
+        "accepted": true,
+        "counts": null,
+        "source": "feb3a2d6715ee90ea4c34df299beea87246ccba1482eabe244dabed3d230ddc9"
+      },
+      {
+        "job": "qr-submitted-aba-spinner-fixed-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "feb3a2d6715ee90ea4c34df299beea87246ccba1482eabe244dabed3d230ddc9"
+      },
+      {
+        "job": "qr-account-file-all",
+        "accepted": true,
+        "counts": {
+          "success": 19,
+          "failure": 0,
+          "error": 0,
+          "skip": 0
+        },
+        "source": "feb3a2d6715ee90ea4c34df299beea87246ccba1482eabe244dabed3d230ddc9"
+      },
+      {
+        "job": "postgres-legacy-actor-guard-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0
+        },
+        "source": "feb3a2d6715ee90ea4c34df299beea87246ccba1482eabe244dabed3d230ddc9"
+      },
+      {
+        "job": "postgres-message-contract-all",
+        "accepted": true,
+        "counts": {
+          "success": 16,
+          "failure": 0
+        },
+        "source": "feb3a2d6715ee90ea4c34df299beea87246ccba1482eabe244dabed3d230ddc9"
+      },
+      {
+        "job": "postgres-report-authority-all",
+        "accepted": false,
+        "counts": {
+          "success": 8,
+          "failure": 8
+        },
+        "source": "feb3a2d6715ee90ea4c34df299beea87246ccba1482eabe244dabed3d230ddc9"
+      }
+    ]
+  },
+  {
+    "phase": "focused-plan-18",
+    "accepted": true,
+    "jobs_completed": 5,
+    "jobs_requested": 5,
+    "started": "2026-10-13T08:39:00.733942+00:00",
+    "finished": "2026-10-13T08:41:00.775676+00:00",
+    "results": [
+      {
+        "job": "postgres-suspended-review-reinstate-case",
+        "accepted": true,
+        "counts": {
+          "success": 1,
+          "failure": 0
+        },
+        "source": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247"
+      },
+      {
+        "job": "postgres-report-authority-all",
+        "accepted": true,
+        "counts": {
+          "success": 16,
+          "failure": 0
+        },
+        "source": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247"
+      },
+      {
+        "job": "web-landing-actual-dom-file",
+        "accepted": true,
+        "counts": {
+          "success": 6,
+          "failure": 0,
+          "skip": 0,
+          "cancelled": 0
+        },
+        "source": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247"
+      },
+      {
+        "job": "web-worker-link-associations-file",
+        "accepted": true,
+        "counts": {
+          "success": 7,
+          "failure": 0,
+          "skip": 0,
+          "cancelled": 0
+        },
+        "source": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247"
+      },
+      {
+        "job": "push-dispatch-and-provider-affected",
+        "accepted": true,
+        "counts": {
+          "success": 12,
+          "failure": 0,
+          "skip": 0
+        },
+        "source": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247"
+      }
+    ]
+  }
+]

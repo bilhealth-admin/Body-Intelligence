@@ -1,0 +1,113 @@
+{
+  "environment": "PostgreSQL17.6 native loopback; synthetic accounts; no Production",
+  "cases": [
+    {
+      "name": "old32/35 exact V1 request/strict response on current schema",
+      "result": "PASS"
+    },
+    {
+      "name": "new V2 capability honestly unavailable on current schema",
+      "result": "PASS"
+    },
+    {
+      "name": "old32/35 exact V1 request/strict response after additive V2",
+      "result": "PASS"
+    },
+    {
+      "name": "V1 function definition is unchanged by V2 migration",
+      "result": "PASS"
+    },
+    {
+      "name": "new capability advertises exact version and supported scopes",
+      "result": "PASS"
+    },
+    {
+      "name": "old base consent does not silently enable either new scope",
+      "result": "PASS"
+    },
+    {
+      "name": "independent device pulls server-authored revision and exact encrypted bytes",
+      "result": "PASS"
+    },
+    {
+      "name": "identical retry returns one durable receipt without second revision",
+      "result": "PASS"
+    },
+    {
+      "name": "same operation cannot be rebound to altered ciphertext or a different device",
+      "result": "PASS"
+    },
+    {
+      "name": "stale CAS preserves trusted current record and stable conflict receipt",
+      "result": "PASS"
+    },
+    {
+      "name": "durable tombstone blocks stale replay and resurrection; explicit new identity remains possible",
+      "result": "PASS"
+    },
+    {
+      "name": "invalid/forged member rolls back the entire SQL request including prior receipt",
+      "result": "PASS"
+    },
+    {
+      "name": "atomic goals identity and nutrition types are scope checked; existing text recipe IDs survive",
+      "result": "PASS"
+    },
+    {
+      "name": "independent pull pages advance durably without duplicate identities or cursor stalls",
+      "result": "PASS"
+    },
+    {
+      "name": "two real concurrent sessions with the same base have one accepted writer and one conflict",
+      "result": "PASS"
+    },
+    {
+      "name": "concurrent double request and retry execute one financial-free record mutation",
+      "result": "PASS"
+    },
+    {
+      "name": "owner isolation, forged identity rejection, anon/direct ACL and actual RLS all enforce boundaries",
+      "result": "PASS"
+    },
+    {
+      "name": "version/plaintext/negative revision/unsupported type and page bounds reject atomically",
+      "result": "PASS"
+    },
+    {
+      "name": "scope/base withdrawal and unfamiliar policies stop access without deleting records",
+      "result": "PASS"
+    },
+    {
+      "name": "revoked device cannot silently reregister through V2 or the unchanged V1 API",
+      "result": "PASS"
+    },
+    {
+      "name": "direct device revocation committed during row wait is rechecked before receipt creation",
+      "result": "PASS"
+    },
+    {
+      "name": "base consent withdrawal committed while sync waits prevents data and receipt creation",
+      "result": "PASS"
+    },
+    {
+      "name": "old client sees only V1; actual old deletion cannot corrupt same-ID V2 record",
+      "result": "PASS"
+    }
+  ],
+  "passed": 23,
+  "failed": 0,
+  "source_files": {
+    "supabase/tests/fixtures/cloud_ledger_baseline/schema.sql": "3f516d0ca6845a322760462cb31a9a63192f2f29b403a13e5d4f87db2098606c",
+    "supabase/tests/fixtures/cloud_ledger_baseline/function.sql": "3342dc46c64284a8fe82cb74284f180ab74ae6e45f5cfc853301102f4884126f",
+    "supabase/migrations/20261004173646_ai_consent_receipt_completion_order_v1.sql": "9aafd1639db0c531f1d7f520014546c98182b2219416c148c01603c1365fa955",
+    "supabase/migrations/20261012052335_cloud_nutrition_goals_restore_v2.sql": "ccacdcef47bf2ff0e3d438826da6fc285015c4554e157834bdea052b5ee73966"
+  },
+  "v1_rpc_md5_before": "b4a56dfd2c6b2d7d38ad2dbf92f5e03f",
+  "legacy_wire_provenance": {
+    "source_commit": "3f0085e6e6686f2e87e9cf14789e9e578ea64159",
+    "path": "lib/features/cloud_platform/services/supabase_cloud_transport.dart",
+    "sha256": "b2bd7be2603b83c28bb1f9078f5dda4f2ce909bfa0062518c9c2ce815b75b477",
+    "proof": "exact wire contract; not executing an Android32 or iOS35 binary"
+  },
+  "v1_rpc_md5_after": "b4a56dfd2c6b2d7d38ad2dbf92f5e03f"
+}

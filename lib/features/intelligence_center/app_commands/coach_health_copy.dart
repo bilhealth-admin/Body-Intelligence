@@ -171,6 +171,26 @@ final class CoachHealthCopy {
       };
       lines.add('${row['day']}: $data');
     }
+    lines.addAll(readAnnotations(result));
+    return lines.join('\n');
+  }
+
+  /// Context from the verified query, retained once beside visual facts.
+  List<String> readAnnotations(Map<String, Object?> result) {
+    final topic = result['topic'];
+    if (!const {
+          'daily',
+          'weight',
+          'progress',
+          'measurements',
+          'sleep',
+          'activity',
+        }.contains(topic) ||
+        result['missingDays'] is! List) {
+      return const [];
+    }
+    final rows = (result['rows'] as List? ?? const []).cast<Map>();
+    final lines = <String>[];
     final missing = (result['missingDays'] as List).length;
     lines.add(
       tr(
@@ -207,7 +227,7 @@ final class CoachHealthCopy {
               ),
       );
     }
-    return lines.join('\n');
+    return lines;
   }
 
   String _activity(Map row) {

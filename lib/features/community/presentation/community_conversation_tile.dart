@@ -34,7 +34,7 @@ class _CommunityConversationTile extends StatelessWidget {
       onTap: onTap,
       child: Ink(
         color: unread
-            ? theme.colorScheme.primaryContainer.withValues(alpha: .25)
+            ? theme.colorScheme.primaryContainer.withValues(alpha: .16)
             : null,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 88),
@@ -60,7 +60,7 @@ class _CommunityConversationTile extends StatelessWidget {
                               style: theme.textTheme.titleSmall?.copyWith(
                                 fontWeight: unread
                                     ? FontWeight.w700
-                                    : FontWeight.w500,
+                                    : FontWeight.w600,
                               ),
                             ),
                           ),
@@ -97,7 +97,9 @@ class _CommunityConversationTile extends StatelessWidget {
                         _NaturalMessageText(
                           authorName!,
                           maxLines: 1,
-                          style: theme.textTheme.bodySmall,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: CommunitySapphire.muted(context),
+                          ),
                         ),
                       ],
                       const SizedBox(height: 4),

@@ -47,6 +47,12 @@ const names: Record<
   },
 };
 
+const allowedEndpointHosts: Record<VisionProviderName, ReadonlySet<string>> = {
+  openai: new Set(["api.openai.com"]),
+  gemini: new Set(["generativelanguage.googleapis.com"]),
+  mistral: new Set(["api.mistral.ai"]),
+};
+
 export function loadProviderConfig(
   provider: VisionProviderName,
   env: EnvReader,
@@ -72,10 +78,15 @@ export function loadProviderConfig(
       provider,
     );
   }
-  if (parsed.protocol !== "https:") {
+  if (
+    parsed.protocol !== "https:" ||
+    !allowedEndpointHosts[provider].has(parsed.hostname.toLowerCase()) ||
+    parsed.username !== "" || parsed.password !== "" || parsed.port !== "" ||
+    parsed.search !== "" || parsed.hash !== ""
+  ) {
     throw new VisionProviderError(
       "not_configured",
-      `${spec.endpoint} must use HTTPS`,
+      `${spec.endpoint} must use the HTTPS endpoint for ${provider}`,
       provider,
     );
   }

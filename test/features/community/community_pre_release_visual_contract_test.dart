@@ -362,6 +362,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // This loop reuses the app's PageStorageBucket across locale changes.
+      // The previous locale scrolled the composer to its body, so restore its
+      // starting viewport before checking the recipient field in this locale.
+      final messageScroll = find.byKey(
+        const Key('community-new-message-scroll'),
+      );
+      await tester.drag(messageScroll, const Offset(0, 2000));
+      await tester.pumpAndSettle();
       final field = find.byKey(const Key('community-message-recipient-search'));
       expect(field, findsOneWidget, reason: localeTag);
       final appBar = find.byType(AppBar);

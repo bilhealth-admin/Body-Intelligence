@@ -151,11 +151,11 @@ void main() {
   });
 
   testWidgets(
-    'a member photo remains an unmodified foreground image provider',
+    'a member photo remains a resized memory provider on the foreground',
     (tester) async {
       final onePixelPng = base64Decode(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4'
-        '//8/AwAI/AL+KDvKAAAAAElFTkSuQmCC',
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+'
+        'A8AAQUBAScY42YAAAAASUVORK5CYII=',
       );
       await pumpHeader(
         tester,
@@ -163,6 +163,10 @@ void main() {
         locale: const Locale('en'),
         photo: onePixelPng,
       );
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 30)),
+      );
+      await tester.pump();
 
       final avatar = tester.widget<CircleAvatar>(
         find.descendant(
@@ -172,8 +176,13 @@ void main() {
       );
       // The freshly selected local photo must stay on the foreground layer so a
       // delayed cached NetworkImage cannot replace it during an unrelated
-      // Dashboard rebuild. This is still the original MemoryImage provider.
-      expect(avatar.foregroundImage, isA<MemoryImage>());
+      // Dashboard rebuild. The resized provider must still wrap the exact
+      // selected in-memory bytes and remain on the foreground layer.
+      expect(avatar.foregroundImage, isA<ResizeImage>());
+      expect(
+        (avatar.foregroundImage as ResizeImage).imageProvider,
+        isA<MemoryImage>(),
+      );
       expect(avatar.backgroundImage, isNull);
       expect(avatar.child, isNull);
     },

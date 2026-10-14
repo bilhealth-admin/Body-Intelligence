@@ -64,7 +64,9 @@ void main() {
     expect(source, contains('PopScope('));
     expect(source, contains('canPop: !saving && !skipping'));
     expect(source, contains('kilograms > 500'));
-    expect(source, contains('.clamp(20, 500)'));
+    expect(source, contains('!kilograms.isFinite'));
+    expect(source, contains('kilograms < 20'));
+    expect(source, contains('kilograms > 500'));
     expect(source, contains('if (saving || skipping) return;'));
     expect(source, isNot(contains('?? 60')));
     expect(source, isNot(contains("text: '60'")));

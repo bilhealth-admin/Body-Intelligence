@@ -29,6 +29,9 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   List<CommunityMessage> _rows = const [];
   TextDirection? _composerDirection;
   bool _sending = false;
+  bool _confirmingReplacement = false;
+  String? _sendRequestId, _sendRequestBody;
+  bool _removedDelivery = false;
 
   @override
   void initState() {
@@ -50,6 +53,8 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
         oldWidget.userId != widget.userId) {
       _retire();
       _composer.clear();
+      _sendRequestId = _sendRequestBody = null;
+      _removedDelivery = false;
       _composerDirection = null;
       _bind();
     }
@@ -173,12 +178,114 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
       _historyScroll.jumpTo(_historyScroll.position.minScrollExtent);
     }
     try {
-      await _run(binding, () => repository.sendMessage(peer, body));
+      if (_removedDelivery) {
+        setState(() => _confirmingReplacement = true);
+        final replace = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            key: const Key('community-message-replacement-confirmation'),
+            title: Text(
+              communityText(
+                context,
+                'Send a new message?',
+                'إرسال رسالة جديدة؟',
+              ),
+            ),
+            content: Text(
+              communityText(
+                context,
+                'The previous request was delivered and then removed. Sending again creates a new message.',
+                'أُرسلت الرسالة السابقة ثم أُزيلت. الإرسال مرة أخرى ينشئ رسالة جديدة.',
+              ),
+            ),
+            actions: [
+              TextButton(
+                key: const Key('community-message-replacement-cancel'),
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(communityText(context, 'Cancel', 'إلغاء')),
+              ),
+              FilledButton(
+                key: const Key('community-message-replacement-send'),
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(
+                  communityText(
+                    context,
+                    'Send new message',
+                    'إرسال رسالة جديدة',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+        if (mounted && _current(binding)) {
+          setState(() => _confirmingReplacement = false);
+        }
+        if (replace != true || !mounted || !_current(binding)) return;
+        _sendRequestId = _sendRequestBody = null;
+        _removedDelivery = false;
+      }
+      if (_sendRequestId == null || _sendRequestBody != body) {
+        _sendRequestId = newCommunityMessageRequestId();
+        _sendRequestBody = body;
+      }
+      await _run(
+        binding,
+        () => repository.sendMessageOperation(
+          peer,
+          body,
+          requestId: _sendRequestId!,
+        ),
+      );
       if (!mounted || !_current(binding)) return;
+      _sendRequestId = _sendRequestBody = null;
       if (_composerRevision == revision && _composer.text.trim() == body) {
         _composer.clear();
       }
       setState(_reload);
+    } on CommunityMessageDeliveryRemoved {
+      if (!mounted || !_current(binding)) return;
+      setState(() => _removedDelivery = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _copy(
+              context,
+              'أُرسلت هذه الرسالة سابقًا ثم أُزيلت. النص محفوظ؛ لم نرسل رسالة أخرى.',
+              'This message was previously delivered and then removed. Your text is kept; no new message was sent.',
+              'Ce message a été envoyé puis supprimé. Votre texte est conservé ; aucun nouveau message n’a été envoyé.',
+              'Este mensaje se envió y luego se eliminó. Conservamos tu texto; no se envió otro mensaje.',
+              'Bu mesaj daha önce iletildi ve ardından kaldırıldı. Metniniz korundu; yeni mesaj gönderilmedi.',
+            ),
+          ),
+        ),
+      );
+    } on TimeoutException {
+      if (!mounted || !_current(binding)) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Sending could not be confirmed yet. Your text is kept; retry checks the same request.',
+              'لم يتأكد الإرسال بعد. النص محفوظ؛ إعادة المحاولة تتحقق من الطلب نفسه.',
+            ),
+          ),
+        ),
+      );
+    } on CommunityMessageDeliveryUnavailable {
+      if (!mounted || !_current(binding)) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Sending is unavailable on this server. Your text is kept. Try again later.',
+              'الإرسال غير متاح على هذا الخادم. احتفظنا بالنص؛ حاول لاحقًا.',
+            ),
+          ),
+        ),
+      );
     } on CommunityPolicyAccessException catch (error) {
       if (!mounted || !_current(binding)) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -247,7 +354,12 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
         ),
       );
     } finally {
-      if (mounted && _current(binding)) setState(() => _sending = false);
+      if (mounted && _current(binding)) {
+        setState(() {
+          _sending = false;
+          _confirmingReplacement = false;
+        });
+      }
     }
   }
 

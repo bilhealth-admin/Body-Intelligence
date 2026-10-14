@@ -209,6 +209,7 @@ void main() {
               'reply': 'General BMI screening guidance.',
               'citations': <Object?>[
                 HealthEvidenceIds.cdcAdultBmi,
+                HealthEvidenceIds.fdaDailyValues,
                 'https://untrusted.example/fake',
                 'invented_study',
                 HealthEvidenceIds.cdcAdultBmi,
@@ -225,6 +226,14 @@ void main() {
         expect(result.status, CoachServiceStatus.ready);
         expect(result.answer?.citationIds, const <String>[
           HealthEvidenceIds.cdcAdultBmi,
+          HealthEvidenceIds.fdaDailyValues,
+        ]);
+        expect(cloud.lastBody?['health_citation_catalog_version'], 2);
+        expect(cloud.events, <String>[
+          'session',
+          'consent',
+          'project',
+          'invoke',
         ]);
       },
     );

@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-String _read(String path) => File(path).readAsStringSync();
+String _read(String path) =>
+    File(path).readAsStringSync().replaceAll('\r\n', '\n');
 
 String _readProfileActivity() => [
   'lib/features/community/home_profile/community_profile_activity_slivers.dart',
@@ -64,9 +65,10 @@ void main() {
     final feedScope = _read(
       'lib/features/community/home_profile/community_feed_owner_scope.dart',
     );
-    final feed = _read(
+    final feed = [
       'lib/features/community/presentation/community_feed_tab.dart',
-    );
+      'lib/features/community/presentation/community_feed_rendering.dart',
+    ].map(_read).join('\n');
     final paging = _read(
       'lib/features/community/presentation/community_feed_pagination.dart',
     );

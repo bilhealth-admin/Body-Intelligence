@@ -15,50 +15,131 @@ class CommunityTopicsPage extends StatefulWidget {
 }
 
 class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
-  late Future<List<CommunityTopic>> _topics = widget.repository
-      .loadCommunityTopics();
+  late _CommunityTopicOwnerScope _owner;
+  late Future<List<CommunityTopic>> _topics;
   final Set<String> _busy = <String>{};
+  int _loadGeneration = 0;
 
-  Future<void> _refresh() async {
-    final future = widget.repository.loadCommunityTopics();
-    setState(() => _topics = future);
-    try {
-      await future;
-    } on Object {
-      // FutureBuilder owns the retry presentation.
+  @override
+  void initState() {
+    super.initState();
+    _bindOwner();
+    _topics = _loadTopics(_owner);
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityTopicsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _owner.dispose();
+      _loadGeneration++;
+      _busy.clear();
+      _bindOwner();
+      _topics = _loadTopics(_owner);
     }
   }
 
-  Future<void> _toggleFollow(CommunityTopic topic) async {
-    if (!_busy.add(topic.slug)) return;
+  @override
+  void dispose() {
+    _loadGeneration++;
+    _owner.dispose();
+    super.dispose();
+  }
+
+  void _bindOwner() {
+    late final _CommunityTopicOwnerScope owner;
+    owner = _CommunityTopicOwnerScope(
+      repository: widget.repository,
+      target: 'topics',
+      currentVisit: () => mounted && identical(_owner, owner),
+      onInvalidated: () {
+        if (!mounted || !identical(_owner, owner)) return;
+        setState(() {
+          _loadGeneration++;
+          _busy.clear();
+          _topics = Future.value(const <CommunityTopic>[]);
+        });
+      },
+    );
+    _owner = owner;
+  }
+
+  Future<List<CommunityTopic>> _loadTopics(
+    _CommunityTopicOwnerScope visit,
+  ) async {
+    if (!visit.isCurrent) return const [];
+    final generation = ++_loadGeneration;
     try {
-      final following = await widget.repository.followCommunityTopic(
-        slug: topic.slug,
-        follow: !topic.following,
-      );
-      if (!mounted) return;
-      final current = await _topics;
-      if (!mounted) return;
-      setState(() {
-        _topics = Future.value(
-          current
-              .map(
-                (value) => value.slug == topic.slug
-                    ? value.copyWith(
-                        following: following,
-                        followerCount: following
-                            ? value.followerCount + 1
-                            : (value.followerCount > 0
-                                  ? value.followerCount - 1
-                                  : 0),
-                      )
-                    : value,
-              )
-              .toList(growable: false),
-        );
+      return await visit.run(() async {
+        final topics = await visit.repository.loadCommunityTopics();
+        visit.check();
+        if (generation != _loadGeneration) {
+          throw const CommunityOwnerOperationCancelled();
+        }
+        return topics;
       });
-    } catch (_) {
-      if (mounted) {
+    } on CommunityOwnerOperationCancelled {
+      return const [];
+    }
+  }
+
+  Future<void> _refresh(_CommunityTopicOwnerScope visit) async {
+    if (!visit.isCurrent) return;
+    final future = _loadTopics(visit);
+    setState(() {
+      _topics = future;
+    });
+    try {
+      await future;
+    } on Object {
+      // FutureBuilder owns the retry presentation for this same visit.
+    }
+  }
+
+  Future<void> _toggleFollow(
+    _CommunityTopicOwnerScope visit,
+    CommunityTopic topic,
+  ) async {
+    if (!visit.isCurrent || _busy.contains(topic.slug)) return;
+    setState(() {
+      _busy.add(topic.slug);
+    });
+    try {
+      await visit.run(() async {
+        final following = await visit.repository.followCommunityTopic(
+          slug: topic.slug,
+          follow: !topic.following,
+        );
+        visit.check();
+        final currentFuture = _topics;
+        final current = await currentFuture;
+        visit.check();
+        if (!identical(_topics, currentFuture)) return;
+        setState(() {
+          _topics = Future.value(
+            current
+                .map((value) {
+                  if (value.slug != topic.slug ||
+                      value.following == following) {
+                    return value;
+                  }
+                  return value.copyWith(
+                    following: following,
+                    followerCount: following
+                        ? value.followerCount + 1
+                        : (value.followerCount > 0
+                              ? value.followerCount - 1
+                              : 0),
+                  );
+                })
+                .toList(growable: false),
+          );
+        });
+      });
+    } on CommunityOwnerOperationCancelled {
+      // A saved callback cannot acquire a later owner or repaint this page.
+    } on Object {
+      if (mounted && visit.isCurrent) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -72,209 +153,246 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
         );
       }
     } finally {
-      _busy.remove(topic.slug);
+      if (visit.isCurrent) {
+        setState(() {
+          _busy.remove(topic.slug);
+        });
+      }
     }
   }
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      leading: const CommunityReturnButton(),
-      title: Text(communityText(context, 'Community topics', 'مواضيع المجتمع')),
-    ),
-    body: RefreshIndicator(
-      onRefresh: _refresh,
-      child: FutureBuilder<List<CommunityTopic>>(
-        future: _topics,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done &&
-              !snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                const SizedBox(height: 160),
-                Center(
-                  child: FilledButton.icon(
-                    onPressed: _refresh,
-                    icon: const BilGlassPressFeedback(
-                      child: Icon(Icons.refresh_rounded),
-                    ),
-                    label: Text(
-                      communityText(context, 'Retry', 'إعادة المحاولة'),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }
+  Future<void> _openTopic(
+    _CommunityTopicOwnerScope visit,
+    CommunityTopic topic,
+  ) async {
+    if (!visit.isCurrent) return;
+    await pushCommunityPage<void>(
+      context,
+      _CommunityTopicPage(
+        repository: visit.repository,
+        topic: topic,
+        parentVisit: visit,
+        onComposeTopic: widget.onComposeTopic,
+      ),
+    );
+  }
 
-          final topics = snapshot.data ?? const <CommunityTopic>[];
-          return ListView.separated(
-            key: const Key('community-topics-list'),
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-            itemCount: topics.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              final topic = topics[index];
-              final title = CommunityTaxonomySheet.titleForSlug(
-                context,
-                topic.slug,
-              );
-              final description = CommunityTaxonomySheet.descriptionForSlug(
-                context,
-                topic.slug,
-              );
-              return Card(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => pushCommunityPage<void>(
-                    context,
-                    _CommunityTopicPage(
-                      repository: widget.repository,
-                      topic: topic,
-                      onComposeTopic: widget.onComposeTopic,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+  @override
+  Widget build(BuildContext context) {
+    final visit = _owner;
+    return Scaffold(
+      appBar: AppBar(
+        leading: const CommunityReturnButton(),
+        title: Text(
+          communityText(context, 'Community topics', 'مواضيع المجتمع'),
+        ),
+      ),
+      body: !visit.isCurrent
+          ? const _CommunityProfileOwnerChangedBody()
+          : RefreshIndicator(
+              onRefresh: () => _refresh(visit),
+              child: FutureBuilder<List<CommunityTopic>>(
+                key: ValueKey(visit),
+                future: _topics,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done &&
+                      !snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            BilSemanticIconBadge(
-                              kind: BilSemanticIconKind.community,
-                              iconOverride: CommunityTaxonomySheet.iconForSlug(
-                                topic.slug,
-                              ),
-                              appleIconOverride:
-                                  CommunityTaxonomySheet.iconForSlug(
-                                    topic.slug,
-                                  ),
+                        const SizedBox(height: 160),
+                        Center(
+                          child: FilledButton.icon(
+                            onPressed: () => _refresh(visit),
+                            icon: const BilGlassPressFeedback(
+                              child: Icon(Icons.refresh_rounded),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          title,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                        ),
-                                      ),
-                                      if (topic.featured)
-                                        const Icon(
-                                          Icons.auto_awesome_rounded,
-                                          size: 18,
-                                        ),
-                                    ],
-                                  ),
-                                  if (description.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      description,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ],
-                              ),
+                            label: Text(
+                              communityText(context, 'Retry', 'إعادة المحاولة'),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            _TopicMetric(
-                              icon: Icons.article_outlined,
-                              value: topic.postCount,
-                              label: communityText(context, 'posts', 'منشورات'),
-                            ),
-                            _TopicMetric(
-                              icon: Icons.people_outline_rounded,
-                              value: topic.followerCount,
-                              label: communityText(
-                                context,
-                                'followers',
-                                'متابعون',
-                              ),
-                            ),
-                            OutlinedButton.icon(
-                              key: Key('community-topic-follow-${topic.slug}'),
-                              onPressed: _busy.contains(topic.slug)
-                                  ? null
-                                  : () => _toggleFollow(topic),
-                              icon: Icon(
-                                topic.following
-                                    ? Icons.check_rounded
-                                    : Icons.add_rounded,
-                                size: 18,
-                              ),
-                              label: Text(
-                                topic.following
-                                    ? communityText(
-                                        context,
-                                        'Following',
-                                        'متابَع',
-                                      )
-                                    : communityText(
-                                        context,
-                                        'Follow',
-                                        'متابعة',
-                                      ),
-                              ),
-                            ),
-                            if (widget.onComposeTopic != null)
-                              IconButton.filledTonal(
-                                tooltip: communityText(
-                                  context,
-                                  'Start a post',
-                                  'ابدأ منشورًا',
-                                ),
-                                onPressed: () =>
-                                    widget.onComposeTopic!(topic.slug),
-                                icon: const Icon(Icons.edit_outlined),
-                              ),
-                          ],
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    ),
-  );
+                    );
+                  }
+
+                  final topics = snapshot.data ?? const <CommunityTopic>[];
+                  return ListView.separated(
+                    key: const Key('community-topics-list'),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                    itemCount: topics.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final topic = topics[index];
+                      final title = CommunityTaxonomySheet.titleForSlug(
+                        context,
+                        topic.slug,
+                      );
+                      final description =
+                          CommunityTaxonomySheet.descriptionForSlug(
+                            context,
+                            topic.slug,
+                          );
+                      return Card(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => _openTopic(visit, topic),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    BilSemanticIconBadge(
+                                      kind: BilSemanticIconKind.community,
+                                      iconOverride:
+                                          CommunityTaxonomySheet.iconForSlug(
+                                            topic.slug,
+                                          ),
+                                      appleIconOverride:
+                                          CommunityTaxonomySheet.iconForSlug(
+                                            topic.slug,
+                                          ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  title,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium
+                                                      ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                ),
+                                              ),
+                                              if (topic.featured)
+                                                const Icon(
+                                                  Icons.auto_awesome_rounded,
+                                                  size: 18,
+                                                ),
+                                            ],
+                                          ),
+                                          if (description.isNotEmpty) ...[
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              description,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    _TopicMetric(
+                                      icon: Icons.article_outlined,
+                                      value: topic.postCount,
+                                      label: communityText(
+                                        context,
+                                        'posts',
+                                        'منشورات',
+                                      ),
+                                    ),
+                                    _TopicMetric(
+                                      icon: Icons.people_outline_rounded,
+                                      value: topic.followerCount,
+                                      label: communityText(
+                                        context,
+                                        'followers',
+                                        'متابعون',
+                                      ),
+                                    ),
+                                    OutlinedButton.icon(
+                                      key: Key(
+                                        'community-topic-follow-${topic.slug}',
+                                      ),
+                                      onPressed: _busy.contains(topic.slug)
+                                          ? null
+                                          : () => _toggleFollow(visit, topic),
+                                      icon: Icon(
+                                        topic.following
+                                            ? Icons.check_rounded
+                                            : Icons.add_rounded,
+                                        size: 18,
+                                      ),
+                                      label: Text(
+                                        topic.following
+                                            ? communityText(
+                                                context,
+                                                'Following',
+                                                'متابَع',
+                                              )
+                                            : communityText(
+                                                context,
+                                                'Follow',
+                                                'متابعة',
+                                              ),
+                                      ),
+                                    ),
+                                    if (widget.onComposeTopic != null)
+                                      IconButton.filledTonal(
+                                        tooltip: communityText(
+                                          context,
+                                          'Start a post',
+                                          'ابدأ منشورًا',
+                                        ),
+                                        onPressed: () => _composeFromTopic(
+                                          context,
+                                          visit,
+                                          topic.slug,
+                                          widget.onComposeTopic!,
+                                        ),
+                                        icon: const Icon(Icons.edit_outlined),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+    );
+  }
 }
 
 class _CommunityTopicPage extends StatefulWidget {
   const _CommunityTopicPage({
     required this.repository,
     required this.topic,
+    this.parentVisit,
     this.onComposeTopic,
   });
 
   final CommunityRepository repository;
   final CommunityTopic topic;
+  final _CommunityTopicOwnerScope? parentVisit;
   final Future<void> Function(String slug)? onComposeTopic;
 
   @override
@@ -284,9 +402,10 @@ class _CommunityTopicPage extends StatefulWidget {
 class _CommunityTopicPageState extends State<_CommunityTopicPage> {
   static const _pageSize = 30;
 
+  late _CommunityTopicOwnerScope _owner;
   final List<CommunityPost> _posts = <CommunityPost>[];
   final Map<String, int> _viewCounts = <String, int>{};
-  late Future<void> _loading = _loadFirst();
+  late Future<void> _loading;
   DateTime? _before;
   String? _beforeId;
   bool _hasMore = false;
@@ -294,45 +413,120 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
   bool _refreshing = false;
   int _loadGeneration = 0;
 
-  Future<void> _loadFirst() async {
-    final generation = ++_loadGeneration;
-    _refreshing = true;
-    try {
-      final page = await widget.repository.loadCommunityTopicPosts(
-        slug: widget.topic.slug,
-        limit: _pageSize,
-      );
-      final counts = await _communityBrowseViewCounts(
-        widget.repository,
-        page.posts,
-      );
-      if (!mounted || generation != _loadGeneration) return;
-      _viewCounts
-        ..clear()
-        ..addAll(counts);
-      _posts
-        ..clear()
-        ..addAll(page.posts);
-      _before = page.nextBefore;
-      _beforeId = page.nextBeforeId;
-      _hasMore = page.hasMore;
-    } finally {
-      if (generation == _loadGeneration) _refreshing = false;
+  @override
+  void initState() {
+    super.initState();
+    _bindOwner();
+    _loading = _loadFirst(_owner);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CommunityTopicPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository) ||
+        oldWidget.topic.slug != widget.topic.slug ||
+        !identical(oldWidget.parentVisit, widget.parentVisit)) {
+      _owner.dispose();
+      _clearRetiredData();
+      _bindOwner();
+      _loading = _loadFirst(_owner);
     }
   }
 
-  Future<void> _refresh() async {
-    final future = _loadFirst();
-    setState(() => _loading = future);
+  @override
+  void dispose() {
+    _loadGeneration++;
+    _owner.dispose();
+    super.dispose();
+  }
+
+  void _clearRetiredData() {
+    _loadGeneration++;
+    _posts.clear();
+    _viewCounts.clear();
+    _before = null;
+    _beforeId = null;
+    _hasMore = false;
+    _loadingMore = false;
+    _refreshing = false;
+  }
+
+  void _bindOwner() {
+    late final _CommunityTopicOwnerScope owner;
+    owner = _CommunityTopicOwnerScope(
+      repository: widget.repository,
+      target: widget.topic.slug,
+      parentVisit: widget.parentVisit,
+      currentVisit: () => mounted && identical(_owner, owner),
+      onInvalidated: () {
+        if (!mounted || !identical(_owner, owner)) return;
+        setState(() {
+          _clearRetiredData();
+          _loading = Future.value();
+        });
+      },
+    );
+    _owner = owner;
+  }
+
+  Future<void> _loadFirst(_CommunityTopicOwnerScope visit) async {
+    if (!visit.isCurrent) return;
+    final generation = ++_loadGeneration;
+    _refreshing = true;
+    _loadingMore = false;
+    try {
+      await visit.run(() async {
+        final page = await visit.repository.loadCommunityTopicPosts(
+          slug: visit.target,
+          limit: _pageSize,
+        );
+        visit.check();
+        if (generation != _loadGeneration) {
+          throw const CommunityOwnerOperationCancelled();
+        }
+        final counts = await _communityBrowseViewCounts(
+          visit.repository,
+          page.posts,
+        );
+        visit.check();
+        if (generation != _loadGeneration) {
+          throw const CommunityOwnerOperationCancelled();
+        }
+        _viewCounts
+          ..clear()
+          ..addAll(counts);
+        _posts
+          ..clear()
+          ..addAll(page.posts);
+        _before = page.nextBefore;
+        _beforeId = page.nextBeforeId;
+        _hasMore = page.hasMore;
+      });
+    } on CommunityOwnerOperationCancelled {
+      // Owner, route and refreshed generation all retire the old continuation.
+    } finally {
+      if (visit.isCurrent && generation == _loadGeneration) {
+        _refreshing = false;
+      }
+    }
+  }
+
+  Future<void> _refresh(_CommunityTopicOwnerScope visit) async {
+    if (!visit.isCurrent) return;
+    final future = _loadFirst(visit);
+    setState(() {
+      _loading = future;
+    });
     try {
       await future;
     } on Object {
-      // FutureBuilder owns the retry state.
+      // FutureBuilder owns the retry state for this same visit.
     }
   }
 
-  Future<void> _loadMore() async {
-    if (_loadingMore ||
+  Future<void> _loadMore(_CommunityTopicOwnerScope visit) async {
+    if (!visit.isCurrent ||
+        _loadingMore ||
         _refreshing ||
         !_hasMore ||
         _before == null ||
@@ -340,47 +534,68 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
       return;
     }
     final generation = _loadGeneration;
-    setState(() => _loadingMore = true);
+    final before = _before;
+    final beforeId = _beforeId;
+    setState(() {
+      _loadingMore = true;
+    });
     try {
-      final page = await widget.repository.loadCommunityTopicPosts(
-        slug: widget.topic.slug,
-        before: _before,
-        beforeId: _beforeId,
-        limit: _pageSize,
-      );
-      final counts = await _communityBrowseViewCounts(
-        widget.repository,
-        page.posts,
-      );
-      if (!mounted || generation != _loadGeneration) return;
-      final known = _posts.map((post) => post.id).toSet();
-      setState(() {
-        _viewCounts.addAll(counts);
-        _posts.addAll(page.posts.where((post) => known.add(post.id)));
-        _before = page.nextBefore;
-        _beforeId = page.nextBeforeId;
-        _hasMore = page.hasMore;
+      await visit.run(() async {
+        final page = await visit.repository.loadCommunityTopicPosts(
+          slug: visit.target,
+          before: before,
+          beforeId: beforeId,
+          limit: _pageSize,
+        );
+        visit.check();
+        if (generation != _loadGeneration) {
+          throw const CommunityOwnerOperationCancelled();
+        }
+        final counts = await _communityBrowseViewCounts(
+          visit.repository,
+          page.posts,
+        );
+        visit.check();
+        if (generation != _loadGeneration) {
+          throw const CommunityOwnerOperationCancelled();
+        }
+        final known = _posts.map((post) => post.id).toSet();
+        setState(() {
+          _viewCounts.addAll(counts);
+          _posts.addAll(page.posts.where((post) => known.add(post.id)));
+          _before = page.nextBefore;
+          _beforeId = page.nextBeforeId;
+          _hasMore = page.hasMore;
+        });
       });
-    } catch (_) {
-      if (!mounted || generation != _loadGeneration) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Could not load older posts. Try again.',
-              'تعذر تحميل المنشورات الأقدم. حاول مجددًا.',
+    } on CommunityOwnerOperationCancelled {
+      // Cancellation never starts optional metrics or a later page.
+    } on Object {
+      if (mounted && visit.isCurrent && generation == _loadGeneration) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              communityText(
+                context,
+                'Could not load older posts. Try again.',
+                'تعذر تحميل المنشورات الأقدم. حاول مجددًا.',
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }
     } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      if (visit.isCurrent && generation == _loadGeneration) {
+        setState(() {
+          _loadingMore = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final visit = _owner;
     final title = CommunityTaxonomySheet.titleForSlug(
       context,
       widget.topic.slug,
@@ -394,127 +609,333 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
         leading: const CommunityReturnButton(),
         title: Text(title),
       ),
-      floatingActionButton: widget.onComposeTopic == null
+      floatingActionButton: !visit.isCurrent || widget.onComposeTopic == null
           ? null
           : FloatingActionButton.extended(
-              onPressed: () => widget.onComposeTopic!(widget.topic.slug),
+              onPressed: () => _composeFromTopic(
+                context,
+                visit,
+                visit.target,
+                widget.onComposeTopic!,
+              ),
               icon: const Icon(Icons.edit_outlined),
               label: Text(communityText(context, 'New post', 'منشور جديد')),
             ),
-      body: FutureBuilder<void>(
-        future: _loading,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done &&
-              _posts.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError && _posts.isEmpty) {
-            return Center(
-              child: FilledButton.icon(
-                onPressed: _refresh,
-                icon: const BilGlassPressFeedback(
-                  child: Icon(Icons.refresh_rounded),
+      body: !visit.isCurrent
+          ? const _CommunityProfileOwnerChangedBody()
+          : FutureBuilder<void>(
+              key: ValueKey(visit),
+              future: _loading,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done &&
+                    _posts.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError && _posts.isEmpty) {
+                  return Center(
+                    child: FilledButton.icon(
+                      onPressed: () => _refresh(visit),
+                      icon: const BilGlassPressFeedback(
+                        child: Icon(Icons.refresh_rounded),
+                      ),
+                      label: Text(
+                        communityText(context, 'Retry', 'إعادة المحاولة'),
+                      ),
+                    ),
+                  );
+                }
+                return RefreshIndicator(
+                  onRefresh: () => _refresh(visit),
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '#${widget.topic.slug}',
+                                textDirection: TextDirection.ltr,
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(fontWeight: FontWeight.w900),
+                              ),
+                              if (description.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(description),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (_posts.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Text(
+                                communityText(
+                                  context,
+                                  'No approved posts in this topic yet.',
+                                  'لا توجد منشورات معتمدة في هذا الموضوع بعد.',
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          sliver: SliverGrid(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                  childAspectRatio: .82,
+                                ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => _postTileForTopic(
+                                context,
+                                visit,
+                                _posts[index],
+                                _viewCounts[_posts[index].id],
+                              ),
+                              childCount: _posts.length,
+                            ),
+                          ),
+                        ),
+                      if (_hasMore)
+                        SliverToBoxAdapter(
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: TextButton.icon(
+                                onPressed: _loadingMore
+                                    ? null
+                                    : () => _loadMore(visit),
+                                icon: _loadingMore
+                                    ? const SizedBox.square(
+                                        dimension: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const BilGlassPressFeedback(
+                                        child: Icon(Icons.expand_more_rounded),
+                                      ),
+                                label: Text(
+                                  communityText(
+                                    context,
+                                    'Load more',
+                                    'تحميل المزيد',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 96)),
+                    ],
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+/// One browse visit retains its original SDK epoch, repository and target.
+/// A nullable owner preserves existing public read behavior; server policy
+/// still decides whether an unauthenticated read or action is allowed.
+class _CommunityTopicOwnerScope {
+  _CommunityTopicOwnerScope({
+    required this.repository,
+    required this.target,
+    required this.currentVisit,
+    required this.onInvalidated,
+    this.parentVisit,
+  }) {
+    _account = CommunityAccountVisit(
+      repository: repository,
+      client: repository.communitySocialClient,
+      onChanged: _retire,
+    );
+    _epoch = _account.epoch;
+    _ownerId = _account.owner;
+    _ticket = _account.capture();
+    parentVisit?.changes.addListener(_parentChanged);
+  }
+
+  final CommunityRepository repository;
+  final String target;
+  final ValueGetter<bool> currentVisit;
+  final VoidCallback onInvalidated;
+  final _CommunityTopicOwnerScope? parentVisit;
+  final ValueNotifier<int> changes = ValueNotifier(0);
+  late final CommunityAccountVisit _account;
+  late final int _epoch;
+  late final String? _ownerId;
+  late final CommunityAccountTicket? _ticket;
+  bool _retired = false;
+  bool _disposeRequested = false;
+  bool _signalScheduled = false;
+  bool _signalDisposed = false;
+
+  bool get isCurrent =>
+      !_retired &&
+      !_disposeRequested &&
+      currentVisit() &&
+      _account.epoch == _epoch &&
+      _account.owner == _ownerId &&
+      (_ticket?.isCurrent ??
+          repository.communitySocialClient.auth.currentUser == null) &&
+      (parentVisit?.isCurrent ?? true);
+
+  void check() {
+    if (!isCurrent) throw const CommunityOwnerOperationCancelled();
+    CommunityOwnerOperation.checkCurrent();
+  }
+
+  Future<T> run<T>(Future<T> Function() action) {
+    check();
+    return CommunityOwnerOperation.run(
+      client: repository.communitySocialClient,
+      ownerId: _ownerId,
+      readOwner: () => _account.owner,
+      isCurrentOwner: () => isCurrent,
+      action: (_) async {
+        final ticket = _ticket;
+        final result = ticket == null
+            ? await action()
+            : await ticket.run(action);
+        check();
+        return result;
+      },
+    );
+  }
+
+  _CommunityProfileVisit? captureProfileVisit() {
+    final ownerId = _ownerId;
+    if (!isCurrent || ownerId == null) return null;
+    return _CommunityProfileVisit(
+      repository: repository,
+      ownerId: ownerId,
+      targetId: target,
+      isCurrent: () => isCurrent,
+      changes: changes,
+    );
+  }
+
+  void _parentChanged() {
+    if (parentVisit?.isCurrent == false) _retire();
+  }
+
+  void _retire({bool dispose = false}) {
+    final wasRetired = _retired;
+    _retired = true;
+    _disposeRequested = _disposeRequested || dispose;
+    if (!wasRetired) {
+      parentVisit?.changes.removeListener(_parentChanged);
+      _account.dispose();
+    }
+    if (_signalDisposed || _signalScheduled || (wasRetired && !dispose)) return;
+    _signalScheduled = true;
+    // Replacement may happen during build. Checks retire immediately; nested
+    // routes receive their signal after the current synchronous frame work.
+    scheduleMicrotask(() {
+      _signalScheduled = false;
+      if (_signalDisposed) return;
+      changes.value++;
+      if (!_disposeRequested && currentVisit()) onInvalidated();
+      if (_disposeRequested) {
+        _signalDisposed = true;
+        changes.dispose();
+      }
+    });
+  }
+
+  void dispose() => _retire(dispose: true);
+}
+
+Future<void> _composeFromTopic(
+  BuildContext context,
+  _CommunityTopicOwnerScope visit,
+  String slug,
+  Future<void> Function(String) compose,
+) async {
+  if (!visit.isCurrent) return;
+  try {
+    await visit.run(() async {
+      visit.check();
+      await compose(slug);
+      visit.check();
+    });
+  } on CommunityOwnerOperationCancelled {
+    // Old intent never becomes an intent belonging to a replacement account.
+  } on Object {
+    if (context.mounted && visit.isCurrent) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not open the composer. Try again.',
+              'تعذر فتح محرر المنشور. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
+}
+
+Widget _postTileForTopic(
+  BuildContext context,
+  _CommunityTopicOwnerScope visit,
+  CommunityPost post,
+  int? viewCount,
+) {
+  final profileVisit = visit.captureProfileVisit();
+  final tile = _CommunityProfilePostTile(
+    visit: profileVisit,
+    post: post,
+    repository: visit.repository,
+    referenceMetadata: null,
+    viewCount: viewCount,
+  );
+  if (profileVisit != null) return tile;
+  // Optional local/public repositories may support anonymous reading. Retain
+  // its content and semantics without allowing its saved action to become B's.
+  return InkWell(
+    borderRadius: BorderRadius.circular(18),
+    onTap: post.moderationStatus == CommunityPostModerationStatus.approved
+        ? () {
+            if (!visit.isCurrent) return;
+            unawaited(
+              pushCommunityPage<void>(
+                context,
+                _CommunityPostDetailPage(
+                  post: post,
+                  initialStats: CommunityPostStats(
+                    postId: post.id,
+                    likeCount: post.likeCount,
+                    liked: post.liked,
+                    commentCount: post.commentCount,
+                  ),
+                  repository: visit.repository,
+                  ownerIsCurrent: () => visit.isCurrent,
+                  ownerChanges: visit.changes,
                 ),
-                label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
               ),
             );
           }
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '#${widget.topic.slug}',
-                          textDirection: TextDirection.ltr,
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w900),
-                        ),
-                        if (description.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(description),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-                if (_posts.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Text(
-                          communityText(
-                            context,
-                            'No approved posts in this topic yet.',
-                            'لا توجد منشورات معتمدة في هذا الموضوع بعد.',
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: .82,
-                          ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => _CommunityProfilePostTile(
-                          post: _posts[index],
-                          repository: widget.repository,
-                          referenceMetadata: null,
-                          viewCount: _viewCounts[_posts[index].id],
-                        ),
-                        childCount: _posts.length,
-                      ),
-                    ),
-                  ),
-                if (_hasMore)
-                  SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: TextButton.icon(
-                          onPressed: _loadingMore ? null : _loadMore,
-                          icon: _loadingMore
-                              ? const SizedBox.square(
-                                  dimension: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const BilGlassPressFeedback(
-                                  child: Icon(Icons.expand_more_rounded),
-                                ),
-                          label: Text(
-                            communityText(context, 'Load more', 'تحميل المزيد'),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                const SliverToBoxAdapter(child: SizedBox(height: 96)),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+        : null,
+    child: ExcludeFocus(child: IgnorePointer(child: tile)),
+  );
 }
 
 class _TopicMetric extends StatelessWidget {

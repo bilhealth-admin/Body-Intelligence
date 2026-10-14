@@ -35,7 +35,9 @@ void main() {
         fats: 65,
         sodium: 2100,
         potassium: 3200,
-        servingSize: 100,
+        // This record is a full-day portion; the 1900 kcal vector is valid
+        // when expressed against a 1000 g basis rather than 100 g.
+        servingSize: 1000,
         servingUnit: 'g',
       );
 
@@ -60,7 +62,7 @@ void main() {
           name: 'Complete daily intake',
           type: 'lunch',
         );
-        await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 100);
+        await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 1000);
       }
       await _seedDecisionMemory(database);
 

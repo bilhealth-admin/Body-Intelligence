@@ -474,10 +474,9 @@ void main() {
     expect(workflow, contains('App Attest production assertion'));
     expect(
       workflow,
-      contains(
-        'Meta native Facebook authorization and Supabase token exchange',
-      ),
+      contains('Facebook OAuth browser flow and Supabase token exchange'),
     );
+    expect(workflow, contains('AdMob consent and served ad review'));
     expect(workflow, contains('StoreKit purchase and restore'));
     expect(workflow, contains('APPLE_REVIEWER_POST_APPROVAL_EXCLUDED='));
     expect(workflow, contains('exhaustive signed UI absence is not claimed'));

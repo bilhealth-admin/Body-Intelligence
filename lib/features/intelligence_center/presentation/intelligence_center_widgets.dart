@@ -24,88 +24,22 @@ class _AiCoachEntryWelcome extends StatelessWidget {
     };
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: BilPearlFinish.background(context),
-                ),
-              ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 104,
-                      height: 104,
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFFE8F4FD), Color(0xFFBED4E6)],
-                        ),
-                      ),
-                      child: const ClipOval(
-                        child: BilCoachPortrait(
-                          width: 98,
-                          height: 98,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      intelligenceText(
-                        context,
-                        'Welcome to AI Coach',
-                        'مرحبًا بك في المدرب الذكي',
-                      ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            fontFamily: displayFamily,
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: locale == 'ar' ? 0 : -.45,
-                            height: locale == 'ar' ? 1.28 : 1.12,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      intelligenceText(
-                        context,
-                        'Speak your language',
-                        'أتكلم لغتك',
-                      ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    SizedBox.square(
-                      dimension: 28,
-                      child: CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.primary,
-                        strokeWidth: 2.4,
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+      body: BilPearlFeatureWelcome(
+        key: const Key('ai-coach-entry-welcome'),
+        title: intelligenceText(
+          context,
+          'Welcome to AI Coach',
+          'مرحبًا بك في المدرب الذكي',
         ),
+        subtitle: intelligenceText(
+          context,
+          'Speak your language',
+          'أتكلم لغتك',
+        ),
+        displayFontFamily: displayFamily,
+        statusLabel: intelligenceText(context, 'Preparing…', 'جارٍ التحضير…'),
+        artworkWidth: 216,
+        artwork: const BilCoachPortrait(fit: BoxFit.cover, cacheWidth: 512),
       ),
     );
   }
@@ -177,10 +111,11 @@ class _InlineCoachDecision extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(
-                      Icons.verified_outlined,
-                      size: 15,
-                      color: scheme.onSurfaceVariant,
+                    const Icon(
+                      Icons.verified_rounded,
+                      key: Key('ai-coach-day-one-guidance-evidence'),
+                      size: 16,
+                      color: Color(0xFF56C878),
                     ),
                     const SizedBox(width: 5),
                     Expanded(
@@ -446,9 +381,9 @@ class _CoachStarterPrompts extends StatelessWidget {
                   'Choose a starting point. The Coach uses only the context available to it.',
                   'اختر نقطة بداية. يستخدم المدرب فقط السياق المتاح له.',
                 ),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: _coachConversationBodyStyle(
+                  context,
                   color: scheme.onSurfaceVariant,
-                  height: 1.4,
                 ),
               ),
               const SizedBox(height: 10),
@@ -490,7 +425,7 @@ class _ListeningComposerLabel extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _VoiceListeningWave(color: scheme.primary, compact: true),
+          _VoiceListeningWave(color: scheme.onSurface, compact: true),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -502,9 +437,7 @@ class _ListeningComposerLabel extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: transcript.trim().isEmpty
-                        ? scheme.primary
-                        : scheme.onSurface,
+                    color: scheme.onSurface,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -513,9 +446,9 @@ class _ListeningComposerLabel extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelSmall?.copyWith(color: scheme.primary),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
               ],
             ),

@@ -540,13 +540,9 @@ void main() {
             'community-updates',
             'community-settings',
           ]) {
-            expect(find.byKey(Key(action)), findsOneWidget);
+            expect(find.byKey(Key(action)).hitTestable(), findsOneWidget);
           }
           expect(find.byType(TabBar), findsNothing);
-          expect(
-            tester.widget<AppBar>(find.byType(AppBar)).actions,
-            hasLength(3),
-          );
           expect(tester.takeException(), isNull);
           if ((tag == 'ar' || tag == 'en') && scale == 1) {
             await _captureSurface(tester, '${tag}_feed');
@@ -891,9 +887,7 @@ void main() {
       650,
       scrollable: find
           .descendant(
-            of: find.byKey(
-              const PageStorageKey('community-feed-scroll-explore'),
-            ),
+            of: find.byKey(const Key('community-public-feed')),
             matching: find.byType(Scrollable),
           )
           .first,

@@ -21,7 +21,7 @@ void main() {
     final consentCoordinator = File(
       'lib/features/intelligence_center/services/'
       'remote_ai_consent_coordinator.dart',
-    ).readAsStringSync();
+    ).readAsStringSync().replaceAll('\r\n', '\n');
     final server = File(
       'supabase/functions/ai-coach/server.ts',
     ).readAsStringSync();
@@ -180,12 +180,144 @@ void main() {
     expect(base, contains('minimum relevant data'));
     expect(base, contains('securely processed by cloud AI'));
   });
+
+  test(
+    'iOS voice disclosures match on-device transcription and AI routing',
+    () {
+      const voiceMarkers = <String, List<String>>{
+        'ar': ['على هذا الجهاز', 'لا يُرسل الصوت الخام إلى Gemini'],
+        'bn': ['এই ডিভাইসেই', 'Raw audio Gemini-তে পাঠানো হয় না'],
+        'de': ['auf diesem Gerät', 'Roh-Audio wird nicht an Gemini gesendet'],
+        'en': ['on this device', 'Raw audio is not sent to Gemini'],
+        'es': [
+          'en este dispositivo',
+          'El audio sin procesar no se envía a Gemini',
+        ],
+        'fa': ['روی همین دستگاه', 'صدای خام به Gemini ارسال نمی‌شود'],
+        'fr': ['sur cet appareil', 'L’audio brut n’est pas envoyé à Gemini'],
+        'hi': ['इस डिवाइस पर', 'कच्चा ऑडियो Gemini को नहीं भेजा जाता'],
+        'id': ['di perangkat ini', 'Audio mentah tidak dikirim ke Gemini'],
+        'it': [
+          'su questo dispositivo',
+          'L’audio grezzo non viene inviato a Gemini',
+        ],
+        'ja': ['このデバイス上', '生の音声は Gemini に送信されません'],
+        'ko': ['이 기기에서', '원본 오디오는 Gemini로 전송되지 않습니다'],
+        'ms': ['pada peranti ini', 'Audio mentah tidak dihantar ke Gemini'],
+        'nl': [
+          'op dit apparaat',
+          'Ruwe audio wordt niet naar Gemini verzonden',
+        ],
+        'pl': ['na tym urządzeniu', 'Surowe audio nie jest wysyłane do Gemini'],
+        'pt-BR': ['neste dispositivo', 'O áudio bruto não é enviado ao Gemini'],
+        'pt-PT': [
+          'neste dispositivo',
+          'O áudio bruto não é enviado para o Gemini',
+        ],
+        'ru': [
+          'на этом устройстве',
+          'Необработанное аудио не отправляется в Gemini',
+        ],
+        'th': ['บนอุปกรณ์นี้', 'เสียงดิบจะไม่ถูกส่งไปยัง Gemini'],
+        'tr': ['bu cihazda', 'Ham ses Gemini’ye gönderilmez'],
+        'uk': [
+          'на цьому пристрої',
+          'Необроблене аудіо не надсилається до Gemini',
+        ],
+        'ur': ['اسی ڈیوائس پر', 'خام آڈیو Gemini کو نہیں بھیجی جاتی'],
+        'vi': ['trên thiết bị này', 'Âm thanh thô không được gửi đến Gemini'],
+        'zh-Hans': ['在此设备上', '原始音频不会发送给 Gemini'],
+        'zh-Hant': ['在此裝置上', '原始音訊不會傳送給 Gemini'],
+      };
+
+      final speechBridge = File(
+        'ios/Runner/BILSpeechBridge.swift',
+      ).readAsStringSync();
+      expect(speechBridge, contains('recognizer.supportsOnDeviceRecognition'));
+      expect(
+        speechBridge,
+        contains('request.requiresOnDeviceRecognition = true'),
+      );
+
+      final localizedFiles = Directory('ios/Runner')
+          .listSync()
+          .whereType<Directory>()
+          .where((directory) => directory.path.endsWith('.lproj'))
+          .map(
+            (directory) => File(
+              '${directory.path}${Platform.pathSeparator}InfoPlist.strings',
+            ),
+          )
+          .where((file) => file.existsSync());
+      for (final file in localizedFiles) {
+        final locale = file.parent.path
+            .split(Platform.pathSeparator)
+            .last
+            .replaceAll('.lproj', '');
+        final contents = file.readAsStringSync();
+        final microphone = _plistDescription(
+          contents,
+          'NSMicrophoneUsageDescription',
+        );
+        final speech = _plistDescription(
+          contents,
+          'NSSpeechRecognitionUsageDescription',
+        );
+        final markers = voiceMarkers[locale]!;
+        expect(
+          microphone,
+          contains(markers.first),
+          reason: '$locale microphone',
+        );
+        expect(speech, contains(markers.first), reason: '$locale speech');
+        expect(
+          '$microphone $speech',
+          contains(markers.last),
+          reason: '$locale raw-audio disclosure',
+        );
+        expect(microphone, isNot(contains('review the text before')));
+        expect(speech, isNot(contains('review it before')));
+      }
+
+      final base = File('ios/Runner/Info.plist').readAsStringSync();
+      final microphone = _plistXmlDescription(
+        base,
+        'NSMicrophoneUsageDescription',
+      );
+      final speech = _plistXmlDescription(
+        base,
+        'NSSpeechRecognitionUsageDescription',
+      );
+      expect(microphone, contains('on this device'));
+      expect(
+        microphone,
+        contains(
+          'voice input for weight, meals, a Community post, or AI Coach',
+        ),
+      );
+      expect(microphone, contains('Raw audio is not sent to Gemini'));
+      expect(speech, contains('on this device'));
+      expect(speech, contains('Raw audio is never sent to Gemini'));
+    },
+  );
 }
 
 String _healthShareDescription(String contents) {
+  return _plistDescription(contents, 'NSHealthShareUsageDescription');
+}
+
+String _plistDescription(String contents, String key) {
   final matches = RegExp(
-    r'^"NSHealthShareUsageDescription"\s*=\s*"([^"]+)";$',
+    r'^"' + RegExp.escape(key) + r'"\s*=\s*"([^"]+)";$',
     multiLine: true,
+  ).allMatches(contents).toList(growable: false);
+  expect(matches, hasLength(1));
+  return matches.single.group(1)!;
+}
+
+String _plistXmlDescription(String contents, String key) {
+  final matches = RegExp(
+    '<key>${RegExp.escape(key)}</key>\\s*<string>([^<]+)</string>',
   ).allMatches(contents).toList(growable: false);
   expect(matches, hasLength(1));
   return matches.single.group(1)!;

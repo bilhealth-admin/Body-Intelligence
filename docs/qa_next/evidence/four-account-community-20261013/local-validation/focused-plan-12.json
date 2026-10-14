@@ -1,0 +1,204 @@
+[
+  {
+    "label": "format-owner-confirmation-and-fixtures",
+    "kind": "format-edit",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "format",
+      "lib/features/community/presentation/community_bil_code_page.dart",
+      "lib/features/community/presentation/community_chat_page.dart",
+      "lib/features/community/presentation/community_chat_rendering.dart",
+      "lib/features/community/presentation/community_gold_balance_action.dart",
+      "lib/features/community/presentation/community_post_moderation_page.dart",
+      "lib/features/community/presentation/new_community_message_page.dart",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "test/features/community/community_notification_content_route_test.dart",
+      "test/features/community/community_relationship_delivery_cases.dart"
+    ]
+  },
+  {
+    "label": "moderator-retirement-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_safety_review_repository_test.dart",
+      "--plain-name",
+      "account switch clears open report text and decision controls"
+    ]
+  },
+  {
+    "label": "chat-real-retry-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "--plain-name",
+      "failed chat send reuses request UUID and success permits a new identical message"
+    ]
+  },
+  {
+    "label": "chat-removed-confirmation-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "--plain-name",
+      "chat removed delivery preserves draft and needs explicit new-message confirmation"
+    ]
+  },
+  {
+    "label": "new-removed-confirmation-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "--plain-name",
+      "new removed delivery preserves draft and needs explicit new-message confirmation"
+    ]
+  },
+  {
+    "label": "gold-refresh-retry-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "--plain-name",
+      "same-account failed Gold refresh retains its verified balance and exposes retry"
+    ]
+  },
+  {
+    "label": "new-community-acceptance-files",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_safety_review_repository_test.dart",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "test/features/community/community_notification_content_route_test.dart",
+      "test/features/intelligence_center/cloud_voice_privacy_contract_test.dart"
+    ]
+  },
+  {
+    "label": "postgres-message-lock-order-case",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_message_delivery_v2_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe",
+      "--case",
+      "legacy INSERT and new RPC preserve pair then member lock order"
+    ]
+  },
+  {
+    "label": "postgres-report-changed-content-case",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_community_safety_review_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe",
+      "--case",
+      "changed reported text rejects stale removal without deleting content"
+    ]
+  },
+  {
+    "label": "postgres-message-contract-all",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_message_delivery_v2_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe"
+    ]
+  },
+  {
+    "label": "postgres-report-authority-all",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_community_safety_review_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe"
+    ]
+  },
+  {
+    "label": "web-landing-actual-dom-file",
+    "kind": "node",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.EXE",
+      "--test",
+      "--test-reporter=tap",
+      "tool/release/community_links.test.mjs"
+    ]
+  },
+  {
+    "label": "web-worker-link-associations-file",
+    "kind": "node",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.EXE",
+      "--test",
+      "--test-reporter=tap",
+      "tool/release/bilhealth_site_worker.test.mjs"
+    ]
+  },
+  {
+    "label": "push-dispatch-and-provider-affected",
+    "kind": "deno",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "test",
+      "--allow-env",
+      "--allow-net",
+      "--allow-read",
+      "supabase/functions/community-push-dispatch/server_test.ts",
+      "supabase/functions/community-push-dispatch/index_test.ts",
+      "supabase/functions/push-provider-gateway/server_test.ts",
+      "supabase/functions/push-provider-gateway/badge_test.ts"
+    ]
+  }
+]

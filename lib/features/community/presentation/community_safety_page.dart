@@ -11,6 +11,7 @@ import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import 'community_copy.dart';
 import 'community_return_button.dart';
+import 'community_blocked_members_sheet.dart';
 
 typedef CommunityPolicyUrlLauncher = Future<bool> Function(Uri uri);
 
@@ -211,6 +212,26 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
     appBar: AppBar(
       leading: const CommunityReturnButton(),
       title: Text(_t('Safety & community policy', 'الأمان وسياسة المجتمع')),
+      actions: [
+        IconButton(
+          key: const Key('community-blocked-members-open'),
+          tooltip: _t('Blocked members', 'الأعضاء المحظورون'),
+          icon: const Icon(Icons.person_off_outlined),
+          onPressed: _repository == null
+              ? null
+              : () => showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.sizeOf(context).height * .85,
+                    maxWidth: 560,
+                  ),
+                  builder: (_) =>
+                      CommunityBlockedMembersSheet(repository: _repository!),
+                ),
+        ),
+      ],
     ),
     body: _policyState == null
         ? _PolicyLoadError(languageCode: _languageCode, onRetry: _retry)
@@ -249,10 +270,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                   const Icon(Icons.shield_outlined, size: 52),
                   const SizedBox(height: 12),
                   Text(
-                    _t(
-                      'A community built around privacy and dignity.',
-                      'مجتمع يحترم الخصوصية والإنسان.',
-                    ),
+                    _t('Privacy and safety', 'الخصوصية والأمان'),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),

@@ -1,0 +1,17 @@
+{
+  "label": "format-notification-constructor-and-interface",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib/features/community/presentation/community_notification_content_page.dart",
+    "lib/features/community/presentation/community_post_detail_page.dart"
+  ],
+  "started_utc": "2026-10-13T07:25:44.965789+00:00",
+  "runner_pid": 2688,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "8c7769b3abdf1c6bd0ed1fbd4499104b8840597aea283363d82b2bcf225d0c11",
+  "fingerprint_version": 4,
+  "pid": 7568
+}

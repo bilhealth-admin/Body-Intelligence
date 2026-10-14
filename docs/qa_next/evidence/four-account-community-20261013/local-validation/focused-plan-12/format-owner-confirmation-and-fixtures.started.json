@@ -1,0 +1,24 @@
+{
+  "label": "format-owner-confirmation-and-fixtures",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib/features/community/presentation/community_bil_code_page.dart",
+    "lib/features/community/presentation/community_chat_page.dart",
+    "lib/features/community/presentation/community_chat_rendering.dart",
+    "lib/features/community/presentation/community_gold_balance_action.dart",
+    "lib/features/community/presentation/community_post_moderation_page.dart",
+    "lib/features/community/presentation/new_community_message_page.dart",
+    "test/features/community/community_code_invite_earn_account_test.dart",
+    "test/features/community/community_notification_content_route_test.dart",
+    "test/features/community/community_relationship_delivery_cases.dart"
+  ],
+  "started_utc": "2026-10-13T07:49:25.329751+00:00",
+  "runner_pid": 24264,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "ae0348e8572c15da5559d058f9e4d32c1f9e90217f6b5a9b2d60ad98c90dee3a",
+  "fingerprint_version": 4,
+  "pid": 23684
+}

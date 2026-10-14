@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -198,7 +198,7 @@ jobs:
             | tee build/first-use-recovery/ci-first-use.jsonl
       - name: Preserve First Use logs and Flutter image evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bil-first-use-recovery-${{ github.sha }}
           path: |
@@ -242,7 +242,7 @@ jobs:
             test/architecture_source_file_size_guard_test.dart
       - name: Export source-only guard report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bil-integration-guard-${{ github.sha }}
           path: build/store-policy/guard.json

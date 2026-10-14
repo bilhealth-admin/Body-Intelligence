@@ -224,6 +224,30 @@
     "arabic": "فيتامين ج"
   },
   {
+    "english": "Saturated fat",
+    "arabic": "الدهون المشبعة"
+  },
+  {
+    "english": "Polyunsaturated fat",
+    "arabic": "الدهون المتعددة غير المشبعة"
+  },
+  {
+    "english": "Monounsaturated fat",
+    "arabic": "الدهون الأحادية غير المشبعة"
+  },
+  {
+    "english": "Trans fat",
+    "arabic": "الدهون المتحولة"
+  },
+  {
+    "english": "Cholesterol",
+    "arabic": "الكوليسترول"
+  },
+  {
+    "english": "Vitamin A",
+    "arabic": "فيتامين أ"
+  },
+  {
     "english": "ml",
     "arabic": "مل"
   },

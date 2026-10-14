@@ -1,0 +1,23 @@
+{
+  "label": "citation-client-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/intelligence_center/coach_remote_consent_preflight_test.dart",
+    "--plain-name",
+    "cloud response keeps only allow-listed health citation IDs"
+  ],
+  "started_utc": "2026-10-13T06:16:47.864118+00:00",
+  "runner_pid": 10600,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb",
+  "fingerprint_version": 4,
+  "pid": 21804
+}

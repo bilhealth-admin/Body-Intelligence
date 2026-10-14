@@ -2,12 +2,16 @@ part of 'community_hub_page.dart';
 
 class _CommunityPostDetailPage extends StatefulWidget {
   const _CommunityPostDetailPage({
+    super.key,
     required this.post,
     required this.initialStats,
     required this.repository,
     this.ownerIsCurrent,
     this.ownerChanges,
     this.referenceMetadata,
+    this.focusCommentId,
+    this.notificationLoader,
+    this.verifyAccess,
   });
 
   final CommunityPost post;
@@ -16,6 +20,9 @@ class _CommunityPostDetailPage extends StatefulWidget {
   final ValueGetter<bool>? ownerIsCurrent;
   final Listenable? ownerChanges;
   final CommunityPostReferenceMetadata? referenceMetadata;
+  final String? focusCommentId;
+  final CommunityNotificationContentLoader? notificationLoader;
+  final Future<bool> Function()? verifyAccess;
 
   @override
   State<_CommunityPostDetailPage> createState() =>
@@ -56,6 +63,122 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   final Map<String, String> _membershipTierByUser = <String, String>{};
   final Set<String> _expandedThreads = <String>{};
   final Set<String> _loadingReplyThreads = <String>{};
+  final _notificationFocusKey = GlobalKey();
+  CommunityNotificationCommentFocus? _notificationFocus;
+  bool _focusLoading = false;
+  bool _focusUnavailable = false;
+  bool _focusFailed = false;
+  int _focusGeneration = 0;
+
+  Future<CommunityNotificationCommentPage> _loadCommentPage({
+    DateTime? after,
+    String? afterId,
+  }) async {
+    final loader = widget.notificationLoader;
+    if (loader != null) {
+      return loader.loadPage(
+        widget.post.id,
+        after: after,
+        afterId: afterId,
+        limit: _pageSize,
+      );
+    }
+    final threads = await widget.repository.loadPostCommentThreads(
+      widget.post.id,
+      after: after,
+      afterId: afterId,
+      limit: _pageSize,
+    );
+    _detailOwnerScope.check();
+    return CommunityNotificationCommentPage(
+      comments: [
+        for (final thread in threads) ...[thread.root, ...thread.replies],
+      ],
+      hasMore: threads.length == _pageSize,
+      after: threads.lastOrNull?.root.createdAt,
+      afterId: threads.lastOrNull?.root.id,
+    );
+  }
+
+  Future<void> _loadNotificationFocus(int generation) =>
+      _runDetailOwner(() async {
+        final loader = widget.notificationLoader;
+        final commentId = widget.focusCommentId;
+        if (loader == null || commentId == null) return;
+        final focusGeneration = ++_focusGeneration;
+        bool current() =>
+            mounted &&
+            _detailOwnerIsCurrent &&
+            generation == _loadGeneration &&
+            focusGeneration == _focusGeneration;
+        setState(() {
+          _focusLoading = true;
+          _focusUnavailable = false;
+          _focusFailed = false;
+        });
+        try {
+          final focus = await loader.loadFocus(
+            widget.post.id,
+            commentId,
+            isCurrent: current,
+          );
+          _detailOwnerScope.check();
+          if (!current()) return;
+          if (widget.verifyAccess != null && !await widget.verifyAccess!()) {
+            return;
+          }
+          _detailOwnerScope.check();
+          if (!current()) return;
+          setState(() {
+            _notificationFocus = focus;
+            _focusUnavailable = focus == null;
+            if (focus != null) {
+              final rows = [focus.thread.root, ...focus.thread.replies];
+              final updated = {for (final row in _comments) row.id: row};
+              for (final row in rows) {
+                updated[row.id] = row;
+              }
+              _comments
+                ..clear()
+                ..addAll(updated.values);
+              if (focus.commentId != focus.thread.root.id) {
+                _expandedThreads.add(focus.thread.root.id);
+              }
+            }
+          });
+          if (focus != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final target = _notificationFocusKey.currentContext;
+              if (!current() || target == null) return;
+              unawaited(
+                Scrollable.ensureVisible(
+                  target,
+                  alignment: .12,
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 180),
+                ),
+              );
+            });
+          }
+        } on CommunityOwnerOperationCancelled {
+          // Cancel/navigation/account change retires the scan, never a new request.
+        } on Object {
+          if (current()) setState(() => _focusFailed = true);
+        } finally {
+          if (current()) setState(() => _focusLoading = false);
+        }
+      }).onError<CommunityOwnerOperationCancelled>((_, _) {
+        // A replaced account/route retires an unawaited scan without repainting.
+      });
+
+  void _cancelNotificationFocus() {
+    setState(() {
+      _focusGeneration++;
+      _focusLoading = false;
+      _focusFailed = true;
+    });
+  }
 
   @override
   void initState() {
@@ -182,25 +305,32 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
 
   Future<void> _loadInitial() => _runDetailOwner(() async {
     final generation = ++_loadGeneration;
+    _focusGeneration++;
+    _focusLoading = false;
     _refreshing = true;
     _loadingMore = false;
     try {
       final values = await Future.wait<Object>([
         widget.repository.loadPostStats([widget.post.id]),
-        widget.repository.loadPostCommentThreads(
-          widget.post.id,
-          limit: _pageSize,
-        ),
+        _loadCommentPage(),
       ]);
       _detailOwnerScope.check();
       final stats = values[0] as List<CommunityPostStats>;
-      final threads = values[1] as List<CommunityCommentThread>;
-      final loadedComments = <CommunityComment>[
-        for (final thread in threads) ...[thread.root, ...thread.replies],
-      ];
+      final page = values[1] as CommunityNotificationCommentPage;
+      final loadedComments = page.comments;
+      if (widget.notificationLoader != null &&
+          (stats.length != 1 || stats.single.postId != widget.post.id)) {
+        await widget.verifyAccess?.call();
+        throw const FormatException('Post access could not be verified');
+      }
       final tiers = await _fetchMembershipTiers(loadedComments);
       if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
-      if (stats.length == 1) _stats = stats.single;
+      if (widget.verifyAccess != null && !await widget.verifyAccess!()) return;
+      _detailOwnerScope.check();
+      if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
+      if (stats.length == 1 && stats.single.postId == widget.post.id) {
+        _stats = stats.single;
+      }
       _comments
         ..clear()
         ..addAll(loadedComments);
@@ -213,9 +343,21 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       _expandedThreads.removeWhere(
         (rootId) => !_comments.any((comment) => comment.id == rootId),
       );
-      _hasMore = threads.length == _pageSize;
-      _after = threads.lastOrNull?.root.createdAt;
-      _afterId = threads.lastOrNull?.root.id;
+      _hasMore = page.hasMore;
+      _after = page.after;
+      _afterId = page.afterId;
+      _notificationFocus = null;
+      if (widget.focusCommentId != null) {
+        // The comment scan owns a separate cancellable operation. Starting it
+        // inside this finishing owner zone would retire it with the page read.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted &&
+              _detailOwnerIsCurrent &&
+              generation == _loadGeneration) {
+            unawaited(_loadNotificationFocus(generation));
+          }
+        });
+      }
     } finally {
       if (generation == _loadGeneration) _refreshing = false;
     }
@@ -251,17 +393,13 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     final generation = _loadGeneration;
     setState(() => _loadingMore = true);
     try {
-      final page = await widget.repository.loadPostCommentThreads(
-        widget.post.id,
-        after: _after,
-        afterId: _afterId,
-        limit: _pageSize,
-      );
+      final page = await _loadCommentPage(after: _after, afterId: _afterId);
       _detailOwnerScope.check();
-      final loaded = <CommunityComment>[
-        for (final thread in page) ...[thread.root, ...thread.replies],
-      ];
+      final loaded = page.comments;
       final tiers = await _fetchMembershipTiers(loaded);
+      if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
+      if (widget.verifyAccess != null && !await widget.verifyAccess!()) return;
+      _detailOwnerScope.check();
       if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
       final known = _comments.map((comment) => comment.id).toSet();
       setState(() {
@@ -269,18 +407,11 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
           loaded.map((comment) => comment.authorId),
         );
         _membershipTierByUser.addAll(tiers);
-        for (final thread in page) {
-          if (known.add(thread.root.id)) {
-            _comments.add(thread.root);
-          }
-          for (final reply in thread.replies) {
-            if (known.add(reply.id)) _comments.add(reply);
-          }
-        }
-        _hasMore = page.length == _pageSize;
-        if (page.isNotEmpty) {
-          _after = page.last.root.createdAt;
-          _afterId = page.last.root.id;
+        _comments.addAll(loaded.where((row) => known.add(row.id)));
+        _hasMore = page.hasMore;
+        if (loaded.isNotEmpty) {
+          _after = page.after;
+          _afterId = page.afterId;
         }
       });
     } on CommunityOwnerOperationCancelled {
@@ -295,6 +426,14 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       }
     }
   });
+
+  CommunityComment? get _focusedRoot => _comments
+      .where(
+        (row) =>
+            row.parentId == null &&
+            row.id == _notificationFocus?.thread.root.id,
+      )
+      .firstOrNull;
 
   List<CommunityComment> get _rootComments {
     final roots =
@@ -647,6 +786,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
 
   @override
   void dispose() {
+    _focusGeneration++;
     _composer.dispose();
     _composerFocus.dispose();
     super.dispose();

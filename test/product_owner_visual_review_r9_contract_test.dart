@@ -25,10 +25,8 @@ void main() {
     expect(dock, contains('MediaQuery.paddingOf(context).bottom'));
     expect(shell, contains('moreAttentionCount:'));
     expect(shell, contains("key: const Key('shell-quick-add')"));
-    expect(
-      shell,
-      contains('showBilQuickAdd(context, originPath: paths[index])'),
-    );
+    expect(shell, contains('await showBilQuickAdd('));
+    expect(shell, contains('originPath: paths[index]'));
     expect(dock, contains('Color(0xFF121B28)'));
     expect(dock, contains('Color(0xFFFFFFFF)'));
     expect(shell, isNot(contains('FloatingActionButtonLocation.centerDocked')));

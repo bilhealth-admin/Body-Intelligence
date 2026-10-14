@@ -1,0 +1,27 @@
+[
+  {
+    "label": "format-qr-regression-case",
+    "kind": "format-edit",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "format",
+      "test\\features\\community\\community_code_invite_earn_account_test.dart"
+    ]
+  },
+  {
+    "label": "qr-submitted-aba-spinner-before-fix",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "--plain-name",
+      "QR submitted rotation retires its spinner on A B A"
+    ]
+  }
+]

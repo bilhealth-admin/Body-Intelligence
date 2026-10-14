@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_restore_conflict_provider.dart';
+import 'dart:io';
 import 'dart:convert';
 import 'package:body_intelligence_log/app/services/local_data_lifecycle_service.dart';
 
@@ -16,6 +17,8 @@ import 'package:body_intelligence_log/features/cloud_platform/presentation/cloud
 import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/cloud_manual_sync_service.dart';
 import 'package:drift/native.dart';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,6 +50,91 @@ void main() {
     await a.close();
     await b.close();
   });
+
+  for (final size in [10, 100]) {
+    test(
+      'actual SQLite restore scans grow linearly for $size meal aggregates',
+      () async {
+        final counter = _RestoreAggregateCounter();
+        final destination = AppDatabase.forTesting(
+          NativeDatabase.memory().interceptWith(counter),
+          localOwnerId: 'owner',
+        );
+        addTearDown(destination.close);
+        await LocalDataAccountBoundary(
+          destination,
+        ).bindAuthenticatedOwner('owner');
+        final food = await FoodRepository(a).addFood(
+          name: 'Synthetic linear-scan fixture',
+          category: 'test',
+          calories: 100,
+          protein: 10,
+          carbs: 10,
+          fats: 2,
+          isCustom: true,
+          source: 'TEST scan bound',
+          servingSize: 100,
+          servingUnit: 'g',
+        );
+        final repository = MealRepository(a);
+        for (var i = 0; i < size; i++) {
+          final meal = await repository.createMeal(
+            date: DateTime.utc(2026, 10, 13).add(Duration(days: i)),
+            name: 'Synthetic lunch $i',
+            type: 'lunch',
+          );
+          await repository.addMealItem(
+            mealId: meal,
+            foodId: food,
+            quantity: 50,
+          );
+        }
+        CloudRestoreV2Engine engine(AppDatabase db, String device) =>
+            CloudRestoreV2Engine(
+              database: db,
+              ownerId: 'owner',
+              deviceId: device,
+              keyId: 'test-key',
+              cipher: const _TransparentTestCipher(),
+              transport: server,
+              ownerIsCurrent: () => true,
+              pageSize: 100,
+            );
+        expect(
+          (await engine(a, 'source-performance').run({'nutrition'})).completed,
+          isTrue,
+        );
+        counter.rows = 0;
+        counter.selects = 0;
+        final clock = Stopwatch()..start();
+        final restored = await engine(
+          destination,
+          'target-performance',
+        ).run({'nutrition'});
+        clock.stop();
+        expect(restored.completed, isTrue);
+        final materialized = counter.rows;
+        final selects = counter.selects;
+        expect(
+          await destination.select(destination.meals).get(),
+          hasLength(size),
+        );
+        expect(
+          await destination.select(destination.mealItems).get(),
+          hasLength(size),
+        );
+        stdout.writeln(
+          'SQLite performance fixture: meals=$size materialized_aggregate_rows=$materialized aggregate_selects=$selects milliseconds=${clock.elapsedMilliseconds}',
+        );
+        expect(
+          materialized,
+          lessThanOrEqualTo(size * 12 + 50),
+          reason:
+              'Verification of one remote aggregate must not repeatedly materialize the whole diary. This row-count bound is independent of machine speed.',
+        );
+      },
+    );
+  }
 
   test(
     'independent SQLite goals restore preserves raw old percentages and zero',
@@ -665,5 +753,25 @@ final class _ModelServer implements CloudRestoreV2Transport {
       'cursor': page.isEmpty ? cursor : page.last['change_sequence'],
       'has_more': matching.length > page.length,
     };
+  }
+}
+
+final class _RestoreAggregateCounter extends QueryInterceptor {
+  int rows = 0, selects = 0;
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) async {
+    final result = await executor.runSelect(statement, args);
+    if (RegExp(
+      r'FROM\s+"?(?:meals|meal_items)"?',
+      caseSensitive: false,
+    ).hasMatch(statement)) {
+      rows += result.length;
+      selects++;
+    }
+    return result;
   }
 }

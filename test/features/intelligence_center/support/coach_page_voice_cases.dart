@@ -57,6 +57,108 @@ Future<void> _waitForCoachCall(
 }
 
 void registerCoachVoiceCases() {
+  for (final dark in [false, true]) {
+    testWidgets(
+      'Coach pearl recording keeps real start stop and no text dispatch dark=$dark',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        final gateway = _HeldGateway();
+        final calls = _mockCoachVoice(tester);
+        try {
+          await _mount(
+            tester,
+            database: database,
+            gateway: gateway,
+            dark: dark,
+            arabic: dark,
+            evidenceFonts: true,
+          );
+          final voice = find.byKey(const Key('ai-coach-voice-button'));
+          _expectCoachPearlAction(
+            tester,
+            voice,
+            glyph: Icons.graphic_eq_rounded,
+          );
+          _expectCoachPearlSemantics(
+            tester,
+            voice,
+            dark ? 'تحدث مع BIL' : 'Talk to BIL',
+          );
+          await tester.tap(voice);
+          for (
+            var i = 0;
+            i < 20 && (calls['bil/speech:listen'] ?? 0) == 0;
+            i++
+          ) {
+            await tester.pump(const Duration(milliseconds: 50));
+          }
+          expect(calls['bil/speech:listen'], 1);
+          await tester.pump(const Duration(milliseconds: 200));
+          _expectCoachPearlAction(tester, voice);
+          expect(
+            tester.widget<IconButton>(voice).tooltip,
+            dark ? 'إنهاء المكالمة' : 'End live call',
+          );
+          _expectCoachPearlSemantics(
+            tester,
+            voice,
+            dark ? 'إنهاء المكالمة' : 'End live call',
+          );
+          final waveBars = find.descendant(
+            of: voice,
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is Container && widget.decoration is BoxDecoration,
+            ),
+          );
+          expect(waveBars, findsNWidgets(4));
+          for (final bar in tester.widgetList<Container>(waveBars)) {
+            expect(
+              (bar.decoration as BoxDecoration).color,
+              const Color(0xFF14243A),
+            );
+          }
+          final composer = tester.widget<AnimatedContainer>(
+            find.byKey(const Key('ai-coach-composer-surface')),
+          );
+          final edge = (composer.decoration as BoxDecoration).border! as Border;
+          expect(
+            edge.top.color,
+            dark ? const Color(0xFF526B80) : const Color(0xFFC4D3E0),
+          );
+          expect(edge.top.width, 1.5);
+          expect(gateway.calls, 0);
+          await tester.tap(voice);
+          await tester.pumpAndSettle();
+          expect(calls['bil/speech:cancel'], greaterThanOrEqualTo(1));
+          expect(
+            find.byKey(const Key('ai-coach-question-field')).hitTestable(),
+            findsOneWidget,
+          );
+          _expectCoachPearlAction(
+            tester,
+            voice,
+            glyph: Icons.graphic_eq_rounded,
+          );
+          expect(
+            gateway.calls,
+            0,
+            reason:
+                'Starting and ending an empty recording never invents an AI question.',
+          );
+          expect(tester.takeException(), isNull);
+        } finally {
+          try {
+            await _unmount(tester);
+          } finally {
+            semantics.dispose();
+            await tester.runAsync(database.close);
+          }
+        }
+      },
+    );
+  }
   testWidgets(
     'Quick Add pauses live voice and retains the unfinished transcript',
     (tester) async {

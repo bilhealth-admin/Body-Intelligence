@@ -127,9 +127,10 @@ void main() {
     final appleExactMatch = boostFunction.indexOf(
       'assertExactAppleTransaction(proof, apple)',
     );
-    final appleActive = boostFunction.indexOf(
-      'apple.productId !== productId || apple.lifecycle !== "active"',
+    final appleProductMatch = boostFunction.indexOf(
+      'if (apple.productId !== productId) throw new Error("wrong_product")',
     );
+    final appleActive = boostFunction.indexOf('apple.lifecycle !== "active"');
     final appleOwnership = boostFunction.indexOf(
       'assertApplePurchaseOwnership(',
     );
@@ -140,7 +141,8 @@ void main() {
     expect(appleLookup, greaterThan(appleProof));
     expect(appleServerRead, greaterThan(appleLookup));
     expect(appleExactMatch, greaterThan(appleServerRead));
-    expect(appleActive, greaterThan(appleExactMatch));
+    expect(appleProductMatch, greaterThan(appleExactMatch));
+    expect(appleActive, greaterThan(appleProductMatch));
     expect(appleOwnership, greaterThan(appleActive));
     expect(credit, greaterThan(appleOwnership));
     expect(

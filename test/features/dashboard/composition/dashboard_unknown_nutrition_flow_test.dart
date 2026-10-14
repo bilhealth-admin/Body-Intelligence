@@ -136,9 +136,26 @@ class _NutritionFixture {
       database.mealItems,
     )..where((row) => row.mealId.equals(mealId))).get()).single;
     if (mask != null) {
-      await (database.update(database.mealItems)
-            ..where((row) => row.id.equals(item.id)))
-          .write(MealItemsCompanion(nutrientEvidenceMask: Value(mask)));
+      // Exercise pre-envelope rows explicitly. Current FoodRepository writes
+      // immutable snapshots, so changing only the projected mask would create
+      // corrupt modern evidence instead of a legacy compatibility fixture.
+      await (database.update(
+        database.foods,
+      )..where((row) => row.id.equals(foodId))).write(
+        FoodsCompanion(
+          foodEvidenceJson: const Value(null),
+          nutrientEvidenceMask: Value(mask),
+        ),
+      );
+      await (database.update(
+        database.mealItems,
+      )..where((row) => row.id.equals(item.id))).write(
+        MealItemsCompanion(
+          foodEvidenceJson: const Value(null),
+          foodSourceSnapshot: Value(source),
+          nutrientEvidenceMask: Value(mask),
+        ),
+      );
     }
     return meals.getMealItem(item.id);
   }

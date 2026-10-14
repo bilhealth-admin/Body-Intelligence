@@ -72,6 +72,9 @@ try {
   // Existing table snapshot is baseline only. The new migration SQL, including
   // ACL, check constraints, trigger, debt and function definitions, runs whole.
   await db.exec(readFileSync(new URL('fixtures/admin_subscription_baseline/tables.sql', import.meta.url), 'utf8'));
+  // The baseline's current store table is intentionally maintained as a
+  // separate snapshot from the older pre-migration public schema.
+  await db.exec(readFileSync(new URL('fixtures/admin_subscription_baseline/store_subscription_table.sql', import.meta.url), 'utf8'));
   await db.exec(tableDefinition('bil_store_notification_inbox','202608040004_bil_store_entitlement_truth.sql'));
   await db.exec(functionDefinition('bil_claim_store_notification','202608040004_bil_store_entitlement_truth.sql'));
   await db.exec(tableDefinition('bil_ai_boost_purchases','202608110004_bil_ai_coach_weekly_usage_and_boost.sql'));

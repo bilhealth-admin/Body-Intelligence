@@ -1,6 +1,4 @@
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,6 +8,8 @@ import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_referral.dart';
 import 'community_copy.dart';
+import 'community_account_visit.dart';
+import '../services/community_owner_operation.dart';
 import 'community_return_button.dart';
 
 class CommunityInviteLandingPage extends StatefulWidget {
@@ -33,7 +33,8 @@ class _CommunityInviteLandingPageState
     extends State<CommunityInviteLandingPage> {
   CommunityRepository? _repository;
   SupabaseClient? _client;
-  StreamSubscription<AuthState>? _auth;
+  CommunityAccountVisit? _visit;
+  Object? _acceptOperation;
   late Future<CommunityInvitePreview> _preview;
   CommunityInviteAcceptance? _acceptance;
   bool _accepting = false;
@@ -43,15 +44,42 @@ class _CommunityInviteLandingPageState
   @override
   void initState() {
     super.initState();
-    _client = widget.client ?? _productionClient();
-    _repository = widget.repository ?? _productionRepository();
-    _preview = _loadPreview();
+    _bindAccount();
+  }
 
-    final client = _client;
-    if (client != null) {
-      _auth = client.auth.onAuthStateChange.listen((_) {
-        if (mounted) setState(() {});
-      }, onError: (Object _) {});
+  void _bindAccount() {
+    _client =
+        widget.client ??
+        widget.repository?.communitySocialClient ??
+        _productionClient();
+    _repository = widget.repository ?? _productionRepository();
+    _visit = CommunityAccountVisit(
+      repository: _repository,
+      client: _client,
+      onChanged: () {
+        if (!mounted) return;
+        setState(() {
+          _acceptOperation = null;
+          _acceptance = null;
+          _accepting = false;
+          _preview = _loadPreview();
+        });
+      },
+    );
+    _preview = _loadPreview();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityInviteLandingPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.token != widget.token ||
+        !identical(oldWidget.client, widget.client) ||
+        !identical(oldWidget.repository, widget.repository)) {
+      _visit?.dispose();
+      _acceptOperation = null;
+      _acceptance = null;
+      _accepting = false;
+      _bindAccount();
     }
   }
 
@@ -78,25 +106,52 @@ class _CommunityInviteLandingPageState
         status: CommunityInvitePreviewStatus.invalid,
       );
     }
-    return repository.previewCommunityInvite(widget.token);
+    final visit = _visit!;
+    final epoch = visit.epoch;
+    final ticket = visit.capture();
+    final preview = ticket == null
+        ? await repository.previewCommunityInvite(widget.token)
+        : await ticket.run(
+            () => repository.previewCommunityInvite(widget.token),
+          );
+    if (!mounted || !identical(visit, _visit) || epoch != visit.epoch) {
+      throw const CommunityOwnerOperationCancelled();
+    }
+    return preview;
   }
 
   void _retry() {
-    setState(() => _preview = _loadPreview());
+    setState(() {
+      _preview = _loadPreview();
+    });
   }
 
-  Future<void> _accept() async {
+  Future<void> _accept(int displayedEpoch) async {
     final repository = _repository;
-    if (repository == null || _accepting) return;
-    if (!_signedIn) {
-      await context.push('/login');
-      if (!mounted || !_signedIn) return;
+    if (repository == null || _accepting || _visit?.epoch != displayedEpoch) {
+      return;
     }
-
+    final operation = Object();
+    _acceptOperation = operation;
     setState(() => _accepting = true);
+    CommunityAccountTicket? ticket;
     try {
-      final acceptance = await repository.acceptCommunityInvite(widget.token);
-      if (!mounted) return;
+      if (!_signedIn) {
+        await context.push('/login');
+        // A sign-in is an owner transition. Show the now-authenticated
+        // acceptance action instead of inheriting a prior account's callback.
+        if (!mounted || !identical(operation, _acceptOperation)) return;
+      }
+      ticket = _visit?.capture();
+      if (ticket == null) return;
+      final acceptance = await ticket.run(
+        () => repository.acceptCommunityInvite(widget.token),
+      );
+      if (!mounted ||
+          !ticket.isCurrent ||
+          !identical(operation, _acceptOperation)) {
+        return;
+      }
       setState(() => _acceptance = acceptance);
       if (!acceptance.attributed) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -106,7 +161,9 @@ class _CommunityInviteLandingPageState
         );
       }
     } catch (_) {
-      if (mounted) {
+      if (mounted &&
+          identical(operation, _acceptOperation) &&
+          ticket?.isCurrent == true) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -120,13 +177,17 @@ class _CommunityInviteLandingPageState
         );
       }
     } finally {
-      if (mounted) setState(() => _accepting = false);
+      if (mounted && identical(operation, _acceptOperation)) {
+        _acceptOperation = null;
+        setState(() => _accepting = false);
+      }
     }
   }
 
   @override
   void dispose() {
-    unawaited(_auth?.cancel());
+    _acceptOperation = null;
+    _visit?.dispose();
     super.dispose();
   }
 
@@ -137,6 +198,7 @@ class _CommunityInviteLandingPageState
       title: Text(communityText(context, 'BIL invitation', 'دعوة BIL')),
     ),
     body: FutureBuilder<CommunityInvitePreview>(
+      key: ValueKey(_visit?.epoch),
       future: _preview,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done &&
@@ -189,6 +251,7 @@ class _CommunityInviteLandingPageState
           );
         }
 
+        final displayedEpoch = _visit!.epoch;
         final accepted = _acceptance?.relationshipAccepted == true;
         final inviterName =
             _acceptance?.displayName ?? preview.displayName ?? 'BIL member';
@@ -251,7 +314,9 @@ class _CommunityInviteLandingPageState
                       if (!accepted)
                         FilledButton.icon(
                           key: const Key('community-accept-invite'),
-                          onPressed: _accepting ? null : _accept,
+                          onPressed: _accepting
+                              ? null
+                              : () => _accept(displayedEpoch),
                           icon: _accepting
                               ? const SizedBox.square(
                                   dimension: 18,

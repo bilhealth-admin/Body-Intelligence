@@ -215,10 +215,17 @@ void registerCoachAccessibilityCases() {
         text: List.filled(60, 'A long reply with details.').join('\n'),
       );
       await tester.pumpAndSettle();
-      expect(scroll.offset, closeTo(scroll.position.minScrollExtent, .5));
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, 400));
+      final viewport = tester.widget<ChatHistoryViewport>(
+        find.byType(ChatHistoryViewport),
+      );
+      final latestReading =
+          viewport.latestTargetOffset?.call(scroll.position) ??
+          scroll.position.minScrollExtent;
+      expect(viewport.latestTargetOffset, isNotNull);
+      expect(scroll.offset, closeTo(latestReading, .5));
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
       await tester.pumpAndSettle();
-      expect(scroll.offset - scroll.position.minScrollExtent, greaterThan(72));
+      expect(latestReading - scroll.offset, greaterThan(72));
       expect(find.byKey(const ValueKey('chat-jump-to-latest')), findsOneWidget);
       expect(
         tester.getCenter(find.byKey(const ValueKey('chat-jump-to-latest'))).dx,

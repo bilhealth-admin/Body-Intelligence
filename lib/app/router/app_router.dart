@@ -296,7 +296,10 @@ class AppRouter {
       ),
       GoRoute(
         path: '/nutrition-plans',
-        builder: (_, _) => const NutritionPathwaysPage(),
+        builder: (_, _) => const BilFeatureEntrySplashGate(
+          kind: BilFeatureEntryKind.diet,
+          child: NutritionPathwaysPage(),
+        ),
       ),
       GoRoute(
         path: '/nutrition-plans/:pathwayId',

@@ -114,7 +114,15 @@ extension CoachMealCompensation on MealRepository {
       );
       final readback = <CoachMealSnapshot>[];
       for (final row in journal.after) {
-        final actual = await _requireCoachSnapshot(row.item.id, scope);
+        late final CoachMealSnapshot actual;
+        try {
+          actual = await _requireCoachSnapshot(row.item.id, scope);
+        } on CoachMealConflict catch (error) {
+          if (error.reason == CoachMealConflictReason.ownerChanged) rethrow;
+          throw const CoachMealConflict(
+            CoachMealConflictReason.readbackUnavailable,
+          );
+        }
         final expected = expectedItems[row.item.id];
         if (expected == null || !_sameCoachItem(expected, actual.item)) {
           throw const CoachMealConflict(

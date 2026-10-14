@@ -25,10 +25,9 @@ void main() {
     expect(source, contains('AbortSignal.timeout(geminiAttemptTimeoutMs)'));
     expect(source, contains('maxOutputTokens'));
     expect(source, contains('responseMimeType: "application/json"'));
-    expect(
-      source,
-      contains('responseSchema: coachResponseSchema(requireTranscript)'),
-    );
+    expect(source, contains('responseSchema: coachResponseSchema('));
+    expect(source, contains('citationCatalogVersion,\n            )'));
+    expect(source, contains('function coachResponseSchema('));
     expect(source, contains('extractModelText(parts)'));
     expect(source, contains('system,\n      4096,'));
     expect(source, contains('const providerContext = context'));

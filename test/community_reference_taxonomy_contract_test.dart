@@ -43,7 +43,10 @@ void main() {
       expect(source, contains('No permission was requested.'));
       expect(source, contains("Key('community-add-by-bil-name')"));
       expect(source, contains('_searchFocus.requestFocus()'));
-      expect(source, contains('_repository!.searchProfiles'));
+      expect(
+        source,
+        contains('visit!.run(() => repository.searchProfiles(value))'),
+      );
     },
   );
 }

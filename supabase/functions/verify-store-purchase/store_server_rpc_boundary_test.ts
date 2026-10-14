@@ -12,10 +12,16 @@ const lineageGuardUrl = new URL(
   "../../migrations/20260927172703_apple_store_lineage_ordering_guard.sql",
   import.meta.url,
 );
+const boostTombstoneReadUrl = new URL(
+  "../../migrations/20261012204610_boost_refund_tombstone_service_read.sql",
+  import.meta.url,
+);
 
-Deno.test("store backend keeps sensitive table access behind server-only RPCs", async () => {
+Deno.test("store backend uses RPCs and its sole server-only refund tombstone read", async () => {
   const source = await Deno.readTextFile(backendUrl);
-  assertEquals((source.match(/\badmin\.from\s*\(/g) ?? []).length, 0);
+  const directReads = [...source.matchAll(/\badmin\.from\s*\(\s*[\"']([^\"']+)/g)]
+    .map((match) => match[1]);
+  assertEquals(directReads, ["bil_ai_boost_store_state"]);
   for (
     const rpc of [
       "bil_lookup_store_subscription_owner",
@@ -26,6 +32,13 @@ Deno.test("store backend keeps sensitive table access behind server-only RPCs", 
   ) {
     assert(source.includes(`\"${rpc}\"`), `missing RPC boundary: ${rpc}`);
   }
+  const tombstoneRead = await Deno.readTextFile(boostTombstoneReadUrl);
+  assert(tombstoneRead.includes("c.relrowsecurity"));
+  assert(tombstoneRead.includes("has_table_privilege('anon'"));
+  assert(tombstoneRead.includes("has_table_privilege('authenticated'"));
+  assert(tombstoneRead.includes(
+    "grant select on table public.bil_ai_boost_store_state to service_role",
+  ));
 });
 
 Deno.test("store RPC migration denies client execution and grants only service_role", async () => {

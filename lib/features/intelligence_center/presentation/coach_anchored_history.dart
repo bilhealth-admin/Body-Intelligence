@@ -68,12 +68,12 @@ class _CoachAnchoredHistoryState extends State<CoachAnchoredHistory> {
       semanticChildCount: ids.length,
       slivers: [
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, newerCount > 0 ? 12 : 0),
+          padding: EdgeInsets.fromLTRB(10, 0, 10, newerCount > 0 ? 12 : 0),
           sliver: rows(newer: true),
         ),
         SliverPadding(
           key: _centerKey,
-          padding: EdgeInsets.fromLTRB(16, 18, 16, newerCount == 0 ? 12 : 0),
+          padding: EdgeInsets.fromLTRB(10, 18, 10, newerCount == 0 ? 12 : 0),
           sliver: rows(newer: false),
         ),
       ],

@@ -2,7 +2,10 @@
 // not unless the Deno VS Code extension is active.
 // @ts-ignore Deno URL import
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { mealVisionConsentIsCurrent } from "./consent.ts";
+import {
+  mealVisionConsentIsCurrent,
+  mealVisionProviderMatchesConsent,
+} from "./consent.ts";
 import { buildProviderRequest } from "./providers/builders.ts";
 import { loadProviderConfig } from "./providers/config.ts";
 import { normalizeProviderResponse } from "./providers/normalize.ts";
@@ -101,6 +104,9 @@ deno.serve(async (request: Request) => {
   const providerChoice =
     (deno.env.get("BIL_MEAL_VISION_PROVIDER") ?? "legacy_gateway").trim()
       .toLowerCase();
+  if (!mealVisionProviderMatchesConsent(providerChoice)) {
+    return reply({ error: "meal_vision_provider_mismatch" }, 503);
+  }
   const directProvider =
     new Set(["openai", "gemini", "mistral"]).has(providerChoice)
       ? providerChoice as VisionProviderName

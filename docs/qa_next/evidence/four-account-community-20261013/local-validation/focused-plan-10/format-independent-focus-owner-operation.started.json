@@ -1,0 +1,16 @@
+{
+  "label": "format-independent-focus-owner-operation",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib\\features\\community\\presentation\\community_post_detail_page.dart"
+  ],
+  "started_utc": "2026-10-13T07:36:23.389457+00:00",
+  "runner_pid": 22856,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "a930f139fea255ce6968d7205f3cd6a512d584868cc600f1f5b091be39d76ba5",
+  "fingerprint_version": 4,
+  "pid": 15104
+}

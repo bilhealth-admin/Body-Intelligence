@@ -13,7 +13,12 @@ import 'bil_integrity_exception.dart';
 /// Verdicts are never decoded or trusted on the device. Google's encrypted
 /// token is forwarded to BIL's authenticated backend for verification.
 final class BilPlayIntegrityService {
-  BilPlayIntegrityService._();
+  BilPlayIntegrityService._() : _testCloudProjectNumber = null;
+
+  @visibleForTesting
+  BilPlayIntegrityService.forTesting({required int cloudProjectNumber})
+    : assert(cloudProjectNumber > 0),
+      _testCloudProjectNumber = cloudProjectNumber;
 
   static final BilPlayIntegrityService instance = BilPlayIntegrityService._();
 
@@ -23,7 +28,11 @@ final class BilPlayIntegrityService {
   );
   static const Uuid _uuid = Uuid();
 
-  static int? get _cloudProjectNumber {
+  final int? _testCloudProjectNumber;
+
+  int? get _cloudProjectNumber {
+    final testValue = _testCloudProjectNumber;
+    if (testValue != null && testValue > 0) return testValue;
     final value = int.tryParse(_cloudProjectNumberValue);
     return value != null && value > 0 ? value : null;
   }

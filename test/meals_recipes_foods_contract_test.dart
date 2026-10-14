@@ -11,6 +11,8 @@ void main() {
       'lib/features/nutrition/presentation/meals_tab.dart',
       'lib/features/nutrition/presentation/recipes_tab.dart',
       'lib/features/nutrition/presentation/meals_recipes_components.dart',
+      'lib/features/nutrition/presentation/meal_copy_page.dart',
+      'lib/features/nutrition/presentation/recipe_diary_confirmation_page.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     final router = [
       File('lib/app/router/app_router.dart').readAsStringSync(),
@@ -20,14 +22,14 @@ void main() {
       "Key('my-meals-tab')",
       "Key('my-recipes-tab')",
       'FoodPage(embedded: true, userOwnedOnly: true)',
-      'usualMealsProvider',
+      'myMealHistoryProvider',
       'createTemplateFromHistoricalMeal',
       'instantiateTemplate',
       "context.push('/wellness/recipes')",
       "context.push('/nutrition/recipes/import?recipeId=\${savedRecipe.id}')",
       "value: '_edit'",
       "value: '_delete'",
-      'trustedRecipeRepositoryProvider).delete(savedRecipe.id)',
+      'await repository.delete(savedRecipe.id)',
       'TrustedRecipeDiaryService(',
     ]) {
       expect(source, contains(contract));

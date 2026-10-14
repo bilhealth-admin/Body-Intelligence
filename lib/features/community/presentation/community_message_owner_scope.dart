@@ -2,10 +2,10 @@ part of 'community_messages_page.dart';
 
 /// A page visit, including its modal callbacks, belongs to the captured owner.
 /// Delivered auth events retire A -> B -> A even if currentUser is already A.
-class _MessageOwnerVisit extends ChangeNotifier {
-  _MessageOwnerVisit(this.repository, this._mounted, this._onChanged) {
+class CommunityMessageOwnerVisit extends ChangeNotifier {
+  CommunityMessageOwnerVisit(this.repository, this._mounted, this._onChanged) {
     try {
-      owner = repository.currentUserId;
+      _owner = repository.currentUserId;
     } on Object {
       _cancelled = true;
     }
@@ -26,7 +26,8 @@ class _MessageOwnerVisit extends ChangeNotifier {
   final CommunityRepository repository;
   final bool Function() _mounted;
   final VoidCallback _onChanged;
-  String? owner;
+  String? _owner;
+  String? get owner => _owner;
   bool _cancelled = false, _disposed = false;
   StreamSubscription<AuthState>? _auth;
   bool get isCurrent {
@@ -109,7 +110,7 @@ String _privateSubjectLimitText(BuildContext context) => communityText(
 class _MessagePolicyRepository extends CommunityRepository {
   _MessagePolicyRepository(this.visit)
     : super(visit.repository.communitySocialClient);
-  final _MessageOwnerVisit visit;
+  final CommunityMessageOwnerVisit visit;
   @override
   String get currentUserId {
     visit.check();
@@ -135,7 +136,7 @@ Future<void> showCommunityMessagingPolicy(
   required bool Function() isCurrent,
 }) async {
   if (!context.mounted || !isCurrent()) return;
-  final visit = _MessageOwnerVisit(
+  final visit = CommunityMessageOwnerVisit(
     repository,
     () => context.mounted && isCurrent(),
     () {},

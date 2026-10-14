@@ -116,11 +116,11 @@ extension _AiCoachSettingsBody on _AiCoachSettingsPageState {
             ),
             subtitle: Text(
               t(
-                'Raw microphone audio is not sent to BIL or Gemini. Your device or platform speech service converts it to text under its settings; only recognized text is sent when you submit.',
-                'لا يُرسل صوت الميكروفون الخام إلى BIL أو Gemini. تحوّله خدمة الكلام في جهازك أو منصتك إلى نص وفق إعداداتها؛ ولا يُرسل سوى النص المتعرّف عليه عندما ترسله.',
-                'Le son brut du microphone n’est pas envoyé à BIL ni à Gemini. Le service vocal de votre appareil ou de votre plateforme le convertit en texte selon ses réglages ; seul le texte reconnu est envoyé lorsque vous validez.',
-                'El audio sin procesar del micrófono no se envía a BIL ni a Gemini. El servicio de voz del dispositivo o de la plataforma lo convierte en texto según sus ajustes; solo se envía el texto reconocido cuando lo confirmas.',
-                'Ham mikrofon sesi BIL’e veya Gemini’ye gönderilmez. Cihazınızdaki ya da platformdaki konuşma hizmeti, kendi ayarlarına göre sesi metne dönüştürür; yalnızca gönderdiğinizde tanınan metin iletilir.',
+                'Your device or platform speech service may process microphone audio under its own terms. When you submit a Coach request, BIL sends Gemini only recognized text, never raw microphone audio.',
+                'قد تعالج خدمة التعرّف على الكلام في جهازك أو منصتك صوت الميكروفون وفق شروطها. عند إرسال طلب إلى Coach، يرسل BIL إلى Gemini النص المتعرّف عليه فقط، ولا يرسل صوت الميكروفون الخام.',
+                'Le service vocal de votre appareil ou de votre plateforme peut traiter l’audio du microphone selon ses propres conditions. Lorsque vous envoyez une demande au Coach, BIL transmet à Gemini uniquement le texte reconnu, jamais l’audio brut du microphone.',
+                'El servicio de voz de tu dispositivo o plataforma puede procesar el audio del micrófono según sus propios términos. Cuando envías una solicitud al Coach, BIL transmite a Gemini solo el texto reconocido, nunca el audio sin procesar del micrófono.',
+                'Cihazınızdaki veya platformdaki konuşma hizmeti mikrofon sesini kendi koşullarına göre işleyebilir. Koç isteğinizi gönderdiğinizde BIL, Gemini’ye yalnızca tanınan metni iletir; ham mikrofon sesini hiçbir zaman göndermez.',
               ),
             ),
           ),

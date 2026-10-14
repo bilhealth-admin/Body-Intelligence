@@ -79,9 +79,52 @@ class _Repository extends CommunityRepository {
 
 class _Picker implements CommunityPostImagePickerContract {
   @override
-  Future<CommunityPostImageDraft?> pick() async => validateCommunityPostImage(
-    Uint8List.fromList(img.encodePng(img.Image(width: 8, height: 5))),
-  );
+  Future<CommunityPostImageDraft?> pick() async {
+    final source = img.Image(width: 8, height: 5)
+      ..clear(img.ColorRgb8(30, 120, 190));
+    return validateCommunityPostImage(
+      Uint8List.fromList(img.encodePng(source)),
+    );
+  }
+}
+
+Future<void> _confirmReviewedPhoto(WidgetTester tester) async {
+  final reviewBody = find.byKey(const Key('bil-media-review-body'));
+  for (var frame = 0; frame < 40 && reviewBody.evaluate().isEmpty; frame++) {
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump();
+  }
+  expect(reviewBody, findsOneWidget);
+
+  final confirm = find.byKey(const Key('bil-media-review-confirm'));
+  for (var frame = 0; frame < 90; frame++) {
+    await tester.pump(const Duration(milliseconds: 50));
+    if (confirm.evaluate().isNotEmpty) {
+      final route = ModalRoute.of(tester.element(confirm));
+      final entered = route?.animation?.status == AnimationStatus.completed;
+      if (entered && tester.widget<FilledButton>(confirm).onPressed != null) {
+        break;
+      }
+    }
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump();
+  }
+  expect(find.byKey(const Key('bil-media-review-error')), findsNothing);
+  expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+  await tester.tap(confirm);
+  for (var frame = 0; frame < 40 && reviewBody.evaluate().isNotEmpty; frame++) {
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump();
+  }
+  expect(reviewBody, findsNothing);
 }
 
 void main() {
@@ -130,7 +173,7 @@ void main() {
       await tester.tap(find.byKey(const Key('community-create-post')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('community-post-add-photo')));
-      await tester.pumpAndSettle();
+      await _confirmReviewedPhoto(tester);
       final publish = find.byKey(const Key('community-post-publish'));
       await tester.ensureVisible(publish);
       await tester.pumpAndSettle();
@@ -188,7 +231,7 @@ void main() {
       await tester.ensureVisible(photo);
       await tester.pumpAndSettle();
       await tester.tap(photo);
-      await tester.pumpAndSettle();
+      await _confirmReviewedPhoto(tester);
       final publish = find.byKey(const Key('community-post-publish'));
       await tester.ensureVisible(publish);
       await tester.pumpAndSettle();

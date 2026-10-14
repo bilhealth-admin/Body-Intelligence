@@ -41,7 +41,7 @@ void main() {
       sql,
       contains("pg_catalog.hashtextextended('community_moderator_roster', 0)"),
     );
-    expect(sql, contains("pg_catalog.lower('kademcom@yahoo.com')"));
+    expect(sql, contains('pg_catalog.lower(account.email)'));
     expect(sql, contains('insert into private.bil_ai_coach_admins'));
     expect(sql, contains('insert into public.bil_ai_closed_test_grants'));
     expect(sql, contains("'operational-admin'"));
@@ -60,9 +60,15 @@ void main() {
       File('lib/app/router/app_router.dart').readAsStringSync(),
       File('lib/app/router/app_community_routes.dart').readAsStringSync(),
     ].join('\n');
-    expect(gateway, contains("'ai-coach-global-reset'"));
-    expect(gateway, contains('BilMobileIntegrityService.instance'));
-    expect(gateway, contains('.protect('));
+    final ownerOperation = File(
+      'lib/features/admin/services/admin_owner_operation.dart',
+    ).readAsStringSync();
+    expect(gateway, contains('AdminOwnerOperation.invoke('));
+    expect(ownerOperation, contains("'ai-coach-global-reset'"));
+    expect(ownerOperation, contains('BilMobileIntegrityService.instance'));
+    expect(ownerOperation, contains('.protect('));
+    expect(ownerOperation, contains("'admin_session_changed'"));
+    expect(ownerOperation, contains('session.accessToken'));
     expect(gateway, isNot(contains("_client.rpc('bil_list_community")));
     expect(gateway, isNot(contains('.whereType<Map>()')));
     expect(gateway, contains('if (row is! Map)'));
@@ -85,7 +91,7 @@ void main() {
       'supabase/migrations/20260906120000_owner_approved_second_administrator.sql',
     ).readAsStringSync();
 
-    expect(sql, contains("lower('bilhealth.app@gmail.com')"));
+    expect(sql, contains('lower(account.email) = lower('));
     expect(
       sql,
       contains(
@@ -124,8 +130,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('owner@example.com'), findsOneWidget);
-    expect(find.text('moderator@example.com'), findsOneWidget);
+    expect(find.text('owner@example.invalid'), findsOneWidget);
+    expect(find.text('moderator@example.invalid'), findsOneWidget);
     expect(
       tester
           .widget<IconButton>(
@@ -141,11 +147,11 @@ void main() {
 
     await tester.enterText(
       find.byKey(const Key('admin-community-moderator-email')),
-      'new@example.com',
+      'new-moderator@example.invalid',
     );
     await tester.tap(find.byKey(const Key('admin-community-moderator-add')));
     await tester.pumpAndSettle();
-    expect(gateway.addedEmails, ['new@example.com']);
+    expect(gateway.addedEmails, ['new-moderator@example.invalid']);
 
     await tester.tap(
       find.byKey(
@@ -182,13 +188,13 @@ final class _FakeModeratorAdminGateway
   Future<List<CommunityModeratorAdminEntry>> listModerators() async => [
     CommunityModeratorAdminEntry(
       userId: '00000000-0000-4000-8000-000000000001',
-      email: 'owner@example.com',
+      email: 'owner@example.invalid',
       createdAt: DateTime.utc(2026),
       protectedAdministrator: true,
     ),
     CommunityModeratorAdminEntry(
       userId: '00000000-0000-4000-8000-000000000002',
-      email: 'moderator@example.com',
+      email: 'moderator@example.invalid',
       createdAt: DateTime.utc(2026),
       protectedAdministrator: false,
     ),

@@ -125,10 +125,6 @@ try:
     execute("""revoke all on function public.bil_moderate_community_post(uuid,text)
       from public,anon,service_role;
       grant execute on function public.bil_moderate_community_post(uuid,text) to authenticated;
-      create trigger bil_post_approval_receipt_v1 after insert on public.bil_community_post_approval_grants
-        for each row execute function private.bil_post_approval_receipt_trigger_v1();
-      create trigger bil_post_rejection_receipt_v1 after update of moderation_status on public.bil_community_posts
-        for each row execute function private.bil_post_rejection_receipt_trigger_v1();
       create trigger bil_01_posts_moderation_guard before insert or update on public.bil_community_posts
         for each row execute function public.bil_guard_community_post_moderation();
       create trigger bil_02_posts_suspended_author_approval before update of moderation_status on public.bil_community_posts
@@ -146,6 +142,8 @@ try:
     contracts_before = scalar("select md5(pg_get_functiondef('public.bil_moderate_community_post(uuid,text)'::regprocedure));")
     migration = root / 'supabase/migrations/20261011193000_community_review_revision_v2.sql'
     execute(migration.read_text(encoding='utf-8'))
+    receipt_migration = root / 'supabase/migrations/20261014113000_community_post_review_receipts_v2.sql'
+    execute(receipt_migration.read_text(encoding='utf-8'))
 
     def legacy():
         identity = post(1, owner=5)
@@ -161,7 +159,10 @@ try:
         execute(f"update public.bil_community_posts set body='Changed after review' where id='{identity}';")
         blocked(lambda: decide(identity, original['revision']), 'community_review_content_changed')
         fresh = snapshot(identity)
-        assert decide(identity, fresh['revision'])['tokens_granted'] == 5
+        receipt = decide(identity, fresh['revision'])
+        assert receipt['tokens_granted'] == 5
+        assert scalar(f"select count(*) from public.bil_community_notifications where recipient_id='{uid(3)}' and source_key='post-moderation-receipt-v2:{identity}';") == '1'
+        assert scalar(f"select count(*) from public.bil_push_outbox where recipient_id='{uid(3)}' and source_key='post-moderation-receipt-v2:{identity}';") == '1'
     check('changed text rejects stale review and fresh revision succeeds', revised)
 
     def unauthorized():
@@ -200,6 +201,10 @@ try:
         original = snapshot(identity, actor=1)
         receipt = decide(identity, original['revision'], actor=1, mode='deferred')
         assert receipt['tokens_granted'] == 0 and receipt['reward_reason'] == 'deferred'
+        assert scalar(f"select count(*) from public.bil_community_notifications where recipient_id='{uid(7)}' and copy_key='post_approved_no_ai_tokens_v1' and metadata->>'reward_reason'='deferred' and entity_id='{identity}';") == '1'
+        # The existing deferred RPC already queued its author push. The
+        # additive receipt adds the durable in-app item without a duplicate.
+        assert scalar(f"select count(*) from public.bil_push_outbox where recipient_id='{uid(7)}' and source_key='post-moderation-receipt-v2:{identity}';") == '0'
         assert scalar(f"select count(*) from public.bil_ai_credit_balances where owner_id='{uid(7)}';") == '0'
         request = value(f"select public.bil_request_community_post_reward_v2('{identity}','{original['revision']}');", uid(2))
         assert request['status'] == 'requested'
@@ -211,6 +216,8 @@ try:
         assert scalar(f"select count(*) from public.bil_community_post_approval_grants where post_id='{identity}';") == '1'
         assert scalar(f"select count(*) from public.bil_push_outbox where recipient_id='{uid(7)}';") == '2'
         assert scalar(f"select count(*) from public.bil_push_outbox where recipient_id='{uid(7)}' and source_key='post-published-only-v2:{identity}';") == '1'
+        assert scalar(f"select count(*) from public.bil_community_notifications where recipient_id='{uid(7)}' and entity_id='{identity}' and copy_key in ('post_approved_no_ai_tokens_v1','post_approved_ai_tokens_v1');") == '2'
+        assert scalar(f"select count(*) from public.bil_push_outbox where recipient_id='{uid(7)}' and source_key='post-reward-result-v2:{identity}';") == '1'
         assert scalar(f"select count(*) from public.bil_ai_credit_balances where owner_id='{uid(7)}' and granted=5;") == '1'
         execute('update private.bil_community_review_policy_v2 set allow_publish_only=false;')
     check('publish only requests a separate administrator award and simultaneous retries credit once', deferred_reward)
@@ -257,6 +264,8 @@ try:
         blocked(lambda: decide(identity, original['revision'], decision='rejected'), 'invalid_community_review_decision')
         assert decide(identity, original['revision'], decision='rejected', reason='Misleading health claim')['tokens_granted'] == 0
         assert scalar(f"select count(*) from public.bil_community_post_approval_grants where post_id='{identity}';") == '0'
+        assert scalar(f"select count(*) from public.bil_community_notifications where recipient_id='{uid(10)}' and kind='comment' and copy_key='post_rejected_v1' and metadata->>'decision'='rejected' and entity_id='{identity}';") == '1'
+        assert scalar(f"select count(*) from public.bil_push_outbox where recipient_id='{uid(10)}' and source_key='post-moderation-receipt-v2:{identity}';") == '1'
         identity = post(10, owner=11)
         original = snapshot(identity)
         execute(f"delete from public.bil_community_posts where id='{identity}';")
@@ -277,6 +286,7 @@ try:
         request = value(f"select public.bil_request_community_post_reward_v2('{identity}','{original['revision']}');", uid(2))
         result = value(f"select public.bil_decide_community_post_reward_v2('{request['request_id']}',true);", uid(1))
         assert result['status'] == 'not_eligible' and result['tokens_granted'] == 0
+        assert scalar(f"select count(*) from public.bil_community_notifications where recipient_id='{uid(11)}' and source_key='post-reward-result-v2:{identity}' and metadata->>'reward_reason'='daily_cap_reached';") == '1'
         assert scalar(f"select reward_day from public.bil_community_post_approval_grants where post_id='{identity}';") == day
         assert scalar(f"select count(*) from public.bil_ai_credit_balances where owner_id='{uid(11)}';") == '0'
         # Delivery state is separate: a failed network send never re-runs a grant.
@@ -325,11 +335,26 @@ try:
         blocked(lambda:value(f"select public.bil_get_my_post_review_v2('{identity}');",uid(3)), 'community_post_not_found')
     check('only the author receives a reason for the current rejected revision',author_reason)
 
+    def receipt_idempotency():
+        identity=post(31,owner=5)
+        original=snapshot(identity,actor=1)
+        operation=str(uuid.uuid4())
+        decide(identity,original['revision'],actor=1,key=operation)
+        before_notifications=scalar(f"select count(*) from public.bil_community_notifications where source_key='post-moderation-receipt-v2:{identity}';")
+        before_outbox=scalar(f"select count(*) from public.bil_push_outbox where source_key='post-moderation-receipt-v2:{identity}';")
+        duplicate=decide(identity,original['revision'],actor=1,key=operation)
+        assert duplicate['duplicate'] is True
+        assert before_notifications=='1' and before_outbox=='1'
+        assert scalar(f"select count(*) from public.bil_community_notifications where source_key='post-moderation-receipt-v2:{identity}';")==before_notifications
+        assert scalar(f"select count(*) from public.bil_push_outbox where source_key='post-moderation-receipt-v2:{identity}';")==before_outbox
+    check('approval receipt is delivered once across operation retry',receipt_idempotency)
+
 finally:
     receipt = {'database': database, 'host': '127.0.0.1', 'port': args.port,
                'head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
                'postgres': '17.6 native, independent psql sessions', 'records': records,
-               'migration_sha256': hashlib.sha256((root / 'supabase/migrations/20261011193000_community_review_revision_v2.sql').read_bytes()).hexdigest()}
+               'migration_sha256': hashlib.sha256((root / 'supabase/migrations/20261011193000_community_review_revision_v2.sql').read_bytes()).hexdigest(),
+               'receipt_migration_sha256': hashlib.sha256((root / 'supabase/migrations/20261014113000_community_post_review_receipts_v2.sql').read_bytes()).hexdigest()}
     (out / 'result.json').write_text(json.dumps(receipt, indent=2), encoding='utf-8')
     print(json.dumps({'evidence': str(out), 'pass': sum(r['result']=='PASS' for r in records),
                       'fail': sum(r['result']=='FAIL' for r in records)}), flush=True)

@@ -370,7 +370,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   }
 
   Future<void> _openLegalLink(String value) async {
-    final uri = Uri.tryParse(value);
+    final uri = Uri.tryParse(value.trim());
     if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return;
     try {
       final opened =

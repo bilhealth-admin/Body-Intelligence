@@ -19,25 +19,48 @@ extension _DailyLogMutationActions on _DailyLogPageState {
       final existing = await repository.getForDay(date);
       final ledger = await repository.readLedger(date);
       if (!current()) return;
-      // Today edits notes in the dedicated editor, which commits them itself.
-      // Its passive controllers may not have received the initial stream value;
-      // never overwrite a saved note/workout with an empty, stale UI mirror.
+      final exerciseNotesWereEdited =
+          exerciseNotesDraftDate != null &&
+          DateUtils.isSameDay(exerciseNotesDraftDate, date);
+      final nextExerciseNotes = exerciseNotesWereEdited
+          ? DailyExerciseNotesCodec.decode(
+              existing?.exerciseNotes,
+            ).compose(manualText: exerciseNotes.text)
+          : existing?.exerciseNotes;
+      // The exercise field is an explicit draft. Preserve the repository value
+      // when it was not touched, and merge edits with structured workout rows
+      // instead of replacing them with the text controller.
       // Save/Done acknowledges this day. It does not implicitly reopen it.
+      if (ledger.state == DayLifecycleState.closed && exerciseNotesWereEdited) {
+        if (mounted && current()) {
+          _message(
+            _tr(
+              'Reopen the completed diary before making changes.',
+              'أعد فتح اليوميات المكتملة قبل إجراء تغييرات.',
+            ),
+          );
+        }
+        return;
+      }
       if (ledger.state != DayLifecycleState.closed) {
         await repository.saveNotesAtomically(
           date: date,
           expectedNotes: existing?.notes,
           expectedExerciseNotes: existing?.exerciseNotes,
           notes: existing?.notes,
-          exerciseNotes: existing?.exerciseNotes,
+          exerciseNotes: nextExerciseNotes,
         );
         if (!current()) return;
         final committed = await repository.getForDay(date);
         if (!current()) return;
         if (committed == null ||
             committed.notes != existing?.notes ||
-            committed.exerciseNotes != existing?.exerciseNotes) {
+            committed.exerciseNotes != nextExerciseNotes) {
           throw StateError('diary_save_readback_mismatch');
+        }
+        if (exerciseNotesWereEdited &&
+            DateUtils.isSameDay(exerciseNotesDraftDate, date)) {
+          exerciseNotesDraftDate = null;
         }
       }
       if (!mounted || !current()) return;

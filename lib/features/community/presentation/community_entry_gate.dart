@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../profile/services/profile_photo_service.dart';
 import '../data/community_repository.dart';
 import '../domain/community_text_policy.dart';
@@ -26,7 +27,7 @@ class CommunityEntryGate extends ConsumerStatefulWidget {
     required this.child,
     this.repository,
     this.showWelcome = false,
-    this.welcomeDuration = const Duration(milliseconds: 2200),
+    this.welcomeDuration = bilFeatureEntryDuration,
     this.syncPhoto,
     super.key,
   });
@@ -114,7 +115,9 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
           if (!changedSession && next == _owner) return;
           _generation++;
           _ownerEpoch++;
+          _welcomeTimer?.cancel();
           setState(() {
+            _welcomePending = false;
             _owner = next;
             _repository =
                 widget.repository ??
@@ -149,6 +152,10 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
   void didUpdateWidget(covariant CommunityEntryGate oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.repository, widget.repository)) {
+      if (_currentOwner(widget.repository) != _owner) {
+        _welcomeTimer?.cancel();
+        _welcomePending = false;
+      }
       _generation++;
       _receipt = null;
       _saveError = null;
@@ -297,6 +304,9 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
   Widget _buildGate(BuildContext context) {
     final ready =
         _receipt != null && !_checking && _receipt!.profile.userId == _owner;
+    final welcome = _welcomePending
+        ? const Scaffold(body: CommunityWelcome(showBack: true))
+        : null;
     final gate = Scaffold(
       key: const Key('community-entry-gate'),
       appBar: AppBar(
@@ -304,9 +314,7 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
         title: Text(communityText(context, 'BIL Community', 'مجتمع BIL')),
       ),
       body: SafeArea(
-        child: _welcomePending
-            ? const CommunityWelcome()
-            : _checking
+        child: _checking
             ? const Center(child: CircularProgressIndicator())
             : _owner == null
             ? Center(
@@ -360,11 +368,12 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
               ),
       ),
     );
-    if (!ready) return gate;
+    if (!ready) return welcome ?? gate;
     // Keep the original welcome intact while the authorized child prepares
     // its real feed. Offstage prevents pixels, input and accessibility leakage,
     // but preserves the same mounted child when the 2200ms welcome ends.
     return Stack(
+      fit: StackFit.expand,
       children: [
         Offstage(
           offstage: _welcomePending,
@@ -373,7 +382,7 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
             child: widget.child,
           ),
         ),
-        if (_welcomePending) gate,
+        if (welcome != null) Positioned.fill(child: welcome),
       ],
     );
   }

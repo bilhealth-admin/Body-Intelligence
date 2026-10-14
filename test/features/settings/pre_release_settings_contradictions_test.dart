@@ -128,13 +128,15 @@ void main() {
       isNot(contains("await preferences.set('displayName', remoteName)")),
       reason: 'Remote names must pass the pending-edit and ownership guards',
     );
-    expect(
-      provider,
-      contains("await preferences.set('profilePhotoPublicUrl', url)"),
-    );
+    expect(provider, contains("set: {'profilePhotoPublicUrl': url}"));
+    expect(provider, contains('await preferences.mutateIfUnchanged('));
+    expect(provider, contains('if (!updated)'));
     expect(avatar, contains('foregroundImage: foreground'));
     expect(avatar, contains('final background = _backgroundImage'));
-    expect(avatar, contains('backgroundImage: background'));
+    expect(avatar, contains('child: background != null'));
+    expect(avatar, contains('BilPersistentNetworkImage('));
+    expect(avatar, contains('key: ValueKey(_owner)'));
+    expect(avatar, isNot(contains('backgroundImage: background')));
     expect(avatar, contains('onForegroundImageError:'));
     expect(photoService, contains(".select('avatar_url')"));
     expect(photoService, contains('if (updated == null'));

@@ -1,0 +1,20 @@
+{
+  "label": "final-python-compilation",
+  "kind": "check",
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "-m",
+    "py_compile",
+    "tools/qa/bil_owner_full_test_runner.py",
+    "tools/qa/test_bil_owner_full_test_runner.py"
+  ],
+  "started_utc": "2026-10-13T05:47:37.761127+00:00",
+  "runner_pid": 7668,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 18692
+}

@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,11 +12,16 @@ import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import '../domain/community_polls.dart';
 import '../domain/community_review_snapshot.dart';
+import '../../safety_moderation/domain/ai_coach_safety_report.dart';
+import '../../safety_moderation/presentation/ai_coach_safety_report_queue_section.dart';
 import 'community_copy.dart';
 import 'community_return_button.dart';
 part 'community_post_moderation_widgets.dart';
 part 'community_post_reward_review.dart';
 part 'community_post_moderation_load.dart';
+part 'community_report_content_review.dart';
+part 'community_ai_coach_report_review.dart';
+part 'community_moderation_queue_tabs.dart';
 
 class CommunityPostModerationPage extends StatefulWidget {
   const CommunityPostModerationPage({this.repository, super.key});
@@ -35,7 +41,12 @@ class _CommunityPostModerationPageState
   final Set<String> _decisionEditors = <String>{};
   final Map<String, CommunityReviewSnapshot> _reviewedPosts = {};
   final Map<String, String> _decisionIds = {};
+  final Map<String, String> _aiCoachDecisionIds = {};
+  final Map<String, _PendingReportDecision> _pendingReportDecisions = {};
   CommunityModerationVisit? _visit;
+  bool _sessionRetired = false;
+
+  void _updateModerationState(VoidCallback update) => setState(update);
 
   @override
   void initState() {
@@ -63,6 +74,7 @@ class _CommunityPostModerationPageState
   }
 
   void _bindVisit() {
+    _sessionRetired = false;
     final repository = _repository;
     _visit = repository == null
         ? null
@@ -76,11 +88,17 @@ class _CommunityPostModerationPageState
   void _retireVisit() {
     if (!mounted) return;
     _busyTargets.clear();
-    setState(() {
-      _queue = Future<_CommunityModerationQueue>.error(
-        const AuthException('Moderator session changed'),
-      );
-    });
+    _pendingReportDecisions.clear();
+    _reviewedPosts.clear();
+    _decisionIds.clear();
+    setState(() => _sessionRetired = true);
+  }
+
+  void _updateReportDecisionUi(VoidCallback update) {
+    if (!mounted) {
+      return;
+    }
+    setState(update);
   }
 
   CommunityRepository? _productionRepository() {
@@ -185,6 +203,10 @@ class _CommunityPostModerationPageState
   }
 
   Future<void> _refresh() async {
+    if (_sessionRetired) {
+      _visit?.dispose();
+      _bindVisit();
+    }
     final refreshed = _load();
     setState(() {
       _queue = refreshed;
@@ -434,263 +456,74 @@ class _CommunityPostModerationPageState
     }
   }
 
-  Future<void> _resolveReport(
-    Map<String, dynamic> report, {
-    required bool removeContent,
-  }) async {
-    final id = report['id'];
-    final visit = _visit;
-    final repository = _repository;
-    if (id is! String ||
-        visit == null ||
-        repository == null ||
-        !visit.isCurrent ||
-        _busyTargets.contains(id)) {
-      return;
-    }
-    if (removeContent) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(
-            communityText(
-              context,
-              'Remove reported content?',
-              'إزالة المحتوى المُبلّغ عنه؟',
+  @override
+  Widget build(BuildContext context) => DefaultTabController(
+    length: 2,
+    initialIndex: 1,
+    child: Scaffold(
+      appBar: AppBar(
+        leading: const CommunityReturnButton(),
+        title: Text(
+          communityText(context, 'Community moderation', 'مراجعة المجتمع'),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _busyTargets.isEmpty ? _refresh : null,
+            tooltip: communityText(context, 'Refresh', 'تحديث'),
+            icon: const BilGlassPressFeedback(
+              child: Icon(Icons.refresh_rounded),
             ),
           ),
-          content: Text(
-            communityText(
-              context,
-              'This closes the report and removes the referenced post or message.',
-              'سيؤدي ذلك إلى إغلاق البلاغ وإزالة المنشور أو الرسالة المشار إليها.',
+        ],
+        bottom: TabBar(
+          isScrollable: true,
+          tabs: [
+            Tab(
+              key: const Key('ai-coach-report-admin-tab'),
+              text: communityText(
+                context,
+                'AI Coach reports',
+                'بلاغات AI Coach',
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(communityText(context, 'Cancel', 'إلغاء')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(
-                communityText(context, 'Remove content', 'إزالة المحتوى'),
+            Tab(
+              key: const Key('community-report-admin-tab'),
+              text: communityText(
+                context,
+                'Community reports',
+                'بلاغات المجتمع',
               ),
             ),
           ],
         ),
-      );
-      if (confirmed != true || !mounted || !visit.isCurrent) return;
-    }
-    setState(() => _busyTargets.add(id));
-    try {
-      await visit.requireFreshModerator();
-      await visit.run(
-        () => repository.moderateReport(
-          reportId: id,
-          resolution: 'closed',
-          action: removeContent ? 'remove_content' : 'none',
-        ),
-      );
-      if (!mounted || !visit.isCurrent) return;
-      await _reloadAndReadback(visit);
-      if (!mounted || !visit.isCurrent) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Report decision saved.',
-              'تم حفظ قرار البلاغ.',
-            ),
-          ),
-        ),
-      );
-    } on Object {
-      if (!mounted || !visit.isCurrent) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Could not resolve the report. Refresh and try again.',
-              'تعذر حسم البلاغ. حدّث القائمة وحاول مجددًا.',
-            ),
-          ),
-        ),
-      );
-    } finally {
-      if (mounted && visit.isCurrent) {
-        setState(() => _busyTargets.remove(id));
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      leading: const CommunityReturnButton(),
-      title: Text(
-        communityText(context, 'Community moderation', 'مراجعة المجتمع'),
       ),
-      actions: [
-        IconButton(
-          onPressed: _busyTargets.isEmpty ? _refresh : null,
-          tooltip: communityText(context, 'Refresh', 'تحديث'),
-          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
-        ),
-      ],
-    ),
-    body: FutureBuilder<_CommunityModerationQueue>(
-      future: _queue,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return _ModerationUnavailable(
-            onRetry: _refresh,
-            accessDenied:
-                snapshot.error is AuthException ||
-                (snapshot.error is PostgrestException &&
-                    (snapshot.error as PostgrestException).code == '42501'),
-          );
-        }
-        final queue = snapshot.requireData;
-        if (!queue.reviewUnavailable &&
-            queue.posts.isEmpty &&
-            queue.hiddenPosts.isEmpty &&
-            queue.reports.isEmpty &&
-            queue.rewards.isEmpty) {
-          return Center(
-            child: Text(
-              communityText(
-                context,
-                'The moderation queue is clear.',
-                'قائمة المراجعة خالية.',
-              ),
+      body: _sessionRetired
+          ? _ModerationUnavailable(onRetry: _refresh, accessDenied: true)
+          : FutureBuilder<_CommunityModerationQueue>(
+              future: _queue,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return _ModerationUnavailable(
+                    onRetry: _refresh,
+                    accessDenied:
+                        snapshot.error is AuthException ||
+                        (snapshot.error is PostgrestException &&
+                            (snapshot.error as PostgrestException).code ==
+                                '42501'),
+                  );
+                }
+                final queue = snapshot.requireData;
+                return TabBarView(
+                  children: [
+                    _aiCoachReportsTab(queue),
+                    _communityReportsTab(queue),
+                  ],
+                );
+              },
             ),
-          );
-        }
-        return RefreshIndicator(
-          onRefresh: _refresh,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (queue.reviewUnavailable) const _ReviewVersionUnavailable(),
-              Text(
-                communityText(
-                  context,
-                  'Posts awaiting human review',
-                  'منشورات بانتظار المراجعة البشرية',
-                ),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 10),
-              if (queue.reviewUnavailable)
-                const SizedBox.shrink()
-              else if (queue.posts.isEmpty)
-                Text(
-                  communityText(
-                    context,
-                    'No pending posts.',
-                    'لا توجد منشورات معلّقة.',
-                  ),
-                )
-              else
-                for (final post in queue.posts) ...[
-                  _PendingPostCard(
-                    post: post,
-                    busy: _busyTargets.contains(post.id),
-                    onApprove: () => _decidePost(
-                      post,
-                      CommunityPostModerationDecision.approved,
-                    ),
-                    onReject: () => _decidePost(
-                      post,
-                      CommunityPostModerationDecision.rejected,
-                    ),
-                    onPublishOnly:
-                        _reviewedPosts[post.id]?.canPublishOnly == true
-                        ? () => _decidePost(
-                            post,
-                            CommunityPostModerationDecision.approved,
-                            publishOnly: true,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              const SizedBox(height: 14),
-              if (queue.rewards.isNotEmpty) ...[
-                Text(
-                  communityText(
-                    context,
-                    'Publication and reward are separate',
-                    'النشر والمكافأة عمليتان منفصلتان',
-                  ),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                for (final review in queue.rewards)
-                  _RewardReviewCard(
-                    review: review,
-                    busy: _busyTargets.contains(review.snapshot.post.id),
-                    onRequest: () => _rewardAction(review, null),
-                    onApprove: () => _rewardAction(review, true),
-                    onReject: () => _rewardAction(review, false),
-                  ),
-                const SizedBox(height: 14),
-              ],
-              Text(
-                communityText(context, 'Hidden posts', 'المنشورات المخفية'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 10),
-              if (queue.hiddenPosts.isEmpty)
-                Text(
-                  communityText(
-                    context,
-                    'No hidden posts.',
-                    'لا توجد منشورات مخفية.',
-                  ),
-                )
-              else
-                for (final post in queue.hiddenPosts) ...[
-                  _HiddenPostCard(
-                    post: post,
-                    busy: _busyTargets.contains(post.id),
-                    onRestore: () => _restorePost(post),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              const SizedBox(height: 14),
-              Text(
-                communityText(context, 'Open reports', 'البلاغات المفتوحة'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 10),
-              if (queue.reports.isEmpty)
-                Text(
-                  communityText(
-                    context,
-                    'No open reports.',
-                    'لا توجد بلاغات مفتوحة.',
-                  ),
-                )
-              else
-                for (final report in queue.reports) ...[
-                  _OpenReportCard(
-                    report: report,
-                    busy: _busyTargets.contains(report['id']),
-                    onClose: () => _resolveReport(report, removeContent: false),
-                    onRemove: () => _resolveReport(report, removeContent: true),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-            ],
-          ),
-        );
-      },
     ),
   );
 }

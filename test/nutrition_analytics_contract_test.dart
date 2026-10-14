@@ -40,7 +40,7 @@ void main() {
       "Key('nutrition-calories-tab')",
       "Key('nutrition-nutrients-tab')",
       "Key('nutrition-macros-tab')",
-      'NutrientEvidenceMask.contains',
+      'MealFoodEvidence.read',
       'selectedLogDateProvider',
       'textDirection: TextDirection.ltr',
       "context.push('/settings/local-export?from=\$iso&to=\$iso')",
@@ -63,14 +63,17 @@ void main() {
 
   test('general references never become personal goal or left values', () {
     final source = analyticsSource();
-    expect(source, contains("TrackedNutrient.sodium, null, 'mg'"));
-    expect(source, contains("TrackedNutrient.potassium, null, 'mg'"));
-    expect(source, contains("TrackedNutrient.calcium, null, 'mg'"));
-    expect(source, contains("TrackedNutrient.magnesium, null, 'mg'"));
-    expect(source, contains("TrackedNutrient.phosphorus, null, 'mg'"));
-    expect(source, isNot(contains('targets.sodium')));
-    expect(source, isNot(contains('targets.potassium')));
-    expect(source, isNot(contains('targets.calcium')));
+    expect(source, contains("storedGoal('goal.sodium')"));
+    expect(source, contains("storedGoal('goal.potassium')"));
+    expect(source, contains("nutrientGoal('goal.calciumMg')"));
+    expect(source, contains("nutrientGoal('goal.magnesium')"));
+    expect(source, contains("nutrientGoal('goal.phosphorus')"));
+    expect(source, contains('sodiumMg: sodiumGoal'));
+    expect(source, contains('potassiumMg: potassiumGoal'));
+    expect(source, contains('goal: goals.sodiumMg'));
+    expect(source, contains('goal: goals.potassiumMg'));
+    expect(source, isNot(contains('NutrientDailyReferences')));
+    expect(source, isNot(contains('dailyReference.value')));
     expect(source, isNot(contains("storedGoal('goal.carbsPercent') ?? 0")));
     expect(source, contains('carbsPercent == null'));
     expect(source, contains('const _NutritionTargets({'));

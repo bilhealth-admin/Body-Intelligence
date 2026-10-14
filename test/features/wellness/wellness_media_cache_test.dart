@@ -48,7 +48,7 @@ void main() {
     expect(client.requests, 0);
   });
 
-  test('corrupt cached media is removed and unavailable offline', () async {
+  test('corrupt cache is unavailable offline and repaired online', () async {
     final bytes = utf8.encode('verified workout video');
     final asset = assetFor(bytes);
     final cached = File(p.join(directory.path, '${asset.sha256}.mp4'));
@@ -60,8 +60,15 @@ void main() {
 
     expect(result.status, WellnessMediaCacheStatus.unavailableOffline);
     expect(result.file, isNull);
-    expect(await cached.exists(), isFalse);
+    // Offline peeks never delete a target that could belong to an in-flight
+    // atomic promotion. Corrupt bytes are never returned as playable media.
+    expect(await cached.exists(), isTrue);
     expect(client.requests, 0);
+
+    final repaired = await cache.resolve(asset, online: true);
+    expect(repaired.status, WellnessMediaCacheStatus.ready);
+    expect(await repaired.file!.readAsBytes(), bytes);
+    expect(client.requests, 1);
   });
 
   test('download is verified then atomically promoted by digest', () async {

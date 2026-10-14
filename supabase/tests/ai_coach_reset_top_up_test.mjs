@@ -48,6 +48,9 @@ try {
     create table public.bil_push_outbox(recipient_id uuid,category text,title text,body text,deep_link text,created_at timestamptz);
   `);
   await db.exec(read(`${fixture}/tables.sql`));
+  // This shared baseline keeps the current deployed subscription table in a
+  // separate snapshot so migration-focused tests can choose it explicitly.
+  await db.exec(read(`${fixture}/store_subscription_table.sql`));
   for (const name of ['bil_resolve_ai_allowance_plan', 'bil_resolve_ai_trial_anchor', 'bil_has_active_premium']) {
     await db.exec(read(`${fixture}/${name}.sql`));
   }

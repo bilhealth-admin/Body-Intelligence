@@ -56,21 +56,28 @@ test("recursively removes every owned object from every BIL bucket", async () =>
     `${owner}/post-b/deeper/image-b.jpg`,
     "someone-else/post/image.png",
   ]);
+  const circleObjects = new Set([
+    `${owner}/circle-a/cover.webp`,
+    "someone-else/circle-b/cover.webp",
+  ]);
   const buckets = new Map<string, FakeBucket>([
     ["profile-avatars", new FakeBucket(avatarObjects)],
     ["community-post-images", new FakeBucket(communityObjects)],
+    ["community-circle-media", new FakeBucket(circleObjects)],
   ]);
 
   const removed = await deleteBilUserStorage({
     from: (bucket) => buckets.get(bucket)!,
   }, owner);
 
-  assert.equal(removed, 3);
+  assert.equal(removed, 4);
   assert.deepEqual([...avatarObjects], []);
   assert.deepEqual([...communityObjects], ["someone-else/post/image.png"]);
+  assert.deepEqual([...circleObjects], ["someone-else/circle-b/cover.webp"]);
   assert.deepEqual(BIL_USER_STORAGE_BUCKETS, [
     "profile-avatars",
     "community-post-images",
+    "community-circle-media",
   ]);
 });
 

@@ -30,17 +30,19 @@ class CoachMessageText extends StatefulWidget {
 }
 
 class _CoachMessageTextState extends State<CoachMessageText>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   // Sliver lists recycle off-screen rows. A fresh widget for the same message
   // must not restart the reveal animation when the user browses history.
   static final _startedRevealKeys = <Object>{};
   AnimationController? _revealController;
+  bool _reducedMotion = false;
   late List<String> _graphemes;
   final _visibleText = ValueNotifier<String>('');
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _resetReveal();
   }
 
@@ -53,6 +55,29 @@ class _CoachMessageTextState extends State<CoachMessageText>
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _applyMotionPreference();
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    if (mounted) _applyMotionPreference();
+  }
+
+  void _applyMotionPreference() {
+    _reducedMotion =
+        MediaQuery.disableAnimationsOf(context) ||
+        View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
+    if (!_reducedMotion) return;
+    // Accessibility changes complete the already available answer immediately.
+    // Keep its reserved typography and never replay it when motion is enabled.
+    _revealController?.dispose();
+    _revealController = null;
+    _visibleText.value = widget.text;
+  }
+
   void _resetReveal() {
     _revealController?.dispose();
     _revealController = null;
@@ -60,6 +85,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
     final revealKey = widget.key;
     final animateReveal =
         widget.animateReveal &&
+        !_reducedMotion &&
         (revealKey == null || _startedRevealKeys.add(revealKey));
     if (!animateReveal || _graphemes.length <= 8) {
       _visibleText.value = widget.text;
@@ -73,7 +99,9 @@ class _CoachMessageTextState extends State<CoachMessageText>
     const initialVisible = 8;
     final remaining = _graphemes.length - initialVisible;
     var visible = initialVisible;
-    _visibleText.value = _graphemes.take(visible).join();
+    // The measured reading anchor settles after the first layout. Paint the
+    // first visible graphemes on the following frame, after that anchor moved.
+    _visibleText.value = '';
     final controller = AnimationController(
       vsync: this,
       // Short answers keep their conversational reveal. Very long answers
@@ -95,11 +123,16 @@ class _CoachMessageTextState extends State<CoachMessageText>
       // reaction buttons or hidden full-text layout is dirtied per tick.
       _visibleText.value = _graphemes.take(visible).join();
     });
-    controller.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _reducedMotion || _revealController != controller) return;
+      _visibleText.value = _graphemes.take(initialVisible).join();
+      controller.forward();
+    });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _revealController?.dispose();
     _visibleText.dispose();
     super.dispose();
@@ -190,9 +223,10 @@ class _CoachMessageTextState extends State<CoachMessageText>
 }
 
 class CoachMessageTime extends StatelessWidget {
-  const CoachMessageTime({required this.createdAt, super.key});
+  const CoachMessageTime({required this.createdAt, this.style, super.key});
 
   final DateTime createdAt;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -202,9 +236,11 @@ class CoachMessageTime extends StatelessWidget {
     return Text(
       time,
       semanticsLabel: '$date, $time',
-      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
+      style:
+          style ??
+          Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
     );
   }
 }

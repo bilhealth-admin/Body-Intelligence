@@ -1,9 +1,10 @@
-"""Analyze, then run host tests in ten serial, fail-between-batch gates.
+"""Analyze, then run the complete host suite once and collect every failure.
 
 No resume, name filters, golden updates, or silent file exclusions. Device
 integration tests are inventoried separately and are never claimed as run.
-Batch 1 also runs every local Deno, PostgreSQL and release-helper test.
-Each invocation starts fresh at analysis and batch 1. Logs stay under build/.
+The complete suite runs in one pass. Sequential child commands exist only for
+review-only compile-time configuration and Windows command-line length. Every
+remaining command still runs after a failure; all results stay under build/.
 The process needs no agent, watcher, network deployment, or automatic repair.
 """
 from __future__ import annotations
@@ -29,6 +30,43 @@ def write_json(path: Path, value: object) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def worktree_snapshot() -> dict:
+    """Fingerprint tracked and untracked dirty files alongside the HEAD SHA."""
+    branch = subprocess.check_output(
+        ["git", "branch", "--show-current"], cwd=ROOT, text=True).strip()
+    head = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    status = subprocess.check_output(
+        ["git", "status", "--short"], cwd=ROOT, text=True)
+    tracked = subprocess.check_output(
+        ["git", "diff", "--name-only", "--no-renames", "-z", "HEAD"],
+        cwd=ROOT).decode("utf-8").split("\0")
+    untracked = subprocess.check_output(
+        ["git", "ls-files", "--others", "--exclude-standard", "-z"],
+        cwd=ROOT).decode("utf-8").split("\0")
+    names = sorted({name for name in [*tracked, *untracked] if name})
+    file_hashes: dict[str, str] = {}
+    digest = hashlib.sha256()
+    for name in names:
+        path = ROOT / name
+        digest.update(name.encode("utf-8") + b"\0")
+        if path.is_file():
+            file_digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            file_hashes[name] = file_digest
+            digest.update(bytes.fromhex(file_digest))
+        else:
+            file_hashes[name] = "DELETED"
+            digest.update(b"<DELETED>")
+    return {
+        "branch": branch,
+        "head": head,
+        "git_status": status,
+        "changed_files": names,
+        "changed_file_sha256": file_hashes,
+        "worktree_diff_sha256": digest.hexdigest(),
+    }
 
 
 @contextmanager
@@ -60,35 +98,52 @@ def exclusive_run(path: Path):
 
 
 def groups(files: list[str]) -> list[list[str]]:
-    # Exercise commerce/access regressions first, without excluding any file.
-    key = lambda name: (not any(part in name for part in (
-        "/commerce/", "subscription", "entitlement", "trial", "store_",
-        "access_policy", "recipe_detail_entitlement", "workout_video_access",
-    )), name)
-    ordered = sorted(files, key=key)
-    return [ordered[len(ordered) * n // 10:len(ordered) * (n + 1) // 10]
-            for n in range(10)]
+    # Keep the inventory in one complete pass. command_parts() handles only
+    # operating-system argv limits and review-only compile-time defines.
+    return [list(files)]
+
+
+PURCHASE_REVIEW_TESTS = {
+    "test/features/commerce/app_purchase_confirmation_test.dart",
+    "test/features/commerce/app_subscription_confirmation_test.dart",
+}
+PURCHASE_REVIEW_DEFINES = [
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms",
+    "--dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy",
+]
 
 
 def command_parts(base: list[str], files: list[str]) -> list[list[str]]:
     # Windows CreateProcess limit is 32767 UTF-16 characters, even without cmd.
     parts: list[list[str]] = []
-    current = list(base)
+    active_base = list(base)
+    current = list(active_base)
+
+    def flush() -> None:
+        nonlocal current
+        if len(current) > len(active_base):
+            parts.append(current)
+        current = list(active_base)
+
     for name in files:
+        wanted_base = [*base, *PURCHASE_REVIEW_DEFINES] \
+            if name in PURCHASE_REVIEW_TESTS else list(base)
+        if wanted_base != active_base:
+            flush()
+            active_base = wanted_base
+            current = list(active_base)
         if name == "test/performance_budget_test.dart":
-            if len(current) > len(base):
-                parts.append(current)
-                current = list(base)
-            parts.append([*base, name])
+            flush()
+            parts.append([*active_base, name])
             continue
         candidate = [*current, name]
         if len(subprocess.list2cmdline(candidate)) > 24000:
-            parts.append(current)
-            current = [*base, name]
+            flush()
+            current = [*active_base, name]
         else:
             current = candidate
-    if len(current) > len(base):
-        parts.append(current)
+    flush()
     return parts
 
 
@@ -183,7 +238,7 @@ def auxiliary_commands(deno: str, node: str) -> list[tuple[str, list[str]]]:
 
 def pipeline(evidence: Path, command: list[str], batches: list[list[str]],
              timeout: int, auxiliary: list[tuple[str, list[str]]]) -> int:
-    """Run all parts of a group, then stop on failure; never resume mid-suite."""
+    """Run every host test once and retain all failures before returning."""
     summary = {"runner_pid": os.getpid(), "analysis": None,
                "batches": [], "status": "RUNNING", "current": "analysis"}
 
@@ -227,11 +282,29 @@ def pipeline(evidence: Path, command: list[str], batches: list[list[str]],
             print(f"BATCH {index}/{len(batches)} {group['status']} (all command results):", flush=True)
             for (label, _), result in zip(parts, group["results"]):
                 print(f"  {label}: {result['status']}", flush=True)
-            summary["status"] = "RUNNING" if passed else f"STOPPED_AT_BATCH_{index}"
+            summary["status"] = "RUNNING"
             publish()
             if not passed:
-                print(f"STOPPED_AFTER_FAILED_BATCH={index}; later batches NOT RUN", flush=True)
-                return 1
+                print(f"BATCH {index} HAD FAILURES; continuing through the full inventory.", flush=True)
+        failures = [
+            (group["batch"], result)
+            for group in summary["batches"]
+            for result in group["results"]
+            if result["status"] != "PASS"
+        ]
+        if failures:
+            summary["status"] = "HOST_SUITE_FAIL"
+            summary["current"] = "complete_with_failures"
+            summary["failed_commands"] = [
+                {"batch": batch, "log": result["log"],
+                 "exit_code": result.get("exit_code"),
+                 "reason": result.get("reason")}
+                for batch, result in failures
+            ]
+            print(f"HOST_SUITE_FAIL: {len(failures)} command(s) failed; full inventory completed.", flush=True)
+            for batch, result in failures:
+                print(f"  batch_{batch:02d}: {result['log']}", flush=True)
+            return 1
         summary["status"] = "HOST_SUITE_PASS"
         summary["current"] = "complete"
         return 0
@@ -256,8 +329,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     dart = args.flutter_root / "bin/cache/dart-sdk/bin" / (
         "dart.exe" if os.name == "nt" else "dart")
-    snapshot = args.flutter_root / "bin/cache/flutter_tools.snapshot"
-    if not dart.is_file() or not snapshot.is_file():
+    flutter_snapshot = args.flutter_root / "bin/cache/flutter_tools.snapshot"
+    if not dart.is_file() or not flutter_snapshot.is_file():
         parser.error("A populated Flutter SDK is required")
     for name in ("deno_executable", "node_executable"):
         value = getattr(args, name)
@@ -274,11 +347,9 @@ def main(argv: list[str] | None = None) -> int:
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     evidence = ROOT / "build/diagnostics" / ("full_validation_" + stamp)
     evidence.mkdir(parents=True, exist_ok=False)
+    worktree = worktree_snapshot()
     plan = {
-        "head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT,
-                                        text=True).strip(),
-        "git_status": subprocess.check_output(["git", "status", "--short"],
-                                              cwd=ROOT, text=True),
+        **worktree,
         "test_file_count": len(files), "batches": batches,
         "auxiliary_batch_1": dict(auxiliary),
         "auxiliary_sha256": {
@@ -295,15 +366,15 @@ def main(argv: list[str] | None = None) -> int:
                         for name in files},
         "device_integration_NOT_RUN": sorted(p.relative_to(ROOT).as_posix()
                                               for p in (ROOT / "integration_test").rglob("*_test.dart")),
-        "note": "Host tests only. Built-in skips are reported in logs, not passes. No device/store test, build, deployment or auto-repair. Stop only after all commands in a failed group finish.",
+        "note": "Host tests only. One complete pass; every command runs even if an earlier command fails. Built-in skips are reported in logs, not passes. No device/store test, build, deployment or auto-repair.",
     }
     write_json(evidence / "plan.json", plan)
-    print(f"EVIDENCE={evidence}; FILES={len(files)}; BATCHES=10", flush=True)
+    print(f"EVIDENCE={evidence}; FILES={len(files)}; FULL_PASSES=1", flush=True)
     if args.list_only:
         return 0
     try:
         with exclusive_run(evidence.parent / "full_validation.lock"):
-            return pipeline(evidence, [str(dart), str(snapshot)], batches,
+            return pipeline(evidence, [str(dart), str(flutter_snapshot)], batches,
                             args.timeout, auxiliary)
     except RuntimeError as error:
         print(str(error), file=sys.stderr, flush=True)

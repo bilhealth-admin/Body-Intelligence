@@ -1,0 +1,46 @@
+{
+  "runner_pid": 13212,
+  "jobs_requested": 2,
+  "jobs_completed": 2,
+  "accepted": false,
+  "started_utc": "2026-10-13T13:41:32.625903+00:00",
+  "finished_utc": "2026-10-13T13:41:52.852915+00:00",
+  "records": [
+    {
+      "job_index": 1,
+      "exit_code": 0,
+      "seconds": 5.22,
+      "pid": 25820,
+      "runner_pid": 13212,
+      "accepted": true,
+      "stable_source": false,
+      "additional_stable_source": true,
+      "source_fingerprint": "8e9bb50b1aac562f91e49d4bb90d709f9474cf0ac5dd222daedce1754c181406",
+      "end_fingerprint": "e82a931de3e4c922d42b4defaec4ddb1c99eed2f93c21d8b7ca6fa0094b0d797",
+      "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+      "started_utc": "2026-10-13T13:41:35.108085+00:00",
+      "finished_utc": "2026-10-13T13:41:40.396973+00:00"
+    },
+    {
+      "job_index": 2,
+      "exit_code": 1,
+      "seconds": 7.09,
+      "pid": 23688,
+      "runner_pid": 13212,
+      "accepted": false,
+      "stable_source": true,
+      "additional_stable_source": true,
+      "source_fingerprint": "e82a931de3e4c922d42b4defaec4ddb1c99eed2f93c21d8b7ca6fa0094b0d797",
+      "end_fingerprint": "e82a931de3e4c922d42b4defaec4ddb1c99eed2f93c21d8b7ca6fa0094b0d797",
+      "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+      "started_utc": "2026-10-13T13:41:45.682020+00:00",
+      "finished_utc": "2026-10-13T13:41:52.848490+00:00",
+      "counts": {
+        "success": 1,
+        "failure": 5,
+        "skip": 0
+      }
+    }
+  ],
+  "scope": "synthetic-local-validation-summary-no-content-no-tokens"
+}

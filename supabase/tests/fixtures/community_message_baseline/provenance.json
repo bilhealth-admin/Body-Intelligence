@@ -1,0 +1,49 @@
+{
+  "source": "Supabase Production catalog read only",
+  "project_id": "tgmanzhqulksykhslrzb",
+  "captured_at_utc": "2026-10-13 06:41:41 UTC",
+  "scope": "Catalog only. No user rows or secrets. Message/block/consent triggers and current policies/ACL. Other Community journeys are outside this baseline.",
+  "scaffolding": "auth.users keys/email only. auth.uid/auth.jwt verbatim; session claim setup uses synthetic users on loopback only.",
+  "owner_mapping": "Source postgres ownership becomes the isolated database creator; no service-role credential.",
+  "excluded": "Other tables/triggers/Community journeys, complete Production database, user data, devices, actual authentication.",
+  "tables": 10,
+  "functions": 16,
+  "policies": 14,
+  "triggers": 8,
+  "definition_hashes": {
+    "auth.uid()": "7c1ff2ecbe653c9358b3115a2607db9573f88a2944ae4eca9e296a89cc5186a7",
+    "auth.jwt()": "7ce3ad8fb99f7ad5f5cd869fbd5479a6325e9444da472c26394cfa66c83b2d11",
+    "bil_community_contact_exchange_violation(text)": "2dfffad914abd0531e4c706ec5368be167fdfb361e06ae7293fb2aa053029189",
+    "private.bil_is_blocked_with(uuid)": "0255e691258fb6f610b66c87fa3641ec9e9cfd9d4d1df1107e52b7d2ca7c3681",
+    "private.bil_assert_current_community_policy()": "aa3c11ba18d434da581a756a9b041821fe8c0112f43ec83ef26d5d6f561d03a8",
+    "private.bil_guard_unblocked_community_message()": "cb0a29f6681cebd51fea6005f9cec17ac191277624e2c8e873cbe70784402ade",
+    "private.bil_lock_community_block_pair()": "85d6ae43e87fab77338be784e70fe8c58599e0d1087fab7c326353ba05db8ab2",
+    "private.bil_validate_community_policy_acceptance()": "85100cd0b3e793cc18b71a451699fe8c3f279d3e775250aaa64bfec21052040a",
+    "bil_audit_community_action()": "85bb84b21849759e553b5a8ee14f83206392dc05277bb5095e6195276791f57b",
+    "bil_can_use_community()": "3b834dee13d16df6cc906f7b145788b220b7c26b60a84f536f10550eb96d9934",
+    "bil_consume_rate_limit(text,integer,integer)": "c940307c14c80d3e5862c4410dd69023042b38c0c279babb2ede078e77cf65c3",
+    "bil_enforce_community_contact_exchange()": "d7bce34b36de7ef40a9714858c5439a41ba9f47082cdabbd0ba1e3914d6020f1",
+    "bil_enqueue_private_push()": "5da2c52df2eeb8bd26a637803cfc931c618f02c91e353613f2b817576bf3f02c",
+    "bil_guard_community_member_access()": "d6e14295e7a847299f925a110d261c3552c609b94732e61173714c303dd3f8a3",
+    "bil_recipient_allows_community_message(uuid)": "dbdcd6ca8375881df1369a27b1c0e3881bb9795c6a096af6726d6cdf061a8e7f",
+    "bil_require_community_policy()": "39567a5ef431f02589f9feb570bf1e92d410ceb9f820b5d0c8a21de6892952a6"
+  },
+  "files": {
+    "catalog.json": {
+      "bytes": 57061,
+      "sha256": "6b595db677f5f12a28f6a92c5cc8532fbf5982c6aacc052746d328d0da55abe8"
+    },
+    "contracts.sql": {
+      "bytes": 13473,
+      "sha256": "7074293d670fcb8728c74cd0466e96c362089bd3ec4688cbde98628e0c9aea5a"
+    },
+    "functions.sql": {
+      "bytes": 22669,
+      "sha256": "a6eafae407c33222ea8d1be9cbf4111d9a59b04e2cece3511e9e325de0e847dc"
+    },
+    "schema.sql": {
+      "bytes": 14926,
+      "sha256": "409d8ffbf22cda06608a4d5a500ed3add6d8afb4be5908185a5916cdb95b0798"
+    }
+  }
+}

@@ -39,8 +39,13 @@ void main() {
       [
         ...BilVerifiedLinksConfiguration.authenticatedReturnPaths,
         ...BilVerifiedLinksConfiguration.publicCommunityPaths,
+        '/download',
       ],
     );
+    final memberComponent = components.cast<Map<String, Object?>>().singleWhere(
+      (component) => component['/'] == '/download',
+    );
+    expect(memberComponent['?'], {'member': '?' * 32});
     expect(BilVerifiedLinksConfiguration.publicCommunityPaths, const [
       '/invite/*',
     ]);

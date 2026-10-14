@@ -1,0 +1,133 @@
+[
+  {
+    "label": "format-notification-constructor-and-interface",
+    "kind": "format-edit",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "format",
+      "lib/features/community/presentation/community_notification_content_page.dart",
+      "lib/features/community/presentation/community_post_detail_page.dart"
+    ]
+  },
+  {
+    "label": "notification-real-reply-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_notification_content_route_test.dart",
+      "--plain-name",
+      "actual notification tap opens and focuses its real reply beyond the first page"
+    ]
+  },
+  {
+    "label": "new-community-acceptance-files",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_safety_review_repository_test.dart",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "test/features/community/community_notification_content_route_test.dart",
+      "test/features/intelligence_center/cloud_voice_privacy_contract_test.dart"
+    ]
+  },
+  {
+    "label": "postgres-message-lock-order-case",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_message_delivery_v2_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe",
+      "--case",
+      "legacy INSERT and new RPC preserve pair then member lock order"
+    ]
+  },
+  {
+    "label": "postgres-report-changed-content-case",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_community_safety_review_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe",
+      "--case",
+      "changed reported text rejects stale removal without deleting content"
+    ]
+  },
+  {
+    "label": "postgres-message-contract-all",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_message_delivery_v2_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe"
+    ]
+  },
+  {
+    "label": "postgres-report-authority-all",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_community_safety_review_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe"
+    ]
+  },
+  {
+    "label": "web-landing-actual-dom-file",
+    "kind": "node",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.EXE",
+      "--test",
+      "--test-reporter=tap",
+      "tool/release/community_links.test.mjs"
+    ]
+  },
+  {
+    "label": "web-worker-link-associations-file",
+    "kind": "node",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.EXE",
+      "--test",
+      "--test-reporter=tap",
+      "tool/release/bilhealth_site_worker.test.mjs"
+    ]
+  },
+  {
+    "label": "push-dispatch-and-provider-affected",
+    "kind": "deno",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "test",
+      "--allow-env",
+      "--allow-net",
+      "--allow-read",
+      "supabase/functions/community-push-dispatch/server_test.ts",
+      "supabase/functions/community-push-dispatch/index_test.ts",
+      "supabase/functions/push-provider-gateway/server_test.ts",
+      "supabase/functions/push-provider-gateway/badge_test.ts"
+    ]
+  }
+]

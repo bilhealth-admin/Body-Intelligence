@@ -63,6 +63,26 @@ abstract final class _CommunityRoutes {
         ),
       ),
       GoRoute(
+        path: '/community/content/:postId',
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityEntryGate(
+            child: CommunitySurface(
+              child: CommunityNotificationContentPage(
+                postId: state.pathParameters['postId']!,
+                commentId: state.uri.queryParameters['comment'],
+                validQuery:
+                    state.uri.fragment.isEmpty &&
+                    state.uri.queryParametersAll.keys.every(
+                      (key) => key == 'comment',
+                    ) &&
+                    (state.uri.queryParametersAll['comment']?.length ?? 1) == 1,
+              ),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/community/post/:postId',
         builder: (_, state) => PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,

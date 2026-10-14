@@ -38,15 +38,19 @@ void main() {
 
     test('global component families are configured centrally', () {
       final theme = BilFlagshipTheme.light();
+      final highContrastTheme = BilFlagshipTheme.light(highContrast: true);
 
-      expect(theme.cardTheme.elevation, 0);
+      expect(theme.cardTheme.elevation, 1);
+      expect(highContrastTheme.cardTheme.elevation, 0);
       expect(theme.navigationBarTheme.height, 68);
       expect(
         theme.bottomNavigationBarTheme.type,
         BottomNavigationBarType.fixed,
       );
-      expect(theme.dialogTheme.elevation, 0);
-      expect(theme.bottomSheetTheme.elevation, 0);
+      expect(theme.dialogTheme.elevation, 8);
+      expect(highContrastTheme.dialogTheme.elevation, 0);
+      expect(theme.bottomSheetTheme.elevation, 8);
+      expect(highContrastTheme.bottomSheetTheme.elevation, 0);
       expect(theme.inputDecorationTheme.filled, isTrue);
       expect(theme.iconButtonTheme.style, isNotNull);
       expect(theme.chipTheme.shape, isA<RoundedRectangleBorder>());

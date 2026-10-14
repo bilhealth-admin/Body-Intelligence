@@ -1,0 +1,160 @@
+[
+  {
+    "label": "format-time-and-foundation",
+    "kind": "format-edit",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "format",
+      "lib/features/connected_health/widgets/live_health_watch_time.dart",
+      "test/app_foundation_services_test.dart"
+    ]
+  },
+  {
+    "label": "watch-large-clock-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/connected_health/health_devices_review_regression_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+      "--plain-name",
+      "iOS/ar_narrow_320_2x_light/premium manual refresh, phone steps, navigation and uncluttered readings"
+    ]
+  },
+  {
+    "label": "compiled-no-cloud-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app_foundation_services_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+      "--dart-define=BIL_USE_SUPABASE=false",
+      "--plain-name",
+      "compiled commerce flag respects explicit payment and legal readiness"
+    ]
+  },
+  {
+    "label": "changed-flutter-files-final",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app/services/scoped_media_file_cache_test.dart",
+      "test/app_foundation_services_test.dart",
+      "test/core/health_evidence_catalog_test.dart",
+      "test/connected_health/health_devices_review_regression_test.dart"
+    ]
+  },
+  {
+    "label": "foundation-compiled-commerce-file-final",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app_foundation_services_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+    ]
+  },
+  {
+    "label": "coach-server-and-integrity-files-final",
+    "kind": "deno",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "test",
+      "--allow-env",
+      "--allow-net",
+      "--allow-read",
+      "supabase/functions/ai-coach/server_test.ts",
+      "supabase/functions/ai-coach/mobile_integrity_test.ts"
+    ]
+  },
+  {
+    "label": "affected-media-health-and-commerce-final",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/app/services/scoped_media_access_test.dart",
+      "test/features/profile/profile_avatar_state_test.dart",
+      "test/connected_health/dashboard_health_cache_startup_contract_test.dart",
+      "test/connected_health/connected_health_contract_test.dart",
+      "test/connected_health/connected_health_guidance_localization_test.dart",
+      "test/features/global_platform/global_health_evidence_graph_test.dart",
+      "test/features/commerce/store_catalog_configuration_test.dart",
+      "test/features/commerce/app_purchase_confirmation_test.dart",
+      "test/features/commerce/app_subscription_confirmation_test.dart",
+      "test/features/commerce/verified_entitlement_session_cache_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy"
+    ]
+  },
+  {
+    "label": "watch-visibility-and-unchanged-golden",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/dashboard_polish/live_health_watch_visibility_test.dart",
+      "test/dashboard_polish/dashboard_watch_compact_connection_test.dart",
+      "test/dashboard_polish/live_health_watch_layout_golden_test.dart"
+    ]
+  },
+  {
+    "label": "watch-real-font-large-capture",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/connected_health/health_devices_review_regression_test.dart",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--dart-define=BIL_TERMS_URL=https://billing-fixture.invalid/terms",
+      "--dart-define=BIL_PRIVACY_URL=https://billing-fixture.invalid/privacy",
+      "--dart-define=BIL_CAPTURE_HEALTH_REVIEW=true",
+      "--plain-name",
+      "iOS/ar_narrow_320_2x_light/premium manual refresh, phone steps, navigation and uncluttered readings"
+    ]
+  }
+]

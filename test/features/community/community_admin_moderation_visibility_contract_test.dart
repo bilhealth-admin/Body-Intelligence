@@ -18,9 +18,10 @@ void main() {
   final card = File(
     'lib/features/community/presentation/community_post_card.dart',
   ).readAsStringSync();
-  final queue = File(
+  final queue = [
     'lib/features/community/presentation/community_post_moderation_page.dart',
-  ).readAsStringSync();
+    'lib/features/community/presentation/community_post_moderation_load.dart',
+  ].map((path) => File(path).readAsStringSync()).join('\n');
 
   test('admin and moderator authority is server-resolved', () {
     expect(migration, contains('private.bil_ai_coach_admins'));

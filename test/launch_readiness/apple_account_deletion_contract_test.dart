@@ -17,6 +17,8 @@ void main() {
     expect(page, contains('SignOutScope.local'));
     expect(page, contains('within 15 minutes'));
     expect(page, contains('accountUsesAppleSignIn'));
+    expect(page, contains('clearConnectedHealthCacheForAccountDeletion('));
+    expect(page, contains('No Apple Health records were deleted'));
     expect(page, contains('https://support.apple.com/102571'));
     expect(page, contains('revokes Apple authorization'));
     expect(page, contains('Older accounts may not have that token'));
@@ -26,6 +28,12 @@ void main() {
       lessThan(page.indexOf('await invalidateMatchingLocalSession(')),
       reason:
           'Apple cleanup intent must survive loss of the auth owner context',
+    );
+    expect(
+      page.indexOf('await clearConnectedHealthCacheForAccountDeletion('),
+      lessThan(page.indexOf('await invalidateMatchingLocalSession(')),
+      reason:
+          'the accepted owner clears only their BIL health cache before sign-out',
     );
     expect(
       page.indexOf('await invalidateMatchingLocalSession('),

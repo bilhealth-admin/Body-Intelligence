@@ -35,6 +35,87 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   children: [
+                    if (_focusLoading || _focusUnavailable || _focusFailed) ...[
+                      Row(
+                        children: [
+                          if (_focusLoading)
+                            const Padding(
+                              padding: EdgeInsetsDirectional.only(end: 8),
+                              child: SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              communityText(
+                                context,
+                                _focusLoading
+                                    ? 'Loading the comment from this notification…'
+                                    : _focusUnavailable
+                                    ? 'This comment is no longer available.'
+                                    : 'Could not open this comment. Try again.',
+                                _focusLoading
+                                    ? 'جارٍ تحميل تعليق الإشعار…'
+                                    : _focusUnavailable
+                                    ? 'هذا التعليق لم يعد متاحًا.'
+                                    : 'تعذر فتح التعليق. حاول مجددًا.',
+                              ),
+                            ),
+                          ),
+                          if (_focusLoading)
+                            IconButton(
+                              key: const Key(
+                                'community-notification-focus-cancel',
+                              ),
+                              tooltip: communityText(
+                                context,
+                                'Cancel comment loading',
+                                'إلغاء تحميل التعليق',
+                              ),
+                              onPressed: _cancelNotificationFocus,
+                              icon: const Icon(Icons.close_rounded),
+                            )
+                          else
+                            IconButton(
+                              key: const Key(
+                                'community-notification-focus-retry',
+                              ),
+                              tooltip: communityText(
+                                context,
+                                'Retry comment loading',
+                                'إعادة تحميل التعليق',
+                              ),
+                              onPressed: () => unawaited(
+                                _loadNotificationFocus(_loadGeneration),
+                              ),
+                              icon: const Icon(Icons.refresh_rounded),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (_focusedRoot case final root?) ...[
+                      Text(
+                        communityText(
+                          context,
+                          'From this notification',
+                          'من هذا الإشعار',
+                        ),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      // Build only this focused thread eagerly so ensureVisible
+                      // reaches a reply even after a long root. Other threads
+                      // retain their existing lazy list behavior.
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _commentThreadTiles(root),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     _CommunityPostDetailHeader(
                       post: widget.post,
                       stats: _stats,
@@ -95,125 +176,10 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                         ),
                       )
                     else
-                      for (final root in _rootComments) ...[
-                        _CommunityCommentTile(
-                          key: ValueKey(root.id),
-                          comment: root,
-                          ownerId: widget.repository.currentUserId,
-                          ownerIsCurrent: () => _detailOwnerIsCurrent,
-                          ownerChanges: widget.ownerChanges,
-                          membershipTier: _membershipTierByUser[root.authorId],
-                          mine:
-                              root.authorId == widget.repository.currentUserId,
-                          busy:
-                              _refreshing ||
-                              _submitting ||
-                              _busyComments.contains(root.id),
-                          onLike: () => _toggleCommentLike(root),
-                          onAction: (action) => _commentAction(root, action),
-                        ),
-                        if (root.replyCount > 0) ...[
-                          if (_expandedThreads.contains(root.id)) ...[
-                            for (final reply in _loadedReplies(root.id))
-                              _CommunityCommentTile(
-                                key: ValueKey(reply.id),
-                                comment: reply,
-                                ownerId: widget.repository.currentUserId,
-                                ownerIsCurrent: () => _detailOwnerIsCurrent,
-                                ownerChanges: widget.ownerChanges,
-                                membershipTier:
-                                    _membershipTierByUser[reply.authorId],
-                                mine:
-                                    reply.authorId ==
-                                    widget.repository.currentUserId,
-                                busy:
-                                    _refreshing ||
-                                    _submitting ||
-                                    _busyComments.contains(reply.id),
-                                parent: root,
-                                onLike: () => _toggleCommentLike(reply),
-                                onAction: (action) =>
-                                    _commentAction(reply, action),
-                              ),
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: Wrap(
-                                spacing: 4,
-                                children: [
-                                  if (_loadedReplies(root.id).length <
-                                      root.replyCount)
-                                    TextButton.icon(
-                                      key: Key(
-                                        'community-comment-load-replies-${root.id}',
-                                      ),
-                                      onPressed:
-                                          _loadingReplyThreads.contains(root.id)
-                                          ? null
-                                          : () => _loadMoreReplies(root),
-                                      icon:
-                                          _loadingReplyThreads.contains(root.id)
-                                          ? const SizedBox.square(
-                                              dimension: 14,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : const BilGlassPressFeedback(
-                                              child: Icon(
-                                                Icons.expand_more_rounded,
-                                              ),
-                                            ),
-                                      label: Text(
-                                        communityText(
-                                          context,
-                                          'Load more replies',
-                                          'تحميل مزيد من الردود',
-                                        ),
-                                      ),
-                                    ),
-                                  TextButton.icon(
-                                    key: Key(
-                                      'community-comment-hide-replies-${root.id}',
-                                    ),
-                                    onPressed: () => _setDetailState(
-                                      () => _expandedThreads.remove(root.id),
-                                    ),
-                                    icon: const BilGlassPressFeedback(
-                                      child: Icon(Icons.expand_less_rounded),
-                                    ),
-                                    label: Text(
-                                      communityText(
-                                        context,
-                                        'Hide replies',
-                                        'إخفاء الردود',
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ] else
-                            Align(
-                              alignment: AlignmentDirectional.centerStart,
-                              child: TextButton.icon(
-                                key: Key(
-                                  'community-comment-view-replies-${root.id}',
-                                ),
-                                onPressed: () => _setDetailState(
-                                  () => _expandedThreads.add(root.id),
-                                ),
-                                icon: const Icon(Icons.forum_outlined),
-                                label: Text(
-                                  communityText(
-                                    context,
-                                    'View {count} replies',
-                                    'عرض {count} ردود',
-                                  ).replaceAll('{count}', '${root.replyCount}'),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ],
+                      for (final root in _rootComments.where(
+                        (root) => root.id != _focusedRoot?.id,
+                      ))
+                        ..._commentThreadTiles(root),
                     if (_hasMore)
                       Center(
                         child: TextButton.icon(
@@ -370,4 +336,98 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
       },
     ),
   );
+  List<Widget> _commentThreadTiles(CommunityComment root) => [
+    _CommunityCommentTile(
+      key: root.id == widget.focusCommentId
+          ? _notificationFocusKey
+          : ValueKey(root.id),
+      comment: root,
+      ownerId: widget.repository.currentUserId,
+      ownerIsCurrent: () => _detailOwnerIsCurrent,
+      ownerChanges: widget.ownerChanges,
+      membershipTier: _membershipTierByUser[root.authorId],
+      mine: root.authorId == widget.repository.currentUserId,
+      busy: _refreshing || _submitting || _busyComments.contains(root.id),
+      onLike: () => _toggleCommentLike(root),
+      onAction: (action) => _commentAction(root, action),
+    ),
+    if (root.replyCount > 0 || _loadedReplies(root.id).isNotEmpty) ...[
+      if (_expandedThreads.contains(root.id)) ...[
+        for (final reply in _loadedReplies(root.id))
+          _CommunityCommentTile(
+            key: reply.id == widget.focusCommentId
+                ? _notificationFocusKey
+                : ValueKey(reply.id),
+            comment: reply,
+            ownerId: widget.repository.currentUserId,
+            ownerIsCurrent: () => _detailOwnerIsCurrent,
+            ownerChanges: widget.ownerChanges,
+            membershipTier: _membershipTierByUser[reply.authorId],
+            mine: reply.authorId == widget.repository.currentUserId,
+            busy:
+                _refreshing || _submitting || _busyComments.contains(reply.id),
+            parent: root,
+            onLike: () => _toggleCommentLike(reply),
+            onAction: (action) => _commentAction(reply, action),
+          ),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Wrap(
+            spacing: 4,
+            children: [
+              if (_loadedReplies(root.id).length < root.replyCount)
+                TextButton.icon(
+                  key: Key('community-comment-load-replies-${root.id}'),
+                  onPressed: _loadingReplyThreads.contains(root.id)
+                      ? null
+                      : () => _loadMoreReplies(root),
+                  icon: _loadingReplyThreads.contains(root.id)
+                      ? const SizedBox.square(
+                          dimension: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const BilGlassPressFeedback(
+                          child: Icon(Icons.expand_more_rounded),
+                        ),
+                  label: Text(
+                    communityText(
+                      context,
+                      'Load more replies',
+                      'تحميل مزيد من الردود',
+                    ),
+                  ),
+                ),
+              TextButton.icon(
+                key: Key('community-comment-hide-replies-${root.id}'),
+                onPressed: () =>
+                    _setDetailState(() => _expandedThreads.remove(root.id)),
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.expand_less_rounded),
+                ),
+                label: Text(
+                  communityText(context, 'Hide replies', 'إخفاء الردود'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ] else
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton.icon(
+            key: Key('community-comment-view-replies-${root.id}'),
+            onPressed: () =>
+                _setDetailState(() => _expandedThreads.add(root.id)),
+            icon: const Icon(Icons.forum_outlined),
+            label: Text(
+              communityText(
+                context,
+                root.replyCount > 0 ? 'View {count} replies' : 'View replies',
+                root.replyCount > 0 ? 'عرض {count} ردود' : 'عرض الردود',
+              ).replaceAll('{count}', '${root.replyCount}'),
+            ),
+          ),
+        ),
+    ],
+  ];
 }

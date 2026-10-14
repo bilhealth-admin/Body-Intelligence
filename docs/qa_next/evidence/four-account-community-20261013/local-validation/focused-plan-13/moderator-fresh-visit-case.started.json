@@ -1,0 +1,23 @@
+{
+  "label": "moderator-fresh-visit-case",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/community/community_safety_review_repository_test.dart",
+    "--plain-name",
+    "moderator A B A explicitly refreshes a fresh authorized visit"
+  ],
+  "started_utc": "2026-10-13T08:10:33.094893+00:00",
+  "runner_pid": 8596,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "8a147bc5a25f3b954245e591016e309b82a8dff01f90714d70bf14d61311d5a1",
+  "fingerprint_version": 4,
+  "pid": 14952
+}

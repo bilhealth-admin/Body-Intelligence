@@ -1,6 +1,11 @@
 // Exercises the real Coach page and entitlement gate with controlled local I/O.
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
+import '../../visual_closure/visual_evidence_font.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_presentation_view.dart';
+import 'support/coach_message_presentation_fixture.dart';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/bil_quick_add_sheet.dart';
@@ -25,6 +30,7 @@ import 'package:body_intelligence_log/features/intelligence_center/services/loca
 import 'package:body_intelligence_log/shared/widgets/chat_history_viewport.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +38,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 part 'support/coach_page_accessibility_cases.dart';
+part 'support/coach_page_presentation_cases.dart';
 part 'support/coach_page_voice_cases.dart';
 part 'support/coach_page_request_cases.dart';
 part 'support/coach_page_scroll_cases.dart';
@@ -40,6 +47,7 @@ class _HeldGateway implements LocalModelGateway {
   final replies = <Completer<LocalModelResult>>[];
   Completer<LocalModelResult> get reply => replies.first;
   int calls = 0;
+  final conversations = <List<CoachConversationTurn>>[];
   @override
   Future<LocalModelResult> answer({
     required String question,
@@ -49,6 +57,7 @@ class _HeldGateway implements LocalModelGateway {
     List<CoachConversationTurn> conversation = const [],
   }) {
     calls++;
+    conversations.add(List.unmodifiable(conversation));
     final pending = Completer<LocalModelResult>();
     replies.add(pending);
     return pending.future;
@@ -86,11 +95,15 @@ Future<GoRouter> _mount(
   Future<Object?> Function()? usageLoader,
   PreferencesRepository? preferences,
   bool arabic = false,
+  bool dark = false,
+  bool highContrast = false,
   int historyCount = 0,
   Size size = const Size(390, 844),
   TargetPlatform platform = TargetPlatform.iOS,
   double textScale = 1,
+  bool evidenceFonts = false,
   Stream<String?>? owners,
+  CoachNativeOwnerWitness? messageOwnerWitness,
   Future<CoachContextSnapshot> Function()? contextLoader,
   bool waitForBrief = false,
 }) async {
@@ -154,10 +167,25 @@ Future<GoRouter> _mount(
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
+  final fixtureTheme =
+      (dark
+              ? BilFlagshipTheme.dark(
+                  isArabic: arabic,
+                  highContrast: highContrast,
+                )
+              : BilFlagshipTheme.light(
+                  isArabic: arabic,
+                  highContrast: highContrast,
+                ))
+          .copyWith(platform: platform);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
+        if (messageOwnerWitness != null)
+          coachNativeOwnerWitnessProvider.overrideWithValue(
+            messageOwnerWitness,
+          ),
         intelligenceCoachMealVisionConsentProvider.overrideWithValue(
           (_) async => true,
         ),
@@ -213,25 +241,32 @@ Future<GoRouter> _mount(
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        theme: BilFlagshipTheme.light(
-          isArabic: arabic,
-        ).copyWith(platform: platform),
+        theme: evidenceFonts
+            ? visualEvidenceTheme(
+                fixtureTheme,
+                fontFamily: arabic ? 'NotoArabicEvidence' : 'RobotoEvidence',
+              )
+            : fixtureTheme,
         routerConfig: router,
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(textScale)),
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-            child: NotificationListener<ScrollStartNotification>(
-              onNotification: (notification) {
-                if (notification.dragDetails != null) {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                }
-                return false;
-              },
-              child: child!,
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            highContrast: highContrast,
+          ),
+          child: RepaintBoundary(
+            key: const ValueKey('coach-screen-capture-root'),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+              child: NotificationListener<ScrollStartNotification>(
+                onNotification: (notification) {
+                  if (notification.dragDetails != null) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  }
+                  return false;
+                },
+                child: child!,
+              ),
             ),
           ),
         ),
@@ -289,6 +324,9 @@ Future<void> _unmount(WidgetTester tester) async {
 }
 
 void main() {
+  setUpAll(loadVisualEvidenceFont);
+  registerCoachPresentationPageCases();
+  registerCoachRevealViewportCases();
   registerCoachAccessibilityCases();
   registerCoachVoiceCases();
   registerCoachRequestCases();
@@ -528,4 +566,424 @@ void main() {
       reason: 'One history action must not stack duplicate sheets.',
     );
   });
+}
+
+void registerCoachRevealViewportCases() {
+  for (final arabic in [false, true]) {
+    testWidgets(
+      'full long reply arrives softly at stable geometry AR=$arabic light 320 2x',
+      (tester) async {
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        final gateway = _HeldGateway();
+        try {
+          await tester.runAsync(loadVisualEvidenceFont);
+          await _mount(
+            tester,
+            database: database,
+            gateway: gateway,
+            gate: true,
+            arabic: arabic,
+            size: const Size(320, 844),
+            textScale: 2,
+            evidenceFonts: true,
+          );
+          await _send(tester, gateway);
+          final reply = List.generate(
+            26,
+            (i) => arabic
+                ? 'فقرة تركيبية $i: هذه قراءة محلية واضحة لا تحفظ طعامًا ولا تغير الحساب.'
+                : 'Synthetic paragraph $i: this readable answer performs no write or account change.',
+          ).join('\n');
+          gateway.finish(text: reply);
+          final row = find.byWidgetPredicate(
+            (widget) => widget is CoachMessageText && widget.text == reply,
+          );
+          for (var frame = 0; frame < 20 && row.evaluate().isEmpty; frame++) {
+            await tester.pump(const Duration(milliseconds: 16));
+          }
+          expect(
+            row,
+            findsOneWidget,
+            reason: 'Actual page must append the answer.',
+          );
+          final replyStyle = tester.widget<CoachMessageText>(row).style;
+          final starterStyle = Theme.of(
+            tester.element(row),
+          ).textTheme.bodySmall;
+          expect(
+            replyStyle?.fontSize,
+            starterStyle?.fontSize,
+            reason: 'Coach replies match the smaller starter guidance style.',
+          );
+          expect(
+            replyStyle?.fontFamily,
+            starterStyle?.fontFamily,
+            reason: 'Coach replies use the same typeface as starter guidance.',
+          );
+          expect(
+            replyStyle?.fontWeight,
+            starterStyle?.fontWeight,
+            reason:
+                'Coach replies use the same font weight as starter guidance.',
+          );
+          final messageTextKey =
+              tester.widget<CoachMessageText>(row).key! as ValueKey<String>;
+          final messageId = messageTextKey.value.replaceFirst(
+            'coach-message-text-',
+            '',
+          );
+          final replyCard = find.byKey(
+            ValueKey('ai-coach-reply-card-$messageId'),
+          );
+          expect(replyCard, findsOneWidget);
+          expect(
+            tester.getSize(replyCard).width,
+            greaterThan(290),
+            reason:
+                'The incoming Coach reply card should fill the wider chat column.',
+          );
+          final selectable = find.descendant(
+            of: row,
+            matching: find.byType(SelectableText),
+          );
+          expect(
+            tester.widget<SelectableText>(selectable).data,
+            reply,
+            reason:
+                'The complete validated answer is present before the soft entrance.',
+          );
+          final arrival = find.byKey(
+            ValueKey('coach-reply-arrival-fade-$messageId'),
+          );
+          expect(arrival, findsOneWidget);
+          final editableFinder = find.descendant(
+            of: row,
+            matching: find.byType(EditableText),
+          );
+          final viewport = find.byType(ChatHistoryViewport);
+          final scroll = tester
+              .widget<ChatHistoryViewport>(viewport)
+              .controller;
+          final samples = <Map<String, Object?>>[];
+          for (var frame = 0; frame < 12; frame++) {
+            final visibleText = tester.widget<SelectableText>(selectable).data!;
+            final editable = tester
+                .state<EditableTextState>(editableFinder)
+                .renderEditable;
+            final selectionLength = visibleText.characters
+                .take(8)
+                .join()
+                .length;
+            final glyphBoxes = editable.getBoxesForSelection(
+              TextSelection(baseOffset: 0, extentOffset: selectionLength),
+            );
+            final viewportRect = tester.getRect(viewport);
+            var visibleGlyphArea = 0.0;
+            for (final box in glyphBoxes) {
+              final local = box.toRect();
+              final global = local.shift(editable.localToGlobal(Offset.zero));
+              final overlap = global.intersect(viewportRect);
+              if (overlap.width > 0 && overlap.height > 0) {
+                visibleGlyphArea += overlap.width * overlap.height;
+              }
+            }
+            samples.add({
+              'virtualFrame': frame,
+              'visibleGraphemes': visibleText.characters.length,
+              'visibleGlyphArea': visibleGlyphArea,
+              'scrollPixels': scroll.offset,
+              'replyOpacity': tester
+                  .widget<FadeTransition>(arrival)
+                  .opacity
+                  .value,
+              'messageHeight': tester.getSize(row).height,
+            });
+            await tester.pump(const Duration(milliseconds: 16));
+          }
+          // Emit source/case metrics before asserting so a genuine failure is
+          // preserved. Virtual frame geometry is not a real device latency P95.
+          debugPrint(
+            'BIL_REPLY_ARRIVAL_WIDGET_GEOMETRY ${jsonEncode({'scope': 'actual_page_widget_virtual_frames_not_device_P95', 'font': arabic ? 'NotoArabicEvidence' : 'RobotoEvidence', 'arabic': arabic, 'theme': 'light', 'width': 320, 'textScale': 2, 'samples': samples})}',
+          );
+          expect(
+            samples
+                .skip(1)
+                .any((sample) => (sample['visibleGlyphArea'] as num) > 0),
+            isTrue,
+            reason:
+                'The complete reply must settle inside the actual chat viewport.',
+          );
+          expect(samples.map((x) => x['messageHeight']).toSet(), hasLength(1));
+          expect(tester.takeException(), isNull);
+        } finally {
+          for (final pending in gateway.replies) {
+            if (!pending.isCompleted) {
+              pending.complete(
+                LocalModelResult.answer(
+                  LocalModelAnswer(
+                    text: 'Synthetic fixture cancelled.',
+                    action: null,
+                  ),
+                ),
+              );
+            }
+          }
+          try {
+            await _unmount(tester); // TTS mock handler is still registered.
+          } finally {
+            await tester.runAsync(database.close);
+          }
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
+  }
+
+  testWidgets(
+    'wide tablet history expands while header and composer stay put',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final gateway = _HeldGateway();
+      try {
+        await _mount(
+          tester,
+          database: database,
+          gateway: gateway,
+          gate: true,
+          size: const Size(1024, 900),
+        );
+        await _send(tester, gateway);
+        gateway.finish(text: 'Wide tablet reply for the layout contract.');
+        await tester.pump(const Duration(milliseconds: 340));
+
+        final row = find.byWidgetPredicate(
+          (widget) =>
+              widget is CoachMessageText &&
+              widget.text == 'Wide tablet reply for the layout contract.',
+        );
+        expect(row, findsOneWidget);
+        final messageTextKey =
+            tester.widget<CoachMessageText>(row).key! as ValueKey<String>;
+        final messageId = messageTextKey.value.replaceFirst(
+          'coach-message-text-',
+          '',
+        );
+        expect(
+          tester
+              .getSize(find.byKey(ValueKey('ai-coach-reply-card-$messageId')))
+              .width,
+          greaterThan(880),
+        );
+        expect(
+          tester.getSize(find.byKey(const ValueKey('ai-coach-hero'))).width,
+          closeTo(760, .1),
+        );
+        expect(
+          tester
+              .getSize(find.byKey(const Key('ai-coach-composer-surface')))
+              .width,
+          closeTo(760, .1),
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        for (final pending in gateway.replies) {
+          if (!pending.isCompleted) {
+            pending.complete(
+              LocalModelResult.answer(
+                LocalModelAnswer(
+                  text: 'Synthetic fixture cancelled.',
+                  action: null,
+                ),
+              ),
+            );
+          }
+        }
+        try {
+          await _unmount(tester);
+        } finally {
+          await tester.runAsync(database.close);
+        }
+      }
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
+
+  testWidgets(
+    'capture actual Coach reply preview from Flutter',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final gateway = _HeldGateway();
+      try {
+        await _mount(
+          tester,
+          database: database,
+          gateway: gateway,
+          gate: true,
+          arabic: true,
+          evidenceFonts: true,
+          size: const Size(390, 844),
+        );
+        Future<void> savePreview(String filename) async {
+          final boundary = tester.renderObject<RenderRepaintBoundary>(
+            find.byKey(const ValueKey('coach-screen-capture-root')),
+          );
+          await tester.runAsync(() async {
+            final image = await boundary.toImage(pixelRatio: 2);
+            try {
+              final png = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              const outputDirectory = 'build/coach-reply-preview';
+              final directory = Directory(outputDirectory);
+              await directory.create(recursive: true);
+              final file = File('${directory.path}/$filename');
+              await file.writeAsBytes(png!.buffer.asUint8List());
+              debugPrint('BIL_COACH_REPLY_PREVIEW ${file.absolute.path}');
+            } finally {
+              image.dispose();
+            }
+          });
+        }
+
+        final firstDayEvidenceIcon = tester.widget<Icon>(
+          find.byKey(const Key('ai-coach-day-one-guidance-evidence')),
+        );
+        expect(firstDayEvidenceIcon.icon, Icons.verified_rounded);
+        expect(firstDayEvidenceIcon.color, const Color(0xFF56C878));
+        await savePreview('coach-first-open-ar.png');
+        await _send(tester, gateway, question: 'كيف أراجع وجبتي؟');
+        const previewReply =
+            'سأراجع وجبتك المسجلة وأعرض السعرات والماكروز بوضوح. هذه معاينة اختبارية ولا تضيف طعامًا إلى سجلك.';
+        gateway.finish(text: previewReply);
+        final previewReplyFinder = find.byWidgetPredicate(
+          (widget) => widget is CoachMessageText && widget.text == previewReply,
+        );
+        for (
+          var frame = 0;
+          frame < 60 && previewReplyFinder.evaluate().isEmpty;
+          frame++
+        ) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+        expect(previewReplyFinder, findsOneWidget);
+        final helpfulButton = find.byWidgetPredicate(
+          (widget) =>
+              widget is IconButton &&
+              widget.key.toString().contains('ai-coach-feedback-helpful-'),
+        );
+        final notHelpfulButton = find.byWidgetPredicate(
+          (widget) =>
+              widget is IconButton &&
+              widget.key.toString().contains('ai-coach-feedback-not-helpful-'),
+        );
+        final helpfulIcon =
+            tester.widget<IconButton>(helpfulButton).icon as AnimatedScale;
+        final notHelpfulIcon =
+            tester.widget<IconButton>(notHelpfulButton).icon as AnimatedScale;
+        expect((helpfulIcon.child as Text).data, '👍');
+        expect((notHelpfulIcon.child as Text).data, '👎');
+        final helpfulStyle = (helpfulIcon.child as Text).style!;
+        expect(helpfulStyle.fontFamily, 'Apple Color Emoji');
+        expect(
+          helpfulStyle.fontFamilyFallback,
+          containsAll(<String>[
+            'Segoe UI Emoji',
+            'Apple Color Emoji',
+            'Noto Color Emoji',
+          ]),
+        );
+        await tester.pump(const Duration(milliseconds: 360));
+        expect(tester.takeException(), isNull);
+        await savePreview('coach-reply-ar.png');
+      } finally {
+        for (final pending in gateway.replies) {
+          if (!pending.isCompleted) {
+            pending.complete(
+              LocalModelResult.answer(
+                LocalModelAnswer(
+                  text: 'Synthetic fixture cancelled.',
+                  action: null,
+                ),
+              ),
+            );
+          }
+        }
+        try {
+          await _unmount(tester);
+        } finally {
+          await tester.runAsync(database.close);
+        }
+      }
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
+
+  testWidgets(
+    'old history remains anchored during actual new reply reveal and keyboard closing',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final gateway = _HeldGateway();
+      try {
+        await tester.runAsync(loadVisualEvidenceFont);
+        await _mount(
+          tester,
+          database: database,
+          gateway: gateway,
+          gate: true,
+          historyCount: 35,
+          arabic: true,
+          evidenceFonts: true,
+        );
+        await _send(tester, gateway);
+        final viewport = find.byType(ChatHistoryViewport);
+        final scroll = tester.widget<ChatHistoryViewport>(viewport).controller;
+        final gesture = await tester.startGesture(tester.getCenter(viewport));
+        for (var i = 0; i < 20; i++) {
+          await gesture.moveBy(const Offset(0, 7));
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+        await gesture.up();
+        await tester.pump(const Duration(milliseconds: 160));
+        final oldOffset = scroll.offset;
+        gateway.finish(
+          text: List.filled(
+            20,
+            'إجابة تركيبية جديدة ينبغي ألا تقطع قراءة الرسائل السابقة.',
+          ).join('\n'),
+        );
+        for (var i = 0; i < 12; i++) {
+          await tester.pump(const Duration(milliseconds: 32));
+          expect(scroll.offset, closeTo(oldOffset, .5));
+        }
+        for (final inset in [240.0, 160.0, 0.0]) {
+          tester.view.viewInsets = FakeViewPadding(bottom: inset);
+          await tester.pump(const Duration(milliseconds: 32));
+        }
+        expect(scroll.offset, closeTo(oldOffset, .5));
+        expect(tester.takeException(), isNull);
+      } finally {
+        for (final pending in gateway.replies) {
+          if (!pending.isCompleted) {
+            pending.complete(
+              LocalModelResult.answer(
+                LocalModelAnswer(
+                  text: 'Synthetic fixture cancelled.',
+                  action: null,
+                ),
+              ),
+            );
+          }
+        }
+        try {
+          await _unmount(tester); // Runs before _mount teardown callbacks.
+        } finally {
+          await tester.runAsync(database.close);
+        }
+      }
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
 }

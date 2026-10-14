@@ -1,0 +1,173 @@
+{
+  "label": "changed-flutter-files-default",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/app/services/scoped_media_file_cache_test.dart",
+    "test/app_foundation_services_test.dart",
+    "test/core/health_evidence_catalog_test.dart",
+    "test/connected_health/health_devices_review_regression_test.dart"
+  ],
+  "started_utc": "2026-10-13T05:38:03.090529+00:00",
+  "runner_pid": 13376,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "d3a072678039bbb621425183ffa42cc899b040fae2abfc3832f8510251a3b8db",
+  "fingerprint_version": 4,
+  "pid": 15556,
+  "exit_code": 1,
+  "finished_utc": "2026-10-13T05:39:01.450896+00:00",
+  "seconds": 58.29,
+  "end_fingerprint": "d3a072678039bbb621425183ffa42cc899b040fae2abfc3832f8510251a3b8db",
+  "stable_source": true,
+  "accepted": false,
+  "counts": {
+    "success": 131,
+    "failure": 0,
+    "error": 16,
+    "skip": 0
+  },
+  "tests_completed": 147,
+  "files_loaded": 4,
+  "files_with_test_outcomes": 4,
+  "harness_pid": 21784,
+  "protocol_success": false,
+  "in_progress": [],
+  "error_events": 16,
+  "errors": [
+    {
+      "testID": 63,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/ar_narrow_320_2x_light/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 24168
+    },
+    {
+      "testID": 64,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/ar_narrow_320_2x_dark/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 24783
+    },
+    {
+      "testID": 65,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/en_narrow_320_2x_light/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 25325
+    },
+    {
+      "testID": 66,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/en_narrow_320_2x_dark/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 25781
+    },
+    {
+      "testID": 92,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/ar_narrow_320_2x_light/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 34302
+    },
+    {
+      "testID": 93,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/ar_narrow_320_2x_dark/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 34699
+    },
+    {
+      "testID": 94,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/en_narrow_320_2x_light/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 35077
+    },
+    {
+      "testID": 95,
+      "error": "Test failed. See exception logs above.\nThe test description was: iOS/en_narrow_320_2x_dark/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 35487
+    },
+    {
+      "testID": 121,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/ar_narrow_320_2x_light/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 43913
+    },
+    {
+      "testID": 122,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/ar_narrow_320_2x_dark/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 44361
+    },
+    {
+      "testID": 123,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/en_narrow_320_2x_light/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 44788
+    },
+    {
+      "testID": 124,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/en_narrow_320_2x_dark/premium manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 45206
+    },
+    {
+      "testID": 150,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/ar_narrow_320_2x_light/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 51927
+    },
+    {
+      "testID": 151,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/ar_narrow_320_2x_dark/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 52356
+    },
+    {
+      "testID": 152,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/en_narrow_320_2x_light/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 52800
+    },
+    {
+      "testID": 153,
+      "error": "Test failed. See exception logs above.\nThe test description was: android/en_narrow_320_2x_dark/free manual refresh, phone steps, navigation and uncluttered readings",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 53206
+    }
+  ]
+}

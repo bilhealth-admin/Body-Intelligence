@@ -16,6 +16,21 @@ abstract final class CorePagesRuntimeCopy {
       "es": "Configuración de AI Coach",
       "tr": "AI Coach ayarları",
     },
+    "Access check unavailable": {
+      'en': "Access check unavailable",
+      "ar": "تعذر التحقق من الصلاحية",
+      "fr": "Vérification de l’accès indisponible",
+      "es": "No se puede comprobar el acceso",
+      "tr": "Erişim kontrolü kullanılamıyor",
+    },
+    "Access is refreshing. Try the feature again.": {
+      'en': "Access is refreshing. Try the feature again.",
+      "ar": "جارٍ تحديث الصلاحية. أعد فتح الميزة.",
+      "fr":
+          "L’accès est en cours d’actualisation. Réessayez la fonctionnalité.",
+      "es": "Se está actualizando el acceso. Vuelve a probar la función.",
+      "tr": "Erişim yenileniyor. Özelliği yeniden deneyin.",
+    },
     "Advertising privacy": {
       'en': "Advertising privacy",
       "ar": "خصوصية الإعلان",
@@ -51,12 +66,12 @@ abstract final class CorePagesRuntimeCopy {
       "es": "Comprobando suscripción",
       "tr": "Abonelik kontrol ediliyor",
     },
-    "Subscription check unavailable": {
-      'en': "Subscription check unavailable",
-      "ar": "تعذّر التحقق من الاشتراك",
-      "fr": "Vérification de l'abonnement indisponible",
-      "es": "Comprobación de suscripción no disponible",
-      "tr": "Abonelik kontrolü kullanılamıyor",
+    "Close": {
+      'en': "Close",
+      "ar": "إغلاق",
+      "fr": "Fermer",
+      "es": "Cerrar",
+      "tr": "Kapat",
     },
     "Coach controls": {
       'en': "Coach controls",
@@ -87,6 +102,13 @@ abstract final class CorePagesRuntimeCopy {
       "tr":
           "Kişiselleştirilmiş hedefleri hesaplamak için profilinizi tamamlayın.",
     },
+    "Continue": {
+      'en': "Continue",
+      "ar": "متابعة",
+      "fr": "Continuer",
+      "es": "Continuar",
+      "tr": "Devam",
+    },
     "Copy from": {
       'en': "Copy from",
       "ar": "نسخ من",
@@ -108,6 +130,20 @@ abstract final class CorePagesRuntimeCopy {
       "es": "PARA HOY",
       "tr": "BUGÜN İÇİN",
     },
+    "Fiber": {
+      'en': "Fiber",
+      "ar": "الألياف",
+      "fr": "Fibres",
+      "es": "Fibra",
+      "tr": "Lif",
+    },
+    "Good afternoon": {
+      'en': "Good afternoon",
+      "ar": "مساء الخير",
+      "fr": "Bon après-midi",
+      "es": "Buenas tardes",
+      "tr": "İyi günler",
+    },
     "Good evening": {
       'en': "Good evening",
       "ar": "مساء الخير",
@@ -121,48 +157,6 @@ abstract final class CorePagesRuntimeCopy {
       "fr": "Bonjour",
       "es": "Buenos días",
       "tr": "Günaydın",
-    },
-    "Good afternoon": {
-      'en': "Good afternoon",
-      "ar": "مساء الخير",
-      "fr": "Bon après-midi",
-      "es": "Buenas tardes",
-      "tr": "İyi günler",
-    },
-    "Close": {
-      'en': "Close",
-      "ar": "إغلاق",
-      "fr": "Fermer",
-      "es": "Cerrar",
-      "tr": "Kapat",
-    },
-    "Serving unit": {
-      'en': "Serving unit",
-      "ar": "وحدة الحصة",
-      "fr": "Unité de portion",
-      "es": "Unidad de porción",
-      "tr": "Porsiyon birimi",
-    },
-    "Fiber": {
-      'en': "Fiber",
-      "ar": "الألياف",
-      "fr": "Fibres",
-      "es": "Fibra",
-      "tr": "Lif",
-    },
-    "Sodium": {
-      'en': "Sodium",
-      "ar": "الصوديوم",
-      "fr": "Sodium",
-      "es": "Sodio",
-      "tr": "Sodyum",
-    },
-    "Global multilingual voice": {
-      'en': "Global multilingual voice",
-      "ar": "صوت متعدد اللغات",
-      "fr": "Voix multilingue mondiale",
-      "es": "Voz multilingüe global",
-      "tr": "Küresel çok dilli ses",
     },
     "I’m ready for your next useful decision.": {
       'en': "I’m ready for your next useful decision.",
@@ -180,7 +174,7 @@ abstract final class CorePagesRuntimeCopy {
     },
     "Manual barcode · Premium": {
       'en': "Manual barcode · Premium",
-      "ar": "الباركود اليدوي · بريميوم",
+      "ar": "الباركود اليدوي · Premium",
       "fr": "Code-barres manuel · Premium",
       "es": "Código de barras manual · Premium",
       "tr": "Manuel barkod · Premium",
@@ -213,6 +207,13 @@ abstract final class CorePagesRuntimeCopy {
       "es": "Aún no se han registrado datos de tendencias.",
       "tr": "Henüz kayıtlı bir trend verisi yok.",
     },
+    "Refresh access": {
+      'en': "Refresh access",
+      "ar": "تحديث الصلاحية",
+      "fr": "Actualiser l’accès",
+      "es": "Actualizar acceso",
+      "tr": "Erişimi yenile",
+    },
     "Review today’s entries, then complete the diary to preserve an authoritative snapshot.": {
       'en':
           "Review today’s entries, then complete the diary to preserve an authoritative snapshot.",
@@ -231,6 +232,20 @@ abstract final class CorePagesRuntimeCopy {
       "es": "Guardar registro",
       "tr": "Günlüğü kaydet",
     },
+    "Serving unit": {
+      'en': "Serving unit",
+      "ar": "وحدة الحصة",
+      "fr": "Unité de portion",
+      "es": "Unidad de porción",
+      "tr": "Porsiyon birimi",
+    },
+    "Sodium": {
+      'en': "Sodium",
+      "ar": "الصوديوم",
+      "fr": "Sodium",
+      "es": "Sodio",
+      "tr": "Sodyum",
+    },
     "Steps": {
       'en': "Steps",
       "ar": "خطوات",
@@ -245,12 +260,78 @@ abstract final class CorePagesRuntimeCopy {
       "es": "hablar ahora",
       "tr": "Şimdi konuş",
     },
+    "This feature needs access": {
+      'en': "This feature needs access",
+      "ar": "هذه الميزة تحتاج إلى صلاحية",
+      "fr": "Cette fonctionnalité nécessite un accès",
+      "es": "Esta función requiere acceso",
+      "tr": "Bu özellik için erişim gerekiyor",
+    },
+    "View plans": {
+      'en': "View plans",
+      "ar": "عرض الخطط",
+      "fr": "Voir les offres",
+      "es": "Ver planes",
+      "tr": "Planları görüntüle",
+    },
+    "You can continue using the app. View plans only if you wish to change your access.": {
+      'en':
+          "You can continue using the app. View plans only if you wish to change your access.",
+      "ar":
+          "يمكنك متابعة استخدام التطبيق. افتح الخطط فقط إن رغبت في تغيير صلاحية هذه الميزة.",
+      "fr":
+          "Vous pouvez continuer à utiliser l’application. Consultez les offres uniquement si vous souhaitez modifier votre accès.",
+      "es":
+          "Puedes seguir usando la aplicación. Consulta los planes solo si quieres cambiar tu acceso.",
+      "tr":
+          "Uygulamayı kullanmaya devam edebilirsiniz. Erişiminizi değiştirmek isterseniz planları görüntüleyin.",
+    },
     "Your BIL Coach": {
       'en': "Your BIL Coach",
       "ar": "مدرب BIL الخاص بك",
       "fr": "Votre coach BIL",
       "es": "Tu coach BIL",
       "tr": "BIL Koçunuz",
+    },
+    "Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.": {
+      'en':
+          "Your subscription was not classified as Free. Check your connection and retry; the rest of the app remains available.",
+      "ar":
+          "لم نصنف اشتراكك كمجاني. تحقق من الاتصال وأعد المحاولة؛ تظل بقية وظائف التطبيق متاحة.",
+      "fr":
+          "Votre abonnement n’a pas été identifié comme gratuit. Vérifiez votre connexion et réessayez ; le reste de l’application reste disponible.",
+      "es":
+          "No se pudo clasificar tu suscripción como gratuita. Comprueba tu conexión e inténtalo de nuevo; el resto de la aplicación seguirá disponible.",
+      "tr":
+          "Aboneliğiniz ücretsiz olarak sınıflandırılamadı. Bağlantınızı kontrol edip tekrar deneyin; uygulamanın geri kalanı kullanılabilir durumda.",
+    },
+    "Cholesterol": {
+      'en': "Cholesterol",
+      "ar": "الكوليسترول",
+      "fr": "Cholestérol",
+      "es": "Colesterol",
+      "tr": "Kolesterol",
+    },
+    "Global multilingual voice": {
+      'en': "Global multilingual voice",
+      "ar": "صوت عالمي متعدد اللغات",
+      "fr": "Voix mondiale multilingue",
+      "es": "Voz global multilingüe",
+      "tr": "Küresel çok dilli ses",
+    },
+    "Saturated fat": {
+      'en': "Saturated fat",
+      "ar": "الدهون المشبعة",
+      "fr": "Acides gras saturés",
+      "es": "Grasas saturadas",
+      "tr": "Doymuş yağ",
+    },
+    "Vitamin A": {
+      'en': "Vitamin A",
+      "ar": "فيتامين أ",
+      "fr": "Vitamine A",
+      "es": "Vitamina A",
+      "tr": "A vitamini",
     },
   };
 }

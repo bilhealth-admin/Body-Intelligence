@@ -1,0 +1,17 @@
+{
+  "label": "web-landing-actual-dom-file",
+  "kind": "node",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.EXE",
+    "--test",
+    "--test-reporter=tap",
+    "tool/release/community_links.test.mjs"
+  ],
+  "started_utc": "2026-10-13T08:40:04.647959+00:00",
+  "runner_pid": 15804,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247",
+  "fingerprint_version": 4,
+  "pid": 23136
+}

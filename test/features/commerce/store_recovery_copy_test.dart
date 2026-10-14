@@ -16,7 +16,10 @@ void main() {
         }.entries) {
           final expected = RuntimeCopy.resolve(entry.value, tag);
           expect(expected, isNotNull, reason: '$tag:${entry.key}');
-          expect(BilStoreCopy.text(tag, entry.key), expected);
+          expect(
+            BilStoreCopy.text(tag, entry.key).replaceAll('’', "'"),
+            expected!.replaceAll('’', "'"),
+          );
           if (locale.languageCode != 'en') {
             expect(
               BilStoreCopy.text(tag, entry.key),

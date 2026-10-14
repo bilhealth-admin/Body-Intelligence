@@ -65,7 +65,8 @@ class NutritionAnalyticsPage extends ConsumerWidget {
     final goal = goalState.value;
     final presetState = ref.watch(dashboardNutrientDashboardProvider);
     final goalStateSnapshot = ref.watch(nutritionGoalSnapshotProvider);
-    if (presetState.isLoading || goalStateSnapshot.isLoading) {
+    if ((presetState.isLoading && !presetState.hasValue) ||
+        (goalStateSnapshot.isLoading && !goalStateSnapshot.hasValue)) {
       return _NutritionAnalyticsLoadingShell(initialTab: initialTab);
     }
     if (presetState.hasError || goalStateSnapshot.hasError) {

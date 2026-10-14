@@ -37,7 +37,7 @@ void main() {
           final card = find.byKey(
             CoachFoodCardKeys.review('capture-food-review'),
           );
-          expect(tester.getSize(card).width, closeTo(290, .01));
+          expect(tester.getSize(card).width, closeTo(width - 24, .01));
           expect(tester.getRect(card).right, lessThanOrEqualTo(width));
           expect(tester.takeException(), isNull);
           if (language == 'ar' && scale == 2) {

@@ -217,7 +217,14 @@ void main() {
                 ),
                 findsNothing,
               );
-              expect(tile.trailing, isA<Icon>());
+              expect(tile.trailing, isNotNull);
+              expect(
+                find.descendant(
+                  of: find.byWidget(tile.trailing!),
+                  matching: find.byType(Icon),
+                ),
+                findsOneWidget,
+              );
               expect(tile.onTap, isNotNull);
               expect(
                 tester.getSize(bodyContext).height,

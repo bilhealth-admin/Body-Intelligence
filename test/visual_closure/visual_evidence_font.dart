@@ -51,6 +51,13 @@ Future<void> _loadRobotoIntoTestFamily() async {
   Future<ByteData> bytes(File source) =>
       source.readAsBytes().then((value) => ByteData.sublistView(value));
   final fontDirectory = font.parent;
+  final flutterRoot = fontDirectory.parent.parent.parent.parent;
+  final colorEmoji = File(
+    '${flutterRoot.path}${Platform.pathSeparator}engine'
+    '${Platform.pathSeparator}src${Platform.pathSeparator}flutter'
+    '${Platform.pathSeparator}txt${Platform.pathSeparator}third_party'
+    '${Platform.pathSeparator}fonts${Platform.pathSeparator}NotoColorEmoji.ttf',
+  );
   final projectArabicRegular = File(
     '${Directory.current.path}${Platform.pathSeparator}assets'
     '${Platform.pathSeparator}fonts${Platform.pathSeparator}'
@@ -94,6 +101,19 @@ Future<void> _loadRobotoIntoTestFamily() async {
   final productionArabic = FontLoader('BILArabic')
     ..addFont(bytes(projectArabicRegular))
     ..addFont(bytes(projectArabicBold));
+  // Widget-test screenshots run without iOS/Android system emoji fonts. Load
+  // the Flutter SDK's Noto color font under the native family names used by
+  // production so screenshots show the real Unicode glyphs rather than tofu.
+  final colorEmojiLoaders = colorEmoji.existsSync()
+      ? <FontLoader>[
+          for (final family in const [
+            'Apple Color Emoji',
+            'Noto Color Emoji',
+            'Segoe UI Emoji',
+          ])
+            FontLoader(family)..addFont(bytes(colorEmoji)),
+        ]
+      : const <FontLoader>[];
   final bilDisplay = FontLoader('BILDisplay')
     ..addFont(
       bytes(
@@ -112,6 +132,7 @@ Future<void> _loadRobotoIntoTestFamily() async {
     bilDisplay.load(),
     if (materialIcons.existsSync()) icons.load(),
     cupertinoIcons.load(),
+    for (final emojiLoader in colorEmojiLoaders) emojiLoader.load(),
   ]);
 }
 

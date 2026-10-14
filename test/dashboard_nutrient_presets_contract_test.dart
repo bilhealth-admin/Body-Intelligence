@@ -19,6 +19,7 @@ void main() {
       final componentSource = [
         'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
         'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
+        'lib/features/dashboard/widgets/dashboard_reference_locked_values.dart',
       ].map((path) => File(path).readAsStringSync()).join('\n');
 
       expect(cardAssembly, contains("tr('Heart Healthy'"));
@@ -30,12 +31,18 @@ void main() {
       expect(cardAssembly, contains('_CircularNutrientCard('));
       expect(phoneSource, contains('_OverviewCardsCarousel('));
       expect(phoneSource, contains('cards: overviewCards'));
-      expect(cardAssembly, contains('PremiumDashboardCardLock('));
+      expect(componentSource, contains('PremiumDashboardCardLock('));
       expect(
         cardAssembly,
         contains('locked: premiumAccessResolved && !premiumUnlocked'),
       );
-      expect(cardAssembly, contains('checking: !premiumAccessResolved'));
+      expect(
+        cardAssembly.replaceAll(RegExp(r'\s+'), ' '),
+        contains(
+          'checking: !premiumAccessResolved && '
+          '(premiumAccessChecking || onPremiumRetry == null)',
+        ),
+      );
       expect(phoneSource, isNot(contains('_ReferenceStatusCard(')));
       expect(
         componentSource,

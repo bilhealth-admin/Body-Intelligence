@@ -81,23 +81,15 @@ void main() {
     await tester.pumpWidget(analyticsApp());
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(
-        ValueKey<String>('analytics-range-${AnalyticsRange.thirtyDays.name}'),
-      ),
-      findsOneWidget,
-    );
+    SegmentedButton<AnalyticsRange> rangeSelector() =>
+        tester.widget(find.byType(SegmentedButton<AnalyticsRange>));
+    expect(rangeSelector().selected, {AnalyticsRange.thirtyDays});
 
     await tester.tap(find.text('7 days'));
     await tester.pump();
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(
-        ValueKey<String>('analytics-range-${AnalyticsRange.sevenDays.name}'),
-      ),
-      findsOneWidget,
-    );
+    expect(rangeSelector().selected, {AnalyticsRange.sevenDays});
     expect(find.text('Analytics overview'), findsOneWidget);
   });
 

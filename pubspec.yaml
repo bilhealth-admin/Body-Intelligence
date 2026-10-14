@@ -50,7 +50,6 @@ dependencies:
   supabase: ^2.14.0
   # Existing locked transport, now also fences Community requests after refresh.
   http: 1.6.0
-  flutter_facebook_auth: 7.2.0
   google_sign_in: 7.2.0
   sign_in_with_apple: 8.2.0
   flutter_svg: ^2.2.0
@@ -92,9 +91,14 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   path_provider_platform_interface: ^2.0.0
+  # The plans-route test exercises this existing platform boundary directly.
+  url_launcher_platform_interface: 2.3.2
   # Exercise actual durable preference failures independently of the UI cache.
   # This is the exact already-locked transitive version, not a runtime upgrade.
   shared_preferences_platform_interface: 2.4.2
+  # Hold actual pinned Functions JSON serialization in owner-boundary tests.
+  # The installed transitive version is unchanged.
+  yet_another_json_isolate: 2.1.1
   # Inject the existing player interface in lifecycle/network widget tests.
   video_player_platform_interface: ^6.9.0
 

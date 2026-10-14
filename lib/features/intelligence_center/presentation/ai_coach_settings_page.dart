@@ -17,6 +17,7 @@ import '../../../app/theme/bil_flat_icon.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../../shared/widgets/bil_clinical_note.dart';
 import '../../commerce/presentation/ai_boost_coach_artwork.dart';
+import '../../commerce/domain/store_catalog_configuration.dart';
 import '../../commerce/presentation/bil_store_copy.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../commerce/providers/app_purchase_providers.dart';
@@ -537,10 +538,37 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   }
 
   Future<void> _manageSubscription() async {
-    final uri = defaultTargetPlatform == TargetPlatform.iOS
-        ? Uri.parse('https://apps.apple.com/account/subscriptions')
-        : Uri.parse('https://play.google.com/store/account/subscriptions');
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final epoch = _ownerEpoch;
+    final owner = _sessionOwner;
+    final uri = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => Uri.parse(
+        'https://apps.apple.com/account/subscriptions',
+      ),
+      TargetPlatform.android => Uri.https(
+        'play.google.com',
+        '/store/account/subscriptions',
+        {'package': StoreCatalogConfiguration.packageName},
+      ),
+      _ => null,
+    };
+    if (uri != null) {
+      try {
+        if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+      } on Object {
+        // Surface native launch failure without changing store or account state.
+      }
+    }
+    if (!mounted || epoch != _ownerEpoch || owner != _sessionOwner) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          BilStoreCopy.text(
+            Localizations.localeOf(context).toLanguageTag(),
+            'subscription_management_unavailable',
+          ),
+        ),
+      ),
+    );
   }
 
   @override

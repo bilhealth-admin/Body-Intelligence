@@ -95,6 +95,7 @@ class DailyLogPage extends ConsumerStatefulWidget {
 class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final notes = TextEditingController();
   final exerciseNotes = TextEditingController();
+  DateTime? exerciseNotesDraftDate;
   final quantity = TextEditingController(text: '100');
   final foodSearch = SearchController();
   static const FoodSearchAssistance _searchAssistance = FoodSearchAssistance();
@@ -227,7 +228,13 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         final exerciseValue = DailyExerciseNotesCodec.decode(
           log?.exerciseNotes,
         ).manualText;
-        if (exerciseNotes.text != exerciseValue) {
+        final selectedDate = DateUtils.dateOnly(
+          ref.read(selectedLogDateProvider),
+        );
+        final draftIsForSelectedDate =
+            exerciseNotesDraftDate != null &&
+            DateUtils.isSameDay(exerciseNotesDraftDate, selectedDate);
+        if (!draftIsForSelectedDate && exerciseNotes.text != exerciseValue) {
           exerciseNotes.text = exerciseValue;
         }
       });
@@ -631,6 +638,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                       key: exerciseSectionKey,
                                       arabic: _arabic,
                                       controller: exerciseNotes,
+                                      onNotesChanged: (_) {
+                                        exerciseNotesDraftDate =
+                                            DateUtils.dateOnly(
+                                              ref.read(selectedLogDateProvider),
+                                            );
+                                      },
                                       structuredExerciseNames:
                                           exerciseNotesView.displayNames,
                                       compact: true,

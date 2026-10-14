@@ -60,10 +60,6 @@ Future<_VoiceFixture> _mount(WidgetTester tester) async {
     await database.customSelect('SELECT 1').get();
     return database;
   }))!;
-  addTearDown(() async {
-    await tester.runAsync(database.close);
-  });
-
   final calls = <String, int>{};
   final messenger = tester.binding.defaultBinaryMessenger;
   for (final name in [
@@ -94,9 +90,14 @@ Future<_VoiceFixture> _mount(WidgetTester tester) async {
   // Register after mount so the page is disposed while its native cleanup
   // channels and database still exist, including when an assertion fails.
   addTearDown(() async {
-    await base.unmount(tester);
     fixture.completeReply();
-    await _drain(tester);
+    // Dispose the Riverpod/Drift listeners and advance one fake-clock frame
+    // before closing the backing database. Closing first can leave Drift's
+    // zero-duration stream shutdown timer pending at test teardown.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.runAsync(database.close);
+    await tester.pump(const Duration(milliseconds: 1));
   });
   for (var turn = 0; turn < 40; turn++) {
     await _drain(tester);
@@ -282,6 +283,12 @@ void main() {
       expect(fixture.nativeCalls['bil/speech:listen'], 1);
       expect(await _savedUserMessages(tester, fixture), hasLength(1));
       expect(tester.takeException(), isNull);
+
+      // Exercise Riverpod/Drift teardown while the widget test's fake clock is
+      // still active; package tearDown alone runs too late for these streams.
+      await base.unmount(tester);
+      await _drain(tester);
+      await tester.pump(Duration.zero);
     },
   );
 }

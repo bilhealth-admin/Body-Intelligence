@@ -33,6 +33,7 @@ import 'runtime_copy_fitness_watch.dart';
 import 'runtime_copy_connected_health.dart';
 import 'runtime_copy_platform_conversation.dart';
 import 'runtime_copy_community_moderation.dart';
+import 'runtime_copy_ai_safety_reports.dart';
 import 'runtime_copy_community_social.dart';
 import 'runtime_copy_community_reference.dart';
 import 'runtime_copy_community_expansion.dart';
@@ -139,6 +140,11 @@ abstract final class RuntimeCopy {
       localeTag,
     );
     if (communityModeration != null) return communityModeration;
+    final aiSafetyReport = AiSafetyReportRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (aiSafetyReport != null) return aiSafetyReport;
     if (AdminNotificationRuntimeCopy.values.containsKey(english)) {
       return AdminNotificationRuntimeCopy.resolve(english, localeTag);
     }
@@ -267,6 +273,7 @@ abstract final class RuntimeCopy {
         CommunityReferenceRuntimeCopy.balanced &&
         CommunityExpansionRuntimeCopy.balanced &&
         CommunityModerationRuntimeCopy.balanced &&
+        AiSafetyReportRuntimeCopy.balanced &&
         AdminNotificationRuntimeCopy.balanced &&
         MealVoiceRuntimeCopy.balanced &&
         CoachReviewRuntimeCopy.balanced &&

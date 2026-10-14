@@ -1,0 +1,93 @@
+{
+  "host": "127.0.0.1",
+  "port": 55432,
+  "database": "bil_qa_safety_20261014181216776548",
+  "production_tested": false,
+  "cases": [
+    {
+      "name": "current RPC types and execute roles match captured published catalog",
+      "result": "PASS"
+    },
+    {
+      "name": "baseline hide admits effect after a separately committed withdrawal",
+      "result": "PASS"
+    },
+    {
+      "name": "old RPC identities return types ACL and financial rights are unchanged",
+      "result": "PASS"
+    },
+    {
+      "name": "hide serializes admitted decision before role withdrawal commits",
+      "result": "PASS"
+    },
+    {
+      "name": "generic report serializes admitted decision before role withdrawal commits",
+      "result": "PASS"
+    },
+    {
+      "name": "service-only reinstatement finishes before admitted administrator withdrawal commits",
+      "result": "PASS"
+    },
+    {
+      "name": "ordinary direct API cannot spoof the actor of roster or suspension RPCs",
+      "result": "PASS"
+    },
+    {
+      "name": "ordinary own-content and revoked identities cannot read reported content",
+      "result": "PASS"
+    },
+    {
+      "name": "suspended moderator cannot read content until reinstated",
+      "result": "PASS"
+    },
+    {
+      "name": "changed reported text rejects stale removal without deleting content",
+      "result": "PASS"
+    },
+    {
+      "name": "changed reported image rejects stale removal without deleting content",
+      "result": "PASS"
+    },
+    {
+      "name": "changed poll question rejects the stale reviewed decision",
+      "result": "PASS"
+    },
+    {
+      "name": "changed poll option rejects the stale reviewed decision",
+      "result": "PASS"
+    },
+    {
+      "name": "withdrawn role cannot replay or read a committed report receipt",
+      "result": "PASS"
+    },
+    {
+      "name": "simultaneous retry creates one decision and owned readback is exact",
+      "result": "PASS"
+    },
+    {
+      "name": "reported reply includes only its context and removes only the referenced reply",
+      "result": "PASS"
+    },
+    {
+      "name": "own-block RLS delete preserves the opposite block and rejects cross-owner removal",
+      "result": "PASS"
+    }
+  ],
+  "input_sha256": {
+    "supabase/tests/fixtures/community_review_baseline/schema.sql": "78bfb546bdf274daddd20879ca4b91e22310420f184dc3021f61b16c3a9b8d39",
+    "supabase/tests/fixtures/community_review_baseline/functions.sql": "ace46d709eec3d91b3352e52cc47984d5259bac49db1a9d765589a88be512606",
+    "supabase/migrations/202608020002_bil_community_foundation.sql": "1aa5b982dcc7f12c79e5fb38d127653a3ba13d6de339a14a1b5dc8f8e00f37b3",
+    "supabase/migrations/20260908013800_bil_community_social_v2.sql": "a44a3e659fbed85e13f1a24518c2035808c9ec26963275f2c4ee004877e91293",
+    "supabase/migrations/20260905160000_admin_community_access_control.sql": "2d4d3bf46e9d5abc61a2146681fc459433872095d5ee40bb2d7e12888b0b43f8",
+    "supabase/migrations/20260904030000_community_post_human_moderation.sql": "ec9f08f7827641676c3447e2c99862e67c7f44a6fe919146dce920aed7e271b8",
+    "supabase/migrations/20260905160100_fix_community_admin_coalesce.sql": "a0aee682886736026b5d0a527605b3cdb7e4530d632b18621dcaa19e4a073b6e",
+    "supabase/migrations/20260905160200_fix_community_suspend_uuid_aggregate.sql": "2e2c92282f830fa8c469cb63cfae8f9599324bbb5d1f7a8d30a733c99ea70044",
+    "supabase/migrations/20260924223453_community_admin_moderation_visibility.sql": "7748689a3c73c050e67f829afb262dcc8e6f65dbfa12a62a85b2253e750bb844",
+    "supabase/migrations/20260925005354_final_hardening_cloud_consent_community_authority.sql": "0b99598d23f0f574db3c0c6c301bc7777a1227d78dabebdf7f25a7745b90d61d",
+    "supabase/tests/fixtures/community_safety_authority_baseline/catalog.json": "dce48df060da1e19b2c991501d617c9a7474ea1ba71825f542c15f0efe0d72a0",
+    "supabase/tests/fixtures/community_safety_authority_baseline/functions.sql": "1962010c9407c0864d9e30cf41bba31409f3bcb45ec5570501eda076d101060b",
+    "supabase/tests/fixtures/community_safety_authority_baseline/contracts.sql": "ed6960d2fb490ca1d1b1e2e16f27b4ad7c07a898d5ec87543b37d45e94604bc9",
+    "supabase/migrations/20261013062221_community_safety_report_review_v1.sql": "8846b0e94d6fee14b76597c05bebb3f9239d71d0e0399127698fbaec7ef30e18"
+  },
+  "source_only_auth_claims": true
+}

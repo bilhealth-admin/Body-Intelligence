@@ -171,6 +171,9 @@ void main() {
       'lib/features/commerce/services/verified_store_purchase_service.dart',
       'lib/features/commerce/services/verified_store_purchase_processing.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
+    final completion = File(
+      'lib/features/commerce/services/verified_store_purchase_completion.dart',
+    ).readAsStringSync();
     final canonicalMigration = File(
       'supabase/migrations/20260815225624_bil_canonical_consumer_tiers.sql',
     ).readAsStringSync();
@@ -188,10 +191,13 @@ void main() {
     expect(backend, contains('appleServerStatusLifecycle'));
     expect(backend, contains('scheduled_reconciliation_failed'));
     expect(client, contains('purchase.status'));
-    expect(
-      client,
-      contains('if (verifiedReceipt && purchase.pendingCompletePurchase)'),
-    );
+    // Receipt verification and native completion are separate stages. The
+    // extracted completion helper may finish only a verified receipt and
+    // preserves a retryable acknowledgement if the store finish fails.
+    expect(client, contains('_finishVerifiedNativeReceipt('));
+    expect(completion, contains('if (purchase.pendingCompletePurchase)'));
+    expect(completion, contains('completeVerifiedNativePurchase('));
+    expect(completion, contains('_pendingVerifiedFinishes[key] = purchase'));
     expect(
       client,
       contains(

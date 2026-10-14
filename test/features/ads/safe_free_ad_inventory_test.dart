@@ -103,7 +103,7 @@ void main() {
         ".from('bil_subscriptions')",
       );
       final verifiedFree = repository.indexOf(
-        '_remember(user.id, _verifiedFree(), now)',
+        '_verifiedFree(verifiedAt: verifiedAt)',
       );
       expect(closedTestBranch, greaterThanOrEqualTo(0));
       expect(subscriptionQuery, greaterThan(closedTestBranch));
@@ -114,7 +114,14 @@ void main() {
       );
       expect(closedTestBody, contains('return await _remember('));
       expect(closedTestBody, contains('_closedTestState('));
-      expect(repository, contains('_remember(user.id, _verifiedFree(), now)'));
+      expect(
+        repository,
+        contains(
+          RegExp(
+            r'_remember\(\s*user\.id,\s*_verifiedFree\(verifiedAt: verifiedAt\),\s*now,\s*\)',
+          ),
+        ),
+      );
       expect(
         repository,
         contains('authority: EntitlementAuthority.verifiedServer'),

@@ -11,6 +11,7 @@ import 'coach_intent_normalizer.dart';
 import 'coach_language_resolver.dart';
 import 'coach_speech_policy.dart';
 import 'local_coach_api.dart';
+import 'local_coach_command_parser.dart';
 import 'local_model_gateway.dart';
 
 part 'intelligence_center_reply.dart';
@@ -419,16 +420,45 @@ class IntelligenceCenterEngine {
             question.contains('kcal') ||
             question.contains('سعرات')) &&
         targets['caloriesKcal'] is num) {
-      final value = (targets['caloriesKcal']! as num).round();
+      final target = (targets['caloriesKcal']! as num).toDouble();
+      if (!target.isFinite || target < 0) return null;
+      final value = target.round();
+      final source = sources['caloriesKcal']?.toString();
+      final sourceCopy = switch (source) {
+        'scheduled_daily_goal' => tr(
+          "It comes from today's scheduled calorie goal.",
+          'مصدره هدف سعرات اليوم المجدول.',
+        ),
+        'saved_percentage_goal' => tr(
+          'It comes from the calorie goal saved in Nutrition Goals.',
+          'مصدره هدف السعرات المحفوظ في أهداف التغذية.',
+        ),
+        'saved_plan_override' || 'saved_plan_recommendation' => tr(
+          'It comes from the target saved in your BIL plan.',
+          'مصدره الهدف المحفوظ في خطتك داخل BIL.',
+        ),
+        'body_profile_calculation' => tr(
+          'It comes from the current BIL body-profile calculation.',
+          'مصدره حساب BIL الحالي المبني على ملف جسمك.',
+        ),
+        _ => tr(
+          'It comes from your current BIL nutrition-target context.',
+          'مصدره سياق أهداف التغذية الحالي داخل BIL.',
+        ),
+      };
       return _reply(
         tr(
-          'Your current daily target is {value} kcal. This is the target saved in your BIL plan, not a generic estimate.',
-          'هدفك اليومي الحالي هو {value} سعرة حرارية. هذا هو الهدف المحفوظ في خطتك وليس تقديرًا عامًا.',
-        ).replaceAll('{value}', value.toString()),
+              'Your current daily target is {value} kcal. {source}',
+              'هدفك اليومي الحالي هو {value} سعرة حرارية. {source}',
+            )
+            .replaceAll('{value}', value.toString())
+            .replaceAll('{source}', sourceCopy),
+        evidence: ['dailyTargets.caloriesKcal', ?source],
         citationIds: const [
           HealthEvidenceIds.mifflinStJeor,
           HealthEvidenceIds.dietaryReferenceIntakes,
         ],
+        confidence: 1,
       );
     }
     return null;
@@ -470,6 +500,15 @@ class IntelligenceCenterEngine {
     CoachContextSnapshot? context,
   ) {
     if (!const CoachSpeechPolicy().isWeightLookup(question)) return null;
+    // A known, admitted weight command must reach the existing local command
+    // path and its confirmation instead of being mistaken for a weight read.
+    // Reuse the same parser so units, dates and ambiguous quantities keep their
+    // existing validation; this probe does not execute or write an action.
+    if (const LocalCoachCommandParser()
+        .parse(question, locale: locale)
+        .any((action) => action.toolId == 'log_weight')) {
+      return null;
+    }
     String tr(String en, String ar) => intelligenceTextFor(locale, en, ar);
     final latest = context?.weights.isNotEmpty == true
         ? context!.weights.first.kg

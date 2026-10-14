@@ -126,10 +126,22 @@ void main() {
             ),
           )
           .firstWhere((w) => w.decoration is BoxDecoration);
+      final finish = bubble.decoration as BoxDecoration;
+      expect(finish.gradient, isA<LinearGradient>());
+      final stops = (finish.gradient! as LinearGradient).colors;
       expect(
-        (bubble.decoration as BoxDecoration).color,
-        CommunitySapphire.blue,
+        stops,
+        dark
+            ? const [Color(0xFF2B609B), Color(0xFF224F83), Color(0xFF1D416F)]
+            : const [Color(0xFF1D5FBC), Color(0xFF1854A7), Color(0xFF174786)],
       );
+      for (final stop in stops) {
+        expect(stop.a, 1);
+        expect(
+          1.05 / (stop.computeLuminance() + .05),
+          greaterThanOrEqualTo(4.5),
+        );
+      }
       expect(tester.takeException(), isNull);
       expect(tester.getSize(find.byType(CommunityMessageBubble)).width, 400);
     });

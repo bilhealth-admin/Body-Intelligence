@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "run_file": "realtime-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "real sender and receiver identities verified",
+      "state": "PASS"
+    },
+    {
+      "index": 2,
+      "static_case_label": "create only isolated test friendship when none exists",
+      "state": "PASS"
+    },
+    {
+      "index": 3,
+      "static_case_label": "receiver subscribes to its own actual Realtime INSERT stream",
+      "state": "PASS"
+    },
+    {
+      "index": 4,
+      "static_case_label": "first message committed with actual server receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 5,
+      "static_case_label": "first actual Realtime event matches committed message and owner",
+      "state": "PASS"
+    },
+    {
+      "index": 6,
+      "static_case_label": "first attention badge increments from committed message",
+      "state": "PASS"
+    },
+    {
+      "index": 7,
+      "static_case_label": "first own read acknowledgment restores unread total",
+      "state": "PASS"
+    },
+    {
+      "index": 8,
+      "static_case_label": "first unrelated account and admin cannot read private message",
+      "state": "PASS"
+    },
+    {
+      "index": 9,
+      "static_case_label": "disconnect and resubscribe actual WebSocket",
+      "state": "PASS"
+    },
+    {
+      "index": 10,
+      "static_case_label": "reconnected message committed with actual server receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 11,
+      "static_case_label": "reconnected actual Realtime event matches committed message and owner",
+      "state": "PASS"
+    },
+    {
+      "index": 12,
+      "static_case_label": "reconnected attention badge increments from committed message",
+      "state": "PASS"
+    },
+    {
+      "index": 13,
+      "static_case_label": "reconnected own read acknowledgment restores unread total",
+      "state": "PASS"
+    },
+    {
+      "index": 14,
+      "static_case_label": "reconnected unrelated account and admin cannot read private message",
+      "state": "PASS"
+    },
+    {
+      "index": 15,
+      "static_case_label": "cleanup only newly created test relationship",
+      "state": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 15,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T07:05:06.010Z",
+  "finished_utc": "2026-10-13T07:05:10.764Z"
+}

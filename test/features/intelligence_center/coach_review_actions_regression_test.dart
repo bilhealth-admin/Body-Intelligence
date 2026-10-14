@@ -138,6 +138,21 @@ Future<void> unmount(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> waitForCoachReady(WidgetTester tester, {bool send = false}) async {
+  final action = find.byKey(
+    Key(send ? 'ai-coach-send-button' : 'ai-coach-voice-button'),
+  );
+  for (var attempt = 0; attempt < 40; attempt++) {
+    await tester.pump(const Duration(milliseconds: 100));
+    if (action.evaluate().isNotEmpty &&
+        tester.widget<IconButton>(action).onPressed != null) {
+      return;
+    }
+  }
+  expect(action, findsOneWidget);
+  expect(tester.widget<IconButton>(action).onPressed, isNotNull);
+}
+
 const historyKey = 'intelligenceConversationHistoryV1';
 const transcriptKey = 'intelligenceConversationV1';
 const activeKey = 'intelligenceConversationActiveIdV1';
@@ -303,9 +318,14 @@ void main() {
       await seed(prefs);
       final gateway = Gateway()..pending = Completer<LocalModelResult>();
       await mount(tester, db, gateway: gateway);
+      await waitForCoachReady(tester);
       final field = find.byKey(const Key('ai-coach-question-field'));
-      await tester.enterText(field, 'Compare protein foods for dinner');
+      await tester.enterText(
+        field,
+        'Please explain how protein supports muscle.',
+      );
       await tester.pump();
+      await waitForCoachReady(tester, send: true);
       await tester.tap(find.byKey(const Key('ai-coach-send-button')));
       for (var i = 0; i < 20 && gateway.questions.isEmpty; i++) {
         await tester.pump(const Duration(milliseconds: 100));
@@ -472,11 +492,13 @@ void main() {
     await seed(prefs);
     final gateway = Gateway()..pending = Completer<LocalModelResult>();
     await mount(tester, db, gateway: gateway);
+    await waitForCoachReady(tester);
     await tester.enterText(
       find.byKey(const Key('ai-coach-question-field')),
-      'Compare protein foods for dinner',
+      'Please explain how protein supports muscle.',
     );
     await tester.pump();
+    await waitForCoachReady(tester, send: true);
     await tester.tap(find.byKey(const Key('ai-coach-send-button')));
     for (var i = 0; i < 20 && gateway.questions.isEmpty; i++) {
       await tester.pump(const Duration(milliseconds: 100));

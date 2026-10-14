@@ -19,6 +19,7 @@ class DailyExerciseSection extends StatelessWidget {
     required this.arabic,
     required this.controller,
     required this.onBrowseWorkouts,
+    this.onNotesChanged,
     this.structuredExerciseNames = const <String>[],
     this.compact = false,
   });
@@ -26,6 +27,7 @@ class DailyExerciseSection extends StatelessWidget {
   final bool arabic;
   final TextEditingController controller;
   final VoidCallback onBrowseWorkouts;
+  final ValueChanged<String>? onNotesChanged;
   final List<String> structuredExerciseNames;
   final bool compact;
 
@@ -101,6 +103,7 @@ class DailyExerciseSection extends StatelessWidget {
           TextField(
             key: const Key('daily-log-exercise-notes'),
             controller: controller,
+            onChanged: onNotesChanged,
             minLines: 1,
             maxLines: 3,
             textInputAction: TextInputAction.newline,
@@ -136,6 +139,7 @@ class DailyExerciseSection extends StatelessWidget {
           TextField(
             key: const Key('daily-log-exercise-notes'),
             controller: controller,
+            onChanged: onNotesChanged,
             minLines: 1,
             maxLines: 4,
             textInputAction: TextInputAction.newline,

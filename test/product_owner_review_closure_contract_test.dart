@@ -72,10 +72,8 @@ void main() {
     );
     expect(shell, contains("Key('shell-quick-add')"));
     expect(shell, contains('bottomNavigationBar: immersiveCoach'));
-    expect(
-      shell,
-      contains('showBilQuickAdd(context, originPath: paths[index])'),
-    );
+    expect(shell, contains('await showBilQuickAdd('));
+    expect(shell, contains('originPath: paths[index]'));
     expect(
       shell,
       contains('floatingActionButton: isDashboard ? quickButton : null'),

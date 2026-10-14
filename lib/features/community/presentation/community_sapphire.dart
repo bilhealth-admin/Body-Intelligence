@@ -5,6 +5,15 @@ import '../../../app/theme/bil_pearl_finish.dart';
 abstract final class CommunitySapphire {
   static const blue = Color(0xFF155EEF);
   static const navy = Color(0xFF14243A);
+
+  /// Every stop maintains at least 4.5:1 contrast against white text.
+  static LinearGradient messageGradient(BuildContext context) => LinearGradient(
+    begin: AlignmentDirectional.topStart,
+    end: AlignmentDirectional.bottomEnd,
+    colors: Theme.of(context).brightness == Brightness.dark
+        ? const [Color(0xFF2B609B), Color(0xFF224F83), Color(0xFF1D416F)]
+        : const [Color(0xFF1D5FBC), Color(0xFF1854A7), Color(0xFF174786)],
+  );
   static Color canvas(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
       ? BilPearlFinish.darkCanvas
@@ -42,15 +51,34 @@ class CommunityMessageBubble extends StatelessWidget {
           color: mine
               ? CommunitySapphire.blue
               : CommunitySapphire.paper(context),
+          gradient: mine
+              ? CommunitySapphire.messageGradient(context)
+              : BilPearlFinish.panel(context, shadow: false).gradient,
+          boxShadow: MediaQuery.highContrastOf(context)
+              ? const []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
           borderRadius: BorderRadiusDirectional.only(
             topStart: const Radius.circular(20),
             topEnd: const Radius.circular(20),
             bottomStart: Radius.circular(mine ? 20 : 6),
             bottomEnd: Radius.circular(mine ? 6 : 20),
           ),
-          border: mine
-              ? null
-              : Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(
+            color: MediaQuery.highContrastOf(context)
+                ? (mine ? Colors.white : CommunitySapphire.ink(context))
+                : mine
+                ? Colors.white.withValues(alpha: .18)
+                : Theme.of(context).brightness == Brightness.dark
+                ? BilPearlFinish.darkEdge
+                : BilPearlFinish.lightEdge,
+            width: MediaQuery.highContrastOf(context) ? 1.5 : .8,
+          ),
         ),
         child: DefaultTextStyle.merge(
           style: TextStyle(

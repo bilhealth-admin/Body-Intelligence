@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "run_file": "read-receipts-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "unrelated publisher cannot acknowledge private messages",
+      "state": "PASS"
+    },
+    {
+      "index": 2,
+      "static_case_label": "admin role gives no private message read privilege",
+      "state": "PASS"
+    },
+    {
+      "index": 3,
+      "static_case_label": "sender cannot mark recipient message read",
+      "state": "PASS"
+    },
+    {
+      "index": 4,
+      "static_case_label": "receiver acknowledges only visible test message through actual app RPC",
+      "state": "PASS"
+    },
+    {
+      "index": 5,
+      "static_case_label": "sender acknowledges only visible test reply through actual app RPC",
+      "state": "PASS"
+    },
+    {
+      "index": 6,
+      "static_case_label": "receiver repeated acknowledgment does not change row again",
+      "state": "PASS"
+    },
+    {
+      "index": 7,
+      "static_case_label": "receiver unread message badge follows confirmed receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 8,
+      "static_case_label": "sender repeated acknowledgment does not change row again",
+      "state": "PASS"
+    },
+    {
+      "index": 9,
+      "static_case_label": "sender unread message badge follows confirmed receipt",
+      "state": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 9,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T06:57:25Z",
+  "finished_utc": "2026-10-13T06:57:28Z",
+  "pid": 6532
+}

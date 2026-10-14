@@ -204,71 +204,41 @@ class _OpenReportCard extends StatelessWidget {
   const _OpenReportCard({
     required this.report,
     required this.busy,
-    required this.onClose,
-    required this.onRemove,
+    required this.onReview,
   });
-
   final Map<String, dynamic> report;
   final bool busy;
-  final VoidCallback onClose;
-  final VoidCallback onRemove;
-
+  final VoidCallback onReview;
   @override
-  Widget build(BuildContext context) {
-    final targetKind = report['target_kind']?.toString() ?? 'unknown';
-    final canRemove = const {'post', 'message'}.contains(targetKind);
-    return Card(
-      key: Key('community-moderation-report-${report['id']}'),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              '$targetKind · ${report['target_id']}',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Chip(
-                avatar: const Icon(Icons.flag_outlined, size: 18),
-                label: Text(
-                  communityText(context, 'Open report', 'بلاغ مفتوح'),
-                ),
+  Widget build(BuildContext context) => Card(
+    key: Key('community-moderation-report-${report['id']}'),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            communityText(context, 'Open report', 'بلاغ مفتوح'),
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          SelectableText(report['reason']?.toString() ?? ''),
+          const SizedBox(height: 12),
+          FilledButton.tonal(
+            onPressed: busy ? null : onReview,
+            key: Key('community-report-view-${report['id']}'),
+            child: Text(
+              communityText(
+                context,
+                'Review reported content',
+                'مراجعة المحتوى المُبلّغ عنه',
               ),
             ),
-            const SizedBox(height: 8),
-            SelectableText(report['reason']?.toString() ?? ''),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonal(
-                  onPressed: busy ? null : onClose,
-                  child: Text(
-                    communityText(context, 'Close report', 'إغلاق البلاغ'),
-                  ),
-                ),
-                if (canRemove)
-                  OutlinedButton(
-                    onPressed: busy ? null : onRemove,
-                    child: Text(
-                      communityText(
-                        context,
-                        'Remove reported content',
-                        'إزالة المحتوى المُبلّغ عنه',
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _ModerationMediaGrid extends StatelessWidget {
@@ -463,12 +433,20 @@ class _CommunityModerationQueue {
     required this.hiddenPosts,
     required this.reports,
     required this.rewards,
+    this.aiCoachReports = const [],
+    this.aiCoachReportReviewUnavailable = false,
+    this.commentReports = const [],
+    this.commentReviewUnavailable = false,
     this.reviewUnavailable = false,
   });
 
   final List<CommunityPost> posts;
   final List<CommunityPost> hiddenPosts;
   final List<Map<String, dynamic>> reports;
+  final List<CommunityCommentReport> commentReports;
+  final bool commentReviewUnavailable;
+  final List<AiCoachSafetyReport> aiCoachReports;
+  final bool aiCoachReportReviewUnavailable;
   final List<CommunityRewardReview> rewards;
   final bool reviewUnavailable;
 }

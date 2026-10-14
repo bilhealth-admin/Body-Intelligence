@@ -7,11 +7,15 @@ import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/premium_route_glass_gate.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
+import 'package:body_intelligence_log/features/intelligence_center/app_commands/coach_health_brief_provider.dart';
+import 'package:body_intelligence_log/features/nutrition/domain/nutrition_goal_snapshot.dart';
+import 'package:body_intelligence_log/features/nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/settings/settings_page.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +26,37 @@ Map<String, Object?> _aiUsage(Object? totalRemaining) => {
   'credits': <String, Object?>{'total_remaining': totalRemaining},
 };
 
+Future<void> _pumpBoundedRouteFrames(WidgetTester tester) async {
+  // Coach and paywall surfaces contain indeterminate animations. Advance the
+  // route transition for a fixed budget instead of waiting for every ticker.
+  for (var frame = 0; frame < 8; frame++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
+Future<void> _waitUntilHitTestable(WidgetTester tester, Finder target) async {
+  for (var frame = 0; frame < 40; frame++) {
+    if (target.hitTestable().evaluate().isNotEmpty) return;
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
+void _stubCoachTts(WidgetTester tester) {
+  const channel = MethodChannel('bil/tts');
+  final messenger = tester.binding.defaultBinaryMessenger;
+  messenger.setMockMethodCallHandler(channel, (_) async => null);
+  addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+}
+
+Future<void> _disposeRouteTree(WidgetTester tester) async {
+  await tester.pumpWidget(const SizedBox.shrink());
+  // Drift stream cancellation schedules zero-duration close timers after the
+  // provider container is disposed; advance fake time to let them drain.
+  for (var frame = 0; frame < 3; frame++) {
+    await tester.pump(const Duration(milliseconds: 1));
+  }
+}
+
 void main() {
   testWidgets('Android More to Coach returns through header and system back', (
     tester,
@@ -30,6 +65,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    _stubCoachTts(tester);
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     final router = GoRouter(
@@ -46,15 +82,26 @@ void main() {
       ],
     );
     addTearDown(router.dispose);
+    addTearDown(() => _disposeRouteTree(tester));
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-review-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(FreePlan.createState()),
           ),
           aiCoachCreditAccessProvider.overrideWithValue(const AsyncData(true)),
+          coachHealthBriefProvider.overrideWith(
+            (ref) async => CoachContextSnapshot.empty(),
+          ),
+          nutritionGoalSnapshotProvider.overrideWith(
+            (ref) =>
+                Stream.value(NutritionGoalSnapshot.resolve(const {}, const {})),
+          ),
           coachContextSnapshotProvider.overrideWith(
             (ref) async => CoachContextSnapshot.empty(),
           ),
@@ -73,32 +120,49 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpBoundedRouteFrames(tester);
 
     Future<void> openCoach() async {
       final entry = find.byKey(const Key('more-ai-coach-entry'));
-      await tester.scrollUntilVisible(entry, 280);
       await tester.ensureVisible(entry);
-      await tester.pumpAndSettle();
+      await _pumpBoundedRouteFrames(tester);
       await tester.tap(entry);
-      await tester.pumpAndSettle();
+      await _pumpBoundedRouteFrames(tester);
+      for (
+        var attempt = 0;
+        attempt < 35 &&
+            find.byKey(const ValueKey('ai-coach-hero')).evaluate().isEmpty;
+        attempt++
+      ) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(IntelligenceCenterPage), findsOneWidget);
       expect(find.byKey(const ValueKey('ai-coach-hero')), findsOneWidget);
-      expect(find.byType(SettingsPage), findsNothing);
+      expect(find.byType(IntelligenceCenterPage).hitTestable(), findsOneWidget);
+      expect(find.byType(SettingsPage).hitTestable(), findsNothing);
     }
 
     await openCoach();
     await tester.tap(find.byTooltip('Back'));
-    await tester.pumpAndSettle();
-    expect(find.byType(SettingsPage), findsOneWidget);
+    await _pumpBoundedRouteFrames(tester);
+    expect(find.byType(SettingsPage).hitTestable(), findsOneWidget);
+    expect(find.byType(IntelligenceCenterPage).hitTestable(), findsNothing);
+    expect(
+      find.byKey(const Key('more-ai-coach-entry')).hitTestable(),
+      findsOneWidget,
+    );
 
     await openCoach();
     await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    expect(find.byType(SettingsPage), findsOneWidget);
+    await _pumpBoundedRouteFrames(tester);
+    expect(find.byType(SettingsPage).hitTestable(), findsOneWidget);
+    expect(find.byType(IntelligenceCenterPage).hitTestable(), findsNothing);
+    expect(
+      find.byKey(const Key('more-ai-coach-entry')).hitTestable(),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
+    await _disposeRouteTree(tester);
   });
 
   testWidgets('Android AI Coach paywall returns to More without freezing', (
@@ -108,6 +172,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    _stubCoachTts(tester);
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     final router = GoRouter(
@@ -124,15 +189,26 @@ void main() {
       ],
     );
     addTearDown(router.dispose);
+    addTearDown(() => _disposeRouteTree(tester));
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-review-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(FreePlan.createState()),
           ),
           aiCoachCreditAccessProvider.overrideWithValue(const AsyncData(false)),
+          coachHealthBriefProvider.overrideWith(
+            (ref) async => CoachContextSnapshot.empty(),
+          ),
+          nutritionGoalSnapshotProvider.overrideWith(
+            (ref) =>
+                Stream.value(NutritionGoalSnapshot.resolve(const {}, const {})),
+          ),
           coachContextSnapshotProvider.overrideWith(
             (ref) async => CoachContextSnapshot.empty(),
           ),
@@ -151,39 +227,55 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await _pumpBoundedRouteFrames(tester);
 
     Future<void> openPaywall() async {
       final entry = find.byKey(const Key('more-ai-coach-entry'));
-      await tester.scrollUntilVisible(entry, 280);
       await tester.ensureVisible(entry);
-      await tester.pumpAndSettle();
+      await _pumpBoundedRouteFrames(tester);
       await tester.tap(entry);
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(const ValueKey('premium-route-protected-content')),
-        findsOneWidget,
-      );
+      await _pumpBoundedRouteFrames(tester);
+      final upgrade = find.byKey(const ValueKey('premium-route-upgrade-cta'));
+      expect(upgrade, findsOneWidget);
+      expect(upgrade.hitTestable(), findsOneWidget);
       expect(find.text('BIL AI BOOST'), findsWidgets);
       expect(find.text('BIL PREMIUM AI COACH'), findsNothing);
-      expect(find.byType(SettingsPage), findsNothing);
+      expect(find.byType(SettingsPage).hitTestable(), findsNothing);
     }
 
     await openPaywall();
-    await tester.tap(
-      find.widgetWithIcon(IconButton, Icons.arrow_back_rounded).last,
+    await tester.tap(find.byKey(const ValueKey('premium-route-back')));
+    await _waitUntilHitTestable(
+      tester,
+      find.byKey(const Key('more-ai-coach-entry')),
     );
-    await tester.pumpAndSettle();
-    expect(find.byType(SettingsPage), findsOneWidget);
+    expect(find.byType(SettingsPage).hitTestable(), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('more-ai-coach-entry')).hitTestable(),
+      findsOneWidget,
+    );
 
     await openPaywall();
     await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    expect(find.byType(SettingsPage), findsOneWidget);
+    await _waitUntilHitTestable(
+      tester,
+      find.byKey(const Key('more-ai-coach-entry')),
+    );
+    expect(find.byType(SettingsPage).hitTestable(), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('premium-route-upgrade-cta')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('more-ai-coach-entry')).hitTestable(),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
+    await _disposeRouteTree(tester);
   });
 
   testWidgets(
@@ -322,7 +414,17 @@ void main() {
           ),
           aiCoachCreditAccessProvider.overrideWithValue(const AsyncLoading()),
         ],
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          routerConfig: router,
+        ),
       ),
     );
     await tester.pumpAndSettle();

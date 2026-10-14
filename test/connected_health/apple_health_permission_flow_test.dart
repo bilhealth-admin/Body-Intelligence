@@ -8,6 +8,7 @@ import 'package:body_intelligence_log/features/connected_health/widgets/dashboar
 import 'package:body_intelligence_log/features/global_platform/health_data/unified_health_data_integration.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
 import 'package:body_intelligence_log/features/global_platform/platform/native_platform_bridges.dart';
+import 'package:body_intelligence_log/features/global_platform/persistence/owner_scoped_health_store.dart';
 import 'package:body_intelligence_log/features/global_platform/runtime/global_product_composition_root.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ void main() {
   group('native permission decision flow', () {
     final host = GlobalNativeIntegrationHost.instance;
     late NativeConnectedHealthGateway gateway;
+    late OwnerScopedHealthStore healthStore;
     late List<String> calls;
     late String status;
     setUp(() async {
@@ -50,6 +52,11 @@ void main() {
           localeCatalogs: [],
         ),
       );
+      healthStore = OwnerScopedHealthStore(
+        inner: host.productFlows!.store,
+        ownerId: OwnerScopedHealthStore.localDeviceOwner,
+        readCurrentOwnerId: () => OwnerScopedHealthStore.localDeviceOwner,
+      );
       gateway = NativeConnectedHealthGateway(host.productFlows!);
     });
     tearDown(() async {
@@ -64,10 +71,7 @@ void main() {
         expect(await gateway.requestStartupPermissions(), isNull);
         expect(calls, isEmpty);
         expect(
-          await host.productFlows!.store.get(
-            'connected_health_consent',
-            'Apple Health',
-          ),
+          await healthStore.get('connected_health_consent', 'Apple Health'),
           isNull,
         );
       },
@@ -86,7 +90,7 @@ void main() {
         expect(calls, isNot(contains('readChanges')));
         expect(calls, isNot(contains('openSettings')));
         expect(
-          (await host.productFlows!.store.get(
+          (await healthStore.get(
             'connected_health_consent',
             'Apple Health',
           ))!['readRequested'],
@@ -99,7 +103,7 @@ void main() {
       'manual review opens guidance and preserves existing read anchors',
       () async {
         status = 'unnecessary';
-        final store = host.productFlows!.store;
+        final store = healthStore;
         await store.put('connected_health_consent', 'Apple Health', {
           'readRequested': true,
           'weightWriteRequested': true,
@@ -129,11 +133,9 @@ void main() {
     test(
       'new read types can still request a native sheet after earlier consent',
       () async {
-        await host.productFlows!.store.put(
-          'connected_health_consent',
-          'Apple Health',
-          {'readRequested': true},
-        );
+        await healthStore.put('connected_health_consent', 'Apple Health', {
+          'readRequested': true,
+        });
         final result = await gateway.requestPermissions();
         expect(
           calls.where((call) => call == 'requestPermissions'),
@@ -155,7 +157,7 @@ void main() {
     test(
       'preview cache rows are ignored, not deleted or counted as Health evidence',
       () async {
-        final store = host.productFlows!.store;
+        final store = healthStore;
         Map<String, Object?> row(String provider, double count) =>
             GlobalHealthSignal(
               key: 'steps',

@@ -7,6 +7,9 @@ void main() {
     final settings = File(
       'lib/features/settings/sharing_privacy_settings_page.dart',
     ).readAsStringSync();
+    final consentTile = File(
+      'lib/features/settings/sharing_privacy_cloud_sync_tile.dart',
+    ).readAsStringSync();
     final providers = File(
       'lib/features/cloud_platform/providers/cloud_sync_providers.dart',
     ).readAsStringSync();
@@ -16,22 +19,26 @@ void main() {
     final connectivity = File(
       'lib/features/cloud_platform/services/system_cloud_connectivity.dart',
     ).readAsStringSync();
+    final settingsAndTile = '$settings\n$consentTile';
 
-    expect(settings, contains('encrypted-cloud-sync-consent'));
-    expect(settings, contains('cloudSyncConsentStateProvider'));
-    expect(settings, contains('.setGranted(granted)'));
-    expect(settings, contains('cloudRuntimePreparationProvider'));
-    expect(settings, contains('CloudSyncConsentCopy.settingsTitle'));
-    expect(settings, contains('CloudSyncConsentCopy.settingsSubtitle'));
+    expect(settingsAndTile, contains('encrypted-cloud-sync-consent'));
+    expect(settingsAndTile, contains('cloudSyncConsentStateProvider'));
+    expect(settingsAndTile, contains('.setGranted(granted)'));
+    expect(settingsAndTile, contains('cloudRuntimePreparationProvider'));
+    expect(settingsAndTile, contains('CloudSyncConsentCopy.settingsTitle'));
+    expect(settingsAndTile, contains('CloudSyncConsentCopy.settingsSubtitle'));
     expect(
-      settings,
+      settingsAndTile,
       contains('CloudSyncConsentSummary(showDeletionControl: true)'),
     );
-    expect(settings, contains('CloudSyncConsentCopy.primaryAction'));
-    expect(settings, contains('CloudSyncConsentCopy.localAction'));
-    expect(settings, isNot(contains("_privacyText(context, 'Turn on')")));
+    expect(settingsAndTile, contains('CloudSyncConsentCopy.primaryAction'));
+    expect(settingsAndTile, contains('CloudSyncConsentCopy.localAction'));
     expect(
-      settings,
+      settingsAndTile,
+      isNot(contains("_privacyText(context, 'Turn on')")),
+    );
+    expect(
+      settingsAndTile,
       isNot(contains('CloudSyncConsentAvailability.premiumRequired')),
     );
 

@@ -320,9 +320,7 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         force ||
         !conversationScroll.hasClients ||
         !conversationScroll.position.hasContentDimensions ||
-        conversationScroll.position.pixels -
-                conversationScroll.position.minScrollExtent <=
-            72;
+        _coachIsNearLatest(conversationScroll.position);
     if (!shouldFollow) {
       return;
     }
@@ -334,16 +332,12 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
           conversationId != activeConversationId) {
         return;
       }
-      if (!jump &&
-          !force &&
-          conversationScroll.position.pixels -
-                  conversationScroll.position.minScrollExtent >
-              72) {
+      if (!jump && !force && !_coachIsNearLatest(conversationScroll.position)) {
         return;
       }
       // The fixed history anchor allows a negative extent for new messages.
       // Follow the measured newest end, not a hard-coded offset of zero.
-      final target = conversationScroll.position.minScrollExtent;
+      final target = _coachLatestReadingOffset(conversationScroll.position);
       if (jump || MediaQuery.disableAnimationsOf(context)) {
         conversationScroll.jumpTo(target);
       } else {

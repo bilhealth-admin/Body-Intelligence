@@ -8,6 +8,8 @@ import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/cloud_platform/domain/cloud_sync_models.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/app_database_cloud_outbox_producer.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/cloud_durable_ports.dart';
+import 'package:body_intelligence_log/features/cloud_platform/services/cloud_manual_sync_service.dart';
+import 'package:body_intelligence_log/features/cloud_platform/services/app_database_cloud_inbox_applier.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/local_data_account_boundary.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,6 +85,73 @@ void main() {
         expect(envelope.payload['foodSourceSnapshot'], item.foodSourceSnapshot);
         expect(envelope.ownerId, 'owner-a');
         expect(envelope.payload['quantity'], 80);
+      },
+    );
+
+    test(
+      '501 actual SQLite weights cannot report completed after the first 500 are queued',
+      () async {
+        sink._allowedKinds.remove(CloudEntityKind.nutrition);
+        final weights = WeightRepository(database);
+        for (var i = 0; i < 501; i++) {
+          await weights.addWeight(
+            80 + i / 1000,
+            date: DateTime.utc(2026, 10, 13).add(Duration(days: i)),
+          );
+        }
+        await boundary.bindAuthenticatedOwner('owner-a');
+        final producer = AppDatabaseCloudOutboxProducer(
+          database: database,
+          accountBoundary: boundary,
+          sink: sink,
+        );
+        final first = await producer.produce();
+        expect(first.enqueued, 500);
+        expect(first.remainingDirty, 1);
+        final now = DateTime.utc(2026, 10, 13, 12);
+        CloudManualSyncResult summarize(CloudOutboxProductionReport report) =>
+            CloudManualSyncResult.fromReports(
+              ownerId: 'owner-a',
+              produce: report,
+              sync: CloudSyncReport(
+                startedAt: now,
+                completedAt: now,
+                pushed: report.enqueued,
+                pulled: 0,
+                conflicts: 0,
+                pending: 0,
+                availability: CloudPlatformAvailability.ready,
+                diagnostics: const [],
+              ),
+              apply: const CloudInboxApplyReport(
+                applied: 0,
+                acknowledged: 0,
+                localWins: 0,
+                unsupported: 0,
+                conflicts: 0,
+              ),
+            );
+        final partial = summarize(first);
+        expect(
+          partial.completed,
+          isFalse,
+          reason:
+              'An unqueued eligible row is not a completed synchronization.',
+        );
+        expect(partial.pending, 1);
+        expect(partial.completedAt, isNull);
+        final second = await producer.produce();
+        expect(second.enqueued, 1);
+        expect(second.remainingDirty, 0);
+        expect(summarize(second).completed, isTrue);
+        expect(
+          sink.records.map((record) => record.recordId).toSet(),
+          hasLength(501),
+        );
+        expect(
+          await database.select(database.weightEntries).get(),
+          hasLength(501),
+        );
       },
     );
 
@@ -249,6 +318,37 @@ void main() {
 
         expect(report.enqueued, 1);
         expect(report.skippedByPolicy, 1);
+        expect(report.remainingDirty, 1);
+        expect(report.eligibleRemaining, 0);
+        final now = DateTime.utc(2026, 10, 13);
+        final completed = CloudManualSyncResult.fromReports(
+          ownerId: 'owner-a',
+          produce: report,
+          sync: CloudSyncReport(
+            startedAt: now,
+            completedAt: now,
+            pushed: 1,
+            pulled: 0,
+            conflicts: 0,
+            pending: 0,
+            availability: CloudPlatformAvailability.ready,
+            diagnostics: const [],
+          ),
+          apply: const CloudInboxApplyReport(
+            applied: 0,
+            acknowledged: 0,
+            localWins: 0,
+            unsupported: 0,
+            conflicts: 0,
+          ),
+        );
+        expect(
+          completed.completed,
+          isTrue,
+          reason:
+              'Rows excluded by the recorded policy must stay local and must not create an upload retry loop.',
+        );
+        expect(completed.pending, 0);
         expect(sink.records.single.entityKind, CloudEntityKind.weight);
         expect(
           (await database.select(database.weightEntries).getSingle())

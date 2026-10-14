@@ -1,0 +1,19 @@
+{
+  "label": "postgres-report-authority-all",
+  "kind": "sql",
+  "command": [
+    "python",
+    "-X",
+    "utf8",
+    "tools/qa/bil_postgres_community_safety_review_test.py",
+    "--psql",
+    "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe"
+  ],
+  "started_utc": "2026-10-13T08:39:25.395096+00:00",
+  "runner_pid": 15804,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "c70448e2794de904ece7c2b75876b77472a84cb6c982d4999a4af13817f2d247",
+  "fingerprint_version": 4,
+  "pid": 6620
+}

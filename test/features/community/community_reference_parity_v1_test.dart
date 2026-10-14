@@ -349,7 +349,7 @@ void main() {
 
     expect(repository, contains('loadVisibleMembershipTiers'));
     expect(repository, contains("'bil_community_comment_membership_tiers_v1'"));
-    expect(pagination, contains('loadVisibleMembershipTiers(authorIds)'));
+    expect(pagination, contains('loadVisibleMembershipTiers(authors)'));
     expect(card, contains('authorMembershipTier'));
     expect(card, contains('_CommunityMembershipTierChip('));
     expect(detail, contains('_loadAuthorMembershipTier'));
@@ -369,9 +369,6 @@ void main() {
       ).readAsStringSync();
       final pagination = File(
         'lib/features/community/presentation/community_feed_pagination.dart',
-      ).readAsStringSync();
-      final feed = File(
-        'lib/features/community/presentation/community_feed_tab.dart',
       ).readAsStringSync();
       final feedSuggestions = File(
         'lib/features/community/presentation/community_feed_reference_suggestions.dart',
@@ -404,7 +401,11 @@ void main() {
       );
       expect(pagination, contains('loadCommunityFeedCommentPreviews(ids)'));
       expect(feedSuggestions, contains("'community-feed-topic-suggestions'"));
-      expect(feed, contains('commentPreview: _commentPreviewByPost[post.id]'));
+      final feedRendering = File(
+        'lib/features/community/presentation/community_feed_rendering.dart',
+      ).readAsStringSync();
+      expect(feedRendering, contains('commentPreview:'));
+      expect(feedRendering, contains('_commentPreviewByPost[post.id]'));
       expect(card, contains("'community-post-comment-preview-"));
       expect(profile, contains('repository.loadGoldBalance()'));
       expect(profile, contains('repository.loadCommunityQuests()'));

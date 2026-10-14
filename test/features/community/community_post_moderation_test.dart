@@ -9,6 +9,7 @@ import 'package:body_intelligence_log/features/community/domain/community_topics
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
+import 'package:body_intelligence_log/features/safety_moderation/domain/ai_coach_safety_report.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../support/community_interaction_test_support.dart';
@@ -37,6 +38,8 @@ final class _ModerationRepository extends CommunityRepository {
   bool withUnavailableImage = false;
   int moderationCalls = 0;
   CommunityPostModerationDecision? lastDecision;
+  AiCoachSafetyReport? aiCoachSafetyReport;
+  final aiCoachSafetyDecisions = <String>[];
 
   CommunityPost get pendingPost => CommunityPost(
     id: postId,
@@ -126,8 +129,46 @@ final class _ModerationRepository extends CommunityRepository {
   }) async => includeHiddenPost ? [pendingPost] : const [];
 
   @override
+  Future<List<CommunityCommentReport>> loadOpenCommentReports() async =>
+      const [];
+
+  @override
   Future<List<Map<String, dynamic>>> loadOpenModerationReports() async =>
       const [];
+
+  @override
+  Future<List<AiCoachSafetyReport>> loadAiCoachSafetyReports() async => [
+    ?aiCoachSafetyReport,
+  ];
+
+  @override
+  Future<AiCoachSafetyReviewReceipt> reviewAiCoachSafetyReport({
+    required String reportId,
+    required String decision,
+    required String operationId,
+  }) async {
+    final report = aiCoachSafetyReport;
+    if (report == null || report.id != reportId || !report.isOpen) {
+      throw const AuthException('ai_coach_report_unavailable');
+    }
+    aiCoachSafetyDecisions.add(decision);
+    aiCoachSafetyReport = AiCoachSafetyReport(
+      id: report.id,
+      reason: report.reason,
+      locale: report.locale,
+      runtime: report.runtime,
+      status: 'reviewed',
+      reportedAt: report.reportedAt,
+      decision: decision,
+      reviewedAt: DateTime.utc(2026, 10, 14, 10),
+    );
+    return AiCoachSafetyReviewReceipt(
+      reportId: reportId,
+      decision: decision,
+      status: 'reviewed',
+      duplicate: false,
+    );
+  }
 
   @override
   Future<CommunityPostModerationResult> moderatePost({
@@ -269,6 +310,73 @@ void main() {
       repository = _ModerationRepository();
     });
     tearDown(() => repository.client.dispose());
+    testWidgets(
+      'AI Coach report appears and its review is recorded separately',
+      (tester) async {
+        repository.aiCoachSafetyReport = AiCoachSafetyReport(
+          id: '00000000-0000-4000-8000-000000000701',
+          reason: 'medical_accuracy',
+          locale: 'en',
+          runtime: 'on_device',
+          status: 'open',
+          reportedAt: DateTime.utc(2026, 10, 14, 9),
+          answerText: 'Synthetic AI answer for moderator review.',
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            home: CommunityPostModerationPage(repository: repository),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Synthetic AI answer for moderator review.'),
+          findsNothing,
+          reason: 'AI safety content stays out of Community Reports.',
+        );
+        await tester.tap(find.byKey(const Key('ai-coach-report-admin-tab')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('AI Coach safety reports'), findsOneWidget);
+        expect(
+          find.text('Synthetic AI answer for moderator review.'),
+          findsOneWidget,
+        );
+        final decision = find.byKey(
+          const Key(
+            'ai-coach-report-confirm-issue-00000000-0000-4000-8000-000000000701',
+          ),
+        );
+        await tester.ensureVisible(decision);
+        await tester.tap(decision);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('ai-coach-safety-review-confirm')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(repository.aiCoachSafetyDecisions, ['confirmed_safety_issue']);
+        expect(find.textContaining('Safety issue confirmed'), findsOneWidget);
+        expect(
+          find.text('Synthetic AI answer for moderator review.'),
+          findsNothing,
+        );
+        expect(
+          find.text('Answer text was removed after review.'),
+          findsOneWidget,
+        );
+        await tester.tap(find.byKey(const Key('community-report-admin-tab')));
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Synthetic AI answer for moderator review.'),
+          findsNothing,
+          reason: 'AI Coach Reports remain a separate moderator tab.',
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+
     testWidgets(
       'missing review V2 keeps existing hidden tools and reports an honest unavailable state',
       (tester) async {
@@ -547,7 +655,7 @@ void main() {
     expect(pendingDefault, greaterThan(backfill));
     expect(moderatorPreflight, greaterThanOrEqualTo(0));
     expect(pendingDefault, greaterThan(moderatorPreflight));
-    expect(sql, contains('kademcom@yahoo.com'));
+    expect(sql, contains('pg_catalog.lower(account.email)'));
     expect(sql, contains('from auth.users account'));
     expect(sql, contains('v_matching_accounts <> 1'));
     expect(sql, contains('community_moderation_preflight_failed'));

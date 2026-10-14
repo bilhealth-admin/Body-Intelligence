@@ -78,8 +78,14 @@ void main() {
           diaryText(tester, 'daily-summary-calories-value'),
           contains('1905'),
         );
-        for (final macro in ['carbs', 'protein', 'fat']) {
-          expect(diaryText(tester, 'daily-summary-$macro-grams'), '—');
+        for (final entry in const {
+          'carbs': 250,
+          'protein': 100,
+          'fat': 70,
+        }.entries) {
+          final macro = diaryText(tester, 'daily-summary-${entry.key}-grams');
+          expect(macro, startsWith('—'));
+          expect(macro, contains('/ ${entry.value}'));
         }
         await _capture(tester, key, 'diary-calorie-only-$suffix');
         await pump(

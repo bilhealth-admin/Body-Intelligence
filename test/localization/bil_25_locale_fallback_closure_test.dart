@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_ai_safety_reports.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_coach_review.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_sleep_schedule.dart';
@@ -40,11 +42,31 @@ void main() {
 
   test('all tracked 25-locale surfaces close English fallback paths', () async {
     final result = await auditLocaleFallbackClosure();
+    expect(
+      AiSafetyReportRuntimeCopy.balanced,
+      isTrue,
+      reason: AiSafetyReportRuntimeCopy.validationIssues.join('\n'),
+    );
     expect(result.requiredSourceCount, greaterThanOrEqualTo(578));
     expect(result.missingSources, isEmpty, reason: jsonEncode(result.toJson()));
     expect(result.directFallbackFiles, isEmpty);
     expect(result.androidFailures, isEmpty);
     expect(result.passed, isTrue);
+  });
+
+  test('AI Coach answer actions stay descriptive in all 25 app locales', () {
+    expect(CoachReviewRuntimeCopy.balanced, isTrue);
+    for (final tag in BilLocalePolicy.productionTags) {
+      for (final source in CoachReviewRuntimeCopy.answerActionKeys) {
+        final translated = CoachReviewRuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        expect(RuntimeCopy.resolve(source, tag), translated);
+        if (tag != 'en') {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+      }
+    }
   });
 
   test('release closure is complete, translated, and placeholder-safe', () {

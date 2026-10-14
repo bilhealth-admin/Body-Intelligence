@@ -60,7 +60,9 @@ Future<void> _seedNonWeightEvidence(AppDatabase database) async {
     fats: 60,
     sodium: 2200,
     potassium: 3200,
-    servingSize: 100,
+    // The fixture represents a full day of intake. Keep its complete energy
+    // vector within the food-contract's per-100-g plausibility ceiling.
+    servingSize: 1000,
     servingUnit: 'g',
   );
   final start = DateTime.utc(2026, 6, 15);
@@ -75,6 +77,6 @@ Future<void> _seedNonWeightEvidence(AppDatabase database) async {
       name: 'Complete intake without weight',
       type: 'lunch',
     );
-    await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 100);
+    await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 1000);
   }
 }

@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: verify-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   source:
@@ -28,7 +28,7 @@ jobs:
           git config --global core.eol lf
 
       - name: Check out accepted source
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -173,7 +173,7 @@ jobs:
           - suite: arabic-meal-image-review
             path: test/features/nutrition/meal_image_language_regression_test.dart
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -183,7 +183,7 @@ jobs:
         run: flutter test --no-pub --timeout=3m "${{ matrix.path }}"
       - name: Preserve real Flutter Vision renderings
         if: ${{ always() && matrix.suite == 'vision-capture' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: qa-vision-renderings-${{ github.sha }}
           path: build/vision-captures/*.png
@@ -222,7 +222,7 @@ jobs:
           git config --global core.eol lf
 
       - name: Check out accepted source
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -312,7 +312,7 @@ jobs:
 
       - name: Preserve failed Golden screenshots from focused suite
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: focused-golden-failures-${{ matrix.suite }}
           path: test/**/failures/**
@@ -356,7 +356,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -370,7 +370,7 @@ jobs:
           flutter test --no-pub --timeout=3m @targets
       - name: Preserve reviewed-only Golden failure evidence
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: broad-regression-failures-${{ matrix.suite }}
           path: test/**/failures/**
@@ -395,7 +395,7 @@ jobs:
           git config --global core.eol lf
 
       - name: Check out accepted source
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -421,7 +421,7 @@ jobs:
 
       - name: Preserve failed golden screenshots from this shard
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: golden-failures-shard-${{ matrix.shard }}
           path: test/**/failures/**

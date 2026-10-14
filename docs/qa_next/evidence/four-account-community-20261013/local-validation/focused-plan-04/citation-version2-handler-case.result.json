@@ -1,0 +1,31 @@
+{
+  "label": "citation-version2-handler-case",
+  "kind": "deno",
+  "command": [
+    "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+    "test",
+    "--allow-env",
+    "--allow-net",
+    "--allow-read",
+    "--filter=version2 request permits FDA",
+    "supabase/functions/ai-coach/server_test.ts"
+  ],
+  "started_utc": "2026-10-13T06:16:32.029674+00:00",
+  "runner_pid": 10600,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb",
+  "fingerprint_version": 4,
+  "pid": 13788,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T06:16:40.964636+00:00",
+  "seconds": 8.82,
+  "end_fingerprint": "96012ca08103a63ba67b1faf4e9aafbe629df325d0200b9a9f9251b926ade7cb",
+  "stable_source": true,
+  "accepted": true,
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "skip": 0
+  }
+}

@@ -222,6 +222,13 @@ void main() {
         );
         await tester.pumpWidget(app());
         await settle();
+        await _until(
+          tester,
+          () => find
+              .byKey(const Key('ai-coach-question-field'))
+              .evaluate()
+              .isNotEmpty,
+        );
         if (mode == 'current') {
           await settleVisualAssetImages(tester);
           await tester.pump();
@@ -242,6 +249,13 @@ void main() {
           replyHeld = true;
         }
         if (mode == 'past') {
+          await _until(
+            tester,
+            () => find
+                .byKey(const Key('ai-coach-conversation-history-button'))
+                .evaluate()
+                .isNotEmpty,
+          );
           await tester.tap(
             find.byKey(const Key('ai-coach-conversation-history-button')),
           );
@@ -426,6 +440,22 @@ void main() {
             await settle();
             await tester.pumpWidget(app());
             await settle();
+            await _until(
+              tester,
+              () =>
+                  find
+                      .byKey(const Key('ai-coach-conversation-history-button'))
+                      .evaluate()
+                      .isNotEmpty &&
+                  tester
+                          .widget<InkWell>(
+                            find.byKey(
+                              const Key('ai-coach-conversation-history-button'),
+                            ),
+                          )
+                          .onTap !=
+                      null,
+            );
             await tester.tap(
               find.byKey(const Key('ai-coach-conversation-history-button')),
             );

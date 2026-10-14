@@ -1,0 +1,555 @@
+{
+  "schema_version": 1,
+  "run_file": "paths-result.json",
+  "scope": "Owner-authorized ordinary account API validation; no phone proof",
+  "cases": [
+    {
+      "index": 1,
+      "static_case_label": "admin session owns its getUser result",
+      "state": "RUN"
+    },
+    {
+      "index": 2,
+      "static_case_label": "admin session owns its getUser result",
+      "state": "PASS"
+    },
+    {
+      "index": 3,
+      "static_case_label": "admin attention snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 4,
+      "static_case_label": "admin attention snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 5,
+      "static_case_label": "admin Gold snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 6,
+      "static_case_label": "admin Gold snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 7,
+      "static_case_label": "publisher session owns its getUser result",
+      "state": "RUN"
+    },
+    {
+      "index": 8,
+      "static_case_label": "publisher session owns its getUser result",
+      "state": "PASS"
+    },
+    {
+      "index": 9,
+      "static_case_label": "publisher attention snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 10,
+      "static_case_label": "publisher attention snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 11,
+      "static_case_label": "publisher Gold snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 12,
+      "static_case_label": "publisher Gold snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 13,
+      "static_case_label": "sender session owns its getUser result",
+      "state": "RUN"
+    },
+    {
+      "index": 14,
+      "static_case_label": "sender session owns its getUser result",
+      "state": "PASS"
+    },
+    {
+      "index": 15,
+      "static_case_label": "sender attention snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 16,
+      "static_case_label": "sender attention snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 17,
+      "static_case_label": "sender Gold snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 18,
+      "static_case_label": "sender Gold snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 19,
+      "static_case_label": "receiver session owns its getUser result",
+      "state": "RUN"
+    },
+    {
+      "index": 20,
+      "static_case_label": "receiver session owns its getUser result",
+      "state": "PASS"
+    },
+    {
+      "index": 21,
+      "static_case_label": "receiver attention snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 22,
+      "static_case_label": "receiver attention snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 23,
+      "static_case_label": "receiver Gold snapshot",
+      "state": "RUN"
+    },
+    {
+      "index": 24,
+      "static_case_label": "receiver Gold snapshot",
+      "state": "PASS"
+    },
+    {
+      "index": 25,
+      "static_case_label": "ordinary member cannot read the admin comment-report queue",
+      "state": "RUN"
+    },
+    {
+      "index": 26,
+      "static_case_label": "ordinary member cannot read the admin comment-report queue",
+      "state": "PASS"
+    },
+    {
+      "index": 27,
+      "static_case_label": "publisher public code can be resolved by sender",
+      "state": "RUN"
+    },
+    {
+      "index": 28,
+      "static_case_label": "publisher public code can be resolved by sender",
+      "state": "PASS"
+    },
+    {
+      "index": 29,
+      "static_case_label": "public code resolves the exact publisher identity",
+      "state": "RUN"
+    },
+    {
+      "index": 30,
+      "static_case_label": "public code resolves the exact publisher identity",
+      "state": "PASS"
+    },
+    {
+      "index": 31,
+      "static_case_label": "invalid code fails closed",
+      "state": "RUN"
+    },
+    {
+      "index": 32,
+      "static_case_label": "invalid code fails closed",
+      "state": "FAIL"
+    },
+    {
+      "index": 33,
+      "static_case_label": "read only the sender/receiver pre-existing relationship",
+      "state": "RUN"
+    },
+    {
+      "index": 34,
+      "static_case_label": "read only the sender/receiver pre-existing relationship",
+      "state": "PASS"
+    },
+    {
+      "index": 35,
+      "static_case_label": "sender sends request / receiver sees its exact row",
+      "state": "RUN"
+    },
+    {
+      "index": 36,
+      "static_case_label": "sender sends request / receiver sees its exact row",
+      "state": "FAIL"
+    },
+    {
+      "index": 37,
+      "static_case_label": "publisher commits first post and replays same operation",
+      "state": "RUN"
+    },
+    {
+      "index": 38,
+      "static_case_label": "publisher commits first post and replays same operation",
+      "state": "PASS"
+    },
+    {
+      "index": 39,
+      "static_case_label": "other member cannot read pending post",
+      "state": "RUN"
+    },
+    {
+      "index": 40,
+      "static_case_label": "other member cannot read pending post",
+      "state": "PASS"
+    },
+    {
+      "index": 41,
+      "static_case_label": "ordinary member cannot moderate pending post",
+      "state": "RUN"
+    },
+    {
+      "index": 42,
+      "static_case_label": "ordinary member cannot moderate pending post",
+      "state": "PASS"
+    },
+    {
+      "index": 43,
+      "static_case_label": "admin approved and returns actual reward receipt",
+      "state": "RUN"
+    },
+    {
+      "index": 44,
+      "static_case_label": "admin approved and returns actual reward receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 45,
+      "static_case_label": "repeat admin decision creates no second grant",
+      "state": "RUN"
+    },
+    {
+      "index": 46,
+      "static_case_label": "repeat admin decision creates no second grant",
+      "state": "PASS"
+    },
+    {
+      "index": 47,
+      "static_case_label": "publisher reads saved moderation status",
+      "state": "RUN"
+    },
+    {
+      "index": 48,
+      "static_case_label": "publisher reads saved moderation status",
+      "state": "PASS"
+    },
+    {
+      "index": 49,
+      "static_case_label": "approved post readable by receiver",
+      "state": "RUN"
+    },
+    {
+      "index": 50,
+      "static_case_label": "approved post readable by receiver",
+      "state": "PASS"
+    },
+    {
+      "index": 51,
+      "static_case_label": "sender likes approved post",
+      "state": "RUN"
+    },
+    {
+      "index": 52,
+      "static_case_label": "sender likes approved post",
+      "state": "PASS"
+    },
+    {
+      "index": 53,
+      "static_case_label": "receiver saves approved post",
+      "state": "RUN"
+    },
+    {
+      "index": 54,
+      "static_case_label": "receiver saves approved post",
+      "state": "PASS"
+    },
+    {
+      "index": 55,
+      "static_case_label": "receiver adds actual comment",
+      "state": "RUN"
+    },
+    {
+      "index": 56,
+      "static_case_label": "receiver adds actual comment",
+      "state": "PASS"
+    },
+    {
+      "index": 57,
+      "static_case_label": "publisher replies to exact comment",
+      "state": "RUN"
+    },
+    {
+      "index": 58,
+      "static_case_label": "publisher replies to exact comment",
+      "state": "PASS"
+    },
+    {
+      "index": 59,
+      "static_case_label": "sender submits comment report",
+      "state": "RUN"
+    },
+    {
+      "index": 60,
+      "static_case_label": "sender submits comment report",
+      "state": "PASS"
+    },
+    {
+      "index": 61,
+      "static_case_label": "admin reads report containing correct comment body",
+      "state": "RUN"
+    },
+    {
+      "index": 62,
+      "static_case_label": "admin reads report containing correct comment body",
+      "state": "PASS"
+    },
+    {
+      "index": 63,
+      "static_case_label": "admin resolves its exact test report without removal",
+      "state": "RUN"
+    },
+    {
+      "index": 64,
+      "static_case_label": "admin resolves its exact test report without removal",
+      "state": "PASS"
+    },
+    {
+      "index": 65,
+      "static_case_label": "resolved report leaves open queue",
+      "state": "RUN"
+    },
+    {
+      "index": 66,
+      "static_case_label": "resolved report leaves open queue",
+      "state": "PASS"
+    },
+    {
+      "index": 67,
+      "static_case_label": "admin hides only created approved post",
+      "state": "RUN"
+    },
+    {
+      "index": 68,
+      "static_case_label": "admin hides only created approved post",
+      "state": "PASS"
+    },
+    {
+      "index": 69,
+      "static_case_label": "hidden post inaccessible to receiver",
+      "state": "RUN"
+    },
+    {
+      "index": 70,
+      "static_case_label": "hidden post inaccessible to receiver",
+      "state": "PASS"
+    },
+    {
+      "index": 71,
+      "static_case_label": "admin restores only created post",
+      "state": "RUN"
+    },
+    {
+      "index": 72,
+      "static_case_label": "admin restores only created post",
+      "state": "PASS"
+    },
+    {
+      "index": 73,
+      "static_case_label": "restoration does not repeat approval grant",
+      "state": "RUN"
+    },
+    {
+      "index": 74,
+      "static_case_label": "restoration does not repeat approval grant",
+      "state": "PASS"
+    },
+    {
+      "index": 75,
+      "static_case_label": "publisher commits rejected post and replays same operation",
+      "state": "RUN"
+    },
+    {
+      "index": 76,
+      "static_case_label": "publisher commits rejected post and replays same operation",
+      "state": "PASS"
+    },
+    {
+      "index": 77,
+      "static_case_label": "other member cannot read pending post",
+      "state": "RUN"
+    },
+    {
+      "index": 78,
+      "static_case_label": "other member cannot read pending post",
+      "state": "PASS"
+    },
+    {
+      "index": 79,
+      "static_case_label": "ordinary member cannot moderate pending post",
+      "state": "RUN"
+    },
+    {
+      "index": 80,
+      "static_case_label": "ordinary member cannot moderate pending post",
+      "state": "PASS"
+    },
+    {
+      "index": 81,
+      "static_case_label": "admin rejected and returns actual reward receipt",
+      "state": "RUN"
+    },
+    {
+      "index": 82,
+      "static_case_label": "admin rejected and returns actual reward receipt",
+      "state": "PASS"
+    },
+    {
+      "index": 83,
+      "static_case_label": "repeat admin decision creates no second grant",
+      "state": "RUN"
+    },
+    {
+      "index": 84,
+      "static_case_label": "repeat admin decision creates no second grant",
+      "state": "PASS"
+    },
+    {
+      "index": 85,
+      "static_case_label": "publisher reads saved moderation status",
+      "state": "RUN"
+    },
+    {
+      "index": 86,
+      "static_case_label": "publisher reads saved moderation status",
+      "state": "PASS"
+    },
+    {
+      "index": 87,
+      "static_case_label": "publisher activity includes current test records only",
+      "state": "RUN"
+    },
+    {
+      "index": 88,
+      "static_case_label": "publisher activity includes current test records only",
+      "state": "PASS"
+    },
+    {
+      "index": 89,
+      "static_case_label": "publisher marks only created test activity seen",
+      "state": "RUN"
+    },
+    {
+      "index": 90,
+      "static_case_label": "publisher marks only created test activity seen",
+      "state": "PASS"
+    },
+    {
+      "index": 91,
+      "static_case_label": "sender activity includes current test records only",
+      "state": "RUN"
+    },
+    {
+      "index": 92,
+      "static_case_label": "sender activity includes current test records only",
+      "state": "PASS"
+    },
+    {
+      "index": 93,
+      "static_case_label": "receiver activity includes current test records only",
+      "state": "RUN"
+    },
+    {
+      "index": 94,
+      "static_case_label": "receiver activity includes current test records only",
+      "state": "PASS"
+    },
+    {
+      "index": 95,
+      "static_case_label": "receiver marks only created test activity seen",
+      "state": "RUN"
+    },
+    {
+      "index": 96,
+      "static_case_label": "receiver marks only created test activity seen",
+      "state": "PASS"
+    },
+    {
+      "index": 97,
+      "static_case_label": "owner deletes only its created test comment",
+      "state": "RUN"
+    },
+    {
+      "index": 98,
+      "static_case_label": "owner deletes only its created test comment",
+      "state": "PASS"
+    },
+    {
+      "index": 99,
+      "static_case_label": "owner deletes only its created test comment",
+      "state": "RUN"
+    },
+    {
+      "index": 100,
+      "static_case_label": "owner deletes only its created test comment",
+      "state": "PASS"
+    },
+    {
+      "index": 101,
+      "static_case_label": "publisher soft deletes only created test post",
+      "state": "RUN"
+    },
+    {
+      "index": 102,
+      "static_case_label": "publisher soft deletes only created test post",
+      "state": "PASS"
+    },
+    {
+      "index": 103,
+      "static_case_label": "deleted test post absent from other member",
+      "state": "RUN"
+    },
+    {
+      "index": 104,
+      "static_case_label": "deleted test post absent from other member",
+      "state": "PASS"
+    },
+    {
+      "index": 105,
+      "static_case_label": "publisher soft deletes only created test post",
+      "state": "RUN"
+    },
+    {
+      "index": 106,
+      "static_case_label": "publisher soft deletes only created test post",
+      "state": "PASS"
+    },
+    {
+      "index": 107,
+      "static_case_label": "deleted test post absent from other member",
+      "state": "RUN"
+    },
+    {
+      "index": 108,
+      "static_case_label": "deleted test post absent from other member",
+      "state": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 52,
+    "FAIL": 2,
+    "BLOCKED": 0
+  },
+  "started_utc": "2026-10-13T06:33:18Z",
+  "finished_utc": "2026-10-13T06:33:32Z",
+  "pid": 5448
+}

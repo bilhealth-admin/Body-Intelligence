@@ -23,56 +23,59 @@ void main() {
     );
   });
 
-  test(
-    'Coach settings uses consent policy v3 and exposes every context focus',
-    () {
-      final page = File(
-        'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
-      ).readAsStringSync();
-      final components = File(
-        'lib/features/intelligence_center/presentation/'
-        'ai_coach_settings_components.dart',
-      ).readAsStringSync();
-      final coordinator = File(
-        'lib/features/intelligence_center/services/'
-        'remote_ai_consent_coordinator.dart',
-      ).readAsStringSync();
+  test('Coach settings uses consent policy v3 and exposes every context focus', () {
+    final page = File(
+      'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
+    ).readAsStringSync();
+    final components = File(
+      'lib/features/intelligence_center/presentation/'
+      'ai_coach_settings_components.dart',
+    ).readAsStringSync();
+    final settingsBody = File(
+      'lib/features/intelligence_center/presentation/'
+      'ai_coach_settings_body.dart',
+    ).readAsStringSync();
+    final coordinator = File(
+      'lib/features/intelligence_center/services/'
+      'remote_ai_consent_coordinator.dart',
+    ).readAsStringSync();
 
-      expect(page, contains('sharedRemoteAiConsentCoordinator()'));
-      expect(page, contains('coordinator.grantAndVerify()'));
-      expect(page, contains('coordinator.revokeAndVerify()'));
+    expect(page, contains('sharedRemoteAiConsentCoordinator()'));
+    expect(page, contains('coordinator.grantAndVerify()'));
+    expect(page, contains('coordinator.revokeAndVerify()'));
+    expect(
+      page,
+      contains("if (!verified) throw StateError('consent_readback_failed')"),
+    );
+    expect(coordinator, contains("client.rpc('bil_get_remote_ai_consent')"));
+    expect(
+      "'p_policy_version': '3'".allMatches(coordinator),
+      hasLength(2),
+      reason: 'Both Allow and withdrawal write the current server policy.',
+    );
+    expect(coordinator, contains("'p_purpose': 'remote_ai'"));
+    expect(coordinator, contains("'p_granted': true"));
+    expect(coordinator, contains("'p_granted': false"));
+    expect(coordinator, contains('isCurrentRemoteAiConsentGranted(receipt)'));
+    expect(page, isNot(contains("policyVersion = '1'")));
+    expect(coordinator, isNot(contains("'p_policy_version': '1'")));
+    expect(page, contains('CoachContextPreferences.storageKey'));
+    for (final focus in CoachContextFocus.values) {
       expect(
-        page,
-        contains("if (!verified) throw StateError('consent_readback_failed')"),
+        components,
+        contains("'ai-coach-context-\${option.\$1.name}'"),
+        reason: 'Every rendered focus must use the stable keyed control.',
       );
-      expect(coordinator, contains("client.rpc('bil_get_remote_ai_consent')"));
-      expect(
-        "'p_policy_version': '3'".allMatches(coordinator),
-        hasLength(2),
-        reason: 'Both Allow and withdrawal write the current server policy.',
-      );
-      expect(coordinator, contains("'p_purpose': 'remote_ai'"));
-      expect(coordinator, contains("'p_granted': true"));
-      expect(coordinator, contains("'p_granted': false"));
-      expect(coordinator, contains('isCurrentRemoteAiConsentGranted(receipt)'));
-      expect(page, isNot(contains("policyVersion = '1'")));
-      expect(coordinator, isNot(contains("'p_policy_version': '1'")));
-      expect(page, contains('CoachContextPreferences.storageKey'));
-      for (final focus in CoachContextFocus.values) {
-        expect(
-          components,
-          contains("'ai-coach-context-\${option.\$1.name}'"),
-          reason: 'Every rendered focus must use the stable keyed control.',
-        );
-        expect(components, contains('CoachContextFocus.${focus.name}'));
-      }
-      expect(
-        page,
-        contains('recent conversation context can be sent to Google Gemini'),
-        reason: 'The disclosure must match the bounded conversation payload.',
-      );
-    },
-  );
+      expect(components, contains('CoachContextFocus.${focus.name}'));
+    }
+    expect(
+      settingsBody,
+      contains(
+        'When enabled, your question and selected weight/body, nutrition, activity, sleep, habit, and recent conversation context can be sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. Turn this off at any time; local BIL features remain available.',
+      ),
+      reason: 'The visible consent disclosure must name its bounded data uses.',
+    );
+  });
 
   test('in-conversation consent prompt states the actual speech boundary', () {
     final source = File(
@@ -81,7 +84,12 @@ void main() {
 
     expect(source, contains('Send selected personal data to Google Gemini?'));
     expect(source, contains('third-party AI service operated by Google'));
-    expect(source, contains('Raw microphone audio is not sent'));
+    expect(
+      source,
+      contains(
+        'BIL sends Gemini only recognized text, never raw microphone audio.',
+      ),
+    );
     expect(source, contains("Don't Allow"));
     expect(source, contains('Allow & Continue'));
   });

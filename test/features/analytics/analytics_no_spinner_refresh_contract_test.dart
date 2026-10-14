@@ -37,7 +37,10 @@ void main() {
       nutrition,
       contains('presetState.isLoading && !presetState.hasValue'),
     );
-    expect(nutrition, contains('state.isLoading && !state.hasValue'));
+    expect(
+      nutrition,
+      contains('goalStateSnapshot.isLoading && !goalStateSnapshot.hasValue'),
+    );
     expect(nutrition, contains('planState.isLoading && !planState.hasValue'));
     expect(
       nutrition,

@@ -1,0 +1,23 @@
+{
+  "label": "qr-submitted-aba-spinner-before-fix",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/community/community_code_invite_earn_account_test.dart",
+    "--plain-name",
+    "QR submitted rotation retires its spinner on A B A"
+  ],
+  "started_utc": "2026-10-13T08:32:03.401507+00:00",
+  "runner_pid": 4416,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "7e870d01866f79c8d00a3f04e19c9f272495a2c992533261a5c855d56b00f739",
+  "fingerprint_version": 4,
+  "pid": 4172
+}

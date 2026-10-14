@@ -1,5 +1,16 @@
 part of 'community_repository.dart';
 
+String newCommunityMessageRequestId() => const Uuid().v4();
+
+class CommunityMessageDeliveryUnavailable implements Exception {
+  const CommunityMessageDeliveryUnavailable();
+}
+
+/// A verified prior request was delivered and later removed. Never resend it.
+class CommunityMessageDeliveryRemoved implements Exception {
+  const CommunityMessageDeliveryRemoved();
+}
+
 mixin _CommunityConnectionsMessagingRepositoryMixin {
   SupabaseClient get _client;
 
@@ -22,53 +33,56 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
         .order('created_at', ascending: false);
   }
 
-  Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async {
-    final response = await _client.rpc('bil_list_community_connections');
-    if (response is! List) {
-      throw const FormatException('Invalid community connections result');
-    }
-    return response
-        .whereType<Map>()
-        .map(Map<String, dynamic>.from)
-        .where((row) {
-          final id = row['id'];
-          final requester = row['requester_id'];
-          final addressee = row['addressee_id'];
-          final status = row['status'];
-          final otherUserId = row['other_user_id'];
-          final displayName = row['display_name'];
-          final avatarUrl = row['avatar_url'];
-          return id is String &&
-              CommunityRepository._uuid.hasMatch(id) &&
-              requester is String &&
-              CommunityRepository._uuid.hasMatch(requester) &&
-              addressee is String &&
-              CommunityRepository._uuid.hasMatch(addressee) &&
-              (requester == _user.id || addressee == _user.id) &&
-              status is String &&
-              const {'pending', 'accepted'}.contains(status) &&
-              otherUserId is String &&
-              CommunityRepository._uuid.hasMatch(otherUserId) &&
-              (displayName == null ||
-                  (displayName is String &&
-                      displayName.trim().length >= 2 &&
-                      displayName.trim().length <= 60 &&
-                      !CommunityRepository._unsafeText.hasMatch(
-                        displayName,
-                      ))) &&
-              (avatarUrl == null || avatarUrl is String);
-        })
-        .map((row) {
-          return {
-            ...row,
-            'profile': {
-              'display_name': row['display_name'],
-              'avatar_url': row['avatar_url'],
-            },
-          };
-        })
-        .toList(growable: false);
-  }
+  Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() =>
+      _runCommunityOwnerOperation((operation) async {
+        final response = await _client.rpc('bil_list_community_connections');
+        operation.check();
+        if (response is! List) {
+          throw const FormatException('Invalid community connections result');
+        }
+        return response
+            .whereType<Map>()
+            .map(Map<String, dynamic>.from)
+            .where((row) {
+              final id = row['id'];
+              final requester = row['requester_id'];
+              final addressee = row['addressee_id'];
+              final status = row['status'];
+              final otherUserId = row['other_user_id'];
+              final displayName = row['display_name'];
+              final avatarUrl = row['avatar_url'];
+              return id is String &&
+                  CommunityRepository._uuid.hasMatch(id) &&
+                  requester is String &&
+                  CommunityRepository._uuid.hasMatch(requester) &&
+                  addressee is String &&
+                  CommunityRepository._uuid.hasMatch(addressee) &&
+                  (requester == operation.ownerId ||
+                      addressee == operation.ownerId) &&
+                  status is String &&
+                  const {'pending', 'accepted'}.contains(status) &&
+                  otherUserId is String &&
+                  CommunityRepository._uuid.hasMatch(otherUserId) &&
+                  (displayName == null ||
+                      (displayName is String &&
+                          displayName.trim().length >= 2 &&
+                          displayName.trim().length <= 60 &&
+                          !CommunityRepository._unsafeText.hasMatch(
+                            displayName,
+                          ))) &&
+                  (avatarUrl == null || avatarUrl is String);
+            })
+            .map((row) {
+              return {
+                ...row,
+                'profile': {
+                  'display_name': row['display_name'],
+                  'avatar_url': row['avatar_url'],
+                },
+              };
+            })
+            .toList(growable: false);
+      });
 
   Future<List<CommunityNotification>> loadCommunityNotifications({
     DateTime? before,
@@ -128,45 +142,114 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
   Future<void> unfollow(String userId) =>
       _client.rpc('bil_unfollow_member', params: {'p_followed_id': userId});
 
-  Future<void> respondToFriendship(String id, {required bool accept}) async {
-    if (!CommunityRepository._uuid.hasMatch(id)) {
-      throw ArgumentError.value(id, 'id');
-    }
-    final changed = await _client
-        .from('bil_friendships')
-        .update({
-          'status': accept ? 'accepted' : 'declined',
-          'responded_at': DateTime.now().toUtc().toIso8601String(),
-        })
-        .eq('id', id)
-        .eq('addressee_id', _user.id)
-        .eq('status', 'pending')
-        .select('id');
-    if (changed.length != 1) {
-      throw StateError('Friend request was not available to update');
-    }
-  }
+  Future<void> respondToFriendship(String id, {required bool accept}) =>
+      _runCommunityOwnerOperation((operation) async {
+        final owner = operation.ownerId;
+        if (owner == null) throw const AuthException('Sign-in required');
+        if (!CommunityRepository._uuid.hasMatch(id)) {
+          throw ArgumentError.value(id, 'id');
+        }
+        final changed = await _client
+            .from('bil_friendships')
+            .update({
+              'status': accept ? 'accepted' : 'declined',
+              'responded_at': DateTime.now().toUtc().toIso8601String(),
+            })
+            .eq('id', id)
+            .eq('addressee_id', owner)
+            .eq('status', 'pending')
+            .select('id');
+        operation.check();
+        if (changed.length != 1) {
+          throw StateError('Friend request was not available to update');
+        }
+      });
 
-  Future<void> removeFriendship(String id) async {
-    if (!CommunityRepository._uuid.hasMatch(id)) {
-      throw ArgumentError.value(id, 'id');
-    }
-    final changed = await _client
-        .from('bil_friendships')
-        .delete()
-        .eq('id', id)
-        .or('requester_id.eq.${_user.id},addressee_id.eq.${_user.id}')
-        .select('id');
-    if (changed.length != 1) {
-      throw StateError('Friendship was not available to remove');
-    }
-  }
+  Future<void> removeFriendship(String id) =>
+      _runCommunityOwnerOperation((operation) async {
+        final owner = operation.ownerId;
+        if (owner == null) throw const AuthException('Sign-in required');
+        if (!CommunityRepository._uuid.hasMatch(id)) {
+          throw ArgumentError.value(id, 'id');
+        }
+        final changed = await _client
+            .from('bil_friendships')
+            .delete()
+            .eq('id', id)
+            .or('requester_id.eq.$owner,addressee_id.eq.$owner')
+            .select('id');
+        operation.check();
+        if (changed.length != 1) {
+          throw StateError('Friendship was not available to remove');
+        }
+      });
 
-  Future<void> blockMember(String userId) async {
-    await _client.rpc(
-      'bil_block_community_member',
-      params: {'p_blocked_id': userId},
+  Future<void> blockMember(String userId) =>
+      _runCommunityOwnerOperation((operation) async {
+        if (!CommunityRepository._uuid.hasMatch(userId) ||
+            userId == operation.ownerId) {
+          throw ArgumentError.value(userId, 'userId');
+        }
+        await _runCommunityMutation(
+          () => _client.rpc(
+            'bil_block_community_member',
+            params: {'p_blocked_id': userId},
+          ),
+        );
+        operation.check();
+      });
+
+  Future<void> cancelFriendRequest(String id) =>
+      _runCommunityOwnerOperation((operation) async {
+        if (!CommunityRepository._uuid.hasMatch(id)) {
+          throw ArgumentError.value(id, 'id');
+        }
+        final owner = operation.ownerId;
+        if (owner == null) throw const AuthException('Sign-in required');
+        await _client
+            .from('bil_friendships')
+            .delete()
+            .eq('id', id)
+            .eq('requester_id', owner)
+            .eq('status', 'pending');
+        operation.check();
+        final remaining = await _client
+            .from('bil_friendships')
+            .select('id,status')
+            .eq('id', id)
+            .eq('requester_id', owner);
+        operation.check();
+        if (remaining.isNotEmpty) {
+          throw StateError('Friend request changed before cancellation');
+        }
+      });
+
+  Stream<void> watchConnectionChanges() {
+    final owner = currentUserId;
+    if (_client.auth.currentUser?.id != owner) return const Stream.empty();
+    final subscriptions = <StreamSubscription<List<Map<String, dynamic>>>>[];
+    late final StreamController<void> changes;
+    changes = StreamController<void>(
+      onListen: () {
+        for (final column in ['requester_id', 'addressee_id']) {
+          subscriptions.add(
+            _client
+                .from('bil_friendships')
+                .stream(primaryKey: const ['id'])
+                .eq(column, owner)
+                .order('created_at')
+                .limit(1)
+                .listen((_) => changes.add(null), onError: changes.addError),
+          );
+        }
+      },
+      onCancel: () async {
+        for (final subscription in subscriptions) {
+          await subscription.cancel();
+        }
+      },
     );
+    return changes.stream;
   }
 
   Future<List<CommunityMessage>> loadMessages(String otherUserId) =>
@@ -337,6 +420,46 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
         return _enrichMessageRows(rows, owner: owner, profileKey: 'sender_id');
       });
 
+  Future<List<Map<String, dynamic>>> loadOlderMessagePreviews({
+    required bool incoming,
+    required DateTime before,
+    required String beforeId,
+  }) => _runCommunityOwnerOperation((operation) async {
+    if (!CommunityRepository._uuid.hasMatch(beforeId)) {
+      throw ArgumentError.value(beforeId, 'beforeId');
+    }
+    final owner = operation.ownerId;
+    if (owner == null) throw const AuthException('Sign-in required');
+    final timestamp = before.toUtc().toIso8601String();
+    final direction = incoming ? 'recipient_id' : 'sender_id';
+    final rows = await _client
+        .from('bil_messages')
+        .select('id,sender_id,recipient_id,body,created_at,read_at')
+        .eq(direction, owner)
+        .or(
+          'created_at.lt.$timestamp,and(created_at.eq.$timestamp,id.lt.$beforeId)',
+        )
+        .order('created_at', ascending: false)
+        .order('id', ascending: false)
+        .limit(100);
+    operation.check();
+    for (final row in rows) {
+      final time = DateTime.tryParse(row['created_at']?.toString() ?? '');
+      if (row[direction] != owner ||
+          time == null ||
+          time.isAfter(before) ||
+          (time.isAtSameMomentAs(before) &&
+              '${row['id']}'.compareTo(beforeId) >= 0)) {
+        throw const FormatException('Invalid message preview page');
+      }
+    }
+    return _enrichMessageRows(
+      rows,
+      owner: owner,
+      profileKey: incoming ? 'sender_id' : 'recipient_id',
+    );
+  });
+
   Stream<void> watchInboxChanges() => _client
       .from('bil_messages')
       .stream(primaryKey: const ['id'])
@@ -440,6 +563,131 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
     return subject.runes.length <= 120 &&
         message.trim().isNotEmpty &&
         message.runes.length <= 2000;
+  }
+
+  /// Additive server contract. Never fall back to a second non-idempotent POST.
+  Future<void> sendMessageOperation(
+    String recipientId,
+    String body, {
+    required String requestId,
+  }) => _runCommunityOwnerOperation((operation) async {
+    final text = body.trim();
+    final owner = operation.ownerId;
+    if (owner == null ||
+        !CommunityRepository._uuid.hasMatch(recipientId) ||
+        recipientId == owner ||
+        !CommunityRepository._uuid.hasMatch(requestId) ||
+        !_validMessageEnvelope(text)) {
+      throw ArgumentError('Invalid private message operation');
+    }
+    try {
+      // Reading a committed, owned receipt is reconciliation, not a new write.
+      // The server still binds recipient/body on replay, including tombstones.
+      final prior = await _client
+          .rpc(
+            'bil_get_community_message_delivery_v2',
+            params: {'p_request_id': requestId},
+          )
+          .timeout(const Duration(seconds: 20));
+      operation.check();
+      if (prior == null) {
+        CommunityTextPolicy.enforce(
+          text,
+          surface: CommunityTextSurface.message,
+        );
+        await _requireAcceptedContentPolicy();
+        operation.check();
+      } else {
+        _validateMessageDelivery(
+          prior,
+          owner: owner,
+          recipient: recipientId,
+          requestId: requestId,
+          body: text,
+        );
+      }
+      final response = await _runCommunityMutation(
+        () => _client.rpc(
+          'bil_send_community_message_v2',
+          params: {
+            'p_request_id': requestId,
+            'p_recipient_id': recipientId,
+            'p_body': text,
+          },
+        ),
+      ).timeout(const Duration(seconds: 20));
+      operation.check();
+      _validateMessageDelivery(
+        response,
+        owner: owner,
+        recipient: recipientId,
+        requestId: requestId,
+        body: text,
+      );
+      final readback = await _client
+          .rpc(
+            'bil_get_community_message_delivery_v2',
+            params: {'p_request_id': requestId},
+          )
+          .timeout(const Duration(seconds: 20));
+      operation.check();
+      _validateMessageDelivery(
+        readback,
+        owner: owner,
+        recipient: recipientId,
+        requestId: requestId,
+        body: text,
+      );
+      final primary = response as Map, confirmed = readback as Map;
+      if ((prior is Map &&
+              ((prior['message_id'] != primary['message_id'] &&
+                      !(primary['status'] == 'removed' &&
+                          primary['message_id'] == null)) ||
+                  (prior['status'] == 'removed' &&
+                      primary['status'] != 'removed'))) ||
+          (primary['message_id'] != confirmed['message_id'] &&
+              !(confirmed['status'] == 'removed' &&
+                  confirmed['message_id'] == null)) ||
+          (primary['status'] == 'removed' &&
+              confirmed['status'] != 'removed')) {
+        throw const FormatException('Message delivery identity changed');
+      }
+      if (confirmed['status'] == 'removed') {
+        throw const CommunityMessageDeliveryRemoved();
+      }
+    } on PostgrestException catch (error) {
+      if (const {'PGRST202', '42883'}.contains(error.code)) {
+        throw const CommunityMessageDeliveryUnavailable();
+      }
+      rethrow;
+    }
+  });
+
+  void _validateMessageDelivery(
+    Object? response, {
+    required String owner,
+    required String recipient,
+    required String requestId,
+    required String body,
+  }) {
+    if (response is! Map) {
+      throw const FormatException('Unverified private message delivery');
+    }
+    final removed = response['status'] == 'removed';
+    final messageId = response['message_id'];
+    if ((!removed && response['status'] != 'delivered') ||
+        response['owner_id'] != owner ||
+        response['recipient_id'] != recipient ||
+        response['request_id'] != requestId ||
+        (removed ? response['body'] != null : response['body'] != body) ||
+        (messageId == null
+            ? !removed
+            : messageId is! String ||
+                  !CommunityRepository._uuid.hasMatch(messageId)) ||
+        response['delivered_at'] is! String ||
+        DateTime.tryParse(response['delivered_at'] as String) == null) {
+      throw const FormatException('Unverified private message delivery');
+    }
   }
 
   Future<void> sendMessage(String recipientId, String body) =>

@@ -1,0 +1,16 @@
+{
+  "label": "format-json-worker-ready-helper",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "test\\features\\community\\community_notification_content_route_test.dart"
+  ],
+  "started_utc": "2026-10-13T07:28:48.710417+00:00",
+  "runner_pid": 15592,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "10cbaec01e25ef313ceca52f2cc7ed84e14d865efe558d90493c61320513c8d8",
+  "fingerprint_version": 4,
+  "pid": 23284
+}

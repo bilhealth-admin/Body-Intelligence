@@ -204,10 +204,13 @@ void main() {
     final source = File(
       'lib/features/nutrition/services/meal_voice_input_service.dart',
     ).readAsStringSync();
-    expect(source, contains('SpeechToText'));
-    expect(source, contains('onError:'));
-    expect(source, contains('listenFor: const Duration(seconds: 30)'));
-    expect(source, contains('pauseFor: const Duration(seconds: 4)'));
+    final session = File(
+      'lib/features/nutrition/services/meal_voice_session.dart',
+    ).readAsStringSync();
+    expect(source, contains('VoiceCaptureLease.acquire(this)'));
+    expect(session, contains('onError:'));
+    expect(session, contains('listenFor: const Duration(seconds: 30)'));
+    expect(session, contains('pauseFor: const Duration(seconds: 4)'));
   });
 
   test('edge gateway authenticates and constrains provider output', () {

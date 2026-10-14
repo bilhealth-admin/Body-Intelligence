@@ -1,7 +1,8 @@
 import 'bil_locale_policy.dart';
+part 'runtime_copy_closure_coach_presentation.dart';
 
 abstract final class ClosureCoachRuntimeCopy {
-  static const sources = [
+  static const _baseSources = [
     'Rename conversation',
     'Change this conversation’s name',
     'Could not rename this conversation. Try again.',
@@ -10,9 +11,38 @@ abstract final class ClosureCoachRuntimeCopy {
     'Context, privacy and balance',
     'Conversations, context, privacy and usage.',
     'My foods stores individual foods with their label values. Meals combine foods; recipes calculate ingredients per serving.',
+    "Your current daily target is {value} kcal. {source}",
+    "It comes from today's scheduled calorie goal.",
+    "It comes from the calorie goal saved in Nutrition Goals.",
   ];
-  static const rows = <String, List<String>>{
-    'en': sources,
+  static const _presentationSources = [
+    'Body measurements',
+    'Body measurements saved.',
+    'Comparison',
+    'Date',
+    'Day summary',
+    'Difference',
+    'Known food subtotal',
+    'Known subtotal · incomplete coverage',
+    'Measurement conditions may differ.',
+    'Minerals',
+    'Net carbs',
+    'Recorded measurements only',
+    'Recorded serving',
+    'Saved day',
+    'Saved food details',
+    'Saved measurement',
+    'Saved record',
+    'Saved source',
+    'Source details are summarized',
+    'Source unavailable',
+    'Unavailable value',
+    'Weight saved.',
+    'recorded periods',
+  ];
+  static const sources = <String>[..._baseSources, ..._presentationSources];
+  static const _baseRows = <String, List<String>>{
+    'en': _baseSources,
     'ar': [
       'إعادة تسمية المحادثة',
       'غيّر اسم هذه المحادثة',
@@ -22,6 +52,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'السياق والخصوصية والرصيد',
       'المحادثات والسياق والخصوصية والاستخدام.',
       'أطعمتي تحفظ الأطعمة الفردية بقيم ملصقاتها. الوجبات تجمع الأطعمة؛ والوصفات تحسب المكونات لكل حصة.',
+      "هدفك اليومي الحالي هو {value} سعرة حرارية. {source}",
+      "مصدره هدف سعرات اليوم المجدول.",
+      "مصدره هدف السعرات المحفوظ في أهداف التغذية.",
     ],
     'fr': [
       'Renommer la conversation',
@@ -32,6 +65,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Contexte, confidentialité et solde',
       'Conversations, contexte, confidentialité et utilisation.',
       'Mes aliments conserve chaque aliment avec les valeurs de son étiquette. Les repas combinent les aliments ; les recettes calculent les ingrédients par portion.',
+      "Votre objectif quotidien actuel est de {value} kcal. {source}",
+      "Il provient de l’objectif calorique planifié pour aujourd’hui.",
+      "Il provient de l’objectif calorique enregistré dans les objectifs nutritionnels.",
     ],
     'es': [
       'Renombrar conversación',
@@ -42,6 +78,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Contexto, privacidad y saldo',
       'Conversaciones, contexto, privacidad y uso.',
       'Mis alimentos guarda cada alimento con los valores de su etiqueta. Las comidas combinan alimentos; las recetas calculan ingredientes por porción.',
+      "Tu objetivo diario actual es de {value} kcal. {source}",
+      "Proviene del objetivo de calorías programado para hoy.",
+      "Proviene del objetivo de calorías guardado en Objetivos nutricionales.",
     ],
     'tr': [
       'Sohbeti yeniden adlandır',
@@ -52,6 +91,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Bağlam, gizlilik ve bakiye',
       'Sohbetler, bağlam, gizlilik ve kullanım.',
       'Yiyeceklerim her yiyeceği etiket değerleriyle saklar. Öğünler yiyecekleri birleştirir; tarifler malzemeleri porsiyon başına hesaplar.',
+      "Güncel günlük hedefiniz {value} kcal. {source}",
+      "Bugün için planlanan kalori hedefinden gelir.",
+      "Beslenme Hedefleri bölümünde kaydedilen kalori hedefinden gelir.",
     ],
     'de': [
       'Unterhaltung umbenennen',
@@ -62,6 +104,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Kontext, Datenschutz und Guthaben',
       'Unterhaltungen, Kontext, Datenschutz und Nutzung.',
       'Meine Lebensmittel speichert einzelne Lebensmittel mit ihren Etikettwerten. Mahlzeiten kombinieren Lebensmittel; Rezepte berechnen Zutaten pro Portion.',
+      "Ihr aktuelles Tagesziel beträgt {value} kcal. {source}",
+      "Es stammt aus dem für heute geplanten Kalorienziel.",
+      "Es stammt aus dem in den Ernährungszielen gespeicherten Kalorienziel.",
     ],
     'it': [
       'Rinomina conversazione',
@@ -72,6 +117,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Contesto, privacy e saldo',
       'Conversazioni, contesto, privacy e utilizzo.',
       'I miei alimenti conserva ogni alimento con i valori della sua etichetta. I pasti combinano alimenti; le ricette calcolano gli ingredienti per porzione.',
+      "Il tuo obiettivo giornaliero attuale è {value} kcal. {source}",
+      "Deriva dall’obiettivo calorico pianificato per oggi.",
+      "Deriva dall’obiettivo calorico salvato in Obiettivi nutrizionali.",
     ],
     'pt-BR': [
       'Renomear conversa',
@@ -82,6 +130,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Contexto, privacidade e saldo',
       'Conversas, contexto, privacidade e uso.',
       'Meus alimentos guarda cada alimento com os valores do rótulo. As refeições combinam alimentos; as receitas calculam ingredientes por porção.',
+      "Sua meta diária atual é de {value} kcal. {source}",
+      "Ela vem da meta de calorias programada para hoje.",
+      "Ela vem da meta de calorias salva em Metas nutricionais.",
     ],
     'pt-PT': [
       'Mudar nome da conversa',
@@ -92,6 +143,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Contexto, privacidade e saldo',
       'Conversas, contexto, privacidade e utilização.',
       'Os meus alimentos guarda cada alimento com os valores do rótulo. As refeições combinam alimentos; as receitas calculam ingredientes por porção.',
+      "O seu objetivo diário atual é de {value} kcal. {source}",
+      "Provém do objetivo de calorias agendado para hoje.",
+      "Provém do objetivo de calorias guardado nos Objetivos nutricionais.",
     ],
     'ur': [
       'گفتگو کا نام بدلیں',
@@ -102,6 +156,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'سیاق، رازداری اور بیلنس',
       'گفتگو، سیاق، رازداری اور استعمال۔',
       'میرے کھانے ہر غذا کو اس کے لیبل کی قدروں کے ساتھ محفوظ کرتے ہیں۔ کھانے غذائیں یکجا کرتے ہیں؛ ترکیبیں فی حصہ اجزاء کا حساب کرتی ہیں۔',
+      "آپ کا موجودہ یومیہ ہدف {value} kcal ہے۔ {source}",
+      "یہ آج کے لیے طے شدہ کیلوری ہدف سے حاصل ہوتا ہے۔",
+      "یہ غذائی اہداف میں محفوظ کیلوری ہدف سے حاصل ہوتا ہے۔",
     ],
     'fa': [
       'تغییر نام گفتگو',
@@ -112,6 +169,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'زمینه، حریم خصوصی و موجودی',
       'گفتگوها، زمینه، حریم خصوصی و استفاده.',
       'غذاهای من هر ماده غذایی را با مقادیر برچسب آن نگه می‌دارد. وعده‌ها غذاها را ترکیب می‌کنند؛ دستورها مواد هر سهم را محاسبه می‌کنند.',
+      "هدف روزانه فعلی شما {value} کیلوکالری است. {source}",
+      "این مقدار از هدف کالری برنامه‌ریزی‌شده برای امروز گرفته شده است.",
+      "این مقدار از هدف کالری ذخیره‌شده در اهداف تغذیه گرفته شده است.",
     ],
     'hi': [
       'बातचीत का नाम बदलें',
@@ -122,6 +182,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'संदर्भ, गोपनीयता और शेष राशि',
       'बातचीत, संदर्भ, गोपनीयता और उपयोग।',
       'मेरे खाद्य पदार्थ अलग-अलग खाद्य को लेबल के मानों सहित रखते हैं। भोजन खाद्य पदार्थों को जोड़ते हैं; व्यंजन हर परोस की सामग्री की गणना करते हैं।',
+      "आपका वर्तमान दैनिक लक्ष्य {value} किलो कैलोरी है। {source}",
+      "यह आज के लिए निर्धारित कैलोरी लक्ष्य से आता है।",
+      "यह पोषण लक्ष्यों में सहेजे गए कैलोरी लक्ष्य से आता है।",
     ],
     'id': [
       'Ganti nama percakapan',
@@ -132,6 +195,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Konteks, privasi dan saldo',
       'Percakapan, konteks, privasi dan penggunaan.',
       'Makanan saya menyimpan setiap bahan makanan beserta nilai labelnya. Santapan menggabungkan makanan; resep menghitung bahan per porsi.',
+      "Target harian Anda saat ini adalah {value} kkal. {source}",
+      "Ini berasal dari target kalori yang dijadwalkan untuk hari ini.",
+      "Ini berasal dari target kalori yang disimpan di Target nutrisi.",
     ],
     'ms': [
       'Namakan semula perbualan',
@@ -142,6 +208,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Konteks, privasi dan baki',
       'Perbualan, konteks, privasi dan penggunaan.',
       'Makanan saya menyimpan setiap makanan bersama nilai labelnya. Hidangan menggabungkan makanan; resipi mengira bahan bagi setiap sajian.',
+      "Sasaran harian semasa anda ialah {value} kcal. {source}",
+      "Ia berasal daripada sasaran kalori yang dijadualkan untuk hari ini.",
+      "Ia berasal daripada sasaran kalori yang disimpan dalam Sasaran pemakanan.",
     ],
     'ja': [
       '会話の名前を変更',
@@ -152,6 +221,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'コンテキスト、プライバシー、残高',
       '会話、コンテキスト、プライバシー、使用状況。',
       'マイ食品は各食品を表示値とともに保存します。食事は食品を組み合わせ、レシピは1人分の材料を計算します。',
+      "現在の1日の目標は{value} kcalです。{source}",
+      "今日の予定カロリー目標に基づく値です。",
+      "栄養目標に保存したカロリー目標に基づく値です。",
     ],
     'ko': [
       '대화 이름 바꾸기',
@@ -162,6 +234,9 @@ abstract final class ClosureCoachRuntimeCopy {
       '맥락, 개인정보 및 잔액',
       '대화, 맥락, 개인정보 및 사용량.',
       '내 음식은 개별 음식과 라벨 값을 저장합니다. 식사는 음식을 조합하고 레시피는 1인분당 재료를 계산합니다.',
+      "현재 일일 목표는 {value} kcal입니다. {source}",
+      "오늘 예정된 칼로리 목표에서 가져온 값입니다.",
+      "영양 목표에 저장된 칼로리 목표에서 가져온 값입니다.",
     ],
     'zh-Hans': [
       '重命名对话',
@@ -172,6 +247,9 @@ abstract final class ClosureCoachRuntimeCopy {
       '上下文、隐私和余额',
       '对话、上下文、隐私和使用情况。',
       '我的食物保存单个食物及其标签数值。餐食组合食物；食谱计算每份所需的配料。',
+      "您当前的每日目标是 {value} 千卡。{source}",
+      "该值来自今天设定的卡路里目标。",
+      "该值来自营养目标中保存的卡路里目标。",
     ],
     'zh-Hant': [
       '重新命名對話',
@@ -182,6 +260,9 @@ abstract final class ClosureCoachRuntimeCopy {
       '情境、隱私與餘額',
       '對話、情境、隱私與使用情況。',
       '我的食物儲存個別食物及其標籤數值。餐點組合食物；食譜計算每份所需的食材。',
+      "您目前的每日目標是 {value} 大卡。{source}",
+      "此值來自今天設定的熱量目標。",
+      "此值來自營養目標中儲存的熱量目標。",
     ],
     'ru': [
       'Переименовать разговор',
@@ -192,6 +273,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Контекст, конфиденциальность и баланс',
       'Разговоры, контекст, конфиденциальность и использование.',
       'Мои продукты хранит отдельные продукты с данными этикеток. Приёмы пищи объединяют продукты; рецепты рассчитывают ингредиенты на порцию.',
+      "Ваша текущая дневная цель — {value} ккал. {source}",
+      "Она взята из цели по калориям, запланированной на сегодня.",
+      "Она взята из цели по калориям, сохранённой в целях питания.",
     ],
     'bn': [
       'কথোপকথনের নাম বদলান',
@@ -202,6 +286,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'প্রসঙ্গ, গোপনীয়তা এবং ব্যালেন্স',
       'কথোপকথন, প্রসঙ্গ, গোপনীয়তা এবং ব্যবহার।',
       'আমার খাবার প্রতিটি খাদ্য তার লেবেলের মানসহ সংরক্ষণ করে। আহার বিভিন্ন খাদ্য একত্র করে; রেসিপি প্রতি পরিবেশনের উপকরণ গণনা করে।',
+      "আপনার বর্তমান দৈনিক লক্ষ্য {value} কিলোক্যালরি। {source}",
+      "এটি আজকের জন্য নির্ধারিত ক্যালোরির লক্ষ্য থেকে নেওয়া হয়েছে।",
+      "এটি পুষ্টির লক্ষ্যসমূহে সংরক্ষিত ক্যালোরির লক্ষ্য থেকে নেওয়া হয়েছে।",
     ],
     'vi': [
       'Đổi tên cuộc trò chuyện',
@@ -212,6 +299,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Ngữ cảnh, quyền riêng tư và số dư',
       'Cuộc trò chuyện, ngữ cảnh, quyền riêng tư và mức sử dụng.',
       'Thực phẩm của tôi lưu từng thực phẩm với giá trị trên nhãn. Bữa ăn kết hợp thực phẩm; công thức tính nguyên liệu theo mỗi khẩu phần.',
+      "Mục tiêu hằng ngày hiện tại của bạn là {value} kcal. {source}",
+      "Giá trị này lấy từ mục tiêu calo đã lên lịch cho hôm nay.",
+      "Giá trị này lấy từ mục tiêu calo đã lưu trong Mục tiêu dinh dưỡng.",
     ],
     'th': [
       'เปลี่ยนชื่อบทสนทนา',
@@ -222,6 +312,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'บริบท ความเป็นส่วนตัว และยอดคงเหลือ',
       'บทสนทนา บริบท ความเป็นส่วนตัว และการใช้งาน',
       'อาหารของฉันบันทึกอาหารแต่ละชนิดพร้อมค่าบนฉลาก มื้ออาหารรวมอาหารหลายชนิด ส่วนสูตรคำนวณวัตถุดิบต่อหนึ่งส่วน',
+      "เป้าหมายรายวันปัจจุบันของคุณคือ {value} กิโลแคลอรี {source}",
+      "ค่านี้มาจากเป้าหมายแคลอรีที่กำหนดไว้สำหรับวันนี้",
+      "ค่านี้มาจากเป้าหมายแคลอรีที่บันทึกไว้ในเป้าหมายโภชนาการ",
     ],
     'pl': [
       'Zmień nazwę rozmowy',
@@ -232,6 +325,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Kontekst, prywatność i saldo',
       'Rozmowy, kontekst, prywatność i użycie.',
       'Moje produkty zapisuje poszczególne produkty z wartościami etykiet. Posiłki łączą produkty; przepisy obliczają składniki na porcję.',
+      "Twój aktualny dzienny cel to {value} kcal. {source}",
+      "Pochodzi z celu kalorycznego zaplanowanego na dziś.",
+      "Pochodzi z celu kalorycznego zapisanego w celach żywieniowych.",
     ],
     'nl': [
       'Gesprek hernoemen',
@@ -242,6 +338,9 @@ abstract final class ClosureCoachRuntimeCopy {
       'Context, privacy en saldo',
       'Gesprekken, context, privacy en gebruik.',
       'Mijn voedingsmiddelen bewaart losse voedingsmiddelen met hun etiketwaarden. Maaltijden combineren voedingsmiddelen; recepten berekenen ingrediënten per portie.',
+      "Uw huidige dagelijkse doel is {value} kcal. {source}",
+      "Het komt uit het caloriedoel dat voor vandaag is gepland.",
+      "Het komt uit het caloriedoel dat is opgeslagen in Voedingsdoelen.",
     ],
     'uk': [
       'Перейменувати розмову',
@@ -252,8 +351,16 @@ abstract final class ClosureCoachRuntimeCopy {
       'Контекст, конфіденційність і баланс',
       'Розмови, контекст, конфіденційність і використання.',
       'Мої продукти зберігає окремі продукти зі значеннями етикеток. Прийоми їжі поєднують продукти; рецепти обчислюють інгредієнти на порцію.',
+      "Ваша поточна денна ціль — {value} ккал. {source}",
+      "Її взято з цілі калорій, запланованої на сьогодні.",
+      "Її взято з цілі калорій, збереженої в цілях харчування.",
     ],
   };
+  static final rows = <String, List<String>>{
+    for (final tag in BilLocalePolicy.productionTags)
+      tag: [..._baseRows[tag]!, ..._closureCoachPresentationRows[tag]!],
+  };
+
   static String? resolve(String source, String tag) {
     final i = sources.indexOf(source);
     if (i < 0) return null;

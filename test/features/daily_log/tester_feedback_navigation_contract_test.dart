@@ -141,26 +141,22 @@ void main() {
     expect(source, contains("context.push('/wellness/workouts/log')"));
   });
 
-  test(
-    'dashboard keeps Premium copy at the route gate instead of every tile',
-    () {
-      final benchmark = _librarySource(
-        'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
-      );
-      final sections = File(
-        'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
-      ).readAsStringSync();
+  test('dashboard uses shared value locks without repeated Premium badges', () {
+    final benchmark = _librarySource(
+      'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+    );
+    final sections = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
+    ).readAsStringSync();
 
-      expect(
-        RegExp(r'PremiumLabelBadge\(').allMatches(benchmark),
-        hasLength(1),
-      );
-      expect(benchmark, contains("Key('dashboard-premium-page-label')"));
-      expect(sections, isNot(contains('PremiumLabelBadge')));
-      expect(sections, isNot(contains('Icons.lock')));
-      expect(sections, isNot(contains('Icons.lock_outline')));
-    },
-  );
+    expect(benchmark, contains('PremiumDashboardCardLock('));
+    expect(benchmark, contains("Key('dashboard-macros-premium-lock')"));
+    expect(benchmark, contains("Key('dashboard-heart-premium-lock')"));
+    expect(benchmark, isNot(contains('PremiumLabelBadge(')));
+    expect(sections, isNot(contains('PremiumLabelBadge')));
+    expect(sections, isNot(contains('Icons.lock')));
+    expect(sections, isNot(contains('Icons.lock_outline')));
+  });
 
   test(
     'dashboard fitness widget keeps live readings inside the watch and card is the navigation target',

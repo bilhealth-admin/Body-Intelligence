@@ -1,0 +1,29 @@
+{
+  "label": "final-full-dart-format-check",
+  "kind": "check",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "--output=none",
+    "--set-exit-if-changed",
+    "integration_test",
+    "lib",
+    "test",
+    "test_driver",
+    "tool",
+    "tools"
+  ],
+  "started_utc": "2026-10-13T05:47:12.346507+00:00",
+  "runner_pid": 7668,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "fingerprint_version": 4,
+  "pid": 18980,
+  "exit_code": 0,
+  "finished_utc": "2026-10-13T05:47:28.270851+00:00",
+  "seconds": 15.86,
+  "end_fingerprint": "319cb455494b26c6986853adfc4b319a949ee480674d6774da8ec817399a2333",
+  "stable_source": true,
+  "accepted": true
+}

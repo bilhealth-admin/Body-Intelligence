@@ -1,0 +1,16 @@
+{
+  "label": "format-focus-sdk-diagnostic-case",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "test\\features\\community\\community_notification_content_route_test.dart"
+  ],
+  "started_utc": "2026-10-13T07:33:27.392843+00:00",
+  "runner_pid": 14252,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "077fd93f5f92766a777143e8f90f6b971bf2e08a84cf75bff35acea8543936d6",
+  "fingerprint_version": 4,
+  "pid": 21020
+}

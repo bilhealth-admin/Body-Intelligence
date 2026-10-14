@@ -373,8 +373,16 @@ void main() {
     ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(provider, contains('globalProductFlowsProvider'));
-    expect(provider, contains('_flows.appleHealth.integration.synchronize'));
-    expect(provider, contains('_flows.healthConnect.integration.synchronize'));
+    expect(
+      provider,
+      contains('bridges: <NativeHealthBridge>[_flows.appleHealth.bridge]'),
+    );
+    expect(
+      provider,
+      contains('bridges: <NativeHealthBridge>[_flows.healthConnect.bridge]'),
+    );
+    expect(provider, contains('_appleHealthIntegration.synchronize('));
+    expect(provider, contains('_healthConnectIntegration.synchronize('));
     expect(provider, contains("'connected_health_ui'"));
     expect(provider, isNot(contains('http://')));
     expect(provider, isNot(contains('https://')));

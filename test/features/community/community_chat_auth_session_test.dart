@@ -7,7 +7,10 @@ import 'package:body_intelligence_log/features/community/services/community_owne
 import 'package:body_intelligence_log/features/community/services/community_owner_http_client.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_people_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -18,6 +21,7 @@ part 'community_chat_repository_cases.dart';
 part 'community_message_entry_owner_cases.dart';
 part 'community_message_retry_cases.dart';
 part 'community_chat_visibility_paging_cases.dart';
+part 'community_relationship_delivery_cases.dart';
 
 const _ownerA = '11111111-1111-4111-8111-111111111111';
 const _ownerB = '22222222-2222-4222-8222-222222222222';
@@ -110,6 +114,7 @@ class _Repository extends CommunityRepository {
   final reads = <List<String>>[];
   final loads = <String>[];
   final sends = <String>[];
+  final operationRequests = <String>[];
   List<CommunityMessage> rows = [_message()];
   Completer<List<CommunityMessage>>? pendingLoad;
   Completer<void>? pendingSend;
@@ -152,6 +157,16 @@ class _Repository extends CommunityRepository {
     olderCursors.add(beforeId);
     if (failOlder) throw StateError('offline');
     return olderRows;
+  }
+
+  @override
+  Future<void> sendMessageOperation(
+    String recipientId,
+    String body, {
+    required String requestId,
+  }) async {
+    operationRequests.add(requestId);
+    await sendMessage(recipientId, body);
   }
 
   @override
@@ -200,7 +215,7 @@ Widget _app(_Repository repo, {String peer = _peer}) => MaterialApp(
   ),
 );
 Finder get _composer => find.byKey(const Key('community-message-composer'));
-Finder get _send => find.widgetWithIcon(IconButton, Icons.send_rounded);
+Finder get _send => find.byKey(const Key('community-chat-send'));
 Future<void> _mount(
   WidgetTester tester,
   _Repository repo, {
@@ -229,6 +244,7 @@ void main() {
     await auth.client.dispose();
   });
   _repositoryCases(() => auth);
+  _relationshipDeliveryCases(() => auth, (repo) => repositories.add(repo));
   _messageEntryCases(() => auth, (repo) => repositories.add(repo));
   _messageRetryCases(() => auth, (repo) => repositories.add(repo));
   _visibilityPagingCases(() => auth, () => repo);

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
@@ -51,7 +52,11 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
   late Future<List<Map<String, dynamic>>> _inbox;
   late Future<List<Map<String, dynamic>>> _sent;
   StreamSubscription<void>? _inboxChanges;
-  _MessageOwnerVisit? _visit;
+  CommunityMessageOwnerVisit? _visit;
+  List<Map<String, dynamic>> _inboxRows = const [], _sentRows = const [];
+  bool _inboxMore = false, _sentMore = false;
+  bool _inboxLoadingMore = false, _sentLoadingMore = false;
+  int _inboxGeneration = 0, _sentGeneration = 0;
 
   @override
   void initState() {
@@ -68,12 +73,15 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
     }
     final repository = _repository;
     if (repository != null) {
-      _visit = _MessageOwnerVisit(repository, () => mounted, () {
+      _visit = CommunityMessageOwnerVisit(repository, () => mounted, () {
         unawaited(_inboxChanges?.cancel());
         _inboxChanges = null;
         if (mounted) setState(() {});
       });
     }
+    _inboxRows = _sentRows = const [];
+    _inboxMore = _sentMore = false;
+    _inboxLoadingMore = _sentLoadingMore = false;
     _reload();
     _watchInbox();
   }
@@ -111,10 +119,10 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
   void _reload() {
     final visit = _visit;
     _inbox = visit?.isCurrent == true
-        ? visit!.run(visit.repository.loadInboxMessages)
+        ? _loadPreviewHead(incoming: true)
         : Future.value(const []);
     _sent = visit?.isCurrent == true
-        ? visit!.run(visit.repository.loadSentMessages)
+        ? _loadPreviewHead(incoming: false)
         : Future.value(const []);
     // A not-yet-opened tab may not have a FutureBuilder attached. Observe its
     // error without changing the original future or hiding its retry state.
@@ -137,7 +145,7 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
     final visit = _visit;
     if (visit?.isCurrent != true) return;
     setState(() {
-      _inbox = visit!.run(visit.repository.loadInboxMessages);
+      _inbox = _loadPreviewHead(incoming: true);
     });
     try {
       await _inbox;
@@ -150,12 +158,111 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
     final visit = _visit;
     if (visit?.isCurrent != true) return;
     setState(() {
-      _sent = visit!.run(visit.repository.loadSentMessages);
+      _sent = _loadPreviewHead(incoming: false);
     });
     try {
       await _sent;
     } on Object {
       /* Visible retry owns the failure. */
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _loadPreviewHead({
+    required bool incoming,
+  }) async {
+    final visit = _visit!;
+    final generation = incoming ? ++_inboxGeneration : ++_sentGeneration;
+    final rows = await visit.run(
+      incoming
+          ? visit.repository.loadInboxMessages
+          : visit.repository.loadSentMessages,
+    );
+    visit.check();
+    if (generation != (incoming ? _inboxGeneration : _sentGeneration)) {
+      return incoming ? _inboxRows : _sentRows;
+    }
+    setState(() {
+      if (incoming) {
+        _inboxRows = rows;
+        _inboxMore = rows.length == 100;
+        _inboxLoadingMore = false;
+      } else {
+        _sentRows = rows;
+        _sentMore = rows.length == 100;
+        _sentLoadingMore = false;
+      }
+    });
+    return rows;
+  }
+
+  Future<void> _loadOlderPreviews({required bool incoming}) async {
+    final visit = _visit;
+    final rows = incoming ? _inboxRows : _sentRows;
+    if (visit?.isCurrent != true ||
+        rows.isEmpty ||
+        (incoming ? _inboxLoadingMore : _sentLoadingMore)) {
+      return;
+    }
+    final generation = incoming ? _inboxGeneration : _sentGeneration;
+    final cursor = rows.last;
+    setState(() {
+      if (incoming) {
+        _inboxLoadingMore = true;
+      } else {
+        _sentLoadingMore = true;
+      }
+    });
+    try {
+      final older = await visit!.run(
+        () => visit.repository.loadOlderMessagePreviews(
+          incoming: incoming,
+          before: DateTime.parse(cursor['created_at'] as String),
+          beforeId: cursor['id'] as String,
+        ),
+      );
+      if (!mounted ||
+          !visit.isCurrent ||
+          generation != (incoming ? _inboxGeneration : _sentGeneration)) {
+        return;
+      }
+      final merged =
+          <String, Map<String, dynamic>>{
+            for (final row in [...rows, ...older]) row['id'] as String: row,
+          }.values.toList()..sort((a, b) {
+            final time = DateTime.parse(
+              b['created_at'] as String,
+            ).compareTo(DateTime.parse(a['created_at'] as String));
+            return time != 0 ? time : '${b['id']}'.compareTo('${a['id']}');
+          });
+      setState(() {
+        if (incoming) {
+          _inboxRows = merged;
+          _inboxMore = older.length == 100;
+          _inbox = Future.value(merged);
+        } else {
+          _sentRows = merged;
+          _sentMore = older.length == 100;
+          _sent = Future.value(merged);
+        }
+      });
+    } on Object {
+      if (mounted && visit!.isCurrent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_MessagesCopy.of(context).loadFailed)),
+        );
+      }
+    } finally {
+      if (mounted &&
+          visit!.isCurrent &&
+          generation == (incoming ? _inboxGeneration : _sentGeneration)) {
+        setState(() {
+          if (incoming) {
+            _inboxLoadingMore = false;
+          } else {
+            _sentLoadingMore = false;
+          }
+        });
+      }
     }
   }
 
@@ -206,31 +313,39 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
             ],
           ),
         ),
-        body: visit != null && !visit.isCurrent
-            ? const _MessageOwnerChanged()
-            : _repository == null
-            ? _MessagesSignIn(copy: copy)
-            : TabBarView(
-                key: ObjectKey(visit),
-                children: [
-                  _MessageList(
-                    visit: visit!,
-                    future: _inbox,
-                    emptyText: copy.noMessages,
-                    copy: copy,
-                    incoming: true,
-                    onRetry: _refreshInbox,
-                  ),
-                  _MessageList(
-                    visit: visit,
-                    future: _sent,
-                    emptyText: copy.noSentMessages,
-                    copy: copy,
-                    incoming: false,
-                    onRetry: _refreshSent,
-                  ),
-                ],
-              ),
+        body: BilPearlBackdrop(
+          child: visit != null && !visit.isCurrent
+              ? const _MessageOwnerChanged()
+              : _repository == null
+              ? _MessagesSignIn(copy: copy)
+              : TabBarView(
+                  key: ObjectKey(visit),
+                  children: [
+                    _MessageList(
+                      visit: visit!,
+                      future: _inbox,
+                      emptyText: copy.noMessages,
+                      copy: copy,
+                      incoming: true,
+                      hasMore: _inboxMore,
+                      loadingMore: _inboxLoadingMore,
+                      onOlder: () => _loadOlderPreviews(incoming: true),
+                      onRetry: _refreshInbox,
+                    ),
+                    _MessageList(
+                      visit: visit,
+                      future: _sent,
+                      emptyText: copy.noSentMessages,
+                      copy: copy,
+                      incoming: false,
+                      hasMore: _sentMore,
+                      loadingMore: _sentLoadingMore,
+                      onOlder: () => _loadOlderPreviews(incoming: false),
+                      onRetry: _refreshSent,
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -243,14 +358,17 @@ class _MessageList extends StatelessWidget {
     required this.emptyText,
     required this.copy,
     required this.incoming,
+    required this.hasMore,
+    required this.loadingMore,
+    required this.onOlder,
     required this.onRetry,
   });
   final Future<List<Map<String, dynamic>>> future;
-  final _MessageOwnerVisit visit;
+  final CommunityMessageOwnerVisit visit;
   final String emptyText;
   final _MessagesCopy copy;
-  final bool incoming;
-  final Future<void> Function() onRetry;
+  final bool incoming, hasMore, loadingMore;
+  final Future<void> Function() onRetry, onOlder;
 
   @override
   Widget build(
@@ -278,10 +396,27 @@ class _MessageList extends StatelessWidget {
               )
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: rows.length,
+                itemCount: rows.length + (hasMore ? 1 : 0),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
+                  if (index == rows.length) {
+                    return TextButton.icon(
+                      key: Key(
+                        incoming
+                            ? 'community-inbox-load-older'
+                            : 'community-sent-load-older',
+                      ),
+                      onPressed: loadingMore ? null : onOlder,
+                      icon: loadingMore
+                          ? const SizedBox.square(
+                              dimension: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.history_rounded),
+                      label: Text(copy.olderMessages),
+                    );
+                  }
                   final row = rows[index];
                   final profile = row['profile'] as Map<String, dynamic>?;
                   final parsed = MessageBodyContract.parse(
@@ -309,15 +444,8 @@ class _MessageList extends StatelessWidget {
                   );
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Material(
-                      color: CommunitySapphire.paper(context),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                      ),
-                      clipBehavior: Clip.antiAlias,
+                    child: BilPearlCard(
+                      margin: EdgeInsets.zero,
                       child: _CommunityConversationTile(
                         key: ValueKey('community-inbox-${row['id']}'),
                         title: parsed.subject.isEmpty ? name : parsed.subject,
@@ -357,15 +485,21 @@ class _EmptyMessages extends StatelessWidget {
     child: Column(
       children: [
         const SizedBox(height: 48),
-        const ExcludeSemantics(
-          child: Text('💬', style: TextStyle(fontSize: 40)),
+        Icon(
+          Icons.forum_outlined,
+          size: 36,
+          color: CommunitySapphire.muted(context),
         ),
         const SizedBox(height: 16),
-        Text(text, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 36),
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
+          child: FilledButton.tonal(
             onPressed: () => context.push('/community/messages/new'),
             child: Text(button),
           ),

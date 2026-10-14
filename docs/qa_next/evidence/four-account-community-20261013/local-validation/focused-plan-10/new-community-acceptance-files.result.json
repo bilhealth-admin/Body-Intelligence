@@ -1,0 +1,158 @@
+{
+  "label": "new-community-acceptance-files",
+  "kind": "flutter",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--timeout=3m",
+    "--reporter=json",
+    "test/features/community/community_safety_review_repository_test.dart",
+    "test/features/community/community_chat_auth_session_test.dart",
+    "test/features/community/community_code_invite_earn_account_test.dart",
+    "test/features/community/community_notification_content_route_test.dart",
+    "test/features/intelligence_center/cloud_voice_privacy_contract_test.dart"
+  ],
+  "started_utc": "2026-10-13T07:37:03.298864+00:00",
+  "runner_pid": 22856,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "34a646b58ecc6bafac13586e59bd447bec3fb5cdc60c503d5fc2f9533ac7afeb",
+  "fingerprint_version": 4,
+  "pid": 6028,
+  "exit_code": 1,
+  "finished_utc": "2026-10-13T07:38:19.724964+00:00",
+  "seconds": 76.29,
+  "end_fingerprint": "34a646b58ecc6bafac13586e59bd447bec3fb5cdc60c503d5fc2f9533ac7afeb",
+  "stable_source": true,
+  "additional_source_sha256": {
+    "public_site/.assetsignore": "5eaeeadca1b89f30d6b5a39fb2c4ea48dd23b6f626285e317a4a657aca7f544b",
+    "public_site/app-ads.txt": "f8043dbc228db374437c11be71a2fcb39c749798422c4f8521af4e766c45142c",
+    "public_site/app.js": "aa8ded500d2e2bf7144267823b8c458c2aeb2ac76521c893362f5c9e058f61c9",
+    "public_site/community_links.mjs": "d2c6807ecfeb56f48eabb0057f1d8e1d6db3867a346059ab32dfd1a6ed6591df",
+    "public_site/favicon.svg": "bf5928b8a948956062ab588f5484ec654be9a0377b84aca9f6980fe412669e6b",
+    "public_site/index.html": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2",
+    "public_site/README.md": "80835520dc90ebb18d1879567bafa1ef23dc49c88ca88868b191b3c645973ce9",
+    "public_site/robots.txt": "8f6fe05326c4c7167746ff2780c2df283902c0bb20b9c95abf3d32f1a2d71568",
+    "public_site/site.webmanifest": "230e49f2f994fceb3bbad093ac452f686d641e602d9a264490c9a294aa052a91",
+    "public_site/sitemap.xml": "f439da63f40feab2c9e419e0ea0a9e727128ab9aec2ad3fdd7de815a0c0cfd25",
+    "public_site/styles.css": "3667982d35546c51d09a30edd1f20914d16365b2a57c505094318dd3a27cf01a",
+    "public_site/_headers": "33838571e78e44550895680a120d336c4eddeb4e67b1007d98ecbd330f852743",
+    "public_site/_redirects": "a77cb5910084dfe39d7060075c92b9d9c9c55bbb1188722f113bc1d6f2714dd8"
+  },
+  "additional_stable_source": true,
+  "accepted": false,
+  "counts": {
+    "success": 105,
+    "failure": 0,
+    "error": 12,
+    "skip": 0
+  },
+  "tests_completed": 117,
+  "files_loaded": 5,
+  "files_with_test_outcomes": 5,
+  "harness_pid": 8160,
+  "protocol_success": false,
+  "in_progress": [],
+  "error_events": 12,
+  "errors": [
+    {
+      "testID": 12,
+      "error": "Test failed. See exception logs above.\nThe test description was: account switch clears open report text and decision controls",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 12944
+    },
+    {
+      "testID": 30,
+      "error": "Test failed. See exception logs above.\nThe test description was: failed chat send reuses request UUID and success permits a new identical message",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 20760
+    },
+    {
+      "testID": 31,
+      "error": "Test failed. See exception logs above.\nThe test description was: chat removed delivery preserves draft and needs explicit new-message confirmation",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 21041
+    },
+    {
+      "testID": 32,
+      "error": "Test failed. See exception logs above.\nThe test description was: new removed delivery preserves draft and needs explicit new-message confirmation",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 26245
+    },
+    {
+      "testID": 91,
+      "error": "Test failed. See exception logs above.\nThe test description was: same-account failed Gold refresh retains its verified balance and exposes retry",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 41247
+    },
+    {
+      "testID": 93,
+      "error": "Test failed. See exception logs above.\nThe test description was: Coach Earn is discoverable and opens only the existing explained composer route",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 41626
+    },
+    {
+      "testID": 98,
+      "error": "Test failed. See exception logs above.\nThe test description was: QR rotation confirmation cannot mutate B after its A owner changes",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 48972
+    },
+    {
+      "testID": 103,
+      "error": "Test failed. See exception logs above.\nThe test description was: QR and Earn remain reachable at 320 and text 2x en dark=false",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 50067
+    },
+    {
+      "testID": 104,
+      "error": "Test failed. See exception logs above.\nThe test description was: QR and Earn remain reachable at 320 and text 2x en dark=true",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 50312
+    },
+    {
+      "testID": 105,
+      "error": "Test failed. See exception logs above.\nThe test description was: QR and Earn remain reachable at 320 and text 2x ar dark=false",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 50561
+    },
+    {
+      "testID": 106,
+      "error": "Test failed. See exception logs above.\nThe test description was: QR and Earn remain reachable at 320 and text 2x ar dark=true",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 50817
+    },
+    {
+      "testID": 124,
+      "error": "Test failed. See exception logs above.\nThe test description was: resuming rechecks social access and clears former visible content",
+      "stackTrace": "",
+      "isFailure": false,
+      "type": "error",
+      "time": 64616
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "label": "format-citation-client",
+  "kind": "format-edit",
+  "command": [
+    "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+    "format",
+    "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+    "test/features/intelligence_center/coach_remote_consent_preflight_test.dart"
+  ],
+  "started_utc": "2026-10-13T06:16:13.384372+00:00",
+  "runner_pid": 10600,
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_fingerprint": "1c9386d6665bb0cc772d8c7e7bfadf1ea2ebbf17aef5f131d47ae5aef66b8043",
+  "fingerprint_version": 4,
+  "pid": 15380
+}

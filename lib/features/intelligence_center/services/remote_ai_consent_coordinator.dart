@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../community/services/community_owner_operation.dart';
+
 import 'coach_cloud_privacy_boundary.dart';
 
 typedef RemoteAiConsentRead = Future<Object?> Function();
@@ -176,17 +178,35 @@ class RemoteAiConsentCoordinator {
 
 RemoteAiConsentCoordinator? _sharedCoordinator;
 SupabaseClient? _sharedClient;
+StreamSubscription<AuthState>? _sharedOwnerSubscription;
 
 RemoteAiConsentCoordinator sharedRemoteAiConsentCoordinator([
   SupabaseClient? suppliedClient,
 ]) {
   final client = suppliedClient ?? Supabase.instance.client;
   if (!identical(client, _sharedClient) || _sharedCoordinator == null) {
+    // Retire work and observation owned by the previous SDK client. A caller
+    // holding its coordinator must not publish a late positive receipt.
+    _sharedCoordinator?.invalidate();
+    unawaited(_sharedOwnerSubscription?.cancel());
     _sharedClient = client;
-    _sharedCoordinator = RemoteAiConsentCoordinator(
-      owner: () => client.auth.currentUser?.id,
-      read: () => client.rpc('bil_get_remote_ai_consent'),
-      write: () async {
+    var authorityUnavailable = false;
+    var deliveredOwner = client.auth.currentUser?.id;
+
+    Future<T> runForOwner<T>(Future<T> Function() action) {
+      return CommunityOwnerOperation.run<T>(
+        client: client,
+        ownerId: client.auth.currentUser?.id,
+        isCurrentOwner: () =>
+            !authorityUnavailable && identical(_sharedClient, client),
+        action: (_) => action(),
+      );
+    }
+
+    final coordinator = RemoteAiConsentCoordinator(
+      owner: () => authorityUnavailable ? null : client.auth.currentUser?.id,
+      read: () => runForOwner(() => client.rpc('bil_get_remote_ai_consent')),
+      write: () => runForOwner(() async {
         await client.rpc(
           'bil_record_consent',
           params: const <String, Object?>{
@@ -195,8 +215,8 @@ RemoteAiConsentCoordinator sharedRemoteAiConsentCoordinator([
             'p_granted': true,
           },
         );
-      },
-      revoke: () async {
+      }),
+      revoke: () => runForOwner(() async {
         await client.rpc(
           'bil_record_consent',
           params: const <String, Object?>{
@@ -205,7 +225,7 @@ RemoteAiConsentCoordinator sharedRemoteAiConsentCoordinator([
             'p_granted': false,
           },
         );
-      },
+      }),
       readDenial: (owner) async =>
           (await SharedPreferences.getInstance()).getBool(
             'bil.remoteAi.denied.v3.$owner',
@@ -217,6 +237,27 @@ RemoteAiConsentCoordinator sharedRemoteAiConsentCoordinator([
           denied,
         );
         if (!persisted) throw StateError('remote_ai_denial_not_persisted');
+      },
+    );
+    _sharedCoordinator = coordinator;
+    _sharedOwnerSubscription = client.auth.onAuthStateChange.listen(
+      (state) {
+        final next = state.session?.user.id;
+        // Polling currentUser alone misses queued A -> B -> A. Invalidate on
+        // the delivered boundary, while retaining same-owner token refresh.
+        if (authorityUnavailable || next != deliveredOwner) {
+          coordinator.invalidate();
+        }
+        authorityUnavailable = false;
+        deliveredOwner = next;
+      },
+      onError: (Object _, StackTrace _) {
+        authorityUnavailable = true;
+        coordinator.invalidate();
+      },
+      onDone: () {
+        authorityUnavailable = true;
+        coordinator.invalidate();
       },
     );
   }

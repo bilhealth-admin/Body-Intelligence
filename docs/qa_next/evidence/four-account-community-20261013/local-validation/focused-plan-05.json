@@ -1,0 +1,247 @@
+[
+  {
+    "label": "format-current-changed-dart",
+    "kind": "format-edit",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "format",
+      "lib/app/environment/app_environment.dart",
+      "lib/app/launch/bil_verified_links_configuration.dart",
+      "lib/app/router/app_community_routes.dart",
+      "lib/app/services/scoped_media_file_cache.dart",
+      "lib/features/community/data/community_notification_content_loader.dart",
+      "lib/features/community/data/community_repository.dart",
+      "lib/features/community/data/community_repository_connections_messaging_mixin.dart",
+      "lib/features/community/data/community_repository_safety_review.dart",
+      "lib/features/community/presentation/community_account_visit.dart",
+      "lib/features/community/presentation/community_bil_code_page.dart",
+      "lib/features/community/presentation/community_blocked_members_sheet.dart",
+      "lib/features/community/presentation/community_chat_page.dart",
+      "lib/features/community/presentation/community_connections_page.dart",
+      "lib/features/community/presentation/community_gold_balance_action.dart",
+      "lib/features/community/presentation/community_hub_page.dart",
+      "lib/features/community/presentation/community_invite_landing_page.dart",
+      "lib/features/community/presentation/community_message_owner_scope.dart",
+      "lib/features/community/presentation/community_messages_copy.dart",
+      "lib/features/community/presentation/community_messages_page.dart",
+      "lib/features/community/presentation/community_notification_content_page.dart",
+      "lib/features/community/presentation/community_notification_destination.dart",
+      "lib/features/community/presentation/community_notifications_page.dart",
+      "lib/features/community/presentation/community_people_page.dart",
+      "lib/features/community/presentation/community_post_detail_page.dart",
+      "lib/features/community/presentation/community_post_detail_rendering.dart",
+      "lib/features/community/presentation/community_post_moderation_load.dart",
+      "lib/features/community/presentation/community_post_moderation_page.dart",
+      "lib/features/community/presentation/community_post_moderation_widgets.dart",
+      "lib/features/community/presentation/community_report_content_review.dart",
+      "lib/features/community/presentation/community_safety_page.dart",
+      "lib/features/community/presentation/new_community_message_page.dart",
+      "lib/features/connected_health/widgets/live_health_watch_time.dart",
+      "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+      "lib/features/notifications/domain/community_deep_link.dart",
+      "test/app/services/scoped_media_file_cache_test.dart",
+      "test/app_foundation_services_test.dart",
+      "test/connected_health/health_devices_review_regression_test.dart",
+      "test/features/community/community_authenticated_interaction_test.dart",
+      "test/features/community/community_bil_code_and_saves_contract_test.dart",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "test/features/community/community_chat_refresh_regression_test.dart",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "test/features/community/community_notification_auth_session_test.dart",
+      "test/features/community/community_notification_content_route_test.dart",
+      "test/features/community/community_polish_visual_test.dart",
+      "test/features/community/community_post_moderation_test.dart",
+      "test/features/community/community_relationship_delivery_cases.dart",
+      "test/features/community/community_safety_review_repository_test.dart",
+      "test/features/community/community_write_entrypoint_policy_test.dart",
+      "test/features/intelligence_center/cloud_voice_privacy_contract_test.dart",
+      "test/features/intelligence_center/coach_remote_consent_preflight_test.dart",
+      "test/launch_readiness/verified_links_and_analytics_test.dart"
+    ]
+  },
+  {
+    "label": "privacy-body-microphones-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/intelligence_center/cloud_voice_privacy_contract_test.dart",
+      "--plain-name",
+      "both coach microphones are text-only at the model boundary"
+    ]
+  },
+  {
+    "label": "stale-report-fresh-review-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_safety_review_repository_test.dart",
+      "--plain-name",
+      "proven stale report rejection requires a fresh review before retry"
+    ]
+  },
+  {
+    "label": "friend-real-cancel-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "--plain-name",
+      "outgoing pending request has a real cancel action and reloads"
+    ]
+  },
+  {
+    "label": "qr-real-share-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "--plain-name",
+      "QR and real native share fixture carry only the current opaque public code"
+    ]
+  },
+  {
+    "label": "notification-real-reply-case",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_notification_content_route_test.dart",
+      "--plain-name",
+      "actual notification tap opens and focuses its real reply beyond the first page"
+    ]
+  },
+  {
+    "label": "new-community-acceptance-files",
+    "kind": "flutter",
+    "command": [
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+      "G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--timeout=3m",
+      "--reporter=json",
+      "test/features/community/community_safety_review_repository_test.dart",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "test/features/community/community_code_invite_earn_account_test.dart",
+      "test/features/community/community_notification_content_route_test.dart",
+      "test/features/intelligence_center/cloud_voice_privacy_contract_test.dart"
+    ]
+  },
+  {
+    "label": "postgres-message-lock-order-case",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_message_delivery_v2_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe",
+      "--case",
+      "legacy INSERT and new RPC preserve pair then member lock order"
+    ]
+  },
+  {
+    "label": "postgres-report-changed-content-case",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_community_safety_review_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe",
+      "--case",
+      "changed reported text rejects stale removal without deleting content"
+    ]
+  },
+  {
+    "label": "postgres-message-contract-all",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_message_delivery_v2_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe"
+    ]
+  },
+  {
+    "label": "postgres-report-authority-all",
+    "kind": "sql",
+    "command": [
+      "python",
+      "-X",
+      "utf8",
+      "tools/qa/bil_postgres_community_safety_review_test.py",
+      "--psql",
+      "G:/BIL_Project/qa-runtime/postgresql-17.6/pgsql/bin/psql.exe"
+    ]
+  },
+  {
+    "label": "web-landing-actual-dom-file",
+    "kind": "node",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.EXE",
+      "--test",
+      "--test-reporter=tap",
+      "tool/release/community_links.test.mjs"
+    ]
+  },
+  {
+    "label": "web-worker-link-associations-file",
+    "kind": "node",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.EXE",
+      "--test",
+      "--test-reporter=tap",
+      "tool/release/bilhealth_site_worker.test.mjs"
+    ]
+  },
+  {
+    "label": "push-dispatch-and-provider-affected",
+    "kind": "deno",
+    "command": [
+      "C:/Users/HP 1040 G8/AppData/Local/Microsoft/WinGet/Links/deno.exe",
+      "test",
+      "--allow-env",
+      "--allow-net",
+      "--allow-read",
+      "supabase/functions/community-push-dispatch/server_test.ts",
+      "supabase/functions/community-push-dispatch/index_test.ts",
+      "supabase/functions/push-provider-gateway/server_test.ts",
+      "supabase/functions/push-provider-gateway/badge_test.ts"
+    ]
+  }
+]

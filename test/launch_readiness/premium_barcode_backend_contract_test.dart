@@ -17,9 +17,14 @@ void main() {
     final client = File(
       'lib/features/nutrition/services/regional_barcode_network_resolver.dart',
     ).readAsStringSync();
-    final access = File(
-      'lib/features/commerce/presentation/premium_barcode_access.dart',
-    ).readAsStringSync();
+    final access = [
+      File(
+        'lib/features/commerce/presentation/premium_barcode_access.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/commerce/presentation/optional_access_offer.dart',
+      ).readAsStringSync(),
+    ].join('\n');
     final dailyLog = File(
       'lib/features/daily_log/daily_log_capture_actions.dart',
     ).readAsStringSync();
@@ -64,7 +69,11 @@ void main() {
     expect(access, contains('CommercePlan.pro'));
     expect(access, contains('CommercePlan.premium'));
     expect(access, contains('CommercePlan.premiumAiCoach'));
-    expect(access, contains("context.push('/plans?focus=subscription')"));
+    expect(access, contains('showOptionalAccessOffer'));
+    expect(
+      access,
+      contains("push('/plans?focus=\${Uri.encodeQueryComponent(focus)}')"),
+    );
     expect(
       RegExp('requestPremiumBarcodeAccess').allMatches(dailyLog).length,
       1,
