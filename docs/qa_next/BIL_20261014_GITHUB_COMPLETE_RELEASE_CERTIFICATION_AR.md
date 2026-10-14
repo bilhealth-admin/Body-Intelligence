@@ -5,7 +5,7 @@
 ## القرار والحالة المباشرة
 
 - التحليل الكامل والشاملة المحلية نجحا على شجرة المصدر ذات البصمة `80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`: التحليل بلا ملاحظات، و9,843/9,843 حالة في 1,356 ملف اختبار، دون فشل أو خطأ أو تخطٍّ. تفاصيل الأمر والسجلات في `BIL_20261014_FULL_SUITE_REPAIRS_AND_FINAL_RESULT_AR.md`.
-- لا يوجد بعد تشغيل GitHub Actions على كوميت الإغلاق المحلي عند إعداد هذه المراجعة. دفع الفرع سيطابق مسار QA المركز فقط؛ لا يوجد نشر Cloudflare على هذا الفرع، كما أن مسارات بناء/رفع المتاجر يدوية فقط.
+- دُفع كوميت الإغلاق، ثم اجتاز Workflow الـQA المركز على GitHub: [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976) على SHA `ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67`، بنجاح خلال 5 دقائق و38 ثانية. مسارات نشر Cloudflare وبناء/رفع المتاجر لم تعمل.
 - لا تُعلن جاهزية إصدار Android 33 أو iOS 36: ملفا manifest ما زالا `STAGING_MANIFEST_COMPLETE: NO` و`CANDIDATE_FROZEN_OR_ACCEPTED: NO`. لا يوجد AAB أو IPA موقّع أو رفع متجر.
 - أُنجزت إصلاحات المصدر والاختبارات المركزة والجولدن واللقطات والتحليل والشاملة؛ لم يُعد تشغيل أي منها بعد نجاح الشاملة. التحديث المتبقي في هذا التقرير توثيقي فقط.
 - لا نشر أو ترحيل حي أو شراء أو منحة أو حذف بيانات أو تغيير رصيد أو إرسال استئناف ضمن هذه المرحلة.
@@ -16,8 +16,8 @@
 |---|---|
 | Repository / remote | `bilhealth-admin/Body-Intelligence` / `origin` |
 | الفرع المحلي | `integration/bil-qa-media-policy-20261011` |
-| HEAD | `e27a58984bff50b4bcf45044ea9893f344307e85` |
-| HEAD البعيد وقت الفحص | `2c518ee469fa5c14f9d9e2c496340b6c4811d57f`؛ المحلي متقدم بكوميت واحد، بلا force/reset |
+| HEAD الذي شُغّلت عليه الشاملة قبل التثبيت | `e27a58984bff50b4bcf45044ea9893f344307e85` |
+| كوميت الإغلاق / HEAD البعيد الحالي | `ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` على الفرع المعتمد؛ GitHub يطابق المحلي |
 | حالة العمل عند بدء الشاملة | 788 إدخالًا في `git status --porcelain=v1 --untracked-files=all`؛ شملت ملفات متتبعة وغير متتبعة. اختُبرت الشجرة نفسها لا HEAD منفردًا |
 | بصمة مدخلات الاختبار قبل/بعد | `80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`، متطابقة قبل وبعد التشغيل |
 | بصمة حالة Git عند بدء الشاملة | `d2f8b6dcbae8c9449025a7b58389bb299b5d284edd595e344d9c8415b00ce634` عبر 788 إدخالًا؛ كل ملفات الاختبار حملت نتيجة |
@@ -61,7 +61,7 @@ python -X utf8 tools/qa/bil_owner_full_test_runner.py `
 
 ## جرد جميع GitHub Actions في الفرع — 58 ملفًا
 
-جرى الجرد على ملفات الفرع المحلية نفسها، لا على قائمة workflows من default branch. `workflow_dispatch` يعني يدويًا ولم يُشغّل؛ و`artifact-upload` يعني Artifact في GitHub Actions لا نشرًا لمتجر. أسماء الفروع التالية قيود `push` كما هي في YAML. `all` يعني لا يوجد قيد فرع، وقد تظل هناك بوابة paths. لا توجد Run IDs لهذا HEAD المحلي.
+جرى الجرد على ملفات الفرع المحلية نفسها، لا على قائمة workflows من default branch. `workflow_dispatch` يعني يدويًا ولم يُشغّل؛ و`artifact-upload` يعني Artifact في GitHub Actions لا نشرًا لمتجر. أسماء الفروع التالية قيود `push` كما هي في YAML. `all` يعني لا يوجد قيد فرع، وقد تظل هناك بوابة paths. Workflow واحد مطابق للفرع والمسارات شُغّل على SHA الإغلاق؛ سائر Run IDs التاريخية لا تمثل هذا المصدر.
 
 | Workflow | التشغيل/الفرع | الغرض والقرار |
 |---|---|---|
@@ -83,7 +83,7 @@ python -X utf8 tools/qa/bil_owner_full_test_runner.py `
 | `bil_healthkit_cloud_simulator.yml` | dispatch + push؛ `cloud/healthkit-4988-4991` | محاكاة HealthKit cloud على macOS 15؛ فرع قديم، لا يثبت جهازًا |
 | `bil_install_reference_revision_20261006.yml` | push؛ `qa/coach-community-next-20261005` | تثبيت مرجع QA؛ صلاحية كتابة/تغيير مصدر؛ فرع قديم |
 | `bil_instant_experience_qa.yml` | push/dispatch؛ فرع التكامل؛ paths ملف workflow فقط | QA تجربة فورية؛ مسار التغيير الحالي لم يلمس ملفه، لذلك لا يطابق حدث push الحالي |
-| `bil_integration_media_policy_focused.yml` | push/dispatch؛ فرع التكامل؛ paths تشمل workflow/lib/test/prebuild | QA مركّز للفرع الحالي على Ubuntu؛ قراءة واختبار ورفع سجل artifact فقط؛ لم يُشغّل لأن المصدر لم يُدفع |
+| `bil_integration_media_policy_focused.yml` | push/dispatch؛ فرع التكامل؛ paths تشمل workflow/lib/test/prebuild | PASS على SHA الإغلاق؛ [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976)، تحليل المصدر وحالات First Use/Community/media والسياسة؛ رفع Artifact QA فقط |
 | `bil_ios_plus8_dual_simulator_qa.yml` | dispatch فقط | محاكي iOS مزدوج على macOS 15 مع أسرار/اختبار خلفي؛ لم يُشغّل ولا يمثل جهازًا حقيقيًا |
 | `bil_ios_signed_release.yml` | dispatch فقط؛ macOS 26 | بناء iOS 36 موقّع مع أسرار؛ لا TestFlight/رفع هنا |
 | `bil_ios_unsigned_release.yml` | dispatch فقط؛ macOS الأحدث | بناء iOS غير موقّع؛ يدوي ولم يُشغّل |
@@ -124,7 +124,7 @@ python -X utf8 tools/qa/bil_owner_full_test_runner.py `
 | `ios_test_build.yml` | dispatch فقط؛ macOS الأحدث | بناء IPA اختباري يدوي؛ لم يُشغّل |
 | `verify.yml` | push/PR/dispatch؛ `phase-3-product-excellence` و`fix/admob-clean-production-2026-10-02` | بوابة عامة، لا تشمل فرع التكامل في تعريف push؛ لا Run على SHA المحلي |
 
-نتيجة تقييم التشغيل: لا نُشغّل تاريخيات أو release/deploy أو formatter/writeback workflows لتمثيل PASS. عند رفع SHA لاحقًا، الـfocused integration هو الفحص التلقائي المطابق لشيفرة الفرع، و`instant_experience` لا يطابق paths الحالية. لا CI/Run ID حاليًا. لم تُشغّل workflows موقّعة أو من ذات أثر خارجي.
+نتيجة تقييم التشغيل: لم نُشغّل تاريخيات أو release/deploy أو formatter/writeback workflows لتمثيل PASS. الـfocused integration هو الفحص التلقائي المطابق للشيفرة الحالية؛ `instant_experience` لا يطابق paths. لا تزال workflows الموقعة والمتاجر والنشر غير مشغلة.
 
 ## المراجعة الأمنية والتوافق والاعتماد
 
@@ -143,10 +143,10 @@ python -X utf8 tools/qa/bil_owner_full_test_runner.py `
 
 | المرشح | المصدر | المصدر المحلي | GitHub CI | جهاز/محاكي | Artifact/توقيع | متجر/حساب مراجع | الحكم الحالي |
 |---|---|---|---|---|---|---|---|
-| Android 33 | الفرع أعلاه؛ المصدر المحلي يتضمن الإصدار 33 في manifest | PASS: التحليل والشاملة على بصمة المصدر المسجلة أعلاه | ينتظر Run فرع التكامل بعد الدفع؛ لا CI على كوميت الإغلاق بعد | لم يُختبر على محاكي أو جهاز في هذه البيئة | لا AAB ولا شهادة توقيع مثبتة | Play build32 والتعليق السابق لم يتغيرا؛ لا مراجعة حساب على build33 | اجتاز المصدر المحلي فقط؛ غير جاهز للنشر |
-| iOS 36 | الفرع أعلاه؛ المصدر المحلي يتضمن الإصدار 36 في manifest | PASS: التحليل والشاملة على بصمة المصدر المسجلة أعلاه | ينتظر Run فرع التكامل بعد الدفع؛ لا CI على كوميت الإغلاق بعد | لم يُختبر على iOS Simulator أو iPhone/iPad في هذه البيئة | لا IPA ولا توقيع/TestFlight مثبت | لا App Store Connect حي أو جلسة مراجع مجرّبة في هذه المرحلة | اجتاز المصدر المحلي فقط؛ غير جاهز للنشر |
+| Android 33 | الفرع أعلاه؛ المصدر المحلي يتضمن الإصدار 33 في manifest | PASS: التحليل والشاملة على بصمة المصدر المسجلة أعلاه | PASS: [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976) على كوميت الإغلاق | لم يُختبر على محاكي أو جهاز في هذه البيئة | لا AAB ولا شهادة توقيع مثبتة | Play build32 والتعليق السابق لم يتغيرا؛ لا مراجعة حساب على build33 | اجتاز فحوص المصدر وCI؛ غير جاهز للنشر |
+| iOS 36 | الفرع أعلاه؛ المصدر المحلي يتضمن الإصدار 36 في manifest | PASS: التحليل والشاملة على بصمة المصدر المسجلة أعلاه | PASS: [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976) على كوميت الإغلاق | لم يُختبر على iOS Simulator أو iPhone/iPad في هذه البيئة | لا IPA ولا توقيع/TestFlight مثبت | لا App Store Connect حي أو جلسة مراجع مجرّبة في هذه المرحلة | اجتاز فحوص المصدر وCI؛ غير جاهز للنشر |
 
-بعد الاختبار تُحدّث الحالات بالأعداد الفعلية وروابط/مسارات السجلات. لا يُرفع شيء إلى المتاجر، ولا يُنشأ build موقّع خلال هذا التشغيل. تقرير المصدر النهائي وحده لا يعوّض الجهاز، الخادم المنشور، حساب المراجعة أو Console.
+حُدّثت الحالات بالأعداد الفعلية وروابط/مسارات السجلات. لم يُرفع شيء إلى المتاجر ولم يُنشأ build موقّع. نجاح المصدر وCI لا يعوض الجهاز، الخادم المنشور، حساب المراجعة أو Console.
 
 ## النتائج التي ستُستكمل بعد التجميد
 
@@ -157,7 +157,9 @@ python -X utf8 tools/qa/bil_owner_full_test_runner.py `
 | Flutter root suite بمشغّل المالك | PASS؛ 9,843 نجاحًا، 0 فشل، 0 خطأ، 0 تخطٍّ من 1,356 ملفًا | `build/owner-full/final-repaired-coach-answer-locales-android33-ios36-20261015/` |
 | استقرار المصدر أثناء الشاملة | PASS؛ `stable_source=true`, `accepted=true`; بصمة المدخلات قبل/بعد متطابقة | بصمتا المصدر وحالة الشجرة أعلاه؛ المخرجات المحلية في مجلد التشغيل |
 | صور المقارنة داخل `test/**/failures/` | محفوظة محليًا ولم تُحذف؛ لم تُضم إلى كوميت المصدر | مخرجات مقارنة مولّدة؛ لا تغيّر Goldens ولا تمثل فشلًا في الشاملة النهائية التي انتهت 9,843/9,843 |
-| GitHub Actions على كوميت الإغلاق | ينتظر الدفع والتحقق بعده | سيعمل QA المركز المطابق للفرع؛ لا يشغّل هذا الإرسال مسار نشر أو رفع متجر |
+| GitHub Actions على كوميت الإغلاق | PASS؛ [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976)، 5m38s | اكتمل التحليل، فحص السياسة، First Use، Community، account/media regressions، والتجميع الصارم؛ Artifact QA فقط |
 | Android 33 / iOS 36: حزمة، توقيع، جهاز، متجر | BLOCKED / لم يُختبر على جهاز أو متجر | لا تُخلط هذه البوابات مع نجاح اختبارات المصدر؛ تتطلب CI/build وجهاز/حساب مراجعة موثق |
 
-لا نعيد كامل الاختبارات لمجرد تحديث هذا التقرير. النتائج السابقة على بصمات أقدم تبقى تاريخية ولا تُنسب إلى المصدر الحالي. نتيجة المصدر النهائية الوحيدة هي التشغيل أعلاه؛ لا تعني قبولًا من GitHub أو Apple أو Google ولا تثبت artifact أو جهازًا فعليًا.
+لا نعيد كامل الاختبارات لمجرد تحديث هذا التقرير. النتائج السابقة على بصمات أقدم تبقى تاريخية ولا تُنسب إلى المصدر الحالي. اجتاز المصدر الشاملة المحلية وWorkflow المركز على GitHub؛ ذلك لا يعني قبولًا من Apple أو Google ولا يثبت artifact أو جهازًا فعليًا.
+
+حُفظت صور `test/**/failures/` التشخيصية الأربع والأربعون في شجرة العمل ولم تُضم إلى كوميت المصدر؛ الشاملة النهائية صفر فشل. بعد دفع الكوميت لم يتغير أي ملف مصدر أو اختبار، والتحديث اللاحق هنا توثيق Run ID فقط.

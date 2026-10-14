@@ -46,6 +46,8 @@
 
 بعد ذلك اكتملت الشاملة المحلية على HEAD نفسه وبصمة المصدر `80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`: 9,843 نجاحًا، 0 فشل/خطأ/تخطٍّ، وكل 1,356 ملف اختبار له نتيجة. هذا يثبت فحوص المصدر والاختبارات فقط، ولا يحل فجوة إقرار App Privacy ولا يعوض build 36 موقعًا ومختبرًا على جهاز. لم يتوفر اتصال API أو مفتاح ASC، ولم تُكتب أي بيانات متجر.
 
+تحديث ما بعد الدفع، 15 أكتوبر: حُفظ المصدر نفسه والوثائق في كوميت `ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67`، واجتاز QA المركز على GitHub في [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976). لا يثبت ذلك محتوى IPA أو إعداد App Privacy الحي؛ لا يزال تدقيق SDK على artifact وقراءة ASC عبر قناة معتمدة مطلوبين قبل أي تغيير بيانات متجر.
+
 ## المراجع الرسمية
 
 - Apple، [Guidelines: App Privacy](https://developer.apple.com/app-store/user-privacy-and-data-use/).

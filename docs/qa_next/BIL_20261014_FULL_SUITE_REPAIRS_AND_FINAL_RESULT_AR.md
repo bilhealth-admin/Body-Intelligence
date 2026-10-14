@@ -132,7 +132,7 @@ python -X utf8 tools/qa/bil_owner_full_test_runner.py `
 
 ## حد الإثبات
 
-هذه نتيجة اختبارات Flutter على المصدر المحلي المثبت بالبصمة أعلاه. لا تثبت وحدها توقيعًا أو تثبيتًا على هاتف أو TestFlight أو Google Play، ولا تثبت نشر تغييرات خادم. لا يوجد commit أو push أو إرسال إلى المتاجر ضمن هذا الإغلاق.
+هذه نتيجة اختبارات Flutter على المصدر المحلي المثبت بالبصمة أعلاه. لا تثبت وحدها توقيعًا أو تثبيتًا على هاتف أو TestFlight أو Google Play، ولا تثبت نشر تغييرات خادم. بعد تسجيل النتيجة، أُنشئ كوميت الإغلاق ودُفع إلى فرع التكامل؛ لم يحصل رفع متجر أو نشر Production.
 
 ## النتيجة النهائية بعد إصلاحات الإغلاق — 15 أكتوبر 2026
 
@@ -145,3 +145,7 @@ python -X utf8 tools/qa/bil_owner_full_test_runner.py `
 - السجلات: `build/owner-full/final-repaired-coach-answer-locales-android33-ios36-20261015/status.json` و`final-result.json` و`test-outcomes.json` و`flutter.jsonl` و`progress.log`.
 
 ظلّت نتيجة `flutter analyze --no-pub` السابقة ناجحة بعد آخر إصلاح للمصدر: `No issues found! (ran in 351.5s)`. لم يتغير المصدر بعد ذلك؛ تحديثات هذه الوثائق فقط لا تستدعي إعادة التحليل أو الشاملة.
+
+## تحديث بعد دفع الإغلاق — 15 أكتوبر 2026
+
+كوميت المصدر والاختبارات والتوثيق: `ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` على الفرع المعتمد، والـHEAD البعيد يطابقه. ربطت شجرة الكوميت بالبصمة التي اجتازت الشاملة أعلاه؛ لم تتغير ملفات المصدر أو الاختبار بعدها. اجتاز أيضًا QA المركز في GitHub [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976) خلال 5 دقائق و38 ثانية.
