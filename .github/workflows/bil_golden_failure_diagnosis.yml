@@ -3,6 +3,9 @@ name: BIL focused golden failure diagnosis
 # Evidence-only replay of the seven failing comparisons. No reference updates,
 # app build, native tests, signing, deployment, store or backend credentials.
 on:
+  push:
+    branches: [integration/bil-qa-media-policy-20261011]
+    paths: [.github/workflows/bil_golden_failure_diagnosis.yml]
   workflow_dispatch:
 
 permissions:
