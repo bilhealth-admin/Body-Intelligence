@@ -363,11 +363,9 @@ jobs:
         run: |
           set -euo pipefail
           supabase init
-          # The production migration intentionally requires the existing
-          # operational owner before enabling pending-by-default moderation.
-          # Create a disposable CI-only auth row immediately before that
-          # migration; this file is generated on the runner and is never
-          # committed or applied to a hosted Supabase project.
+          # Checked-in migrations require the operational owner and a separate
+          # store-review moderator. These disposable CI-only identities have
+          # no password and are generated only for this local database.
           test ! -e supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql
           cat > supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql <<'SQL'
           insert into auth.users (
@@ -381,17 +379,22 @@ jobs:
             raw_user_meta_data,
             created_at,
             updated_at
-          ) values (
+          ) values
+          (
             '00000000-0000-4000-8000-000000000018',
-            'authenticated',
-            'authenticated',
-            'kademcom@yahoo.com',
-            '',
+            'authenticated', 'authenticated', 'kademcom@yahoo.com', '',
             pg_catalog.now(),
             '{"provider":"email","providers":["email"]}'::jsonb,
-            '{"bil_ci_fixture":true}'::jsonb,
+            '{"bil_ci_fixture":true,"bil_ci_role":"operational_owner"}'::jsonb,
+            pg_catalog.now(), pg_catalog.now()
+          ),
+          (
+            '00000000-0000-4000-8000-000000000019',
+            'authenticated', 'authenticated', 'play-review@bilhealth.com', '',
             pg_catalog.now(),
-            pg_catalog.now()
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            '{"bil_ci_fixture":true,"bil_ci_role":"store_review_moderator"}'::jsonb,
+            pg_catalog.now(), pg_catalog.now()
           );
           SQL
           supabase start --exclude studio,logflare,vector,postgres-meta,supavisor,imgproxy,mailpit \
@@ -437,6 +440,8 @@ jobs:
           declare
             v_admin_id uuid;
             v_admin_count integer;
+            v_reviewer_id uuid;
+            v_reviewer_count integer;
           begin
             select pg_catalog.count(*)::integer
               into v_admin_count
@@ -450,6 +455,26 @@ jobs:
             select id into v_admin_id
             from auth.users
             where pg_catalog.lower(email) = 'kademcom@yahoo.com';
+
+            select pg_catalog.count(*)::integer
+              into v_reviewer_count
+            from auth.users
+            where pg_catalog.lower(email) = 'play-review@bilhealth.com';
+
+            if v_reviewer_count <> 1 then
+              raise exception 'local_moderator_fixture_reviewer_count_invalid';
+            end if;
+
+            select id into v_reviewer_id
+            from auth.users
+            where pg_catalog.lower(email) = 'play-review@bilhealth.com';
+
+            if not exists (
+              select 1 from public.bil_community_moderators
+              where user_id = v_reviewer_id
+            ) then
+              raise exception 'local_moderator_fixture_reviewer_enrollment_missing';
+            end if;
 
             if not exists (
               select 1 from public.bil_community_moderators
