@@ -14,6 +14,22 @@ on:
     paths-ignore:
       - 'docs/**'
   workflow_dispatch:
+    inputs:
+      supabase_only:
+        description: Run only the isolated Supabase migration and API integration job
+        required: false
+        type: boolean
+        default: false
+      android_only:
+        description: Run only the Java/Kotlin and Android API 33 certification job
+        required: false
+        type: boolean
+        default: false
+      ios_only:
+        description: Run only the Swift and iOS 36 simulator certification job
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   actions: read
@@ -23,6 +39,7 @@ permissions:
 
 jobs:
   analyze:
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || (inputs.android_only == true && matrix.language == 'java-kotlin') || (inputs.ios_only == true && matrix.language == 'swift') }}
     name: CodeQL (${{ matrix.language }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
@@ -68,6 +85,33 @@ jobs:
         if: matrix.flutter-build != false
         run: flutter pub get
 
+      - name: Prepare iOS pods and verify simulator build settings before CodeQL tracing
+        if: matrix.flutter-build == 'ios'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=artifacts/qa/text18/ios36-simulators
+          mkdir -p "$OUT"
+          xcodebuild -version | tee "$OUT/xcode-version.txt"
+          pod install --project-directory=ios 2>&1 | tee "$OUT/pod-install.log"
+          SOURCE_PACKAGES="$GITHUB_WORKSPACE/build/ios/SourcePackages"
+          mkdir -p "$SOURCE_PACKAGES"
+          xcodebuild \
+            -clonedSourcePackagesDirPath "$SOURCE_PACKAGES" \
+            -skipPackageUpdates \
+            -skipPackagePluginValidation \
+            -skipPackageSignatureValidation \
+            -project "$GITHUB_WORKSPACE/ios/Runner.xcodeproj" \
+            -scheme Runner \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -showBuildSettings \
+            "BUILD_DIR=$GITHUB_WORKSPACE/build/ios" \
+            > "$OUT/xcode-build-settings.log"
+          grep -E '^[[:space:]]*TARGET_BUILD_DIR = .+' "$OUT/xcode-build-settings.log"
+          grep -E '^[[:space:]]*WRAPPER_NAME = Runner.app$' "$OUT/xcode-build-settings.log"
+
       - name: Initialize CodeQL with Security Extended
         uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
@@ -90,10 +134,10 @@ jobs:
 
       - name: Build iOS plugin sources for CodeQL
         if: matrix.flutter-build == 'ios'
-        # Let Flutter resolve/install the generated CocoaPods graph as part
-        # of the traced build; this repository does not commit a Podfile.lock.
+        # CocoaPods and simulator build settings are prepared before CodeQL;
+        # the plugin build remains traced, and Podfile.lock is not committed.
         run: >-
-          flutter build ios --simulator --debug --no-codesign --no-pub
+          flutter --verbose build ios --simulator --debug --no-codesign --no-pub
           --build-number 36
           --dart-define=BIL_ENVIRONMENT=testing
           --dart-define=BIL_USE_SUPABASE=false
@@ -103,6 +147,33 @@ jobs:
           --dart-define=BIL_ADS_ENABLED=false
           --dart-define=BIL_COMMUNITY_ENABLED=false
           --dart-define=BIL_PUSH_ENABLED=false
+
+      - name: Diagnose iOS simulator build settings after Flutter failure
+        if: ${{ failure() && matrix.flutter-build == 'ios' }}
+        shell: bash
+        run: |
+          set +e
+          OUT=artifacts/qa/text18/ios36-simulators
+          mkdir -p "$OUT"
+          SOURCE_PACKAGES="$GITHUB_WORKSPACE/build/ios/SourcePackages"
+          xcodebuild \
+            -clonedSourcePackagesDirPath "$SOURCE_PACKAGES" \
+            -skipPackageUpdates \
+            -skipPackagePluginValidation \
+            -skipPackageSignatureValidation \
+            -project "$GITHUB_WORKSPACE/ios/Runner.xcodeproj" \
+            -scheme Runner \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -showBuildSettings \
+            "BUILD_DIR=$GITHUB_WORKSPACE/build/ios" \
+            > "$OUT/xcode-build-settings-after-failure.log" 2>&1
+          SETTINGS_STATUS=$?
+          echo "xcodebuild_show_build_settings_exit=$SETTINGS_STATUS"
+          rg -n 'TARGET_BUILD_DIR|WRAPPER_NAME|CONFIGURATION =|error:|Error' \
+            "$OUT/xcode-build-settings-after-failure.log" | tail -n 80 || true
+          find build/ios -maxdepth 7 -name Runner.app -print 2>/dev/null || true
 
       - name: Rebuild the patched Drift worker before JavaScript analysis
         if: matrix.flutter-build == 'web-worker'
@@ -142,46 +213,8 @@ jobs:
           target: google_apis
           profile: pixel_6
           disable-animations: true
-          emulator-boot-timeout: 900
-          script: |
-            bash -euo pipefail <<'BASH'
-            OUT=artifacts/qa/text18/android-api33
-            mkdir -p "$OUT"
-            SOURCE_HEAD="$(git rev-parse HEAD)"
-            SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
-            adb shell settings put global airplane_mode_on 1
-            adb shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true
-            adb shell svc wifi disable
-            adb shell svc data disable
-            test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = '1'
-            flutter test integration_test/system_crypto_bridge_integration_test.dart \
-              --no-pub --device-id emulator-5554 --reporter expanded \
-              --dart-define=BIL_ENVIRONMENT=testing \
-              --dart-define=BIL_USE_SUPABASE=false \
-              --dart-define=BIL_PAYMENTS_ENABLED=false \
-              --dart-define=BIL_ADS_ENABLED=false \
-              2>&1 | tee "$OUT/system-crypto.log"
-            BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/native-settings" \
-              flutter drive --device-id emulator-5554 \
-                --driver=test_driver/native_settings_capture_driver.dart \
-                --target=integration_test/native_settings_polish_test.dart \
-                --dart-define=BIL_ENVIRONMENT=testing \
-                --dart-define=BIL_USE_SUPABASE=false \
-                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
-                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
-                2>&1 | tee "$OUT/native-settings.log"
-            BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/feature-splashes" \
-              flutter drive --device-id emulator-5554 \
-                --driver=test_driver/native_feature_splashes_driver.dart \
-                --target=integration_test/native_feature_splashes_test.dart \
-                --dart-define=BIL_ENVIRONMENT=testing \
-                --dart-define=BIL_USE_SUPABASE=false \
-                --dart-define=BIL_QA_ANDROID_EMULATOR=true \
-                --dart-define=BIL_QA_DEVICE_NAME=github-api33-pixel6 \
-                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
-                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
-                2>&1 | tee "$OUT/native-feature-splashes.log"
-            BASH
+          emulator-boot-timeout: 1200
+          script: bash .github/scripts/bil_android33_native_integration.sh
 
       - name: Upload Android API 33 native integration evidence
         if: always() && matrix.flutter-build == 'android'
@@ -295,6 +328,7 @@ jobs:
           retention-days: 14
 
   local-supabase-integration:
+    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true }}
     name: Local Supabase migrations, SQL, Auth and RLS
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -341,7 +375,38 @@ jobs:
         run: |
           set -euo pipefail
           supabase init
-          supabase start --exclude studio,analytics \
+          # The production migration intentionally requires the existing
+          # operational owner before enabling pending-by-default moderation.
+          # Create a disposable CI-only auth row immediately before that
+          # migration; this file is generated on the runner and is never
+          # committed or applied to a hosted Supabase project.
+          test ! -e supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql
+          cat > supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql <<'SQL'
+          insert into auth.users (
+            id,
+            aud,
+            role,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at
+          ) values (
+            '00000000-0000-4000-8000-000000000018',
+            'authenticated',
+            'authenticated',
+            'kademcom@yahoo.com',
+            '',
+            pg_catalog.now(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            '{"bil_ci_fixture":true}'::jsonb,
+            pg_catalog.now(),
+            pg_catalog.now()
+          );
+          SQL
+          supabase start --exclude studio,logflare,vector,postgres-meta,supavisor,imgproxy,mailpit \
             > "$RUNNER_TEMP/bil-supabase-start.log" 2>&1 || {
               python3 - "$RUNNER_TEMP/bil-supabase-start.log" <<'PY'
           import re
@@ -373,11 +438,48 @@ jobs:
           test -n "$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env")"
           test -n "$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
 
-      - name: Apply every checked-in migration to the local database
+      - name: Apply checked-in migrations and verify local moderator precondition
         shell: bash
         run: |
           set -euo pipefail
           supabase db reset --local --no-seed
+          docker exec -i "$BIL_LOCAL_DB_CONTAINER" psql \
+            -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          do $local_moderator_fixture_assertion$
+          declare
+            v_admin_id uuid;
+            v_admin_count integer;
+          begin
+            select pg_catalog.count(*)::integer
+              into v_admin_count
+            from auth.users
+            where pg_catalog.lower(email) = 'kademcom@yahoo.com';
+
+            if v_admin_count <> 1 then
+              raise exception 'local_moderator_fixture_auth_user_count_invalid';
+            end if;
+
+            select id into v_admin_id
+            from auth.users
+            where pg_catalog.lower(email) = 'kademcom@yahoo.com';
+
+            if not exists (
+              select 1 from public.bil_community_moderators
+              where user_id = v_admin_id
+            ) or not exists (
+              select 1 from private.bil_ai_coach_admins
+              where user_id = v_admin_id and active
+            ) or not exists (
+              select 1 from public.bil_ai_closed_test_grants
+              where owner_id = v_admin_id
+                and active
+                and expires_at > pg_catalog.now()
+            ) then
+              raise exception 'local_moderator_fixture_entitlements_incomplete';
+            end if;
+          end
+          $local_moderator_fixture_assertion$;
+          SQL
 
       - name: Execute PostgreSQL migration and RLS tests
         shell: bash

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUT=artifacts/qa/text18/android-api33
+mkdir -p "$OUT"
+SOURCE_HEAD="$(git rev-parse HEAD)"
+SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
+
+adb shell settings put global airplane_mode_on 1
+adb shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true
+adb shell svc wifi disable
+adb shell svc data disable
+test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = '1'
+
+flutter test integration_test/system_crypto_bridge_integration_test.dart \
+  --no-pub --device-id emulator-5554 --reporter expanded \
+  --dart-define=BIL_ENVIRONMENT=testing \
+  --dart-define=BIL_USE_SUPABASE=false \
+  --dart-define=BIL_PAYMENTS_ENABLED=false \
+  --dart-define=BIL_ADS_ENABLED=false \
+  2>&1 | tee "$OUT/system-crypto.log"
+
+BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/native-settings" \
+  flutter drive --device-id emulator-5554 \
+    --driver=test_driver/native_settings_capture_driver.dart \
+    --target=integration_test/native_settings_polish_test.dart \
+    --dart-define=BIL_ENVIRONMENT=testing \
+    --dart-define=BIL_USE_SUPABASE=false \
+    --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
+    --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
+    2>&1 | tee "$OUT/native-settings.log"
+
+BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/feature-splashes" \
+  flutter drive --device-id emulator-5554 \
+    --driver=test_driver/native_feature_splashes_driver.dart \
+    --target=integration_test/native_feature_splashes_test.dart \
+    --dart-define=BIL_ENVIRONMENT=testing \
+    --dart-define=BIL_USE_SUPABASE=false \
+    --dart-define=BIL_QA_ANDROID_EMULATOR=true \
+    --dart-define=BIL_QA_DEVICE_NAME=github-api33-pixel6 \
+    --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
+    --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
+    2>&1 | tee "$OUT/native-feature-splashes.log"
