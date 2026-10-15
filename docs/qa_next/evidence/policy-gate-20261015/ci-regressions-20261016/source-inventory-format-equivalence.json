@@ -1,0 +1,9 @@
+{
+  "classification": "SERIALIZATION_CHANGE_ONLY_NO_TEST_OR_IMPLEMENTATION_CHANGE",
+  "reason": "Generic secret detector interpreted121 filename-to-SHA256 mappings as API assignments. Every original value validated as a SHA256 digest; records distinguish the path from its digest. No detector or rule disabled.",
+  "record_count": 7005,
+  "reconstructed_mapping_equal": true,
+  "original_serialization_sha256": "355aa736c284c1562b00befc6d47008d03e044ab92b1715e5e628708b7327536",
+  "public_record_serialization_sha256": "abc1ba3981896698a39b9bdf68fb2d5aa11b860d7f2d7cd68573d793542cbe51",
+  "original_raw_retained": "build/qa/policy-gate-20261015/corrected-full-analysis-20261016/source-inputs-before.json"
+}

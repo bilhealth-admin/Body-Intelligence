@@ -1,0 +1,60 @@
+{
+  "scope": "Read-only official metadata. No dependency changes or Gradle execution.",
+  "lint_32_0_patch_fix_found": false,
+  "insights_patch_fix_found": false,
+  "status": "BLOCKED_VENDOR",
+  "sources": [
+    {
+      "name": "lint-metadata",
+      "official_url": "https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-checks/maven-metadata.xml",
+      "http_status": 200,
+      "sha256": "edd62face5ae22d556852bc33d31fcd4df6abc405929e264c35d8c6f50a85dd0",
+      "versions": [
+        "32.0.0-alpha01",
+        "32.0.0-alpha02",
+        "32.0.0-alpha03",
+        "32.0.0-alpha04",
+        "32.0.0-alpha05",
+        "32.0.0-alpha06",
+        "32.0.0-alpha07",
+        "32.0.0-alpha08",
+        "32.0.0-alpha09",
+        "32.0.0-alpha10",
+        "32.0.0-alpha11",
+        "32.0.0-alpha12",
+        "32.0.0-alpha13",
+        "32.0.0-alpha14",
+        "32.0.0-beta01",
+        "32.0.0-beta02",
+        "32.0.0-beta03",
+        "32.0.0-beta04",
+        "32.0.0-beta05",
+        "32.0.0-rc01",
+        "32.0.0-rc02",
+        "32.0.0-rc03",
+        "32.0.0",
+        "32.0.1"
+      ],
+      "last_updated": "20261015142236"
+    },
+    {
+      "name": "insights-metadata",
+      "official_url": "https://dl.google.com/dl/android/maven2/com/google/play/policy/insights/insights-lint/maven-metadata.xml",
+      "http_status": 200,
+      "sha256": "2ebc4fbeb66c090009c80654560e8b7d19871394fe303407940abb0f992f79ec",
+      "versions": [
+        "0.1.3",
+        "0.1.4",
+        "0.1.5-alpha",
+        "0.1.5"
+      ],
+      "last_updated": "20260528203227"
+    },
+    {
+      "name": "agp-9.0.1-pom",
+      "official_url": "https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/9.0.1/gradle-9.0.1.pom",
+      "http_status": 200,
+      "sha256": "a84c9d87affce73a3914781d7174548be771b2401936de82c50384e3cd253938"
+    }
+  ]
+}

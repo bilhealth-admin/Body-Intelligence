@@ -1,0 +1,35 @@
+{
+  "scope": "Launch preparation only, not a test-case failure or completed comprehensive suite",
+  "original_flutter_started": false,
+  "original_test_cases_executed": 0,
+  "original_resource_requirement_unchanged": "4GiB freeRAM for2workers",
+  "ready_memory_samples": [
+    {
+      "elapsed_seconds": 0.0,
+      "available_bytes": 1470873600
+    },
+    {
+      "elapsed_seconds": 10.0,
+      "available_bytes": 356618240
+    },
+    {
+      "elapsed_seconds": 20.0,
+      "available_bytes": 592719872
+    },
+    {
+      "elapsed_seconds": 30.01,
+      "available_bytes": 1304166400
+    },
+    {
+      "elapsed_seconds": 40.01,
+      "available_bytes": 1770287104
+    },
+    {
+      "elapsed_seconds": 50.01,
+      "available_bytes": 5827899392
+    }
+  ],
+  "source_policy_fingerprint_before": "1116f9c3504dfb9a6a3340508563e45fbac6fbc1c10b033dbeddd0d807167551",
+  "actual_full_label": "policy-corrected-20261016-ready",
+  "no_source_change_to_bypass_memory_guard": true
+}

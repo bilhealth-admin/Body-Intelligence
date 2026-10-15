@@ -1,0 +1,5 @@
+focused_window=Window{b234a04 u0 Application Not Responding: com.android.systemui}
+window_status=EMULATOR_SYSTEM_UI_ANR
+anr_package=com.android.systemui
+EMULATOR_SYSTEM_UI_ANR: focused Android window does not prove interactive BIL content; no dialog was dismissed or accepted.
+observed_exit=20; expected_failure_classification_exit=20

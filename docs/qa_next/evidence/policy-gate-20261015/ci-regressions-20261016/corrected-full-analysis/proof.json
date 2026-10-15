@@ -1,0 +1,33 @@
+{
+  "accepted": true,
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "source_state": "includes all intentional local fixes, not HEAD alone",
+  "input_fingerprint_v4": "cbdedb20f0cf756f8816d366ea57a65ba0e0afd54bd8ee331f2cbde159547b45",
+  "format_files": 53,
+  "format_changed": 0,
+  "complete_flutter_analyze_exit": 0,
+  "framework_seconds": 536.8,
+  "source_before_after_identical": true,
+  "files": [
+    {
+      "name": "flutter-analyze.log",
+      "sha256": "301f55ff785c838f5b738cd72f8003efdf45a80f0e7bb39b0a5b09789b5839ae"
+    },
+    {
+      "name": "format-check.log",
+      "sha256": "c504506b122745e0de934e6f7791b55bead84c81da4b3f86e7ae3dca6f068adf"
+    },
+    {
+      "name": "format-files.json",
+      "sha256": "71a9e96fd45fd7cc7809d87ff7b811ff7f6ff48dcadca805d88ae823fc4f1957"
+    },
+    {
+      "name": "result.json",
+      "sha256": "2da90cb3ac7f76e4b5514c7ce65cee3789d1c8f205c9a056a436a5718660c409"
+    },
+    {
+      "name": "source-inputs-before.json",
+      "sha256": "355aa736c284c1562b00befc6d47008d03e044ab92b1715e5e628708b7327536"
+    }
+  ]
+}

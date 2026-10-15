@@ -1,0 +1,26 @@
+test_smoke_preserves_system_ui_failure_before_install_or_launch (tool.release.test_verify_android_startup_frame.VerifyAndroidWindowFocusTest.test_smoke_preserves_system_ui_failure_before_install_or_launch) ... ERROR
+
+======================================================================
+ERROR: test_smoke_preserves_system_ui_failure_before_install_or_launch (tool.release.test_verify_android_startup_frame.VerifyAndroidWindowFocusTest.test_smoke_preserves_system_ui_failure_before_install_or_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tool\release\test_verify_android_startup_frame.py", line 347, in test_smoke_preserves_system_ui_failure_before_install_or_launch
+    result = subprocess.run(
+        [bash, "-x", (release / "run_android_emulator_smoke.sh").as_posix()],
+    ...<5 lines>...
+        creationflags=(subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0),
+    )
+  File "C:\Users\HP 1040 G8\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP 1040 G8\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP 1040 G8\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 1664, in _communicate
+    raise TimeoutExpired(self.args, orig_timeout)
+subprocess.TimeoutExpired: Command '['C:\\Program Files\\Git\\bin\\bash.exe', '-x', 'G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tool/release/run_android_emulator_smoke.sh']' timed out after 15 seconds
+
+----------------------------------------------------------------------
+Ran 1 test in 15.960s
+
+FAILED (errors=1)

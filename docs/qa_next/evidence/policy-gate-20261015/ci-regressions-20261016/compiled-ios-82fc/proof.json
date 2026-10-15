@@ -1,0 +1,42 @@
+{
+  "source_sha": "82fc546ee14a401465ce2c835df83acc834874d4",
+  "run_id": 38805818728,
+  "job_id": 116666268682,
+  "artifact_id": 12005914202,
+  "artifact_name": "bil-ios36-native-only-82fc546ee14a401465ce2c835df83acc834874d4",
+  "compiled_manifests": 31,
+  "unique_manifest_content_hashes": 19,
+  "declared_collected_data_union": 22,
+  "google_mobile_ads_version": "13.11.0",
+  "ump_version": "3.1.0",
+  "other_usage_data_declaration_source": "GoogleSignIn_GoogleSignIn.bundle; linked=true, tracking=false, Analytics",
+  "other_usage_data_declaration_source_resolved": true,
+  "runtime_collection_or_tracking_verified": false,
+  "crash_data_asc_linked": null,
+  "app_privacy_corrected": false,
+  "signed_release": false,
+  "native_keychain_result": "FAIL_-34018_ENTITLEMENT",
+  "ipad_or_later_entrypoints_executed": false,
+  "files": [
+    {
+      "file": "system-crypto-privacy-inventory.json",
+      "sha256": "50cbdb617199c9b35ba2342aadc438651b2cace8a87d279dc4a034b83ba7a8ac"
+    },
+    {
+      "file": "system-crypto-generic-build-result.json",
+      "sha256": "35fe6f613a85b437a76937ec616775502cd096e3bbd5a030f2e5fcad9a0a64e7"
+    },
+    {
+      "file": "system-crypto-binary.sha256",
+      "sha256": "020304cf793316ff055cd5fdcadcdc96a0d0084091725c8e388c1ef2f2fa0b53"
+    },
+    {
+      "file": "iphone-system-crypto-drive-result.json",
+      "sha256": "608e312921e8640c4abb645d2774f14a247add0115986143e388772426a9c2ac"
+    },
+    {
+      "file": "iphone-system-crypto.log",
+      "sha256": "2069c62274a4bd3fed57bd377dd7cb156f06f8e55f4592252a1e5904413a0619"
+    }
+  ]
+}

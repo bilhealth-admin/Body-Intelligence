@@ -1,0 +1,15 @@
+Check supabase/functions/ai-coach/provider_recipient_policy_test.ts
+running 10 tests from ./supabase/functions/ai-coach/provider_recipient_policy_test.ts
+Coach rejects an undisclosed recipient before fetch: http://generativelanguage.googleapis.com/v1beta ... ok (82ms)
+Coach rejects an undisclosed recipient before fetch: https://outside.example/v1beta ... ok (1ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com.outside.example/v1beta ... ok (976µs)
+Coach rejects an undisclosed recipient before fetch: https://user:password@generativelanguage.googleapis.com/v1beta ... ok (1ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com:8443/v1beta ... ok (1ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta?override=recipient ... ok (1ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta#recipient ... ok (1ms)
+Coach rejects an undisclosed recipient before fetch: not a URL ... ok (1ms)
+Coach uses the disclosed Gemini origin and prohibits redirects ... ok (32ms)
+Coach does not accept a redirect response as a provider answer ... ok (4ms)
+
+ok | 10 passed | 0 failed (156ms)
+

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T23:10:59.609Z",
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "source_contains_local_changes": true,
+  "owner_correction": "The two named Gmail accounts are personal test accounts, not the store reviewer identities.",
+  "dedicated_apple_account": "play-review@bilhealth.com",
+  "apple_identity_evidence": "Current ASC appStoreReviewDetails; Apple report 20261016",
+  "google_identity_evidence": "Historical app_access metadata only; current Play App Access not readable",
+  "personal_secondary_admin_repair_status": "LOCAL_MIGRATION_CREATED_ISOLATED_TEST_PENDING_NOT_APPLIED",
+  "mistake": "The deployed single-owner migration incorrectly disabled a previously owner-approved secondary operational administrator.",
+  "before_repair_preflight": {
+    "owner_active": true,
+    "store_moderator": false,
+    "secondary_active": false,
+    "secondary_reason": "owner_approved_secondary_administrator",
+    "single_active_index": "CREATE UNIQUE INDEX bil_ai_coach_single_active_admin_uidx ON private.bil_ai_coach_admins USING btree (active) WHERE active",
+    "store_administrator": false,
+    "owner_identity_count": 1,
+    "store_identity_count": 1,
+    "secondary_identity_count": 1,
+    "secondary_granted_by_owner": true
+  },
+  "credentials_logged": false
+}

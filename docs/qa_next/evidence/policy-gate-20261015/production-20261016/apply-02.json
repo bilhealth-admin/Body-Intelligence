@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261011193000_community_review_revision_v2.sql",
+  "name": "community_review_revision_v2",
+  "source_version": "20261011193000",
+  "source_sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+  "executed_query_sha256": "c7e48bae9c99b2d7efd5ffdd2bd5b50323f030adb90d8b2b298fe85ff83b929f",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:50:24 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

@@ -1,0 +1,105 @@
+Running Gradle task 'assembleDebug'...                          
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=G:\BIL_Toolchains\gradle-tmp -Djdk.net.unixdomain.tmpdir=G:\BIL_Toolchains\gradle-tmp
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_timezone, in_app_review, mobile_scanner
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDebug'...                            725.1s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...           9.0s
+D/CompatibilityChangeReporter( 4131): Compat change id reported: 193247900; UID 10174; state: ENABLED
+W/intelligencelog( 4131): Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (unsupported,test-api, reflection, allowed)
+W/intelligencelog( 4131): Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (unsupported, reflection, allowed)
+W/intelligencelog( 4131): Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (unsupported, reflection, allowed)
+W/intelligencelog( 4131): Accessing hidden method Landroid/util/LongArray;->get(I)J (unsupported, reflection, allowed)
+D/FlutterRenderer( 4131): Width is zero. 0,0
+D/CompatibilityChangeReporter( 4131): Compat change id reported: 237531167; UID 10174; state: DISABLED
+W/Parcel  ( 4131): Expecting binder but got null!
+I/Choreographer( 4131): Skipped 673 frames!  The application may be doing too much work on its main thread.
+I/intelligencelog( 4131): Waiting for a blocking GC ClassLinker
+I/intelligencelog( 4131): NativeAlloc concurrent copying GC freed 31807(3157KB) AllocSpace objects, 5(164KB) LOS objects, 49% free, 4008KB/8017KB, paused 6.720ms,20us total 401.213ms
+I/intelligencelog( 4131): WaitForGcToComplete blocked ClassLinker on NativeAlloc for 39.718ms
+D/FlutterRenderer( 4131): Width is zero. 0,0
+D/FlutterJNI( 4131): Sending viewport metrics to the engine.
+D/HostConnection( 4131): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+W/OpenGLRenderer( 4131): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+D/EGL_emulation( 4131): eglCreateContext: 0x7da3fd24aed0: maj 3 min 0 rcv 3
+D/EGL_emulation( 4131): eglMakeCurrent: 0x7da3fd24aed0: ver 3 0 (tinfo 0x7da61b980180) (first time)
+I/Gralloc4( 4131): mapper 4.x is not supported
+W/Gralloc4( 4131): allocator 4.x is not supported
+D/HostConnection( 4131): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+D/HostConnection( 4131): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+D/EGL_emulation( 4131): eglMakeCurrent: 0x7da3fd2391d0: ver 3 0 (tinfo 0x7da61b980200) (first time)
+D/EGL_emulation( 4131): eglCreateContext: 0x7da3fd24b7d0: maj 3 min 0 rcv 3
+D/FlutterJNI( 4131): Sending viewport metrics to the engine.
+I/intelligencelog( 4131): Compiler allocated 4355KB to compile void android.view.ViewRootImpl.performTraversals()
+D/ProfileInstaller( 4131): Installing profile for com.bilhealth.bodyintelligencelog
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:[ephemeral-port]/[redacted-vm-session]/
+VMServiceFlutterDriver: Isolate found with number: 6287472802897803
+VMServiceFlutterDriver: Isolate 6287472802897803 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+I/flutter ( 4131): 00:00 +0: native Coach reveal ar-light-normal 2x real fonts and frames
+VMServiceFlutterDriver: Connected to Flutter application.
+I/Choreographer( 4131): Skipped 40 frames!  The application may be doing too much work on its main thread.
+D/FlutterJNI( 4131): Sending viewport metrics to the engine.
+D/EGL_emulation( 4131): app_time_stats: avg=1362.14ms min=185.82ms max=2216.99ms count=3
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+D/EGL_emulation( 4131): app_time_stats: avg=141.43ms min=34.30ms max=502.96ms count=7
+D/EGL_emulation( 4131): app_time_stats: avg=1300.19ms min=84.64ms max=3729.65ms count=3
+D/EGL_emulation( 4131): app_time_stats: avg=4506.28ms min=2398.11ms max=6614.44ms count=2
+W/InputMethodManager( 4131): Ignoring showSoftInput() as view=io.flutter.embedding.android.FlutterView{9463a0c VFE...... .F....ID 0,0-1080,2337 #2} is not served.
+W/InputMethodManager( 4131): Ignoring showSoftInput() as view=io.flutter.embedding.android.FlutterView{9463a0c VFE...... .F....ID 0,0-1080,2337 #2} is not served.
+I/AssistStructure( 4131): Flattened final assist data: 508 bytes, containing 1 windows, 3 views
+D/EGL_emulation( 4131): app_time_stats: avg=489.25ms min=172.82ms max=990.11ms count=3
+E/AccessibilityBridge( 4131): Scroll index is out of bounds.
+D/EGL_emulation( 4131): app_time_stats: avg=1246.64ms min=341.95ms max=2151.34ms count=2
+D/EGL_emulation( 4131): app_time_stats: avg=126.23ms min=37.73ms max=313.14ms count=9
+D/EGL_emulation( 4131): app_time_stats: avg=53.75ms min=33.60ms max=95.90ms count=20
+D/EGL_emulation( 4131): app_time_stats: avg=50.54ms min=34.25ms max=82.79ms count=20
+D/EGL_emulation( 4131): app_time_stats: avg=3052.40ms min=3052.40ms max=3052.40ms count=1
+D/EGL_emulation( 4131): app_time_stats: avg=70.65ms min=34.27ms max=154.95ms count=15
+I/intelligencelog( 4131): Background concurrent copying GC freed 244(78KB) AllocSpace objects, 9(3648KB) LOS objects, 49% free, 5287KB/10MB, paused 350us,14us total 161.788ms
+D/EGL_emulation( 4131): app_time_stats: avg=51.69ms min=34.84ms max=77.31ms count=20
+D/EGL_emulation( 4131): app_time_stats: avg=2329.45ms min=2329.45ms max=2329.45ms count=1
+D/EGL_emulation( 4131): app_time_stats: avg=58.56ms min=38.03ms max=126.62ms count=18
+D/EGL_emulation( 4131): app_time_stats: avg=52.27ms min=40.51ms max=102.30ms count=20
+I/flutter ( 4131): 00:20 +1: native Coach history ar-light-normal 2x real fonts and frames
+D/EGL_emulation( 4131): app_time_stats: avg=2174.75ms min=2174.75ms max=2174.75ms count=1
+D/EGL_emulation( 4131): app_time_stats: avg=84.87ms min=15.43ms max=240.85ms count=13
+D/EGL_emulation( 4131): app_time_stats: avg=68.29ms min=42.50ms max=149.22ms count=12
+D/EGL_emulation( 4131): app_time_stats: avg=169.36ms min=75.26ms max=520.63ms count=7
+D/EGL_emulation( 4131): app_time_stats: avg=3558.87ms min=3558.87ms max=3558.87ms count=1
+W/InputMethodManager( 4131): Ignoring showSoftInput() as view=io.flutter.embedding.android.FlutterView{9463a0c VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} is not served.
+W/InputMethodManager( 4131): Ignoring showSoftInput() as view=io.flutter.embedding.android.FlutterView{9463a0c VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} is not served.
+I/AssistStructure( 4131): Flattened final assist data: 508 bytes, containing 1 windows, 3 views
+D/EGL_emulation( 4131): app_time_stats: avg=128.59ms min=45.88ms max=285.18ms count=9
+D/EGL_emulation( 4131): app_time_stats: avg=93.02ms min=58.62ms max=270.27ms count=11
+D/EGL_emulation( 4131): app_time_stats: avg=2569.00ms min=2569.00ms max=2569.00ms count=1
+D/EGL_emulation( 4131): app_time_stats: avg=68.01ms min=40.92ms max=104.13ms count=15
+D/EGL_emulation( 4131): app_time_stats: avg=60.43ms min=44.18ms max=75.15ms count=17
+D/EGL_emulation( 4131): app_time_stats: avg=62.57ms min=38.47ms max=104.12ms count=16
+D/EGL_emulation( 4131): app_time_stats: avg=88.58ms min=47.85ms max=379.87ms count=12
+D/EGL_emulation( 4131): app_time_stats: avg=59.04ms min=45.19ms max=99.58ms count=17
+D/EGL_emulation( 4131): app_time_stats: avg=5214.61ms min=5214.61ms max=5214.61ms count=1
+I/intelligencelog( 4131): NativeAlloc concurrent copying GC freed 10918(737KB) AllocSpace objects, 11(5292KB) LOS objects, 49% free, 4293KB/8587KB, paused 5.085ms,22us total 106.017ms
+D/EGL_emulation( 4131): app_time_stats: avg=60.74ms min=42.45ms max=143.81ms count=17
+D/EGL_emulation( 4131): app_time_stats: avg=63.54ms min=45.15ms max=145.78ms count=17
+D/EGL_emulation( 4131): app_time_stats: avg=2420.21ms min=2420.21ms max=2420.21ms count=1
+D/EGL_emulation( 4131): app_time_stats: avg=68.51ms min=42.11ms max=144.97ms count=15
+D/EGL_emulation( 4131): app_time_stats: avg=51.19ms min=43.27ms max=59.35ms count=20
+D/EGL_emulation( 4131): app_time_stats: avg=55.72ms min=47.18ms max=79.14ms count=18
+I/flutter ( 4131): 00:37 +2: (tearDownAll)
+I/flutter ( 4131): 00:37 +3: All tests passed!
+D/EGL_emulation( 4131): app_time_stats: avg=3136.92ms min=3136.92ms max=3136.92ms count=1
+All tests passed.
+D/EGL_emulation( 4131): app_time_stats: avg=21.86ms min=4.90ms max=37.70ms count=18
+D/EGL_emulation( 4131): app_time_stats: avg=26.37ms min=4.53ms max=65.98ms count=15
+D/EGL_emulation( 4131): app_time_stats: avg=34.31ms min=5.51ms max=69.03ms count=14
+D/EGL_emulation( 4131): app_time_stats: avg=35.48ms min=9.28ms max=72.45ms count=14
+Native evidence saved: 0 entry scenes / 1 reply scenes / 1 history scenes / 6 PNGs
+D/EGL_emulation( 4131): app_time_stats: avg=37.20ms min=7.92ms max=94.61ms count=14

@@ -128,7 +128,7 @@ void main() {
     expect(find.text('Local progress analytics'), findsOneWidget);
     expect(find.text('Export your own data'), findsOneWidget);
     expect(find.text('Watch and health sync'), findsOneWidget);
-    expect(find.text('300+ home workout videos'), findsNothing);
+    expect(find.text('300+ workout videos'), findsNothing);
     expect(find.text('View all features (17)'), findsOneWidget);
     final freeCard = find.byKey(const ValueKey('store-free-tier-card'));
     final premiumCard = find.byKey(
@@ -158,7 +158,7 @@ void main() {
 
     // The published 300+ workout-video inventory is included in Premium.
     for (final benefit in <String>[
-      '300+ home workout videos',
+      '300+ workout videos',
       'Personal weekly meal plan',
       'Goal-based nutrition pathways',
       'Weekly trends and comparisons',
@@ -172,6 +172,7 @@ void main() {
     ]) {
       expect(find.text(benefit), findsOneWidget, reason: benefit);
     }
+    expect(find.text('300+ home workout videos'), findsNothing);
     for (final benefit in ['Friends and requests', 'Private messages']) {
       expect(
         find.descendant(of: premiumCard, matching: find.text(benefit)),
@@ -429,12 +430,13 @@ void main() {
         'Personalized Meal Planner',
         'Scan food barcode',
         '1,500 recipes',
-        '300+ home workout videos',
+        '300+ workout videos',
         '100+ video-guided weight-training plans',
         'Connected health',
       ]) {
         expect(find.text(inherited), findsOneWidget, reason: inherited);
       }
+      expect(find.text('300+ home workout videos'), findsNothing);
 
       final premiumLabels = find.byWidgetPredicate(
         (widget) =>

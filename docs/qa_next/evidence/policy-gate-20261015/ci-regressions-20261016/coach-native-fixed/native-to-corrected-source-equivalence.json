@@ -1,0 +1,18 @@
+{
+  "native_source_implementation_fingerprint": "5f26d817fb684b3ec217afa620700ae7f984eecf814e1eb079d07f77c0144688",
+  "corrected_full_source_implementation_fingerprint": "1116f9c3504dfb9a6a3340508563e45fbac6fbc1c10b033dbeddd0d807167551",
+  "changes": [
+    {
+      "path": "tool/release/test_verify_android_startup_frame.py",
+      "native_before_sha256": "8da2a0e3a0af41c19af8ff6b1bf1276e89cc8d1ee7fad6eb5d55355844f5d5dc",
+      "corrected_full_before_sha256": "c9a9fabbb9671156a70cbbc94b7b4e490c406818438d7984135afb24f5d10811"
+    },
+    {
+      "path": "tool/release/verify_android_startup_frame.py",
+      "native_before_sha256": "d65141a1e1c243db14d32e1750741bd6abe6bc2f04584a685dfb2fd578c3c893",
+      "corrected_full_before_sha256": "addba25ddc3d9c7e8d2c49beb9d0f903d25466c7d3e0491dc7d7c85be827691e"
+    }
+  ],
+  "native_coach_product_and_harness_unchanged": true,
+  "scope": "Input manifest equivalence for the2 actual local Android Coach cases, not a claim that later QA changes or store artifacts ran in the earlier native process"
+}

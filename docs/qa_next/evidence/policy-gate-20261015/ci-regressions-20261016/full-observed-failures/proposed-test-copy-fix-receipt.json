@@ -1,0 +1,23 @@
+{
+  "scope": "Prepared only; current full source NOT changed",
+  "files": [
+    {
+      "path": "test/features/commerce/bil_dynamic_store_offers_test.dart",
+      "before_sha256": "91bea45293d3ad777a16068a782cdad36c75836b499ca16fe206753247f61cba",
+      "candidate_sha256": "c743dc220bdd47b3a8d268337e4f2301bd05a08f9907bf910ade7050569c96d8",
+      "updated_old_expectation_literals": 3,
+      "new_explicit_obsolete_claim_absence_assertions": 2,
+      "original_eol_preserved": "LF",
+      "applied": false
+    },
+    {
+      "path": "test/features/commerce/paywall_ai_market_benefits_test.dart",
+      "before_sha256": "69c606ac35ff5f5427a3afd4efa31e90bc5ad899fbf0075a5ff6e9896e734ccc",
+      "candidate_sha256": "3e79d3c2cd93bb6da769a672f4bcd20ae04637c07347ff1a43884a76d53ca46a",
+      "updated_old_expectation_literals": 1,
+      "new_explicit_obsolete_claim_absence_assertions": 1,
+      "original_eol_preserved": "LF",
+      "applied": false
+    }
+  ]
+}

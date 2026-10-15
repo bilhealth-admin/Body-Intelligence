@@ -96,48 +96,41 @@ void main() {
         },
       );
 
-      try {
-        expect(await repository().readCached(ownerA), isNull);
-        expect(await repository().resolve(ownerA), keyA);
-        // A fresh repository and plugin wrapper read native persisted storage.
-        expect(
-          await CloudAccountKeyRepository(
-            client: client,
-            activeOwner: () => owner,
-            rpc: (_) =>
-                throw StateError('Native cached key must not call cloud'),
-          ).resolve(ownerA),
-          keyA,
-        );
-        owner = ownerB;
-        expect(await repository().resolve(ownerB), keyB);
-        await expectLater(repository().readCached(ownerA), throwsStateError);
-        owner = ownerA;
-        expect(await repository().readCached(ownerA), keyA);
-        expect(rpcCalls, 2);
-        await repository().removeLocal(ownerA);
-        expect(await repository().readCached(ownerA), isNull);
-        owner = ownerB;
-        expect(await repository().readCached(ownerB), keyB);
-        owner = ownerA;
-        await store.write(
-          'bil.cloud.payload-key.v1.$ownerA',
-          'corrupt-native-fixture',
-        );
-        await expectLater(
-          repository().readCached(ownerA),
-          throwsFormatException,
-        );
-        expect(
-          rpcCalls,
-          2,
-          reason: 'Corruption must not silently create a key.',
-        );
-      } finally {
-        await repository().removeLocal(ownerA);
-        await repository().removeLocal(ownerB);
-        await client.dispose();
-      }
+      // Independent teardown callbacks preserve the original test exception.
+      // Cleanup errors still fail the test, and one delete cannot skip another.
+      // Registered in reverse order because addTearDown executes last-in first.
+      addTearDown(client.dispose);
+      addTearDown(() => repository().removeLocal(ownerB));
+      addTearDown(() => repository().removeLocal(ownerA));
+
+      expect(await repository().readCached(ownerA), isNull);
+      expect(await repository().resolve(ownerA), keyA);
+      // A fresh repository and plugin wrapper read native persisted storage.
+      expect(
+        await CloudAccountKeyRepository(
+          client: client,
+          activeOwner: () => owner,
+          rpc: (_) => throw StateError('Native cached key must not call cloud'),
+        ).resolve(ownerA),
+        keyA,
+      );
+      owner = ownerB;
+      expect(await repository().resolve(ownerB), keyB);
+      await expectLater(repository().readCached(ownerA), throwsStateError);
+      owner = ownerA;
+      expect(await repository().readCached(ownerA), keyA);
+      expect(rpcCalls, 2);
+      await repository().removeLocal(ownerA);
+      expect(await repository().readCached(ownerA), isNull);
+      owner = ownerB;
+      expect(await repository().readCached(ownerB), keyB);
+      owner = ownerA;
+      await store.write(
+        'bil.cloud.payload-key.v1.$ownerA',
+        'corrupt-native-fixture',
+      );
+      await expectLater(repository().readCached(ownerA), throwsFormatException);
+      expect(rpcCalls, 2, reason: 'Corruption must not silently create a key.');
     },
   );
 }

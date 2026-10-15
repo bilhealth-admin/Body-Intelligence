@@ -4,6 +4,12 @@
 
 ## القرار المباشر
 
+**إضافة16 أكتوبر — حزمة Simulator فعلية:** جرد `82fc546e` في [الدليل المدمج](evidence/policy-gate-20261015/ci-regressions-20261016/compiled-ios-82fc/proof.json) يثبت31 Manifest ذات19 بصمة محتوى و7 سجلات Framework، واتحاد22 نوع بيانات. GMA الفعلي **13.11.0** وUMP **3.1.0**؛ فحص vendor13.7.0 في الجدول التاريخي أدناه لا يمثل إصدار هذه الحزمة. مصدر تصريح **Other Usage Data** أصبح مثبتًا: Google Sign-In يعلنه linked=true وtracking=false ولغرض Analytics، مطابقًا لصف ASC؛ أُغلق غموض مصدر التصريح لهذه الحزمة، لا سلوك الجمع الفعلي. لا يلزم إضافة صف عشوائي إلى Runner.
+
+بقيت فروق تحتاج إثبات السلوك: GMA يعلن Device ID tracking=true؛ وASC يعلن tracking لـUser ID وProduct Interaction خلاف التصريحات المدمجة المقابلة. GMA يعلن DeveloperAdvertising لستة أنواع غير ظاهرة بهذا الغرض في ASC، وGoogle Sign-In يعلن Analytics لـUser ID غير ظاهر في صف ASC. لا تسمح هذه الفروق بمسح إجابات المتجر تلقائيًا. NSPrivacyTracking العام false في29 ملفًا و**null** في GMA وUMP؛ Crash Data linked في قراءة ASC يبقى **null**. قفل CocoaPods المدون يحتوي Flutter/simple_barcode_scanner فقط، ولا يثبت قفل جميع حزم SwiftPM.
+
+هذا البناء `BIL_ADS_ENABLED=false`، واختباره الحقيقي نجح في AES ثم فشل في Keychain بـ`-34018`؛ لم يصل إلى iPad أو بقية المسارات. لا يثبت توقيع المتجر أو SDK signatures أو شبكة إصدار الإعلانات الفعلي. تبقى A084 وقرار التتبع وتصحيح ASC **BLOCKED/P0** للمرشح36، مع بقاء رفض35 التاريخي **FAIL/P0**. جرد الخصوصية الفعلي متاح الآن، وأي وصف أقدم هنا بأن جميع تصريحات الحزمة غير متاحة تجاوزته هذه الإضافة المحددة.
+
 **قراءة App Privacy ورسالة الرفض أصبحتا READ_VERIFIED، وليستا READ_BLOCKED. ما زال تصحيح الإجابات وإغلاق مطابقتها مع IPA وسلوك التشغيل BLOCKED/P0.** لا أوصي بإلغاء علامات tracking الثلاث اعتمادًا على NPA أو على نجاح QA بلا إعلانات. لا أوصي بإضافة ATT لمجرد مطابقة إعلان غير محقق. يلزم أولًا إثبات سلوك الإصدار الفعلي ثم تنفيذ القرار الموافق له بموافقة المالك.
 
 الدليل الحي الذي قرأه الوكيل الرئيسي من DOM الفعلي وموصل Gmail الرسمي هو [live-store-ui-readback-20261015.json](evidence/policy-gate-20261015/live-store-ui-readback-20261015.json). لم ينفذ مؤلف هذا الملحق UI أو شبكة أو اختبارات أو بناء أو تعديل متجر جديدًا. لم تتغير حسابات أو أسعار أو Trial أو أدوار أو بيانات Production.

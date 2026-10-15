@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261011211500_admin_authority_transaction_lock.sql",
+  "name": "admin_authority_transaction_lock",
+  "source_version": "20261011211500",
+  "source_sha256": "e10b82d4b2abbfab9f3c558be344cc20b18e4ca890cf62851d0e3e05b1a6c93d",
+  "executed_query_sha256": "e819fee1cb646d23c08482bf911d798d319658800745ae656f305714edc51bf9",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:00 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

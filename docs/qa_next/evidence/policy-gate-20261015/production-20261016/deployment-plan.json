@@ -1,0 +1,101 @@
+{
+  "planned_at_utc": "2026-10-15T22:45:49.704299+00:00",
+  "status": "PREPARED_NOT_EXECUTED",
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "deployer": "root only sequential MCP apply_migration",
+  "migrations": [
+    {
+      "source_file": "supabase/migrations/20261007130000_bil08_community_profile_activity_v1.sql",
+      "source_version": "20261007130000",
+      "name": "bil08_community_profile_activity_v1",
+      "sha256": "a881cbd06c5b08813b9d02ab38162112169f7edddb4132644423ac53fda8706e",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261011193000_community_review_revision_v2.sql",
+      "source_version": "20261011193000",
+      "name": "community_review_revision_v2",
+      "sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261011211500_admin_authority_transaction_lock.sql",
+      "source_version": "20261011211500",
+      "name": "admin_authority_transaction_lock",
+      "sha256": "e10b82d4b2abbfab9f3c558be344cc20b18e4ca890cf62851d0e3e05b1a6c93d",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261012052335_cloud_nutrition_goals_restore_v2.sql",
+      "source_version": "20261012052335",
+      "name": "cloud_nutrition_goals_restore_v2",
+      "sha256": "ccacdcef47bf2ff0e3d438826da6fc285015c4554e157834bdea052b5ee73966",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261012202029_admin_credit_authority_transaction_lock.sql",
+      "source_version": "20261012202029",
+      "name": "admin_credit_authority_transaction_lock",
+      "sha256": "a53858dfac88c3e5ba7dd311608b5a1832602c26d0fd25afcf17e12757cbf402",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261012204610_boost_refund_tombstone_service_read.sql",
+      "source_version": "20261012204610",
+      "name": "boost_refund_tombstone_service_read",
+      "sha256": "045a80617915ddc4f6b36a460925bedca36c1c950f96b721d835bd5af369a267",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261013062209_community_message_delivery_v2.sql",
+      "source_version": "20261013062209",
+      "name": "community_message_delivery_v2",
+      "sha256": "321b00a6f5b483c6ae555911c1153c4174fe78a2b4ff49d15c7c10487502a00d",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261013062221_community_safety_report_review_v1.sql",
+      "source_version": "20261013062221",
+      "name": "community_safety_report_review_v1",
+      "sha256": "8846b0e94d6fee14b76597c05bebb3f9239d71d0e0399127698fbaec7ef30e18",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261014100000_ai_coach_safety_reports_v1.sql",
+      "source_version": "20261014100000",
+      "name": "ai_coach_safety_reports_v1",
+      "sha256": "aaad8ac351dd43983cffb7b4ad63491715c55aa3d59b490f1c32b0f30a13540f",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261015090000_restore_single_owner_administrator.sql",
+      "source_version": "20261015090000",
+      "name": "restore_single_owner_administrator",
+      "sha256": "4e46262ba06f8aa368c508a1f0937d28dd931f5642feeecffca943ab2a9be973",
+      "query_loaded_from_current_file": true
+    },
+    {
+      "source_file": "supabase/migrations/20261015090100_allow_authenticated_community_contact_guard.sql",
+      "source_version": "20261015090100",
+      "name": "allow_authenticated_community_contact_guard",
+      "sha256": "b01e111cc8a099d4ee93e13194a563837ae95d7e145e86503eb741b418446f03",
+      "query_loaded_from_current_file": true
+    }
+  ],
+  "hold": [
+    {
+      "source_file": "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql",
+      "reason": "Confirmed duplicate notification/push against actual deployed Oct5 V1 hooks; needs compatible ledger/seen/requeue adapter and focused tests"
+    }
+  ],
+  "role_scope": "Apply only existing designated-single-owner Admin migration explicitly covered by owner-authorized migrations. No unplanned moderator removal, grant, token reset or purchased-right change.",
+  "api_migration_versions": "MCP assigns deployed migration versions; record actual returned migration history and original source version/hash, without rewriting unrelated historical migration records.",
+  "preservation": [
+    "Legacy32/35 RPC identities and purchased records",
+    "Existing ledger events and balances",
+    "Default publish-only=false",
+    "Full source frozen during existing Flutter run"
+  ],
+  "backup_scope": "Private affected schema/function/ACL/trigger catalog plus exact touched administrator rows; NOT a complete database backup or restore drill"
+}

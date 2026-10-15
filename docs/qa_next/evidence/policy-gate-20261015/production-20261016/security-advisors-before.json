@@ -1,0 +1,2446 @@
+{
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "read_utc": "2026-10-15T22:39:43.335Z",
+  "scope": "Security advisors before owner-authorized Production migration deployment; no changes made",
+  "data": {
+    "result": {
+      "lints": [
+        {
+          "name": "rls_enabled_no_policy",
+          "title": "RLS Enabled No Policy",
+          "level": "INFO",
+          "facing": "EXTERNAL",
+          "categories": [
+            "SECURITY"
+          ],
+          "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+          "count": 85,
+          "findings": [
+            {
+              "detail": "Table \\`bil_admin_private.subscription_commands\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "subscription_commands",
+                "type": "table",
+                "schema": "bil_admin_private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`bil_admin_private.subscription_grants\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "subscription_grants",
+                "type": "table",
+                "schema": "bil_admin_private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_admin_ai_boost_grants\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_admin_ai_boost_grants",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_admin_notification_audit\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_admin_notification_audit",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_admin_notification_message_overrides\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_admin_notification_message_overrides",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_ai_coach_admins\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_ai_coach_admins",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_ai_coach_reset_token_grants\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_ai_coach_reset_token_grants",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_apple_account_event_receipts\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_apple_account_event_receipts",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_apple_sign_in_credentials\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_apple_sign_in_credentials",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_community_member_access\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_member_access",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_community_member_access_audit\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_member_access_audit",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_community_moderator_admin_audit\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_moderator_admin_audit",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_community_post_events_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_events_v1",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_community_publish_operations_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_publish_operations_v1",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_push_delivery_preferences_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_push_delivery_preferences_v1",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`private.bil_store_reconciliation_scheduler_state\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_store_reconciliation_scheduler_state",
+                "type": "table",
+                "schema": "private"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_ai_boost_store_events\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_ai_boost_store_events",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_ai_boost_store_state\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_ai_boost_store_state",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_ai_credit_config\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_ai_credit_config",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_ai_qa_grants\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_ai_qa_grants",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_ai_usage_config\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_ai_usage_config",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_app_attest_keys\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_app_attest_keys",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_barcode_shared_cache\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_barcode_shared_cache",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_cloud_key_refs\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_cloud_key_refs",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_audit_events\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_audit_events",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_circle_memberships\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_circle_memberships",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_circles\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_circles",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_creator_certifications_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_creator_certifications_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_invites\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_invites",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_level_policy\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_level_policy",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_moderators\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_moderators",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_poll_options\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_poll_options",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_poll_votes\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_poll_votes",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_polls\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_polls",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_approval_grants\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_approval_grants",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_circles\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_circles",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_collaborators_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_collaborators_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_draft_media_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_draft_media_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_drafts_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_drafts_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_hashtags_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_hashtags_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_locations_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_locations_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_media_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_media_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_mentions_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_mentions_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_reward_policy\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_reward_policy",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_reward_usage\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_reward_usage",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_topics\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_topics",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_post_views_v1\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_post_views_v1",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_quest_definitions\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_quest_definitions",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_quest_progress\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_quest_progress",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_quest_progress_events\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_quest_progress_events",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_referral_attributions\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_referral_attributions",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_referral_policy\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_referral_policy",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_reputation_accounts\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_reputation_accounts",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_reward_claim_audit\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_reward_claim_audit",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_reward_policy\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_reward_policy",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_topic_follows\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_topic_follows",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_topics\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_topics",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_community_xp_ledger\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_community_xp_ledger",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_food_translation_cache\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_food_translation_cache",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_gold_accounts\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_gold_accounts",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_gold_ledger\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_gold_ledger",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_mobile_integrity_challenges\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_mobile_integrity_challenges",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_mobile_integrity_grants\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_mobile_integrity_grants",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_official_food_catalog\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_official_food_catalog",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_play_integrity_events\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_play_integrity_events",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_push_delivery_attempts\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_push_delivery_attempts",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_push_delivery_policy\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_push_delivery_policy",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_push_device_tokens\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_push_device_tokens",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_push_outbox\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_push_outbox",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_rate_limit_buckets\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_rate_limit_buckets",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_sensitive_request_receipts\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_sensitive_request_receipts",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_social_comment_likes_v2\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_social_comment_likes_v2",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_social_comment_reports_v2\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_social_comment_reports_v2",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_social_comments_v2\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_social_comments_v2",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_social_handles_v2\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_social_handles_v2",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_social_post_likes_v2\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_social_post_likes_v2",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_social_post_saves_v2\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_social_post_saves_v2",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_social_public_codes_v2\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_social_public_codes_v2",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_store_entitlement_audit\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_store_entitlement_audit",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_store_notification_inbox\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_store_notification_inbox",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_store_product_registry\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_store_product_registry",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_store_subscription_snapshots\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_store_subscription_snapshots",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_vision_model_pricing\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_vision_model_pricing",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_vision_quota_config\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_vision_quota_config",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Table \\`public.bil_vision_runtime_config\\` has RLS enabled, but no policies exist",
+              "metadata": {
+                "name": "bil_vision_runtime_config",
+                "type": "table",
+                "schema": "public"
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            }
+          ]
+        },
+        {
+          "name": "anon_security_definer_function_executable",
+          "title": "Public Can Execute SECURITY DEFINER Function",
+          "level": "WARN",
+          "facing": "EXTERNAL",
+          "categories": [
+            "SECURITY"
+          ],
+          "description": "Detects `SECURITY DEFINER` functions that are callable without signing in. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if it is not meant to be public.",
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+          "count": 1,
+          "findings": [
+            {
+              "detail": "Function `public.bil_preview_community_invite_v1(p_token text)` can be executed by the `anon` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_preview_community_invite_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_preview_community_invite_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_token text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            }
+          ]
+        },
+        {
+          "name": "authenticated_security_definer_function_executable",
+          "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+          "level": "WARN",
+          "facing": "EXTERNAL",
+          "categories": [
+            "SECURITY"
+          ],
+          "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+          "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+          "count": 145,
+          "findings": [
+            {
+              "detail": "Function `public.bil_abort_my_community_publish_operation_v1(p_operation_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_abort_my_community_publish_operation_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_abort_my_community_publish_operation_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_operation_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_accept_community_invite_v1(p_token text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_accept_community_invite_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_accept_community_invite_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_token text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_assert_community_publish_ready()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_assert_community_publish_ready`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_assert_community_publish_ready",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_begin_my_community_publish_operation_v1(p_operation_id uuid, p_payload jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_begin_my_community_publish_operation_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_begin_my_community_publish_operation_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_operation_id uuid, p_payload jsonb",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_block_community_member(p_blocked_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_block_community_member`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_block_community_member",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_blocked_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_can_manage_ai_coach()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_can_manage_ai_coach`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_can_manage_ai_coach",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_can_moderate_community_post_image(p_object_path text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_can_moderate_community_post_image`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_can_moderate_community_post_image",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "p_object_path text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_can_read_community_post_image_v2(p_object_path text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_can_read_community_post_image_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_can_read_community_post_image_v2",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "p_object_path text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_can_use_community()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_can_use_community`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_can_use_community",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_claim_community_quest_v1(p_quest_key text, p_period_key text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_claim_community_quest_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_claim_community_quest_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_quest_key text, p_period_key text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_claim_sensitive_request(p_action text, p_idempotency_key text, p_payload_digest text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_claim_sensitive_request`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_claim_sensitive_request",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_action text, p_idempotency_key text, p_payload_digest text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_attention_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_attention_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_attention_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_attention_v2()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_attention_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_attention_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_circle_post_refs_v1(p_slug text, p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_circle_post_refs_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_circle_post_refs_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_slug text, p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_comment_membership_tiers_v1(p_user_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_comment_membership_tiers_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_comment_membership_tiers_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_creator_projection_v1(p_user_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_creator_projection_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_creator_projection_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_earn_summary_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_earn_summary_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_earn_summary_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_feed_comment_previews_v1(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_feed_comment_previews_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_feed_comment_previews_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_feed_refs_v1(p_mode text, p_before_priority integer, p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_feed_refs_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_feed_refs_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_mode text, p_before_priority integer, p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_my_reputation_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_my_reputation_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_my_reputation_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_poll_v1(p_post_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_poll_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_poll_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_polls_v1(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_polls_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_polls_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_post_locations_v1(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_post_locations_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_post_locations_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_post_media_v1(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_post_media_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_post_media_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_post_reference_metadata_v1(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_post_reference_metadata_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_post_reference_metadata_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_post_view_counts_v1(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_post_view_counts_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_post_view_counts_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_profile_connections_v1(p_user_id uuid, p_kind text, p_before timestamp with time zone, p_before_user_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_profile_connections_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_profile_connections_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid, p_kind text, p_before timestamp with time zone, p_before_user_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_profile_connections_v2(p_user_id uuid, p_kind text, p_before timestamp with time zone, p_before_user_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_profile_connections_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_profile_connections_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid, p_kind text, p_before timestamp with time zone, p_before_user_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_profile_cover_v1(p_user_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_profile_cover_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_profile_cover_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_profile_posts_v1(p_user_id uuid, p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_profile_posts_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_profile_posts_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid, p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_profile_projection_v1(p_user_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_profile_projection_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_profile_projection_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_profile_reviews_v1(p_user_id uuid, p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_profile_reviews_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_profile_reviews_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid, p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_review_summary_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_review_summary_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_review_summary_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_community_topic_post_refs_v1(p_slug text, p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_community_topic_post_refs_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_community_topic_post_refs_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_slug text, p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_consume_my_community_post_draft_v1(p_draft_id uuid, p_post_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_consume_my_community_post_draft_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_consume_my_community_post_draft_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_draft_id uuid, p_post_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_consume_rate_limit(p_action text, p_limit integer, p_window_seconds integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_consume_rate_limit`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_consume_rate_limit",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_action text, p_limit integer, p_window_seconds integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_create_community_invite_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_create_community_invite_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_create_community_invite_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_create_my_community_poll_v1(p_post_id uuid, p_question text, p_options text[], p_allow_multiple boolean, p_closes_at timestamp with time zone)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_create_my_community_poll_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_create_my_community_poll_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_question text, p_options text[], p_allow_multiple boolean, p_closes_at timestamp with time zone",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_create_support_request(p_category text, p_subject text, p_message text, p_client_context jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_create_support_request`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_create_support_request",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_category text, p_subject text, p_message text, p_client_context jsonb",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_delete_community_post(p_post_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_delete_community_post`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_delete_community_post",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_delete_message(p_message_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_delete_message`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_delete_message",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_message_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_delete_my_community_post_draft_v1(p_draft_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_delete_my_community_post_draft_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_delete_my_community_post_draft_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_draft_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_disable_push_tokens()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_disable_push_tokens`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_disable_push_tokens",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_dismiss_admin_notice(p_owner_id uuid, p_notification_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_dismiss_admin_notice`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_dismiss_admin_notice",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_owner_id uuid, p_notification_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_dismiss_ai_coach_reset_notice(p_owner_id uuid, p_reset_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_dismiss_ai_coach_reset_notice`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_dismiss_ai_coach_reset_notice",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_owner_id uuid, p_reset_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_estimate_vision_cost(p_provider text, p_model text, p_input_tokens integer, p_output_tokens integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_estimate_vision_cost`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_estimate_vision_cost",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_provider text, p_model text, p_input_tokens integer, p_output_tokens integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_finalize_food_submission(submission_id uuid, decision text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_finalize_food_submission`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_finalize_food_submission",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "submission_id uuid, decision text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_follow_community_topic_v1(p_slug text, p_follow boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_follow_community_topic_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_follow_community_topic_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_slug text, p_follow boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_follow_member(p_followed_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_follow_member`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_follow_member",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_followed_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_get_ai_usage_status()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_get_ai_usage_status`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_get_ai_usage_status",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_get_existing_cloud_key()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_get_existing_cloud_key`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_get_existing_cloud_key",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_get_my_community_post_draft_v1(p_draft_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_get_my_community_post_draft_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_get_my_community_post_draft_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_draft_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_get_my_push_delivery_categories_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_get_my_push_delivery_categories_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_get_my_push_delivery_categories_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_get_or_create_cloud_key()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_get_or_create_cloud_key`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_get_or_create_cloud_key",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_get_push_preferences()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_get_push_preferences`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_get_push_preferences",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_get_vision_usage()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_get_vision_usage`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_get_vision_usage",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_gold_balance_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_gold_balance_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_gold_balance_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_gold_history_v1(p_before_created_at timestamp with time zone, p_before_id bigint, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_gold_history_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_gold_history_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_before_created_at timestamp with time zone, p_before_id bigint, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_guard_community_publish_image_insert_v1(p_path text, p_owner_id text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_guard_community_publish_image_insert_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_guard_community_publish_image_insert_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_path text, p_owner_id text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_has_community_moderators(p_excluded_user_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_has_community_moderators`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_has_community_moderators",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_excluded_user_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_is_community_moderator()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_is_community_moderator`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_is_community_moderator",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_join_community_circle_v1(p_slug text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_join_community_circle_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_join_community_circle_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_slug text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_leave_community_circle_v1(p_slug text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_leave_community_circle_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_leave_community_circle_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_slug text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_community_activity_v2(p_before timestamp with time zone, p_before_id uuid, p_kinds text[], p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_community_activity_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_community_activity_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_before timestamp with time zone, p_before_id uuid, p_kinds text[], p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_community_circles_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_community_circles_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_community_circles_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_community_connections()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_community_connections`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_community_connections",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_community_notifications(p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_community_notifications`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_community_notifications",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_community_quests_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_community_quests_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_community_quests_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_community_topics_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_community_topics_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_community_topics_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_hidden_community_posts(p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_hidden_community_posts`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_hidden_community_posts",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_my_community_post_drafts_v1(p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_my_community_post_drafts_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_my_community_post_drafts_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_my_post_events_v1(p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_my_post_events_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_my_post_events_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_open_community_reports()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_open_community_reports`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_open_community_reports",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_pending_community_posts(p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_pending_community_posts`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_pending_community_posts",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_list_reviewable_products()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_list_reviewable_products`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_list_reviewable_products",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_mark_community_activity_seen_v2(p_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_mark_community_activity_seen_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_mark_community_activity_seen_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_mark_community_notifications_seen(p_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_mark_community_notifications_seen`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_mark_community_notifications_seen",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_mark_conversation_read(p_sender_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_mark_conversation_read`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_mark_conversation_read",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "p_sender_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_mark_message_read(message_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_mark_message_read`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_mark_message_read",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "message_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_mark_my_post_events_seen_v1(p_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_mark_my_post_events_seen_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_mark_my_post_events_seen_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_mark_visible_messages_read_v1(p_message_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_mark_visible_messages_read_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_mark_visible_messages_read_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_message_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_moderate_community_post(p_post_id uuid, p_decision text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_moderate_community_post`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_moderate_community_post",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_decision text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_moderate_community_report(p_report_id uuid, p_resolution text, p_action text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_moderate_community_report`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_moderate_community_report",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_report_id uuid, p_resolution text, p_action text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_moderate_published_community_post(p_post_id uuid, p_action text, p_reason text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_moderate_published_community_post`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_moderate_published_community_post",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_action text, p_reason text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_my_community_post_media_paths_v1(p_post_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_my_community_post_media_paths_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_my_community_post_media_paths_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_my_community_referral_v1()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_my_community_referral_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_my_community_referral_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_preview_community_invite_v1(p_token text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_preview_community_invite_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_preview_community_invite_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_token text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_publish_community_post_operation_v1(p_operation_id uuid, p_payload jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_publish_community_post_operation_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_publish_community_post_operation_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_operation_id uuid, p_payload jsonb",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_publish_diary_snapshot(p_diary_day date, p_payload jsonb, p_source_revision integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_publish_diary_snapshot`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_publish_diary_snapshot",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_diary_day date, p_payload jsonb, p_source_revision integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_read_shared_diary(p_owner_id uuid, p_diary_day date, p_access_key_sha256 text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_read_shared_diary`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_read_shared_diary",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_owner_id uuid, p_diary_day date, p_access_key_sha256 text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_recipient_allows_community_message(p_recipient_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_recipient_allows_community_message`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_recipient_allows_community_message",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_recipient_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_reclaim_stale_vision_reservations()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_reclaim_stale_vision_reservations`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_reclaim_stale_vision_reservations",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_record_ai_coach_feedback(p_response_id text, p_helpful boolean, p_reason text, p_locale text, p_runtime text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_record_ai_coach_feedback`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_record_ai_coach_feedback",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_response_id text, p_helpful boolean, p_reason text, p_locale text, p_runtime text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_record_community_post_view_v1(p_post_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_record_community_post_view_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_record_community_post_view_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_record_consent(p_purpose text, p_policy_version text, p_granted boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_record_consent`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_record_consent",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_purpose text, p_policy_version text, p_granted boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_register_push_token(p_token text, p_platform text, p_timezone text, p_sensitive_preview_allowed boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_register_push_token`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_register_push_token",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_token text, p_platform text, p_timezone text, p_sensitive_preview_allowed boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_register_push_token_v2(p_token text, p_platform text, p_timezone text, p_sensitive_preview_allowed boolean, p_message_enabled boolean, p_friend_request_enabled boolean, p_friend_accepted_enabled boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_register_push_token_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_register_push_token_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_token text, p_platform text, p_timezone text, p_sensitive_preview_allowed boolean, p_message_enabled boolean, p_friend_request_enabled boolean, p_friend_accepted_enabled boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_remove_published_community_post(p_post_id uuid, p_reason text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_remove_published_community_post`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_remove_published_community_post",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_reason text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_request_account_deletion(p_reason text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_request_account_deletion`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_request_account_deletion",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_reason text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_request_friendship(p_addressee_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_request_friendship`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_request_friendship",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_addressee_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_reserve_vision_request(p_request_id text, p_image_digest text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_reserve_vision_request`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_reserve_vision_request",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_request_id text, p_image_digest text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_respond_community_collaboration_v1(p_post_id uuid, p_accept boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_respond_community_collaboration_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_respond_community_collaboration_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_accept boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_search_community_foods(p_query text, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_search_community_foods`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_search_community_foods",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_query text, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_search_community_mentions_v1(p_query text, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_search_community_mentions_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_search_community_mentions_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_query text, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_search_community_profiles(p_query text, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_search_community_profiles`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_search_community_profiles",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_query text, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_diary_share_settings(p_visibility text, p_access_key_sha256 text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_diary_share_settings`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_diary_share_settings",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_visibility text, p_access_key_sha256 text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_post_circle_v1(p_post_id uuid, p_slug text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_post_circle_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_post_circle_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_slug text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_post_context_v1(p_post_id uuid, p_location_label text, p_mentioned_user_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_post_context_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_post_context_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_location_label text, p_mentioned_user_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_post_draft_media_v1(p_draft_id uuid, p_items jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_post_draft_media_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_post_draft_media_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_draft_id uuid, p_items jsonb",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_post_location_v1(p_post_id uuid, p_label text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_post_location_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_post_location_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_label text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_post_media_v1(p_post_id uuid, p_items jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_post_media_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_post_media_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_items jsonb",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_post_reference_metadata_v1(p_post_id uuid, p_title text, p_hashtags text[], p_collaborator_user_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_post_reference_metadata_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_post_reference_metadata_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_title text, p_hashtags text[], p_collaborator_user_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_post_topics_v1(p_post_id uuid, p_slugs text[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_post_topics_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_post_topics_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_slugs text[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_community_profile_cover_v1(p_object_path text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_community_profile_cover_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_community_profile_cover_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_object_path text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_my_push_delivery_categories_v1(p_message_enabled boolean, p_friend_request_enabled boolean, p_friend_accepted_enabled boolean, p_expected_revision bigint)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_my_push_delivery_categories_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_my_push_delivery_categories_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_message_enabled boolean, p_friend_request_enabled boolean, p_friend_accepted_enabled boolean, p_expected_revision bigint",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_push_delivery_categories_v2(p_message_enabled boolean, p_friend_request_enabled boolean, p_friend_accepted_enabled boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_push_delivery_categories_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_push_delivery_categories_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_message_enabled boolean, p_friend_request_enabled boolean, p_friend_accepted_enabled boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_set_sensitive_push_previews(p_allowed boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_set_sensitive_push_previews`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_set_sensitive_push_previews",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "p_allowed boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_add_comment_v2(p_post_id uuid, p_body text, p_parent_id uuid, p_client_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_add_comment_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_add_comment_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_body text, p_parent_id uuid, p_client_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_claim_handle_v2(p_handle text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_claim_handle_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_claim_handle_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_handle text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_comment_replies_v3(p_root_id uuid, p_after timestamp with time zone, p_after_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_comment_replies_v3`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_comment_replies_v3",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_root_id uuid, p_after timestamp with time zone, p_after_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_comment_reports_v2(p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_comment_reports_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_comment_reports_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_comment_threads_v3(p_post_id uuid, p_after timestamp with time zone, p_after_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_comment_threads_v3`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_comment_threads_v3",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_after timestamp with time zone, p_after_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_comments_v2(p_post_id uuid, p_after timestamp with time zone, p_after_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_comments_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_comments_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_after timestamp with time zone, p_after_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_delete_comment_v2(p_comment_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_delete_comment_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_delete_comment_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_comment_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_identity_v2()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_identity_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_identity_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_like_comment_v2(p_comment_id uuid, p_liked boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_like_comment_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_like_comment_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_comment_id uuid, p_liked boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_like_v2(p_post_id uuid, p_liked boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_like_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_like_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_liked boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_post_authors_v2(p_user_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_post_authors_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_post_authors_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_public_code_v2()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_public_code_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_public_code_v2",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_report_comment_v2(p_comment_id uuid, p_reason text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_report_comment_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_report_comment_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_comment_id uuid, p_reason text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_request_friend_v2(p_user_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_request_friend_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_request_friend_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_user_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_resolve_comment_report_v2(p_report_id uuid, p_remove boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_resolve_comment_report_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_resolve_comment_report_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_report_id uuid, p_remove boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_resolve_public_code_v2(p_code text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_resolve_public_code_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_resolve_public_code_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_code text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_rotate_public_code_v2()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_rotate_public_code_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_rotate_public_code_v2",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_save_v2(p_post_id uuid, p_saved boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_save_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_save_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_saved boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_saved_posts_v2(p_before timestamp with time zone, p_before_id uuid, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_saved_posts_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_saved_posts_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_before timestamp with time zone, p_before_id uuid, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_saved_state_v2(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_saved_state_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_saved_state_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_search_handles_v2(p_query text, p_limit integer)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_search_handles_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_search_handles_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_query text, p_limit integer",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_social_stats_v2(p_post_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_social_stats_v2`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_social_stats_v2",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_sync_records(p_device_id text, p_cursor bigint, p_operations jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_sync_records`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_sync_records",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_device_id text, p_cursor bigint, p_operations jsonb",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_unfollow_member(p_followed_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_unfollow_member`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_unfollow_member",
+                "schema": "public",
+                "language": "sql",
+                "arguments": "p_followed_id uuid",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_upsert_community_food_contribution(p_payload jsonb)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_upsert_community_food_contribution`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_upsert_community_food_contribution",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_payload jsonb",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_upsert_my_community_post_draft_v1(p_draft_id uuid, p_title text, p_body text, p_topic_slugs text[], p_circle_slug text, p_location_label text, p_mentioned_user_ids uuid[], p_collaborator_user_ids uuid[], p_hashtags text[], p_poll_question text, p_poll_options text[], p_poll_allow_multiple boolean)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_upsert_my_community_post_draft_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_upsert_my_community_post_draft_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_draft_id uuid, p_title text, p_body text, p_topic_slugs text[], p_circle_slug text, p_location_label text, p_mentioned_user_ids uuid[], p_collaborator_user_ids uuid[], p_hashtags text[], p_poll_question text, p_poll_options text[], p_poll_allow_multiple boolean",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_vote_community_poll_v1(p_post_id uuid, p_option_ids uuid[])` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_vote_community_poll_v1`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_vote_community_poll_v1",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_post_id uuid, p_option_ids uuid[]",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            },
+            {
+              "detail": "Function `public.bil_withdraw_community_food_contribution(p_client_food_id text)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/bil_withdraw_community_food_contribution`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+              "metadata": {
+                "name": "bil_withdraw_community_food_contribution",
+                "schema": "public",
+                "language": "plpgsql",
+                "arguments": "p_client_food_id text",
+                "security_definer": true
+              },
+              "observed_at": "2026-10-15T22:39:43.335Z"
+            }
+          ]
+        },
+        {
+          "name": "auth_leaked_password_protection",
+          "title": "Leaked Password Protection Disabled",
+          "level": "WARN",
+          "facing": "EXTERNAL",
+          "categories": [
+            "SECURITY"
+          ],
+          "description": "Leaked password protection is currently disabled.",
+          "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+          "count": 1,
+          "findings": [
+            {
+              "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+              "metadata": {
+                "type": "auth",
+                "entity": "Auth"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+

@@ -1,0 +1,1 @@
+{"schema":"bil.qa.okhttp.jvm.v1","mode":"linkage","version":"4.9.2","passed":75,"failed":0,"symbols_checked":32,"network_requests":0,"real_tls_chain_tested":false}

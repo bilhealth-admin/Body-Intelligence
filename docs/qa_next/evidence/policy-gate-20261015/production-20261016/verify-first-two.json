@@ -1,0 +1,37 @@
+{
+  "scope": "Reconciles durable apply01/02 receipts; no reapplication",
+  "rows": [
+    {
+      "file": "supabase/migrations/20261007130000_bil08_community_profile_activity_v1.sql",
+      "name": "bil08_community_profile_activity_v1",
+      "source_version": "20261007130000",
+      "source_sha256": "a881cbd06c5b08813b9d02ab38162112169f7edddb4132644423ac53fda8706e",
+      "executed_query_sha256": "d5fbd04596c495930d76a40631f89fd116a947e8842d27fa2ee1df49f4924cf6",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:49:52 UTC",
+      "remote_migration": {
+        "version": "20261015224954",
+        "name": "bil08_community_profile_activity_v1"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261011193000_community_review_revision_v2.sql",
+      "name": "community_review_revision_v2",
+      "source_version": "20261011193000",
+      "source_sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+      "executed_query_sha256": "c7e48bae9c99b2d7efd5ffdd2bd5b50323f030adb90d8b2b298fe85ff83b929f",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:50:24 UTC",
+      "postconditions": {
+        "rpc_present": true,
+        "publish_only_disabled": true,
+        "private_tables_rls": true
+      },
+      "remote_migration": {
+        "version": "20261015225026",
+        "name": "community_review_revision_v2"
+      }
+    }
+  ]
+}
+

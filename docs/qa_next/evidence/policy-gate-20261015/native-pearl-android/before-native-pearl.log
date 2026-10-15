@@ -1,0 +1,144 @@
+Running Gradle task 'assembleDebug'...                          
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=G:\BIL_Toolchains\gradle-tmp -Djdk.net.unixdomain.tmpdir=G:\BIL_Toolchains\gradle-tmp
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_timezone, in_app_review, mobile_scanner
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDebug'...                            102.8s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...           4.1s
+W/intelligencelog( 4368): Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (unsupported,test-api, reflection, allowed)
+W/intelligencelog( 4368): Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (unsupported, reflection, allowed)
+W/intelligencelog( 4368): Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (unsupported, reflection, allowed)
+W/intelligencelog( 4368): Accessing hidden method Landroid/util/LongArray;->get(I)J (unsupported, reflection, allowed)
+D/FlutterRenderer( 4368): Width is zero. 0,0
+D/CompatibilityChangeReporter( 4368): Compat change id reported: 237531167; UID 10175; state: DISABLED
+W/Parcel  ( 4368): Expecting binder but got null!
+I/Choreographer( 4368): Skipped 259 frames!  The application may be doing too much work on its main thread.
+D/FlutterRenderer( 4368): Width is zero. 0,0
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/HostConnection( 4368): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+W/OpenGLRenderer( 4368): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+D/EGL_emulation( 4368): eglCreateContext: 0x7eca13822c90: maj 3 min 0 rcv 3
+D/EGL_emulation( 4368): eglMakeCurrent: 0x7eca13822c90: ver 3 0 (tinfo 0x7ecc3933b180) (first time)
+I/Gralloc4( 4368): mapper 4.x is not supported
+W/Gralloc4( 4368): allocator 4.x is not supported
+D/HostConnection( 4368): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+D/HostConnection( 4368): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+D/EGL_emulation( 4368): eglMakeCurrent: 0x7eca138216d0: ver 3 0 (tinfo 0x7ecc3933b200) (first time)
+D/EGL_emulation( 4368): eglCreateContext: 0x7eca1383b590: maj 3 min 0 rcv 3
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+I/intelligencelog( 4368): Compiler allocated 4355KB to compile void android.view.ViewRootImpl.performTraversals()
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58016/qB3efeOBMtQ=/
+VMServiceFlutterDriver: Isolate found with number: 7430975349319307
+VMServiceFlutterDriver: Isolate 7430975349319307 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+I/flutter ( 4368): 00:00 +0: native symbols and Arabic single-line profile on device
+VMServiceFlutterDriver: Connected to Flutter application.
+D/ProfileInstaller( 4368): Installing profile for com.bilhealth.bodyintelligencelog
+I/intelligencelog( 4368): Background concurrent copying GC freed 39641(3561KB) AllocSpace objects, 5(164KB) LOS objects, 49% free, 4121KB/8243KB, paused 451us,13us total 111.122ms
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+D/EGL_emulation( 4368): app_time_stats: avg=2321.40ms min=58.50ms max=4584.30ms count=2
+D/EGL_emulation( 4368): app_time_stats: avg=2161.11ms min=201.16ms max=4574.40ms count=3
+D/EGL_emulation( 4368): app_time_stats: avg=727.87ms min=172.34ms max=1283.40ms count=2
+D/EGL_emulation( 4368): app_time_stats: avg=3099.29ms min=3099.29ms max=3099.29ms count=1
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/EGL_emulation( 4368): app_time_stats: avg=626.48ms min=28.83ms max=2403.54ms count=4
+D/EGL_emulation( 4368): app_time_stats: avg=352.58ms min=36.25ms max=969.55ms count=3
+D/EGL_emulation( 4368): app_time_stats: avg=1920.00ms min=362.46ms max=3477.54ms count=2
+D/EGL_emulation( 4368): app_time_stats: avg=169.87ms min=32.74ms max=474.79ms count=6
+D/InputMethodManager( 4368): showSoftInput() view=io.flutter.embedding.android.FlutterView{affdae0 VFE...... .F....ID 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputMethodManager( 4368): showSoftInput() view=io.flutter.embedding.android.FlutterView{affdae0 VFE...... .F....ID 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/EGL_emulation( 4368): app_time_stats: avg=1830.90ms min=1830.90ms max=1830.90ms count=1
+I/AssistStructure( 4368): Flattened final assist data: 416 bytes, containing 1 windows, 3 views
+D/EGL_emulation( 4368): app_time_stats: avg=686.56ms min=602.15ms max=770.97ms count=2
+D/InputMethodManager( 4368): showSoftInput() view=io.flutter.embedding.android.FlutterView{affdae0 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/EGL_emulation( 4368): app_time_stats: avg=1378.11ms min=1378.11ms max=1378.11ms count=1
+D/EGL_emulation( 4368): app_time_stats: avg=143.52ms min=83.53ms max=279.69ms count=7
+I/intelligencelog( 4368): NativeAlloc concurrent copying GC freed 11466(836KB) AllocSpace objects, 17(2836KB) LOS objects, 49% free, 4233KB/8467KB, paused 45us,175us total 243.328ms
+D/InsetsController( 4368): show(ime(), fromIme=true)
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/InsetsController( 4368): show(ime(), fromIme=true)
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/EGL_emulation( 4368): app_time_stats: avg=206.20ms min=43.76ms max=705.78ms count=5
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/FlutterJNI( 4368): Sending viewport metrics to the engine.
+D/EGL_emulation( 4368): app_time_stats: avg=1586.05ms min=37.91ms max=3134.20ms count=2
+I/flutter ( 4368): ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+I/flutter ( 4368): The following TestFailure was thrown running a test:
+I/flutter ( 4368): Expected: '1875'
+I/flutter ( 4368):   Actual: '1875.0'
+I/flutter ( 4368):    Which: is different. Both strings start the same, but the actual value also has the following
+I/flutter ( 4368): trailing characters: .0
+I/flutter ( 4368): 
+I/flutter ( 4368): When the exception was thrown, this was the stack:
+I/flutter ( 4368): #4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/integration_test/native_settings_polish_test.dart:199:9)
+I/flutter ( 4368): <asynchronous suspension>
+I/flutter ( 4368): #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+I/flutter ( 4368): <asynchronous suspension>
+I/flutter ( 4368): #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+I/flutter ( 4368): <asynchronous suspension>
+I/flutter ( 4368): #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+I/flutter ( 4368): <asynchronous suspension>
+I/flutter ( 4368): 
+I/flutter ( 4368): This was caught by the test expectation on the following line:
+I/flutter ( 4368):   file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/integration_test/native_settings_polish_test.dart line 199
+I/flutter ( 4368): The test description was:
+I/flutter ( 4368):   native symbols and Arabic single-line profile on device
+I/flutter ( 4368): ════════════════════════════════════════════════════════════════════════════════════════════════════
+I/flutter ( 4368): 00:20 +0: native symbols and Arabic single-line profile on device [E]
+I/flutter ( 4368):   Test failed. See exception logs above.
+I/flutter ( 4368):   The test description was: native symbols and Arabic single-line profile on device
+I/flutter ( 4368):   
+I/flutter ( 4368): 00:20 +0 -1: (tearDownAll)
+D/EGL_emulation( 4368): app_time_stats: avg=580.69ms min=53.50ms max=3063.79ms count=6
+I/flutter ( 4368): 00:20 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: native symbols and Arabic single-line profile on device
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: '1875'
+  Actual: '1875.0'
+   Which: is different. Both strings start the same, but the
+actual value also has the following trailing characters: .0
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/integration_test/native_settings_polish_test.dart:199:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/integration_test/native_settings_polish_test.dart line 199
+The test description was:
+  native symbols and Arabic single-line profile on device
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+Unhandled exception:
+Bad state: Native pages and platform-font dialogs are required
+#0      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test_driver/native_settings_capture_driver.dart:57:9)
+#1      integrationDriver (package:integration_test/integration_test_driver_extended.dart:175:33)
+<asynchronous suspension>
+#2      main (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test_driver/native_settings_capture_driver.dart:19:3)
+<asynchronous suspension>

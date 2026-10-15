@@ -1,0 +1,41 @@
+F.FFF.
+======================================================================
+FAIL: test_aligned_load_cannot_hide_unaligned_relro (tools.qa.test_android_relro_policy.RelroPolicyTest.test_aligned_load_cannot_hide_unaligned_relro)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tools\qa\test_android_relro_policy.py", line 17, in test_aligned_load_cannot_hide_unaligned_relro
+    with self.assertRaises(gate.GateError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: GateError not raised
+
+======================================================================
+FAIL: test_each_relro_range_is_checked (tools.qa.test_android_relro_policy.RelroPolicyTest.test_each_relro_range_is_checked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tools\qa\test_android_relro_policy.py", line 37, in test_each_relro_range_is_checked
+    with self.assertRaises(gate.GateError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: GateError not raised
+
+======================================================================
+FAIL: test_malformed_relro_fails_closed (tools.qa.test_android_relro_policy.RelroPolicyTest.test_malformed_relro_fails_closed) (row='GNU_RELRO truncated')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tools\qa\test_android_relro_policy.py", line 33, in test_malformed_relro_fails_closed
+    with self.subTest(row=row), self.assertRaises(gate.GateError):
+                                ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: GateError not raised
+
+======================================================================
+FAIL: test_malformed_relro_fails_closed (tools.qa.test_android_relro_policy.RelroPolicyTest.test_malformed_relro_fails_closed) (row='GNU_RELRO 0x0 0x0 0x0 0x0 unknown R 0x1')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tools\qa\test_android_relro_policy.py", line 33, in test_malformed_relro_fails_closed
+    with self.subTest(row=row), self.assertRaises(gate.GateError):
+                                ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: GateError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.008s
+
+FAILED (failures=4)

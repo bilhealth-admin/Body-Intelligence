@@ -1,0 +1,81 @@
+{
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "source_implementation_fingerprint": "5f26d817fb684b3ec217afa620700ae7f984eecf814e1eb079d07f77c0144688",
+  "scope": "Actual Android33 local emulator, actual production Coach page held with synthetic replies; not real AI or store reviewer login",
+  "cases": 2,
+  "framework_summary_including_teardown": "+3 All tests passed",
+  "passed": 2,
+  "failed": 0,
+  "png_count": 6,
+  "original_failed_native_assertion_unchanged": true,
+  "text_scale": 2,
+  "scene": "ar-light-normal",
+  "total_seconds": 811.752,
+  "test_framework_seconds": 37,
+  "vm_session_url_redacted_in_public_log": true,
+  "private_raw_log_sha256": "966e56a98eb72bd6820335bdff5ca536d00df4e655a57c8c3f40f5a917913904",
+  "public_log_sha256": "05d8ca2c1b1309be49f160ccc1c03e11e28ecce4896385b5a8cf5dfc1a96f522",
+  "store_artifact_tested": false,
+  "visual_review": "Root inspected actual first and end PNG: first paragraph starts visibly at top, same production theme and fonts; enlarged accessibility2x fixture, not a typography redesign.",
+  "files": [
+    {
+      "name": "broadcast-idle-control-result.json",
+      "sha256": "5e3a2981d1b1a9a0677c4c9f466e6bc70ae0cb0c4c97e1ef521e3c39a2ae696d"
+    },
+    {
+      "name": "broadcast-idle-control.log",
+      "sha256": "129f36d6b1f69f48092ec96d580263f7c6046d6a52a9f82d1bbe69325a4f4b8c"
+    },
+    {
+      "name": "coach-history-ar-light-normal-end.png",
+      "sha256": "8b9264b979b6c3f1cda16cbb0a2a286d3c2168fc8e6239e5a5d08cd9df25cf71"
+    },
+    {
+      "name": "coach-history-ar-light-normal-mid.png",
+      "sha256": "8b9264b979b6c3f1cda16cbb0a2a286d3c2168fc8e6239e5a5d08cd9df25cf71"
+    },
+    {
+      "name": "coach-history-ar-light-normal-reading.png",
+      "sha256": "032cd45ba4ded1477fbf05f7b753a79d8f5218818bdc8153ee5ea88e942b243f"
+    },
+    {
+      "name": "coach-reveal-ar-light-normal-end.png",
+      "sha256": "758a44bef801585f7ff6933457c3dc1755ce11822fce9d08834ad34efb897a91"
+    },
+    {
+      "name": "coach-reveal-ar-light-normal-first.png",
+      "sha256": "4beb148ff9c6c6a978bd801c1a15b080c6160033c2b3998f5823202809dd8cf7"
+    },
+    {
+      "name": "coach-reveal-ar-light-normal-mid.png",
+      "sha256": "758a44bef801585f7ff6933457c3dc1755ce11822fce9d08834ad34efb897a91"
+    },
+    {
+      "name": "native-metadata.json",
+      "sha256": "d6556cc99656881852149faf7351b0d99fe8b15dc631bbee30e7c1d818e62c0b"
+    },
+    {
+      "name": "native-result.json",
+      "sha256": "bfdb1687f7154df91f74ffd3100b7d816d8335e0b226d2789818db153be2715e"
+    },
+    {
+      "name": "native.log",
+      "sha256": "05d8ca2c1b1309be49f160ccc1c03e11e28ecce4896385b5a8cf5dfc1a96f522"
+    }
+  ],
+  "actual_first_nonempty_native_frame": {
+    "observed_at_ms": 497,
+    "viewport_present": true,
+    "scroll_pixels": 1514.438174935246,
+    "viewport_top": 182.36190476190475,
+    "viewport_bottom": 673.5237298266587,
+    "reply_row_present": true,
+    "message_height": 1871.9999999999998,
+    "arrival_present": true,
+    "reply_opacity": 1.0,
+    "visible_graphemes": 1783,
+    "first_glyphs_visible_area": 13844.81250276696
+  },
+  "entrance_intermediate_frame_observed": false,
+  "native_performance_limit": "Debug local emulator evidence, not release performance or guaranteed320ms observed capture. Deterministic IME-firstpaint regression is separately proven before/after in widget frames."
+}

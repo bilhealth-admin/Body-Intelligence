@@ -1,0 +1,52 @@
+{
+  "recorded_at_utc": "2026-10-15T22:45:49.704299+00:00",
+  "owner_instruction_local_date": "2026-10-16",
+  "authorization": {
+    "production_required_migrations": true,
+    "accurate_store_metadata_preparation_and_edits": true,
+    "stop_stores_before_adding_builds": true,
+    "appeal_submission": false,
+    "store_build_upload_or_addition": false,
+    "prices_or_trial_changes": false,
+    "unrelated_account_role_or_balance_changes": false
+  },
+  "source": {
+    "branch": "integration/bil-qa-media-policy-20261011",
+    "head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+    "dirty_implementation_frozen_during_full": true,
+    "root_full_label": "policy-corrected-20261016-ready",
+    "root_full_fingerprint_v4": "cbdedb20f0cf756f8816d366ea57a65ba0e0afd54bd8ee331f2cbde159547b45"
+  },
+  "google_live_ui": {
+    "read_at_utc": "2026-10-15T22:39:00Z",
+    "read_time_precision": "minute",
+    "browser": "Chrome extension existing authorized session",
+    "url": "https://play.google.com/console/u/0/developers/7540824385820504578/app/4974243137795319021/policy-center?pli=1",
+    "package": "com.bilhealth.bodyintelligencelog",
+    "state": "App suspended",
+    "suspension_display_time": "8 Oct 2026, 22:38",
+    "case_id": "4976804875812644073",
+    "all_previous_versions_removed_message": true,
+    "app_content_navigation": {
+      "disabled_attribute": true,
+      "aria_disabled": "false",
+      "parent_class": "_ngcontent-nth-31 disabled grand-child-level",
+      "click_changed_page": false,
+      "effective_result": "BLOCKED_BY_CONSOLE_SUSPENSION"
+    },
+    "app_access_or_data_safety_current_answers_read": false,
+    "appeal_button_visible": true,
+    "appeal_opened_or_submitted_this_readback": false,
+    "independent_prior_appeal_history_confirmed": false,
+    "store_fields_written": 0
+  },
+  "production": {
+    "project_ref": "tgmanzhqulksykhslrzb",
+    "project_name": "body-intelligence-log",
+    "status_before": "ACTIVE_HEALTHY",
+    "postgres_before": "17.6.1.155",
+    "latest_recorded_migration_before": "20261005090328 community_reward_receipt_seen_sync_v1",
+    "deployed_in_this_receipt": false,
+    "receipt_scope": "Authorization and readback only; deployment needs separate before/after result"
+  }
+}

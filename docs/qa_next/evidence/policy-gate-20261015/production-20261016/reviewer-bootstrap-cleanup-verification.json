@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T23:21:24.969Z",
+  "source_file": "supabase/migrations/20261015231333_remove_legacy_store_reviewer_moderator_bootstrap.sql",
+  "source_sha256": "96d2af4ffb725190633882629f936a48d9a8bbe351e89eee735a2f85252474ab",
+  "live_migration": {
+    "version": "20261015231707",
+    "name": "remove_legacy_store_reviewer_moderator_bootstrap"
+  },
+  "focused_isolated_cases": {
+    "passed": 44,
+    "failed": 0
+  },
+  "legacy_real_review_bootstrap_reproduced_locally": true,
+  "full_source_privacy_migration_not_executed_in_fixture": true,
+  "preflight_live_dedicated_reviewer_moderator_absent": true,
+  "all_live_administrator_moderator_rows_unchanged": true,
+  "all_six_financial_rowset_hashes_unchanged_in_immediate_before_after": true,
+  "no_actual_live_role_removed": true,
+  "auth_or_artifact_test": false
+}

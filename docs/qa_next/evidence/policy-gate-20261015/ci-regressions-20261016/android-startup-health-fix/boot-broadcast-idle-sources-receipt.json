@@ -1,0 +1,104 @@
+{
+  "read_at_utc": "2026-10-15T21:43:35.538369+00:00",
+  "finding": "sys.boot_completed alone is not a broadcast-bootstrap completion fence",
+  "proved_source_order": [
+    {
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-14.0.0_r1/services/core/java/com/android/server/am/ActivityManagerService.java",
+      "lines": [
+        5062,
+        5064
+      ],
+      "meaning": "sys.boot_completed is set before UserController.onBootComplete is called"
+    },
+    {
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-14.0.0_r1/services/core/java/com/android/server/am/UserController.java",
+      "lines": [
+        833,
+        842,
+        849,
+        851
+      ],
+      "meaning": "BOOT_COMPLETED is posted on FgThread; completion is recorded after delivery"
+    }
+  ],
+  "idle_support": [
+    {
+      "api": 26,
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-8.0.0_r1/services/core/java/com/android/server/am/ActivityManagerService.java",
+      "method_line": 24137,
+      "success_marker_line": 24154,
+      "marker": "All broadcast queues are idle!"
+    },
+    {
+      "api": 29,
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-10.0.0_r1/services/core/java/com/android/server/am/ActivityManagerService.java",
+      "method_line": 18639,
+      "success_marker_line": 18658,
+      "marker": "All broadcast queues are idle!"
+    },
+    {
+      "api": 33,
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-13.0.0_r1/services/core/java/com/android/server/am/ActivityManagerService.java",
+      "method_line": 17739,
+      "success_marker_line": 17760,
+      "marker": "All broadcast queues are idle!"
+    },
+    {
+      "api": 34,
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-14.0.0_r1/services/core/java/com/android/server/am/ActivityManagerService.java",
+      "method_line": 18982,
+      "success_marker_line": 18990,
+      "marker": "All broadcast queues are idle!"
+    },
+    {
+      "api": 35,
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-15.0.0_r1/services/core/java/com/android/server/am/ActivityManagerService.java",
+      "method_line": 20153,
+      "success_marker_line": 20159,
+      "marker": "All broadcast queues are idle!"
+    },
+    {
+      "api": 36,
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/android-16.0.0_r1/services/core/java/com/android/server/am/ActivityManagerService.java",
+      "method_line": 18263,
+      "success_marker_line": 18269,
+      "marker": "All broadcast queues are idle!"
+    }
+  ],
+  "shell_sources": [
+    "https://android.googlesource.com/platform/frameworks/base/+/android-13.0.0_r1/services/core/java/com/android/server/am/ActivityManagerShellCommand.java",
+    "https://android.googlesource.com/platform/frameworks/base/+/android-14.0.0_r1/services/core/java/com/android/server/am/ActivityManagerShellCommand.java"
+  ],
+  "implemented_control": {
+    "command": [
+      "adb",
+      "shell",
+      "cmd",
+      "activity",
+      "wait-for-broadcast-idle"
+    ],
+    "timeout_seconds": 120,
+    "requires": "exit0 and exact idle marker, followed by actual input-focus/SystemUI/ANR checks",
+    "failure_exit": 25,
+    "no_fixed_boot_sleep": true,
+    "no_dialog_dismissal": true,
+    "no_resource_tuning": true
+  },
+  "pinned_action": {
+    "commit": "4c44018e59b437e86cdfc41da381398f93ed8808",
+    "raw_source_fetch": "HTTP404; no assertion of exact source inspection",
+    "exact_run_runtime_evidence": "2cores; unspecified RAM; emulator increased API33 to2048MB and API34 to2560MB",
+    "cause_not_proven": "RAM/OOM was not established"
+  },
+  "original_api34": {
+    "run": 38805632701,
+    "job": 116675317040,
+    "attempt": 2,
+    "source": "82fc546ee14a401465ce2c835df83acc834874d4",
+    "zip_download": "completed on attempt2",
+    "blocking_anr_owner": "com.google.android.apps.nexuslauncher",
+    "classifier_exit": 22,
+    "app_startup_pass": false
+  },
+  "limits": "Official source proves the missing readiness fence; it does not prove boot broadcasts were the sole cause of both ANRs. Clean-AVD startup control and live API33 command evidence remain owned by root."
+}

@@ -1,0 +1,850 @@
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=G:\BIL_Toolchains\gradle-tmp -Djdk.net.unixdomain.tmpdir=G:\BIL_Toolchains\gradle-tmp
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :gradle
+WARNING: Unsupported Kotlin plugin version.
+The `embedded-kotlin` and `kotlin-dsl` plugins rely on features of Kotlin `2.2.0` that might work differently than in the requested version `2.2.20`.
+
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+
+> Configure project :app
+WARNING: The option setting 'android.builtInKotlin=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.newDsl=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/build.gradle.kts:34:1: 'fun Project.android(configure: Action<BaseAppModuleExtension>): Unit' is deprecated. Replaced by com.android.build.api.dsl.ApplicationExtension.
+This class is not used for the public extensions in AGP when android.newDsl=true, which is the default in AGP 9.0, and will be removed in AGP 10.0.
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :app_links
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':app_links' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :camera_android_camerax
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':camera_android_camerax' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :connectivity_plus
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':connectivity_plus' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :file_selector_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':file_selector_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :flutter_local_notifications
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':flutter_local_notifications' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :flutter_plugin_android_lifecycle
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':flutter_plugin_android_lifecycle' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :flutter_secure_storage
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':flutter_secure_storage' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :flutter_timezone
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':flutter_timezone' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :google_mobile_ads
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':google_mobile_ads' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :google_sign_in_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':google_sign_in_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :image_picker_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':image_picker_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :in_app_purchase_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':in_app_purchase_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :in_app_review
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':in_app_review' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :jni_flutter
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':jni_flutter' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :mobile_scanner
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':mobile_scanner' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :permission_handler_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':permission_handler_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :share_plus
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':share_plus' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :shared_preferences_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':shared_preferences_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :sign_in_with_apple
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':sign_in_with_apple' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :url_launcher_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':url_launcher_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :video_player_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':video_player_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+
+> Configure project :webview_flutter_android
+w: Deprecated 'org.jetbrains.kotlin.android' plugin usage
+The 'org.jetbrains.kotlin.android' plugin in project ':webview_flutter_android' is no longer required for Kotlin support since AGP 9.0.
+Solution: Remove both `android.builtInKotlin=true` and `android.newDsl=false` from `gradle.properties`, then migrate to built-in Kotlin.
+See https://kotl.in/gradle/agp-built-in-kotlin for more details.
+
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_timezone, in_app_review, mobile_scanner
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+
+> Task :app:bilPolicyRuntimeDependencies
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app_links:preBuild UP-TO-DATE
+> Task :app_links:preDebugBuild UP-TO-DATE
+> Task :app_links:extractDeepLinksDebug UP-TO-DATE
+> Task :app_links:processDebugManifest UP-TO-DATE
+> Task :camera_android_camerax:preBuild UP-TO-DATE
+> Task :camera_android_camerax:preDebugBuild UP-TO-DATE
+> Task :camera_android_camerax:extractDeepLinksDebug UP-TO-DATE
+> Task :camera_android_camerax:processDebugManifest UP-TO-DATE
+> Task :connectivity_plus:preBuild UP-TO-DATE
+> Task :connectivity_plus:preDebugBuild UP-TO-DATE
+> Task :connectivity_plus:extractDeepLinksDebug UP-TO-DATE
+> Task :connectivity_plus:processDebugManifest UP-TO-DATE
+> Task :file_selector_android:preBuild UP-TO-DATE
+> Task :file_selector_android:preDebugBuild UP-TO-DATE
+> Task :file_selector_android:extractDeepLinksDebug UP-TO-DATE
+> Task :file_selector_android:processDebugManifest UP-TO-DATE
+> Task :flutter_local_notifications:preBuild UP-TO-DATE
+> Task :flutter_local_notifications:preDebugBuild UP-TO-DATE
+> Task :flutter_local_notifications:extractDeepLinksDebug UP-TO-DATE
+> Task :flutter_local_notifications:processDebugManifest UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:preBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:preDebugBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:extractDeepLinksDebug UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:processDebugManifest UP-TO-DATE
+> Task :flutter_secure_storage:preBuild UP-TO-DATE
+> Task :flutter_secure_storage:preDebugBuild UP-TO-DATE
+> Task :flutter_secure_storage:extractDeepLinksDebug UP-TO-DATE
+> Task :flutter_secure_storage:processDebugManifest UP-TO-DATE
+> Task :flutter_timezone:preBuild UP-TO-DATE
+> Task :flutter_timezone:preDebugBuild UP-TO-DATE
+> Task :flutter_timezone:extractDeepLinksDebug UP-TO-DATE
+> Task :flutter_timezone:processDebugManifest UP-TO-DATE
+> Task :google_mobile_ads:preBuild UP-TO-DATE
+> Task :google_mobile_ads:preDebugBuild UP-TO-DATE
+> Task :google_mobile_ads:extractDeepLinksDebug UP-TO-DATE
+> Task :google_mobile_ads:processDebugManifest UP-TO-DATE
+> Task :google_sign_in_android:preBuild UP-TO-DATE
+> Task :google_sign_in_android:preDebugBuild UP-TO-DATE
+> Task :google_sign_in_android:extractDeepLinksDebug UP-TO-DATE
+> Task :google_sign_in_android:processDebugManifest UP-TO-DATE
+> Task :image_picker_android:preBuild UP-TO-DATE
+> Task :image_picker_android:preDebugBuild UP-TO-DATE
+> Task :image_picker_android:extractDeepLinksDebug UP-TO-DATE
+> Task :image_picker_android:processDebugManifest UP-TO-DATE
+> Task :in_app_purchase_android:preBuild UP-TO-DATE
+> Task :in_app_purchase_android:preDebugBuild UP-TO-DATE
+> Task :in_app_purchase_android:extractDeepLinksDebug UP-TO-DATE
+> Task :in_app_purchase_android:processDebugManifest UP-TO-DATE
+> Task :in_app_review:preBuild UP-TO-DATE
+> Task :in_app_review:preDebugBuild UP-TO-DATE
+> Task :in_app_review:extractDeepLinksDebug UP-TO-DATE
+> Task :in_app_review:processDebugManifest UP-TO-DATE
+> Task :jni:preBuild UP-TO-DATE
+> Task :jni:preDebugBuild UP-TO-DATE
+> Task :jni:extractDeepLinksDebug UP-TO-DATE
+> Task :jni:processDebugManifest UP-TO-DATE
+> Task :jni_flutter:preBuild UP-TO-DATE
+> Task :jni_flutter:preDebugBuild UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksDebug UP-TO-DATE
+> Task :jni_flutter:processDebugManifest UP-TO-DATE
+> Task :mobile_scanner:preBuild UP-TO-DATE
+> Task :mobile_scanner:preDebugBuild UP-TO-DATE
+> Task :mobile_scanner:extractDeepLinksDebug UP-TO-DATE
+> Task :mobile_scanner:processDebugManifest UP-TO-DATE
+> Task :permission_handler_android:preBuild UP-TO-DATE
+> Task :permission_handler_android:preDebugBuild UP-TO-DATE
+> Task :permission_handler_android:extractDeepLinksDebug UP-TO-DATE
+> Task :permission_handler_android:processDebugManifest UP-TO-DATE
+> Task :share_plus:preBuild UP-TO-DATE
+> Task :share_plus:preDebugBuild UP-TO-DATE
+> Task :share_plus:extractDeepLinksDebug UP-TO-DATE
+> Task :share_plus:processDebugManifest UP-TO-DATE
+> Task :shared_preferences_android:preBuild UP-TO-DATE
+> Task :shared_preferences_android:preDebugBuild UP-TO-DATE
+> Task :shared_preferences_android:extractDeepLinksDebug UP-TO-DATE
+> Task :shared_preferences_android:processDebugManifest UP-TO-DATE
+> Task :sign_in_with_apple:preBuild UP-TO-DATE
+> Task :sign_in_with_apple:preDebugBuild UP-TO-DATE
+> Task :sign_in_with_apple:extractDeepLinksDebug UP-TO-DATE
+> Task :sign_in_with_apple:processDebugManifest UP-TO-DATE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :url_launcher_android:preDebugBuild UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksDebug UP-TO-DATE
+> Task :url_launcher_android:processDebugManifest UP-TO-DATE
+> Task :video_player_android:preBuild UP-TO-DATE
+> Task :video_player_android:preDebugBuild UP-TO-DATE
+> Task :video_player_android:extractDeepLinksDebug UP-TO-DATE
+> Task :video_player_android:processDebugManifest UP-TO-DATE
+> Task :webview_flutter_android:preBuild UP-TO-DATE
+> Task :webview_flutter_android:preDebugBuild UP-TO-DATE
+> Task :webview_flutter_android:extractDeepLinksDebug UP-TO-DATE
+> Task :webview_flutter_android:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app_links:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app_links:preReleaseBuild UP-TO-DATE
+> Task :app_links:generateReleaseResources UP-TO-DATE
+> Task :app_links:packageReleaseResources UP-TO-DATE
+> Task :app_links:processReleaseNavigationResources UP-TO-DATE
+> Task :app_links:parseReleaseLocalResources UP-TO-DATE
+> Task :app_links:generateReleaseRFile UP-TO-DATE
+> Task :app_links:compileReleaseKotlin NO-SOURCE
+> Task :app_links:javaPreCompileRelease UP-TO-DATE
+> Task :app_links:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :app_links:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :app_links:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :camera_android_camerax:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :camera_android_camerax:preReleaseBuild UP-TO-DATE
+> Task :camera_android_camerax:generateReleaseResources UP-TO-DATE
+> Task :camera_android_camerax:packageReleaseResources UP-TO-DATE
+> Task :camera_android_camerax:processReleaseNavigationResources UP-TO-DATE
+> Task :camera_android_camerax:parseReleaseLocalResources UP-TO-DATE
+> Task :camera_android_camerax:generateReleaseRFile UP-TO-DATE
+> Task :camera_android_camerax:compileReleaseKotlin UP-TO-DATE
+> Task :camera_android_camerax:javaPreCompileRelease UP-TO-DATE
+> Task :camera_android_camerax:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :camera_android_camerax:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :camera_android_camerax:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :connectivity_plus:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :connectivity_plus:preReleaseBuild UP-TO-DATE
+> Task :connectivity_plus:generateReleaseResources UP-TO-DATE
+> Task :connectivity_plus:packageReleaseResources UP-TO-DATE
+> Task :connectivity_plus:processReleaseNavigationResources UP-TO-DATE
+> Task :connectivity_plus:parseReleaseLocalResources UP-TO-DATE
+> Task :connectivity_plus:generateReleaseRFile UP-TO-DATE
+> Task :connectivity_plus:compileReleaseKotlin NO-SOURCE
+> Task :connectivity_plus:javaPreCompileRelease UP-TO-DATE
+> Task :connectivity_plus:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :connectivity_plus:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :connectivity_plus:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :file_selector_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :file_selector_android:preReleaseBuild UP-TO-DATE
+> Task :file_selector_android:generateReleaseResources UP-TO-DATE
+> Task :file_selector_android:packageReleaseResources UP-TO-DATE
+> Task :file_selector_android:processReleaseNavigationResources UP-TO-DATE
+> Task :file_selector_android:parseReleaseLocalResources UP-TO-DATE
+> Task :file_selector_android:generateReleaseRFile UP-TO-DATE
+> Task :file_selector_android:compileReleaseKotlin UP-TO-DATE
+> Task :file_selector_android:javaPreCompileRelease UP-TO-DATE
+> Task :file_selector_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :file_selector_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :file_selector_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :flutter_local_notifications:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :flutter_local_notifications:preReleaseBuild UP-TO-DATE
+> Task :flutter_local_notifications:generateReleaseResources UP-TO-DATE
+> Task :flutter_local_notifications:packageReleaseResources UP-TO-DATE
+> Task :flutter_local_notifications:processReleaseNavigationResources UP-TO-DATE
+> Task :flutter_local_notifications:parseReleaseLocalResources UP-TO-DATE
+> Task :flutter_local_notifications:generateReleaseRFile UP-TO-DATE
+> Task :flutter_local_notifications:compileReleaseKotlin NO-SOURCE
+> Task :flutter_local_notifications:javaPreCompileRelease UP-TO-DATE
+> Task :flutter_local_notifications:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :flutter_local_notifications:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :flutter_local_notifications:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :flutter_plugin_android_lifecycle:preReleaseBuild UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateReleaseResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:packageReleaseResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:processReleaseNavigationResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:parseReleaseLocalResources UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateReleaseRFile UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileReleaseKotlin NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:javaPreCompileRelease UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :image_picker_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :image_picker_android:preReleaseBuild UP-TO-DATE
+> Task :image_picker_android:generateReleaseResources UP-TO-DATE
+> Task :image_picker_android:packageReleaseResources UP-TO-DATE
+> Task :image_picker_android:processReleaseNavigationResources UP-TO-DATE
+> Task :image_picker_android:parseReleaseLocalResources UP-TO-DATE
+> Task :image_picker_android:generateReleaseRFile UP-TO-DATE
+> Task :image_picker_android:compileReleaseKotlin UP-TO-DATE
+> Task :image_picker_android:javaPreCompileRelease UP-TO-DATE
+> Task :image_picker_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :image_picker_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :image_picker_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :flutter_secure_storage:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :flutter_secure_storage:preReleaseBuild UP-TO-DATE
+> Task :flutter_secure_storage:generateReleaseBuildConfig UP-TO-DATE
+> Task :flutter_secure_storage:generateReleaseResources UP-TO-DATE
+> Task :flutter_secure_storage:packageReleaseResources UP-TO-DATE
+> Task :flutter_secure_storage:processReleaseNavigationResources UP-TO-DATE
+> Task :flutter_secure_storage:parseReleaseLocalResources UP-TO-DATE
+> Task :flutter_secure_storage:generateReleaseRFile UP-TO-DATE
+> Task :flutter_secure_storage:compileReleaseKotlin NO-SOURCE
+> Task :flutter_secure_storage:javaPreCompileRelease UP-TO-DATE
+> Task :flutter_secure_storage:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :flutter_secure_storage:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :flutter_secure_storage:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :flutter_timezone:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :flutter_timezone:preReleaseBuild UP-TO-DATE
+> Task :flutter_timezone:generateReleaseResources UP-TO-DATE
+> Task :flutter_timezone:packageReleaseResources UP-TO-DATE
+> Task :flutter_timezone:processReleaseNavigationResources UP-TO-DATE
+> Task :flutter_timezone:parseReleaseLocalResources UP-TO-DATE
+> Task :flutter_timezone:generateReleaseRFile UP-TO-DATE
+> Task :flutter_timezone:compileReleaseKotlin UP-TO-DATE
+> Task :flutter_timezone:javaPreCompileRelease UP-TO-DATE
+> Task :flutter_timezone:compileReleaseJavaWithJavac NO-SOURCE
+> Task :flutter_timezone:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :flutter_timezone:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :google_mobile_ads:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :google_mobile_ads:preReleaseBuild UP-TO-DATE
+> Task :google_mobile_ads:generateReleaseResources UP-TO-DATE
+> Task :google_mobile_ads:packageReleaseResources UP-TO-DATE
+> Task :google_mobile_ads:processReleaseNavigationResources UP-TO-DATE
+> Task :google_mobile_ads:parseReleaseLocalResources UP-TO-DATE
+> Task :google_mobile_ads:generateReleaseRFile UP-TO-DATE
+> Task :webview_flutter_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :webview_flutter_android:preReleaseBuild UP-TO-DATE
+> Task :webview_flutter_android:generateReleaseResources UP-TO-DATE
+> Task :webview_flutter_android:packageReleaseResources UP-TO-DATE
+> Task :webview_flutter_android:processReleaseNavigationResources UP-TO-DATE
+> Task :webview_flutter_android:parseReleaseLocalResources UP-TO-DATE
+> Task :webview_flutter_android:generateReleaseRFile UP-TO-DATE
+> Task :webview_flutter_android:compileReleaseKotlin UP-TO-DATE
+> Task :webview_flutter_android:javaPreCompileRelease UP-TO-DATE
+> Task :webview_flutter_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :webview_flutter_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :google_mobile_ads:compileReleaseKotlin NO-SOURCE
+> Task :google_mobile_ads:javaPreCompileRelease UP-TO-DATE
+> Task :google_mobile_ads:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :google_mobile_ads:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :google_mobile_ads:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :google_sign_in_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :google_sign_in_android:preReleaseBuild UP-TO-DATE
+> Task :google_sign_in_android:generateReleaseResources UP-TO-DATE
+> Task :google_sign_in_android:packageReleaseResources UP-TO-DATE
+> Task :google_sign_in_android:processReleaseNavigationResources UP-TO-DATE
+> Task :google_sign_in_android:parseReleaseLocalResources UP-TO-DATE
+> Task :google_sign_in_android:generateReleaseRFile UP-TO-DATE
+> Task :google_sign_in_android:compileReleaseKotlin UP-TO-DATE
+> Task :google_sign_in_android:javaPreCompileRelease UP-TO-DATE
+> Task :google_sign_in_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :google_sign_in_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :google_sign_in_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :in_app_purchase_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_purchase_android:preReleaseBuild UP-TO-DATE
+> Task :in_app_purchase_android:generateReleaseBuildConfig UP-TO-DATE
+> Task :in_app_purchase_android:generateReleaseResources UP-TO-DATE
+> Task :in_app_purchase_android:packageReleaseResources UP-TO-DATE
+> Task :in_app_purchase_android:processReleaseNavigationResources UP-TO-DATE
+> Task :in_app_purchase_android:parseReleaseLocalResources UP-TO-DATE
+> Task :in_app_purchase_android:generateReleaseRFile UP-TO-DATE
+> Task :in_app_purchase_android:compileReleaseKotlin UP-TO-DATE
+> Task :in_app_purchase_android:javaPreCompileRelease UP-TO-DATE
+> Task :in_app_purchase_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :in_app_purchase_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :in_app_purchase_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :in_app_review:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_review:preReleaseBuild UP-TO-DATE
+> Task :in_app_review:generateReleaseResources UP-TO-DATE
+> Task :in_app_review:packageReleaseResources UP-TO-DATE
+> Task :in_app_review:processReleaseNavigationResources UP-TO-DATE
+> Task :in_app_review:parseReleaseLocalResources UP-TO-DATE
+> Task :in_app_review:generateReleaseRFile UP-TO-DATE
+> Task :in_app_review:compileReleaseKotlin UP-TO-DATE
+> Task :in_app_review:javaPreCompileRelease UP-TO-DATE
+> Task :in_app_review:compileReleaseJavaWithJavac NO-SOURCE
+> Task :in_app_review:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :in_app_review:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :jni:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni:preReleaseBuild UP-TO-DATE
+> Task :jni:generateReleaseResources UP-TO-DATE
+> Task :jni:packageReleaseResources UP-TO-DATE
+> Task :jni:processReleaseNavigationResources UP-TO-DATE
+> Task :jni:parseReleaseLocalResources UP-TO-DATE
+> Task :jni:generateReleaseRFile UP-TO-DATE
+> Task :jni:compileReleaseKotlin NO-SOURCE
+> Task :jni:javaPreCompileRelease UP-TO-DATE
+> Task :jni:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :jni:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :jni_flutter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :jni_flutter:preReleaseBuild UP-TO-DATE
+> Task :jni_flutter:generateReleaseResources UP-TO-DATE
+> Task :jni_flutter:packageReleaseResources UP-TO-DATE
+> Task :jni_flutter:processReleaseNavigationResources UP-TO-DATE
+> Task :jni_flutter:parseReleaseLocalResources UP-TO-DATE
+> Task :jni_flutter:generateReleaseRFile UP-TO-DATE
+> Task :jni_flutter:compileReleaseKotlin NO-SOURCE
+> Task :jni_flutter:javaPreCompileRelease UP-TO-DATE
+> Task :jni_flutter:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :jni_flutter:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :jni_flutter:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :jni:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :jni:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :mobile_scanner:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :mobile_scanner:preReleaseBuild UP-TO-DATE
+> Task :mobile_scanner:generateReleaseResources UP-TO-DATE
+> Task :mobile_scanner:packageReleaseResources UP-TO-DATE
+> Task :mobile_scanner:processReleaseNavigationResources UP-TO-DATE
+> Task :mobile_scanner:parseReleaseLocalResources UP-TO-DATE
+> Task :mobile_scanner:generateReleaseRFile UP-TO-DATE
+> Task :mobile_scanner:compileReleaseKotlin UP-TO-DATE
+> Task :mobile_scanner:javaPreCompileRelease UP-TO-DATE
+> Task :mobile_scanner:compileReleaseJavaWithJavac NO-SOURCE
+> Task :mobile_scanner:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :mobile_scanner:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :permission_handler_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :permission_handler_android:preReleaseBuild UP-TO-DATE
+> Task :permission_handler_android:generateReleaseResources UP-TO-DATE
+> Task :permission_handler_android:packageReleaseResources UP-TO-DATE
+> Task :permission_handler_android:processReleaseNavigationResources UP-TO-DATE
+> Task :permission_handler_android:parseReleaseLocalResources UP-TO-DATE
+> Task :permission_handler_android:generateReleaseRFile UP-TO-DATE
+> Task :permission_handler_android:compileReleaseKotlin NO-SOURCE
+> Task :permission_handler_android:javaPreCompileRelease UP-TO-DATE
+> Task :permission_handler_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :permission_handler_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :permission_handler_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :share_plus:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :share_plus:preReleaseBuild UP-TO-DATE
+> Task :share_plus:generateReleaseResources UP-TO-DATE
+> Task :share_plus:packageReleaseResources UP-TO-DATE
+> Task :share_plus:processReleaseNavigationResources UP-TO-DATE
+> Task :share_plus:parseReleaseLocalResources UP-TO-DATE
+> Task :share_plus:generateReleaseRFile UP-TO-DATE
+> Task :share_plus:compileReleaseKotlin UP-TO-DATE
+> Task :share_plus:javaPreCompileRelease UP-TO-DATE
+> Task :share_plus:compileReleaseJavaWithJavac NO-SOURCE
+> Task :share_plus:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :share_plus:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :shared_preferences_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared_preferences_android:preReleaseBuild UP-TO-DATE
+> Task :shared_preferences_android:generateReleaseResources UP-TO-DATE
+> Task :shared_preferences_android:packageReleaseResources UP-TO-DATE
+> Task :shared_preferences_android:processReleaseNavigationResources UP-TO-DATE
+> Task :shared_preferences_android:parseReleaseLocalResources UP-TO-DATE
+> Task :shared_preferences_android:generateReleaseRFile UP-TO-DATE
+> Task :shared_preferences_android:compileReleaseKotlin UP-TO-DATE
+> Task :shared_preferences_android:javaPreCompileRelease UP-TO-DATE
+> Task :shared_preferences_android:compileReleaseJavaWithJavac NO-SOURCE
+> Task :shared_preferences_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :shared_preferences_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :sign_in_with_apple:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :sign_in_with_apple:preReleaseBuild UP-TO-DATE
+> Task :sign_in_with_apple:generateReleaseResources UP-TO-DATE
+> Task :sign_in_with_apple:packageReleaseResources UP-TO-DATE
+> Task :sign_in_with_apple:processReleaseNavigationResources UP-TO-DATE
+> Task :sign_in_with_apple:parseReleaseLocalResources UP-TO-DATE
+> Task :sign_in_with_apple:generateReleaseRFile UP-TO-DATE
+> Task :sign_in_with_apple:compileReleaseKotlin UP-TO-DATE
+> Task :sign_in_with_apple:javaPreCompileRelease UP-TO-DATE
+> Task :sign_in_with_apple:compileReleaseJavaWithJavac NO-SOURCE
+> Task :sign_in_with_apple:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :sign_in_with_apple:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :url_launcher_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :url_launcher_android:preReleaseBuild UP-TO-DATE
+> Task :url_launcher_android:generateReleaseBuildConfig UP-TO-DATE
+> Task :url_launcher_android:generateReleaseResources UP-TO-DATE
+> Task :url_launcher_android:packageReleaseResources UP-TO-DATE
+> Task :url_launcher_android:processReleaseNavigationResources UP-TO-DATE
+> Task :url_launcher_android:parseReleaseLocalResources UP-TO-DATE
+> Task :url_launcher_android:generateReleaseRFile UP-TO-DATE
+> Task :url_launcher_android:compileReleaseKotlin UP-TO-DATE
+> Task :url_launcher_android:javaPreCompileRelease UP-TO-DATE
+> Task :url_launcher_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :url_launcher_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :video_player_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :video_player_android:preReleaseBuild UP-TO-DATE
+> Task :video_player_android:generateReleaseResources UP-TO-DATE
+> Task :video_player_android:packageReleaseResources UP-TO-DATE
+> Task :video_player_android:processReleaseNavigationResources UP-TO-DATE
+> Task :video_player_android:parseReleaseLocalResources UP-TO-DATE
+> Task :video_player_android:generateReleaseRFile UP-TO-DATE
+> Task :video_player_android:compileReleaseKotlin UP-TO-DATE
+> Task :video_player_android:javaPreCompileRelease UP-TO-DATE
+> Task :video_player_android:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :video_player_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :video_player_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :webview_flutter_android:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :webview_flutter_android:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:cleanMergeReleaseAssets
+> Task :app:compileFlutterBuildRelease UP-TO-DATE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app_links:generateReleaseAssets UP-TO-DATE
+> Task :app_links:mergeReleaseAssets UP-TO-DATE
+> Task :camera_android_camerax:generateReleaseAssets UP-TO-DATE
+> Task :camera_android_camerax:mergeReleaseAssets UP-TO-DATE
+> Task :connectivity_plus:generateReleaseAssets UP-TO-DATE
+> Task :connectivity_plus:mergeReleaseAssets UP-TO-DATE
+> Task :file_selector_android:generateReleaseAssets UP-TO-DATE
+> Task :file_selector_android:mergeReleaseAssets UP-TO-DATE
+> Task :flutter_local_notifications:generateReleaseAssets UP-TO-DATE
+> Task :flutter_local_notifications:mergeReleaseAssets UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:generateReleaseAssets UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:mergeReleaseAssets UP-TO-DATE
+> Task :flutter_secure_storage:generateReleaseAssets UP-TO-DATE
+> Task :flutter_secure_storage:mergeReleaseAssets UP-TO-DATE
+> Task :flutter_timezone:generateReleaseAssets UP-TO-DATE
+> Task :flutter_timezone:mergeReleaseAssets UP-TO-DATE
+> Task :google_mobile_ads:generateReleaseAssets UP-TO-DATE
+> Task :google_mobile_ads:mergeReleaseAssets UP-TO-DATE
+> Task :google_sign_in_android:generateReleaseAssets UP-TO-DATE
+> Task :google_sign_in_android:mergeReleaseAssets UP-TO-DATE
+> Task :image_picker_android:generateReleaseAssets UP-TO-DATE
+> Task :image_picker_android:mergeReleaseAssets UP-TO-DATE
+> Task :in_app_purchase_android:generateReleaseAssets UP-TO-DATE
+> Task :in_app_purchase_android:mergeReleaseAssets UP-TO-DATE
+> Task :in_app_review:generateReleaseAssets UP-TO-DATE
+> Task :in_app_review:mergeReleaseAssets UP-TO-DATE
+> Task :jni:generateReleaseAssets UP-TO-DATE
+> Task :jni:mergeReleaseAssets UP-TO-DATE
+> Task :jni_flutter:generateReleaseAssets UP-TO-DATE
+> Task :jni_flutter:mergeReleaseAssets UP-TO-DATE
+> Task :mobile_scanner:generateReleaseAssets UP-TO-DATE
+> Task :mobile_scanner:mergeReleaseAssets UP-TO-DATE
+> Task :permission_handler_android:generateReleaseAssets UP-TO-DATE
+> Task :permission_handler_android:mergeReleaseAssets UP-TO-DATE
+> Task :share_plus:generateReleaseAssets UP-TO-DATE
+> Task :share_plus:mergeReleaseAssets UP-TO-DATE
+> Task :shared_preferences_android:generateReleaseAssets UP-TO-DATE
+> Task :shared_preferences_android:mergeReleaseAssets UP-TO-DATE
+> Task :sign_in_with_apple:generateReleaseAssets UP-TO-DATE
+> Task :sign_in_with_apple:mergeReleaseAssets UP-TO-DATE
+> Task :url_launcher_android:generateReleaseAssets UP-TO-DATE
+> Task :url_launcher_android:mergeReleaseAssets UP-TO-DATE
+> Task :video_player_android:generateReleaseAssets UP-TO-DATE
+> Task :video_player_android:mergeReleaseAssets UP-TO-DATE
+> Task :webview_flutter_android:generateReleaseAssets UP-TO-DATE
+> Task :webview_flutter_android:mergeReleaseAssets UP-TO-DATE
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:mergeReleaseAssets
+> Task :app:copyFlutterAssetsRelease
+> Task :app:generateReleaseResources UP-TO-DATE
+> Task :app:processReleaseGoogleServices UP-TO-DATE
+> Task :app:packageReleaseResources UP-TO-DATE
+> Task :app:processReleaseNavigationResources UP-TO-DATE
+> Task :app:parseReleaseLocalResources UP-TO-DATE
+> Task :app:generateReleaseRFile UP-TO-DATE
+> Task :app_links:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :camera_android_camerax:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :connectivity_plus:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :file_selector_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :flutter_local_notifications:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :flutter_secure_storage:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :flutter_timezone:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :google_mobile_ads:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :google_sign_in_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :image_picker_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :in_app_review:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :jni_flutter:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :mobile_scanner:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :permission_handler_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :share_plus:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :shared_preferences_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :sign_in_with_apple:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :video_player_android:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :app:javaPreCompileRelease UP-TO-DATE
+> Task :app_links:prepareReleaseArtProfile UP-TO-DATE
+> Task :camera_android_camerax:prepareReleaseArtProfile UP-TO-DATE
+> Task :connectivity_plus:prepareReleaseArtProfile UP-TO-DATE
+> Task :file_selector_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :flutter_local_notifications:prepareReleaseArtProfile UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:prepareReleaseArtProfile UP-TO-DATE
+> Task :flutter_secure_storage:prepareReleaseArtProfile UP-TO-DATE
+> Task :flutter_timezone:prepareReleaseArtProfile UP-TO-DATE
+> Task :google_mobile_ads:prepareReleaseArtProfile UP-TO-DATE
+> Task :google_sign_in_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :image_picker_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :in_app_purchase_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :in_app_review:prepareReleaseArtProfile UP-TO-DATE
+> Task :jni:prepareReleaseArtProfile UP-TO-DATE
+> Task :jni_flutter:prepareReleaseArtProfile UP-TO-DATE
+> Task :mobile_scanner:prepareReleaseArtProfile UP-TO-DATE
+> Task :permission_handler_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :share_plus:prepareReleaseArtProfile UP-TO-DATE
+> Task :shared_preferences_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :sign_in_with_apple:prepareReleaseArtProfile UP-TO-DATE
+> Task :url_launcher_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :video_player_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :webview_flutter_android:prepareReleaseArtProfile UP-TO-DATE
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :app_links:writeReleaseAarMetadata UP-TO-DATE
+> Task :camera_android_camerax:writeReleaseAarMetadata UP-TO-DATE
+> Task :connectivity_plus:writeReleaseAarMetadata UP-TO-DATE
+> Task :file_selector_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :flutter_local_notifications:writeReleaseAarMetadata UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:writeReleaseAarMetadata UP-TO-DATE
+> Task :flutter_secure_storage:writeReleaseAarMetadata UP-TO-DATE
+> Task :flutter_timezone:writeReleaseAarMetadata UP-TO-DATE
+> Task :google_mobile_ads:writeReleaseAarMetadata UP-TO-DATE
+> Task :google_sign_in_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :image_picker_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :in_app_purchase_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :in_app_review:writeReleaseAarMetadata UP-TO-DATE
+> Task :jni:writeReleaseAarMetadata UP-TO-DATE
+> Task :jni_flutter:writeReleaseAarMetadata UP-TO-DATE
+> Task :mobile_scanner:writeReleaseAarMetadata UP-TO-DATE
+> Task :permission_handler_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :share_plus:writeReleaseAarMetadata UP-TO-DATE
+> Task :shared_preferences_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :sign_in_with_apple:writeReleaseAarMetadata UP-TO-DATE
+> Task :url_launcher_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :video_player_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :webview_flutter_android:writeReleaseAarMetadata UP-TO-DATE
+> Task :app:compileReleaseKotlin
+> Task :app:checkReleaseAarMetadata UP-TO-DATE
+> Task :app:compileReleaseNavigationResources UP-TO-DATE
+
+> Task :app:compileReleaseKotlin
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFirebaseMessagingService.kt:14:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFitnessBleBridge.kt:383:64 'var value: ByteArray!' is deprecated. Deprecated in Java.
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFitnessBleBridge.kt:392:64 'var value: ByteArray!' is deprecated. Deprecated in Java.
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILPushProvider.kt:64:41 'val token: Task<String!>' is deprecated. Deprecated in Java.
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILPushProvider.kt:74:41 'fun deleteToken(): Task<Void!>' is deprecated. Deprecated in Java.
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt:61:16 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt:62:16 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+
+> Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :app:mergeReleaseResources UP-TO-DATE
+> Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :app:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :app:extractDeepLinksRelease UP-TO-DATE
+> Task :app_links:extractDeepLinksRelease UP-TO-DATE
+> Task :app_links:processReleaseManifest UP-TO-DATE
+> Task :camera_android_camerax:extractDeepLinksRelease UP-TO-DATE
+> Task :camera_android_camerax:processReleaseManifest UP-TO-DATE
+> Task :connectivity_plus:extractDeepLinksRelease UP-TO-DATE
+> Task :connectivity_plus:processReleaseManifest UP-TO-DATE
+> Task :file_selector_android:extractDeepLinksRelease UP-TO-DATE
+> Task :file_selector_android:processReleaseManifest UP-TO-DATE
+> Task :flutter_local_notifications:extractDeepLinksRelease UP-TO-DATE
+> Task :flutter_local_notifications:processReleaseManifest UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:extractDeepLinksRelease UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:processReleaseManifest UP-TO-DATE
+> Task :flutter_secure_storage:extractDeepLinksRelease UP-TO-DATE
+> Task :flutter_secure_storage:processReleaseManifest UP-TO-DATE
+> Task :flutter_timezone:extractDeepLinksRelease UP-TO-DATE
+> Task :flutter_timezone:processReleaseManifest UP-TO-DATE
+> Task :google_mobile_ads:extractDeepLinksRelease UP-TO-DATE
+> Task :google_mobile_ads:processReleaseManifest UP-TO-DATE
+> Task :google_sign_in_android:extractDeepLinksRelease UP-TO-DATE
+> Task :google_sign_in_android:processReleaseManifest UP-TO-DATE
+> Task :image_picker_android:extractDeepLinksRelease UP-TO-DATE
+> Task :image_picker_android:processReleaseManifest UP-TO-DATE
+> Task :in_app_purchase_android:extractDeepLinksRelease UP-TO-DATE
+> Task :in_app_purchase_android:processReleaseManifest UP-TO-DATE
+> Task :in_app_review:extractDeepLinksRelease UP-TO-DATE
+> Task :in_app_review:processReleaseManifest UP-TO-DATE
+> Task :jni:extractDeepLinksRelease UP-TO-DATE
+> Task :jni:processReleaseManifest UP-TO-DATE
+> Task :jni_flutter:extractDeepLinksRelease UP-TO-DATE
+> Task :jni_flutter:processReleaseManifest UP-TO-DATE
+> Task :mobile_scanner:extractDeepLinksRelease UP-TO-DATE
+> Task :mobile_scanner:processReleaseManifest UP-TO-DATE
+> Task :permission_handler_android:extractDeepLinksRelease UP-TO-DATE
+> Task :permission_handler_android:processReleaseManifest UP-TO-DATE
+> Task :share_plus:extractDeepLinksRelease UP-TO-DATE
+> Task :share_plus:processReleaseManifest UP-TO-DATE
+> Task :shared_preferences_android:extractDeepLinksRelease UP-TO-DATE
+> Task :shared_preferences_android:processReleaseManifest UP-TO-DATE
+> Task :sign_in_with_apple:extractDeepLinksRelease UP-TO-DATE
+> Task :sign_in_with_apple:processReleaseManifest UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksRelease UP-TO-DATE
+> Task :url_launcher_android:processReleaseManifest UP-TO-DATE
+> Task :video_player_android:extractDeepLinksRelease UP-TO-DATE
+> Task :video_player_android:processReleaseManifest UP-TO-DATE
+> Task :webview_flutter_android:extractDeepLinksRelease UP-TO-DATE
+> Task :webview_flutter_android:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseMainManifest UP-TO-DATE
+> Task :app:outputReleaseAppLinkSettings UP-TO-DATE
+> Task :app:processReleaseManifest UP-TO-DATE
+> Task :app:processReleaseManifestForPackage UP-TO-DATE
+> Task :app:processReleaseResources UP-TO-DATE
+> Task :app_links:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :camera_android_camerax:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :connectivity_plus:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :file_selector_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :flutter_local_notifications:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :flutter_plugin_android_lifecycle:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :flutter_secure_storage:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :flutter_timezone:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :google_mobile_ads:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :google_sign_in_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :image_picker_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :in_app_purchase_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :in_app_review:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :jni:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :jni_flutter:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :mobile_scanner:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :permission_handler_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :share_plus:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :shared_preferences_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :sign_in_with_apple:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :url_launcher_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :video_player_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :webview_flutter_android:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :app:processReleaseJavaRes UP-TO-DATE
+> Task :app_links:processReleaseJavaRes NO-SOURCE
+> Task :camera_android_camerax:processReleaseJavaRes UP-TO-DATE
+> Task :connectivity_plus:processReleaseJavaRes NO-SOURCE
+> Task :file_selector_android:processReleaseJavaRes UP-TO-DATE
+> Task :flutter_local_notifications:processReleaseJavaRes NO-SOURCE
+> Task :flutter_plugin_android_lifecycle:processReleaseJavaRes NO-SOURCE
+> Task :flutter_secure_storage:processReleaseJavaRes NO-SOURCE
+> Task :flutter_timezone:processReleaseJavaRes UP-TO-DATE
+> Task :google_mobile_ads:processReleaseJavaRes NO-SOURCE
+> Task :google_sign_in_android:processReleaseJavaRes UP-TO-DATE
+> Task :image_picker_android:processReleaseJavaRes UP-TO-DATE
+> Task :in_app_purchase_android:processReleaseJavaRes UP-TO-DATE
+> Task :in_app_review:processReleaseJavaRes UP-TO-DATE
+> Task :jni:processReleaseJavaRes NO-SOURCE
+> Task :jni_flutter:processReleaseJavaRes NO-SOURCE
+> Task :mobile_scanner:processReleaseJavaRes UP-TO-DATE
+> Task :permission_handler_android:processReleaseJavaRes NO-SOURCE
+> Task :share_plus:processReleaseJavaRes UP-TO-DATE
+> Task :shared_preferences_android:processReleaseJavaRes UP-TO-DATE
+> Task :sign_in_with_apple:processReleaseJavaRes UP-TO-DATE
+> Task :url_launcher_android:processReleaseJavaRes UP-TO-DATE
+> Task :video_player_android:processReleaseJavaRes UP-TO-DATE
+> Task :webview_flutter_android:processReleaseJavaRes UP-TO-DATE
+> Task :app:expandReleaseArtProfileWildcards
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:mergeReleaseJavaResource
+> Task :app:minifyReleaseWithR8
+> Task :app:convertShrunkResourcesToBinaryRelease UP-TO-DATE
+> Task :app:optimizeReleaseResources UP-TO-DATE
+
+> Task :app:bilPolicyNotificationResource
+BIL_ANDROID_NOTIFICATION_RESOURCE=PASS
+
+[Incubating] Problems report is available at: file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 12m 46s
+484 actionable tasks: 10 executed, 474 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html

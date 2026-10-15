@@ -1,0 +1,88 @@
+{
+  "recorded_at_utc": "2026-10-15T22:49:10.515379+00:00",
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "scope": "Live observation only; full continues, not final result",
+  "failed_cases": [
+    {
+      "test_id": 3080,
+      "name": "does not invent prices when store metadata is unavailable",
+      "suite": {
+        "id": 3072,
+        "platform": "vm",
+        "path": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart"
+      },
+      "result": "error",
+      "error_events": [
+        {
+          "testID": 3080,
+          "error": "Test failed. See exception logs above.\nThe test description was: does not invent prices when store metadata is unavailable",
+          "stackTrace": "",
+          "isFailure": false,
+          "type": "error",
+          "time": 613092
+        }
+      ]
+    },
+    {
+      "test_id": 3091,
+      "name": "AI Coach explains inherited Free and paid features with one Premium label",
+      "suite": {
+        "id": 3072,
+        "platform": "vm",
+        "path": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart"
+      },
+      "result": "error",
+      "error_events": [
+        {
+          "testID": 3091,
+          "error": "Test failed. See exception logs above.\nThe test description was: AI Coach explains inherited Free and paid features with one Premium label",
+          "stackTrace": "",
+          "isFailure": false,
+          "type": "error",
+          "time": 614221
+        }
+      ]
+    },
+    {
+      "test_id": 3241,
+      "name": "AI-only storefront explains concrete Premium and AI benefits",
+      "suite": {
+        "id": 3228,
+        "platform": "vm",
+        "path": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/paywall_ai_market_benefits_test.dart"
+      },
+      "result": "error",
+      "error_events": [
+        {
+          "testID": 3241,
+          "error": "Test failed. See exception logs above.\nThe test description was: AI-only storefront explains concrete Premium and AI benefits",
+          "stackTrace": "",
+          "isFailure": false,
+          "type": "error",
+          "time": 633303
+        }
+      ]
+    },
+    {
+      "test_id": 11467,
+      "name": "iOS native crypto runtime check is explicit opt-in with evidence",
+      "suite": {
+        "id": 11458,
+        "platform": "vm",
+        "path": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/system_crypto_export_compliance_contract_test.dart"
+      },
+      "result": "failure",
+      "error_events": [
+        {
+          "testID": 11467,
+          "error": "Expected: an object with length of <2>\n  Actual: _StringAllMatchesIterable:[Instance of '_StringMatch']\n   Which: has length of <1>\n",
+          "stackTrace": "package:matcher                                                                expect\npackage:flutter_test/src/widget_tester.dart 473:18                             expect\ntest\\launch_readiness\\system_crypto_export_compliance_contract_test.dart 28:5  main.<fn>\n",
+          "isFailure": true,
+          "type": "error",
+          "time": 2158332
+        }
+      ]
+    }
+  ],
+  "failed_case_count": 4
+}

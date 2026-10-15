@@ -1,0 +1,15 @@
+{
+  "phase": "failed_preflight",
+  "label": "policy-corrected-20261016",
+  "expected_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "started_utc": "2026-10-15T22:02:43.046647+00:00",
+  "runner_pid": 16816,
+  "flutter_started": false,
+  "accepted": false,
+  "automatic_retry": false,
+  "working_tree_status_entries": 178,
+  "working_tree_status_fingerprint": "974365bab3c19b020dc8c7ea0cc3e329fcbd0e4a26edd06d1fb07bb333989a9d",
+  "runner_error": "RuntimeError: less than4GiB free RAM; do not start an unstable two-worker run",
+  "finished_utc": "2026-10-15T22:02:43.485973+00:00",
+  "owned_process_termination": null
+}

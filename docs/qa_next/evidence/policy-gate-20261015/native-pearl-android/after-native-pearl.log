@@ -1,0 +1,185 @@
+Running Gradle task 'assembleDebug'...                          
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=G:\BIL_Toolchains\gradle-tmp -Djdk.net.unixdomain.tmpdir=G:\BIL_Toolchains\gradle-tmp
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_timezone, in_app_review, mobile_scanner
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDebug'...                             59.8s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...           3.0s
+D/CompatibilityChangeReporter( 4965): Compat change id reported: 193247900; UID 10176; state: ENABLED
+W/intelligencelog( 4965): Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (unsupported,test-api, reflection, allowed)
+W/intelligencelog( 4965): Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (unsupported, reflection, allowed)
+W/intelligencelog( 4965): Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (unsupported, reflection, allowed)
+W/intelligencelog( 4965): Accessing hidden method Landroid/util/LongArray;->get(I)J (unsupported, reflection, allowed)
+D/FlutterRenderer( 4965): Width is zero. 0,0
+D/CompatibilityChangeReporter( 4965): Compat change id reported: 237531167; UID 10176; state: DISABLED
+W/Parcel  ( 4965): Expecting binder but got null!
+I/Choreographer( 4965): Skipped 323 frames!  The application may be doing too much work on its main thread.
+D/FlutterRenderer( 4965): Width is zero. 0,0
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/HostConnection( 4965): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+W/OpenGLRenderer( 4965): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+D/EGL_emulation( 4965): eglCreateContext: 0x7eca138213d0: maj 3 min 0 rcv 3
+D/EGL_emulation( 4965): eglMakeCurrent: 0x7eca138213d0: ver 3 0 (tinfo 0x7ecc40199180) (first time)
+I/Gralloc4( 4965): mapper 4.x is not supported
+W/Gralloc4( 4965): allocator 4.x is not supported
+D/HostConnection( 4965): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+D/HostConnection( 4965): HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_multi_configs ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+D/EGL_emulation( 4965): eglMakeCurrent: 0x7eca13825750: ver 3 0 (tinfo 0x7ecc40199200) (first time)
+D/EGL_emulation( 4965): eglCreateContext: 0x7eca13821490: maj 3 min 0 rcv 3
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+I/intelligencelog( 4965): Compiler allocated 4355KB to compile void android.view.ViewRootImpl.performTraversals()
+D/ProfileInstaller( 4965): Installing profile for com.bilhealth.bodyintelligencelog
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58230/Thd8xy0_x4k=/
+VMServiceFlutterDriver: Isolate found with number: 8662269198906091
+VMServiceFlutterDriver: Isolate 8662269198906091 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+I/flutter ( 4965): 00:00 +0: native symbols and Arabic single-line profile on device
+VMServiceFlutterDriver: Connected to Flutter application.
+D/EGL_emulation( 4965): app_time_stats: avg=1161.84ms min=90.59ms max=2233.09ms count=2
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+D/EGL_emulation( 4965): app_time_stats: avg=968.67ms min=98.44ms max=2893.11ms count=5
+D/EGL_emulation( 4965): app_time_stats: avg=2254.48ms min=2254.48ms max=2254.48ms count=1
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=494.02ms min=22.58ms max=1888.13ms count=4
+D/EGL_emulation( 4965): app_time_stats: avg=356.63ms min=36.06ms max=995.40ms count=3
+D/EGL_emulation( 4965): app_time_stats: avg=1659.22ms min=304.96ms max=3013.48ms count=2
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F....ID 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/EGL_emulation( 4965): app_time_stats: avg=212.68ms min=31.65ms max=515.09ms count=7
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F....ID 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/EGL_emulation( 4965): app_time_stats: avg=1529.22ms min=1529.22ms max=1529.22ms count=1
+I/AssistStructure( 4965): Flattened final assist data: 416 bytes, containing 1 windows, 3 views
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=1147.82ms min=1147.82ms max=1147.82ms count=1
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=239.12ms min=26.16ms max=1234.02ms count=8
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=404.06ms min=199.44ms max=783.63ms count=3
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=362.39ms min=139.55ms max=661.58ms count=3
+D/EGL_emulation( 4965): app_time_stats: avg=369.68ms min=29.86ms max=1137.22ms count=5
+I/intelligencelog( 4965): NativeAlloc concurrent copying GC freed 16300(1063KB) AllocSpace objects, 17(2836KB) LOS objects, 49% free, 4191KB/8383KB, paused 211us,22us total 298.063ms
+D/EGL_emulation( 4965): app_time_stats: avg=359.86ms min=139.25ms max=972.12ms count=5
+D/EGL_emulation( 4965): app_time_stats: avg=1751.48ms min=1751.48ms max=1751.48ms count=1
+D/EGL_emulation( 4965): app_time_stats: avg=147.16ms min=43.36ms max=518.86ms count=8
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=148.34ms min=11.97ms max=346.99ms count=7
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+I/AssistStructure( 4965): Flattened final assist data: 416 bytes, containing 1 windows, 3 views
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=2419.30ms min=2419.30ms max=2419.30ms count=1
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=178.70ms min=80.04ms max=344.03ms count=6
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+I/intelligencelog( 4965): Background concurrent copying GC freed 6399(374KB) AllocSpace objects, 6(3736KB) LOS objects, 49% free, 4298KB/8596KB, paused 62us,21us total 433.907ms
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=196.34ms min=28.49ms max=752.79ms count=6
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=294.40ms min=90.14ms max=717.24ms count=5
+D/EGL_emulation( 4965): app_time_stats: avg=236.70ms min=75.19ms max=706.08ms count=5
+D/EGL_emulation( 4965): app_time_stats: avg=363.06ms min=99.24ms max=1247.00ms count=6
+D/EGL_emulation( 4965): app_time_stats: avg=2182.79ms min=2182.79ms max=2182.79ms count=1
+I/intelligencelog( 4965): NativeAlloc concurrent copying GC freed 6425(370KB) AllocSpace objects, 9(2436KB) LOS objects, 49% free, 4200KB/8400KB, paused 218us,18us total 136.186ms
+D/EGL_emulation( 4965): app_time_stats: avg=143.64ms min=50.40ms max=547.95ms count=9
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=118.08ms min=9.93ms max=240.36ms count=9
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+I/AssistStructure( 4965): Flattened final assist data: 416 bytes, containing 1 windows, 3 views
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=2059.24ms min=2059.24ms max=2059.24ms count=1
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/EGL_emulation( 4965): app_time_stats: avg=276.38ms min=212.59ms max=372.91ms count=4
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=176.83ms min=18.58ms max=731.56ms count=6
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=252.55ms min=136.43ms max=494.28ms count=4
+D/EGL_emulation( 4965): app_time_stats: avg=208.01ms min=28.55ms max=761.43ms count=6
+D/EGL_emulation( 4965): app_time_stats: avg=322.79ms min=108.01ms max=992.45ms count=6
+D/EGL_emulation( 4965): app_time_stats: avg=1842.16ms min=1842.16ms max=1842.16ms count=1
+I/intelligencelog( 4965): NativeAlloc concurrent copying GC freed 13803(669KB) AllocSpace objects, 10(3108KB) LOS objects, 49% free, 4205KB/8410KB, paused 149us,12us total 112.690ms
+D/EGL_emulation( 4965): app_time_stats: avg=140.76ms min=42.83ms max=529.00ms count=9
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+I/AssistStructure( 4965): Flattened final assist data: 416 bytes, containing 1 windows, 3 views
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=1830.90ms min=1830.90ms max=1830.90ms count=1
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=146.60ms min=7.71ms max=431.97ms count=9
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+I/intelligencelog( 4965): Background young concurrent copying GC freed 4326(231KB) AllocSpace objects, 9(2808KB) LOS objects, 35% free, 5435KB/8410KB, paused 26us,22us total 525.768ms
+D/InputMethodManager( 4965): showSoftInput() view=io.flutter.embedding.android.FlutterView{a3c94f3 VFE...... .F...... 0,0-1080,2337 #2 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InsetsController( 4965): show(ime(), fromIme=true)
+D/EGL_emulation( 4965): app_time_stats: avg=253.35ms min=190.15ms max=338.29ms count=4
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=253.16ms min=36.55ms max=999.38ms count=5
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/FlutterJNI( 4965): Sending viewport metrics to the engine.
+D/EGL_emulation( 4965): app_time_stats: avg=345.56ms min=284.05ms max=378.15ms count=3
+D/EGL_emulation( 4965): app_time_stats: avg=295.25ms min=55.24ms max=893.83ms count=5
+D/EGL_emulation( 4965): app_time_stats: avg=340.02ms min=176.73ms max=759.74ms count=4
+D/EGL_emulation( 4965): app_time_stats: avg=527.04ms min=190.47ms max=863.61ms count=2
+D/EGL_emulation( 4965): app_time_stats: avg=2363.81ms min=2363.81ms max=2363.81ms count=1
+I/intelligencelog( 4965): NativeAlloc concurrent copying GC freed 8685(462KB) AllocSpace objects, 10(3480KB) LOS objects, 49% free, 4233KB/8467KB, paused 51us,23us total 194.379ms
+D/EGL_emulation( 4965): app_time_stats: avg=174.85ms min=60.33ms max=754.86ms count=9
+I/flutter ( 4965): 00:37 +1: (tearDownAll)
+I/Choreographer( 4965): Skipped 53 frames!  The application may be doing too much work on its main thread.
+I/flutter ( 4965): 00:38 +2: All tests passed!
+D/EGL_emulation( 4965): app_time_stats: avg=2253.34ms min=2253.34ms max=2253.34ms count=1
+I/OpenGLRenderer( 4965): Davey! duration=930ms; Flags=0, FrameTimelineVsyncId=263892, IntendedVsync=1010708635971, Vsync=1011591969216, InputEventId=0, HandleInputStart=1011609013130, AnimationStart=1011609016283, PerformTraversalsStart=1011609016865, DrawStart=1011610028278, FrameDeadline=1010725302637, FrameInterval=1011604103831, FrameStartTime=16666665, SyncQueued=1011610219555, SyncStart=1011613877344, IssueDrawCommandsStart=1011615497284, SwapBuffers=1011624883920, FrameCompleted=1011642895739, DequeueBufferDuration=5384, QueueBufferDuration=619986, GpuCompleted=1011642895739, SwapBuffersCompleted=1011628715496, DisplayPresentTime=0, CommandSubmissionCompleted=1011624883920, 
+All tests passed.

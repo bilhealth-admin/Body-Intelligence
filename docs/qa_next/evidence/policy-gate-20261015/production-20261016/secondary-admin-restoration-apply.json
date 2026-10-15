@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T23:11:40.903Z",
+  "project_id": "tgmanzhqulksykhslrzb",
+  "purpose": "Restore prior owner-approved personal secondary administrator after mistaken reviewer classification",
+  "source_file": "supabase/migrations/20261015230655_restore_owner_approved_secondary_admin_identity_correction.sql",
+  "source_sha256": "68428113e1f6af74a6b4c6b8ff6eec4e68e6f3bd5d412d1a4ce523ed2fed569f",
+  "focused_isolated_tests": {
+    "passed": 33,
+    "failed": 0,
+    "execution_errors": 0
+  },
+  "actual_apply_result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  },
+  "grants_or_balances_changed": false,
+  "postconditions": "PENDING_LIVE_READBACK"
+}

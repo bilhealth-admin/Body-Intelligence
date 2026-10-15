@@ -1,0 +1,44 @@
+test_smoke_preserves_system_ui_failure_before_install_or_launch (tool.release.test_verify_android_startup_frame.VerifyAndroidWindowFocusTest.test_smoke_preserves_system_ui_failure_before_install_or_launch) ... FAIL
+
+======================================================================
+FAIL: test_smoke_preserves_system_ui_failure_before_install_or_launch (tool.release.test_verify_android_startup_frame.VerifyAndroidWindowFocusTest.test_smoke_preserves_system_ui_failure_before_install_or_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tool\release\test_verify_android_startup_frame.py", line 348, in test_smoke_preserves_system_ui_failure_before_install_or_launch
+    result = subprocess.run(
+        [bash, "-x", (release / "run_android_emulator_smoke.sh").as_posix()],
+    ...<5 lines>...
+        creationflags=(subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0),
+    )
+  File "C:\Users\HP 1040 G8\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP 1040 G8\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP 1040 G8\AppData\Local\Programs\Python\Python314\Lib\subprocess.py", line 1664, in _communicate
+    raise TimeoutExpired(self.args, orig_timeout)
+subprocess.TimeoutExpired: Command '['C:\\Program Files\\Git\\bin\\bash.exe', '-x', 'G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tool/release/run_android_emulator_smoke.sh']' timed out after 15 seconds
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tool\release\test_verify_android_startup_frame.py", line 358, in test_smoke_preserves_system_ui_failure_before_install_or_launch
+    self.fail(
+    ~~~~~~~~~^
+        f"Isolated Bash fixture timed out: {error.stdout!r}\n"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        f"{error.stderr!r}\n"
+        ^^^^^^^^^^^^^^^^^^^^^
+        f"adb calls: {commands.read_text() if commands.exists() else 'none'}"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Isolated Bash fixture timed out: ''
+'+ set -euo pipefail\n+ readonly app_id=com.bilhealth.bodyintelligencelog\n+ app_id=com.bilhealth.bodyintelligencelog\n+ readonly api_level=33\n+ api_level=33\n+ readonly apk=build/app/outputs/flutter-apk/app-debug.apk\n+ apk=build/app/outputs/flutter-apk/app-debug.apk\n+ readonly evidence=artifacts/release/android_emulator_smoke/api-33\n+ evidence=artifacts/release/android_emulator_smoke/api-33\n+ stage=initialize\n+ mkdir -p artifacts/release/android_emulator_smoke/api-33\n      1 [main] bash 1597 dofork: child -1 - forked process 6676 died unexpectedly, retry 0, exit code 0xC0000142, errno 11\nG:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tool/release/run_android_emulator_smoke.sh: fork: retry: Resource temporarily unavailable\n1183093 [main] bash 1597 dofork: child -1 - forked process 24496 died unexpectedly, retry 0, exit code 0xC0000142, errno 11\nG:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tool/release/run_android_emulator_smoke.sh: fork: retry: Resource temporarily unavailable\n3395464 [main] bash 1597 dofork: child -1 - forked process 15656 died unexpectedly, retry 0, exit code 0xC0000142, errno 11\nG:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tool/release/run_android_emulator_smoke.sh: fork: retry: Resource temporarily unavailable\n      0 [main] bash 1601 child_copy: dll data read copy failed, 0x1417000..0x1430CB0, done 0, windows pid 1144, Win32 error 299\n7577617 [main] bash 1597 dofork: child -1 - forked process 1144 died unexpectedly, retry 0, exit code 0xC0000005, errno 11\nG:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tool/release/run_android_emulator_smoke.sh: fork: retry: Resource temporarily unavailable\n15814602 [main] bash 1597 dofork: child -1 - forked process 2748 died unexpectedly, retry 0, exit code 0xC0000142, errno 11\nG:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tool/release/run_android_emulator_smoke.sh: fork: Resource temporarily unavailable\n'
+adb calls: none
+
+----------------------------------------------------------------------
+Ran 1 test in 16.249s
+
+FAILED (failures=1)

@@ -58,7 +58,7 @@ class CommunityPostModerationReceipt {
     final tokens = rawTokens.toInt();
 
     final valid = switch (copyKey) {
-      'post_approved_ai_tokens_v1' =>
+      'post_approved_ai_tokens_v1' || 'community_post_ai_reward_v1' =>
         decision == CommunityPostModerationReceiptDecision.approved &&
             tokens == 5 &&
             rewardReason == 'granted',

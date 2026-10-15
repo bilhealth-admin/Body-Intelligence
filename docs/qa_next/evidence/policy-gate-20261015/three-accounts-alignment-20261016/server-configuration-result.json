@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T23:20:59.597Z",
+  "project_id": "tgmanzhqulksykhslrzb",
+  "owner_authorization": "Latest direct owner instruction: align Google reviewer and dr.kadem account with Apple review access; only kademcom and bilhealth.app remain Admin.",
+  "operation": "Existing server bil_manage_admin_subscription; real registered Admin actor; one independent365day Premium AI Coach grant for personal QA; stable idempotency key; no password/auth/role changes",
+  "scope": "Server configuration only; no normal Auth/phone/signed artifact/store settings proof",
+  "before_local_test": {
+    "file": "supabase/tests/admin_subscription_grants_test.mjs",
+    "passed": 21,
+    "failed": 0
+  },
+  "transaction_guards": {
+    "same_exact_admin_and_moderator_rows": true,
+    "target_store_subscription_unchanged": true,
+    "target_store_snapshots_unchanged": true,
+    "target_boost_purchases_unchanged": true,
+    "target_credit_balance_unchanged": true,
+    "target_store_entitlements_unchanged": true,
+    "checked_inside_same_transaction": true
+  },
+  "actual_alignment": {
+    "accounts": [
+      {
+        "email": "dr.kadem.nana@gmail.com",
+        "credits": {
+          "used": 271,
+          "granted": 10005,
+          "reserved": 0,
+          "refund_debt": 0
+        },
+        "moderator": false,
+        "administrator": false,
+        "store_mirror_provider": "apple",
+        "admin_grant_expires_at": "2027-10-15T23:19:50.48684+00:00",
+        "store_mirror_lifecycle": "expired",
+        "closed_test_grant_expires_at": null,
+        "effective_admin_subscription_plan": "premium_ai_coach"
+      },
+      {
+        "email": "google-play-review-20261004@bilhealth.com",
+        "credits": {
+          "used": 0,
+          "granted": 2500,
+          "reserved": 0,
+          "refund_debt": 0
+        },
+        "moderator": false,
+        "administrator": false,
+        "store_mirror_provider": "closed_test",
+        "admin_grant_expires_at": null,
+        "store_mirror_lifecycle": "active",
+        "closed_test_grant_expires_at": "2027-10-05T00:00:00+00:00",
+        "effective_admin_subscription_plan": "premium_ai_coach"
+      },
+      {
+        "email": "play-review@bilhealth.com",
+        "credits": {
+          "used": 0,
+          "granted": 2500,
+          "reserved": 0,
+          "refund_debt": 0
+        },
+        "moderator": false,
+        "administrator": false,
+        "store_mirror_provider": "closed_test",
+        "admin_grant_expires_at": "2027-10-04T23:21:42.650205+00:00",
+        "store_mirror_lifecycle": "active",
+        "closed_test_grant_expires_at": "2027-10-05T00:00:00+00:00",
+        "effective_admin_subscription_plan": "premium_ai_coach"
+      }
+    ],
+    "owner_grant_command": {
+      "changed": true,
+      "matched": true,
+      "actor_is_designated_owner": true
+    },
+    "active_admin_accounts": [
+      "bilhealth.app@gmail.com",
+      "kademcom@yahoo.com"
+    ]
+  },
+  "effective_server_features": [
+    {
+      "account": "dr.kadem.nana@gmail.com",
+      "ai_plan": "ai_coach",
+      "premium_access": true
+    },
+    {
+      "account": "google-play-review-20261004@bilhealth.com",
+      "ai_plan": "ai_coach",
+      "premium_access": true
+    },
+    {
+      "account": "play-review@bilhealth.com",
+      "ai_plan": "ai_coach",
+      "premium_access": true
+    }
+  ],
+  "google_current_app_access_not_read_back": true,
+  "new_auth_or_device_tests": false,
+  "paid_AI_requests": false,
+  "appeal_submitted": false
+}

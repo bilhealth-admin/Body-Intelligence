@@ -1,0 +1,88 @@
+name: BIL owner full analysis and comprehensive tests
+
+on:
+  push:
+    branches: [integration/bil-qa-media-policy-20261011]
+    paths: [.github/workflows/bil_owner_comprehensive_validation.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-owner-comprehensive-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  analyze-then-comprehensive:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    name: Full analysis then one unsharded root suite
+    runs-on: windows-2025
+    timeout-minutes: 360
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+    steps:
+      - name: Preserve source newlines before checkout
+        run: git config --global core.autocrlf false
+      - name: Check out the exact requested integration SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Record source identity without changing remote branches
+        shell: pwsh
+        run: |
+          git switch -c integration/bil-qa-media-policy-20261011
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ((git rev-parse HEAD) -ne $env:GITHUB_SHA) { throw 'Unexpected source SHA' }
+          New-Item -ItemType Directory -Force build/qa/owner-github-comprehensive | Out-Null
+          git rev-parse HEAD | Out-File -Encoding utf8 build/qa/owner-github-comprehensive/source-head.txt
+      - name: Install the approved Flutter toolchain
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve only locked dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Freeze exact analysis inputs
+        shell: pwsh
+        run: |
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -c "import sys,json,pathlib; sys.path.insert(0,'tools/qa'); import bil_owner_full_test_runner as r; pathlib.Path('build/qa/owner-github-comprehensive/analysis-inputs.json').write_text(json.dumps(r.inputs()),encoding='utf-8')"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run complete Flutter analysis before any root suite
+        shell: pwsh
+        run: |
+          flutter analyze --no-pub 2>&1 | Tee-Object -FilePath build/qa/owner-github-comprehensive/flutter-analyze.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -c "import sys,json,pathlib; sys.path.insert(0,'tools/qa'); import bil_owner_full_test_runner as r; assert r.inputs()==json.loads(pathlib.Path('build/qa/owner-github-comprehensive/analysis-inputs.json').read_text(encoding='utf-8')), 'Source changed during analysis'"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run one complete root suite with every failure retained
+        shell: pwsh
+        run: |
+          $flutterExecutable=(Get-Command flutter.bat -ErrorAction Stop).Source
+          $runLabel="github-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          python -u tools/qa/bil_owner_full_test_runner.py $runLabel --expect-head $env:GITHUB_SHA --flutter $flutterExecutable
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Summarize actual outcome without store certification
+        if: always()
+        shell: pwsh
+        run: |
+          "Source: $env:GITHUB_SHA. One root run; no shards, retries, baseline updates, signing or deployment." | Add-Content $env:GITHUB_STEP_SUMMARY
+          $result="build/owner-full/github-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT/final-result.json"
+          if (Test-Path -LiteralPath $result) { Get-Content -LiteralPath $result -Raw | Add-Content $env:GITHUB_STEP_SUMMARY }
+          else { 'Root suite did not produce a final result; inspect earlier steps. This is not PASS.' | Add-Content $env:GITHUB_STEP_SUMMARY }
+      - name: Preserve complete analysis, all test events and all failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-owner-comprehensive-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            build/qa/owner-github-comprehensive/
+            build/owner-full/
+            test/**/failures/*.png
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 30

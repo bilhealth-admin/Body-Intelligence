@@ -54,7 +54,8 @@ void main() {
     await tester.pump();
 
     expect(find.text('1,500 recipes'), findsOneWidget);
-    expect(find.text('300+ home workout videos'), findsOneWidget);
+    expect(find.text('300+ workout videos'), findsOneWidget);
+    expect(find.text('300+ home workout videos'), findsNothing);
     expect(find.text('Scan food barcode'), findsOneWidget);
     expect(find.text('Live fasting timer'), findsOneWidget);
     expect(find.text('No ads'), findsOneWidget);

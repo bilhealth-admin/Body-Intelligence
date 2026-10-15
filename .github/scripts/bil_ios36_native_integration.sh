@@ -131,6 +131,13 @@ for KIND in "${KINDS[@]}"; do
   APP="$GITHUB_WORKSPACE/build/ios/iphonesimulator/Runner.app"
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '36'
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
+  # Local pseudo-identity '-' only: no certificate, provisioning or store signing.
+  # The real Keychain integration test below still decides native correctness.
+  stage "$KIND-simulator-adhoc-sign" 240 "$OUT/$KIND-simulator-adhoc-sign.log" \
+    python3 .github/scripts/bil_ios_simulator_adhoc_sign.py \
+    --qa-simulator-only --workspace "$GITHUB_WORKSPACE" --app "$APP" \
+    --output "$GITHUB_WORKSPACE/$OUT/$KIND-simulator-signature.json" \
+    --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE"
   shasum -a 256 "$APP/Runner" > "$OUT/$KIND-binary.sha256"
   # Export only compiled SDK declarations/versions; no app data or secrets.
   # This reuses the existing generic QA bundle, not another build or signing.
@@ -139,6 +146,7 @@ import hashlib
 import json
 from pathlib import Path
 import plistlib
+import re
 import sys
 
 bundle, output, source_head = Path(sys.argv[1]).resolve(), Path(sys.argv[2]), sys.argv[3]
@@ -173,10 +181,38 @@ if pod.is_file():
         if line == 'PODS:': in_pods = True
         elif line and not line.startswith(' '): in_pods = False
         if in_pods and line.startswith('  - '): pods.append(line[4:].split(':', 1)[0])
+workspace = Path.cwd().resolve()
+lock_paths = set(workspace.glob('ios/*.xcworkspace/xcshareddata/swiftpm/Package.resolved'))
+lock_paths.update(workspace.glob('ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved'))
+source_packages = workspace / 'build/ios/SourcePackages'
+if source_packages.is_dir():
+    lock_paths.update(source_packages.rglob('Package.resolved'))
+swift_packages = []
+def public_field(value, pattern):
+    return value if isinstance(value, str) and re.fullmatch(pattern, value) else None
+for lock in sorted(lock_paths):
+    relative = lock.resolve().relative_to(workspace).as_posix()
+    document = json.loads(lock.read_bytes())
+    pins = document.get('pins', document.get('object', {}).get('pins'))
+    rows = []
+    if pins is not None and not isinstance(pins, list):
+        raise ValueError('SwiftPM pins must be an array when available')
+    for pin in pins or []:
+        if not isinstance(pin, dict) or not isinstance(pin.get('state', {}), dict):
+            raise ValueError('Malformed SwiftPM pin')
+        state = pin.get('state', {})
+        rows.append({'identity': public_field(pin.get('identity', pin.get('package')), r'[A-Za-z0-9_.-]{1,160}'),
+                     'version': public_field(state.get('version'), r'[A-Za-z0-9.+_-]{1,128}'),
+                     'revision': public_field(state.get('revision'), r'[0-9A-Fa-f]{7,64}')})
+    swift_packages.append({'path': relative, 'sha256': digest(lock), 'pins': rows,
+        'status': 'READ' if pins is not None else 'UNKNOWN_SCHEMA',
+        'scope': 'checkout lock; not final app resolution' if '/checkouts/' in relative else 'workspace or SourcePackages resolution; not compiled-use proof'})
 output.parent.mkdir(parents=True, exist_ok=True)
 output.write_text(json.dumps({'scope': 'Compiled simulator declarations only; not actual data use, tracking, SDK signatures or signed-release certification',
     'source_head': source_head, 'privacy_manifests': manifests, 'frameworks': frameworks,
     'pod_lock_sha256': digest(pod) if pod.is_file() else None, 'resolved_pods': pods,
+    'swiftpm_lock_status': 'FOUND' if swift_packages else 'UNKNOWN_NO_RESOLVED_LOCK_FOUND',
+    'swiftpm_resolved_locks': swift_packages,
     'signed_release': False, 'sdk_signatures_verified': False, 'network_collection_verified': False}, indent=2) + '\n')
 BIL_PRIVACY_PY
   for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do

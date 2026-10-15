@@ -1,0 +1,141 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in ar
+00:00 +1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in en
+00:00 +2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in fr
+00:00 +3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in es
+00:00 +4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in tr
+00:00 +5: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in de
+00:00 +6: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in it
+00:00 +7: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in pt-BR
+00:00 +8: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in pt-PT
+00:00 +9: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in ur
+00:00 +10: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in fa
+00:00 +11: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in hi
+00:00 +12: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in id
+00:00 +13: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in ms
+00:00 +14: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in ja
+00:00 +15: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in ko
+00:00 +16: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in zh-Hans
+00:00 +17: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in zh-Hant
+00:00 +18: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in ru
+00:00 +19: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in bn
+00:00 +20: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in vi
+00:00 +21: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in th
+00:00 +22: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in pl
+00:00 +23: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in nl
+00:00 +24: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/localization/closure_interfaces_runtime_copy_test.dart: closure controls and review copy resolve in uk
+00:00 +25: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goals_widget_test.dart
+00:09 +25: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goals_widget_test.dart: corrupt persisted nutrition goal fails closed
+00:13 +26: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goals_widget_test.dart: nutrition goal saves and clears through repository
+00:18 +27: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goals_widget_test.dart: failed write keeps nutrition editor and draft open
+00:18 +28: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goals_widget_test.dart: failed explicit restore keeps draft and stored goal
+00:19 +29: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart
+00:20 +29: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: (setUpAll)
+00:20 +29: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance ar default with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:23 +30: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance ar default with source and real editor taps narrow 320 2x
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:23 +31: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance ar custom with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:25 +32: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance ar custom with source and real editor taps narrow 320 2x
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:26 +33: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance ar legacy with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:27 +34: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance ar grams with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: scroll to grams
+goal fixture phase: editor tap
+goal fixture phase: entry
+goal fixture phase: save waiting
+goal fixture phase: capture
+goal fixture phase: finished
+00:28 +35: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance ar grams with source and real editor taps narrow 320 2x
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: scroll to grams
+goal fixture phase: editor tap
+goal fixture phase: entry
+goal fixture phase: save waiting
+goal fixture phase: capture
+goal fixture phase: finished
+00:29 +36: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance en default with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:29 +37: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance en default with source and real editor taps narrow 320 2x
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:30 +38: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance en custom with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:31 +39: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance en custom with source and real editor taps narrow 320 2x
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:32 +40: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance en legacy with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: capture
+goal fixture phase: finished
+00:33 +41: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance en grams with source and real editor taps
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: scroll to grams
+goal fixture phase: editor tap
+goal fixture phase: entry
+goal fixture phase: save waiting
+goal fixture phase: capture
+goal fixture phase: finished
+00:33 +42: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: actual goal provenance en grams with source and real editor taps narrow 320 2x
+goal fixture phase: seed committed
+goal fixture phase: UI pumped
+goal fixture phase: snapshot ready
+goal fixture phase: scroll to grams
+goal fixture phase: editor tap
+goal fixture phase: entry
+goal fixture phase: save waiting
+goal fixture phase: capture
+goal fixture phase: finished
+00:34 +43: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/nutrition_goal_provenance_ui_test.dart: (tearDownAll)
+00:34 +43: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/reference_diary_preferences_consumption_test.dart
+00:35 +43: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/reference_diary_preferences_consumption_test.dart: meal names are stored atomically and consumed by diary rows
+00:35 +44: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/reference_diary_preferences_consumption_test.dart: default search selection controls real nutrition landing tab
+00:35 +45: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/reference_diary_preferences_consumption_test.dart: diary fallback copy used by defaults exists across 25 locales
+00:36 +46: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/reference_diary_preferences_consumption_test.dart: macro grams derive only from a complete valid personal goal
+00:36 +47: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/reference_diary_preferences_consumption_test.dart: stored nutrition goals reject every corrupt domain
+00:36 +48: All tests passed!

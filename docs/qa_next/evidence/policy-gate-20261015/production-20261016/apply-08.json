@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261013062221_community_safety_report_review_v1.sql",
+  "name": "community_safety_report_review_v1",
+  "source_version": "20261013062221",
+  "source_sha256": "8846b0e94d6fee14b76597c05bebb3f9239d71d0e0399127698fbaec7ef30e18",
+  "executed_query_sha256": "7c10decd93b69bbaa18953882bfc33aaa3a64016d1b1ce7647411b620993e5df",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:11 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

@@ -1,0 +1,70 @@
+{
+  "captured_at_utc": "2026-10-15T23:46:19.240147+00:00",
+  "rows": [
+    {
+      "function": "verify-store-purchase",
+      "method": "OPTIONS",
+      "http_status": 405,
+      "body": "{\"error\":\"method_not_allowed\"}",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    },
+    {
+      "function": "verify-store-purchase",
+      "method": "POST",
+      "http_status": 400,
+      "body": "{\"error\":\"invalid_action\"}",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    },
+    {
+      "function": "ai-coach",
+      "method": "OPTIONS",
+      "http_status": 405,
+      "body": "{\"error\":\"method_not_allowed\"}",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    },
+    {
+      "function": "ai-coach",
+      "method": "POST",
+      "http_status": 401,
+      "body": "{\"error\":\"authentication_required\"}",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    },
+    {
+      "function": "analyze-meal",
+      "method": "OPTIONS",
+      "http_status": 200,
+      "body": "ok",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    },
+    {
+      "function": "analyze-meal",
+      "method": "POST",
+      "http_status": 401,
+      "body": "{\"code\":\"UNAUTHORIZED_NO_AUTH_HEADER\",\"message\":\"Missing authorization header\"}",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    },
+    {
+      "function": "food-search",
+      "method": "OPTIONS",
+      "http_status": 405,
+      "body": "{\"error\":\"method_not_allowed\"}",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    },
+    {
+      "function": "food-search",
+      "method": "POST",
+      "http_status": 401,
+      "body": "{\"error\":\"invalid_session\"}",
+      "authenticated": false,
+      "scope": "unauthenticated boundary probe; no valid user, store transaction, image, audio or paid AI"
+    }
+  ],
+  "not_authenticated_e2e": true
+}

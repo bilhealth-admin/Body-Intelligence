@@ -1,0 +1,62 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_visual_observer_regression_test.dart
+00:00 +0: first painted reply stays readable when IME resizes before arrival AR=true
+BIL_IME_FIRST_PAINT {arabic: true, scope: widget virtual frame regression, not native performance, samples: [{observed_at_ms: 2, viewport_present: true, scroll_pixels: 3954.0, viewport_top: 182.0, viewport_bottom: 674.0, reply_row_present: true, message_height: 4420.0, arrival_present: true, reply_opacity: 0.0, visible_graphemes: 1783, first_glyphs_visible_area: 0.0}, {observed_at_ms: 158, viewport_present: true, scroll_pixels: 4153.218967921897, viewport_top: 182.0, viewport_bottom: 474.7810320781032, reply_row_present: true, message_height: 4420.0, arrival_present: true, reply_opacity: 1.0, visible_graphemes: 1783, first_glyphs_visible_area: 0.0}, {observed_at_ms: 182, viewport_present: true, scroll_pixels: 4153.218967921897, viewport_top: 182.0, viewport_bottom: 474.7810320781032, reply_row_present: true, message_height: 4420.0, arrival_present: true, reply_opacity: 1.0, visible_graphemes: 1783, first_glyphs_visible_area: 24281.1012840271}, {observed_at_ms: 201, viewport_present: true, scroll_pixels: 4153.218967921897, viewport_top: 182.0, viewport_bottom: 474.7810320781032, reply_row_present: true, message_height: 4420.0, arrival_present: true, reply_opacity: 1.0, visible_graphemes: 1783, first_glyphs_visible_area: 24281.1012840271}]}
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a value greater than <0>
+  Actual: <0.0>
+   Which: is not a value greater than <0>
+First nonempty painted glyphs must be inside the resized viewport.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_visual_observer_regression_test.dart:134:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_visual_observer_regression_test.dart line 134
+The test description was:
+  first painted reply stays readable when IME resizes before arrival AR=true
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:02 +0 -1: first painted reply stays readable when IME resizes before arrival AR=true [E]
+  Test failed. See exception logs above.
+  The test description was: first painted reply stays readable when IME resizes before arrival AR=true
+  
+00:02 +0 -1: first painted reply stays readable when IME resizes before arrival AR=false
+BIL_IME_FIRST_PAINT {arabic: false, scope: widget virtual frame regression, not native performance, samples: [{observed_at_ms: 0, viewport_present: true, scroll_pixels: 5722.0, viewport_top: 182.0, viewport_bottom: 674.0, reply_row_present: true, message_height: 6188.0, arrival_present: true, reply_opacity: 0.0, visible_graphemes: 2225, first_glyphs_visible_area: 0.0}, {observed_at_ms: 24, viewport_present: true, scroll_pixels: 5921.218967921897, viewport_top: 182.0, viewport_bottom: 474.7810320781032, reply_row_present: true, message_height: 6188.0, arrival_present: true, reply_opacity: 1.0, visible_graphemes: 2225, first_glyphs_visible_area: 0.0}, {observed_at_ms: 37, viewport_present: true, scroll_pixels: 5921.218967921897, viewport_top: 182.0, viewport_bottom: 474.7810320781032, reply_row_present: true, message_height: 6188.0, arrival_present: true, reply_opacity: 1.0, visible_graphemes: 2225, first_glyphs_visible_area: 6157.560325622559}, {observed_at_ms: 49, viewport_present: true, scroll_pixels: 5921.218967921897, viewport_top: 182.0, viewport_bottom: 474.7810320781032, reply_row_present: true, message_height: 6188.0, arrival_present: true, reply_opacity: 1.0, visible_graphemes: 2225, first_glyphs_visible_area: 6157.560325622559}]}
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a value greater than <0>
+  Actual: <0.0>
+   Which: is not a value greater than <0>
+First nonempty painted glyphs must be inside the resized viewport.
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_visual_observer_regression_test.dart:134:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_visual_observer_regression_test.dart line 134
+The test description was:
+  first painted reply stays readable when IME resizes before arrival AR=false
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:02 +0 -2: first painted reply stays readable when IME resizes before arrival AR=false [E]
+  Test failed. See exception logs above.
+  The test description was: first painted reply stays readable when IME resizes before arrival AR=false
+  
+00:02 +0 -2: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_visual_observer_regression_test.dart: first painted reply stays readable when IME resizes before arrival AR=false
+  G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_visual_observer_regression_test.dart: first painted reply stays readable when IME resizes before arrival AR=true

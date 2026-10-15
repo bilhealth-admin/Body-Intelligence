@@ -1,0 +1,59 @@
+{
+  "checkedAtUtc": "2026-10-15T23:44:32.332Z",
+  "versionId": "7a132506-d5a8-4810-a51f-b2dc2bd636cf",
+  "state": "PREPARE_FOR_SUBMISSION",
+  "attachedBuild": null,
+  "mutations": [
+    {
+      "resource": "/v1/appStoreReviewDetails/ce559d08-1073-4d88-9887-7f31d1951533",
+      "attribute": "notes",
+      "beforeSha256": "f12d151521d0ca36dde2e6783c525ce393165765978d6ac6b8eb2c513acc5536",
+      "afterSha256": "a87599cce47012dc81ff2b97cfcc55bc53febf6bd7db757eef84b089c67a88d5",
+      "beforeIntro": "BUILD 35 — SUBMITTED REVIEW BUILD\nPlease review iOS App 1.0.0 (35), the binary attached to this submission. It supersedes previously withdrawn or test builds and contains the corrections submitted for review.",
+      "afterIntro": "REVIEW PREPARATION — NOT SUBMITTED\nThe previously reviewed binary was iOS App 1.0.0 (35). This draft currently has no build attached. A corrected replacement has not yet been validated or resubmitted; these notes do not establish that the previous privacy rejection is resolved.",
+      "beforeScreenshots": "SCREENSHOTS — GUIDELINE 2.3.10\nAll App Store screenshots have been replaced with current iOS-only screenshots. They accurately represent the submitted iOS Build 35 and contain no Android interface elements or non-iOS status bars.",
+      "afterScreenshots": "SCREENSHOTS — GUIDELINE 2.3.10\nThe screenshot sets remain in this draft. Their correspondence to the corrected replacement must be verified before submission."
+    },
+    {
+      "resource": "/v1/appStoreVersionLocalizations/3866ba6c-b637-4f70-9c53-d6274c37bc62",
+      "attribute": "description",
+      "beforeSha256": "a0fc1131bb50ed0b0419ef987fac458ea38d9df66259001b72de39334247eb8d",
+      "afterSha256": "c9ccd886ef66be58d4b439ce3d479948780184b094f4225af0dc78ebdb26517b",
+      "beforeText": "Paid access is granted only after verified App Store purchases, and eligible purchases can be restored.",
+      "afterText": "In-App Purchases are activated after App Store verification, and eligible purchases can be restored."
+    }
+  ],
+  "privateFieldsChanged": false,
+  "appPrivacyChanged": false,
+  "productsChanged": false,
+  "pricesOrTrialChanged": false,
+  "buildChanged": false,
+  "submissionRequested": false,
+  "completedAtUtc": "2026-10-15T23:44:34.361Z",
+  "writes": [
+    {
+      "method": "PATCH",
+      "resource": "/v1/appStoreVersionLocalizations/3866ba6c-b637-4f70-9c53-d6274c37bc62",
+      "attributes": [
+        "description"
+      ],
+      "ok": true
+    },
+    {
+      "method": "PATCH",
+      "resource": "/v1/appStoreReviewDetails/ce559d08-1073-4d88-9887-7f31d1951533",
+      "attributes": [
+        "notes"
+      ],
+      "ok": true
+    }
+  ],
+  "notesExactReadback": true,
+  "descriptionExactReadback": true,
+  "nonNotesReviewFieldsPreserved": true,
+  "nonDescriptionLocalizationFieldsPreserved": true,
+  "finalState": "PREPARE_FOR_SUBMISSION",
+  "finalBuild": null,
+  "credentialsPrintedOrPersisted": false,
+  "allGuardsPassed": true
+}

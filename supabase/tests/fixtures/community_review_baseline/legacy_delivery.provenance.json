@@ -1,0 +1,95 @@
+{
+  "schema": 2,
+  "source": "Authorized read-only Production catalog; no user rows, tokens or credentials",
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "captured_date_cairo": "2026-10-16",
+  "scope": "Receipt/event push and seen/requeue dependencies only; unrelated report-target tables are explicit column projections, not complete schemas",
+  "legacy_core_functions_in_existing_fixture": [
+    {
+      "name": "private.bil_emit_post_receipt_v1",
+      "pg_get_functiondef_sha256": "d89003128960bd5def9825390177f66b8d78685f3bdbced32c5b714dbe0346b9"
+    },
+    {
+      "name": "private.bil_post_approval_receipt_trigger_v1",
+      "pg_get_functiondef_sha256": "376a58c5d559b598ac7f58263c0dcd4ea9e2f871efb038d491077483b424e447"
+    },
+    {
+      "name": "private.bil_post_rejection_receipt_trigger_v1",
+      "pg_get_functiondef_sha256": "87d266f61b12c26a7a3358616141745d2e7d9272525c32f9718637c3123be222"
+    }
+  ],
+  "additional_functions": [
+    {
+      "name": "private.bil_requeue_post_notices_for_owner_v1",
+      "pg_get_functiondef_sha256": "fc227e8ced1f1a54ed4d164dbb5dc517ec15b01b5277690fdae27618043961f3"
+    },
+    {
+      "name": "private.bil_sync_post_receipt_seen_v1",
+      "pg_get_functiondef_sha256": "cc41e9129608859987e8090580215d585912fbaf104836a3c4d12ed779812fa5"
+    },
+    {
+      "name": "public.bil_list_my_post_events_v1",
+      "pg_get_functiondef_sha256": "c8d0d01929e01c65fbaac3ad5a45525c518a96bc1e822eb1964cd7f72b58626a"
+    },
+    {
+      "name": "public.bil_mark_my_post_events_seen_v1",
+      "pg_get_functiondef_sha256": "a1133f3fda0fad24a8596cab4718daa3d7e0ee71aaaf1eaf4aa9d79fd2153918"
+    },
+    {
+      "name": "private.bil_can_receive_review_notice_v1",
+      "pg_get_functiondef_sha256": "5855d45ebbaa404b5d20c4fb6ebbad8ef073af582d9a5979b5bbc0237eef63fa"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "bil_post_approval_receipt_v1",
+      "pg_get_triggerdef_sha256": "4167f57b0629ef52e7af6fc8fb9ff8351991c6e2208f4e8a7d034c5d130b8780"
+    },
+    {
+      "name": "bil_post_rejection_receipt_v1",
+      "pg_get_triggerdef_sha256": "a051c9a4bcf1e17598ba414bd606f9a0ffc74cd05ffa6ff848b9d03133ff9d83"
+    },
+    {
+      "name": "bil_sync_post_receipt_seen_v1",
+      "pg_get_triggerdef_sha256": "935c97b980b59c205ec09559fd183c37eb73addaa1421e821e7b1714810f174c"
+    }
+  ],
+  "tokens": "All fixture tokens and users are created synthetically by the local runner; captured files contain schema and function definitions only.",
+  "revision_note": "All three actual authenticated seen RPCs receive the same per-owner transaction lock before their first UPDATE. The guarded V1 requeue uses the same lock and excludes active/terminal attempts. CREATE OR REPLACE preserves the captured public signatures, owner and ACL; bridge AFTER triggers do not acquire advisory locks.",
+  "common_functions": [
+    {
+      "name": "public.bil_mark_community_activity_seen_v2",
+      "pg_get_functiondef_sha256": "668f167505c502aa916035cc36c743c670c35b13e7a1e4e2309e79b18bbc326d",
+      "owner": "postgres",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}"
+    },
+    {
+      "name": "public.bil_mark_community_notifications_seen",
+      "identity_arguments": "p_ids uuid[]",
+      "pg_get_functiondef_sha256": "7233d976a91b8fb177dcdbc8e1bfe52bcd98f8bb2b8fdd0b84babb3b96a4f7c0",
+      "owner": "postgres",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}"
+    }
+  ],
+  "authenticated_seen_writer_audit": {
+    "captured_at_utc": "2026-10-15T23:27:26Z",
+    "scope": "Every authenticated-executable function/procedure in all non-pg, non-information_schema schemas; 322 complete function definitions, including extension/storage/realtime routines, plus direct table/column ACL.",
+    "function_count": 322,
+    "application_function_count": 178,
+    "seen_or_target_reference_count": 11,
+    "receipt_seen_writers": [
+      "public.bil_mark_community_activity_seen_v2(uuid[])",
+      "public.bil_mark_community_notifications_seen(uuid[])",
+      "public.bil_mark_my_post_events_seen_v1(uuid[])"
+    ],
+    "other_seen_writers": [
+      "public.bil_dismiss_admin_notice(uuid,uuid) writes public.bil_admin_notices only",
+      "public.bil_dismiss_ai_coach_reset_notice(uuid,uuid) writes public.bil_ai_coach_reset_notices only"
+    ],
+    "wrappers_calling_receipt_seen_apis": [],
+    "application_dynamic_sql_executors": [],
+    "direct_authenticated_update_or_seen_column_update": false,
+    "catalog_evidence": "Ignored private seen-writer-catalog.private.json captured with this candidate; definitions and ACL only, no user rows.",
+    "limitation": "Catalog snapshot at the recorded time. A later new writer or privilege change requires a fresh audit."
+  }
+}

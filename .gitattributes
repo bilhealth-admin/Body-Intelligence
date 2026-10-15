@@ -9,3 +9,6 @@ docs/qa_next/evidence/policy-gate-20261015/**/*.json -text whitespace=cr-at-eol,
 docs/qa_next/evidence/policy-gate-20261015/**/*.log -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
 docs/qa_next/evidence/policy-gate-20261015/**/*.txt -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
 docs/qa_next/evidence/policy-gate-20261015/**/*.tsv -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+# Saved unified-diff evidence requires a single-space prefix on blank context
+# lines. Preserve those bytes; this exception never applies to source files.
+docs/qa_next/evidence/policy-gate-20261015/ci-regressions-20261016/full-observed-failures/proposed-test-copy-fix.patch -text whitespace=-blank-at-eol

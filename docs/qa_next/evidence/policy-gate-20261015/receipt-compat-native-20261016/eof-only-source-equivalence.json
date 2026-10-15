@@ -1,0 +1,37 @@
+[
+  {
+    "path": "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql",
+    "tested_sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b",
+    "final_sha256": "353ae56556e5f956e8210d887a523be2cb9b5c320d13a32904774d9d6a9dd183",
+    "difference": "EOF blank line only; all other bytes identical",
+    "repeated_native_tests": false
+  },
+  {
+    "path": "tools/qa/bil_postgres_review_v2_test.py",
+    "tested_sha256": "1112d5ae534b400dff24e26c19420f3412c069495344742bf6e1c2e6aef834ae",
+    "final_sha256": "34cf3219ecb3ffd3a9549fe93520cdb36c7602383f308fbc1ed488afbc90233a",
+    "difference": "EOF blank line only; all other bytes identical",
+    "repeated_native_tests": false
+  },
+  {
+    "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.provenance.json",
+    "tested_sha256": "1cf7db014787c2383f65274e209a2c12b859379ea3dbe9a85d1d01e34a2341be",
+    "final_sha256": "0d9c0e78e8c6996bd8450b7ba332545359d0a82f8f6e796c7770e8d5e7eb50de",
+    "difference": "EOF blank line only; all other bytes identical",
+    "repeated_native_tests": false
+  },
+  {
+    "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.sql",
+    "tested_sha256": "bd4dc2c928edd42f6637f126bb54cf4d11f24856076051f346ad40a24bf6025a",
+    "final_sha256": "b53238016608ce5bca3c4acbcd0f4fd4bbbeb3382a1a81b02d137ffc673ce021",
+    "difference": "EOF blank line only; all other bytes identical",
+    "repeated_native_tests": false
+  },
+  {
+    "path": "tools/qa/bil_postgres_receipt_compat_cases.py",
+    "tested_sha256": "66d7a0291f83fc19868e3a5df16ba572a249af203a71a7fee12a3ec33733229b",
+    "final_sha256": "62c733f409c09cce8cadbbe71fc6d7154edbb4c925cb11e49cc1edf603641812",
+    "difference": "EOF blank line only; all other bytes identical",
+    "repeated_native_tests": false
+  }
+]

@@ -1,0 +1,65 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: catalog changes explain no checkout in all 25 supported locales
+00:00 +1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: store/paywall copy is balanced across five production locales
+00:00 +2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: catalog has final tier vocabulary and no monetary literals
+00:00 +3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: Premium brand names stay exact across all 25 locales
+00:00 +4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: AI tier states the complete inherited paid tier without repetition
+00:00 +5: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: paywall copy permits one visible Premium label per tier route
+00:00 +6: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: exact Premium AI Coach title and one inheritance label across all 25 locales
+00:00 +7: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: tier summaries stay concise on compact paywall cards
+00:00 +8: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: compact tier summaries remain localized across all 25 locales
+00:00 +9: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: trial renewal disclosure is localized and store-price driven
+00:00 +10: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: explicit Premium benefits are localized in all 25 locales
+00:00 +11: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: workout benefit describes the approved home and gym inventory
+00:00 +12: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_copy_test.dart: AI Boost sells the BIL coach experience in all 25 locales
+00:00 +13: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart
+00:01 +13: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart: (setUpAll)
+00:01 +13: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference en 390x844 at 160%
+00:02 +14: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference ar 390x844 at 160%
+00:02 +15: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart: (tearDownAll)
+00:02 +15: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart
+00:03 +15: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: (setUpAll)
+00:03 +15: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium
+00:06 +16: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_annual
+00:06 +17: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach
+00:07 +18: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach_annual
+00:07 +19: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_ai_boost
+00:08 +20: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: (tearDownAll)
+00:08 +20: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart
+00:09 +20: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: disclosure explains the actual Android boundary before voice (variant: TargetPlatform.android)
+00:10 +21: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: accept waits until the dialog leaves the real route (variant: TargetPlatform.android)
+00:10 +22: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: back is a refusal; normal entry asks again on the next use (variant: TargetPlatform.android)
+00:10 +23: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: one live call reuses consent until an explicit reset (variant: TargetPlatform.android)
+00:11 +24: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: owner or conversation change cannot inherit live access (variant: TargetPlatform.android)
+00:11 +25: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: generation invalidation rejects an already open decision (variant: TargetPlatform.android)
+00:11 +26: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: backgrounding ends the temporary live call decision (variant: TargetPlatform.android)
+00:11 +27: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: other locales receive a complete English fallback (variant: TargetPlatform.android)
+00:11 +28: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: Arabic remains readable on a small display with large text (variant: TargetPlatform.android)
+00:11 +29: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: iOS keeps its existing on-device permission flow (variant: TargetPlatform.iOS)
+00:11 +30: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: food voice still starts after disclosure and granted permission (variant: TargetPlatform.android)
+00:11 +31: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: BilSpeechUse.food cannot capture after decline even with granted permission (variant: TargetPlatform.android)
+00:11 +32: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: BilSpeechUse.weight cannot capture after decline even with granted permission (variant: TargetPlatform.android)
+00:11 +33: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/app/services/system_speech_disclosure_test.dart: BilSpeechUse.community cannot capture after decline even with granted permission (variant: TargetPlatform.android)
+00:12 +34: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/policy_reviewer_navigation_test.dart
+00:17 +34: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/policy_reviewer_navigation_test.dart: (setUpAll)
+00:17 +34: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/policy_reviewer_navigation_test.dart: reviewer navigation en: loading paid Free reopen editor
+POLICY JOURNEY en database ready
+POLICY JOURNEY en checking screen ready
+POLICY JOURNEY en checking captured
+POLICY JOURNEY en receipt resolved
+POLICY JOURNEY en editor saved
+POLICY JOURNEY en dispose
+POLICY JOURNEY en complete
+00:22 +35: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/policy_reviewer_navigation_test.dart: reviewer navigation ar: loading paid Free reopen editor
+POLICY JOURNEY ar database ready
+Missing reviewed runtime translation: ar: Personal plan
+Missing reviewed runtime translation: ar: Personal plan
+POLICY JOURNEY ar checking screen ready
+POLICY JOURNEY ar checking captured
+POLICY JOURNEY ar receipt resolved
+POLICY JOURNEY ar editor saved
+Missing reviewed runtime translation: ar: Personal plan
+POLICY JOURNEY ar dispose
+POLICY JOURNEY ar complete
+00:26 +36: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/policy_reviewer_navigation_test.dart: (tearDownAll)
+00:26 +36: All tests passed!

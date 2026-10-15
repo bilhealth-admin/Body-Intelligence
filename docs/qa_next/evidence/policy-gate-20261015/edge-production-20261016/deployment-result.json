@@ -1,0 +1,63 @@
+{
+  "classification": "PRODUCTION_EDGE_SOURCE_DEPLOYMENT_AND_READBACK_NOT_AUTHENTICATED_OR_STORE_E2E",
+  "project": "tgmanzhqulksykhslrzb",
+  "results": [
+    {
+      "name": "verify-store-purchase",
+      "previousVersion": 93,
+      "newVersion": 94,
+      "status": "ACTIVE",
+      "verifyJwt": false,
+      "importMap": false,
+      "allUploadedFilesMatchReadback": true,
+      "mismatchedFiles": []
+    },
+    {
+      "name": "ai-coach",
+      "previousVersion": 106,
+      "newVersion": 107,
+      "status": "ACTIVE",
+      "verifyJwt": false,
+      "importMap": true,
+      "allUploadedFilesMatchReadback": true,
+      "mismatchedFiles": []
+    },
+    {
+      "name": "analyze-meal",
+      "previousVersion": 103,
+      "newVersion": 104,
+      "status": "ACTIVE",
+      "verifyJwt": true,
+      "importMap": false,
+      "allUploadedFilesMatchReadback": true,
+      "mismatchedFiles": []
+    },
+    {
+      "name": "food-search",
+      "previousVersion": 60,
+      "newVersion": 61,
+      "status": "ACTIVE",
+      "verifyJwt": false,
+      "importMap": false,
+      "allUploadedFilesMatchReadback": true,
+      "mismatchedFiles": []
+    }
+  ],
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "exact_uploaded_file_contents_verified": true,
+  "existing_verify_jwt_and_import_map_preserved": true,
+  "existing_secrets_preserved": true,
+  "no_new_required_secret_names": true,
+  "custom_secret_presence_freshly_enumerated": false,
+  "targeted_test_evidence": {
+    "verifier_existing_source_matched": 76,
+    "provider_existing_source_matched": 68,
+    "food_newly_run": 13,
+    "entrypoints_typechecked": 4
+  },
+  "paid_calls_or_store_transactions_performed": false,
+  "unchanged_functions": [
+    "global-reset62",
+    "community-push-dispatch56"
+  ]
+}

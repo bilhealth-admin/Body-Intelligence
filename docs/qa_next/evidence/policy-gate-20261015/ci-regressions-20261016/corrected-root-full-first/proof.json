@@ -1,0 +1,14 @@
+{
+  "recorded_at_utc": "2026-10-15T22:56:58.449213+00:00",
+  "result": "FAIL_four_cases",
+  "cases_total": 9888,
+  "passed": 9884,
+  "failure_category": 1,
+  "error_category": 3,
+  "skipped": 0,
+  "test_files": 1358,
+  "source_stable": true,
+  "raw_protocol_sha256": "6bf90280b503e10ad3f129aaf85a8e6262c987c3bc2cf5a770f834ea01d2e59d",
+  "raw_protocol_bytes": 6901804,
+  "scope_note": "Wrapper production_changed=false describes wrapper actions only. Root independently deployed11migrations duringrun undernewownerauthorization; seeProductionreceipt. Flutterfull is source-only."
+}

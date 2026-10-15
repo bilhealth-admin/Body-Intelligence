@@ -1,0 +1,13 @@
+CASE ascii-match expected=true actual=true PASS
+CASE ascii-case expected=true actual=true PASS
+CASE wrong-host expected=false actual=false PASS
+CASE wildcard-child expected=true actual=true PASS
+CASE wildcard-apex-rejected expected=false actual=false PASS
+CASE wildcard-multilevel-rejected expected=false actual=false PASS
+CASE ipv4-match expected=true actual=true PASS
+CASE ipv4-mismatch expected=false actual=false PASS
+CASE ipv6-match expected=true actual=true PASS
+CASE ipv6-mismatch expected=false actual=false PASS
+CASE non-ascii-kelvin-host-must-reject expected=false actual=true FAIL
+CASE non-ascii-kelvin-san-must-reject expected=false actual=true FAIL
+{"schema":"bil.qa.okhttp.jvm.v1","mode":"functional","version":"3.0.0","passed":18,"failed":2,"symbols_checked":0,"network_requests":0,"real_tls_chain_tested":false}

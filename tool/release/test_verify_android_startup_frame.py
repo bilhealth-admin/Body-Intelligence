@@ -3,19 +3,28 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
+import json
 import struct
+import subprocess
 import sys
 import tempfile
 import unittest
 import zlib
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from verify_android_startup_frame import (
     frame_is_blank,
     has_interactive_app_content,
     inspect_frame,
+    inspect_window_state,
+    main,
     startup_is_ready,
+    wait_for_boot_broadcast_idle,
+    window_check_exit_code,
 )
 
 
@@ -129,6 +138,312 @@ class VerifyAndroidStartupFrameTest(unittest.TestCase):
             )
             has_content = has_interactive_app_content(tree)
         self.assertFalse(has_content)
+
+
+class VerifyAndroidWindowFocusTest(unittest.TestCase):
+    def _window_result(self, state: str) -> dict[str, str]:
+        with tempfile.TemporaryDirectory() as directory:
+            window = Path(directory) / "window.txt"
+            window.write_text(state, encoding="utf-8")
+            return inspect_window_state(window)
+
+    def test_system_ui_anr_blocks_resumed_and_interactive_bil(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            capture = Path(directory) / "welcome.png"
+            tree = Path(directory) / "welcome.xml"
+            window = Path(directory) / "window.txt"
+            capture.write_bytes(_rgb_png(96, 128, marked=True))
+            tree.write_text(
+                '<hierarchy><node package="com.bilhealth.bodyintelligencelog" '
+                'class="android.widget.Button" content-desc="Sign in" '
+                'clickable="true" enabled="true" /></hierarchy>',
+                encoding="utf-8",
+            )
+            window.write_text(
+                "topResumedActivity=ActivityRecord{abc u0 "
+                "com.bilhealth.bodyintelligencelog/.MainActivity}\n"
+                "mCurrentFocus=Window{def u0 Application Not Responding: "
+                "com.android.systemui}\n"
+                "mFocusedApp=ActivityRecord{abc u0 "
+                "com.bilhealth.bodyintelligencelog/.MainActivity}\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(has_interactive_app_content(tree))
+            self.assertFalse(startup_is_ready(inspect_frame(capture), tree, window))
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                with contextlib.redirect_stderr(io.StringIO()) as errors:
+                    result = main(
+                        [str(capture), str(tree), "--window-state", str(window)]
+                    )
+        self.assertEqual(result, 20)
+        self.assertIn("window_status=EMULATOR_SYSTEM_UI_ANR", output.getvalue())
+        self.assertIn("EMULATOR_SYSTEM_UI_ANR", errors.getvalue())
+
+    def test_bil_anr_is_a_distinct_application_failure(self) -> None:
+        result = self._window_result(
+            "mCurrentFocus=Window{abc u0 Application Not Responding: "
+            "com.bilhealth.bodyintelligencelog}"
+        )
+        self.assertEqual(result["window_status"], "APP_ANR")
+        self.assertEqual(result["anr_package"], "com.bilhealth.bodyintelligencelog")
+        self.assertEqual(window_check_exit_code(result, require_app_focus=False), 21)
+
+    def test_another_app_anr_is_not_mislabelled_as_system_ui(self) -> None:
+        result = self._window_result(
+            "mCurrentFocus=Window{abc u0 Application Not Responding: com.example.other}"
+        )
+        self.assertEqual(result["window_status"], "EXTERNAL_APP_ANR")
+        self.assertEqual(window_check_exit_code(result, require_app_focus=True), 22)
+
+    def test_normal_permission_dialog_is_not_anr_or_bil_readiness(self) -> None:
+        result = self._window_result(
+            "topResumedActivity=ActivityRecord{abc u0 "
+            "com.bilhealth.bodyintelligencelog/.MainActivity}\n"
+            "mCurrentFocus=Window{def u0 com.google.android.permissioncontroller/"
+            "com.android.permissioncontroller.permission.ui.GrantPermissionsActivity}"
+        )
+        self.assertEqual(result["window_status"], "OTHER_FOCUSED_WINDOW")
+        self.assertEqual(window_check_exit_code(result, require_app_focus=False), 0)
+        self.assertEqual(window_check_exit_code(result, require_app_focus=True), 1)
+
+    def test_healthy_bil_focus_ignores_a_stale_anr_window_listing(self) -> None:
+        result = self._window_result(
+            "Window #7 Window{def u0 Application Not Responding: com.android.systemui}:\n"
+            "mCurrentFocus=Window{abc u0 com.bilhealth.bodyintelligencelog/.MainActivity}"
+        )
+        self.assertEqual(result["window_status"], "APP_FOCUSED")
+        self.assertEqual(window_check_exit_code(result, require_app_focus=True), 0)
+
+    def test_resumed_activity_alone_is_never_proof_of_actual_focus(self) -> None:
+        result = self._window_result(
+            "topResumedActivity=ActivityRecord{abc u0 "
+            "com.bilhealth.bodyintelligencelog/.MainActivity}\n"
+            "mFocusedApp=ActivityRecord{abc u0 "
+            "com.bilhealth.bodyintelligencelog/.MainActivity}"
+        )
+        self.assertEqual(result["window_status"], "FOCUSED_WINDOW_UNAVAILABLE")
+        self.assertEqual(window_check_exit_code(result, require_app_focus=True), 23)
+
+    def test_null_focus_is_not_replaced_by_a_resumed_app(self) -> None:
+        result = self._window_result(
+            "mCurrentFocus=null\nmFocusedApp=ActivityRecord{abc u0 "
+            "com.bilhealth.bodyintelligencelog/.MainActivity}"
+        )
+        self.assertEqual(result["window_status"], "FOCUSED_WINDOW_UNAVAILABLE")
+
+    def test_focused_window_alias_and_package_boundary(self) -> None:
+        for package, expected in (
+            ("com.bilhealth.bodyintelligencelog", "APP_FOCUSED"),
+            ("com.bilhealth.bodyintelligencelog.other", "OTHER_FOCUSED_WINDOW"),
+        ):
+            with self.subTest(package=package):
+                result = self._window_result(
+                    f"mFocusedWindow=Window{{abc u0 {package}/.MainActivity}}"
+                )
+                self.assertEqual(result["window_status"], expected)
+
+    def test_prelaunch_health_checks_window_without_accepting_a_bil_frame(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            window = Path(directory) / "window.txt"
+            window.write_text(
+                "mCurrentFocus=Window{abc u0 com.android.launcher/.Launcher}",
+                encoding="utf-8",
+            )
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                result = main(
+                    ["--window-health-only", "--window-state", str(window)]
+                )
+        self.assertEqual(result, 0)
+        self.assertIn("window_status=OTHER_FOCUSED_WINDOW", output.getvalue())
+        self.assertNotIn("accessible_interactive_app_content=true", output.getvalue())
+
+    def test_smoke_preserves_system_ui_failure_before_install_or_launch(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory) / "evidence"
+            picture = _rgb_png(96, 128, marked=True)
+            tree = (
+                '<hierarchy><node package="android" class="android.widget.Button" '
+                'text="Wait" resource-id="android:id/aerr_wait" '
+                'clickable="true" enabled="true" /></hierarchy>'
+            )
+            operations = []
+
+            def adb_read(command, **options):
+                operations.append(command)
+                if command == ["adb", "shell", "cmd", "activity", "wait-for-broadcast-idle"]:
+                    return subprocess.CompletedProcess(
+                        command, 0, "All broadcast queues are idle!\n", ""
+                    )
+                if command == ["adb", "shell", "pidof", "com.android.systemui"]:
+                    return subprocess.CompletedProcess(command, 0, "123\n", "")
+                if command == ["adb", "shell", "dumpsys", "window"]:
+                    return subprocess.CompletedProcess(
+                        command, 0,
+                        "mCurrentFocus=Window{abc u0 Application Not Responding: "
+                        "com.android.systemui}\n", "",
+                    )
+                if command == ["adb", "exec-out", "screencap", "-p"]:
+                    return subprocess.CompletedProcess(command, 0, picture, b"")
+                if command[1:3] == ["logcat", "-d"]:
+                    return subprocess.CompletedProcess(command, 0, b"ANR fixture\n", b"")
+                if command[1:4] == ["shell", "uiautomator", "dump"]:
+                    return subprocess.CompletedProcess(command, 0, b"dumped\n", b"")
+                if command[1] == "pull":
+                    Path(command[-1]).write_text(tree, encoding="utf-8")
+                    return subprocess.CompletedProcess(command, 0, b"pulled\n", b"")
+                self.fail(f"Unexpected command in read-only prelaunch guard: {command}")
+
+            with patch("verify_android_startup_frame.subprocess.run", side_effect=adb_read):
+                with contextlib.redirect_stderr(io.StringIO()) as errors:
+                    result = main(["--verify-emulator-before-launch", str(evidence)])
+            self.assertEqual(result, 20)
+            self.assertIn("EMULATOR_SYSTEM_UI_ANR", errors.getvalue())
+            receipt = (evidence / "prelaunch-failure.txt").read_text()
+            self.assertIn("exit_status=20", receipt)
+            self.assertIn("stage=verify-emulator-system-ui-before-launch", receipt)
+            self.assertEqual((evidence / "failure-screen.png").read_bytes(), picture)
+            self.assertEqual(
+                (evidence / "prelaunch-failure-window.xml").read_text(), tree
+            )
+            self.assertIn(
+                "anr_package=com.android.systemui",
+                (evidence / "prelaunch-window-check.txt").read_text(),
+            )
+            self.assertFalse((evidence / "startup.png").exists())
+            idle = json.loads((evidence / "prelaunch-boot-idle-receipt.json").read_text())
+            self.assertEqual(idle["status"], "IDLE")
+            self.assertFalse(idle["app_startup_proven"])
+            self.assertEqual(operations[0][-1], "wait-for-broadcast-idle")
+            self.assertEqual(len(operations), 7)
+
+    def test_missing_system_ui_process_cannot_pass_prelaunch_health(self) -> None:
+        def adb_read(command, **options):
+            if command[-1] == "wait-for-broadcast-idle":
+                return subprocess.CompletedProcess(
+                    command, 0, "All broadcast queues are idle!\n", ""
+                )
+            if command[1:3] == ["shell", "pidof"]:
+                return subprocess.CompletedProcess(command, 1, "", "no process")
+            if command[1:3] == ["shell", "dumpsys"]:
+                return subprocess.CompletedProcess(
+                    command, 0, "mCurrentFocus=Window{abc u0 com.android.launcher/.Home}", ""
+                )
+            return subprocess.CompletedProcess(command, 0, b"", b"")
+
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            with patch("verify_android_startup_frame.subprocess.run", side_effect=adb_read):
+                with patch("verify_android_startup_frame.time.sleep") as pause:
+                    with contextlib.redirect_stderr(io.StringIO()) as errors:
+                        result = main(["--verify-emulator-before-launch", str(evidence)])
+            self.assertEqual(result, 24)
+            self.assertEqual(pause.call_count, 14)
+            self.assertIn("EMULATOR_SYSTEM_UI_UNAVAILABLE", errors.getvalue())
+            self.assertIn(
+                "exit_status=24", (evidence / "prelaunch-failure.txt").read_text()
+            )
+
+    def test_evidence_capture_failure_does_not_replace_original_anr_exit(self) -> None:
+        def adb_read(command, **options):
+            if command[-1] == "wait-for-broadcast-idle":
+                return subprocess.CompletedProcess(
+                    command, 0, "All broadcast queues are idle!\n", ""
+                )
+            if command[1:3] == ["shell", "pidof"]:
+                return subprocess.CompletedProcess(command, 0, "123\n", "")
+            if command[1:3] == ["shell", "dumpsys"]:
+                return subprocess.CompletedProcess(
+                    command, 0, "mCurrentFocus=Window{abc u0 Application Not Responding: "
+                    "com.bilhealth.bodyintelligencelog}", "",
+                )
+            raise subprocess.TimeoutExpired(command, 15)
+
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            with patch("verify_android_startup_frame.subprocess.run", side_effect=adb_read):
+                with contextlib.redirect_stderr(io.StringIO()):
+                    result = main(["--verify-emulator-before-launch", str(evidence)])
+            self.assertEqual(result, 21)
+            self.assertIn("exit_status=21", (evidence / "prelaunch-failure.txt").read_text())
+            self.assertIn(
+                "window_status=APP_ANR",
+                (evidence / "prelaunch-window-check.txt").read_text(),
+            )
+            self.assertTrue((evidence / "failure-screen.png.errors.txt").is_file())
+            self.assertTrue((evidence / "prelaunch-pull.txt.errors.txt").is_file())
+
+
+class VerifyBootBroadcastIdleTest(unittest.TestCase):
+    def test_success_requires_zero_exit_and_exact_idle_line(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            result = subprocess.CompletedProcess(
+                [], 0, "Waiting for queue...\nAll broadcast queues are idle!\r\n", ""
+            )
+            with patch("verify_android_startup_frame.subprocess.run", return_value=result) as run:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    ready = wait_for_boot_broadcast_idle(evidence)
+            receipt = json.loads((evidence / "prelaunch-boot-idle-receipt.json").read_text())
+            self.assertTrue(ready)
+            self.assertEqual(receipt["status"], "IDLE")
+            self.assertEqual(receipt["adb_return_code"], 0)
+            self.assertEqual(receipt["timeout_seconds"], 120)
+            self.assertGreaterEqual(receipt["elapsed_seconds"], 0)
+            self.assertFalse(receipt["app_startup_proven"])
+            self.assertEqual(run.call_args.kwargs["timeout"], 120)
+
+    def test_nonzero_exit_never_passes_even_with_idle_text(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            result = subprocess.CompletedProcess(
+                [], 7, "All broadcast queues are idle!\n", "remote failure\n"
+            )
+            with patch("verify_android_startup_frame.subprocess.run", return_value=result):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    ready = wait_for_boot_broadcast_idle(evidence)
+            receipt = json.loads((evidence / "prelaunch-boot-idle-receipt.json").read_text())
+            self.assertFalse(ready)
+            self.assertEqual(receipt["status"], "NONZERO_EXIT")
+            self.assertEqual(receipt["adb_return_code"], 7)
+            self.assertEqual(
+                (evidence / "prelaunch-boot-idle.stderr.txt").read_text(), "remote failure\n"
+            )
+
+    def test_timeout_keeps_partial_output_and_never_proves_startup(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            timeout = subprocess.TimeoutExpired(
+                ["adb"], 120, output=b"Waiting for queue...\n", stderr=b"partial error\n"
+            )
+            with patch("verify_android_startup_frame.subprocess.run", side_effect=timeout):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    ready = wait_for_boot_broadcast_idle(evidence)
+            receipt = json.loads((evidence / "prelaunch-boot-idle-receipt.json").read_text())
+            self.assertFalse(ready)
+            self.assertEqual(receipt["status"], "TIMEOUT")
+            self.assertIsNone(receipt["adb_return_code"])
+            self.assertFalse(receipt["broadcast_idle_confirmed"])
+            self.assertIn(
+                "Waiting for queue...",
+                (evidence / "prelaunch-boot-idle.stdout.txt").read_text(),
+            )
+            self.assertIn(
+                "120s", (evidence / "prelaunch-boot-idle.stderr.txt").read_text()
+            )
+
+    def test_zero_exit_with_missing_or_misleading_marker_is_failure(self) -> None:
+        for output in ("", "Waiting for queue...", "NOT All broadcast queues are idle!"):
+            with self.subTest(output=output), tempfile.TemporaryDirectory() as directory:
+                evidence = Path(directory)
+                result = subprocess.CompletedProcess([], 0, output, "")
+                with patch("verify_android_startup_frame.subprocess.run", return_value=result):
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        ready = wait_for_boot_broadcast_idle(evidence)
+                receipt = json.loads(
+                    (evidence / "prelaunch-boot-idle-receipt.json").read_text()
+                )
+                self.assertFalse(ready)
+                self.assertEqual(receipt["status"], "INVALID_IDLE_OUTPUT")
 
 
 if __name__ == "__main__":

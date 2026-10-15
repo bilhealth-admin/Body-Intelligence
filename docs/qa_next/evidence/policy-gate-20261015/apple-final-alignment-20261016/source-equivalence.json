@@ -1,0 +1,110 @@
+{
+  "scope": "Source-file hash equivalence only; not signed-release/runtime proof",
+  "sourceHead": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "files": [
+    {
+      "path": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "priorSha256": "c4a96400202e4ef669b947fbfd6678de15bef1b6196fcea6a36a82ae051e69e6",
+      "currentSha256": "c4a96400202e4ef669b947fbfd6678de15bef1b6196fcea6a36a82ae051e69e6",
+      "unchanged": true
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach.dart",
+      "priorSha256": "f97c74da982b1f317be290190269b5e62ea47029f9626f1720369f98fc310fdc",
+      "currentSha256": "f97c74da982b1f317be290190269b5e62ea47029f9626f1720369f98fc310fdc",
+      "unchanged": true
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_extended.dart",
+      "priorSha256": "653a686a463ef9ac41de2fd42c133b8fc63f133e454ff65d7a8d1e244417e6ee",
+      "currentSha256": "653a686a463ef9ac41de2fd42c133b8fc63f133e454ff65d7a8d1e244417e6ee",
+      "unchanged": true
+    },
+    {
+      "path": "test/features/commerce/bil_store_copy_test.dart",
+      "priorSha256": "8499a09d82647c3458089a500608f6cdc060ea7f32821a370bbb9d5ea785a91f",
+      "currentSha256": "8499a09d82647c3458089a500608f6cdc060ea7f32821a370bbb9d5ea785a91f",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/commerce/domain/store_catalog_configuration.dart",
+      "priorSha256": "34a1b04c6dee409ae1770a5f78b00bc93b8a44a7745b6c293911bed174c1a8b6",
+      "currentSha256": "34a1b04c6dee409ae1770a5f78b00bc93b8a44a7745b6c293911bed174c1a8b6",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/commerce/domain/paid_plan_catalog.dart",
+      "priorSha256": "535a9186f9e5502ab204de33f408af9f228c3a295a3464fddf8d83d4808db4e4",
+      "currentSha256": "535a9186f9e5502ab204de33f408af9f228c3a295a3464fddf8d83d4808db4e4",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/commerce/domain/free_plan.dart",
+      "priorSha256": "9d2d9af7d310ff6119170216e40a49d85926f362ccce2ac17c3e78dcdd893f56",
+      "currentSha256": "9d2d9af7d310ff6119170216e40a49d85926f362ccce2ac17c3e78dcdd893f56",
+      "unchanged": true
+    },
+    {
+      "path": "lib/app/localization/bil_locale_rollout_manifest.dart",
+      "priorSha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433",
+      "currentSha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/workout_media/workout_release_bundle_registry_v1.json",
+      "priorSha256": "90bd7cd4ce7d9c1a2652720b79b67e0ede885da1cf979d86632a3f8f3c345a3f",
+      "currentSha256": "90bd7cd4ce7d9c1a2652720b79b67e0ede885da1cf979d86632a3f8f3c345a3f",
+      "unchanged": true
+    },
+    {
+      "path": "assets/catalogs/recipes/v1/recipe-index.json",
+      "priorSha256": "6c9f4773f6221f5468c28e02d3897271009e6e36c3f0d9dd6bdca2fe66628638",
+      "currentSha256": "6c9f4773f6221f5468c28e02d3897271009e6e36c3f0d9dd6bdca2fe66628638",
+      "unchanged": true
+    },
+    {
+      "path": "assets/catalogs/recipes/v1/release-manifest.json",
+      "priorSha256": "a966bbedf7ada7dcf16d483c1d9c2fe94a810dffff504eb9944ed9b56bd86b53",
+      "currentSha256": "a966bbedf7ada7dcf16d483c1d9c2fe94a810dffff504eb9944ed9b56bd86b53",
+      "unchanged": true
+    },
+    {
+      "path": "ios/Runner/BILSpeechBridge.swift",
+      "priorSha256": "13746972cbe09a074486bbd3c32873451a7ba0563d737b9e467bd8d077918656",
+      "currentSha256": "13746972cbe09a074486bbd3c32873451a7ba0563d737b9e467bd8d077918656",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/remote_ai_consent_coordinator.dart",
+      "priorSha256": "80fc59d26f7f4739c97686b9ea85658c79c72d0597b9e5eab0b5570167d6ccbb",
+      "currentSha256": "80fc59d26f7f4739c97686b9ea85658c79c72d0597b9e5eab0b5570167d6ccbb",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart",
+      "priorSha256": "44320fc810156c9b4c727b574c9f3879dcd0b0200ec7c47621415ee9590d4202",
+      "currentSha256": "44320fc810156c9b4c727b574c9f3879dcd0b0200ec7c47621415ee9590d4202",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_capture_actions.dart",
+      "priorSha256": "745b3feb3589b0eb32450cfafa9e31113c74d193a3153a3182a3cdc1b03d52d9",
+      "currentSha256": "745b3feb3589b0eb32450cfafa9e31113c74d193a3153a3182a3cdc1b03d52d9",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/daily_log/food_log_actions.dart",
+      "priorSha256": "0ac51bf1da30af333f21ba75a8e849a890f62ec3827b3c3d9f48d028d13108f8",
+      "currentSha256": "0ac51bf1da30af333f21ba75a8e849a890f62ec3827b3c3d9f48d028d13108f8",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_vision_flow.dart",
+      "priorSha256": "ba1b337bab05dfc0559c00a89d304497db96a98c11b517bdc9383768147cad4f",
+      "currentSha256": "ba1b337bab05dfc0559c00a89d304497db96a98c11b517bdc9383768147cad4f",
+      "unchanged": true
+    }
+  ],
+  "unchangedCount": 17,
+  "total": 17
+}

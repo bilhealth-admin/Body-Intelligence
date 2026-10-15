@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261007130000_bil08_community_profile_activity_v1.sql",
+  "name": "bil08_community_profile_activity_v1",
+  "source_version": "20261007130000",
+  "source_sha256": "a881cbd06c5b08813b9d02ab38162112169f7edddb4132644423ac53fda8706e",
+  "executed_query_sha256": "d5fbd04596c495930d76a40631f89fd116a947e8842d27fa2ee1df49f4924cf6",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:49:52 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

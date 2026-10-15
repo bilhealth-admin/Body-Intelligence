@@ -30,6 +30,12 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   late final Animation<Offset> _position;
   String? _handledMessageId;
   String? _awaitingLayoutFor;
+  int _layoutGeneration = 0;
+  bool _awaitingFirstPaint = false;
+
+  bool get _reduceMotion =>
+      MediaQuery.disableAnimationsOf(context) ||
+      View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
 
   @override
   void initState() {
@@ -60,6 +66,8 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
         oldWidget.animate != widget.animate) {
       _handledMessageId = null;
       _awaitingLayoutFor = null;
+      _awaitingFirstPaint = false;
+      _layoutGeneration++;
       _controller.value = widget.animate ? 0 : 1;
       _syncMotionPreference();
     }
@@ -68,11 +76,52 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   @override
   void didChangeAccessibilityFeatures() => _syncMotionPreference();
 
+  @override
+  void didChangeMetrics() {
+    if (!mounted || !_awaitingFirstPaint) return;
+    // IME metrics can arrive after the old reading offset was measured but
+    // before the first positive-opacity frame. Keep that frame transparent
+    // until the viewport's post-layout pin has been laid out at the new size.
+    // Once any entrance frame has painted, never restart or hide the reply.
+    _waitForReadingLayout();
+  }
+
+  void _waitForReadingLayout() {
+    final messageId = widget.messageId;
+    final generation = ++_layoutGeneration;
+    _awaitingLayoutFor = messageId;
+    _awaitingFirstPaint = true;
+    _controller.stop();
+    _controller.value = 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          generation != _layoutGeneration ||
+          _awaitingLayoutFor != messageId) {
+        return;
+      }
+      _awaitingLayoutFor = null;
+      if (_reduceMotion) {
+        _controller.value = 1;
+      } else {
+        _controller.forward(from: 0);
+      }
+      _observeFirstPaint(generation);
+    });
+  }
+
+  void _observeFirstPaint(int generation) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || generation != _layoutGeneration) return;
+      if (_opacity.value > 0) {
+        _awaitingFirstPaint = false;
+      } else {
+        _observeFirstPaint(generation);
+      }
+    });
+  }
+
   void _syncMotionPreference() {
-    final reduceMotion =
-        MediaQuery.disableAnimationsOf(context) ||
-        View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
-    if (reduceMotion) {
+    if (_reduceMotion) {
       if (_awaitingLayoutFor == widget.messageId) return;
       final firstLayout =
           widget.animate &&
@@ -80,27 +129,24 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
           _animatedMessageIds.add(widget.messageId);
       _controller.stop();
       _handledMessageId = widget.messageId;
-      if (!firstLayout) {
+      if (!firstLayout && !_awaitingFirstPaint) {
         _controller.value = 1;
         return;
       }
       // The reversed viewport measures a long reply's reading start during
       // its first layout. Skip motion, but let that anchor settle before
       // painting; otherwise reduced motion briefly exposes the reply's end.
-      final messageId = widget.messageId;
-      _awaitingLayoutFor = messageId;
-      _controller.value = 0;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || _awaitingLayoutFor != messageId) return;
-        _awaitingLayoutFor = null;
-        _controller.value = 1;
-      });
+      _waitForReadingLayout();
       return;
     }
     if (_handledMessageId == widget.messageId) return;
     _handledMessageId = widget.messageId;
     if (widget.animate && _animatedMessageIds.add(widget.messageId)) {
+      // Keep the established 320ms entrance when layout is stable. Only an
+      // actual metric change before its first paint needs the layout gate.
+      _awaitingFirstPaint = true;
       _controller.forward(from: 0);
+      _observeFirstPaint(++_layoutGeneration);
     } else {
       _controller.value = 1;
     }

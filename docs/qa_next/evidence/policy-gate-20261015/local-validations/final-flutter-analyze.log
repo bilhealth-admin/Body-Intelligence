@@ -1,0 +1,20 @@
+Analyzing bil-ios36-audit-snapshot-20261014...                  
+
+   info - The import of 'dart:async' is unnecessary because all of the used elements are also provided by the import of 'package:flutter_test/flutter_test.dart'. Try removing the import directive - integration_test\android_notification_permission_integration_test.dart:1:8 - unnecessary_import
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\features\intelligence_center\presentation\intelligence_conversation_voice.dart:566:9 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - lib\features\intelligence_center\presentation\intelligence_conversation_voice.dart:575:7 - curly_braces_in_flow_control_structures
+   info - The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart'. Try removing the import directive - test\app\services\system_speech_disclosure_test.dart:1:8 - unnecessary_import
+   info - The import of 'package:body_intelligence_log/features/nutrition/services/bil_speech_to_text.dart' is unnecessary because all of the used elements are also provided by the import of 'package:body_intelligence_log/app/services/system_speech_disclosure.dart'. Try removing the import directive - test\app\services\system_speech_disclosure_test.dart:8:8 - unnecessary_import
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - tool\release\defer_ios_simple_barcode_scanner.dart:515:5 - curly_braces_in_flow_control_structures
+warning - The receiver can't be null, so the null-aware operator '?.' is unnecessary. Try replacing the operator '?.' with '.' - tool\release\sanitize_flutter_release_plugins.dart:622:28 - invalid_null_aware_operator
+warning - The operand can't be 'null', so the condition is always 'true'. Remove the condition - tool\release\sanitize_flutter_release_plugins.dart:629:25 - unnecessary_null_comparison
+warning - The operand can't be 'null', so the condition is always 'true'. Remove the condition - tool\release\sanitize_flutter_release_plugins.dart:646:29 - unnecessary_null_comparison
+   info - The imported package 'test' isn't a dependency of the importing package. Try adding a dependency for 'test' in the 'pubspec.yaml' file - tools\qa\flutter\native_capture_collection_test.dart:6:8 - depend_on_referenced_packages
+   info - Statements in a for should be enclosed in a block. Try wrapping the statement in a block - tools\qa\flutter\native_capture_collection_test.dart:106:38 - curly_braces_in_flow_control_structures
+   info - Statements in a for should be enclosed in a block. Try wrapping the statement in a block - tools\qa\flutter\native_capture_collection_test.dart:115:41 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block. Try wrapping the statement in a block - tools\qa\flutter\native_capture_collection_test.dart:147:13 - curly_braces_in_flow_control_structures
+   info - The imported package 'test' isn't a dependency of the importing package. Try adding a dependency for 'test' in the 'pubspec.yaml' file - tools\qa\flutter\native_capture_manifest_test.dart:8:8 - depend_on_referenced_packages
+   info - The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart'. Try removing the import directive - tools\qa\flutter\policy_pearl_dialog_visual_test.dart:6:8 - unnecessary_import
+   info - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check - tools\qa\flutter\policy_pearl_dialog_visual_test.dart:71:48 - use_build_context_synchronously
+
+16 issues found. (ran in 431.6s)

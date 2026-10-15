@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261014100000_ai_coach_safety_reports_v1.sql",
+  "name": "ai_coach_safety_reports_v1",
+  "source_version": "20261014100000",
+  "source_sha256": "aaad8ac351dd43983cffb7b4ad63491715c55aa3d59b490f1c32b0f30a13540f",
+  "executed_query_sha256": "77f9d1f30556c885725b1f6c3c6b274e83899e1f3fae70027d2def0aff753136",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:13 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

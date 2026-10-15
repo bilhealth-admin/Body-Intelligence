@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T21:34:41.176319+00:00",
+  "classification": "Bounded source fix and focused widget regression; native candidate rerun is separate",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "head_at_start": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "head_at_receipt": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "source_is_modified_working_tree": true,
+  "changed_files_by_this_task": [
+    "lib/features/intelligence_center/presentation/coach_reply_arrival.dart",
+    "tools/qa/flutter/native_visual_observer_regression_test.dart"
+  ],
+  "production_change": "Only CoachReplyArrival gates a fresh reply on metrics changes before its first positive painted frame. Normal stable-layout entrance still starts immediately and retains 320ms/easeOutCubic/.008 slide. Generation guards discard obsolete layout callbacks. No follow-state changes.",
+  "original_arrival_source_sha256": "d5316f0c672ef718bfd169b8be0206a069248a987a8c3129dce64180d6312444",
+  "native_failure": {
+    "run_id": 38805818728,
+    "job_id": 116666268115,
+    "source_head": "82fc546ee14a401465ce2c835df83acc834874d4",
+    "source_fingerprint": "8cb611e3d8eb2eff3bc084e70e1ba9668eec8c17",
+    "scene": "ar-light-normal",
+    "text_scale": 2.0,
+    "first_nonempty_native_frame": {
+      "observed_at_ms": 633,
+      "viewport_present": true,
+      "scroll_pixels": 1514.438174935246,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 474.3047619047619,
+      "reply_row_present": true,
+      "message_height": 1872.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 1783,
+      "first_glyphs_visible_area": 0.0
+    },
+    "preceding_transparent_native_frame": {
+      "observed_at_ms": 277,
+      "viewport_present": true,
+      "scroll_pixels": 1514.438174935246,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "reply_row_present": true,
+      "message_height": 1872.0,
+      "arrival_present": true,
+      "reply_opacity": 0.0,
+      "visible_graphemes": 1783,
+      "first_glyphs_visible_area": 0.0
+    },
+    "ime_viewport_shrink_logical_pixels": 199.21896792189682,
+    "assertion_preserved": "First nonempty painted glyphs must be inside the actual native viewport.",
+    "limit": "No failed-frame PNG exists because the geometry assertion preceded capture. Old trace proves clipped first glyphs, not permanent content loss or release-device performance."
+  },
+  "diagnosis": "A post-frame pin changes scroll pixels before the next glyph layout. IME resize between initial layout and first positive opacity exposes the previous reading geometry for one frame. The deterministic regression uses the unchanged native glyph geometry observer, not a grapheme-count replacement.",
+  "validation": [
+    {
+      "stage": "before",
+      "log": "build/qa/policy-gate-20261015/coach-first-paint-metrics-before.log",
+      "exit_code": 1,
+      "pass": 0,
+      "fail": 2,
+      "expected_failure": true,
+      "cases": [
+        "AR first positive frame area zero",
+        "EN first positive frame area zero"
+      ]
+    },
+    {
+      "stage": "intermediate_candidate",
+      "log": "build/qa/policy-gate-20261015/coach-first-paint-metrics-after-focused.log",
+      "exit_code": 1,
+      "pass": 12,
+      "fail": 2,
+      "reason": "Waiting initial layout in the normal path added a ticker delay detected by two existing 160ms entrance assertions; final fix preserves their original timing and assertions."
+    },
+    {
+      "stage": "final_focused",
+      "log": "build/qa/policy-gate-20261015/coach-first-paint-metrics-after-final.log",
+      "exit_code": 0,
+      "pass": 14,
+      "fail": 0,
+      "files": [
+        "tools/qa/flutter/native_visual_observer_regression_test.dart",
+        "test/features/intelligence_center/coach_reply_arrival_test.dart",
+        "test/shared/widgets/chat_history_viewport_regression_test.dart",
+        "tools/qa/flutter/native_history_anchor_regression_test.dart"
+      ],
+      "concurrency": 1,
+      "first_positive_glyph_area": {
+        "AR": 24281.10128402712,
+        "EN": 6157.560325622559
+      },
+      "geometry_scope": "Widget virtual frames using synthetic data and the production observer; not a native-font screenshot or native performance measure"
+    },
+    {
+      "stage": "focused_analysis",
+      "log": "build/qa/policy-gate-20261015/coach-first-paint-metrics-focused-analyze.log",
+      "exit_code": 0,
+      "result": "No issues found; 2 items; analyzer reported 289.5s"
+    },
+    {
+      "stage": "format_and_diff",
+      "exit_code": 0,
+      "result": "dart format --output none --set-exit-if-changed: 2 files, 0 changed; git diff --check: clean"
+    }
+  ],
+  "tests_removed_or_assertions_weakened": false,
+  "goldens_updated": false,
+  "native_tests_or_ci_started_by_this_task": false,
+  "protected_source": "ChatHistoryViewport unchanged by this task, SHA256 3ee18f4eabf120eb62edf25162a86424c638e666e176a655d3ae1900279d1790. No style, font, composer, navigation, Home, splash, purchase, store, cloud, or account edits.",
+  "remaining": "Root reruns affected native AR-normal case on frozen current source before attributing Android-native success. No full-suite or signed-artifact certification from these 14 focused tests.",
+  "fingerprints": [
+    {
+      "path": "lib/features/intelligence_center/presentation/coach_reply_arrival.dart",
+      "sha256": "a1142e88ccd03b0174816e8eaa71cc1feb67c7c3e9ad4a53dfa20600115c2020",
+      "bytes": 5359,
+      "lines": 169
+    },
+    {
+      "path": "tools/qa/flutter/native_visual_observer_regression_test.dart",
+      "sha256": "9fb25e2ec02264ccf9ba9e6d5ba5a12cb878941ae71c87abb0f795a8e16943ea",
+      "bytes": 10321,
+      "lines": 261
+    },
+    {
+      "path": "lib/shared/widgets/chat_history_viewport.dart",
+      "sha256": "3ee18f4eabf120eb62edf25162a86424c638e666e176a655d3ae1900279d1790",
+      "bytes": 8988,
+      "lines": 241
+    },
+    {
+      "path": "build/qa/policy-gate-20261015/coach-first-paint-metrics-before.log",
+      "sha256": "e633765007e81a56afe4d37f162614485df99d48b59266e7c0aefe1be3b64c62",
+      "bytes": 7036,
+      "lines": 62
+    },
+    {
+      "path": "build/qa/policy-gate-20261015/coach-first-paint-metrics-after-focused.log",
+      "sha256": "d1edfeeddb2c4a6483ad3e343d2843f15703cd51ca05ed51ef0c77dd9c19b753",
+      "bytes": 22709,
+      "lines": 75
+    },
+    {
+      "path": "build/qa/policy-gate-20261015/coach-first-paint-metrics-after-final.log",
+      "sha256": "fd62cd9772c53741d94b0d880b5d9ad3be0091472aedc555b13f9d482f3f2316",
+      "bytes": 18398,
+      "lines": 21
+    },
+    {
+      "path": "build/qa/policy-gate-20261015/coach-first-paint-metrics-focused-analyze.log",
+      "sha256": "ffea488b1abdc8c13064738099b55186727285ce35d3273597daa940362f8308",
+      "bytes": 100,
+      "lines": 2
+    }
+  ]
+}

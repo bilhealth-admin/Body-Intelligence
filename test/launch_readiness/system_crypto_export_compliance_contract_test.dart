@@ -26,8 +26,12 @@ void main() {
       ),
     );
     expect(
-      'if: \${{ inputs.run_native_crypto_checks }}'.allMatches(workflow),
+      RegExp(
+        r'^\s*if:\s*(?:\$\{\{\s*inputs\.run_native_crypto_checks\s*\}\}|inputs\.run_native_crypto_checks)\s*$',
+        multiLine: true,
+      ).allMatches(workflow),
       hasLength(2),
+      reason: 'Both Simulator boot and native execution require owner opt-in.',
     );
     expect(
       workflow,

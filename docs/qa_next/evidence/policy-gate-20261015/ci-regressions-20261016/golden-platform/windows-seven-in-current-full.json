@@ -1,0 +1,51 @@
+{
+  "scope": "Seven case slice of ongoing failing full; not an overall full PASS",
+  "source_fingerprint_v4": "cbdedb20f0cf756f8816d366ea57a65ba0e0afd54bd8ee331f2cbde159547b45",
+  "platform": "Windows",
+  "cases": [
+    {
+      "name": "App Store review screenshot selects bil_premium",
+      "file": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart",
+      "result": "success",
+      "skipped": false
+    },
+    {
+      "name": "App Store review screenshot selects bil_premium_annual",
+      "file": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart",
+      "result": "success",
+      "skipped": false
+    },
+    {
+      "name": "App Store review screenshot selects bil_premium_ai_coach",
+      "file": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart",
+      "result": "success",
+      "skipped": false
+    },
+    {
+      "name": "App Store review screenshot selects bil_premium_ai_coach_annual",
+      "file": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart",
+      "result": "success",
+      "skipped": false
+    },
+    {
+      "name": "App Store review screenshot selects bil_ai_boost",
+      "file": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart",
+      "result": "success",
+      "skipped": false
+    },
+    {
+      "name": "Plans light reference en 390x844 at 160%",
+      "file": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart",
+      "result": "success",
+      "skipped": false
+    },
+    {
+      "name": "Plans light reference ar 390x844 at 160%",
+      "file": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart",
+      "result": "success",
+      "skipped": false
+    }
+  ],
+  "all_seven_passed": true,
+  "overall_full_status": "RUNNING_WITH_THREE_OTHER_COPY_FAILURES"
+}

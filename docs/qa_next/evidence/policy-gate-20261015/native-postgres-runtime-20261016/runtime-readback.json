@@ -1,0 +1,13 @@
+{
+  "classification": "Isolated synthetic local QA runtime, not Production17.6, not a store build",
+  "version": "PostgreSQL17.11 x86_64-windows msvc19.44.35228 64bit",
+  "listen_address": "127.0.0.1",
+  "port": 55432,
+  "qa_user": "bil_test_superuser",
+  "authentication": "SCRAM-SHA-256",
+  "private_connection_file_not_exported": true,
+  "registered_system_service": false,
+  "application_dependencies_changed": false,
+  "server_wrapper_session": 88727,
+  "behavioral_receipt_tests_started": false
+}

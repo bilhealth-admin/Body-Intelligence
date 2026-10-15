@@ -1,0 +1,249 @@
+00:00 +0: loading /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart
+00:00 +0: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart: (setUpAll)
+00:00 +0: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference en 390x844 at 160%
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/plans_light_en_390x844_160.png": Pixel test failed, 4.23%, 13926px diff detected.
+Failure feedback can be found at
+/home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart:65:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -1: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium
+00:01 +0 -1: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference en 390x844 at 160% [E]
+  Test failed. See exception logs above.
+  The test description was: Plans light reference en 390x844 at 160%
+  
+00:01 +0 -1: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference ar 390x844 at 160%
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/plans_light_ar_390x844_160.png": Pixel test failed, 4.11%, 13528px diff detected.
+Failure feedback can be found at
+/home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart:65:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +0 -2: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium
+00:01 +0 -2: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference ar 390x844 at 160% [E]
+  Test failed. See exception logs above.
+  The test description was: Plans light reference ar 390x844 at 160%
+  
+00:01 +0 -2: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/app_store_review/v1.0/bil_premium.png": Pixel test failed, 3.17%, 94038px diff
+detected.
+Failure feedback can be found at
+/home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart:315:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +0 -3: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium [E]
+  Test failed. See exception logs above.
+  The test description was: App Store review screenshot selects bil_premium
+  
+00:03 +0 -3: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_annual
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/app_store_review/v1.0/bil_premium_annual.png": Pixel test failed, 3.16%, 93549px
+diff detected.
+Failure feedback can be found at
+/home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart:315:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:04 +0 -4: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_annual [E]
+  Test failed. See exception logs above.
+  The test description was: App Store review screenshot selects bil_premium_annual
+  
+00:04 +0 -4: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/app_store_review/v1.0/bil_premium_ai_coach.png": Pixel test failed, 3.01%, 89030px
+diff detected.
+Failure feedback can be found at
+/home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart:315:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +0 -5: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach [E]
+  Test failed. See exception logs above.
+  The test description was: App Store review screenshot selects bil_premium_ai_coach
+  
+00:06 +0 -5: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach_annual
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/app_store_review/v1.0/bil_premium_ai_coach_annual.png": Pixel test failed, 3.01%,
+89242px diff detected.
+Failure feedback can be found at
+/home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart:315:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +0 -6: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach_annual [E]
+  Test failed. See exception logs above.
+  The test description was: App Store review screenshot selects bil_premium_ai_coach_annual
+  
+00:07 +0 -6: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_ai_boost
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/app_store_review/v1.0/bil_ai_boost.png": Pixel test failed, 3.17%, 94017px diff
+detected.
+Failure feedback can be found at
+/home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart:315:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:09 +0 -7: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_ai_boost [E]
+  Test failed. See exception logs above.
+  The test description was: App Store review screenshot selects bil_ai_boost
+  
+00:09 +0 -7: /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: (tearDownAll)
+00:09 +0 -7: Some tests failed.
+
+Failing tests:
+  /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_ai_boost
+  /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium
+  /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach
+  /home/runner/work/Body-Intelligence/Body-Intelligence/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach_annual
+  ... and 3 more

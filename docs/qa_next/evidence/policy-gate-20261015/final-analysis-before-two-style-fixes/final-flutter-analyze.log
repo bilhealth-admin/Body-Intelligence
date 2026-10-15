@@ -1,0 +1,6 @@
+Analyzing bil-ios36-audit-snapshot-20261014...                  
+
+   info - Unnecessary braces in a string interpolation. Try removing the braces - test\launch_readiness\deferred_ios_simple_barcode_scanner_plugin_test.dart:365:33 - unnecessary_brace_in_string_interps
+   info - Use the null-aware marker '?' rather than a null check via an 'if'. Try using '?' - tool\release\deferred_simple_barcode_provenance.dart:148:5 - use_null_aware_elements
+
+2 issues found. (ran in 313.0s)

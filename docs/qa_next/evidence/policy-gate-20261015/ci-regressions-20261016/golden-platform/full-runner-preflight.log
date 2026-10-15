@@ -1,0 +1,27 @@
+test_changed_dart_in_failures_is_not_an_ignored_raster (test_bil_owner_full_test_runner.LedgerTests.test_changed_dart_in_failures_is_not_an_ignored_raster) ... ok
+test_hidden_loading_pass_does_not_inflate_pass_count (test_bil_owner_full_test_runner.LedgerTests.test_hidden_loading_pass_does_not_inflate_pass_count) ... ok
+test_kill_and_wait_failure_keep_lock_until_real_child_exits (test_bil_owner_full_test_runner.LedgerTests.test_kill_and_wait_failure_keep_lock_until_real_child_exits) ... ok
+test_loading_failure_cannot_be_reported_as_empty_success (test_bil_owner_full_test_runner.LedgerTests.test_loading_failure_cannot_be_reported_as_empty_success) ... ok
+test_localized_progress_name_cannot_crash_windows_console_output (test_bil_owner_full_test_runner.LedgerTests.test_localized_progress_name_cannot_crash_windows_console_output) ... ok
+2026-10-15T21:07:29.486173+00:00 START SHA=frozen root test concurrency=2; no shards or automatic retries
+test_popen_failure_is_visible_and_never_running (test_bil_owner_full_test_runner.LedgerTests.test_popen_failure_is_visible_and_never_running) ... {"phase": "failed_start", "flutter_started": false, "error": "OSError: synthetic spawn failure"}
+ok
+test_preflight_failure_has_no_flutter_process (test_bil_owner_full_test_runner.LedgerTests.test_preflight_failure_has_no_flutter_process) ... {"phase": "failed_preflight", "flutter_started": false, "error": "RuntimeError: the frozen SHA and authorized integration branch must match"}
+ok
+test_real_git_status_records_dirty_source_without_rejecting_it (test_bil_owner_full_test_runner.LedgerTests.test_real_git_status_records_dirty_source_without_rejecting_it) ... ok
+test_root_command_opts_into_public_smoke_without_filter_or_retry (test_bil_owner_full_test_runner.LedgerTests.test_root_command_opts_into_public_smoke_without_filter_or_retry) ... ok
+test_second_process_cannot_hold_an_active_run_lock (test_bil_owner_full_test_runner.LedgerTests.test_second_process_cannot_hold_an_active_run_lock) ... ok
+test_skip_and_unfinished_cases_remain_visible (test_bil_owner_full_test_runner.LedgerTests.test_skip_and_unfinished_cases_remain_visible) ... ok
+test_skip_only_loaded_suite_is_not_accepted (test_bil_owner_full_test_runner.LedgerTests.test_skip_only_loaded_suite_is_not_accepted) ... ok
+test_source_fingerprint_covers_workflows_native_builds_and_test_tools (test_bil_owner_full_test_runner.LedgerTests.test_source_fingerprint_covers_workflows_native_builds_and_test_tools) ... ok
+test_atomic_json_uses_unique_closed_temporary_files (test_bil_owner_full_test_runner.StatusPublicationTests.test_atomic_json_uses_unique_closed_temporary_files) ... ok
+test_final_status_remains_strict_with_real_windows_lock_and_preserves_results (test_bil_owner_full_test_runner.StatusPublicationTests.test_final_status_remains_strict_with_real_windows_lock_and_preserves_results) ... ok
+test_live_progress_does_not_swallow_an_unknown_os_error (test_bil_owner_full_test_runner.StatusPublicationTests.test_live_progress_does_not_swallow_an_unknown_os_error) ... ok
+test_live_progress_keeps_ledger_and_os_lock_after_real_windows_status_contention (test_bil_owner_full_test_runner.StatusPublicationTests.test_live_progress_keeps_ledger_and_os_lock_after_real_windows_status_contention) ... ok
+test_real_windows_replace_lock_outlasts_bounded_retry_then_recovers (test_bil_owner_full_test_runner.StatusPublicationTests.test_real_windows_replace_lock_outlasts_bounded_retry_then_recovers) ... ok
+test_real_windows_replace_lock_releases_within_retry_budget (test_bil_owner_full_test_runner.StatusPublicationTests.test_real_windows_replace_lock_releases_within_retry_budget) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 5.518s
+
+OK

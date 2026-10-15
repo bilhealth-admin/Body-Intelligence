@@ -1,0 +1,37 @@
+{
+  "recorded_at_utc": "2026-10-15 22:51:59 UTC",
+  "all_six_row_sets_unchanged": true,
+  "tables": [
+    {
+      "object_name": "public.bil_subscriptions",
+      "row_count": 8,
+      "row_set_md5": "1cbd6a5f03a4d5d5e95235d4e2c5abcd"
+    },
+    {
+      "object_name": "public.bil_ai_boost_purchases",
+      "row_count": 12,
+      "row_set_md5": "6fe2cbc6d8a8077b2da0f81d3054bb82"
+    },
+    {
+      "object_name": "bil_admin_private.subscription_grants",
+      "row_count": 10,
+      "row_set_md5": "bdfba81a526bb61a88e0fddaebf1b975"
+    },
+    {
+      "object_name": "public.bil_ai_boost_store_state",
+      "row_count": 0,
+      "row_set_md5": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "object_name": "public.bil_store_subscription_snapshots",
+      "row_count": 4,
+      "row_set_md5": "eb5a4cdd70594c7dd9ae6ec362db38c8"
+    },
+    {
+      "object_name": "bil_admin_private.subscription_commands",
+      "row_count": 14,
+      "row_set_md5": "5e5a0acf7aaa85dbe91b981b982173cd"
+    }
+  ]
+}
+

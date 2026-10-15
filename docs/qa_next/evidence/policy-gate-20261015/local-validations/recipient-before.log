@@ -1,0 +1,133 @@
+Check supabase/functions/ai-coach/provider_recipient_policy_test.ts
+running 10 tests from ./supabase/functions/ai-coach/provider_recipient_policy_test.ts
+Coach rejects an undisclosed recipient before fetch: http://generativelanguage.googleapis.com/v1beta ... FAILED (107ms)
+Coach rejects an undisclosed recipient before fetch: https://outside.example/v1beta ... FAILED (2ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com.outside.example/v1beta ... FAILED (2ms)
+Coach rejects an undisclosed recipient before fetch: https://user:password@generativelanguage.googleapis.com/v1beta ... FAILED (2ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com:8443/v1beta ... FAILED (1ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta?override=recipient ... FAILED (2ms)
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta#recipient ... FAILED (1ms)
+Coach rejects an undisclosed recipient before fetch: not a URL ... FAILED (1ms)
+Coach uses the disclosed Gemini origin and prohibits redirects ... FAILED (11ms)
+Coach does not accept a redirect response as a provider answer ... FAILED (4ms)
+
+ ERRORS 
+
+Coach rejects an undisclosed recipient before fetch: http://generativelanguage.googleapis.com/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach rejects an undisclosed recipient before fetch: https://outside.example/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com.outside.example/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach rejects an undisclosed recipient before fetch: https://user:password@generativelanguage.googleapis.com/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com:8443/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta?override=recipient => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta#recipient => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach rejects an undisclosed recipient before fetch: not a URL => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+error: AssertionError: Expected function to reject.
+    throw new AssertionError(
+          ^
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:118:11)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:41:7
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:35:5
+
+Coach uses the disclosed Gemini origin and prohibits redirects => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:51:6
+error: AssertionError: Values are not equal.
+
+
+    [Diff] Actual / Expected
+
+
+-   /v1beta//models/gemini-test:generateContent
++   /v1beta/models/gemini-test:generateContent
+
+
+  throw new AssertionError(message);
+        ^
+    at assertEquals (https://jsr.io/@std/assert/1.0.19/equals.ts:67:9)
+    at fetcher (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:57:7)
+    at geminiCall (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/server.ts:880:24)
+    at file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:61:11
+    at withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:11)
+    at file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:52:9
+
+Coach does not accept a redirect response as a provider answer => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:66:6
+error: AssertionError: Expected error message to include "provider_http_302", but got "Values are not equal.\n\n\n    [Diff] Actual / Expected\n\n\n-   undefined\n+   \"error\"\n".
+    throw new AssertionError(msg);
+          ^
+    at assertIsError (https://jsr.io/@std/assert/1.0.19/is_error.ts:63:11)
+    at assertRejects (https://jsr.io/@std/assert/1.0.19/rejects.ts:107:7)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:77:5
+    at async withEndpoint (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:15:5)
+    at async file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/supabase/functions/ai-coach/provider_recipient_policy_test.ts:67:3
+
+ FAILURES 
+
+Coach rejects an undisclosed recipient before fetch: http://generativelanguage.googleapis.com/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach rejects an undisclosed recipient before fetch: https://outside.example/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com.outside.example/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach rejects an undisclosed recipient before fetch: https://user:password@generativelanguage.googleapis.com/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com:8443/v1beta => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta?override=recipient => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach rejects an undisclosed recipient before fetch: https://generativelanguage.googleapis.com/v1beta#recipient => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach rejects an undisclosed recipient before fetch: not a URL => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:34:8
+Coach uses the disclosed Gemini origin and prohibits redirects => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:51:6
+Coach does not accept a redirect response as a provider answer => ./supabase/functions/ai-coach/provider_recipient_policy_test.ts:66:6
+
+FAILED | 0 passed | 10 failed (161ms)
+
+error: Test failed

@@ -1,0 +1,78 @@
+[
+  {
+    "file": "materialicons-regular.otf",
+    "sha256": "d9865b671a09d683d13a863089d8825e0f61a37696ce5d7d448bc8023aa62453"
+  },
+  {
+    "file": "roboto-black.ttf",
+    "sha256": "3872e9b39760a1b59ac1e192633dbb3b58e595b4d423930ac7ded525e9ae25e0"
+  },
+  {
+    "file": "roboto-blackitalic.ttf",
+    "sha256": "013d22a4fb2638adba28555ee19366f4585f6dc533b7c332f4931a231497cb22"
+  },
+  {
+    "file": "roboto-bold.ttf",
+    "sha256": "7d0b991ee3e0be7af01ad7ea8cd2beea6c00a25e679a0226b6737f079aafff86"
+  },
+  {
+    "file": "roboto-bolditalic.ttf",
+    "sha256": "a4bcac14f419a97de0917198a4bc51c3ed4fc4a3db9f68a5102f23664ee01354"
+  },
+  {
+    "file": "roboto-italic.ttf",
+    "sha256": "5fce8b6f8ba9f4d19f0d535e241d56a2b8e72bb07e7df711d968d092ef7f9fca"
+  },
+  {
+    "file": "roboto-light.ttf",
+    "sha256": "a6d343d425bc38db90152fa06058b1c7391eca9264f334ef65c1ce175085c6f6"
+  },
+  {
+    "file": "roboto-lightitalic.ttf",
+    "sha256": "364a23e13c64937c3fcea3db778628b89379c893849bbade6e5bf83c5f605c6a"
+  },
+  {
+    "file": "roboto-medium.ttf",
+    "sha256": "f205cc511821ea56078a105557fcea6253129404d411c997e1866fbd006abb68"
+  },
+  {
+    "file": "roboto-mediumitalic.ttf",
+    "sha256": "f177eed10d2470d13ec68d04907a582829d0ee8281f8a02a906f6954c7816e58"
+  },
+  {
+    "file": "roboto-regular.ttf",
+    "sha256": "79e851404657dac2106b3d22ad256d47824a9a5765458edb72c9102a45816d95"
+  },
+  {
+    "file": "roboto-thin.ttf",
+    "sha256": "3d91f7aa69cb7f7064035895c566ac5cb9b2084582d351af7267bb4e0fba60f5"
+  },
+  {
+    "file": "roboto-thinitalic.ttf",
+    "sha256": "f5e89a344894a60f0f98f1c0182ba51f5046e29dde3118820d39025445aeaae8"
+  },
+  {
+    "file": "robotocondensed-bold.ttf",
+    "sha256": "03b4e8042b9af4bf3349428fa734ed583f2d5d83287e1f42cf4d514c909146ef"
+  },
+  {
+    "file": "robotocondensed-bolditalic.ttf",
+    "sha256": "aecb99256fe43e06356bcf1af7a2a384fe9334dc21508f37c6259beae67e190e"
+  },
+  {
+    "file": "robotocondensed-italic.ttf",
+    "sha256": "351cc12eb1d11769056069a6c14f84e45c46bb18d1b7327bae45720aa9753f28"
+  },
+  {
+    "file": "robotocondensed-light.ttf",
+    "sha256": "b766b29053df4c6bfedbdf3cc33284717f835cdf6ca8d137c5106cee9dba68d3"
+  },
+  {
+    "file": "robotocondensed-lightitalic.ttf",
+    "sha256": "da6861fa0ca6a29d305d5f484fbb228ea354ac9d27737e8cd7c15b754b4f9fb9"
+  },
+  {
+    "file": "robotocondensed-regular.ttf",
+    "sha256": "6a2cfb7e61dd09d77526fd314b256894094f96e3a6f3149d9f8000c1132ef4b8"
+  }
+]

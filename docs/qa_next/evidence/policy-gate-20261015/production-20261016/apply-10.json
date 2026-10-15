@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261015090000_restore_single_owner_administrator.sql",
+  "name": "restore_single_owner_administrator",
+  "source_version": "20261015090000",
+  "source_sha256": "4e46262ba06f8aa368c508a1f0937d28dd931f5642feeecffca943ab2a9be973",
+  "executed_query_sha256": "17f678e36256a1c628580987b01e3c59673234cba94dcfbd95aa3769d19f0ebb",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:15 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

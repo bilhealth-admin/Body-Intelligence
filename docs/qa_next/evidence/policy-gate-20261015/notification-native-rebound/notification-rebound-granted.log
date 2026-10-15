@@ -1,0 +1,20 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/integration_test/android_notification_permission_integration_test.dart
+Running Gradle task 'assembleDebug'...                          
+Picked up JAVA_TOOL_OPTIONS: -Djava.io.tmpdir=G:\BIL_Toolchains\gradle-tmp -Djdk.net.unixdomain.tmpdir=G:\BIL_Toolchains\gradle-tmp
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_timezone, in_app_review, mobile_scanner
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDebug'...                             44.4s
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...        2,427ms
+00:00 +0: Android local SDK permission granted plain
+BIL_NOTIFICATION_SDK_QA {"classification":"native local-notification SDK runtime QA only","not_production_notification_e2e":true,"marker":"BIL LOCAL NOTIFICATIONS SDK QA ONLY","sdk_build_input":"flutter_local_notifications 22.2.0","expected_permission":"granted","variant":"plain","source_head":"769169f2dd00f7e3dbcbce763285d2b81c2e9d60","source_fingerprint":"f8dae1d4c84d3c78e48117843ff363bd5d9d59a96274cd9c7c76eb5d1ca7b5e4","started_utc":"2026-10-15T18:49:37.508050Z","status":"PASS","android_api":36,"native_emulator_property":"1","initialized":true,"permission_before_show":true,"notification_id":1112113842,"notification_tag":null,"show_completed_without_exception":true,"matching_active_count":1,"matching_active_title":"BIL LOCAL NOTIFICATIONS SDK QA ONLY / granted / plain","matching_active_channel":"bil_native_notification_permission_qa_v1","permission_after_show":true,"owned_notification_cleanup":"PASS","dart_http_attempts":0,"ended_utc":"2026-10-15T18:49:40.045206Z"}
+00:03 +1: Android local SDK permission granted tagged
+BIL_NOTIFICATION_SDK_QA {"classification":"native local-notification SDK runtime QA only","not_production_notification_e2e":true,"marker":"BIL LOCAL NOTIFICATIONS SDK QA ONLY","sdk_build_input":"flutter_local_notifications 22.2.0","expected_permission":"granted","variant":"tagged","source_head":"769169f2dd00f7e3dbcbce763285d2b81c2e9d60","source_fingerprint":"f8dae1d4c84d3c78e48117843ff363bd5d9d59a96274cd9c7c76eb5d1ca7b5e4","started_utc":"2026-10-15T18:49:40.481649Z","status":"PASS","android_api":36,"native_emulator_property":"1","initialized":true,"permission_before_show":true,"notification_id":1112134510,"notification_tag":"bil-native-sdk-qa-1112134510","show_completed_without_exception":true,"matching_active_count":1,"matching_active_title":"BIL LOCAL NOTIFICATIONS SDK QA ONLY / granted / tagged","matching_active_channel":"bil_native_notification_permission_qa_v1","permission_after_show":true,"owned_notification_cleanup":"PASS","dart_http_attempts":0,"ended_utc":"2026-10-15T18:49:40.817061Z"}
+00:03 +2: (tearDownAll)
+00:04 +2: All tests passed!

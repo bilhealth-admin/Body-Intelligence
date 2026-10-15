@@ -1,0 +1,26 @@
+test_smoke_preserves_system_ui_failure_before_install_or_launch (tool.release.test_verify_android_startup_frame.VerifyAndroidWindowFocusTest.test_smoke_preserves_system_ui_failure_before_install_or_launch) ... FAIL
+
+======================================================================
+FAIL: test_smoke_preserves_system_ui_failure_before_install_or_launch (tool.release.test_verify_android_startup_frame.VerifyAndroidWindowFocusTest.test_smoke_preserves_system_ui_failure_before_install_or_launch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\tool\release\test_verify_android_startup_frame.py", line 352, in test_smoke_preserves_system_ui_failure_before_install_or_launch
+    self.assertEqual(result.returncode, 20, result.stdout + result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 127 != 20 : + set -euo pipefail
++ readonly app_id=com.bilhealth.bodyintelligencelog
++ app_id=com.bilhealth.bodyintelligencelog
++ readonly api_level=33
++ api_level=33
++ readonly apk=build/app/outputs/flutter-apk/app-debug.apk
++ apk=build/app/outputs/flutter-apk/app-debug.apk
++ readonly evidence=artifacts/release/android_emulator_smoke/api-33
++ evidence=artifacts/release/android_emulator_smoke/api-33
++ stage=initialize
++ mkdir -p artifacts/release/android_emulator_smoke/api-33
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.826s
+
+FAILED (failures=1)

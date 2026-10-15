@@ -17,13 +17,17 @@ capture_failure_evidence() {
     adb devices -l >> "$evidence/failure.txt" 2>&1 || true
     adb logcat -d -t 1500 \
       > "$evidence/failure-logcat.txt" 2>&1 || true
-    if [[ ! -f "$evidence/startup.png" ]]; then
+    if [[ ! -f "$evidence/startup.png" && ! -f "$evidence/failure-screen.png" ]]; then
       adb exec-out screencap -p > "$evidence/failure-screen.png" 2>&1 || true
     fi
     adb shell dumpsys activity activities \
       > "$evidence/failure-activity-state.txt" 2>&1 || true
     adb shell dumpsys window windows \
       > "$evidence/failure-window-state.txt" 2>&1 || true
+    adb shell uiautomator dump /sdcard/bil-failure-window.xml \
+      > "$evidence/failure-uiautomator.txt" 2>&1 || true
+    adb pull /sdcard/bil-failure-window.xml "$evidence/failure-window.xml" \
+      >/dev/null 2>&1 || true
   fi
 }
 trap capture_failure_evidence EXIT
@@ -62,38 +66,7 @@ if [[ "$actual_api_level" != "$api_level" ]]; then
 fi
 
 network_mode='radio-state-not-forced'
-stage='install-debug-apk'
-adb install "$apk"
-stage='clear-app-data'
-adb shell pm clear "$app_id" >/dev/null
-stage='launch-main-activity'
-adb shell am start -n "$app_id/.MainActivity"
-stage='wait-for-app-foreground'
-app_pid=''
-foreground_window=''
-for attempt in {1..15}; do
-  app_pid=$(adb shell pidof "$app_id" | tr -d '\r' || true)
-  foreground_window=$(
-    {
-      adb shell dumpsys activity activities 2>/dev/null
-      adb shell dumpsys window windows 2>/dev/null
-    } \
-      | grep -E 'topResumedActivity|mResumedActivity|ResumedActivity|mCurrentFocus|mFocusedApp|mFocusedWindow' \
-      | grep -F "$app_id" \
-      | head -n 1 \
-      | tr -d '\r' || true
-  )
-  if [[ -n "$app_pid" && "$foreground_window" == *"$app_id"* ]]; then
-    break
-  fi
-  sleep 2
-done
-if [[ -z "$app_pid" || "$foreground_window" != *"$app_id"* ]]; then
-  echo "BIL did not become the foreground Android window: $foreground_window" >&2
-  exit 1
-fi
-
-stage='capture-launch-evidence'
+stage='capture-launch-scope'
 printf '%s\n' "$actual_api_level" > "$evidence/api-level.txt"
 printf '%s\n' \
   "source_sha=${GITHUB_SHA:-unknown}" \
@@ -102,6 +75,45 @@ printf '%s\n' \
   "apk_sha256=$(sha256sum "$apk" | awk '{print $1}')" \
   'supabase=false payments=false ads=false community=false push=false' \
   > "$evidence/test-scope.txt"
+
+stage='verify-emulator-system-ui-before-launch'
+python3 tool/release/verify_android_startup_frame.py \
+  --verify-emulator-before-launch "$evidence"
+
+stage='install-debug-apk'
+adb install "$apk"
+stage='clear-app-data'
+adb shell pm clear "$app_id" >/dev/null
+stage='launch-main-activity'
+adb shell am start -n "$app_id/.MainActivity"
+stage='wait-for-app-foreground'
+app_pid=''
+foreground_ready=false
+for attempt in {1..15}; do
+  app_pid=$(adb shell pidof "$app_id" | tr -d '\r' || true)
+  adb shell dumpsys window > "$evidence/foreground-focused-window.txt"
+  window_exit=0
+  python3 tool/release/verify_android_startup_frame.py \
+    --window-health-only --require-app-focus \
+    --window-state "$evidence/foreground-focused-window.txt" \
+    > "$evidence/foreground-window-check.txt" \
+    2> "$evidence/foreground-window-errors.txt" || window_exit=$?
+  if (( window_exit >= 20 && window_exit <= 22 )); then
+    cat "$evidence/foreground-window-check.txt" >&2
+    cat "$evidence/foreground-window-errors.txt" >&2
+    exit "$window_exit"
+  fi
+  if [[ -n "$app_pid" && "$window_exit" == 0 ]]; then
+    foreground_ready=true
+    break
+  fi
+  sleep 2
+done
+if [[ "$foreground_ready" != true ]]; then
+  cat "$evidence/foreground-window-check.txt" >&2 || true
+  echo 'BIL did not become the actual focused Android window.' >&2
+  exit 1
+fi
 
 stage='wait-for-accessible-app-content-and-first-frame'
 frame_ready=false
@@ -114,14 +126,24 @@ for attempt in {1..30}; do
       && adb pull /sdcard/bil-startup-window.xml \
         "$evidence/startup-window.xml" >/dev/null 2>&1; then
     if adb exec-out screencap -p > "$evidence/startup.png" \
-        2> "$evidence/screencap-errors.txt" \
-        && python3 tool/release/verify_android_startup_frame.py \
+        2> "$evidence/screencap-errors.txt"; then
+      adb shell dumpsys window > "$evidence/startup-focused-window.txt"
+      frame_exit=0
+      python3 tool/release/verify_android_startup_frame.py \
           "$evidence/startup.png" "$evidence/startup-window.xml" \
+          --window-state "$evidence/startup-focused-window.txt" \
           > "$evidence/startup-frame.txt" \
-          2> "$evidence/startup-frame-errors.txt"; then
-      app_content_ready=true
-      frame_ready=true
-      break
+          2> "$evidence/startup-frame-errors.txt" || frame_exit=$?
+      if (( frame_exit >= 20 && frame_exit <= 22 )); then
+        cat "$evidence/startup-frame.txt" >&2
+        cat "$evidence/startup-frame-errors.txt" >&2
+        exit "$frame_exit"
+      fi
+      if (( frame_exit == 0 )); then
+        app_content_ready=true
+        frame_ready=true
+        break
+      fi
     fi
   fi
   sleep 2

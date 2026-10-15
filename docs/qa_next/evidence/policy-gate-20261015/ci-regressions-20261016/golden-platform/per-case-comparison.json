@@ -1,0 +1,121 @@
+[
+  {
+    "case": "bil_ai_boost",
+    "size": [
+      1170,
+      2532
+    ],
+    "reference": "test/features/commerce/goldens/app_store_review/v1.0/bil_ai_boost.png",
+    "master_matches_git_baseline": true,
+    "different_pixels": 94017,
+    "different_percent": 3.1736338963827118,
+    "difference_bounds": [
+      64,
+      63,
+      1033,
+      2433
+    ]
+  },
+  {
+    "case": "bil_premium_ai_coach_annual",
+    "size": [
+      1170,
+      2532
+    ],
+    "reference": "test/features/commerce/goldens/app_store_review/v1.0/bil_premium_ai_coach_annual.png",
+    "master_matches_git_baseline": true,
+    "different_pixels": 89242,
+    "different_percent": 3.0124491972833205,
+    "difference_bounds": [
+      64,
+      63,
+      1053,
+      2521
+    ]
+  },
+  {
+    "case": "bil_premium_ai_coach",
+    "size": [
+      1170,
+      2532
+    ],
+    "reference": "test/features/commerce/goldens/app_store_review/v1.0/bil_premium_ai_coach.png",
+    "master_matches_git_baseline": true,
+    "different_pixels": 89030,
+    "different_percent": 3.005292934202887,
+    "difference_bounds": [
+      64,
+      63,
+      1053,
+      2518
+    ]
+  },
+  {
+    "case": "bil_premium_annual",
+    "size": [
+      1170,
+      2532
+    ],
+    "reference": "test/features/commerce/goldens/app_store_review/v1.0/bil_premium_annual.png",
+    "master_matches_git_baseline": true,
+    "different_pixels": 93549,
+    "different_percent": 3.157836108073075,
+    "difference_bounds": [
+      64,
+      63,
+      1053,
+      2532
+    ]
+  },
+  {
+    "case": "bil_premium",
+    "size": [
+      1170,
+      2532
+    ],
+    "reference": "test/features/commerce/goldens/app_store_review/v1.0/bil_premium.png",
+    "master_matches_git_baseline": true,
+    "different_pixels": 94038,
+    "different_percent": 3.1743427714991697,
+    "difference_bounds": [
+      64,
+      63,
+      1053,
+      2532
+    ]
+  },
+  {
+    "case": "plans_light_ar_390x844_160",
+    "size": [
+      390,
+      844
+    ],
+    "reference": "test/features/commerce/goldens/plans_light_ar_390x844_160.png",
+    "master_matches_git_baseline": true,
+    "different_pixels": 13528,
+    "different_percent": 4.109855389476243,
+    "difference_bounds": [
+      40,
+      18,
+      369,
+      844
+    ]
+  },
+  {
+    "case": "plans_light_en_390x844_160",
+    "size": [
+      390,
+      844
+    ],
+    "reference": "test/features/commerce/goldens/plans_light_en_390x844_160.png",
+    "master_matches_git_baseline": true,
+    "different_pixels": 13926,
+    "different_percent": 4.230769230769231,
+    "difference_bounds": [
+      21,
+      18,
+      347,
+      813
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart: (setUpAll)
+00:00 +0: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference en 390x844 at 160%
+00:03 +1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium
+00:04 +2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium
+00:06 +3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_annual
+00:07 +4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach
+00:08 +5: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach_annual
+00:09 +6: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_ai_boost
+00:10 +7: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/apple_review_product_screenshot_test.dart: (tearDownAll)
+00:10 +7: All tests passed!

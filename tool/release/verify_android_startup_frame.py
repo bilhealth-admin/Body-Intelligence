@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+import argparse
+import json
+import re
 import struct
+import subprocess
 import sys
+import time
 import zlib
 from collections import Counter
 from pathlib import Path
@@ -12,6 +17,15 @@ from xml.etree import ElementTree
 
 APP_PACKAGE = "com.bilhealth.bodyintelligencelog"
 MIN_FOREGROUND_PIXEL_SHARE = 0.05
+SYSTEM_UI_PACKAGE = "com.android.systemui"
+BOOT_BROADCAST_IDLE_TIMEOUT = 120
+BOOT_BROADCAST_IDLE_MARKER = "All broadcast queues are idle!"
+WINDOW_FAILURE_CODES = {
+    "EMULATOR_SYSTEM_UI_ANR": 20,
+    "APP_ANR": 21,
+    "EXTERNAL_APP_ANR": 22,
+    "FOCUSED_WINDOW_UNAVAILABLE": 23,
+}
 
 
 def _paeth(left: int, up: int, up_left: int) -> int:
@@ -134,23 +148,249 @@ def has_interactive_app_content(path: Path) -> bool:
     return False
 
 
+def inspect_window_state(path: Path) -> dict[str, str]:
+    """Use actual input focus, never a resumed app behind a system dialog."""
+    state = path.read_text(encoding="utf-8", errors="replace")
+    focus = re.search(r"^\s*mCurrentFocus\s*=\s*(.+)$", state, re.MULTILINE)
+    if focus is None:
+        focus = re.search(r"^\s*mFocusedWindow\s*=\s*(.+)$", state, re.MULTILINE)
+    focused_window = focus.group(1).strip() if focus else ""
+    result = {"focused_window": focused_window}
+    if not focused_window or focused_window == "null":
+        return {**result, "window_status": "FOCUSED_WINDOW_UNAVAILABLE"}
+    anr = re.search(r"Application Not Responding:\s*([\w.]+)", focused_window)
+    if anr:
+        owner = anr.group(1)
+        status = (
+            "EMULATOR_SYSTEM_UI_ANR"
+            if owner == SYSTEM_UI_PACKAGE
+            else "APP_ANR" if owner == APP_PACKAGE else "EXTERNAL_APP_ANR"
+        )
+        return {**result, "window_status": status, "anr_package": owner}
+    app_focused = re.search(
+        rf"(?<![\w.]){re.escape(APP_PACKAGE)}(?=[/\s}}]|$)", focused_window
+    )
+    return {
+        **result,
+        "window_status": "APP_FOCUSED" if app_focused else "OTHER_FOCUSED_WINDOW",
+    }
+
+
+def window_check_exit_code(
+    result: dict[str, str], *, require_app_focus: bool
+) -> int:
+    status = result["window_status"]
+    if status in WINDOW_FAILURE_CODES:
+        return WINDOW_FAILURE_CODES[status]
+    if require_app_focus and status != "APP_FOCUSED":
+        return 1
+    return 0
+
+
+def report_window_state(path: Path, *, require_app_focus: bool) -> int:
+    try:
+        result = inspect_window_state(path)
+    except OSError as error:
+        print(f"invalid focused-window capture: {error}", file=sys.stderr)
+        return 2
+    for name, value in result.items():
+        print(f"{name}={value}")
+    exit_code = window_check_exit_code(result, require_app_focus=require_app_focus)
+    if exit_code:
+        print(
+            f"{result['window_status']}: focused Android window does not prove "
+            "interactive BIL content; no dialog was dismissed or accepted.",
+            file=sys.stderr,
+        )
+    return exit_code
+
+
+def _capture_prelaunch_blocker(evidence: Path, exit_code: int) -> None:
+    """Preserve the failed attempt; never dismiss a dialog or restart a process."""
+    (evidence / "prelaunch-failure.txt").write_text(
+        f"exit_status={exit_code}\nstage=verify-emulator-system-ui-before-launch\n",
+        encoding="utf-8",
+    )
+    captures = (
+        ("failure-screen.png", ["exec-out", "screencap", "-p"]),
+        ("prelaunch-logcat.txt", ["logcat", "-d", "-t", "1500"]),
+        (
+            "prelaunch-uiautomator.txt",
+            ["shell", "uiautomator", "dump", "/sdcard/bil-prelaunch-failure.xml"],
+        ),
+        (
+            "prelaunch-pull.txt",
+            [
+                "pull",
+                "/sdcard/bil-prelaunch-failure.xml",
+                str(evidence / "prelaunch-failure-window.xml"),
+            ],
+        ),
+    )
+    for filename, arguments in captures:
+        try:
+            result = subprocess.run(
+                ["adb", *arguments], capture_output=True, timeout=15, check=False
+            )
+            (evidence / filename).write_bytes(result.stdout)
+            if result.returncode or result.stderr:
+                (evidence / f"{filename}.errors.txt").write_bytes(result.stderr)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            (evidence / f"{filename}.errors.txt").write_text(
+                str(error), encoding="utf-8"
+            )
+
+
+def wait_for_boot_broadcast_idle(evidence: Path) -> bool:
+    """Wait for actual broadcast completion, beyond sys.boot_completed=1."""
+    command = ["adb", "shell", "cmd", "activity", "wait-for-broadcast-idle"]
+    started = time.monotonic()
+    stdout = stderr = ""
+    return_code = None
+    status = "COMMAND_ERROR"
+    print(
+        f"Waiting for Android boot broadcasts (limit={BOOT_BROADCAST_IDLE_TIMEOUT}s).",
+        flush=True,
+    )
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=BOOT_BROADCAST_IDLE_TIMEOUT,
+            check=False,
+        )
+        stdout, stderr, return_code = result.stdout, result.stderr, result.returncode
+        marker_found = BOOT_BROADCAST_IDLE_MARKER in (
+            line.strip() for line in stdout.splitlines()
+        )
+        status = (
+            "IDLE" if return_code == 0 and marker_found
+            else "NONZERO_EXIT" if return_code != 0
+            else "INVALID_IDLE_OUTPUT"
+        )
+    except subprocess.TimeoutExpired as error:
+        status = "TIMEOUT"
+        stdout = error.stdout or ""
+        stderr = error.stderr or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode("utf-8", errors="replace")
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        stderr += f"\nBoot broadcast idle timed out after {BOOT_BROADCAST_IDLE_TIMEOUT}s."
+    except OSError as error:
+        stderr = str(error)
+    receipt = {
+        "command": command,
+        "timeout_seconds": BOOT_BROADCAST_IDLE_TIMEOUT,
+        "elapsed_seconds": round(time.monotonic() - started, 3),
+        "adb_return_code": return_code,
+        "status": status,
+        "broadcast_idle_confirmed": status == "IDLE",
+        "app_startup_proven": False,
+    }
+    (evidence / "prelaunch-boot-idle.stdout.txt").write_text(stdout, encoding="utf-8")
+    (evidence / "prelaunch-boot-idle.stderr.txt").write_text(stderr, encoding="utf-8")
+    (evidence / "prelaunch-boot-idle-receipt.json").write_text(
+        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+    )
+    return status == "IDLE"
+
+
+def verify_emulator_before_launch(evidence: Path) -> int:
+    """Check System UI and input focus before any APK installation or launch."""
+    evidence.mkdir(parents=True, exist_ok=True)
+    if not wait_for_boot_broadcast_idle(evidence):
+        print("EMULATOR_BOOT_BROADCAST_NOT_IDLE: launch blocked.", file=sys.stderr)
+        _capture_prelaunch_blocker(evidence, 25)
+        return 25
+    for attempt in range(15):
+        try:
+            pid = subprocess.run(
+                ["adb", "shell", "pidof", SYSTEM_UI_PACKAGE],
+                capture_output=True, text=True, timeout=15, check=False,
+            )
+            window = subprocess.run(
+                ["adb", "shell", "dumpsys", "window"],
+                capture_output=True, text=True, timeout=15, check=False,
+            )
+            (evidence / "prelaunch-system-ui-pid.txt").write_text(
+                pid.stdout, encoding="utf-8"
+            )
+            window_path = evidence / "prelaunch-focused-window.txt"
+            window_path.write_text(window.stdout, encoding="utf-8")
+            (evidence / "prelaunch-adb-errors.txt").write_text(
+                pid.stderr + window.stderr, encoding="utf-8"
+            )
+            status = inspect_window_state(window_path)
+            (evidence / "prelaunch-window-check.txt").write_text(
+                "".join(f"{key}={value}\n" for key, value in status.items()),
+                encoding="utf-8",
+            )
+            code = window_check_exit_code(status, require_app_focus=False)
+            if code in (20, 21, 22):
+                print(f"{status['window_status']}: emulator launch blocked.", file=sys.stderr)
+                _capture_prelaunch_blocker(evidence, code)
+                return code
+            if pid.returncode == 0 and pid.stdout.strip() and window.returncode == 0 and code == 0:
+                return 0
+        except (OSError, subprocess.TimeoutExpired) as error:
+            (evidence / "prelaunch-adb-errors.txt").write_text(
+                str(error), encoding="utf-8"
+            )
+        if attempt < 14:
+            time.sleep(2)
+    print(
+        "EMULATOR_SYSTEM_UI_UNAVAILABLE: System UI/focused window was not ready "
+        "before launching BIL.",
+        file=sys.stderr,
+    )
+    _capture_prelaunch_blocker(evidence, 24)
+    return 24
+
+
 def startup_is_ready(
-    frame_result: dict[str, int | float], accessibility_tree: Path
+    frame_result: dict[str, int | float],
+    accessibility_tree: Path,
+    window_state: Path | None = None,
 ) -> bool:
+    if window_state is not None:
+        try:
+            focus = inspect_window_state(window_state)
+        except OSError:
+            return False
+        if window_check_exit_code(focus, require_app_focus=True):
+            return False
     return not frame_is_blank(frame_result) and has_interactive_app_content(
         accessibility_tree
     )
 
 
-def main() -> int:
-    if len(sys.argv) != 3:
-        print(
-            "usage: verify_android_startup_frame.py <screenshot.png> <accessibility-tree.xml>",
-            file=sys.stderr,
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("screenshot", nargs="?", type=Path)
+    parser.add_argument("accessibility_tree", nargs="?", type=Path)
+    parser.add_argument("--window-state", type=Path)
+    parser.add_argument("--window-health-only", action="store_true")
+    parser.add_argument("--require-app-focus", action="store_true")
+    parser.add_argument("--verify-emulator-before-launch", type=Path)
+    args = parser.parse_args(argv)
+    if args.verify_emulator_before_launch is not None:
+        return verify_emulator_before_launch(args.verify_emulator_before_launch)
+    if args.window_health_only:
+        if args.window_state is None:
+            parser.error("--window-health-only requires --window-state")
+        return report_window_state(
+            args.window_state, require_app_focus=args.require_app_focus
         )
-        return 2
+    if args.screenshot is None or args.accessibility_tree is None:
+        parser.error("a screenshot and accessibility tree are required")
+    if args.window_state is not None:
+        window_exit = report_window_state(args.window_state, require_app_focus=True)
+        if window_exit:
+            return window_exit
     try:
-        result = inspect_frame(Path(sys.argv[1]))
+        result = inspect_frame(args.screenshot)
     except (OSError, ValueError, zlib.error) as error:
         print(f"invalid startup capture: {error}", file=sys.stderr)
         return 2
@@ -163,7 +403,7 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-    if not has_interactive_app_content(Path(sys.argv[2])):
+    if not has_interactive_app_content(args.accessibility_tree):
         print(
             "Android accessibility tree has no enabled, clickable app button; "
             "the capture may still be the native splash or transition frame.",

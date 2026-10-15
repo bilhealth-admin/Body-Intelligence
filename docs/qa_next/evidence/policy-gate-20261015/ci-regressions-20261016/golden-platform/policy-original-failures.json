@@ -1,0 +1,32 @@
+{
+  "run_id": 38805632780,
+  "job_id": 116665616016,
+  "tested_sha": "82fc546ee14a401465ce2c835df83acc834874d4",
+  "passed": 319,
+  "failed": 7,
+  "failed_cases": [
+    "features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference en 390x844 at 160% [E]",
+    "features/commerce/bil_store_plans_light_visual_test.dart: Plans light reference ar 390x844 at 160% [E]",
+    "features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium [E]",
+    "features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_annual [E]",
+    "features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach [E]",
+    "features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_premium_ai_coach_annual [E]",
+    "features/commerce/apple_review_product_screenshot_test.dart: App Store review screenshot selects bil_ai_boost [E]"
+  ],
+  "raw_log": "policy-original-failed-job.log",
+  "original_failure_images_uploaded": false,
+  "original_images_missing_is_evidence_gap": true,
+  "merged_manifest_failures_secondary_to_skipped_production_step": [
+    "merged-debug-available",
+    "merged-release-available"
+  ],
+  "windows_replay": {
+    "exit_code": 0,
+    "passed": 7,
+    "failed": 0,
+    "raw_log": "../golden-font-investigation/windows-exact-seven.log"
+  },
+  "cause_status": "UNDER_INVESTIGATION",
+  "goldens_updated": false,
+  "tests_skipped": false
+}

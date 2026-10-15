@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T23:15:44.250Z",
+  "developer_id": "7540824385820504578",
+  "app_id": "4974243137795319021",
+  "package_name": "com.bilhealth.bodyintelligencelog",
+  "case_id": "4976804875812644073",
+  "live_status": "Suspended",
+  "live_status_date_display": "8 Oct 2026, 22:38",
+  "email_primary_suspension_utc": "2026-10-08T19:38:58Z",
+  "email_primary_paywall_v32_utc": "2026-10-08T10:01:02Z",
+  "appeal_mode": "I understand what led to this issue and will fix it",
+  "form_supports_plan_before_resubmission": true,
+  "plan_chars": 949,
+  "form_limit": 1000,
+  "plan_text": "We understand the suspension followed Health Connect overreach on v13, an earlier unresponsive purchase screen/item error, and paywall-blocked reviews on 3 October and 8 October (v32). We do not dispute these findings. Version 32 is unchanged. Current source limits Health Connect to Steps, Distance and Active Calories and improves entitlement loading/retry and product lookup; it is not a tested Play release. Dedicated reviewer access and AI balance are configured server-side; normal sign-in and app access remain unverified. Before resubmission we will test a corrected signed build, reviewer access without payment/OTP, AI balance, all cited UI and Play SKUs; verify merged permissions; and match App Access, Data Safety and Health declarations to the build and backend. We will review our portfolio and all tracks and replace noncompliant bundles as permitted. Please confirm the official route to provide the corrected build while suspended.",
+  "current_plan_is_temporary_unsent_dialog": true,
+  "submit_button_enabled": true,
+  "submit_clicked": false,
+  "additional_contacts_added": false,
+  "app_access_values_not_read": true,
+  "historical_email_wrong_package_link_seen_and_not_followed": "com.dima.marlo",
+  "route_used": "Official Console policy-center for confirmed BIL app, Appeal button",
+  "prior_appeal_search": {
+    "narrow_connected_mail_queries_no_appeal_correspondence_found": true,
+    "not_proof_of_complete_global_history": true
+  },
+  "owner_approval_required_for_submit": true,
+  "build_evidence_still_required_before_app_resubmission": true
+}

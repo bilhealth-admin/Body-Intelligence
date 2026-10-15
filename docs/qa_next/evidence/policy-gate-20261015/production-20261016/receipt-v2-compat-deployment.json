@@ -1,0 +1,154 @@
+{
+  "classification": "PRODUCTION_DDL_DEPLOYMENT_AND_READBACK_NOT_SIGNED_ARTIFACT_E2E",
+  "source_file": "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql",
+  "source_sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b",
+  "apply": {
+    "success": true
+  },
+  "verification": {
+    "functions": [
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "cb3b9bc7f12ab4d4159653189d4f6ae2b2f648de8a316b6cfb6cb2d1ba77da51",
+        "signature": "private.bil_emit_community_post_review_receipt_v2(uuid,uuid,text,integer,text,text)",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": false
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "745805be5ab20e8f5c1114f0945205524a1ae8276004be777c282fcdb957f2a3",
+        "signature": "private.bil_emit_community_post_review_grant_receipt_v2()",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": false
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "5647a0d53d2282137390473f101b0286b3ac5b9a369b7bdd83e10c2d4dc401b7",
+        "signature": "private.bil_emit_community_post_review_rejection_receipt_v2()",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": false
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "a94cb3a2f306ef0e2251ff11583503befebf2a3d8fd092c46111500d880d6e11",
+        "signature": "private.bil_emit_community_post_review_operation_receipt_v2()",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": false
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "55402d2c223bf5d9965c47d60444b2323e317426fae3246ffd9c8987df28199f",
+        "signature": "private.bil_sync_post_review_activity_seen_v2()",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": false
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "2f93b38a75b946fd457023266fbed2bffa1ef3417cbc82a0077d888cb700cc56",
+        "signature": "private.bil_sync_post_review_event_seen_v2()",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": false
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "360112f2b85b1cf18fc2c0c7435bde35d84eef42a28900e50a0f55b580c0cf37",
+        "signature": "public.bil_mark_community_activity_seen_v2(uuid[])",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": true
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "4145cb4a5247036d24c3929fe306b716677deb2ad30788e2144f28d0a8765f1d",
+        "signature": "public.bil_mark_community_notifications_seen(uuid[])",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": true
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "77a3d362a414d8825f7b370f237a07b7f14f84259acb6a8807bae915c8cfc23e",
+        "signature": "public.bil_mark_my_post_events_seen_v1(uuid[])",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": true
+      },
+      {
+        "owner": "postgres",
+        "exists": true,
+        "sha256": "ddd1e3fe67781e212c92f70f955fa536f1bde77a20e4fb0a9e6f86bbe84980cf",
+        "signature": "private.bil_requeue_post_notices_for_owner_v1(uuid)",
+        "anon_execute": false,
+        "service_execute": false,
+        "authenticated_execute": false
+      }
+    ],
+    "publish_only": false,
+    "live_migration": [
+      {
+        "name": "community_post_review_receipts_v2_compat",
+        "version": "20261015234009"
+      }
+    ]
+  },
+  "preservation": {
+    "before": {
+      "financial": {
+        "subscriptions": "4b75134294c9059d5b44326d86953ecb",
+        "boost_purchases": "6fa43737876e7605ada6f4bd907f1c5a",
+        "store_snapshots": "48fc7f9fb0a0429cc0640919e4984e36",
+        "boost_store_state": "d41d8cd98f00b204e9800998ecf8427e",
+        "subscription_grants": "f0f6cb7975de79b1ee6a6a34fe848f3b",
+        "subscription_commands": "e1a8f94788dbd30c152bcc6094cd0673"
+      },
+      "captured_at_utc": "2026-10-15T23:39:37.727113+00:00",
+      "receipt_history": {
+        "events": 15,
+        "outbox": 109,
+        "activities": 22,
+        "events_hash": "e27bb43088868f67ac182e74cda40462",
+        "outbox_hash": "62608911b86ccdbf7a77b9b7e9ac4368",
+        "activities_hash": "d71debc015fb8a28fbc881fa750f845e"
+      }
+    },
+    "after": {
+      "financial": {
+        "subscriptions": "4b75134294c9059d5b44326d86953ecb",
+        "boost_purchases": "6fa43737876e7605ada6f4bd907f1c5a",
+        "store_snapshots": "48fc7f9fb0a0429cc0640919e4984e36",
+        "boost_store_state": "d41d8cd98f00b204e9800998ecf8427e",
+        "subscription_grants": "f0f6cb7975de79b1ee6a6a34fe848f3b",
+        "subscription_commands": "e1a8f94788dbd30c152bcc6094cd0673"
+      },
+      "captured_at_utc": "2026-10-15T23:40:27.638185+00:00",
+      "receipt_history": {
+        "events": 15,
+        "outbox": 109,
+        "activities": 22,
+        "events_hash": "e27bb43088868f67ac182e74cda40462",
+        "outbox_hash": "62608911b86ccdbf7a77b9b7e9ac4368",
+        "activities_hash": "d71debc015fb8a28fbc881fa750f845e"
+      }
+    },
+    "sameFinancial": true,
+    "sameHistory": true
+  },
+  "native_sql_cases_passed": 39,
+  "affected_flutter_cases_passed": 25,
+  "new_total_deployed_migrations": 14
+}

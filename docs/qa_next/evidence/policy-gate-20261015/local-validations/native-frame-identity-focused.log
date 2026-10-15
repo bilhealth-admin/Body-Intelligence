@@ -1,0 +1,10 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/tools/qa/flutter/native_frame_timing_identity_test.dart
+00:00 +0: same frame joins despite target and start being different phases
+00:00 +1: identity does not assume any fixed frame period or timestamp epoch
+00:00 +2: equal timestamp on another frame never replaces missing identity
+00:00 +3: nearby earlier and later frames never manufacture an absent frame
+00:00 +4: unavailable engine identity stays distinct from missing timing
+00:00 +5: duplicate frame identities are ambiguous and cannot pass
+00:00 +6: serialized or noninteger identity is never coerced to the frame
+00:00 +7: batched timing order is independent of exact identity matching
+00:00 +8: All tests passed!

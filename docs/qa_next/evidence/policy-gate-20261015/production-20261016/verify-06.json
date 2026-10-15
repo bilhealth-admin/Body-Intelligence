@@ -1,0 +1,28 @@
+{
+  "file": "supabase/migrations/20261012204610_boost_refund_tombstone_service_read.sql",
+  "name": "boost_refund_tombstone_service_read",
+  "source_version": "20261012204610",
+  "source_sha256": "045a80617915ddc4f6b36a460925bedca36c1c950f96b721d835bd5af369a267",
+  "executed_query_sha256": "d60bcf0f43a42df7751ac080d964cff48e83438c85d09cb72f98e8fb9fb431b8",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:06 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  },
+  "postconditions": {
+    "service_read": true,
+    "user_read_denied": true,
+    "anon_read_denied": true
+  },
+  "remote_migration": {
+    "version": "20261015225109",
+    "name": "boost_refund_tombstone_service_read"
+  }
+}
+

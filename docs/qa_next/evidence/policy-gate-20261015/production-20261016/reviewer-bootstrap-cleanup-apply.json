@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "at_utc": "2026-10-15T23:17:06.243Z",
+  "source_file": "supabase/migrations/20261015231333_remove_legacy_store_reviewer_moderator_bootstrap.sql",
+  "source_sha256": "96d2af4ffb725190633882629f936a48d9a8bbe351e89eee735a2f85252474ab",
+  "focused_isolated_tests": {
+    "passed": 44,
+    "failed": 0,
+    "execution_errors": 0
+  },
+  "preflight_confirmed_actual_store_role_already_absent": true,
+  "actual_apply_result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  },
+  "postconditions": "PENDING"
+}

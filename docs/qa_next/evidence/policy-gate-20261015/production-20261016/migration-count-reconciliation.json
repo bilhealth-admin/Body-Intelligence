@@ -1,0 +1,68 @@
+{
+  "project": "tgmanzhqulksykhslrzb",
+  "live_applied_migration_count": 229,
+  "this_followup_deployed_count": 14,
+  "older_applied_entries": 215,
+  "local_sql_file_count": 223,
+  "local_files_and_live_entries_are_not_one_to_one": "Remote applied timestamps and some historical remote-only migrations differ; counts alone are not a missing-migration or rollback test.",
+  "this_followup_deployed": [
+    {
+      "version": "20261015224954",
+      "name": "bil08_community_profile_activity_v1"
+    },
+    {
+      "version": "20261015225026",
+      "name": "community_review_revision_v2"
+    },
+    {
+      "version": "20261015225102",
+      "name": "admin_authority_transaction_lock"
+    },
+    {
+      "version": "20261015225104",
+      "name": "cloud_nutrition_goals_restore_v2"
+    },
+    {
+      "version": "20261015225106",
+      "name": "admin_credit_authority_transaction_lock"
+    },
+    {
+      "version": "20261015225109",
+      "name": "boost_refund_tombstone_service_read"
+    },
+    {
+      "version": "20261015225110",
+      "name": "community_message_delivery_v2"
+    },
+    {
+      "version": "20261015225113",
+      "name": "community_safety_report_review_v1"
+    },
+    {
+      "version": "20261015225114",
+      "name": "ai_coach_safety_reports_v1"
+    },
+    {
+      "version": "20261015225118",
+      "name": "restore_single_owner_administrator"
+    },
+    {
+      "version": "20261015225121",
+      "name": "allow_authenticated_community_contact_guard"
+    },
+    {
+      "version": "20261015231142",
+      "name": "restore_owner_approved_secondary_admin_identity_correction"
+    },
+    {
+      "version": "20261015231707",
+      "name": "remove_legacy_store_reviewer_moderator_bootstrap"
+    },
+    {
+      "version": "20261015234009",
+      "name": "community_post_review_receipts_v2_compat"
+    }
+  ],
+  "no_migration_history_deleted": true,
+  "edge_deployments_counted_separately": 4
+}

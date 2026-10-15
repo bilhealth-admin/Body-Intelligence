@@ -1,0 +1,78 @@
+{
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "scope": "Live observation, not final full result",
+  "failed_cases": [
+    {
+      "test_id": 3080,
+      "name": "does not invent prices when store metadata is unavailable",
+      "suite": {
+        "id": 3072,
+        "platform": "vm",
+        "path": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart"
+      },
+      "result": "error",
+      "error_events": [
+        {
+          "testID": 3080,
+          "error": "Test failed. See exception logs above.\nThe test description was: does not invent prices when store metadata is unavailable",
+          "stackTrace": "",
+          "isFailure": false,
+          "type": "error",
+          "time": 613092
+        }
+      ],
+      "prints": [
+        "══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\nThe following TestFailure was thrown running a test:\nExpected: exactly one matching candidate\n  Actual: _TextWidgetFinder:<Found 0 widgets with text \"300+ home workout videos\": []>\n   Which: means none were found but one was expected\n300+ home workout videos\n\nWhen the exception was thrown, this was the stack:\n#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart:173:7)\n<asynchronous suspension>\n#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)\n<asynchronous suspension>\n#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)\n<asynchronous suspension>\n<asynchronous suspension>\n(elided one frame from package:stack_trace)\n\nThis was caught by the test expectation on the following line:\n  file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart line 173\nThe test description was:\n  does not invent prices when store metadata is unavailable\n════════════════════════════════════════════════════════════════════════════════════════════════════"
+      ]
+    },
+    {
+      "test_id": 3091,
+      "name": "AI Coach explains inherited Free and paid features with one Premium label",
+      "suite": {
+        "id": 3072,
+        "platform": "vm",
+        "path": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart"
+      },
+      "result": "error",
+      "error_events": [
+        {
+          "testID": 3091,
+          "error": "Test failed. See exception logs above.\nThe test description was: AI Coach explains inherited Free and paid features with one Premium label",
+          "stackTrace": "",
+          "isFailure": false,
+          "type": "error",
+          "time": 614221
+        }
+      ],
+      "prints": [
+        "══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\nThe following TestFailure was thrown running a test:\nExpected: exactly one matching candidate\n  Actual: _TextWidgetFinder:<Found 0 widgets with text \"300+ home workout videos\": []>\n   Which: means none were found but one was expected\n300+ home workout videos\n\nWhen the exception was thrown, this was the stack:\n#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart:436:9)\n<asynchronous suspension>\n#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)\n<asynchronous suspension>\n#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)\n<asynchronous suspension>\n<asynchronous suspension>\n(elided one frame from package:stack_trace)\n\nThis was caught by the test expectation on the following line:\n  file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/bil_dynamic_store_offers_test.dart line 436\nThe test description was:\n  AI Coach explains inherited Free and paid features with one Premium label\n════════════════════════════════════════════════════════════════════════════════════════════════════"
+      ]
+    },
+    {
+      "test_id": 3241,
+      "name": "AI-only storefront explains concrete Premium and AI benefits",
+      "suite": {
+        "id": 3228,
+        "platform": "vm",
+        "path": "G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/paywall_ai_market_benefits_test.dart"
+      },
+      "result": "error",
+      "error_events": [
+        {
+          "testID": 3241,
+          "error": "Test failed. See exception logs above.\nThe test description was: AI-only storefront explains concrete Premium and AI benefits",
+          "stackTrace": "",
+          "isFailure": false,
+          "type": "error",
+          "time": 633303
+        }
+      ],
+      "prints": [
+        "══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\nThe following TestFailure was thrown running a test:\nExpected: exactly one matching candidate\n  Actual: _TextWidgetFinder:<Found 0 widgets with text \"300+ home workout videos\": []>\n   Which: means none were found but one was expected\n\nWhen the exception was thrown, this was the stack:\n#4      main.<anonymous closure> (file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/paywall_ai_market_benefits_test.dart:57:5)\n<asynchronous suspension>\n#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)\n<asynchronous suspension>\n#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)\n<asynchronous suspension>\n<asynchronous suspension>\n(elided one frame from package:stack_trace)\n\nThis was caught by the test expectation on the following line:\n  file:///G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/commerce/paywall_ai_market_benefits_test.dart line 57\nThe test description was:\n  AI-only storefront explains concrete Premium and AI benefits\n════════════════════════════════════════════════════════════════════════════════════════════════════"
+      ]
+    }
+  ],
+  "cause": "Three widget expectations still demand300+home workout videos after verified inventory correction to300+workout videos; home-only count is below300, combinedhome+gym inventory meets advertised count.",
+  "repair_plan": "After frozen full completes, update4 literals across2 testfiles, including meaningfulcollapsed-negative andexpanded-positive checks; add explicit absence of obsoletehome-onlyclaim. Retain all price/entitlement/Free inheritance assertions and original failedlogs. Then focused, completeanalysis and corrected full.",
+  "implementation_changed_during_running_full": false
+}

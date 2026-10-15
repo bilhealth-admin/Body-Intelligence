@@ -1,0 +1,40 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart
+00:00 +0: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: removes only iOS support from simple_barcode_scanner 0.6.0
+00:00 +1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: Android defers only the Windows barcode plugin and preserves its assets
+00:00 +2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: pubspec surgery fails closed for another package or version
+00:00 +3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: pub-get reset rebinds owned ios overlay before metadata sanitizer
+00:01 +4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: pub-get reset rebinds owned android overlay before metadata sanitizer
+00:01 +5: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects changed lib/simple_barcode_scanner.dart without touching any fixture file
+00:01 +6: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects changed assets/barcode.html without touching any fixture file
+00:02 +7: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects changed LICENSE without touching any fixture file
+00:02 +8: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects changed android/src/Plugin.java without touching any fixture file
+00:02 +9: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects changed ios/Classes/Plugin.swift without touching any fixture file
+00:03 +10: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects changed pubspec.yaml without touching any fixture file
+00:03 +11: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects an unknown file without overwriting it
+00:03 +12: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects an unknown directory without overwriting it
+00:04 +13: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects a different canonical upstream even with identical bytes
+00:04 +14: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned marker status fails closed before rebinding
+00:04 +15: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned marker plugin fails closed before rebinding
+00:05 +16: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned marker version fails closed before rebinding
+00:05 +17: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned marker source_root_uri fails closed before rebinding
+00:05 +18: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned marker android_removed fails closed before rebinding
+00:05 +19: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned marker unknown_marker_key fails closed before rebinding
+00:06 +20: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: already-bound owned tree also rejects altered Dart bytes
+00:06 +21: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: missing owned marker is preserved as a refusal without new writes
+00:06 +22: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects override symlink and keeps its target
+00:07 +23: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: rebind rejects upstream symlink and keeps its target
+00:07 +24: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned early empty-plugin upgrade survives direct reuse
+00:07 +25: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: owned early empty-plugin upgrade survives pub-get reset
+00:07 +26: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: deferred override controls Flutter discovery and preserves Android
+00:08 +27: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart
+00:09 +27: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: removes every dev-only native plugin and keeps production plugins
+00:09 +28: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: Android excludes the unused legacy scanner while retaining camera and mobile scanner
+00:09 +29: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: sanitizer is idempotent
+00:09 +30: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: fails closed when production transitively requires a dev plugin
+00:09 +31: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: Android sanitizer preserves runtime registrant and production plugins
+00:10 +32: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: iOS sanitizer preserves header, implementation, and production plugin
+00:10 +33: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: iOS excludes Windows-only barcode native code while preserving test plugins
+00:10 +34: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: missing runtime registrant fails before plugin metadata is changed
+00:10 +35: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: RC iOS excludes Windows-only barcode native code before build
+00:10 +36: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/flutter_release_plugin_sanitizer_test.dart: signed workflows sanitize after tests and before release build
+00:10 +37: All tests passed!

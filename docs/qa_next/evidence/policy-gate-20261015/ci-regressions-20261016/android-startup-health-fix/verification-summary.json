@@ -1,0 +1,79 @@
+{
+  "source_files": [
+    {
+      "path": "tool/release/run_android_emulator_smoke.sh",
+      "sha256": "57946da72058607a5a0a3b3f2e5986d85d8eb3c3f4d88e43b69e810df8e84ee5",
+      "lines": 185
+    },
+    {
+      "path": "tool/release/verify_android_startup_frame.py",
+      "sha256": "addba25ddc3d9c7e8d2c49beb9d0f903d25466c7d3e0491dc7d7c85be827691e",
+      "lines": 418
+    },
+    {
+      "path": "tool/release/test_verify_android_startup_frame.py",
+      "sha256": "c9a9fabbb9671156a70cbbc94b7b4e490c406818438d7984135afb24f5d10811",
+      "lines": 450
+    }
+  ],
+  "focused_final": {
+    "unique_tests": 21,
+    "passed": 21,
+    "failed": 0,
+    "skipped": 0,
+    "framework_seconds": 1.748,
+    "log": "boot-idle-focused-unit.log",
+    "do_not_sum_with_prior_overlapping_runs": true
+  },
+  "bash_syntax": {
+    "exit_code": 0,
+    "scope": "syntax only; not an Android or live shell smoke pass"
+  },
+  "original_api33_replay": {
+    "original_run": 38805632701,
+    "original_source": "82fc546ee14a401465ce2c835df83acc834874d4",
+    "original_result": "FAILED",
+    "observed_owner": "com.android.systemui",
+    "expected_classifier_exit": 20,
+    "observed_classifier_exit": 20,
+    "log": "original-api33-classification-replay.log"
+  },
+  "retained_earlier_failures": [
+    {
+      "log": "focused-unit.log",
+      "result": "14 passed, 1 shell fixture timeout; overlaps final cases"
+    },
+    {
+      "log": "shell-fixture-diagnosis.log",
+      "result": "isolated shell failed before mock adb, exit127"
+    },
+    {
+      "log": "shell-fixture-fixed-path.log",
+      "result": "isolated shell timeout15s"
+    },
+    {
+      "log": "shell-fixture-timeout-trace.log",
+      "result": "MSYS dofork failed 0xC0000142 / Win32 299 before any adb"
+    }
+  ],
+  "resolution": "Production prelaunch QA path is one portable Python function invoked by the smoke shell and directly exercised with mocked adb. No test skip, dialog dismissal, process kill, SDK change or product mutation. Added a single120s real broadcast-idle fence before install/launch; exit0 plus exact marker is mandatory. It does not replace visible/interactive app assertions.",
+  "live_api33_status": "PENDING root's owned-device control and clean-AVD startup; no device PASS claimed",
+  "api34_status": "Original SDK archive failure preserved; rerun controlled by root",
+  "workflow_changed": false,
+  "focused_before_boot_idle": {
+    "unique_tests": 17,
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "framework_seconds": 0.892,
+    "log": "focused-unit-final.log"
+  },
+  "boot_idle_sources_receipt": "boot-broadcast-idle-sources-receipt.json",
+  "original_api34_replay": {
+    "observed_owner": "com.google.android.apps.nexuslauncher",
+    "expected_classifier_exit": 22,
+    "observed_classifier_exit": 22,
+    "log": "original-api34-classification-replay.log",
+    "original_startup_result": "FAILED"
+  }
+}

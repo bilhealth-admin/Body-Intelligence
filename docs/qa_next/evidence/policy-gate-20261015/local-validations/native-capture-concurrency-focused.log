@@ -1,0 +1,28 @@
+Running build hooks...Running build hooks...00:00 +0: loading tools/qa/flutter/native_capture_manifest_test.dart
+00:00 +0: tools/qa/flutter/native_capture_manifest_test.dart: manifest verifies the exact original size hash and dimensions
+00:00 +1: tools/qa/flutter/native_capture_manifest_test.dart: complete PNG required: header alone or missing IEND fails
+00:00 +2: tools/qa/flutter/native_capture_manifest_test.dart: corrupted compressed image bytes fail PNG chunk CRC
+00:00 +3: tools/qa/flutter/native_capture_manifest_test.dart: manifest size hash and dimensions cannot disagree with PNG
+00:00 +4: tools/qa/flutter/native_capture_manifest_test.dart: only the matching persisted SDK entry loses its bytes
+00:00 +5: tools/qa/flutter/native_capture_manifest_test.dart: SDK missing capture fails without removing another entry
+00:00 +6: tools/qa/flutter/native_capture_manifest_test.dart: SDK duplicate capture fails without removing another entry
+00:00 +7: tools/qa/flutter/native_capture_manifest_test.dart: SDK changed capture fails without removing another entry
+00:00 +8: tools/qa/flutter/native_capture_manifest_test.dart: malformed or duplicated manifest data is rejected
+00:00 +9: tools/qa/flutter/native_capture_manifest_test.dart: Android selected serial is passed as literal adb argv (5580)
+00:00 +10: tools/qa/flutter/native_capture_manifest_test.dart: Android cannot read databases foreign files or shell paths
+00:00 +11: tools/qa/flutter/native_capture_manifest_test.dart: iOS selected simulator owns its precise Documents capture path
+00:00 +12: tools/qa/flutter/native_capture_manifest_test.dart: transport saves original PNG unchanged and records selected device
+00:00 +13: tools/qa/flutter/native_capture_manifest_test.dart: invalid path is rejected before the native reader runs
+00:00 +14: tools/qa/flutter/native_capture_manifest_test.dart: transport missing image fails without manufacturing a PNG
+00:00 +15: tools/qa/flutter/native_capture_manifest_test.dart: transport corrupt image fails without manufacturing a PNG
+00:00 +16: tools/qa/flutter/native_capture_manifest_test.dart: transport timeout image fails without manufacturing a PNG
+00:00 +17: loading tools/qa/flutter/native_capture_collection_test.dart
+00:00 +17: tools/qa/flutter/native_capture_collection_test.dart: four readers preserve manifest order despite reverse completion
+00:01 +18: tools/qa/flutter/native_capture_collection_test.dart: failed batch retains prefix and valid peers before error escapes
+00:01 +19: tools/qa/flutter/native_capture_collection_test.dart: hung reader times out without losing peers or starting later batch
+00:01 +20: tools/qa/flutter/native_capture_collection_test.dart: duplicate manifest starts no reader
+00:01 +21: tools/qa/flutter/native_capture_collection_test.dart: duplicate SDK prefix starts no reader
+00:01 +22: tools/qa/flutter/native_capture_collection_test.dart: a late foreign path rejects the entire queue before reading
+00:01 +23: tools/qa/flutter/native_capture_collection_test.dart: bad original PNG fails verification while valid batch peers remain
+00:01 +24: tools/qa/flutter/native_capture_collection_test.dart: checkpoint failure remains fatal and stops later readers
+00:01 +25: All tests passed!

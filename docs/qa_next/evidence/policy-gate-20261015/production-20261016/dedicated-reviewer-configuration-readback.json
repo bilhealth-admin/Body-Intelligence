@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T23:10:59.610Z",
+  "classification": "READ_ONLY_PRODUCTION_CONFIGURATION_NOT_AUTH_OR_ARTIFACT_PROOF",
+  "project_id": "tgmanzhqulksykhslrzb",
+  "account_alias": "dedicated_store_review",
+  "state": {
+    "grant": [
+      {
+        "active": true,
+        "cohort": "apple-app-review-20261005",
+        "valid_now": true,
+        "expires_at": "2027-10-05T00:00:00+00:00"
+      }
+    ],
+    "moderator": false,
+    "ai_balance": [
+      {
+        "used": 0,
+        "granted": 2500,
+        "reserved": 0,
+        "updated_at": "2026-09-09T23:54:18.307744+00:00",
+        "refund_debt": 0
+      }
+    ],
+    "account_alias": "dedicated_store_review",
+    "administrator": false,
+    "identity_count": 1,
+    "email_confirmed": true,
+    "currently_banned": false,
+    "password_present": true,
+    "subscription_mirror": [
+      {
+        "plan_id": "premium_ai_coach",
+        "provider": "closed_test",
+        "lifecycle": "active",
+        "expires_at": "2027-10-05T00:00:00+00:00",
+        "verified_at": "2026-10-04T22:03:15.107294+00:00"
+      }
+    ]
+  },
+  "normal_auth_result": "AUTOMATIC_APPROVAL_REJECTED_PROCESS_START_NO_LOGIN_ATTEMPT",
+  "normal_auth_failure_detail": "Execution blocked by policy; no more detailed reason supplied",
+  "temporary_key_file_removed": true,
+  "grant_or_balance_changes": false,
+  "store_metadata_changed": false
+}

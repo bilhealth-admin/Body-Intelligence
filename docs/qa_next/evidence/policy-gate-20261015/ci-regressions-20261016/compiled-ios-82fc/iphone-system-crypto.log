@@ -1,0 +1,73 @@
+Failed to index parameter type: <WFExpandingParameter: 0x10912d420> in is.workflow.actions.downloadurl: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFExpandingParameter) for locale: en
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50122/6EY-QEgVQCA=/
+VMServiceFlutterDriver: Isolate found with number: 1406129874307239
+VMServiceFlutterDriver: Isolate 1406129874307239 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: native AES-256-GCM bridge matches the legacy v1 byte layout
+flutter: 00:00 +1: native secure account-key cache survives reopen and isolates owners
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following PlatformException was thrown running a test:
+flutter: PlatformException(Unexpected security result code, Code: -34018, Message: A required entitlement
+flutter: isn't present., -34018, null)
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+flutter: #1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+flutter: <asynchronous suspension>
+flutter: #2      FlutterSecureStorage.delete (package:flutter_secure_storage/flutter_secure_storage.dart:258:5)
+flutter: <asynchronous suspension>
+flutter: #3      CloudAccountKeyRepository.removeLocal (package:body_intelligence_log/features/cloud_platform/services/cloud_account_key_repository.dart:189:5)
+flutter: <asynchronous suspension>
+flutter: #4      main.<anonymous closure> (file:///Users/runner/work/Body-Intelligence/Body-Intelligence/integration_test/system_crypto_bridge_integration_test.dart:137:9)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: The test description was:
+flutter:   native secure account-key cache survives reopen and isolates owners
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:00 +1: native secure account-key cache survives reopen and isolates owners [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: native secure account-key cache survives reopen and isolates owners
+flutter:
+flutter: 00:00 +1 -1: (tearDownAll)
+flutter: 00:00 +2 -1: Some tests failed.
+VMServiceFlutterDriver: Connected to Flutter application.
+Failure Details:
+Failure in method: native secure account-key cache survives reopen and isolates owners
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following PlatformException was thrown running a test:
+PlatformException(Unexpected security result code, Code: -34018,
+Message: A required entitlement isn't present., -34018, null)
+
+When the exception was thrown, this was the stack:
+#0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+#1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+<asynchronous suspension>
+#2      FlutterSecureStorage.delete (package:flutter_secure_storage/flutter_secure_storage.dart:258:5)
+<asynchronous suspension>
+#3      CloudAccountKeyRepository.removeLocal (package:body_intelligence_log/features/cloud_platform/services/cloud_account_key_repository.dart:189:5)
+<asynchronous suspension>
+#4      main.<anonymous closure> (file:///Users/runner/work/Body-Intelligence/Body-Intelligence/integration_test/system_crypto_bridge_integration_test.dart:137:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+<asynchronous suspension>
+
+The test description was:
+  native secure account-key cache survives reopen and isolates
+  owners
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+

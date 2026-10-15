@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "recorded_at_utc": "2026-10-15T23:15:44.230Z",
+  "source_file": "supabase/migrations/20261015230655_restore_owner_approved_secondary_admin_identity_correction.sql",
+  "source_sha256": "68428113e1f6af74a6b4c6b8ff6eec4e68e6f3bd5d412d1a4ce523ed2fed569f",
+  "live_migration": {
+    "version": "20261015231142",
+    "name": "restore_owner_approved_secondary_admin_identity_correction"
+  },
+  "isolated_focused_tests": {
+    "passed": 33,
+    "failed": 0
+  },
+  "exact_preexisting_administrator_rows_restored": true,
+  "active_administrators": 2,
+  "moderators_count": 2,
+  "dedicated_store_administrator": false,
+  "dedicated_store_moderator": false,
+  "restrictive_index_absent": true,
+  "financial_comparison": {
+    "baseline_scope": "Earlier 11-migration deployment, not an immediate pre-restoration snapshot",
+    "all_row_counts_same": true,
+    "comparisons": [
+      {
+        "object": "public.bil_subscriptions",
+        "row_count": 8,
+        "baseline_md5": "1cbd6a5f03a4d5d5e95235d4e2c5abcd",
+        "current_md5": "7b2e7bbada3423acc3b7820ea9c7e486",
+        "same": false
+      },
+      {
+        "object": "public.bil_ai_boost_purchases",
+        "row_count": 12,
+        "baseline_md5": "6fe2cbc6d8a8077b2da0f81d3054bb82",
+        "current_md5": "6fe2cbc6d8a8077b2da0f81d3054bb82",
+        "same": true
+      },
+      {
+        "object": "bil_admin_private.subscription_grants",
+        "row_count": 10,
+        "baseline_md5": "bdfba81a526bb61a88e0fddaebf1b975",
+        "current_md5": "bdfba81a526bb61a88e0fddaebf1b975",
+        "same": true
+      },
+      {
+        "object": "public.bil_ai_boost_store_state",
+        "row_count": 0,
+        "baseline_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "current_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "same": true
+      },
+      {
+        "object": "public.bil_store_subscription_snapshots",
+        "row_count": 4,
+        "baseline_md5": "eb5a4cdd70594c7dd9ae6ec362db38c8",
+        "current_md5": "d5da15c5295bc72dd6fbb19cf528dd01",
+        "same": false
+      },
+      {
+        "object": "bil_admin_private.subscription_commands",
+        "row_count": 14,
+        "baseline_md5": "5e5a0acf7aaa85dbe91b981b982173cd",
+        "current_md5": "5e5a0acf7aaa85dbe91b981b982173cd",
+        "same": true
+      }
+    ],
+    "all_hashes_same": false,
+    "latest_server_verification_at": "2026-10-15T23:07:04.059+00:00",
+    "latest_verification_precedes_restoration_migration": true,
+    "admin_user_triggers": [],
+    "inference": "The two newer financial rowsets are consistent with an independent server refresh before this role-only correction. No purchase snapshot was rolled back or overwritten."
+  },
+  "no_grant_balance_purchase_DML_in_migration": true,
+  "normal_auth_or_device_test": false
+}

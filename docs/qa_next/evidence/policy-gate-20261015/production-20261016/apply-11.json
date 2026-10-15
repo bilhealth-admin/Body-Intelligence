@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261015090100_allow_authenticated_community_contact_guard.sql",
+  "name": "allow_authenticated_community_contact_guard",
+  "source_version": "20261015090100",
+  "source_sha256": "b01e111cc8a099d4ee93e13194a563837ae95d7e145e86503eb741b418446f03",
+  "executed_query_sha256": "16b349017f99783d7b53a16d5caeec387749fa925c9a86ce2a3bdd8ae55e18ef",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:18 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

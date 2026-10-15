@@ -1,0 +1,224 @@
+{
+  "recorded_at_utc": "2026-10-15 22:54:16 UTC",
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "scope": "Actual Production DDL deployment and limited catalog/negative-HTTP verification; not reviewer login, phone, purchase or final signed-artifact proof",
+  "applied_count": 11,
+  "applied": [
+    {
+      "file": "supabase/migrations/20261007130000_bil08_community_profile_activity_v1.sql",
+      "name": "bil08_community_profile_activity_v1",
+      "source_version": "20261007130000",
+      "source_sha256": "a881cbd06c5b08813b9d02ab38162112169f7edddb4132644423ac53fda8706e",
+      "executed_query_sha256": "d5fbd04596c495930d76a40631f89fd116a947e8842d27fa2ee1df49f4924cf6",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:49:52 UTC",
+      "remote_migration": {
+        "version": "20261015224954",
+        "name": "bil08_community_profile_activity_v1"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261011193000_community_review_revision_v2.sql",
+      "name": "community_review_revision_v2",
+      "source_version": "20261011193000",
+      "source_sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+      "executed_query_sha256": "c7e48bae9c99b2d7efd5ffdd2bd5b50323f030adb90d8b2b298fe85ff83b929f",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:50:24 UTC",
+      "postconditions": {
+        "rpc_present": true,
+        "publish_only_disabled": true,
+        "private_tables_rls": true
+      },
+      "remote_migration": {
+        "version": "20261015225026",
+        "name": "community_review_revision_v2"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261011211500_admin_authority_transaction_lock.sql",
+      "name": "admin_authority_transaction_lock",
+      "source_version": "20261011211500",
+      "source_sha256": "e10b82d4b2abbfab9f3c558be344cc20b18e4ca890cf62851d0e3e05b1a6c93d",
+      "executed_query_sha256": "e819fee1cb646d23c08482bf911d798d319658800745ae656f305714edc51bf9",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:00 UTC",
+      "postconditions": {
+        "authority_locked": true,
+        "clients_denied": true
+      },
+      "remote_migration": {
+        "version": "20261015225102",
+        "name": "admin_authority_transaction_lock"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261012052335_cloud_nutrition_goals_restore_v2.sql",
+      "name": "cloud_nutrition_goals_restore_v2",
+      "source_version": "20261012052335",
+      "source_sha256": "ccacdcef47bf2ff0e3d438826da6fc285015c4554e157834bdea052b5ee73966",
+      "executed_query_sha256": "d3d2b2def605f6b72b83b7b1836afbe068e7f94e708e044ad048ba04c836db4d",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:02 UTC",
+      "postconditions": {
+        "capabilities_present": true,
+        "public_tables_rls": true,
+        "anonymous_records_denied": true
+      },
+      "remote_migration": {
+        "version": "20261015225104",
+        "name": "cloud_nutrition_goals_restore_v2"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261012202029_admin_credit_authority_transaction_lock.sql",
+      "name": "admin_credit_authority_transaction_lock",
+      "source_version": "20261012202029",
+      "source_sha256": "a53858dfac88c3e5ba7dd311608b5a1832602c26d0fd25afcf17e12757cbf402",
+      "executed_query_sha256": "6f3f51a3a8628bb300cf3068416a490d0bbf0d2e4523bed04f5a88c06a5e6438",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:04 UTC",
+      "postconditions": {
+        "four_credit_rpcs_locked": true
+      },
+      "remote_migration": {
+        "version": "20261015225106",
+        "name": "admin_credit_authority_transaction_lock"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261012204610_boost_refund_tombstone_service_read.sql",
+      "name": "boost_refund_tombstone_service_read",
+      "source_version": "20261012204610",
+      "source_sha256": "045a80617915ddc4f6b36a460925bedca36c1c950f96b721d835bd5af369a267",
+      "executed_query_sha256": "d60bcf0f43a42df7751ac080d964cff48e83438c85d09cb72f98e8fb9fb431b8",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:06 UTC",
+      "postconditions": {
+        "service_read": true,
+        "user_read_denied": true,
+        "anon_read_denied": true
+      },
+      "remote_migration": {
+        "version": "20261015225109",
+        "name": "boost_refund_tombstone_service_read"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261013062209_community_message_delivery_v2.sql",
+      "name": "community_message_delivery_v2",
+      "source_version": "20261013062209",
+      "source_sha256": "321b00a6f5b483c6ae555911c1153c4174fe78a2b4ff49d15c7c10487502a00d",
+      "executed_query_sha256": "17007de2ad70c54da66300a4a3df6cb56aa1e5f50909ce8c0d9e6db7cfd014c1",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:09 UTC",
+      "postconditions": {
+        "send_rpc_present": true,
+        "private_ledger_rls": true,
+        "direct_ledger_denied": true
+      },
+      "remote_migration": {
+        "version": "20261015225110",
+        "name": "community_message_delivery_v2"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261013062221_community_safety_report_review_v1.sql",
+      "name": "community_safety_report_review_v1",
+      "source_version": "20261013062221",
+      "source_sha256": "8846b0e94d6fee14b76597c05bebb3f9239d71d0e0399127698fbaec7ef30e18",
+      "executed_query_sha256": "7c10decd93b69bbaa18953882bfc33aaa3a64016d1b1ce7647411b620993e5df",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:11 UTC",
+      "postconditions": {
+        "content_rpc_present": true,
+        "decision_rpc_present": true,
+        "private_decisions_rls": true
+      },
+      "remote_migration": {
+        "version": "20261015225113",
+        "name": "community_safety_report_review_v1"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261014100000_ai_coach_safety_reports_v1.sql",
+      "name": "ai_coach_safety_reports_v1",
+      "source_version": "20261014100000",
+      "source_sha256": "aaad8ac351dd43983cffb7b4ad63491715c55aa3d59b490f1c32b0f30a13540f",
+      "executed_query_sha256": "77f9d1f30556c885725b1f6c3c6b274e83899e1f3fae70027d2def0aff753136",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:13 UTC",
+      "postconditions": {
+        "submit_rpc_present": true,
+        "private_report_tables_rls": true,
+        "anonymous_submit_denied": true
+      },
+      "remote_migration": {
+        "version": "20261015225114",
+        "name": "ai_coach_safety_reports_v1"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261015090000_restore_single_owner_administrator.sql",
+      "name": "restore_single_owner_administrator",
+      "source_version": "20261015090000",
+      "source_sha256": "4e46262ba06f8aa368c508a1f0937d28dd931f5642feeecffca943ab2a9be973",
+      "executed_query_sha256": "17f678e36256a1c628580987b01e3c59673234cba94dcfbd95aa3769d19f0ebb",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:15 UTC",
+      "postconditions": {
+        "exactly_one_active_admin": true,
+        "designated_owner_only": true,
+        "unique_index_present": true
+      },
+      "remote_migration": {
+        "version": "20261015225118",
+        "name": "restore_single_owner_administrator"
+      }
+    },
+    {
+      "file": "supabase/migrations/20261015090100_allow_authenticated_community_contact_guard.sql",
+      "name": "allow_authenticated_community_contact_guard",
+      "source_version": "20261015090100",
+      "source_sha256": "b01e111cc8a099d4ee93e13194a563837ae95d7e145e86503eb741b418446f03",
+      "executed_query_sha256": "16b349017f99783d7b53a16d5caeec387749fa925c9a86ce2a3bdd8ae55e18ef",
+      "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+      "started_at_utc": "2026-10-15 22:51:18 UTC",
+      "postconditions": {
+        "authenticated_execute": true,
+        "service_execute": true
+      },
+      "remote_migration": {
+        "version": "20261015225121",
+        "name": "allow_authenticated_community_contact_guard"
+      }
+    }
+  ],
+  "new_functions_present": 29,
+  "old_contracts_compared": 19,
+  "old_name_arguments_return_owner_unchanged": true,
+  "old_abi_mismatch": [],
+  "old_acl_preserved_except_intended_contact_classifier_service_execute": true,
+  "new_anonymous_executable_functions": 0,
+  "financial_six_row_sets_unchanged": true,
+  "held_migrations": [
+    {
+      "source_file": "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql",
+      "deployed": false,
+      "reason": "Confirmed live legacy receipt fan-out duplication, pending compatible tested fix"
+    }
+  ],
+  "owner_admin_after": "Exactly one active; designated owner",
+  "reviewer_b_moderator_after": "Unchanged, still needs explicit least-privilege reconciliation",
+  "reviewer_a_entitlement": "None in preflight; no new grant made",
+  "publish_only_enabled": false,
+  "edge_functions_deployed": 0,
+  "store_metadata_written": 0,
+  "store_builds_uploaded_or_added": 0,
+  "appeals_or_review_replies_sent": 0,
+  "retention_policy": "No TTL invented or data cleanup scheduled. Separate audit retention review remains open; DDL deployment is not certification that this policy gate is closed.",
+  "backups": "Ignored scoped definitions/ACL/catalog and exact Adminrows; not a full database backup/restore drill",
+  "abi_comparison_source": "Actual captured before catalog; no inferred type defaults"
+}
+

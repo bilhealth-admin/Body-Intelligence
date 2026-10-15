@@ -1,0 +1,92 @@
+{
+  "schema": 3,
+  "classification": "REVISED_CANDIDATE_NOT_APPLIED_BEHAVIOR_NOT_TESTED",
+  "source_head_at_intake": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "files": [
+    {
+      "path": "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql",
+      "original_sha256": "4ac4a5e372e9a33d2daeb94cb286343c196d8324c3796048c9abd357bc4a91f9",
+      "candidate_sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b",
+      "candidate_bytes": 25947,
+      "candidate_lines": 497
+    },
+    {
+      "path": "tools/qa/bil_postgres_review_v2_test.py",
+      "original_sha256": "fa16d27b33b1141c75a8fc9a01045ea201384240cda088196e647ad4891df0c5",
+      "candidate_sha256": "1112d5ae534b400dff24e26c19420f3412c069495344742bf6e1c2e6aef834ae",
+      "candidate_bytes": 35673,
+      "candidate_lines": 587
+    },
+    {
+      "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.sql",
+      "original_sha256": null,
+      "candidate_sha256": "bd4dc2c928edd42f6637f126bb54cf4d11f24856076051f346ad40a24bf6025a",
+      "candidate_bytes": 14473,
+      "candidate_lines": 220
+    },
+    {
+      "path": "lib/features/community/activity_rewards/community_post_moderation_receipt.dart",
+      "original_sha256": "085d6a00b1e57c0a396ed4e7f06b973ea86f3069b65f439620a0046911f64cf9",
+      "candidate_sha256": "3bbb10c43664c6eb8e35f5e87fd127d0a64963d55011c17c9c009669ebf6cc23",
+      "candidate_bytes": 2714,
+      "candidate_lines": 83
+    },
+    {
+      "path": "test/parallel/bil05/community_post_moderation_receipt_test.dart",
+      "original_sha256": "03798702976ab9057883688a513b0fafbe83fd3f139a2d7e5582ff61a89f5903",
+      "candidate_sha256": "97e42ad1400f4d1be305fd00aa4ca48e8f3fffc3c8cbd69fa94a0495c070824a",
+      "candidate_bytes": 6720,
+      "candidate_lines": 208
+    },
+    {
+      "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.provenance.json",
+      "original_sha256": null,
+      "candidate_sha256": "1cf7db014787c2383f65274e209a2c12b859379ea3dbe9a85d1d01e34a2341be",
+      "candidate_bytes": 4700,
+      "candidate_lines": 96
+    },
+    {
+      "path": "tools/qa/bil_postgres_receipt_compat_cases.py",
+      "original_sha256": null,
+      "candidate_sha256": "66d7a0291f83fc19868e3a5df16ba572a249af203a71a7fee12a3ec33733229b",
+      "candidate_bytes": 16788,
+      "candidate_lines": 240
+    }
+  ],
+  "patch_sha256": "1cdd212fa966a4bfa2eec46ebadc8ffeec91016612730b31b4f135f320948e04",
+  "patch_bytes": 83407,
+  "python_ast_parse": {
+    "classification": "SYNTAX_ONLY_AST_PARSE_NO_IMPORT_OR_TEST_EXECUTION",
+    "files": [
+      {
+        "path": "tools/qa/bil_postgres_review_v2_test.py",
+        "sha256": "1112d5ae534b400dff24e26c19420f3412c069495344742bf6e1c2e6aef834ae",
+        "result": "PASS"
+      },
+      {
+        "path": "tools/qa/bil_postgres_receipt_compat_cases.py",
+        "sha256": "66d7a0291f83fc19868e3a5df16ba572a249af203a71a7fee12a3ec33733229b",
+        "result": "PASS"
+      }
+    ]
+  },
+  "seen_writer_catalog_audit": {
+    "classification": "READ_ONLY_LIVE_CATALOG_DDL_AND_ACL_ONLY",
+    "captured_at_utc": "2026-10-15T23:27:26Z",
+    "catalog_sha256": "f450c68827ae7901459ed656f313e0ba46af9e9fc263f83bc9d4426a08d823b0",
+    "catalog_bytes": 647228,
+    "authenticated_function_count": 322,
+    "application_function_count": 178,
+    "receipt_seen_writer_count": 3,
+    "third_writer_definition_sha256": "7233d976a91b8fb177dcdbc8e1bfe52bcd98f8bb2b8fdd0b84babb3b96a4f7c0",
+    "third_writer_owner": "postgres",
+    "third_writer_acl": "{postgres=X/postgres,authenticated=X/postgres}",
+    "direct_authenticated_table_or_seen_column_update": false
+  },
+  "proposed_seen_rpc_overlap_cases": 12,
+  "behavioral_tests_run": false,
+  "local_qa_connection_used": false,
+  "live_mutations": false,
+  "actual_source_modified": false,
+  "retention_policy": "UNRESOLVED_NO_TTL_INVENTED"
+}

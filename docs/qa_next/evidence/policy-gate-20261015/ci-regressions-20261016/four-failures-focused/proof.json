@@ -1,0 +1,18 @@
+{
+  "recorded_at_utc": "2026-10-15T22:59:14.270755+00:00",
+  "passed": 33,
+  "failed": 0,
+  "skipped": 0,
+  "previous_failed_cases_fixed": 4,
+  "goldens_updated": 0,
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "dirty_tree": true,
+  "file_sha256": {
+    "test/features/commerce/bil_store_copy_test.dart": "8499a09d82647c3458089a500608f6cdc060ea7f32821a370bbb9d5ea785a91f",
+    "test/features/commerce/bil_dynamic_store_offers_test.dart": "c743dc220bdd47b3a8d268337e4f2301bd05a08f9907bf910ade7050569c96d8",
+    "test/features/commerce/paywall_ai_market_benefits_test.dart": "3e79d3c2cd93bb6da769a672f4bcd20ae04637c07347ff1a43884a76d53ca46a",
+    "test/launch_readiness/system_crypto_export_compliance_contract_test.dart": "89d2155db8939f5695fdc6160ef0ea712a548401a25a24be08c6c9e061398d97",
+    ".github/workflows/bil_apple_google_policy_gate.yml": "187e0921f56063941756b94030843965724c56f710b54852d4111f4f735a939f"
+  },
+  "scope": "Four complete focusedfiles, including all4actualrootfullfailures; not correctedcomprehensivePASS"
+}

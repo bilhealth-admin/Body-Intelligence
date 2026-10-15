@@ -1,0 +1,12 @@
+{
+  "extracted_files": 1591,
+  "selected": [
+    "pgsql/bin",
+    "pgsql/lib",
+    "pgsql/share",
+    "license files"
+  ],
+  "runtime": "G:\\BIL_Toolchains\\PostgreSQL\\17.11-3-qa-20261016\\runtime",
+  "source_sha256_verified": true,
+  "server_started": false
+}

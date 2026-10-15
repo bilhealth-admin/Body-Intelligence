@@ -1,0 +1,18 @@
+00:00 +0: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart
+00:00 +0: pub-get reset rebinds owned ios overlay before metadata sanitizer
+00:00 +0 -1: pub-get reset rebinds owned ios overlay before metadata sanitizer [E]
+  Bad state: Refusing to overwrite a pre-existing simple_barcode_scanner override.
+  tool\release\defer_ios_simple_barcode_scanner.dart 521:5                           prepareDeferredIosSimpleBarcodeScannerPackage
+  test\launch_readiness\deferred_ios_simple_barcode_scanner_plugin_test.dart 115:25  main.<fn>
+  
+00:00 +0 -1: pub-get reset rebinds owned android overlay before metadata sanitizer
+00:00 +0 -2: pub-get reset rebinds owned android overlay before metadata sanitizer [E]
+  Bad state: Refusing to overwrite a pre-existing simple_barcode_scanner override.
+  tool\release\defer_ios_simple_barcode_scanner.dart 521:5                           prepareDeferredIosSimpleBarcodeScannerPackage
+  test\launch_readiness\deferred_ios_simple_barcode_scanner_plugin_test.dart 115:25  main.<fn>
+  
+00:00 +0 -2: Some tests failed.
+
+Failing tests:
+  G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: pub-get reset rebinds owned android overlay before metadata sanitizer
+  G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart: pub-get reset rebinds owned ios overlay before metadata sanitizer

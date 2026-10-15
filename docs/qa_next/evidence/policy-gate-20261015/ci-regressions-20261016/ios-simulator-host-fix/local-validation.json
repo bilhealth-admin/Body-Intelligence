@@ -1,0 +1,69 @@
+{
+  "schema": "bil.qa.ios-simulator-signing-host-validation.v1",
+  "source_head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "scope": "Host fixture/mocked subprocess validation only; Apple signing and native Keychain not executed",
+  "native_keychain_status": "NOT_RUN",
+  "store_signing_status": "NOT_RUN",
+  "old_native_ci_run": "38805818728",
+  "old_native_failure": "-34018 at cleanup line137; primary error not separately preserved",
+  "steps": [
+    {
+      "name": "host-fixtures-final",
+      "command": [
+        "C:\\Users\\HP 1040 G8\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        ".github/scripts/test_bil_ios_simulator_adhoc_sign.py"
+      ],
+      "exit_code": 0,
+      "log": "build\\qa\\policy-gate-20261015\\ios-simulator-signing-20261016\\host-fixtures-final.log",
+      "log_sha256": "cebbf38fcc745f0884b047284603bc319fc594d60f8210d3c2b0423dbad11cbe",
+      "fixture_case_count": 31
+    },
+    {
+      "name": "shell-syntax",
+      "command": [
+        "C:/Program Files/Git/bin/bash.exe",
+        "-n",
+        ".github/scripts/bil_ios36_native_integration.sh"
+      ],
+      "exit_code": 0,
+      "log": "build\\qa\\policy-gate-20261015\\ios-simulator-signing-20261016\\shell-syntax.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "native-fixture-format",
+      "command": [
+        "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/bin/dart.exe",
+        "format",
+        "--output=none",
+        "--set-exit-if-changed",
+        "integration_test/system_crypto_bridge_integration_test.dart"
+      ],
+      "exit_code": 0,
+      "log": "build\\qa\\policy-gate-20261015\\ios-simulator-signing-20261016\\native-fixture-format.log",
+      "log_sha256": "1685974b88bd671112e17334bdc2abb8ef350e01ae026547459ec7a8307375ec"
+    },
+    {
+      "name": "scoped-diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        ".github/scripts/bil_ios36_native_integration.sh",
+        "integration_test/system_crypto_bridge_integration_test.dart"
+      ],
+      "exit_code": 0,
+      "log": "build\\qa\\policy-gate-20261015\\ios-simulator-signing-20261016\\scoped-diff-check.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "source_sha256": {
+    ".github/scripts/bil_ios36_native_integration.sh": "00c7a43b1c82d9c1a75f6dd71be36c8d2650ed87b296a3ed5a040fc37210f33f",
+    ".github/scripts/bil_ios_simulator_adhoc_sign.py": "6f62038c20d74013653c645c1d8152ce83918bee8d3a57abb322779413b108d1",
+    ".github/scripts/test_bil_ios_simulator_adhoc_sign.py": "7651d52a119f9b50f0bdea36bd127955b2894a3a0672e41fbfa8c8d80109d15e",
+    "integration_test/system_crypto_bridge_integration_test.dart": "2aad26b929a0260009cb2141a39af8796b04810bcf051715e95dd32d1bb377ed"
+  }
+}

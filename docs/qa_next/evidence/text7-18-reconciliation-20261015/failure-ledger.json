@@ -357,10 +357,24 @@
     {
       "id": "PG18",
       "kind": "P0 reviewer role separation",
-      "cause": "Original legacy second-admin migration also grantsModerator; restoring singleownerAdmin does not revoke Moderator.",
-      "proof": "reviewer-administrator-moderator-sql-result.json:10/10 actual isolated PostgreSQL assertions; original migration bytes unchanged.",
-      "fix": "No unauthorized real-role change. Specific readback and UUID-scoped removal plan prepared for owner decision; preserve independentmoderators, purchasedrights and credits.",
-      "result": "SQL_REGRESSION PASS reproduces source overlap; liveaccounts and leastprivilege compliance BLOCKED, notPASS."
+      "cause": "Historical September6 bootstrap enrolls actual dedicated store account play-review as Moderator in canonical source; no later source migration revokes it. Live dedicated account already has neither role. Legitimate personal secondary Admin/Moderator must be preserved.",
+      "proof": "Live readback: actual dedicated account Admin=false/Moderator=false; exact two personal operational Admin rows restored from pre-deployment snapshot. Isolated role-repair33/33 PASS; bootstrap forward-cleanup tests pending separately.",
+      "fix": "Personal secondary Admin restored with exact before rows; reviewer bootstrap cleanup source96d2af4f passed44/44 and was deployed as a verified no-op on already unprivileged live reviewer. Unrelated roles and immediate six financial fingerprints unchanged. Latest owner authorized three consumer access grants; only dr.kadem needed one new independent PremiumAI365day grant through existing server RPC; no role/credit/store-record changes.",
+      "result": "SOURCE_ROLE_CHAIN_44_PASS; LIVE_LEAST_PRIVILEGE_READBACK_PASS; THREE_ACCOUNTS_SERVER_PREMIUM_AI_PLAN_PASS; NORMAL_AUTH_AND_SIGNED_ARTIFACT_STILL_UNTESTED",
+      "live_update_20261016": "Dedicated store identity play-review@bilhealth.com present, noAdmin/noModerator; active closed-test grant expires2027-10-05 and stored granted2500/used0/reserved0. Normal Auth start rejected by automatic approval, no login attempted. Personal Admin rows exactly restored, not a reviewer role grant.",
+      "previous_identity_interpretation_withdrawn_20261016": "The two Gmail accounts are personal accounts. Their prior reviewer_a/reviewer_b labels and single-owner-only premise were incorrect; the secondary operational administrator was owner-approved.",
+      "latest_accounts_20261016": {
+        "apple": "play-review@bilhealth.com",
+        "google": "google-play-review-20261004@bilhealth.com",
+        "personal_qa": "dr.kadem.nana@gmail.com",
+        "admins_only": [
+          "kademcom@yahoo.com",
+          "bilhealth.app@gmail.com"
+        ],
+        "server_premium": true,
+        "server_ai_plan": "ai_coach",
+        "current_play_app_access_value_not_read": true
+      }
     },
     {
       "id": "PG19",
@@ -448,8 +462,111 @@
       "fix": "Equivalent interpolation and null-aware Set element; no ignore, semantics/permissions/package version/UI/Production change.",
       "before": "final-analysis-before-two-style-fixes raw log and315.675s process receipt retained.",
       "after": "PASS affected37/37 and clean full Flutter analyze327.6s/exit0 (process331.385s),0issues; no ignore. Later read-only CI attestation workflow has identical Dart/product inputs, proven by full source snapshot comparison."
+    },
+    {
+      "id": "PG28",
+      "kind": "Seven exact Golden comparisons ran on a different font rasterizer than their approved references",
+      "risk": "P1",
+      "status": "FIX_PREPARED_AWAITING_CI",
+      "failed_run": 38805632780,
+      "failed_source_sha": "82fc546ee14a401465ce2c835df83acc834874d4",
+      "passed": 319,
+      "failed": 7,
+      "cause": "Exact Linux replay confirms all7 Masters match committed baselines, all19 SDK fonts and3 project faces match, Flutter/engine match, layout/content/wrapping match; differences are glyph/linear-icon edge rasterization (DirectWrite versus FreeType). Independent visual review completed7/7. LocalWindows7/7 pass with original comparator.",
+      "fix": "Compare the seven original exact Windows references in a dedicated Windows policy job; other affected regressions stay on Linux. Same tests, zero tolerance, no update or skip. Preserve future failure images in main policy artifact.",
+      "proof": "ci-regressions-20261016/golden-platform/proof.json; per-case-comparison.json; all28 original Linux PNGs"
+    },
+    {
+      "id": "PG29",
+      "kind": "Android34 emulator SDK system-image download failed before any app test",
+      "risk": "P1",
+      "status": "ARCHIVE_RESOLVED_SECOND_ENVIRONMENT_FAILURE_RETAINED",
+      "failed_run": 38805632701,
+      "failed_job": 116665615579,
+      "cause": "sdkmanager system-images;android-34;google_apis;x86_64 failed Error on ZipFile unknown archive. Emulator never started; not an app assertion or APK compilation failure.",
+      "fix": "No SDK version or app change for the transient archive. After one targeted retry proved download recovery, diagnose and guard actual emulator readiness rather than blindly retrying again.",
+      "proof": "ci-82fc546e/android34-original-failed-job.log",
+      "replay": "The single API34 attempt2 downloaded the same pinned system image successfully, then failed behind a PixelLauncher ANR (com.google.android.apps.nexuslauncher). Failed job116675317040 and artifact12008112457 retained. No BIL-process ANR proven; shared boot-idle/focus guard prepared underPG32."
+    },
+    {
+      "id": "PG30",
+      "kind": "iPhone native secure-storage test lacks Keychain entitlement in unsigned generic simulator bundle",
+      "risk": "P1",
+      "status": "FIX_PREPARED_NATIVE_REPLAY_REQUIRED",
+      "failed_run": 38805818728,
+      "failed_job": 116666268682,
+      "cause": "Native AES bridge passes, then real FlutterSecureStorage returns -34018 missing entitlement. Final cleanup may mask first operation; original1failedtest and raw log retained. iPad and later entrypoints not reached, not PASS.",
+      "proof": "ci-regressions-20261016/compiled-ios-82fc; ios-simulator-host-fix/local-validation.json",
+      "product_failure_proven": false,
+      "fix": "QA-only local ad-hoc Simulator signature identity -, actual Mach-O/platform/settings/entitlement guards and before/after readback; no developer certificate, provisioning or store signature. Cleanup moved to independent addTearDown callbacks to retain primary failures.31/31 host fixtures PASS; native Keychain not yet proven."
+    },
+    {
+      "id": "PG31",
+      "kind": "Real first-visible Coach text can paint outside native viewport during IME resize",
+      "risk": "P1",
+      "status": "FOCUSED_AND_AFFECTED_NATIVE_PASS_FINAL_FULL_AND_CI_REQUIRED",
+      "failed_run": 38805818728,
+      "failed_job": 116666268115,
+      "case": "native Coach reveal ar-light-normal 2x real fonts and frames",
+      "cause": "First positive opacity1 occurs while glyph geometry remains from pre-IME layout; first visible area0. Scroll offset adjusts post-frame, next frame visible. AR/EN focused regressions reproduce2 intendedFAIL before repair. No proof of a permanent missing reply.",
+      "fix": "Keep original320ms/easeOutCubic/.008 entrance. Only a metrics change before the first positive painted frame gates opacity until post-layout reading anchor is laid out; never hide/restart after first paint. ChatHistoryViewport unchanged.",
+      "proof": "ci-regressions-20261016/coach-first-paint/coach-first-paint-metrics-fix-receipt.json; original Android native failure and geometry retained",
+      "after": "AR/EN reproducer before0PASS/2intendedFAIL. First candidate12PASS/2ordinary160ms timingFAIL retained. Final14/14 focusedPASS with original timing assertions intact; scoped analyze0issues289.5s. Actual affected Android33 native replay currently building; not yetPASS. Actual fixed Android33 native replay:2/2 casesPASS,6/6 originalPNGs collected, process0; firstpaint and manualhistory assertions intact. Framework+3 includes teardown, not3cases.",
+      "native_proof": "ci-regressions-20261016/coach-native-fixed/proof.json"
+    },
+    {
+      "id": "PG32",
+      "kind": "API33 SystemUI ANR and API34 attempt2 PixelLauncher ANR block startup behind visible BIL Welcome",
+      "risk": "P1",
+      "status": "FIX_PREPARED_AVD_REPLAY_REQUIRED",
+      "failed_run": 38805632701,
+      "failed_job": 116665615423,
+      "cause": "Screenshot/XML/window focus prove ANR owner com.android.systemui, app Welcome fully rendered behind modal. Existing foreground guard accepted resumed BIL despite actual focus being Android ANR. No BIL-process ANR proven.",
+      "fix": "One bounded120s cmd activity wait-for-broadcast-idle barrier requiring exit0 plus exact full-line success; then actual-focus/ANR prelaunch and polling checks. DistinguishSystemUI20/BIL21/external22. Never pressWait/Close, kill system UI, suppress failure or accept app rendered behind modal.21/21 host testsPASS; no app/SDK/resource change.",
+      "proof": "ci-regressions-20261016/android-startup-health-fix/verification-summary.json; boot-broadcast-idle-sources-receipt.json; original API33/API34 logs and artifacts",
+      "after": "Actual command control on owned localAPI33 emulator5582 returned exit0 and exact idle marker in0.294s. This proves command support only; all affected startup assertions still require hosted AVD execution. API34 attempt2 remainsFAIL, notPASS."
+    },
+    {
+      "id": "PG33",
+      "kind": "Three stale storefront widget expectations after truthful full-video inventory wording change",
+      "risk": "P2",
+      "status": "PASS_FOCUSED_33_OF_33_CORRECTED_FULL_PENDING",
+      "run": "local owner full policy-corrected-20261016-ready",
+      "failed_source_sha": "ed963053c62cc549cbe50757279bd39d73a10e35 plus frozen local fixes",
+      "failed_source_fingerprint_v4": "cbdedb20f0cf756f8816d366ea57a65ba0e0afd54bd8ee331f2cbde159547b45",
+      "failed_cases": 3,
+      "cause": "Three widget expectations still demand300+home workout videos after verified inventory correction to300+workout videos; home-only count is below300, combinedhome+gym inventory meets advertised count.",
+      "fix": "After frozen full completes, update4 literals across2 testfiles, including meaningfulcollapsed-negative andexpanded-positive checks; add explicit absence of obsoletehome-onlyclaim. Retain all price/entitlement/Free inheritance assertions and original failedlogs. Then focused, completeanalysis and corrected full.",
+      "proof": "ci-regressions-20261016/full-observed-failures/observed-three-copy-failures.json",
+      "product_regression_proven": false,
+      "after": "Exact small update applied after full completed; no product copy or price assertions weakened.",
+      "focused_proof": "ci-regressions-20261016/four-failures-focused/proof.json"
+    },
+    {
+      "id": "PG34",
+      "kind": "Stale formatting-only native crypto workflow gate contract",
+      "risk": "P2",
+      "status": "PASS_FOCUSED_33_OF_33_CORRECTED_FULL_PENDING",
+      "failed_cases": 1,
+      "cause": "Exact source count expected two braced GitHub if expressions; one native step correctly uses equivalent implicit expression syntax. Boot and execution remain opt-in.",
+      "fix": "Accept only the two valid exact expression spellings, still require exactly two opt-in conditions; preserve owner-waiver/artifact/IPA crypto assertions. No release workflow weakened.",
+      "proof": "ci-regressions-20261016/full-observed-failures/observed-four-failures-live.json",
+      "focused_proof": "ci-regressions-20261016/four-failures-focused/proof.json"
+    },
+    {
+      "id": "PG35",
+      "kind": "V2 receipt incompatibility with actual deployed Oct5 V1 ledger/hooks",
+      "risk": "P1",
+      "status": "FIXED_NATIVE_39_FLUTTER_25_AND_PRODUCTION_DEPLOYED",
+      "cause": "Different Activity/push source keys bypass unique dedup against live V1 hooks. New V2 operation can also feed duplicate_decision/duplicate_receipt to rejecting emitter. No repeated financial credit proven.",
+      "fix": "One canonical V1/V2 Activity and push; suppress duplicate operation fan-out; serialize all three seen APIs before row writes; preserve delivered/leased/terminal/expired history and monetary rules.",
+      "proof": "docs/qa_next/evidence/policy-gate-20261015/receipt-compat-native-20261016/verification-summary.json; docs/qa_next/evidence/policy-gate-20261015/production-20261016/receipt-v2-compat-deployment.json",
+      "live_migration": "20261015234009",
+      "artifact_or_auth_e2e": false
     }
   ],
-  "policy_updated_at_utc": "2026-10-15T20:49:59.791086+00:00",
-  "counts_note": "F01-F23 historical categories and PG01-PG21 additive findings are not unique failed-case counts; shared variant diagnostics and overlapping tests are not summed."
+  "policy_updated_at_utc": "2026-10-15T23:47:59.321306+00:00",
+  "counts_note": "F01-F23 and PG01-PG35 are finding categories, not unique case totals. Completed root full:9888 cases,9884PASS,1failure+3error=4 failing cases,0skip,1358files. Source stable. Focused repairs in progress; original failing proof retained.",
+  "current_owner_validation_decision": "Latest owner explicitly requests commit/push now, full analysis followed by one comprehensive root suite on GitHub, then stop. Earlier no-push-until-local-full instruction superseded. Local analysis stopped for transfer; local full not started.",
+  "production_deployment_evidence": "14 migrations deployed; receipt-v2-compat-deployment.json; four Edge functions verified by exact source readback: verifier94/coach107/vision104/food61. Not signed artifact or authenticated store E2E."
 }

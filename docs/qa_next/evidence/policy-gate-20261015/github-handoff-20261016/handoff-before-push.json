@@ -1,0 +1,22 @@
+{
+  "recorded_at_utc": "2026-10-15T23:58:56.499942+00:00",
+  "owner_requested_commit_push_then_github_comprehensive_and_stop": true,
+  "local_analysis_status": "STOPPED_BY_OWNER_TRANSFER_TO_GITHUB_NOT_A_CODE_FAILURE",
+  "local_full_started": false,
+  "local_analysis_source_fingerprint": "98c7bb11d0445ff32296df6b698ebb4c1041293b92d5993aa62dc27856f1ad35",
+  "new_workflow": ".github/workflows/bil_owner_comprehensive_validation.yml",
+  "github_execution": "Complete analysis must pass before one unsharded Windows root suite; no automatic retry, build, signing or deployment. Push path trigger starts this first run; do not additionally dispatch a duplicate.",
+  "production_applied_migrations": 229,
+  "production_this_batch": 14,
+  "production_edges_deployed": 4,
+  "focused_passes": {
+    "receipt_native_sql": 39,
+    "affected_flutter": 25,
+    "food": 13,
+    "commerce_and_crypto": 33
+  },
+  "old_full": "9888 total /9884 PASS/4 FAIL; repaired and focused PASS. Not represented as current full PASS.",
+  "generated_failure_pngs_excluded_from_commit": 44,
+  "hash_manifest_original_retained": true,
+  "store_acceptance_or_signed_artifact_certified": false
+}

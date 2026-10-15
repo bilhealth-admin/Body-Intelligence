@@ -1,0 +1,34 @@
+test_absent_prefix_uses_declared_simulator_only_team_fallback (__main__.SimulatorSigningFixtures.test_absent_prefix_uses_declared_simulator_only_team_fallback) ... ok
+test_command_timeout_stays_a_failure_and_preserves_receipt (__main__.SimulatorSigningFixtures.test_command_timeout_stays_a_failure_and_preserves_receipt) ... ok
+test_conflicting_prefix_is_not_replaced_with_team (__main__.SimulatorSigningFixtures.test_conflicting_prefix_is_not_replaced_with_team) ... ok
+test_device_bundle_is_refused (__main__.SimulatorSigningFixtures.test_device_bundle_is_refused) ... ok
+test_duplicate_runner_settings_are_refused (__main__.SimulatorSigningFixtures.test_duplicate_runner_settings_are_refused) ... ok
+test_mismatching_signed_group_does_not_become_pass (__main__.SimulatorSigningFixtures.test_mismatching_signed_group_does_not_become_pass) ... ok
+test_missing_qa_opt_in_is_refused (__main__.SimulatorSigningFixtures.test_missing_qa_opt_in_is_refused) ... ok
+test_missing_team_is_not_guessed (__main__.SimulatorSigningFixtures.test_missing_team_is_not_guessed) ... ok
+test_non_adhoc_resolved_identity_is_refused (__main__.SimulatorSigningFixtures.test_non_adhoc_resolved_identity_is_refused) ... ok
+test_non_macos_host_is_refused_before_commands (__main__.SimulatorSigningFixtures.test_non_macos_host_is_refused_before_commands) ... ok
+test_non_qa_target_is_refused_before_commands (__main__.SimulatorSigningFixtures.test_non_qa_target_is_refused_before_commands) ... ok
+test_project_source_entitlements_are_never_overwritten (__main__.SimulatorSigningFixtures.test_project_source_entitlements_are_never_overwritten) ... ok
+test_provisioned_bundle_is_refused (__main__.SimulatorSigningFixtures.test_provisioned_bundle_is_refused) ... ok
+test_resolved_provisioning_profile_is_refused (__main__.SimulatorSigningFixtures.test_resolved_provisioning_profile_is_refused) ... ok
+test_shared_app_group_is_refused (__main__.SimulatorSigningFixtures.test_shared_app_group_is_refused) ... ok
+test_shared_keychain_group_is_refused (__main__.SimulatorSigningFixtures.test_shared_keychain_group_is_refused) ... ok
+test_signature_verification_failure_does_not_become_pass (__main__.SimulatorSigningFixtures.test_signature_verification_failure_does_not_become_pass) ... ok
+test_signing_failure_is_preserved_in_receipt (__main__.SimulatorSigningFixtures.test_signing_failure_is_preserved_in_receipt) ... ok
+test_source_hashes_are_required (__main__.SimulatorSigningFixtures.test_source_hashes_are_required) ... ok
+test_source_team_mismatch_is_refused (__main__.SimulatorSigningFixtures.test_source_team_mismatch_is_refused) ... ok
+test_unexpanded_prefix_is_not_replaced_with_team (__main__.SimulatorSigningFixtures.test_unexpanded_prefix_is_not_replaced_with_team) ... ok
+test_unexpected_certificate_signature_does_not_become_pass (__main__.SimulatorSigningFixtures.test_unexpected_certificate_signature_does_not_become_pass) ... ok
+test_unsigned_fixture_becomes_exact_local_signature_with_real_prefix (__main__.SimulatorSigningFixtures.test_unsigned_fixture_becomes_exact_local_signature_with_real_prefix) ... ok
+test_wrong_bundle_identity_is_refused (__main__.SimulatorSigningFixtures.test_wrong_bundle_identity_is_refused) ... ok
+test_checkout_lock_is_not_claimed_as_final_compiled_version (__main__.SwiftPackageInventoryFixtures.test_checkout_lock_is_not_claimed_as_final_compiled_version) ... ok
+test_current_workspace_lock_keeps_only_identity_version_revision (__main__.SwiftPackageInventoryFixtures.test_current_workspace_lock_keeps_only_identity_version_revision) ... ok
+test_malformed_pin_fails_instead_of_claiming_complete_inventory (__main__.SwiftPackageInventoryFixtures.test_malformed_pin_fails_instead_of_claiming_complete_inventory) ... ok
+test_missing_resolution_is_unknown (__main__.SwiftPackageInventoryFixtures.test_missing_resolution_is_unknown) ... ok
+test_unrecognized_lock_schema_is_explicitly_unknown (__main__.SwiftPackageInventoryFixtures.test_unrecognized_lock_schema_is_explicitly_unknown) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 1.341s
+
+OK

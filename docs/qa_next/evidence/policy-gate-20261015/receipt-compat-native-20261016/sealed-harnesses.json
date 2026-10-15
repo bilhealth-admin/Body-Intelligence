@@ -1,0 +1,93 @@
+{
+  "classification": "Isolated source/fixture harnesses; not the full Flutter source tree",
+  "approved_candidate_patch_sha256": "1cdd212fa966a4bfa2eec46ebadc8ffeec91016612730b31b4f135f320948e04",
+  "source_worktree_modified": false,
+  "harnesses": [
+    {
+      "mode": "before",
+      "root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\build\\qa\\policy-gate-20261015\\native-receipt-before-after-20261016\\before",
+      "receipt_migration_sha256": "4ac4a5e372e9a33d2daeb94cb286343c196d8324c3796048c9abd357bc4a91f9",
+      "files": [
+        {
+          "path": "supabase/migrations/20261011193000_community_review_revision_v2.sql",
+          "sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85"
+        },
+        {
+          "path": "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql",
+          "sha256": "4ac4a5e372e9a33d2daeb94cb286343c196d8324c3796048c9abd357bc4a91f9"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/functions.sql",
+          "sha256": "ace46d709eec3d91b3352e52cc47984d5259bac49db1a9d765589a88be512606"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.provenance.json",
+          "sha256": "1cf7db014787c2383f65274e209a2c12b859379ea3dbe9a85d1d01e34a2341be"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.sql",
+          "sha256": "bd4dc2c928edd42f6637f126bb54cf4d11f24856076051f346ad40a24bf6025a"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/moderator_population.sql",
+          "sha256": "24c2412250e3eba0b98ea8aa7fd8674cc846b83e170ced6bb39b20e5675a02b7"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/schema.sql",
+          "sha256": "78bfb546bdf274daddd20879ca4b91e22310420f184dc3021f61b16c3a9b8d39"
+        },
+        {
+          "path": "tools/qa/bil_postgres_receipt_compat_cases.py",
+          "sha256": "66d7a0291f83fc19868e3a5df16ba572a249af203a71a7fee12a3ec33733229b"
+        },
+        {
+          "path": "tools/qa/bil_postgres_review_v2_test.py",
+          "sha256": "1112d5ae534b400dff24e26c19420f3412c069495344742bf6e1c2e6aef834ae"
+        }
+      ]
+    },
+    {
+      "mode": "after",
+      "root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\build\\qa\\policy-gate-20261015\\native-receipt-before-after-20261016\\after",
+      "receipt_migration_sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b",
+      "files": [
+        {
+          "path": "supabase/migrations/20261011193000_community_review_revision_v2.sql",
+          "sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85"
+        },
+        {
+          "path": "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql",
+          "sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/functions.sql",
+          "sha256": "ace46d709eec3d91b3352e52cc47984d5259bac49db1a9d765589a88be512606"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.provenance.json",
+          "sha256": "1cf7db014787c2383f65274e209a2c12b859379ea3dbe9a85d1d01e34a2341be"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/legacy_delivery.sql",
+          "sha256": "bd4dc2c928edd42f6637f126bb54cf4d11f24856076051f346ad40a24bf6025a"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/moderator_population.sql",
+          "sha256": "24c2412250e3eba0b98ea8aa7fd8674cc846b83e170ced6bb39b20e5675a02b7"
+        },
+        {
+          "path": "supabase/tests/fixtures/community_review_baseline/schema.sql",
+          "sha256": "78bfb546bdf274daddd20879ca4b91e22310420f184dc3021f61b16c3a9b8d39"
+        },
+        {
+          "path": "tools/qa/bil_postgres_receipt_compat_cases.py",
+          "sha256": "66d7a0291f83fc19868e3a5df16ba572a249af203a71a7fee12a3ec33733229b"
+        },
+        {
+          "path": "tools/qa/bil_postgres_review_v2_test.py",
+          "sha256": "1112d5ae534b400dff24e26c19420f3412c069495344742bf6e1c2e6aef834ae"
+        }
+      ]
+    }
+  ]
+}

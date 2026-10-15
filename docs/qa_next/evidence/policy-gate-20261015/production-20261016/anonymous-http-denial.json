@@ -1,0 +1,28 @@
+{
+  "recorded_at_utc": "2026-10-15T22:54:06.953724+00:00",
+  "scope": "Actual HTTPS/PostgREST anonymous denial checks only; existing publishable key, no Authsession/paidservice/userdata mutation",
+  "keys_logged": false,
+  "private_key_file_removed": true,
+  "cases": [
+    {
+      "rpc": "bil_cloud_restore_capabilities_v2",
+      "http_status": 401,
+      "error_code": "42501",
+      "passed": true
+    },
+    {
+      "rpc": "bil_my_blocked_members_v1",
+      "http_status": 401,
+      "error_code": "42501",
+      "passed": true
+    },
+    {
+      "rpc": "bil_list_ai_coach_safety_reports_v1",
+      "http_status": 401,
+      "error_code": "42501",
+      "passed": true
+    }
+  ],
+  "passed": 3,
+  "failed": 0
+}

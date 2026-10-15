@@ -1,0 +1,193 @@
+[
+  {
+    "name": "ai-coach",
+    "entrypoint_path": "ai-coach/index.ts",
+    "verify_jwt": false,
+    "import_map_path": "ai-coach/deno.json",
+    "files": [
+      {
+        "name": "ai-coach/index.ts",
+        "sha256": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+        "bytes": 83
+      },
+      {
+        "name": "ai-coach/server.ts",
+        "sha256": "ccb7c47e20c5931238b4d7521a76882ba0296241b4a09a7b01f83c3e7f0f03e8",
+        "bytes": 51861
+      },
+      {
+        "name": "ai-coach/deno.json",
+        "sha256": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411",
+        "bytes": 82
+      },
+      {
+        "name": "_shared/bcp47.ts",
+        "sha256": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+        "bytes": 1838
+      },
+      {
+        "name": "_shared/mobile_integrity.ts",
+        "sha256": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+        "bytes": 5668
+      },
+      {
+        "name": "_shared/ai_provider_recipient.ts",
+        "sha256": "9f1b1b2629fcc0a89f3dc6dfed7efd3e304961ab32c5e701cdc37d0daf77a08d",
+        "bytes": 849
+      }
+    ],
+    "package_sha256": "90de802373b8357b5b5612032aeeeb8b4300e2a9dde87afca52a4574fdddf6ba"
+  },
+  {
+    "name": "analyze-meal",
+    "entrypoint_path": "analyze-meal/index.ts",
+    "verify_jwt": true,
+    "import_map_path": null,
+    "files": [
+      {
+        "name": "analyze-meal/index.ts",
+        "sha256": "d2acba4686ec70c0f3464f3bed019ab3c1a50e641280c1f87a86bfd223a7fc02",
+        "bytes": 20325
+      },
+      {
+        "name": "analyze-meal/consent.ts",
+        "sha256": "1c627c54bba9bdb79dceefe0f15e7543d863783892250a81fbff2b1fec400a04",
+        "bytes": 614
+      },
+      {
+        "name": "analyze-meal/providers/builders.ts",
+        "sha256": "c28657da85db89e21d21225bb5aae421b388345886006fe36fa9bd00d89f6dc3",
+        "bytes": 2028
+      },
+      {
+        "name": "analyze-meal/providers/config.ts",
+        "sha256": "dd399bed530298a611ce1d14473b5e8c1e77b27c321f61107f26d9045e4c9a2c",
+        "bytes": 2624
+      },
+      {
+        "name": "analyze-meal/providers/locale.ts",
+        "sha256": "d43232d5e922b622db607277cfaf244167929859b9e67498550ed5b62324b948",
+        "bytes": 3843
+      },
+      {
+        "name": "analyze-meal/providers/normalize.ts",
+        "sha256": "c863606699ae3a9a27cc702c171f287b837e8042d6671fd2c36d80f49c855b1e",
+        "bytes": 14700
+      },
+      {
+        "name": "analyze-meal/providers/prompt.ts",
+        "sha256": "5100a6cdd16ab593413b691636eb0ebcaf0d90afb6f72719a9b8cb05939056af",
+        "bytes": 5800
+      },
+      {
+        "name": "analyze-meal/providers/types.ts",
+        "sha256": "b24170c0b79592ec54f7151d0f8d827773806f489ce4c18f2a4ec5752efbb9ce",
+        "bytes": 1657
+      },
+      {
+        "name": "_shared/bcp47.ts",
+        "sha256": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+        "bytes": 1838
+      },
+      {
+        "name": "_shared/ai_provider_recipient.ts",
+        "sha256": "9f1b1b2629fcc0a89f3dc6dfed7efd3e304961ab32c5e701cdc37d0daf77a08d",
+        "bytes": 849
+      }
+    ],
+    "package_sha256": "c77dec7f81f21b2ef725b55da62b8b7c0e59a5d256181d1568e0512df38360e4"
+  },
+  {
+    "name": "verify-store-purchase",
+    "entrypoint_path": "verify-store-purchase/index.ts",
+    "verify_jwt": false,
+    "import_map_path": null,
+    "files": [
+      {
+        "name": "verify-store-purchase/index.ts",
+        "sha256": "9fcf388584ab7458976e0865cb8d042836a13ec4c8aa612edd1beee9348927dd",
+        "bytes": 90
+      },
+      {
+        "name": "verify-store-purchase/store_backend.ts",
+        "sha256": "0b4146ece80ff552a39ca668b94761def4a5fa5d3b8bb90c9aca14ba04d5b6be",
+        "bytes": 81507
+      },
+      {
+        "name": "verify-store-purchase/store_delivery_receipt.ts",
+        "sha256": "ca76c4cde0cbf63a74809a0872fbfe50d1c1121a26e928b4bc1d562bb20a263a",
+        "bytes": 2416
+      },
+      {
+        "name": "verify-store-purchase/apple_certificate_verifier.ts",
+        "sha256": "956c8f2ddda9456f89097123a2d4b356f7802ad829f035125b21daaa521bf78d",
+        "bytes": 11290
+      },
+      {
+        "name": "verify-store-purchase/apple_purchase_reconciliation.ts",
+        "sha256": "56f477b25029b0fb42172dd76fe9a6234dcc293d5c486dc56fed39a16abeb1d9",
+        "bytes": 2783
+      },
+      {
+        "name": "verify-store-purchase/apple_purchase_ownership.ts",
+        "sha256": "91b49408c42dfae5d1bf9ed2dca666147963581c1c553704582663842611d885",
+        "bytes": 3585
+      },
+      {
+        "name": "verify-store-purchase/apple_notification_policy.ts",
+        "sha256": "8d8603970811c9b0837429f50c0b75f0c523372d26cd5bb3650340bbfa302420",
+        "bytes": 1863
+      },
+      {
+        "name": "verify-store-purchase/apple_subscription_lifecycle.ts",
+        "sha256": "e340d9959056521f492f4386d827bd84bde29200d6fca798f1bd98a105e70947",
+        "bytes": 3665
+      },
+      {
+        "name": "verify-store-purchase/google_play_subscription_lifecycle.ts",
+        "sha256": "fe42fcaa043c61379e8f64cea0985bbae635159f739612eb99a31efdbfc76917",
+        "bytes": 3914
+      },
+      {
+        "name": "verify-store-purchase/google_play_notification.ts",
+        "sha256": "52e8fdff726e6200b3394f88c46a5ac872ac72191f878adfb3c9b400be214b71",
+        "bytes": 1624
+      },
+      {
+        "name": "verify-store-purchase/store_environment.ts",
+        "sha256": "2453b14ef15dc29906be21994b8232b250b8fc8b110ebc6abc55cf5525b8bd2c",
+        "bytes": 837
+      },
+      {
+        "name": "_shared/mobile_integrity.ts",
+        "sha256": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+        "bytes": 5668
+      }
+    ],
+    "package_sha256": "03a75a9d461be2b0db645833982bde0c78a45f0708106abe33bc3c01c02b593a"
+  },
+  {
+    "name": "food-search",
+    "entrypoint_path": "food-search/index.ts",
+    "verify_jwt": false,
+    "import_map_path": null,
+    "files": [
+      {
+        "name": "food-search/index.ts",
+        "sha256": "7af2164e36de3722e32b2fabf6abbe0a301564a3ad1219dde9e02d0cb98cc0fc",
+        "bytes": 20479
+      },
+      {
+        "name": "food-search/search_memo.ts",
+        "sha256": "3a00631ecae6f497e08f22bc7f39972f8374c33fc9991961b7df4cabf9319248",
+        "bytes": 2485
+      },
+      {
+        "name": "food-search/translation_text.ts",
+        "sha256": "4a4de57ef44e9c569934d1fd3eaed0c9f631359a1e05944b6cda33e6b9a07086",
+        "bytes": 322
+      }
+    ],
+    "package_sha256": "30528dd019129429f101dfcd776940cb775a592eed80b7b14762898743e229fa"
+  }
+]

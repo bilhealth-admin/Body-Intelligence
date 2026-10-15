@@ -1,0 +1,185 @@
+{
+  "database": "bil_qa_review_20261016023804681259",
+  "host": "127.0.0.1",
+  "port": 55432,
+  "head": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "head_status": "CAPTURED",
+  "postgres": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+  "runtime_probe": {
+    "status": "CAPTURED",
+    "version": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit",
+    "server_version": "17.11",
+    "server_version_num": "170011",
+    "queried_database": "postgres"
+  },
+  "session_model": "native independent psql sessions",
+  "fatal_error": null,
+  "records": [
+    {
+      "name": "legacy 32/35 moderation contract remains unchanged",
+      "result": "PASS"
+    },
+    {
+      "name": "changed text rejects stale review and fresh revision succeeds",
+      "result": "PASS"
+    },
+    {
+      "name": "ordinary user direct API and revoked moderator are denied",
+      "result": "PASS"
+    },
+    {
+      "name": "two independent sessions and response retry grant once",
+      "result": "PASS"
+    },
+    {
+      "name": "publish only is denied until owner policy explicitly enables it",
+      "result": "PASS"
+    },
+    {
+      "name": "publish only requests a separate administrator award and simultaneous retries credit once",
+      "result": "PASS"
+    },
+    {
+      "name": "media revision invalidates a decision and late owner edits cannot change an approved post",
+      "result": "PASS"
+    },
+    {
+      "name": "role withdrawn in a separate pending transaction prevents a decision",
+      "result": "PASS"
+    },
+    {
+      "name": "rejection requires a reason and deleted recreated content cannot reuse a review",
+      "result": "PASS"
+    },
+    {
+      "name": "late reward uses original approval day and notification failure cannot award twice",
+      "result": "PASS"
+    },
+    {
+      "name": "reward queue separates content authority and grants without blocking actor deletion",
+      "result": "PASS"
+    },
+    {
+      "name": "only the author receives a reason for the current rejected revision",
+      "result": "PASS"
+    },
+    {
+      "name": "approval receipt is delivered once across same and new operation retries",
+      "result": "PASS"
+    },
+    {
+      "name": "V1 and V2 positive daily-zero and rejected totals across all keys",
+      "result": "PASS"
+    },
+    {
+      "name": "different V2 operation IDs and mixed V1 V2 sessions fan out and credit once",
+      "result": "PASS"
+    },
+    {
+      "name": "existing immutable grant receipt does not create another fan-out",
+      "result": "PASS"
+    }
+  ],
+  "receipt_baseline": "clean",
+  "seen_overlap_observations": [],
+  "source_fingerprints": {
+    "before": {
+      "tools/qa/bil_postgres_review_v2_test.py": {
+        "status": "CAPTURED",
+        "bytes": 35673,
+        "sha256": "1112d5ae534b400dff24e26c19420f3412c069495344742bf6e1c2e6aef834ae"
+      },
+      "tools/qa/bil_postgres_receipt_compat_cases.py": {
+        "status": "CAPTURED",
+        "bytes": 16788,
+        "sha256": "66d7a0291f83fc19868e3a5df16ba572a249af203a71a7fee12a3ec33733229b"
+      },
+      "supabase/tests/fixtures/community_review_baseline/schema.sql": {
+        "status": "CAPTURED",
+        "bytes": 30265,
+        "sha256": "78bfb546bdf274daddd20879ca4b91e22310420f184dc3021f61b16c3a9b8d39"
+      },
+      "supabase/tests/fixtures/community_review_baseline/functions.sql": {
+        "status": "CAPTURED",
+        "bytes": 14977,
+        "sha256": "ace46d709eec3d91b3352e52cc47984d5259bac49db1a9d765589a88be512606"
+      },
+      "supabase/tests/fixtures/community_review_baseline/moderator_population.sql": {
+        "status": "CAPTURED",
+        "bytes": 753,
+        "sha256": "24c2412250e3eba0b98ea8aa7fd8674cc846b83e170ced6bb39b20e5675a02b7"
+      },
+      "supabase/tests/fixtures/community_review_baseline/legacy_delivery.sql": {
+        "status": "CAPTURED",
+        "bytes": 14473,
+        "sha256": "bd4dc2c928edd42f6637f126bb54cf4d11f24856076051f346ad40a24bf6025a"
+      },
+      "supabase/tests/fixtures/community_review_baseline/legacy_delivery.provenance.json": {
+        "status": "CAPTURED",
+        "bytes": 4700,
+        "sha256": "1cf7db014787c2383f65274e209a2c12b859379ea3dbe9a85d1d01e34a2341be"
+      },
+      "supabase/migrations/20261011193000_community_review_revision_v2.sql": {
+        "status": "CAPTURED",
+        "bytes": 22709,
+        "sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85"
+      },
+      "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql": {
+        "status": "CAPTURED",
+        "bytes": 25947,
+        "sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b"
+      }
+    },
+    "after": {
+      "tools/qa/bil_postgres_review_v2_test.py": {
+        "status": "CAPTURED",
+        "bytes": 35673,
+        "sha256": "1112d5ae534b400dff24e26c19420f3412c069495344742bf6e1c2e6aef834ae"
+      },
+      "tools/qa/bil_postgres_receipt_compat_cases.py": {
+        "status": "CAPTURED",
+        "bytes": 16788,
+        "sha256": "66d7a0291f83fc19868e3a5df16ba572a249af203a71a7fee12a3ec33733229b"
+      },
+      "supabase/tests/fixtures/community_review_baseline/schema.sql": {
+        "status": "CAPTURED",
+        "bytes": 30265,
+        "sha256": "78bfb546bdf274daddd20879ca4b91e22310420f184dc3021f61b16c3a9b8d39"
+      },
+      "supabase/tests/fixtures/community_review_baseline/functions.sql": {
+        "status": "CAPTURED",
+        "bytes": 14977,
+        "sha256": "ace46d709eec3d91b3352e52cc47984d5259bac49db1a9d765589a88be512606"
+      },
+      "supabase/tests/fixtures/community_review_baseline/moderator_population.sql": {
+        "status": "CAPTURED",
+        "bytes": 753,
+        "sha256": "24c2412250e3eba0b98ea8aa7fd8674cc846b83e170ced6bb39b20e5675a02b7"
+      },
+      "supabase/tests/fixtures/community_review_baseline/legacy_delivery.sql": {
+        "status": "CAPTURED",
+        "bytes": 14473,
+        "sha256": "bd4dc2c928edd42f6637f126bb54cf4d11f24856076051f346ad40a24bf6025a"
+      },
+      "supabase/tests/fixtures/community_review_baseline/legacy_delivery.provenance.json": {
+        "status": "CAPTURED",
+        "bytes": 4700,
+        "sha256": "1cf7db014787c2383f65274e209a2c12b859379ea3dbe9a85d1d01e34a2341be"
+      },
+      "supabase/migrations/20261011193000_community_review_revision_v2.sql": {
+        "status": "CAPTURED",
+        "bytes": 22709,
+        "sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85"
+      },
+      "supabase/migrations/20261014113000_community_post_review_receipts_v2.sql": {
+        "status": "CAPTURED",
+        "bytes": 25947,
+        "sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b"
+      }
+    },
+    "unchanged": true
+  },
+  "legacy_delivery_fixture_sha256": "bd4dc2c928edd42f6637f126bb54cf4d11f24856076051f346ad40a24bf6025a",
+  "migration_sha256": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+  "receipt_migration_sha256": "a56a82a9b1425b52c59024f7778e8bcb5139750b5a1633d933421eb51e25710b"
+}

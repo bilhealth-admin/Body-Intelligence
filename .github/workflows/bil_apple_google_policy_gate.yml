@@ -11,6 +11,9 @@ on:
       - .github/workflows/bil_apple_google_policy_gate.yml
       - .github/scripts/bil_native_bounded_command.py
       - .github/scripts/test_bil_native_bounded_command.py
+      - .github/scripts/bil_ios36_native_integration.sh
+      - .github/scripts/bil_ios_simulator_adhoc_sign.py
+      - .github/scripts/test_bil_ios_simulator_adhoc_sign.py
       - android/**
       - ios/**
       - lib/**
@@ -19,10 +22,16 @@ on:
       - test_driver/**
       - supabase/functions/**
       - supabase/tests/reviewer_administrator_moderator_chain_test.mjs
+      - supabase/tests/fixtures/community_review_baseline/**
       - supabase/tests/package.json
       - supabase/tests/package-lock.json
       - supabase/migrations/20260906120000_owner_approved_second_administrator.sql
+      - supabase/migrations/20260906100000_community_moderation_reviewer_and_message_privacy.sql
       - supabase/migrations/20261015090000_restore_single_owner_administrator.sql
+      - supabase/migrations/20261015230655_restore_owner_approved_secondary_admin_identity_correction.sql
+      - supabase/migrations/20261015231333_remove_legacy_store_reviewer_moderator_bootstrap.sql
+      - supabase/migrations/20261011193000_community_review_revision_v2.sql
+      - supabase/migrations/20261014113000_community_post_review_receipts_v2.sql
       - supabase/migrations/20260831151527_ai_coach_admin_global_individual_reset.sql
       - supabase/migrations/202608020004_bil_community_hardening.sql
       - supabase/migrations/202608020003_bil_commerce_foundation.sql
@@ -74,6 +83,15 @@ jobs:
     if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' && !(github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation')
     runs-on: ubuntu-24.04
     timeout-minutes: 100
+    services:
+      receipt_postgres:
+        image: postgres:17.11@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3
+        env:
+          POSTGRES_USER: bil_test_superuser
+          POSTGRES_PASSWORD: isolated-fixture-only
+        options: >-
+          --health-cmd "pg_isready -U bil_test_superuser -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - name: Check out exact integration source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -123,7 +141,9 @@ jobs:
           python3 -m unittest discover -s tools/qa -p 'test_bil_store_policy_gate.py' -v 2>&1 | tee "$POLICY_OUT/policy-checker-unit.log"
           python3 -m unittest discover -s tools/qa -p 'test_android_relro_policy.py' -v 2>&1 | tee "$POLICY_OUT/relro-unit.log"
           python3 -m unittest discover -s tool/release -p 'test_prepare_android_policy_plugin_overrides.py' -v 2>&1 | tee "$POLICY_OUT/plugin-overlay-unit.log"
+          python3 -m unittest discover -s tool/release -p 'test_verify_android_startup_frame.py' -v 2>&1 | tee "$POLICY_OUT/android-startup-health-unit.log"
           python3 -m unittest discover -s .github/scripts -p 'test_bil_native_bounded_command.py' -v 2>&1 | tee "$POLICY_OUT/native-supervisor-unit.log"
+          python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_simulator_adhoc_sign.py' -v 2>&1 | tee "$POLICY_OUT/ios-simulator-signing-host-unit.log"
           python3 tool/release/verify_android_16k_alignment.py --self-test
           python3 tools/qa/bil_store_policy_gate.py --output "$POLICY_OUT/source-checks-before-lint.json"
           python3 tool/prebuild/store_policy_source_guard.py --json-out "$POLICY_OUT/legacy-source-policy-preflight.json"
@@ -142,6 +162,26 @@ jobs:
           node supabase/tests/reviewer_administrator_moderator_chain_test.mjs \
             2>&1 | tee "$POLICY_OUT/reviewer-administrator-moderator-sql.log"
 
+      - name: Verify deployed and clean receipt compatibility in isolated native PostgreSQL
+        shell: bash
+        env:
+          BIL_RECEIPT_PG_CONTAINER: ${{ job.services.receipt_postgres.id }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bil-receipt-qa"
+          cat > "$RUNNER_TEMP/bil-receipt-qa/psql" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          exec docker exec -i --env PGPASSWORD=isolated-fixture-only "$BIL_RECEIPT_PG_CONTAINER" psql "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/bil-receipt-qa/psql"
+          for baseline in deployed clean; do
+            python3 tools/qa/bil_postgres_review_v2_test.py \
+              --psql "$RUNNER_TEMP/bil-receipt-qa/psql" --port 5432 \
+              --receipt-baseline "$baseline" \
+              2>&1 | tee "$POLICY_OUT/receipt-native-$baseline.log"
+          done
+
       - name: Verify affected provider and consent boundaries without paid requests
         shell: bash
         run: |
@@ -155,7 +195,7 @@ jobs:
           deno check supabase/functions/analyze-meal/index.ts \
             2>&1 | tee "$POLICY_OUT/vision-typecheck.log"
 
-      - name: Analyze the final Dart source without rerunning the full suite
+      - name: Analyze the exact Dart source for this policy run
         shell: bash
         run: |
           set -euo pipefail
@@ -170,14 +210,20 @@ jobs:
           flutter test --no-pub --reporter expanded --concurrency 2 --timeout 5m \
             test/app/services/system_speech_disclosure_test.dart \
             test/features/commerce/bil_store_copy_test.dart \
+            test/features/commerce/bil_dynamic_store_offers_test.dart \
+            test/features/commerce/paywall_ai_market_benefits_test.dart \
+            test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
             test/localization/closure_interfaces_runtime_copy_test.dart \
-            test/features/commerce/bil_store_plans_light_visual_test.dart \
-            test/features/commerce/apple_review_product_screenshot_test.dart \
             tools/qa/flutter/policy_pearl_dialog_visual_test.dart \
             test/features/nutrition/speech_bridge_capture_ownership_test.dart \
             test/features/nutrition/voice_shared_purpose_behavior_test.dart \
             test/features/nutrition/meal_voice_panel_behavior_test.dart \
             test/features/community/community_voice_unicode_retention_test.dart \
+            test/parallel/bil05/community_post_moderation_receipt_test.dart \
+            test/features/community/community_post_receipt_page_test.dart \
+            test/features/community/community_activity_auto_read_test.dart \
+            test/features/community/community_visible_read_receipts_test.dart \
+            test/features/community/community_activity_v2_contract_test.dart \
             test/parallel/bil02/coach_media_voice_overlay_test.dart \
             test/features/daily_check_in/daily_check_in_voice_end_to_end_test.dart \
             test/features/community/community_reference_composer_v1_test.dart \
@@ -307,9 +353,56 @@ jobs:
           name: bil-apple-google-policy-${{ github.sha }}
           path: |
             build/qa/policy-gate-20261015
+            build/stage1-closure/postgres-review-v2-*/result.json
             build/app/reports/lint-results-*
             build/app/intermediates/merged_manifests/**/AndroidManifest.xml
+            test/**/failures/*_masterImage.png
+            test/**/failures/*_testImage.png
+            test/**/failures/*_isolatedDiff.png
+            test/**/failures/*_maskedDiff.png
             !build/qa/**/private-synthetic-keysets/**
+          if-no-files-found: error
+          retention-days: 30
+
+  approved-windows-goldens:
+    name: Seven exact plan goldens on their Windows reference platform
+    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' && !(github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation')
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - name: Check out the same exact policy source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install the identical pinned Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Resolve locked dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Compare all seven original references with zero tolerance
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:POLICY_OUT | Out-Null
+          git rev-parse HEAD | Out-File -Encoding utf8 "$env:POLICY_OUT/windows-golden-source.txt"
+          flutter --version --machine | Out-File -Encoding utf8 "$env:POLICY_OUT/windows-golden-flutter.json"
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 5m `
+            test/features/commerce/bil_store_plans_light_visual_test.dart `
+            test/features/commerce/apple_review_product_screenshot_test.dart `
+            2>&1 | Tee-Object -FilePath "$env:POLICY_OUT/windows-seven-goldens.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- test/features/commerce/goldens
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve the comparison result and any actual failure images
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-windows-plan-goldens-${{ github.sha }}
+          path: |
+            build/qa/policy-gate-20261015/windows-*
+            test/features/commerce/failures/*.png
           if-no-files-found: error
           retention-days: 30
 
@@ -351,7 +444,7 @@ jobs:
                   return json.load(response)
           def verify_run(role, record, source):
               specs = {
-                  'policy': ('bil_apple_google_policy_gate.yml', 'push', {'Source and affected regressions; certification remains separate'}),
+                  'policy': ('bil_apple_google_policy_gate.yml', 'push', {'Source and affected regressions; certification remains separate', 'Seven exact plan goldens on their Windows reference platform'}),
                   'source_security': ('bil_codeql_security_extended.yml', 'push', {'CodeQL (actions)', 'CodeQL (javascript-typescript)', 'CodeQL (python)', 'Isolated Semgrep source audit'}),
                   'android_startup': ('bil_android_isolated_emulator_smoke.yml', 'push', {f'Android {level} offline-config startup' for level in (26,29,33,34,35,36)}),
                   'native_android_ios': ('bil_codeql_security_extended.yml', 'workflow_dispatch', {'Android API 33 native integration without CodeQL tracing', 'iPhone and iPad native tests from exact simulator bundles'}),
@@ -390,7 +483,7 @@ jobs:
               out.parent.mkdir(parents=True, exist_ok=True)
               out.write_text(json.dumps(result, indent=2) + '\n')
               with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
-                  stream.write(f'Final commit `{head}` has the same implementation as tested `{source}`. All four required live runs and 13 jobs verified. No tests repeated. Store certification remains BLOCKED.\n')
+                  stream.write(f'Final commit `{head}` has the same implementation as tested `{source}`. All four required live runs and 14 jobs verified. No tests repeated. Store certification remains BLOCKED.\n')
           main()
           PY
       - name: Preserve final SHA attestation

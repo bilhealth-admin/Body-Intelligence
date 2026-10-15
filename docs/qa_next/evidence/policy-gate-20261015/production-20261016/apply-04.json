@@ -1,0 +1,19 @@
+{
+  "file": "supabase/migrations/20261012052335_cloud_nutrition_goals_restore_v2.sql",
+  "name": "cloud_nutrition_goals_restore_v2",
+  "source_version": "20261012052335",
+  "source_sha256": "ccacdcef47bf2ff0e3d438826da6fc285015c4554e157834bdea052b5ee73966",
+  "executed_query_sha256": "d3d2b2def605f6b72b83b7b1836afbe068e7f94e708e044ad048ba04c836db4d",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:02 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  }
+}
+

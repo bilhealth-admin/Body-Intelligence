@@ -26,6 +26,41 @@ void main() {
     expect(receipt.route, '/community/post/$postId');
   });
 
+  test(
+    'enriched canonical legacy reward keeps its copy key and typed receipt',
+    () {
+      const oldMetadata = {
+        'currency': 'ai_tokens',
+        'tokens': 5,
+        'decision': 'approved',
+        'receipt_id': '22222222-2222-4222-8222-222222222222',
+      };
+      expect(
+        CommunityPostModerationReceipt.tryParse(
+          entityKind: 'post',
+          entityId: postId,
+          copyKey: 'community_post_ai_reward_v1',
+          metadata: oldMetadata,
+        ),
+        isNull,
+      );
+      final receipt = CommunityPostModerationReceipt.tryParse(
+        entityKind: 'post',
+        entityId: postId,
+        copyKey: 'community_post_ai_reward_v1',
+        metadata: const {
+          ...oldMetadata,
+          'receipt_kind': 'post_moderation',
+          'post_id': postId,
+          'ai_tokens_granted': 5,
+          'reward_reason': 'granted',
+        },
+      );
+      expect(receipt?.hasConfirmedAiGrant, isTrue);
+      expect(receipt?.route, '/community/post/$postId');
+    },
+  );
+
   test('approved daily-cap receipt does not promise AI tokens', () {
     final receipt = CommunityPostModerationReceipt.tryParse(
       entityKind: 'post',

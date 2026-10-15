@@ -1,0 +1,132 @@
+{
+  "original_source_sha": "82fc546ee14a401465ce2c835df83acc834874d4",
+  "original_run": 38805632780,
+  "linux_replay_sha": "ed963053c62cc549cbe50757279bd39d73a10e35",
+  "linux_replay_run": 38807256618,
+  "product_changes_between_sources": false,
+  "replay_changed_files": [
+    ".github/workflows/bil_golden_failure_diagnosis.yml"
+  ],
+  "original_baselines_modified": false,
+  "comparator_tolerance_added": false,
+  "skip_added": false,
+  "windows_passed": 7,
+  "windows_failed": 0,
+  "images": [
+    {
+      "file": "linux-failures/bil_ai_boost_isolatedDiff.png",
+      "sha256": "7199819a91a292d3abc801c4dfce4d342da359b825f80b121c9d08e4e1086ff4"
+    },
+    {
+      "file": "linux-failures/bil_ai_boost_maskedDiff.png",
+      "sha256": "c23a62f99da4a0c46c0d526c90e564cac303768cf3680e42783b168dbee5a670"
+    },
+    {
+      "file": "linux-failures/bil_ai_boost_masterImage.png",
+      "sha256": "39aeec24ea3053de494cc2a597b38fda43a2b7d3b3b72725a2b0636df57317d9"
+    },
+    {
+      "file": "linux-failures/bil_ai_boost_testImage.png",
+      "sha256": "0496e3a2318313139f39347ee7e9869a0e359559f863a3eba1abd3861d9cfa03"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_annual_isolatedDiff.png",
+      "sha256": "0a88e70126796e1dd3559abcee764875086f768bc9201b13e851938d14ec167c"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_annual_maskedDiff.png",
+      "sha256": "d04a426dc9e0b9544a21d04b792f36d392bbc51af76816c2cefb7b00d9712ed8"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_annual_masterImage.png",
+      "sha256": "563a377acc5b243e80b2c6d60b083c05c5ba6923320adc52bca36568400104f7"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_annual_testImage.png",
+      "sha256": "41d19ad4cb00566893ebcfacf29065e2db5848cd9001d5a2b398f046bcc0d78b"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_isolatedDiff.png",
+      "sha256": "dc1200c94bb263f3302bca435601959873a6137a941b7b71a96029d44d052d2a"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_maskedDiff.png",
+      "sha256": "4d3fc41ed13366a9c26519ffd0762d8f856b71cbf22b83d564269dbc080b1c88"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_masterImage.png",
+      "sha256": "7cc85394be0624471e446be95418e52854bd5239d4512d7301793dc90311c0ee"
+    },
+    {
+      "file": "linux-failures/bil_premium_ai_coach_testImage.png",
+      "sha256": "8b66bb4541bb8efee66d59f6df99d0d6f7a61e87a3758d6323616aa09ec45213"
+    },
+    {
+      "file": "linux-failures/bil_premium_annual_isolatedDiff.png",
+      "sha256": "9e4edb1194b12acfd56f81db632ce0e5506d20df1071ceea22c87e6797b7604a"
+    },
+    {
+      "file": "linux-failures/bil_premium_annual_maskedDiff.png",
+      "sha256": "a84b4f8deb61f7115771928455b4a61ae76aef972c67292a7cd41807f5952f13"
+    },
+    {
+      "file": "linux-failures/bil_premium_annual_masterImage.png",
+      "sha256": "04c8ed22dced5ea09add2459e774eaaa1afecf369759d7fd55b3a7cd28627016"
+    },
+    {
+      "file": "linux-failures/bil_premium_annual_testImage.png",
+      "sha256": "76f10f327fdc514d9184187c5af75bd327c993da2f759604d055cca72d1ed4dc"
+    },
+    {
+      "file": "linux-failures/bil_premium_isolatedDiff.png",
+      "sha256": "2f8ff652354403e2dd64f2f45a360ba2692e0252e37fe07dcd30a2a2721e496c"
+    },
+    {
+      "file": "linux-failures/bil_premium_maskedDiff.png",
+      "sha256": "b22f5a34e97bcf897b553cb5707b0442ff2c5cf123eda067a85945162875bfaf"
+    },
+    {
+      "file": "linux-failures/bil_premium_masterImage.png",
+      "sha256": "daccb3356fe2e65e98576c1ec6b1a281b7cc76a96b7489ccfafa1f4de7bd74c7"
+    },
+    {
+      "file": "linux-failures/bil_premium_testImage.png",
+      "sha256": "cb08cd85e433eb24af6d29e5b750642abdb825f86ff23d31c8573c01734856f6"
+    },
+    {
+      "file": "linux-failures/plans_light_ar_390x844_160_isolatedDiff.png",
+      "sha256": "8ee1d96030933ed97249a4232a947988ef312c9112ce68bd674e989a5bbd6600"
+    },
+    {
+      "file": "linux-failures/plans_light_ar_390x844_160_maskedDiff.png",
+      "sha256": "f9555bca313de9bb8d8826e199efedcb835f9db64143cfcf85e04bb09eb64622"
+    },
+    {
+      "file": "linux-failures/plans_light_ar_390x844_160_masterImage.png",
+      "sha256": "21642e8bfc5bc912f0b30c2ddec164db6a71de1c5fc94cb0a4fc609977f074df"
+    },
+    {
+      "file": "linux-failures/plans_light_ar_390x844_160_testImage.png",
+      "sha256": "547eb88282a33922b6408364c7c2d1fa79f212d764fcc7e622734d6ddc32b589"
+    },
+    {
+      "file": "linux-failures/plans_light_en_390x844_160_isolatedDiff.png",
+      "sha256": "636bdaef425bb0b41468387f8f193711a7ddf137873a7be9a8e3636620ade149"
+    },
+    {
+      "file": "linux-failures/plans_light_en_390x844_160_maskedDiff.png",
+      "sha256": "372710d6a82db5080cdbb12becb4949bfc1502edb4c1dbfb120657305b719c72"
+    },
+    {
+      "file": "linux-failures/plans_light_en_390x844_160_masterImage.png",
+      "sha256": "d11fc98c3a8bc3149d013de75ee0c79ac33139e9a499a93b1799e888992a73cc"
+    },
+    {
+      "file": "linux-failures/plans_light_en_390x844_160_testImage.png",
+      "sha256": "0e95f6c29c2b98acce74463b3662bf27c771caa9da8304f8d585fc7a06cd3e45"
+    }
+  ],
+  "independent_reviewer": "google_policy_gate",
+  "cause": "Identical font bytes and Flutter/engine revisions; DirectWrite vs FreeType edge rasterization with identical content and layout. All7 master images equal committed baselines.",
+  "repair": "Run original seven exact Golden tests on Windows; preserve319 other affected tests on Linux. All326 cases still required."
+}

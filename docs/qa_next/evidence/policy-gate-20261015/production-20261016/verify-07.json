@@ -1,0 +1,28 @@
+{
+  "file": "supabase/migrations/20261013062209_community_message_delivery_v2.sql",
+  "name": "community_message_delivery_v2",
+  "source_version": "20261013062209",
+  "source_sha256": "321b00a6f5b483c6ae555911c1153c4174fe78a2b4ff49d15c7c10487502a00d",
+  "executed_query_sha256": "17007de2ad70c54da66300a4a3df6cb56aa1e5f50909ce8c0d9e6db7cfd014c1",
+  "wrapper": "Only transaction/session-local5slock/30sstatementlimits; source SQLbodyunchanged",
+  "started_at_utc": "2026-10-15 22:51:09 UTC",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"success\":true}"
+      }
+    ],
+    "isError": false
+  },
+  "postconditions": {
+    "send_rpc_present": true,
+    "private_ledger_rls": true,
+    "direct_ledger_denied": true
+  },
+  "remote_migration": {
+    "version": "20261015225110",
+    "name": "community_message_delivery_v2"
+  }
+}
+
