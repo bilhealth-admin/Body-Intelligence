@@ -34,3 +34,16 @@
 لا يعاد تشغيل الاختبارات حتى تُحفظ هذه الخطة وتعديلات التشخيص في المصدر. بعد ذلك يشغّل مسار Supabase المعزول مرة واحدة على SHA جديد. معيار المرور: نجاح كل ملفات `*_test.sql` ثم إكمال فحص Auth/RLS المحلي ومجموعات PostgreSQL وEdge Function في التشغيل نفسه. إذا كشف التشخيص اختلاف هوية أو نتيجة طابور، يوثق السبب قبل أي تعديل لاحق. لا يشمل هذا التشغيل قاعدة مستضافة أو شراءً أو تعديل حساب حقيقي.
 
 لا تُنسب نتيجة هذا التشغيل إلى `1478f4ed` أو أي SHA آخر، ولا تُنسب نتائج الحسابات الاصطناعية إلى اختبار الحسابين الحقيقيين أو نسختي Android/iOS.
+
+## تحقق محلي موجّه بعد حفظ التشخيص
+
+- المصدر المختبر: `f3ab218b974e267da5f1704a1fd2d501d7322296`، الفرع `integration/bil-qa-media-policy-20261011`.
+- الأمر: `deno test --allow-read='G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\supabase\migrations\20261014100000_ai_coach_safety_reports_v1.sql' --allow-read='C:\Users\HP 1040 G8\AppData\Local\deno\npm\registry.npmjs.org\@electric-sql\pglite\0.3.15' supabase/tests/ai_coach_safety_reports_v1_pglite_test.ts`: نجح 1/1 بعد تقييد صلاحية القراءة للملف والحزمة. المحاولة الأولى توقفت قبل بدء assertions لأن Deno لم يُمنح قراءة ملف بيانات PGlite؛ ليست فشل عقد.
+- `npm test --prefix supabase/tests`: نجحت السكربتات الخمسة الموجودة في README، بمجموع 74 فحص PostgreSQL (21 + 10 + 3 + 14 + 26). جميعها محلية اصطناعية، ولم تكتب إلى خدمة بعيدة.
+- لم تتوفر Supabase CLI أو Docker أو psql في بيئة العمل، لذلك لم تُنفذ دورة Supabase المحلية الكاملة ولا ملفا SQL اللذان فشلا في التشغيل السابق. هذه النتائج المحلية لا تثبت نجاح `community_policy_v1_test.sql` ولا تحدد سبب فشل قائمة بلاغات AI في بيئة Supabase.
+
+## بوابة الاختبار المعزول
+
+- المشروع المتصل هو `tgmanzhqulksykhslrzb`، والفرع الوحيد الظاهر باسم `main` يعيد `project_ref` نفسه للمشروع، لذلك لم يُستخدم كقاعدة اختبار.
+- أداة تقدير تكلفة فرع Supabase أعادت `get_cost was not returned by tools/list`. لم يُنشأ فرع ولم تُطبق migrations على المشروع المستضاف.
+- بقي الاختبار التالي الموثق هو تشغيل `BIL CodeQL security-extended` يدويًا مع `supabase_only=true` مرة واحدة بعد نقل SHA الجديد إلى GitHub. هذا التشغيل ينشئ Supabase محليًا داخل CI المعزول، لكنه قد يكشف الفشل غير المحسوم؛ لا يمكن اعتباره مضمون النجاح قبل تشغيله. لم يبدأ بعد، والـremote ما زال عند `53ff3c8c867f1c862eab4aceafc1318c10bb4616`.
