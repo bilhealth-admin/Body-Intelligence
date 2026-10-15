@@ -55,10 +55,10 @@ if [[ "$actual_api_level" != "$api_level" ]]; then
 fi
 
 network_mode='radio-state-not-forced'
+stage='install-debug-apk'
+adb install "$apk"
 stage='clear-app-data'
 adb shell pm clear "$app_id" >/dev/null
-stage='install-debug-apk'
-adb install -r "$apk"
 stage='launch-main-activity'
 adb shell am start -n "$app_id/.MainActivity"
 stage='wait-for-app-process'
