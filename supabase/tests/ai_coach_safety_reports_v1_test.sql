@@ -125,6 +125,28 @@ where report_entry->>'report_id' = (
   select first_report->>'report_id'
   from pg_temp.ai_coach_safety_report_test_state
 );
+do $review_input_assert$
+declare
+  v_report_id uuid;
+  v_queue_report_id uuid;
+begin
+  select (first_report->>'report_id')::uuid,
+    (initial_queue->>'report_id')::uuid
+  into v_report_id, v_queue_report_id
+  from pg_temp.ai_coach_safety_report_test_state;
+
+  if v_report_id is null then
+    raise exception 'ai_coach_safety_review_source_report_id_missing';
+  end if;
+  if v_queue_report_id is distinct from v_report_id then
+    raise exception 'ai_coach_safety_review_queue_item_missing';
+  end if;
+  if auth.uid() is distinct from
+    '14100000-0000-4000-8000-000000000002'::uuid then
+    raise exception 'ai_coach_safety_review_actor_mismatch';
+  end if;
+end
+$review_input_assert$;
 insert into pg_temp.ai_coach_safety_report_test_state(review_receipt)
 select public.bil_review_ai_coach_safety_report_v1(
   (first_report->>'report_id')::uuid,

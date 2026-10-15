@@ -363,10 +363,10 @@ jobs:
         run: |
           set -euo pipefail
           supabase init
-          # Checked-in migrations require the operational owner, its separately
-          # approved second administrator, and a store-review moderator. These
-          # disposable CI-only identities have no password and exist only in
-          # this local database.
+          # Checked-in migrations require the operational owner, a legacy
+          # review moderator, and a reviewer identity referenced by an older
+          # migration. These disposable CI-only rows have no password and are
+          # created only in this local database.
           test ! -e supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql
           cat > supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql <<'SQL'
           insert into auth.users (
@@ -402,7 +402,15 @@ jobs:
             'authenticated', 'authenticated', 'bilhealth.app@gmail.com', '',
             pg_catalog.now(),
             '{"provider":"email","providers":["email"]}'::jsonb,
-            '{"bil_ci_fixture":true,"bil_ci_role":"approved_secondary_administrator"}'::jsonb,
+            '{"bil_ci_fixture":true,"bil_ci_role":"store_review_account"}'::jsonb,
+            pg_catalog.now(), pg_catalog.now()
+          ),
+          (
+            '00000000-0000-4000-8000-000000000021',
+            'authenticated', 'authenticated', 'dr-reviewer@bil-test.invalid', '',
+            pg_catalog.now(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            '{"bil_ci_fixture":true,"bil_ci_role":"store_review_account"}'::jsonb,
             pg_catalog.now(), pg_catalog.now()
           );
           SQL
@@ -438,7 +446,7 @@ jobs:
           test -n "$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env")"
           test -n "$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
 
-      - name: Apply checked-in migrations and verify local moderator precondition
+      - name: Apply checked-in migrations and verify local authority preconditions
         shell: bash
         run: |
           set -euo pipefail
@@ -449,8 +457,10 @@ jobs:
           declare
             v_admin_id uuid;
             v_admin_count integer;
-            v_secondary_admin_id uuid;
-            v_secondary_admin_count integer;
+            v_reviewer_account_id uuid;
+            v_reviewer_account_count integer;
+            v_second_reviewer_id uuid;
+            v_second_reviewer_count integer;
             v_reviewer_id uuid;
             v_reviewer_count integer;
           begin
@@ -468,17 +478,30 @@ jobs:
             where pg_catalog.lower(email) = 'kademcom@yahoo.com';
 
             select pg_catalog.count(*)::integer
-              into v_secondary_admin_count
+              into v_reviewer_account_count
             from auth.users
             where pg_catalog.lower(email) = 'bilhealth.app@gmail.com';
 
-            if v_secondary_admin_count <> 1 then
-              raise exception 'local_moderator_fixture_secondary_admin_count_invalid';
+            if v_reviewer_account_count <> 1 then
+              raise exception 'local_moderator_fixture_reviewer_account_count_invalid';
             end if;
 
-            select id into v_secondary_admin_id
+            select id into v_reviewer_account_id
             from auth.users
             where pg_catalog.lower(email) = 'bilhealth.app@gmail.com';
+
+            select pg_catalog.count(*)::integer
+              into v_second_reviewer_count
+            from auth.users
+            where pg_catalog.lower(email) = 'dr-reviewer@bil-test.invalid';
+
+            if v_second_reviewer_count <> 1 then
+              raise exception 'local_moderator_fixture_second_reviewer_count_invalid';
+            end if;
+
+            select id into v_second_reviewer_id
+            from auth.users
+            where pg_catalog.lower(email) = 'dr-reviewer@bil-test.invalid';
 
             select pg_catalog.count(*)::integer
               into v_reviewer_count
@@ -515,16 +538,19 @@ jobs:
               raise exception 'local_moderator_fixture_entitlements_incomplete';
             end if;
 
-            if not exists (
-              select 1 from public.bil_community_moderators
-              where user_id = v_secondary_admin_id
-            ) or not exists (
-              select 1 from private.bil_ai_coach_admins
-              where user_id = v_secondary_admin_id
-                and active
-                and granted_by = v_admin_id
-            ) then
-              raise exception 'local_moderator_fixture_secondary_admin_entitlements_incomplete';
+            if (select pg_catalog.count(*)
+                from private.bil_ai_coach_admins
+                where active) <> 1
+              or exists (
+                select 1 from private.bil_ai_coach_admins
+                where user_id in (v_reviewer_account_id, v_second_reviewer_id)
+                  and active
+              )
+              or not exists (
+                select 1 from private.bil_ai_coach_admins
+                where user_id = v_admin_id and active
+              ) then
+              raise exception 'local_moderator_fixture_reviewer_admin_separation_invalid';
             end if;
           end
           $local_moderator_fixture_assertion$;
@@ -534,7 +560,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          supabase test db --local
+          supabase test db --local supabase/tests/*.sql
 
       - name: Exercise Auth sessions and owner-scoped RLS through local APIs
         shell: bash

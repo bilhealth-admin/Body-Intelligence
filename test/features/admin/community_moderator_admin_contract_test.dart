@@ -86,23 +86,21 @@ void main() {
     expect(moderationRoute, isNot(contains('PremiumRouteGlassGate')));
   });
 
-  test('owner-approved second administrator is enrolled by auth identity', () {
+  test('review accounts stay outside the single owner administrator role', () {
     final sql = File(
-      'supabase/migrations/20260906120000_owner_approved_second_administrator.sql',
+      'supabase/migrations/20261015090000_restore_single_owner_administrator.sql',
     ).readAsStringSync();
 
-    expect(sql, contains('lower(account.email) = lower('));
     expect(
       sql,
-      contains(
-        'drop index if exists private.bil_ai_coach_single_active_admin_uidx',
-      ),
+      contains("pg_catalog.lower(account.email) = 'kademcom@yahoo.com'"),
     );
-    expect(sql, contains('insert into private.bil_ai_coach_admins'));
-    expect(sql, contains('insert into public.bil_community_moderators'));
-    expect(sql, contains('owner_approved_secondary_administrator'));
+    expect(sql, contains('set active = false'));
+    expect(sql, contains('administrator.user_id <> v_owner_id'));
+    expect(sql, contains('create unique index if not exists'));
+    expect(sql, contains('where active;'));
+    expect(sql, isNot(contains('bilhealth.app@gmail.com')));
     expect(sql, contains('v_owner_id'));
-    expect(sql, contains('v_secondary_id'));
   });
 
   testWidgets('administrator can add and remove roster entries by account', (
