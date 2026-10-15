@@ -1,0 +1,38 @@
+{
+  "recorded_at_utc": "2026-10-15T12:53:56.217110+00:00",
+  "source_head": "b2f41184560f1f09cc5fda70ce1cfc50864a9e5e",
+  "compared_to_saved_full_suite_source": "ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67",
+  "application_trees": [
+    {
+      "path": "lib",
+      "baseline_tree": "a21b1f30293cdf973768b15a49b47368fc466939",
+      "current_tree": "a21b1f30293cdf973768b15a49b47368fc466939",
+      "identical": true
+    },
+    {
+      "path": "ios",
+      "baseline_tree": "6cdd9ce7a2f17672017059088e68da8317ec4723",
+      "current_tree": "6cdd9ce7a2f17672017059088e68da8317ec4723",
+      "identical": true
+    },
+    {
+      "path": "android",
+      "baseline_tree": "869a94963811d846056bd51a912a626e2294f3a6",
+      "current_tree": "869a94963811d846056bd51a912a626e2294f3a6",
+      "identical": true
+    }
+  ],
+  "localization_file_sizes": [
+    {
+      "path": "lib/app/localization/runtime_copy_closure_coach.dart",
+      "lines": 378,
+      "sha256": "53e4b80ae5ac79b95947900fe010fb5eb8dca4762b43d368fb448281842182d7"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_closure_coach_presentation.dart",
+      "lines": 605,
+      "sha256": "fdfe268693767a6baf1c9db5293cb21fd24cf7f360cc8a9bd26ce61820455313"
+    }
+  ],
+  "note": "App trees unchanged. Focused native/QA/dependency input changes after the full-suite snapshot remain separately mapped; no relabeling of the 9843 result."
+}

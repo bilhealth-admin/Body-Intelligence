@@ -240,14 +240,7 @@ jobs:
       - name: Enable and require KVM before Android native integration
         if: matrix.flutter-build == 'android'
         shell: bash
-        run: |
-          set -euo pipefail
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-          test -r /dev/kvm
-          test -w /dev/kvm
+        run: bash .github/scripts/bil_prepare_android_kvm.sh
 
       - name: Run Android 33 native integration journeys offline
         if: matrix.flutter-build == 'android'
@@ -707,15 +700,7 @@ jobs:
         run: flutter pub get
       - name: Enable and require hardware acceleration on the disposable runner
         shell: bash
-        run: |
-          set -euo pipefail
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-          test -r /dev/kvm
-          test -w /dev/kvm
-          free -m
+        run: bash .github/scripts/bil_prepare_android_kvm.sh
       - name: Run the existing native integration suite on API 33
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         env:

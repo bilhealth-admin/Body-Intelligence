@@ -75,6 +75,13 @@
       "cause": "Local Windows Gradle/JDK selector failed Unable to establish loopback connection before Android test; short task-scoped Java temp directory permits selector and TCP loopback",
       "fix": "JAVA_TOOL_OPTIONS task-scoped java.io.tmpdir and jdk.net.unixdomain.tmpdir; no global Java or app setting change",
       "status": "Actual API36/WHPX native Flutter integration PASS 1/1 after short task-scoped Java temp. Final command used native chat shell to avoid intermediate Python cp1252 output failure."
+    },
+    {
+      "id": "F12",
+      "run": 38738008732,
+      "cause": "KVM setup exited 1 immediately after queued udev trigger before native test. No stat/command trace retained, so exact failing guard and final mode cannot be proven retrospectively.",
+      "fix": "One shared setup waits udevadm settle with bounded20s, prints actual node mode/user then requires read/write; native script checks real emulator acceleration after action-installed binary exists.",
+      "status": "Local actionlint and bash syntax PASS; Linux runtime rerun pending. Actual native secure cache already passed2/2 on local API36/WHPX."
     }
   ],
   "raw_logs_retained_locally": [
@@ -107,6 +114,11 @@
       "file": "run-38729694517-supabase.log",
       "bytes": 14804,
       "sha256": "023b9bb34aec16c4871cd73ef687df19d64f05998353df0c83680f6eb0ee2d65"
+    },
+    {
+      "file": "android-secure-cache-38738008732.log",
+      "bytes": 43305,
+      "sha256": "54df9145b333280eafbd2efb1e8ea877e667c1fe4a1d681efc29d5bf5aa45e1e"
     }
   ],
   "full_suite_repeated": false

@@ -5,6 +5,8 @@ OUT=artifacts/qa/text18/android-api33
 mkdir -p "$OUT"
 SOURCE_HEAD="$(git rev-parse HEAD)"
 SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
+# The emulator action has installed its SDK binary before calling this script.
+"${ANDROID_HOME:?}/emulator/emulator" -accel-check
 case "${BIL_NATIVE_TARGET:-all}" in
   all|system-crypto) ;;
   *) echo 'Unsupported native entrypoint scope' >&2; exit 2 ;;
