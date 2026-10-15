@@ -73,8 +73,16 @@ app_pid=''
 foreground_window=''
 for attempt in {1..15}; do
   app_pid=$(adb shell pidof "$app_id" | tr -d '\r' || true)
-  foreground_window=$(adb shell dumpsys window windows 2>/dev/null \
-    | grep -E 'mCurrentFocus|mFocusedApp' | tail -n 1 | tr -d '\r' || true)
+  foreground_window=$(
+    {
+      adb shell dumpsys activity activities 2>/dev/null
+      adb shell dumpsys window windows 2>/dev/null
+    } \
+      | grep -E 'topResumedActivity|mResumedActivity|ResumedActivity|mCurrentFocus|mFocusedApp|mFocusedWindow' \
+      | grep -F "$app_id" \
+      | head -n 1 \
+      | tr -d '\r' || true
+  )
   if [[ -n "$app_pid" && "$foreground_window" == *"$app_id"* ]]; then
     break
   fi
@@ -84,7 +92,6 @@ if [[ -z "$app_pid" || "$foreground_window" != *"$app_id"* ]]; then
   echo "BIL did not become the foreground Android window: $foreground_window" >&2
   exit 1
 fi
-sleep 5
 
 stage='capture-launch-evidence'
 printf '%s\n' "$actual_api_level" > "$evidence/api-level.txt"
@@ -95,8 +102,32 @@ printf '%s\n' \
   "apk_sha256=$(sha256sum "$apk" | awk '{print $1}')" \
   'supabase=false payments=false ads=false community=false push=false' \
   > "$evidence/test-scope.txt"
-adb exec-out screencap -p > "$evidence/startup.png"
+
+stage='wait-for-visible-first-frame'
+frame_ready=false
+frame_attempt=0
+for attempt in {1..30}; do
+  frame_attempt=$attempt
+  if adb exec-out screencap -p > "$evidence/startup.png" \
+      2> "$evidence/screencap-errors.txt" \
+      && python3 tool/release/verify_android_startup_frame.py \
+        "$evidence/startup.png" > "$evidence/startup-frame.txt" \
+        2> "$evidence/startup-frame-errors.txt"; then
+    frame_ready=true
+    break
+  fi
+  sleep 2
+done
+printf 'attempts=%s\nframe_ready=%s\n' \
+  "$frame_attempt" "$frame_ready" > "$evidence/startup-frame-wait.txt"
 sha256sum "$evidence/startup.png" > "$evidence/startup.sha256"
+if [[ "$frame_ready" != true ]]; then
+  cat "$evidence/startup-frame.txt" >&2 || true
+  echo 'BIL did not render a visible launch frame within 60 seconds.' >&2
+  exit 1
+fi
+
+stage='capture-launch-evidence'
 adb logcat -d -t 5000 > "$evidence/startup-logcat.txt" 2>&1 || true
 adb shell dumpsys activity activities > "$evidence/activity-state.txt" 2>&1 || true
 adb shell dumpsys window windows > "$evidence/window-state.txt" 2>&1 || true
@@ -113,8 +144,6 @@ if grep -Eqi \
   echo 'Android reported an ANR dialog or unresponsive process during startup.' >&2
   exit 1
 fi
-python3 tool/release/verify_android_startup_frame.py \
-  "$evidence/startup.png" | tee "$evidence/startup-frame.txt"
 
 stage='check-app-crash-log'
 if adb logcat -d -t 2000 --pid="$app_pid" | grep -Eq 'FATAL EXCEPTION|Fatal signal [0-9]+'; then
