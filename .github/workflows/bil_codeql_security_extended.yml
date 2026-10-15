@@ -39,34 +39,22 @@ permissions:
 
 jobs:
   analyze:
-    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || (inputs.android_only == true && matrix.language == 'java-kotlin') || (inputs.ios_only == true && matrix.language == 'swift') }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true }}
     name: CodeQL (${{ matrix.language }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - language: actions
-            runner: ubuntu-24.04
-            build-mode: none
-            flutter-build: false
-          - language: javascript-typescript
-            runner: ubuntu-24.04
-            build-mode: none
-            flutter-build: web-worker
-          - language: python
-            runner: ubuntu-24.04
-            build-mode: none
-            flutter-build: false
-          - language: java-kotlin
-            runner: ubuntu-24.04
-            build-mode: manual
-            flutter-build: android
-          - language: swift
-            runner: macos-26-intel
-            build-mode: manual
-            flutter-build: ios
+      matrix: >-
+        ${{ fromJSON(
+          inputs.android_only == true && inputs.ios_only == true &&
+            '{"include":[{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"},{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
+          || inputs.android_only == true &&
+            '{"include":[{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"}]}'
+          || inputs.ios_only == true &&
+            '{"include":[{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
+          || '{"include":[{"language":"actions","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"javascript-typescript","runner":"ubuntu-24.04","build-mode":"none","flutter-build":"web-worker"},{"language":"python","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"},{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
+        ) }}
 
     steps:
       - name: Check out accepted source
