@@ -1,6 +1,8 @@
 -- Align only the draft body CHECK with the approved LF/CR/TAB RPC contract.
 -- The original CHECK rejected genuine multiline drafts after RPC validation.
 -- No body-size increase, data rewrite, privilege, RLS or function change.
+begin;
+
 set local lock_timeout = '5s';
 set local statement_timeout = '30s';
 
@@ -48,3 +50,5 @@ begin
   end if;
 end
 $draft_body_whitespace$;
+
+commit;

@@ -4,6 +4,8 @@
 -- The five inspected tables are currently 49-147 KiB (including all indexes).
 -- Ordinary transactional index creation is deliberately bounded; if the lock
 -- or build cannot finish, abort and reassess instead of silently waiting.
+begin;
+
 set local lock_timeout='3s';
 set local statement_timeout='30s';
 
@@ -97,3 +99,5 @@ begin
   end if;
 end
 $fk_lookup_indexes$;
+
+commit;

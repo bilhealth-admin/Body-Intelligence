@@ -25,7 +25,7 @@ jobs:
   analyze:
     name: CodeQL (${{ matrix.language }})
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
     strategy:
       fail-fast: false
       matrix:
@@ -110,10 +110,11 @@ jobs:
         run: |
           set -euo pipefail
           dart compile js -O2 -o web/drift_worker.dart.js tool/drift_worker.dart
-          git diff --exit-code -- \
-            web/drift_worker.dart.js \
-            web/drift_worker.dart.js.deps \
-            web/drift_worker.dart.js.map
+          # The deps manifest and source map contain runner-local package URIs.
+          # Compare the generated executable worker, which is the CodeQL input.
+          git diff --exit-code -- web/drift_worker.dart.js
+          test -s web/drift_worker.dart.js.deps
+          test -s web/drift_worker.dart.js.map
 
       - name: Upload CodeQL results
         uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
@@ -143,7 +144,7 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           script: |
-            set -euo pipefail
+            bash -euo pipefail <<'BASH'
             OUT=artifacts/qa/text18/android-api33
             mkdir -p "$OUT"
             SOURCE_HEAD="$(git rev-parse HEAD)"
@@ -180,6 +181,7 @@ jobs:
                 --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
                 --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
                 2>&1 | tee "$OUT/native-feature-splashes.log"
+            BASH
 
       - name: Upload Android API 33 native integration evidence
         if: always() && matrix.flutter-build == 'android'

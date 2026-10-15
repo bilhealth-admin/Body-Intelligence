@@ -4,6 +4,8 @@
 -- earlier by now(), so both AI purpose selectors kept a newer-started grant.
 -- This fixes timestamp/serialization ordering only. It does NOT cancel a
 -- provider request already admitted or claim a tested deterministic tie policy.
+begin;
+
 set local lock_timeout='3s';
 set local statement_timeout='30s';
 
@@ -75,3 +77,5 @@ begin
     set granted = excluded.granted, recorded_at = excluded.recorded_at;
 end;
 $function$;
+
+commit;

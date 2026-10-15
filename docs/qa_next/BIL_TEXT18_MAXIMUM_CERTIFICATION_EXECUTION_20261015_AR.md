@@ -4,7 +4,20 @@
 
 هذا سجل تنفيذ محدد لطلب text-18، وليس إعادة احتساب لنتائج الفروع السابقة. أُجريت التغييرات على الفرع `integration/bil-qa-media-policy-20261011` انطلاقًا من `2a9ea4e085094959ff5ae6d2d1e35890a41733e8`، وهو نفسه SHA البعيد عند بدء العمل. لا تُنسب نتائج هذا السجل إلى SHA أقدم أو إلى نسخة متجر.
 
-**حالة GitHub Actions: بانتظار تشغيل `bil_codeql_security_extended.yml` على الالتزام الذي سيحتوي هذه التغييرات.** سيُستكمل هذا السجل برقم التشغيل ونتيجة كل job بعد انتهائه. لا يُعد أي تشغيل محلي بديلًا عن ذلك الدليل.
+**آخر تشغيل GitHub:** [Run 38697770620](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38697770620) على SHA `6149e8e92a859be28fd8449762088458142dbad1` انتهى بالفشل، وليس شهادة اعتماد. جرى استخراج أسباب الإخفاق من سجلات الـjobs، وأُصلحت في شجرة العمل التالية لإعادة الفحوص المتأثرة.
+
+### نتيجة أول تشغيل GitHub وأسباب الفشل
+
+| Job | النتيجة الفعلية على SHA 6149e8e | السبب والدليل |
+|---|---|---|
+| CodeQL Actions | PASS | اكتمل التحليل ورفع النتائج. |
+| CodeQL Python | PASS | اكتمل التحليل ورفع النتائج. |
+| CodeQL Java/Kotlin | Job FAIL؛ تحليل CodeQL ورفع نتائجه نجحا | محاكي API 33 أقلع، لكن السكربت أُرسل إلى `/usr/bin/sh` وفيه `set -euo pipefail`؛ رفضه `sh` بـ`Illegal option -o pipefail` قبل بدء اختبارات Flutter. |
+| CodeQL JavaScript/TypeScript | Job FAIL قبل رفع CodeQL | أعاد Dart توليد `.deps` و`.map` بمسارات الحزم المحلية للـrunner؛ اختلف الملفان، بينما لم يظهر `web/drift_worker.dart.js` ضمن diff. كان الفحص يقارن الثلاثة كأنها كلها مخرجات ثابتة بين أنظمة التشغيل. |
+| CodeQL Swift/iOS | Job CANCELLED عند حد 60 دقيقة | نجح بناء Swift ورفع CodeQL، وثُبّت تطبيق build 36 وشُغّل باردًا على iPhone Simulator بنظام Xcode 26.6. بدأ `flutter test` لكن بناء Xcode لاختبار التكامل لم ينته قبل إلغاء الـJob؛ لم تصل الاختبارات إلى نتيجة، ولم يبدأ iPad. حُفظ artifact رقم `11957831922` وفيه لقطة تشغيل iPhone وسجل يبيّن بداية بناء الاختبار فقط. |
+| Local Supabase | Job FAIL بعد نجاح بدء Stack محلي مؤقت | `supabase db reset --local --no-seed` وصل إلى `202608140001_bil_account_deletion_idempotency.sql` ثم PostgreSQL رفض `LOCK TABLE` بـ`SQLSTATE 25P01: LOCK TABLE can only be used in transaction blocks`. لذلك تخطت بقية اختبارات migrations وAuth/RLS وStorage وRealtime وEdge Functions. |
+
+الإصلاحات التالية أُضيفت بعد هذا التشغيل ولم تُختبر بعد على GitHub: مقارنة ملف Drift التنفيذي فقط والتحقق من وجود `.deps` و`.map`؛ تشغيل سكربت محاكي Android عبر Bash؛ رفع مهلة Swift إلى 180 دقيقة لأن التشغيل قطع بناء Xcode قبل نتيجة الاختبار؛ وإضافة معاملة صريحة حول خمسة migrations تحتوي أقفالًا أو `SET LOCAL` مع أقفال، حتى يصبح القفل ومهلته ضمن معاملة فعلية. سيُعاد تشغيل Workflow بعد تثبيت هذه التغييرات، وستظل نتيجة Run 38697770620 فشلًا تاريخيًا على SHA السابق.
 
 ## ما عُدّل
 
@@ -73,7 +86,7 @@
 
 ## سجل التشغيل النهائي
 
-يُضاف هنا بعد انتهاء Workflow:
+سيُستكمل هذا القسم بعد إعادة التشغيل على SHA الإصلاح. لا يُنسب تشغيل Run 38697770620 إلى SHA الإصلاح:
 
 - Commit/source SHA وtree SHA:
 - GitHub Actions run ID والرابط:

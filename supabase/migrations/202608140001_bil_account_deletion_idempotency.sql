@@ -1,6 +1,8 @@
 -- Keep an account-deletion request idempotent while it is active. Recording
 -- the request does not claim that the separately deployed worker completed it.
 
+begin;
+
 lock table public.bil_account_deletion_requests in share row exclusive mode;
 
 with ranked as (
@@ -67,3 +69,5 @@ end $$;
 
 revoke all on function public.bil_request_account_deletion(text) from public, anon;
 grant execute on function public.bil_request_account_deletion(text) to authenticated;
+
+commit;

@@ -2,6 +2,8 @@
 -- 2026-10-04: health envelopes must not cross RPC or direct SELECT after decline.
 -- Device inventory/revocation and consent readback remain available when OFF.
 -- Payload encryption is not a substitute for transport/storage consent.
+begin;
+
 set local lock_timeout='3s';
 set local statement_timeout='30s';
 
@@ -287,3 +289,5 @@ using (coalesce((select receipt.granted and receipt.policy_version='1'
 -- CREATE OR REPLACE retains exact existing function ownership and ACLs;
 -- public/anon cannot execute either RPC, sync is authenticated-only, and the
 -- existing service_role consent permission is not expanded to table CRUD.
+
+commit;
