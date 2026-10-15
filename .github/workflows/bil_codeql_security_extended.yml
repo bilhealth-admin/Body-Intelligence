@@ -37,7 +37,7 @@ jobs:
           - language: javascript-typescript
             runner: ubuntu-24.04
             build-mode: none
-            flutter-build: false
+            flutter-build: web-worker
           - language: python
             runner: ubuntu-24.04
             build-mode: none
@@ -77,15 +77,323 @@ jobs:
 
       - name: Build Android plugin sources for CodeQL
         if: matrix.flutter-build == 'android'
-        run: flutter build apk --debug --no-pub
+        run: >-
+          flutter build apk --debug --no-pub --build-number 33
+          --dart-define=BIL_ENVIRONMENT=testing
+          --dart-define=BIL_USE_SUPABASE=false
+          --dart-define=SUPABASE_URL=
+          --dart-define=SUPABASE_ANON_KEY=
+          --dart-define=BIL_PAYMENTS_ENABLED=false
+          --dart-define=BIL_ADS_ENABLED=false
+          --dart-define=BIL_COMMUNITY_ENABLED=false
+          --dart-define=BIL_PUSH_ENABLED=false
 
       - name: Build iOS plugin sources for CodeQL
         if: matrix.flutter-build == 'ios'
         # Let Flutter resolve/install the generated CocoaPods graph as part
         # of the traced build; this repository does not commit a Podfile.lock.
-        run: flutter build ios --simulator --debug --no-codesign --no-pub
+        run: >-
+          flutter build ios --simulator --debug --no-codesign --no-pub
+          --build-number 36
+          --dart-define=BIL_ENVIRONMENT=testing
+          --dart-define=BIL_USE_SUPABASE=false
+          --dart-define=SUPABASE_URL=
+          --dart-define=SUPABASE_ANON_KEY=
+          --dart-define=BIL_PAYMENTS_ENABLED=false
+          --dart-define=BIL_ADS_ENABLED=false
+          --dart-define=BIL_COMMUNITY_ENABLED=false
+          --dart-define=BIL_PUSH_ENABLED=false
+
+      - name: Rebuild the patched Drift worker before JavaScript analysis
+        if: matrix.flutter-build == 'web-worker'
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart compile js -O2 -o web/drift_worker.dart.js tool/drift_worker.dart
+          git diff --exit-code -- \
+            web/drift_worker.dart.js \
+            web/drift_worker.dart.js.deps \
+            web/drift_worker.dart.js.map
 
       - name: Upload CodeQL results
         uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
           category: /language:${{ matrix.language }}
+
+      - name: Verify purchase and restore pipeline with isolated native SDK fakes
+        if: matrix.flutter-build == 'android'
+        run: >-
+          flutter test --no-pub --reporter expanded
+          --dart-define=BIL_PAYMENTS_ENABLED=true
+          test/features/commerce/store_transaction_queue_test.dart
+          test/features/commerce/store_native_purchase_completion_test.dart
+          test/features/commerce/app_purchase_confirmation_test.dart
+          test/features/commerce/app_subscription_confirmation_test.dart
+          test/features/commerce/verified_store_purchase_startup_event_test.dart
+          test/features/intelligence_center/ai_boost_purchase_service_test.dart
+
+      - name: Run Android 33 native integration journeys offline
+        if: matrix.flutter-build == 'android'
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 900
+          script: |
+            set -euo pipefail
+            OUT=artifacts/qa/text18/android-api33
+            mkdir -p "$OUT"
+            SOURCE_HEAD="$(git rev-parse HEAD)"
+            SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
+            adb shell settings put global airplane_mode_on 1
+            adb shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true
+            adb shell svc wifi disable
+            adb shell svc data disable
+            test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = '1'
+            flutter test integration_test/system_crypto_bridge_integration_test.dart \
+              --no-pub --device-id emulator-5554 --reporter expanded \
+              --dart-define=BIL_ENVIRONMENT=testing \
+              --dart-define=BIL_USE_SUPABASE=false \
+              --dart-define=BIL_PAYMENTS_ENABLED=false \
+              --dart-define=BIL_ADS_ENABLED=false \
+              2>&1 | tee "$OUT/system-crypto.log"
+            BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/native-settings" \
+              flutter drive --device-id emulator-5554 \
+                --driver=test_driver/native_settings_capture_driver.dart \
+                --target=integration_test/native_settings_polish_test.dart \
+                --dart-define=BIL_ENVIRONMENT=testing \
+                --dart-define=BIL_USE_SUPABASE=false \
+                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
+                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
+                2>&1 | tee "$OUT/native-settings.log"
+            BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/feature-splashes" \
+              flutter drive --device-id emulator-5554 \
+                --driver=test_driver/native_feature_splashes_driver.dart \
+                --target=integration_test/native_feature_splashes_test.dart \
+                --dart-define=BIL_ENVIRONMENT=testing \
+                --dart-define=BIL_USE_SUPABASE=false \
+                --dart-define=BIL_QA_ANDROID_EMULATOR=true \
+                --dart-define=BIL_QA_DEVICE_NAME=github-api33-pixel6 \
+                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
+                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
+                2>&1 | tee "$OUT/native-feature-splashes.log"
+
+      - name: Upload Android API 33 native integration evidence
+        if: always() && matrix.flutter-build == 'android'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-android33-native-integration-${{ github.sha }}
+          path: artifacts/qa/text18/android-api33
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Run iOS 36 native integration journeys on iPhone and iPad
+        if: matrix.flutter-build == 'ios'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=artifacts/qa/text18/ios36-simulators
+          mkdir -p "$OUT"
+          APP=build/ios/iphonesimulator/Runner.app
+          test -d "$APP"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '36'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
+          xcodebuild -version > "$OUT/xcode-version.txt"
+          SOURCE_HEAD="$(git rev-parse HEAD)"
+          SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
+          read -r RUNTIME IPHONE_TYPE IPAD_TYPE < <(python3 - <<'PY'
+          import json
+          import re
+          import subprocess
+
+          runtimes = json.loads(subprocess.check_output(
+              ['xcrun', 'simctl', 'list', 'runtimes', 'available', '-j'],
+          ))['runtimes']
+          ios = [item for item in runtimes if item.get('isAvailable') and
+                 item.get('identifier', '').startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
+          if not ios:
+              raise SystemExit('No available iOS Simulator runtime')
+          def version(item):
+              return tuple(int(part) for part in re.findall(r'\d+', item.get('version', '0')))
+          runtime = max(ios, key=version)
+          types = json.loads(subprocess.check_output(
+              ['xcrun', 'simctl', 'list', 'devicetypes', '-j'],
+          ))['devicetypes']
+          iphones = [item for item in types if item['name'].startswith('iPhone')]
+          ipads = [item for item in types if item['name'].startswith('iPad')]
+          def select(items, preferred):
+              by_name = {item['name']: item for item in items}
+              for name in preferred:
+                  if name in by_name:
+                      return by_name[name]
+              return items[-1]
+          if not iphones or not ipads:
+              raise SystemExit('Both iPhone and iPad Simulator device types are required')
+          iphone = select(iphones, ['iPhone 16 Pro', 'iPhone 16', 'iPhone 15 Pro'])
+          ipad = select(ipads, ['iPad Pro 13-inch (M4)', 'iPad Pro (13-inch) (M4)',
+                                'iPad Pro (12.9-inch) (6th generation)'])
+          print(runtime['identifier'], iphone['identifier'], ipad['identifier'])
+          PY
+          )
+          IPHONE_UDID="$(xcrun simctl create "BIL-iPhone36-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME")"
+          IPAD_UDID="$(xcrun simctl create "BIL-iPad36-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME")"
+          for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do
+            DEVICE="${PAIR#*:}"
+            LABEL="${PAIR%%:*}"
+            xcrun simctl erase "$DEVICE"
+            xcrun simctl boot "$DEVICE"
+            xcrun simctl bootstatus "$DEVICE" -b
+            xcrun simctl ui "$DEVICE" appearance light
+            xcrun simctl install "$DEVICE" "$APP"
+            xcrun simctl launch "$DEVICE" com.bilhealth.bodyintelligencelog \
+              -AppleLanguages '(en)' -AppleLocale 'en_US' \
+              | tee "$OUT/$LABEL-build36-launch.log"
+            sleep 8
+            xcrun simctl io "$DEVICE" screenshot "$OUT/$LABEL-build36-launch.png"
+            xcrun simctl terminate "$DEVICE" com.bilhealth.bodyintelligencelog
+            flutter test integration_test/system_crypto_bridge_integration_test.dart \
+              --no-pub --device-id "$DEVICE" --reporter expanded \
+              --dart-define=BIL_ENVIRONMENT=testing \
+              --dart-define=BIL_USE_SUPABASE=false \
+              --dart-define=BIL_PAYMENTS_ENABLED=false \
+              --dart-define=BIL_ADS_ENABLED=false \
+              2>&1 | tee "$OUT/$LABEL-system-crypto.log"
+            BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-native-settings" \
+              flutter drive --device-id "$DEVICE" \
+                --driver=test_driver/native_settings_capture_driver.dart \
+                --target=integration_test/native_settings_polish_test.dart \
+                --dart-define=BIL_ENVIRONMENT=testing \
+                --dart-define=BIL_USE_SUPABASE=false \
+                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
+                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
+                2>&1 | tee "$OUT/$LABEL-native-settings.log"
+            BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-feature-splashes" \
+              flutter drive --device-id "$DEVICE" \
+                --driver=test_driver/native_feature_splashes_driver.dart \
+                --target=integration_test/native_feature_splashes_test.dart \
+                --dart-define=BIL_ENVIRONMENT=testing \
+                --dart-define=BIL_USE_SUPABASE=false \
+                --dart-define=BIL_QA_IOS_SIMULATOR=true \
+                --dart-define=BIL_QA_DEVICE_NAME=github-ios36-$LABEL \
+                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
+                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
+                2>&1 | tee "$OUT/$LABEL-feature-splashes.log"
+          done
+
+      - name: Upload iOS 36 iPhone and iPad evidence
+        if: always() && matrix.flutter-build == 'ios'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-ios36-iphone-ipad-integration-${{ github.sha }}
+          path: artifacts/qa/text18/ios36-simulators
+          if-no-files-found: warn
+          retention-days: 14
+
+  local-supabase-integration:
+    name: Local Supabase migrations, SQL, Auth and RLS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    steps:
+      - name: Check out accepted source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js 24
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Install Deno 2
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
+        with:
+          deno-version: v2.x
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3
+        with:
+          version: 2.121.0
+
+      - name: Verify local-only prerequisites and install SQL fixture dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          deno --version
+          supabase --version
+          supabase --help
+          supabase start --help
+          supabase db reset --help
+          supabase test --help
+          docker version
+          test ! -e supabase/config.toml
+          npm ci --prefix supabase/tests --ignore-scripts --no-audit --no-fund
+
+      - name: Start the disposable local Supabase stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase init
+          supabase start --exclude studio,analytics \
+            > "$RUNNER_TEMP/bil-supabase-start.log" 2>&1 || {
+              python3 - "$RUNNER_TEMP/bil-supabase-start.log" <<'PY'
+          import re
+          import sys
+          for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
+              if re.search(r'(?i)(anon key|service.role key|jwt secret|password|secret key)', line):
+                  print('[redacted local Supabase credential line]')
+              else:
+                  print(line, end='')
+          PY
+              exit 1
+            }
+          python3 - "$RUNNER_TEMP/bil-supabase-start.log" <<'PY'
+          import re
+          import sys
+          for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
+              if re.search(r'(?i)(anon key|service.role key|jwt secret|password|secret key)', line):
+                  print('[redacted local Supabase credential line]')
+              else:
+                  print(line, end='')
+          PY
+          supabase status --output env > "$RUNNER_TEMP/bil-supabase-local.env"
+          {
+            echo "API_URL=$(grep '^API_URL=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
+            echo "ANON_KEY=$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
+          } >> "$GITHUB_ENV"
+          echo "BIL_LOCAL_DB_CONTAINER=$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)" >> "$GITHUB_ENV"
+          test -n "$(grep '^API_URL=' "$RUNNER_TEMP/bil-supabase-local.env")"
+          test -n "$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env")"
+          test -n "$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
+
+      - name: Apply every checked-in migration to the local database
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase db reset --local --no-seed
+
+      - name: Execute PostgreSQL migration and RLS tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          supabase test db --local
+
+      - name: Exercise Auth sessions and owner-scoped RLS through local APIs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            supabase/tests/local_supabase_auth_rls_e2e_test.mjs \
+            supabase/tests/local_supabase_storage_realtime_e2e_test.mjs
+
+      - name: Run all isolated PostgreSQL and Edge Function suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test --prefix supabase/tests
+          deno test --allow-env --allow-read --allow-net supabase/functions

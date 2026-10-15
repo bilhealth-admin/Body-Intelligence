@@ -15,6 +15,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 import { clientFromEnvironment } from './asc_catalog_sync.mjs';
+import { containsExactHttpsUrl } from '../shared/exact_url.mjs';
 
 const VERSION_ID = '7a132506-d5a8-4810-a51f-b2dc2bd636cf';
 const LOCALIZATION_ID = '3866ba6c-b637-4f70-9c53-d6274c37bc62';
@@ -83,7 +84,7 @@ if (
 }
 
 const beforeDescription = beforeLocalization.attributes.description ?? '';
-const targetDescription = beforeDescription.includes(POLICY_URL)
+const targetDescription = containsExactHttpsUrl(beforeDescription, POLICY_URL)
   ? beforeDescription
   : `${beforeDescription.trimEnd()}\n\n${POLICY_LINE}`;
 if (targetDescription.length > 4000) {

@@ -2,6 +2,7 @@
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import { resolveSameOriginHttpsUrl } from '../shared/trusted_https_url.mjs';
 
 const ENDPOINT =
   'https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase';
@@ -48,8 +49,14 @@ async function accessToken(credential) {
 }
 
 async function googleGet(url, token) {
-  const response = await fetch(url, {
+  const trustedUrl = resolveSameOriginHttpsUrl(
+    url,
+    'https://pubsub.googleapis.com',
+    ['/v1/projects/'],
+  );
+  const response = await fetch(trustedUrl, {
     headers: { authorization: `Bearer ${token}` },
+    redirect: 'error',
   });
   let body = {};
   try {

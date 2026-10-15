@@ -101,6 +101,8 @@ dev_dependencies:
   yet_another_json_isolate: 2.1.1
   # Inject the existing player interface in lifecycle/network widget tests.
   video_player_platform_interface: ^6.9.0
+  # The security regression test imports the audited local stack_trace fork.
+  stack_trace: 1.12.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -130,6 +132,11 @@ dependency_overrides:
   # the server-verified auth/session flow and keeps release crypto OS-backed.
   dart_jsonwebtoken:
     path: tool/vendor_dart_jsonwebtoken
+  # Drift's web worker parses stack traces received through its worker bridge.
+  # This upstream-compatible fork removes catastrophic backtracking from an
+  # optional Firefox/Safari frame prefix without changing supported frame data.
+  stack_trace:
+    path: tool/vendor_stack_trace
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

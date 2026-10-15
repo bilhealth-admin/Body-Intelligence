@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { resolveSameOriginHttpsUrl } from '../../shared/trusted_https_url.mjs';
 
 export const root = process.cwd();
 export const statePath = requiredEnv('BIL_QA_STATE_PATH');
@@ -87,8 +88,12 @@ export function mask(...values) {
 
 export function letters(byteLength = 18) {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-  return [...crypto.randomBytes(byteLength)]
-    .map((value) => alphabet[value % alphabet.length])
+  if (!Number.isInteger(byteLength) || byteLength < 0 || byteLength > 4096) {
+    throw new Error('invalid_random_identifier_length');
+  }
+  return Array.from({ length: byteLength }, () =>
+    alphabet[crypto.randomInt(alphabet.length)]
+  )
     .join('');
 }
 
@@ -107,7 +112,8 @@ export async function request({
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (prefer) headers.Prefer = prefer;
-  const response = await fetch(`${supabaseConfig.url}${route}`, {
+  const url = resolveSameOriginHttpsUrl(route, supabaseConfig.url);
+  const response = await fetch(url, {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),

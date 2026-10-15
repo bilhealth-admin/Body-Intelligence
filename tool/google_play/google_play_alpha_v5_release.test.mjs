@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -19,6 +20,7 @@ import {
   buildReadOnlyPreflightResource,
   buildTrackUpdate,
   classifyAlphaState,
+  inspectAab,
   parseArguments,
   plannedOperations,
   resumableOffsetFromRange,
@@ -27,6 +29,31 @@ import {
 } from './google_play_alpha_v5_release.mjs';
 
 const TEST_CHUNK_BYTES = 256 * 1024;
+
+test('AAB validation and SHA-256 use one opened file descriptor', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'bil-play-aab-inspect-'));
+  const aabPath = path.join(directory, 'candidate.aab');
+  const bytes = Buffer.concat([
+    Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+    Buffer.from('synthetic-local-aab-content'),
+  ]);
+  fs.writeFileSync(aabPath, bytes);
+  try {
+    const inspected = await inspectAab(aabPath);
+    assert.equal(inspected.byteLength, bytes.length);
+    assert.equal(
+      inspected.sha256,
+      crypto.createHash('sha256').update(bytes).digest('hex'),
+    );
+    await assert.rejects(
+      inspectAab(path.join(directory, 'missing.aab')),
+      (error) => error instanceof SafeFailure &&
+        error.code === 'AAB_FILE_UNREADABLE',
+    );
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
 
 async function requestBodyBytes(body) {
   const chunks = [];

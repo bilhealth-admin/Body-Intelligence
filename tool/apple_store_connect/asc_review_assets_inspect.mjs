@@ -11,6 +11,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { validateTrustedHttpsUrl } from '../shared/trusted_https_url.mjs';
 
 const APP_ID = '6805349703';
 const VERSION = '1.0.0';
@@ -52,6 +53,7 @@ async function request(path, { allow = [] } = {}) {
   for (let attempt = 1; attempt <= 4; attempt += 1) {
     const response = await fetch(`https://api.appstoreconnect.apple.com${path}`, {
       headers: { Authorization: `Bearer ${token}` },
+      redirect: 'error',
     });
     if (response.ok) return { status: response.status, ...(await response.json()) };
     if (allow.includes(response.status)) return { status: response.status, data: null };
@@ -77,7 +79,11 @@ async function saveReviewScreenshot(imageAsset, fileName) {
     .replace('{w}', String(width))
     .replace('{h}', String(height))
     .replace('{f}', 'png');
-  const response = await fetch(url);
+  const trustedUrl = validateTrustedHttpsUrl(url, ['mzstatic.com']);
+  if (!/^(subscription|iap)-[a-z0-9_]+\.png$/i.test(fileName)) {
+    throw new Error('Review screenshot filename is invalid');
+  }
+  const response = await fetch(trustedUrl, { redirect: 'error' });
   if (!response.ok) throw new Error(`Review screenshot download failed: ${response.status}`);
   fs.mkdirSync(downloadDir, { recursive: true });
   fs.writeFileSync(path.join(downloadDir, fileName), Buffer.from(await response.arrayBuffer()));

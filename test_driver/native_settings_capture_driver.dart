@@ -5,7 +5,10 @@ import 'package:integration_test/integration_test_driver_extended.dart';
 /// Receives native screenshots on the host before the test app is removed.
 /// A valid capture is evidence, not an automatic Apple visual-match approval.
 Future<void> main() async {
-  final output = Directory('docs/qa/native_settings_20260910');
+  final output = Directory(
+    Platform.environment['BIL_NATIVE_SETTINGS_OUTPUT'] ??
+        'docs/qa/native_settings_20260910',
+  );
   await output.create(recursive: true);
   final captures = <String>[];
   await integrationDriver(

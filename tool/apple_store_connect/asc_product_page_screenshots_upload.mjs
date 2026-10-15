@@ -23,6 +23,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 import { clientFromEnvironment } from './asc_catalog_sync.mjs';
+import { validateAppleUploadOperation } from '../shared/trusted_https_url.mjs';
 
 export const APP_ID = '6805349703';
 export const VERSION = '1.0.0';
@@ -114,10 +115,12 @@ async function uploadOperations(operations, bytes, fetchImpl = fetch) {
     const headers = Object.fromEntries(
       (operation.requestHeaders ?? []).map(({ name, value }) => [name, value]),
     );
-    const response = await fetchImpl(operation.url, {
-      method: operation.method ?? 'PUT',
+    const url = validateAppleUploadOperation(operation);
+    const response = await fetchImpl(url, {
+      method: 'PUT',
       headers,
       body: bytes.subarray(offset, offset + length),
+      redirect: 'error',
     });
     if (!response.ok) {
       throw new Error(`Apple screenshot asset upload failed with HTTP ${response.status}`);

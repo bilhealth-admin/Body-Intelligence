@@ -13,6 +13,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { validateTrustedHttpsUrl } from '../shared/trusted_https_url.mjs';
 
 const PACKAGE_NAME = 'com.bilhealth.bodyintelligencelog';
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -44,7 +45,11 @@ function googleHashMatches(remote, actualHex) {
 }
 
 function fullResolutionGoogleImageUrl(url) {
-  const parsed = new URL(url);
+  const parsed = new URL(validateTrustedHttpsUrl(
+    url,
+    ['play-lh.googleusercontent.com'],
+    { allowSubdomains: false },
+  ));
   const lastSlash = parsed.pathname.lastIndexOf('/');
   const suffix = parsed.pathname.indexOf('=', lastSlash + 1);
   if (suffix >= 0) parsed.pathname = parsed.pathname.slice(0, suffix);
@@ -198,6 +203,7 @@ async function main() {
         if (!remote.url) throw new Error(`Google screenshot ${locale}[${index}] has no URL`);
         const response = await fetch(fullResolutionGoogleImageUrl(remote.url), {
           headers: { Authorization: `Bearer ${token}` },
+          redirect: 'error',
         });
         if (!response.ok) throw new Error(`Screenshot download failed (${response.status})`);
         const bytes = Buffer.from(await response.arrayBuffer());

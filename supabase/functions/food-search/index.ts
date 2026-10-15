@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { FoodSearchMemo, searchMemoKey } from "./search_memo.ts";
+import { decodeTranslatedText } from "./translation_text.ts";
 
 const maxRequestBytes = 4096;
 const minuteQuota = 10;
@@ -318,14 +319,6 @@ async function translateWithGoogle(
     clearTimeout(timer);
   }
 }
-
-const decodeTranslatedText = (value: string) =>
-  value
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-    .replaceAll("&amp;", "&")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">");
 
 const secretApiKey = () => {
   const modern = env("SUPABASE_SECRET_KEYS");

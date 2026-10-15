@@ -37,7 +37,8 @@ Future<void> main() async {
         'width_pixels': png.getUint32(16),
         'height_pixels': png.getUint32(20),
         'byte_count': bytes.length,
-        'classification': 'native Flutter screenshot from Android emulator',
+        'classification':
+            'native Flutter screenshot captured by integration_test',
       });
       return true;
     },

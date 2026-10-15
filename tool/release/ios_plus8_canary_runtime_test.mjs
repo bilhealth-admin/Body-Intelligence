@@ -19,6 +19,11 @@ globalThis.fetch = async (url, options) => {
 
 try {
   const runtime = await import('./ios_plus8_canary/runtime.mjs');
+  assert.equal(runtime.letters(40).length, 40);
+  assert.match(runtime.letters(64), /^[A-HJ-NP-Z]{64}$/);
+  assert.throws(() => runtime.letters(-1), /invalid_random_identifier_length/);
+  assert.throws(() => runtime.letters(4097), /invalid_random_identifier_length/);
+  process.stdout.write('IOS_PLUS8_CANARY_RANDOM_IDENTIFIERS=PASS\n');
   const result = await runtime.request({ route: '/rest/v1/runtime_probe' });
   assert.equal(result.status, 200);
   assert.deepEqual(result.data, { ok: true });
@@ -28,6 +33,11 @@ try {
     captured.url,
     `${runtime.supabaseConfig.url}/rest/v1/runtime_probe`,
   );
+  await assert.rejects(
+    runtime.request({ route: 'https://attacker.example/collect' }),
+    /TRUSTED_URL/,
+  );
+  process.stdout.write('IOS_PLUS8_CANARY_REQUEST_ORIGIN_GUARD=PASS\n');
   process.stdout.write('IOS_PLUS8_CANARY_RUNTIME_FETCH_INJECTION=PASS\n');
 
   process.env.BIL_SUPABASE_SERVICE_ROLE_KEY = 'local-scope-probe-only';

@@ -12,6 +12,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { googleOAuthTokenUri } from './google_oauth.mjs';
+import { resolveSameOriginHttpsUrl } from '../shared/trusted_https_url.mjs';
 
 const PACKAGE_NAME = 'com.bilhealth.bodyintelligencelog';
 const API_ROOT = 'https://androidpublisher.googleapis.com/androidpublisher/v3';
@@ -41,7 +43,7 @@ function safeError(status, parsed) {
 
 async function accessToken(credentials) {
   const now = Math.floor(Date.now() / 1000);
-  const tokenUri = credentials.token_uri || 'https://oauth2.googleapis.com/token';
+  const tokenUri = googleOAuthTokenUri(credentials);
   const header = base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
   const claims = base64Url(JSON.stringify({
     iss: credentials.client_email,
@@ -56,6 +58,7 @@ async function accessToken(credentials) {
     .toString('base64url');
   const response = await fetch(tokenUri, {
     method: 'POST',
+    redirect: 'error',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
@@ -75,13 +78,18 @@ class GetOnlyClient {
   }
 
   async get(resource) {
-    const url = resource.startsWith('http') ? resource : `${API_ROOT}${resource}`;
+    const url = resolveSameOriginHttpsUrl(
+      resource,
+      API_ROOT,
+      ['/androidpublisher/v3/'],
+    );
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${this.token}`,
         Accept: 'application/json',
       },
+      redirect: 'error',
     });
     const parsed = await response.json().catch(() => null);
     if (!response.ok) return { ok: false, error: safeError(response.status, parsed) };

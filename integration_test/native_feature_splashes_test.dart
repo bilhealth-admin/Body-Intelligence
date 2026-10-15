@@ -48,6 +48,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 const _owner = '11111111-1111-4111-8111-111111111111';
 const _head = String.fromEnvironment('BIL_QA_SOURCE_HEAD');
 const _fingerprint = String.fromEnvironment('BIL_QA_SOURCE_FINGERPRINT');
+const _androidQaEnabled = bool.fromEnvironment('BIL_QA_ANDROID_EMULATOR');
+const _iosQaEnabled = bool.fromEnvironment('BIL_QA_IOS_SIMULATOR');
 const _sceneFilter = String.fromEnvironment('BIL_QA_NATIVE_SCENE');
 const _kinds = ['recipes', 'videos', 'sleep', 'diet', 'coach', 'community'];
 const _scenes = [
@@ -57,8 +59,12 @@ const _scenes = [
   (language: 'en', reduced: true, scale: 2.0),
 ];
 
+bool _isExpectedNativeQaTarget() =>
+    (Platform.isAndroid && _androidQaEnabled) ||
+    (Platform.isIOS && _iosQaEnabled);
+
 // This guards Dart HttpClient creation only. Raw/native sockets are not covered;
-// root must also verify the dedicated AVD is offline before launching this app.
+// the fixture also injects transports that forbid cloud requests.
 class _NativeDartNetworkDeny extends HttpOverrides {
   int blockedClientCreations = 0;
   @override
@@ -199,11 +205,13 @@ String _location(String kind) => switch (kind) {
 };
 
 Future<Directory> _output() async {
-  final external = await getExternalStorageDirectory();
-  if (external == null) {
-    throw StateError('QA external app directory unavailable');
+  final root = Platform.isAndroid
+      ? await getExternalStorageDirectory()
+      : await getApplicationDocumentsDirectory();
+  if (root == null) {
+    throw StateError('Native QA app documents directory unavailable');
   }
-  final directory = Directory('${external.path}/feature-splashes-native');
+  final directory = Directory('${root.path}/feature-splashes-native');
   await directory.create(recursive: true);
   return directory;
 }
@@ -233,10 +241,11 @@ void main() {
       'native six feature entries $name with real platform fonts',
       (tester) async {
         expect(
-          Platform.isAndroid,
+          Platform.isAndroid || Platform.isIOS,
           isTrue,
-          reason: 'This QA fixture targets the dedicated Android AVD only',
+          reason: 'This QA fixture requires an Android or iOS native target',
         );
+        expect(_isExpectedNativeQaTarget(), isTrue);
         expect(AppEnvironment.profile, EnvironmentProfile.testing);
         expect(AppEnvironment.useSupabase, isFalse);
         expect(
@@ -246,7 +255,6 @@ void main() {
           isFalse,
         );
         expect(AppEnvironment.supabaseRuntimeReady, isFalse);
-        expect(const bool.fromEnvironment('BIL_QA_ANDROID_EMULATOR'), isTrue);
         expect(
           _head.isNotEmpty && _fingerprint.isNotEmpty,
           isTrue,
@@ -271,12 +279,13 @@ void main() {
         final timings = <Map<String, Object?>>[];
         final source = <String, Object?>{
           'classification':
-              'Android emulator / native Flutter debug QA entrypoint',
+              'native ${Platform.operatingSystem} Flutter debug QA entrypoint',
+          'platform': Platform.operatingSystem,
           'source_head': _head,
           'source_fingerprint': _fingerprint,
           'scene': name,
           'platform_version': Platform.operatingSystemVersion,
-          'emulator_name': const String.fromEnvironment('BIL_QA_EMULATOR_NAME'),
+          'device_name': const String.fromEnvironment('BIL_QA_DEVICE_NAME'),
           'fonts':
               'actual platform theme; production BILDisplay/BILArabic overrides retained',
           'text_scale': scene.scale,
@@ -452,8 +461,10 @@ void main() {
               originContext,
             );
           }
-          await binding.convertFlutterSurfaceToImage();
-          await tester.pump(); // Required by the pinned Android screenshot API.
+          if (Platform.isAndroid) {
+            await binding.convertFlutterSurfaceToImage();
+          }
+          await tester.pump();
           for (final kind in _kinds) {
             await tester.ensureVisible(
               find.byKey(ValueKey('native-open-$kind')),
@@ -898,8 +909,10 @@ Future<GoRouter> _mountNativeCoach(
     find.byKey(const Key('ai-coach-question-field')).hitTestable(),
     findsOneWidget,
   );
-  await IntegrationTestWidgetsFlutterBinding.ensureInitialized()
-      .convertFlutterSurfaceToImage();
+  if (Platform.isAndroid) {
+    await IntegrationTestWidgetsFlutterBinding.ensureInitialized()
+        .convertFlutterSurfaceToImage();
+  }
   await tester.pump();
   return router;
 }
@@ -966,7 +979,8 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
         testWidgets(
           'native Coach $mode $scene 2x real fonts and frames',
           (tester) async {
-            expect(Platform.isAndroid, isTrue);
+            expect(Platform.isAndroid || Platform.isIOS, isTrue);
+            expect(_isExpectedNativeQaTarget(), isTrue);
             expect(AppEnvironment.profile, EnvironmentProfile.testing);
             expect(
               AppEnvironment.useSupabase ||
@@ -974,10 +988,6 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   AppEnvironment.pushEnabled ||
                   AppEnvironment.adsEnabled,
               isFalse,
-            );
-            expect(
-              const bool.fromEnvironment('BIL_QA_ANDROID_EMULATOR'),
-              isTrue,
             );
             expect(_head.isNotEmpty && _fingerprint.isNotEmpty, isTrue);
             final output = await _output();
@@ -994,7 +1004,8 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
             ).join('\n');
             final metadata = <String, Object?>{
               'classification':
-                  'native Android emulator QA production Coach page / held synthetic model, not AI-quality E2E',
+                  'native ${Platform.operatingSystem} QA production Coach page / held synthetic model, not AI-quality E2E',
+              'platform': Platform.operatingSystem,
               'source_head': _head,
               'source_fingerprint': _fingerprint,
               'scene': scene,

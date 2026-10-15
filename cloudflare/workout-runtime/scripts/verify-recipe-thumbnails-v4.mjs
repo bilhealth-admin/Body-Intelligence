@@ -2,11 +2,16 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { resolveSameOriginHttpsUrl } from "../../../tool/shared/trusted_https_url.mjs";
 
 const expectedManifestSha256 =
   "24055bdfa731250fcac4aa55e3ab691fe2fc01a84733a8086ca2accf232a9029";
 const base = new URL(process.argv[2] ?? "");
-if (base.protocol !== "https:" || base.pathname !== "/" || base.search || base.hash) {
+if (
+  base.href !== "https://workouts.bilhealth.com/" ||
+  base.username ||
+  base.password
+) {
   throw new Error("Pass one exact HTTPS origin ending in '/'.");
 }
 
@@ -32,9 +37,13 @@ const workers = Array.from({ length: 16 }, async () => {
     const index = cursor++;
     if (index >= manifest.entries.length) return;
     const entry = manifest.entries[index];
-    const url = new URL(entry.delivery_path, base);
+    const url = resolveSameOriginHttpsUrl(
+      entry.delivery_path,
+      base.href,
+      ["/v4/recipes/thumbnails/"],
+    );
     try {
-      const response = await fetch(url, { method: "HEAD" });
+      const response = await fetch(url, { method: "HEAD", redirect: "error" });
       const valid =
         response.status === 200 &&
         response.headers.get("content-type") === "image/webp" &&
@@ -64,8 +73,14 @@ if (failures.length > 0) {
 
 for (const index of [0, 749, 1499]) {
   const entry = manifest.entries[index];
-  const response = await fetch(new URL(entry.delivery_path, base), {
+  const url = resolveSameOriginHttpsUrl(
+    entry.delivery_path,
+    base.href,
+    ["/v4/recipes/thumbnails/"],
+  );
+  const response = await fetch(url, {
     headers: { authorization: "Bearer deliberately-not-consumed" },
+    redirect: "error",
   });
   const bytes = new Uint8Array(await response.arrayBuffer());
   const sha256 = createHash("sha256").update(bytes).digest("hex");

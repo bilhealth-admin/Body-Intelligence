@@ -51,7 +51,7 @@ for (const language of ['en', 'ar']) {
     assert.equal(open.href, model.appUrl);
     assert.equal(elements.some((element) => element.id === 'community-apple-store'), false);
     assert.match(elements.find((element) => element.id === 'community-google-play').href,
-      /^https:\/\/play.google.com\/store\/apps\/details\?id=com.bilhealth.bodyintelligencelog$/);
+      /^https:\/\/play\.google\.com\/store\/apps\/details\?id=com\.bilhealth\.bodyintelligencelog$/);
     assert.equal(elements.some((element) => ['form', 'script', 'iframe'].includes(element.tagName)), false);
     assert.equal(elements.some((element) => element.onclick), false);
     assert.equal(elements.some((element) => String(element.textContent).includes('access_token')), false);

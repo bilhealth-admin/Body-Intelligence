@@ -252,6 +252,14 @@ void main() {
     }
   }
 
+  Future<void> waitForVerificationFailure() async {
+    for (var i = 0; i < 100; i++) {
+      if (store.state == VerifiedStoreState.failed) return;
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+    expect(store.state, VerifiedStoreState.failed);
+  }
+
   test(
     'subscription callback timeout stays unresolved and cannot open a second charge',
     () async {
@@ -299,7 +307,7 @@ void main() {
           headers: {'content-type': 'application/json'},
         ),
       );
-      await drain();
+      await waitForVerificationFailure();
       expect(store.state, VerifiedStoreState.failed);
       expect(store.messageCode, 'verification_failed');
       await store.initialize();

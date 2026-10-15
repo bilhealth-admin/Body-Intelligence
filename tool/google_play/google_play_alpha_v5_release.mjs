@@ -181,41 +181,66 @@ function loadCredentials(credentialsPath) {
   return parsed;
 }
 
-async function inspectAab(aabPath) {
+export async function inspectAab(aabPath) {
   const resolved = path.resolve(aabPath);
   if (path.extname(resolved).toLowerCase() !== '.aab') {
     fail('AAB_EXTENSION_REQUIRED');
   }
-  let stat;
-  let prefix;
+  let descriptor;
+  let summary;
   try {
-    stat = fs.statSync(resolved);
-    const descriptor = fs.openSync(resolved, 'r');
-    try {
-      prefix = Buffer.alloc(4);
-      fs.readSync(descriptor, prefix, 0, 4, 0);
-    } finally {
-      fs.closeSync(descriptor);
+    descriptor = fs.openSync(resolved, 'r');
+    const before = fs.fstatSync(descriptor, { bigint: true });
+    const byteLength = Number(before.size);
+    if (!before.isFile() || !Number.isSafeInteger(byteLength) || byteLength < 4) {
+      fail('AAB_FILE_INVALID');
     }
-  } catch {
+    const digest = crypto.createHash('sha256');
+    const buffer = Buffer.allocUnsafe(64 * 1024);
+    let position = 0;
+    let firstChunk = true;
+    while (position < byteLength) {
+      const bytesRead = fs.readSync(
+        descriptor,
+        buffer,
+        0,
+        Math.min(buffer.length, byteLength - position),
+        position,
+      );
+      if (bytesRead <= 0) fail('AAB_FILE_CHANGED_DURING_READ');
+      if (firstChunk) {
+        if (bytesRead < 4 || buffer.subarray(0, 4).toString('hex') !== '504b0304') {
+          fail('AAB_FILE_INVALID');
+        }
+        firstChunk = false;
+      }
+      digest.update(buffer.subarray(0, bytesRead));
+      position += bytesRead;
+    }
+    const after = fs.fstatSync(descriptor, { bigint: true });
+    if (
+      before.dev !== after.dev ||
+      before.ino !== after.ino ||
+      before.size !== after.size ||
+      before.mtimeNs !== after.mtimeNs ||
+      before.ctimeNs !== after.ctimeNs
+    ) {
+      fail('AAB_FILE_CHANGED_DURING_READ');
+    }
+    summary = {
+      byteLength,
+      sha256: digest.digest('hex'),
+    };
+  } catch (error) {
+    if (error instanceof SafeFailure) throw error;
     fail('AAB_FILE_UNREADABLE');
-  }
-  if (!stat.isFile() || stat.size < 4 || prefix.toString('hex') !== '504b0304') {
-    fail('AAB_FILE_INVALID');
-  }
-  const digest = crypto.createHash('sha256');
-  try {
-    for await (const chunk of fs.createReadStream(resolved)) {
-      digest.update(chunk);
-    }
-  } catch {
-    fail('AAB_HASH_FAILED');
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
   }
   return {
     path: resolved,
     basename: path.basename(resolved),
-    byteLength: stat.size,
-    sha256: digest.digest('hex'),
+    ...summary,
   };
 }
 

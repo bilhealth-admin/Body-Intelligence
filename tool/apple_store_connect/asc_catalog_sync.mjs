@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { resolveSameOriginHttpsUrl } from '../shared/trusted_https_url.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const scriptDir = path.dirname(scriptPath);
@@ -329,7 +330,7 @@ export class AscClient {
   }
 
   async request(method, resource, body) {
-    const url = resource.startsWith('http') ? resource : `${this.baseUrl}${resource}`;
+    const url = resolveSameOriginHttpsUrl(resource, this.baseUrl, ['/v1/', '/v2/']);
     const response = await fetch(url, {
       method,
       headers: {
@@ -338,6 +339,7 @@ export class AscClient {
         ...(body ? { 'Content-Type': 'application/json' } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
+      redirect: 'error',
     });
     const text = await response.text();
     const parsed = text ? JSON.parse(text) : null;

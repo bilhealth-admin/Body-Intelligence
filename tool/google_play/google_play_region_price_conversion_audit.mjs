@@ -12,6 +12,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { googleOAuthTokenUri } from './google_oauth.mjs';
 
 const PACKAGE_NAME = 'com.bilhealth.bodyintelligencelog';
 const SCOPE = 'https://www.googleapis.com/auth/androidpublisher';
@@ -27,7 +28,7 @@ function base64Url(value) {
 
 async function accessToken(credentials) {
   const now = Math.floor(Date.now() / 1000);
-  const tokenUri = credentials.token_uri || 'https://oauth2.googleapis.com/token';
+  const tokenUri = googleOAuthTokenUri(credentials);
   const header = base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
   const claims = base64Url(JSON.stringify({
     iss: credentials.client_email,
@@ -42,6 +43,7 @@ async function accessToken(credentials) {
     .toString('base64url');
   const response = await fetch(tokenUri, {
     method: 'POST',
+    redirect: 'error',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',

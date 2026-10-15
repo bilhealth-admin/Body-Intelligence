@@ -5,6 +5,7 @@ import {
   supabaseConfig,
   uuid,
 } from './runtime.mjs';
+import { resolveSameOriginHttpsUrl } from '../../shared/trusted_https_url.mjs';
 
 function serviceRole() {
   const value = requiredEnv('BIL_SUPABASE_SERVICE_ROLE_KEY');
@@ -27,7 +28,8 @@ export async function serviceRequest({
   };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (prefer) headers.Prefer = prefer;
-  const response = await fetch(`${supabaseConfig.url}${route}`, {
+  const url = resolveSameOriginHttpsUrl(route, supabaseConfig.url);
+  const response = await fetch(url, {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
