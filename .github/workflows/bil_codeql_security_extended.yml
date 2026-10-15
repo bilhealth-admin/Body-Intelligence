@@ -47,7 +47,7 @@ jobs:
             build-mode: manual
             flutter-build: android
           - language: swift
-            runner: macos-26
+            runner: macos-26-intel
             build-mode: manual
             flutter-build: ios
 
