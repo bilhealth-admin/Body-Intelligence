@@ -363,9 +363,10 @@ jobs:
         run: |
           set -euo pipefail
           supabase init
-          # Checked-in migrations require the operational owner and a separate
-          # store-review moderator. These disposable CI-only identities have
-          # no password and are generated only for this local database.
+          # Checked-in migrations require the operational owner, its separately
+          # approved second administrator, and a store-review moderator. These
+          # disposable CI-only identities have no password and exist only in
+          # this local database.
           test ! -e supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql
           cat > supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql <<'SQL'
           insert into auth.users (
@@ -394,6 +395,14 @@ jobs:
             pg_catalog.now(),
             '{"provider":"email","providers":["email"]}'::jsonb,
             '{"bil_ci_fixture":true,"bil_ci_role":"store_review_moderator"}'::jsonb,
+            pg_catalog.now(), pg_catalog.now()
+          ),
+          (
+            '00000000-0000-4000-8000-000000000020',
+            'authenticated', 'authenticated', 'bilhealth.app@gmail.com', '',
+            pg_catalog.now(),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            '{"bil_ci_fixture":true,"bil_ci_role":"approved_secondary_administrator"}'::jsonb,
             pg_catalog.now(), pg_catalog.now()
           );
           SQL
@@ -440,6 +449,8 @@ jobs:
           declare
             v_admin_id uuid;
             v_admin_count integer;
+            v_secondary_admin_id uuid;
+            v_secondary_admin_count integer;
             v_reviewer_id uuid;
             v_reviewer_count integer;
           begin
@@ -455,6 +466,19 @@ jobs:
             select id into v_admin_id
             from auth.users
             where pg_catalog.lower(email) = 'kademcom@yahoo.com';
+
+            select pg_catalog.count(*)::integer
+              into v_secondary_admin_count
+            from auth.users
+            where pg_catalog.lower(email) = 'bilhealth.app@gmail.com';
+
+            if v_secondary_admin_count <> 1 then
+              raise exception 'local_moderator_fixture_secondary_admin_count_invalid';
+            end if;
+
+            select id into v_secondary_admin_id
+            from auth.users
+            where pg_catalog.lower(email) = 'bilhealth.app@gmail.com';
 
             select pg_catalog.count(*)::integer
               into v_reviewer_count
@@ -489,6 +513,18 @@ jobs:
                 and expires_at > pg_catalog.now()
             ) then
               raise exception 'local_moderator_fixture_entitlements_incomplete';
+            end if;
+
+            if not exists (
+              select 1 from public.bil_community_moderators
+              where user_id = v_secondary_admin_id
+            ) or not exists (
+              select 1 from private.bil_ai_coach_admins
+              where user_id = v_secondary_admin_id
+                and active
+                and granted_by = v_admin_id
+            ) then
+              raise exception 'local_moderator_fixture_secondary_admin_entitlements_incomplete';
             end if;
           end
           $local_moderator_fixture_assertion$;
