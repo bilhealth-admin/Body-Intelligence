@@ -5,10 +5,14 @@ on:
     branches:
       - main
       - integration/bil-qa-media-policy-20261011
+    paths-ignore:
+      - 'docs/**'
   pull_request:
     branches:
       - main
       - integration/bil-qa-media-policy-20261011
+    paths-ignore:
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -64,11 +68,6 @@ jobs:
         if: matrix.flutter-build != false
         run: flutter pub get
 
-      - name: Install locked iOS pods
-        if: matrix.flutter-build == 'ios'
-        run: pod install --deployment
-        working-directory: ios
-
       - name: Initialize CodeQL with Security Extended
         uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
@@ -82,6 +81,8 @@ jobs:
 
       - name: Build iOS plugin sources for CodeQL
         if: matrix.flutter-build == 'ios'
+        # Let Flutter resolve/install the generated CocoaPods graph as part
+        # of the traced build; this repository does not commit a Podfile.lock.
         run: flutter build ios --simulator --debug --no-codesign --no-pub
 
       - name: Upload CodeQL results

@@ -1,0 +1,105 @@
+name: BIL Android isolated emulator startup evidence
+
+on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_android_isolated_emulator_smoke.yml
+      - android/**
+      - lib/**
+      - pubspec.yaml
+      - pubspec.lock
+      - tool/release/run_android_emulator_smoke.sh
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-android-isolated-emulator-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  android-debug-emulator:
+    name: Android ${{ matrix.api-level }} offline startup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 26
+            profile: pixel_2
+          - api-level: 29
+            profile: pixel_2
+          - api-level: 33
+            profile: pixel_6
+          - api-level: 34
+            profile: pixel_6
+          - api-level: 35
+            profile: pixel_6
+          - api-level: 36
+            profile: pixel_6
+
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve Flutter dependencies
+        run: flutter pub get
+
+      - name: Build un-signed local-only Android debug APK
+        shell: bash
+        run: >-
+          flutter build apk --debug --no-pub --build-number 33
+          --dart-define=BIL_ENVIRONMENT=testing
+          --dart-define=BIL_USE_SUPABASE=false
+          --dart-define=SUPABASE_URL=
+          --dart-define=SUPABASE_ANON_KEY=
+          --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false
+          --dart-define=BIL_PAYMENTS_ENABLED=false
+          --dart-define=BIL_ADS_ENABLED=false
+          --dart-define=BIL_COMMUNITY_ENABLED=false
+          --dart-define=BIL_PUSH_ENABLED=false
+
+      - name: Enable KVM for the isolated emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install and launch BIL offline on API ${{ matrix.api-level }}
+        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          target: google_apis
+          profile: ${{ matrix.profile }}
+          disable-animations: true
+          emulator-boot-timeout: 900
+          pre-emulator-launch-script: |
+            adb kill-server || true
+            adb start-server
+            adb version
+          script: BIL_ANDROID_EMULATOR_API=${{ matrix.api-level }} bash tool/release/run_android_emulator_smoke.sh
+
+      - name: Upload startup screenshots and metadata
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-android-api${{ matrix.api-level }}-startup-${{ github.sha }}
+          path: artifacts/release/android_emulator_smoke/api-${{ matrix.api-level }}
+          if-no-files-found: warn
+          retention-days: 14
