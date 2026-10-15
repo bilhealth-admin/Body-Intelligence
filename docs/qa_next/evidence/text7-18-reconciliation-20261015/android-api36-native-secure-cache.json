@@ -1,0 +1,34 @@
+{
+  "recorded_at_utc": "2026-10-15T12:48:40.999412+00:00",
+  "source_head": "bb5611d58c7f3b5097a3c27fbb754019ef7799c0",
+  "dirty_dart_inputs": [
+    {
+      "path": "integration_test/system_crypto_bridge_integration_test.dart",
+      "sha256": "6e3f5822b09eb282a943ed41c144c2d504eb252ea755881b8508e833381cbe56"
+    }
+  ],
+  "result": "PASS",
+  "tests": 2,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "api": "36",
+  "scope": "Local API36 x86_64/WHPX; actual native AES and flutter_secure_storage plugin. Synthetic canonical-key RPC and owner identities; no cloud/Auth or hardware-backed key attestation claim.",
+  "verified": [
+    "legacy AES256GCM byte layout",
+    "real secure-store write/read through fresh repository and plugin wrapper",
+    "A to B to A owner isolation",
+    "mismatched owner rejected",
+    "remove A preserves B",
+    "corrupt stored key rejected without silent RPC repair"
+  ],
+  "gradle_build_seconds": 105.0,
+  "installation_seconds": 3.6,
+  "test_reported_seconds": 5,
+  "log_sha256": "03d34de9375bfa8787f764904ae38e0699a26271337c65ef1c374eef4c400079",
+  "apk_sha256": "063e9f748e1e4bd8291bf4d5997c88839b8466af678db9caa9c7cc65e65c0958",
+  "apk_scope": "Standalone debug integration-test entrypoint, not release build33",
+  "cleanup": "Only unique bil-native-qa owner slots removed by test; no deleteAll or real account slots",
+  "airplane_mode_restored": true,
+  "owned_emulator_shutdown_requested": true
+}

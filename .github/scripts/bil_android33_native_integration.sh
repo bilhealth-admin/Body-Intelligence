@@ -5,6 +5,10 @@ OUT=artifacts/qa/text18/android-api33
 mkdir -p "$OUT"
 SOURCE_HEAD="$(git rev-parse HEAD)"
 SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
+case "${BIL_NATIVE_TARGET:-all}" in
+  all|system-crypto) ;;
+  *) echo 'Unsupported native entrypoint scope' >&2; exit 2 ;;
+esac
 
 # ConnectivityService provides the shell command used by Android CTS. Sending
 # AIRPLANE_MODE broadcasts directly is forbidden to shell on the API 33 image.
@@ -18,6 +22,10 @@ flutter test integration_test/system_crypto_bridge_integration_test.dart \
   --dart-define=BIL_PAYMENTS_ENABLED=false \
   --dart-define=BIL_ADS_ENABLED=false \
   2>&1 | tee "$OUT/system-crypto.log"
+
+if [ "${BIL_NATIVE_TARGET:-all}" = system-crypto ]; then
+  exit 0
+fi
 
 BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/native-settings" \
   flutter drive --device-id emulator-5554 \

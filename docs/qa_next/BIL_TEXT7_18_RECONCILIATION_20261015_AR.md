@@ -178,7 +178,7 @@ Gitleaks للـstaged diff التقط اثنتين من بصمات ملفات mi
 | RESILIENCE | fail-closed release configuration وعزل jobs؛ اختبار retry/CAS/tombstone | Play Integrity/App Attest والتوقيع/anti-tamper على حزم توزيع مع بيئاتها؛ لا نتيجة dynamic pentest مدعاة |
 | PRIVACY | اختبارات الموافقات المنفصلة ورفض الصوت الخام وبيانات البلاغ المحددة وعزل الحسابات؛ لا بيانات حية في الأدلة | تطابق الإفصاح مع IPA/AAB النهائي وسلوك SDK الفعلي؛ المفتاح العام يحتاج تحقق قيود مالك Google Cloud |
 
-الاختبارات الموجودة للأداء والـbenchmark جزء من الشاملة السابقة؛ لا تسمى قياس سرعة Production أو أداء جهاز. لا توجد حتى الآن حملة fuzz/mutation أو نسبة coverage كاملة؛ لا يتحول count assertions أو تعدد الملفات إلى هذه المقاييس. توثيق هذا النقص صريح، وليس blocker بسبب غياب إذن نشر: يحتاج نطاق corpus/targets وقياس مستقل، مع أولوية إغلاق إخفاقات API/native المثبتة الحالية دون إعادة المنجز. لم تربط خدمة خارجية جديدة أو حساب أداة مدفوعة.
+الاختبارات الموجودة للأداء والـbenchmark جزء من الشاملة السابقة؛ لا تسمى قياس سرعة Production أو أداء جهاز. لا توجد حملة fuzz/mutation أو coverage للتطبيق كله؛ أضيف القياس المحصور لمحرر الماكروز الموثق أدناه. لا يتحول count assertions أو تعدد الملفات إلى نسبة تغطية عامة. أي توسيع لهذا النطاق يكون قياسًا مستقلًا، لا إعادة تلقائية للشاملة أو ادعاءً بإغلاق كل أسطح التطبيق. لم تربط خدمة خارجية جديدة أو حساب أداة مدفوعة.
 
 ### التشغيل المحدود بعد تحقق الإصلاحات محليًا
 
@@ -210,3 +210,13 @@ gh workflow run bil_codeql_security_extended.yml --ref integration/bil-qa-media-
 نجحت محليًا، وكشفت **5/5 تعديلات سلوكية خاطئة مقصودة** على نسخ مؤقتة: معامل دهون خاطئ، السماح بتحرير مقفل، السماح بقيمة غير finite، فقد قفل الغرام، وتجاوز سقف تحقق السعرات. لم يُمس المصدر الحقيقي؛ hash قبل/بعد مطابق. محاولات الـmutants المتوقعة ليست إخفاقات المنتج؛ لا يحتسب compile error كقتل mutant. صُحح أولًا تشخيص العارض لنص Dart `Bad state` ثم نجح القياس النهائي.
 
 تغطية VM للملف المستهدف فقط: أسطر **78/81**، دوال **7/8**، فروع **24/27**. ليست نسبة تغطية للتطبيق ولا mutation score شاملًا. يستخدم coverage المثبتة في package map دون إضافة SDK/package؛ لا تسرب VM service URI في التقرير. `macro-generated-local.json` يحفظ زمن التشغيل والهدف والبصمة والنطاق. أُضيف إلى مسار source audit لكي ينفذ في GitHub أيضًا؛ لا إعادة Native/Supabase ناجحة لأجل هذا المشغّل.
+
+### تحقق GitHub للقياس الجديد، وإضافة فحص مخزن المفاتيح المطلوب
+
+الـcommit `bb5611d58c7f3b5097a3c27fbb754019ef7799c0` محفوظ ومرفوع. [Run38736058081](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38736058081) **SUCCESS في الوظائف الخمس**، بما فيها القياس المولد وCodeQL الثلاثة وSemgrep. أعاد Linux **10,000/380,014 و5/5** مع نسب تغطية الملف نفسها تمامًا؛ زمن أداة القياس 12:39:00–12:39:03 UTC. الأدلة `macro-generated-github-bb5611d5.json` و`semgrep-bb5611d5.json`: **5,148 مسارًا،15 finding،0 errors**. أضيف مشغّل QA فقط؛ لا تغيير محرر الأهداف الحقيقي أو بياناته.
+
+ورد في text-18 طلب Keychain/Keystore؛ لا يغلقه اختبار AES السابق. أضيفت حالة إلى ملف Native crypto القائم تستعمل `FlutterSecureCloudSecretStore` الفعلية، بمفاتيح وأسماء owner تركيبية فريدة لا تطابق UUID حساب حقيقي. Canonical-key RPC وactive-owner lookup محقونان بوضوح؛ هذا فحص مخزن النظام وليس GoTrue/Vault. تتحقق من write/read عبر wrapper ومستودع جديدين، وعزل A→B→A، ورفض owner مختلف، وحذف A دون B، ورفض cached key تالف دون RPC يصلحه خفيةً. تنظيف فقط slotين أنشأهما الاختبار، دون deleteAll.
+
+الملف الأصلي بعد الإضافة نجح على محاكي Android API36/WHPX **2/2** بلا skip، وGradle105s/install3.6s/test5s؛ `android-api36-native-secure-cache.json` يسجل SHA الأساس وبصمة ملف Dart غير الملتزم أثناء الفحص. استعيد وضع الشبكة وأغلق المحاكي. لا ادعاء hardware attestation أو iOS Keychain أو حزمة توزيع. يُشغل الآن التحليل الكامل بعد آخر تعديل Dart؛ لا يعاد root/full suite. أضيف نطاق `native_target=system-crypto` إلى المشغلات الموجودة لاختبار هذا الملف فقط في GitHub دون تكرار settings/splashes بعد نتيجتهما.
+
+التحليل الكامل بعد آخر تعديل Native Dart **PASS: No issues found،456.4s**؛ `flutter-analyze-native-cache.json`. تنسيق الملف بعده تحقق بلا تغيير. فحوص الـ60 workflow وsyntax المشغّلين وGitleaks تؤخذ قبل الدفع. هذه إضافة اختبار إلى integration_test فقط؛ لا lib/ios/android أو مكتبات أو Goldens جديدة. نتيجة الشاملة القديمة لا تنسب إلى إضافة الاختبار الجديدة، ولا تستلزم إعادة الـ9,843.

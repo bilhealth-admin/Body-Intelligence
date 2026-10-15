@@ -60,7 +60,12 @@ DEFINES=(
   --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD"
   --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE"
 )
-for KIND in system-crypto native-settings feature-splashes; do
+case "${BIL_NATIVE_TARGET:-all}" in
+  all) KINDS=(system-crypto native-settings feature-splashes) ;;
+  system-crypto) KINDS=(system-crypto) ;;
+  *) echo 'Unsupported native entrypoint scope' >&2; exit 2 ;;
+esac
+for KIND in "${KINDS[@]}"; do
   case "$KIND" in
     system-crypto)
       TARGET=integration_test/system_crypto_bridge_integration_test.dart

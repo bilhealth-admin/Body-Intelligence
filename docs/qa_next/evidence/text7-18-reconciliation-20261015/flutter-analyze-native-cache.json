@@ -1,0 +1,15 @@
+{
+  "recorded_at_utc": "2026-10-15T12:52:08.055234+00:00",
+  "source_head": "bb5611d58c7f3b5097a3c27fbb754019ef7799c0",
+  "result": "PASS",
+  "command": "flutter analyze --no-pub",
+  "duration_seconds": 456.4,
+  "dirty_dart_inputs": [
+    {
+      "path": "integration_test\\system_crypto_bridge_integration_test.dart",
+      "sha256": "6e3f5822b09eb282a943ed41c144c2d504eb252ea755881b8508e833381cbe56"
+    }
+  ],
+  "log_sha256": "b0f6029c15073a97ae410acb08c48561a6433d62105a29dcdeaa3b6934f5788c",
+  "scope": "Full Flutter analyze after the last native secure-cache test addition; no ignores or skipped analysis"
+}

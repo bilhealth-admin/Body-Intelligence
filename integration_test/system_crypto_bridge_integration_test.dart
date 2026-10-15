@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:body_intelligence_log/features/cloud_platform/services/aes_gcm_cloud_payload_cipher.dart';
+import 'package:body_intelligence_log/features/cloud_platform/services/cloud_account_key_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +66,80 @@ void main() {
       <String, Object?>{'legacy': true},
     );
   });
+
+  testWidgets(
+    'native secure account-key cache survives reopen and isolates owners',
+    (tester) async {
+      expect(Platform.isAndroid || Platform.isIOS, isTrue);
+      // No initialized app/Auth/cloud and no real owner slots. Exercise the real
+      // secure-storage plugin; only the unavailable canonical-key RPC is injected.
+      final suffix = DateTime.now().microsecondsSinceEpoch;
+      final ownerA = 'bil-native-qa-a-$suffix';
+      final ownerB = 'bil-native-qa-b-$suffix';
+      var owner = ownerA;
+      var rpcCalls = 0;
+      final keyA = List<int>.generate(32, (index) => index + 10);
+      final keyB = List<int>.generate(32, (index) => index + 70);
+      final client = SupabaseClient(
+        'http://127.0.0.1:1',
+        'synthetic-native-qa',
+      );
+      final store = FlutterSecureCloudSecretStore();
+      CloudAccountKeyRepository repository() => CloudAccountKeyRepository(
+        client: client,
+        secureStore: store,
+        activeOwner: () => owner,
+        rpc: (name) {
+          expect(name, 'bil_get_or_create_cloud_key');
+          rpcCalls++;
+          return base64.encode(owner == ownerA ? keyA : keyB);
+        },
+      );
+
+      try {
+        expect(await repository().readCached(ownerA), isNull);
+        expect(await repository().resolve(ownerA), keyA);
+        // A fresh repository and plugin wrapper read native persisted storage.
+        expect(
+          await CloudAccountKeyRepository(
+            client: client,
+            activeOwner: () => owner,
+            rpc: (_) =>
+                throw StateError('Native cached key must not call cloud'),
+          ).resolve(ownerA),
+          keyA,
+        );
+        owner = ownerB;
+        expect(await repository().resolve(ownerB), keyB);
+        await expectLater(repository().readCached(ownerA), throwsStateError);
+        owner = ownerA;
+        expect(await repository().readCached(ownerA), keyA);
+        expect(rpcCalls, 2);
+        await repository().removeLocal(ownerA);
+        expect(await repository().readCached(ownerA), isNull);
+        owner = ownerB;
+        expect(await repository().readCached(ownerB), keyB);
+        owner = ownerA;
+        await store.write(
+          'bil.cloud.payload-key.v1.$ownerA',
+          'corrupt-native-fixture',
+        );
+        await expectLater(
+          repository().readCached(ownerA),
+          throwsFormatException,
+        );
+        expect(
+          rpcCalls,
+          2,
+          reason: 'Corruption must not silently create a key.',
+        );
+      } finally {
+        await repository().removeLocal(ownerA);
+        await repository().removeLocal(ownerB);
+        await client.dispose();
+      }
+    },
+  );
 }
 
 Uint8List _hex(String value) {

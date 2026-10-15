@@ -45,6 +45,14 @@ on:
         required: false
         type: boolean
         default: false
+      native_target:
+        description: Scope native-only reruns to the affected existing entrypoint
+        required: false
+        type: choice
+        options:
+          - all
+          - system-crypto
+        default: all
       mobsf_only:
         description: Inspect an existing offline debug APK with pinned, network-disabled MobSF
         required: false
@@ -710,6 +718,8 @@ jobs:
           free -m
       - name: Run the existing native integration suite on API 33
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        env:
+          BIL_NATIVE_TARGET: ${{ inputs.native_target }}
         with:
           api-level: 33
           arch: x86_64
@@ -751,6 +761,8 @@ jobs:
           flutter pub get
           pod install --project-directory=ios
       - name: Drive each actual test entrypoint on iPhone and iPad
+        env:
+          BIL_NATIVE_TARGET: ${{ inputs.native_target }}
         run: bash .github/scripts/bil_ios36_native_integration.sh
       - name: Upload exact native test evidence
         if: always()
