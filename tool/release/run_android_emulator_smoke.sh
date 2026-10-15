@@ -25,19 +25,15 @@ fi
 
 test -s "$apk"
 adb wait-for-device
-network_mode='wifi-and-data-disabled'
+network_mode='radio-state-not-forced'
 if adb shell cmd connectivity airplane-mode enable >/dev/null 2>&1; then
   airplane_status=$(adb shell cmd connectivity airplane-mode | tr -d '\r')
   if [[ "$airplane_status" == 'enabled' ]]; then
     network_mode='airplane-mode'
   fi
 fi
-adb shell svc wifi disable
-adb shell svc data disable || true
 if [[ "$network_mode" == 'airplane-mode' ]]; then
   test "$(adb shell cmd connectivity airplane-mode | tr -d '\r')" = 'enabled'
-else
-  test "$(adb shell settings get global wifi_on | tr -d '\r')" = '0'
 fi
 adb shell pm clear "$app_id" >/dev/null
 adb install -r "$apk"
@@ -50,7 +46,7 @@ adb shell getprop ro.build.version.sdk | tr -d '\r' > "$evidence/api-level.txt"
 printf '%s\n' \
   "source_sha=${GITHUB_SHA:-unknown}" \
   'build_number=33' \
-  "network=$network_mode" \
+  "network=$network_mode;app_services_disabled=true" \
   "apk_sha256=$(sha256sum "$apk" | awk '{print $1}')" \
   'supabase=false payments=false ads=false community=false push=false' \
   > "$evidence/test-scope.txt"
