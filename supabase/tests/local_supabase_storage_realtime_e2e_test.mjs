@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
 import { findLocalDatabase } from './local_supabase_test_support.mjs';
+import { removeStorageFixture, storageFixture } from './local_supabase_storage_fixture.mjs';
 
 const baseUrl = process.env.API_URL ?? process.env.SUPABASE_URL ?? '';
 const anonKey = process.env.ANON_KEY ?? process.env.SUPABASE_ANON_KEY ?? '';
@@ -40,7 +41,8 @@ function executeLocalSql(container, sql) {
   assert.equal(
     result.status,
     0,
-    'Synthetic local Supabase SQL setup or cleanup failed',
+    'Synthetic local SQL failed: ' + result.stderr.split(/\r?\n/)
+      .filter((line) => line.includes('ERROR:')).slice(0, 2).join(' ').slice(0, 500),
   );
 }
 
@@ -223,42 +225,17 @@ test('isolated Supabase Storage and Realtime enforce scoped authenticated access
   assertLocalApi();
   const container = findLocalDatabase();
   const suffix = randomUUID().replaceAll('-', '');
-  const table = 'bil_ci_storage_rt_' + suffix;
-  const bucket = 'bil-ci-' + suffix;
-  const tablePolicy = table + '_owner';
-  const storageSelectPolicy = bucket + '_select';
-  const storageInsertPolicy = bucket + '_insert';
+  const fixture = storageFixture(suffix);
+  const { table, bucket } = fixture;
+  const cleanupKey = process.env.BIL_LOCAL_SERVICE_ROLE_KEY;
+  assert.ok(cleanupKey, 'Disposable Storage cleanup key is required before fixture creation');
   const users = [];
-  let fixtureMayExist = true;
+  let fixtureCreated = false;
+  let primaryError;
 
   try {
-    executeLocalSql(
-      container,
-      'CREATE TABLE public.' + table + ' (' +
-        'id uuid PRIMARY KEY, ' +
-        'owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, ' +
-        'payload text NOT NULL); ' +
-        'ALTER TABLE public.' + table + ' ENABLE ROW LEVEL SECURITY; ' +
-        'CREATE POLICY ' + tablePolicy + '_select ON public.' + table +
-        ' FOR SELECT TO authenticated USING (owner_id = auth.uid()); ' +
-        'CREATE POLICY ' + tablePolicy + '_insert ON public.' + table +
-        ' FOR INSERT TO authenticated WITH CHECK (owner_id = auth.uid()); ' +
-        'GRANT SELECT, INSERT ON public.' + table + ' TO authenticated; ' +
-        'DO $$ BEGIN ' +
-        'IF NOT EXISTS (SELECT 1 FROM pg_publication_tables ' +
-        'WHERE pubname = \'supabase_realtime\' AND schemaname = \'public\' ' +
-        'AND tablename = ' + "'" + table + "'" + ') THEN ' +
-        'EXECUTE format(\'ALTER PUBLICATION supabase_realtime ADD TABLE public.%I\', ' +
-        "'" + table + "'" + '); END IF; END $$; ' +
-        'INSERT INTO storage.buckets (id, name, public) VALUES (' +
-        "'" + bucket + "', '" + bucket + "', false); " +
-        'CREATE POLICY ' + storageSelectPolicy + ' ON storage.objects ' +
-        'FOR SELECT TO authenticated USING (bucket_id = ' +
-        "'" + bucket + "' AND (storage.foldername(name))[1] = auth.uid()::text); " +
-        'CREATE POLICY ' + storageInsertPolicy + ' ON storage.objects ' +
-        'FOR INSERT TO authenticated WITH CHECK (bucket_id = ' +
-        "'" + bucket + "' AND (storage.foldername(name))[1] = auth.uid()::text);",
-    );
+    executeLocalSql(container, fixture.setup);
+    fixtureCreated = true;
 
     const owner = await createUser();
     users.push(owner.user.id);
@@ -327,22 +304,24 @@ test('isolated Supabase Storage and Realtime enforce scoped authenticated access
       assert.equal(record.owner_id, owner.user.id);
       assert.equal(record.payload, 'synthetic-realtime-event');
     });
+  } catch (error) {
+    primaryError = error;
+    throw error;
   } finally {
-    if (fixtureMayExist) {
+    if (fixtureCreated) {
       const deleteUsers = users.length
         ? 'DELETE FROM auth.users WHERE id IN (' +
           users.map((id) => "'" + id + "'").join(',') +
           ');'
         : '';
-      executeLocalSql(
-        container,
-        'DROP TABLE IF EXISTS public.' + table + ' CASCADE; ' +
-          'DELETE FROM storage.objects WHERE bucket_id = ' +
-          "'" + bucket + "'; " +
-          'DELETE FROM storage.buckets WHERE id = ' +
-          "'" + bucket + "'; " +
-          deleteUsers,
-      );
+      try {
+        await removeStorageFixture(baseUrl, cleanupKey, bucket);
+        executeLocalSql(container, fixture.cleanup + deleteUsers);
+      } catch (cleanupError) {
+        if (primaryError) throw new AggregateError([primaryError, cleanupError],
+          'Preserved both fixture failure and cleanup failure');
+        throw cleanupError;
+      }
     }
   }
 });

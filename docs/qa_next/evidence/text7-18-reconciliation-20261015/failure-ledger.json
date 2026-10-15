@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-10-15T11:25:23.267634+00:00",
+  "recorded_at_utc": "2026-10-15T12:21:53.625697+00:00",
   "source_at_start": "7a797819d882674b6b7ed83a546c23ff3922c312",
   "known_failures": [
     {
@@ -40,17 +40,49 @@
       "id": "F06",
       "cause": "native Windows Semgrep core: Unix_error Invalid argument socketpair, reproduced on one synthetic rule and jobs=1",
       "fix": "isolated Linux CE scanner job with sanitized artifact, no telemetry/source upload",
-      "status": "Linux scanner executed: 5130 paths, 13 findings and 2 timeouts; PARTIAL, no clean claim"
+      "status": "Linux run 38729699048: 5135 paths, 13 findings, 0 errors; FINDINGS_REVIEW, not clean"
     },
     {
       "id": "F07",
       "run": 38726355481,
       "cause": "all four API parent tests rejected the valid Docker name supabase_db_Body-Intelligence using a lowercase-only selector",
       "fix": "shared explicit container selection with exact running-name validation and fail-closed ambiguity check",
-      "status": "5/5 local regression cases PASS; real API rerun pending"
+      "status": "Fixed on 73785549; API run 38729694517 signed Auth and product RPC cases passed; 28/29 overall, separate Storage DDL fixture failure"
+    },
+    {
+      "id": "F08",
+      "run": 38726365073,
+      "cause": "Runner lacks read/write permission for /dev/kvm; software boot took 774668ms, then emulator action unlock failed service input Broken pipe before native tests",
+      "fix": "Reuse the KVM udev setup already used by the successful six-API startup workflow; fail fast if /dev/kvm inaccessible; native-only job avoids repeating successful CodeQL and 97 purchase tests",
+      "status": "Local workflow validation passed; actual API33 native rerun required"
+    },
+    {
+      "id": "F09",
+      "run": 38729694517,
+      "cause": "Storage fixture emits unquoted hyphenated policy name; cleanup direct SQL also failed and masked original error",
+      "fix": "Safe bounded policy identifiers, transactional setup, Storage API lifecycle cleanup for exact synthetic bucket, preserve primary and cleanup errors separately",
+      "status": "Real PostgreSQL before/after DDL PASS; Node helper/selector 8/8 PASS; full Storage API/Realtime rerun required"
+    },
+    {
+      "id": "F10",
+      "run": 38713591000,
+      "cause": "iPhone native crypto test loading failed: Xcode build is missing expected TARGET_BUILD_DIR build setting; no crypto assertion executed",
+      "fix": "Build the same three actual entrypoints for generic simulator; drive the exact prebuilt bundle on iPhone and iPad using supported pinned Flutter APIs; new native-only job without repeating Swift CodeQL",
+      "status": "Local script syntax and 60-workflow actionlint PASS; native execution pending; no manual SDK or Xcode project patch"
+    },
+    {
+      "id": "F11",
+      "cause": "Local Windows Gradle/JDK selector failed Unable to establish loopback connection before Android test; short task-scoped Java temp directory permits selector and TCP loopback",
+      "fix": "JAVA_TOOL_OPTIONS task-scoped java.io.tmpdir and jdk.net.unixdomain.tmpdir; no global Java or app setting change",
+      "status": "Small Java probe PASS; actual single-file native retry is running and not claimed passed"
     }
   ],
   "raw_logs_retained_locally": [
+    {
+      "file": "ios-final-38713591000.log",
+      "bytes": 13347160,
+      "sha256": "f4822d64a950cda07052449c6fec9efa3e4b5fe7d21efdde26fad6ed5cc8e910"
+    },
     {
       "file": "run-38713591000-android.log",
       "bytes": 331122,
@@ -60,6 +92,21 @@
       "file": "run-38716505124-supabase.log",
       "bytes": 16742,
       "sha256": "fcd375db4c3a6c5dc839858d0d014ffe7281eb6c98657c2005d9fc6ca7f18cd3"
+    },
+    {
+      "file": "run-38726355481-supabase.log",
+      "bytes": 18384,
+      "sha256": "7bf5307cbd1c3fd68fe486c0481bce4e424ce164e31af245c5df4ce750a9b0ac"
+    },
+    {
+      "file": "run-38726365073-android.log",
+      "bytes": 138713,
+      "sha256": "09c051f643fe36a5edfd76b51e89a0fa1fb6272f0080d396764d74551c412b46"
+    },
+    {
+      "file": "run-38729694517-supabase.log",
+      "bytes": 14804,
+      "sha256": "023b9bb34aec16c4871cd73ef687df19d64f05998353df0c83680f6eb0ee2d65"
     }
   ],
   "full_suite_repeated": false

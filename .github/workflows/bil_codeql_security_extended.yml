@@ -35,6 +35,26 @@ on:
         required: false
         type: boolean
         default: false
+      android_native_only:
+        description: Run only the Android API 33 native tests on a fresh accelerated runner
+        required: false
+        type: boolean
+        default: false
+      ios_native_only:
+        description: Run existing iPhone and iPad tests from generic simulator bundles without CodeQL tracing
+        required: false
+        type: boolean
+        default: false
+      mobsf_only:
+        description: Inspect an existing offline debug APK with pinned, network-disabled MobSF
+        required: false
+        type: boolean
+        default: false
+      android_artifact_run:
+        description: Completed run containing a verified isolated debug APK; used only by MobSF
+        required: false
+        type: string
+        default: ''
 
 permissions:
   actions: read
@@ -44,7 +64,7 @@ permissions:
 
 jobs:
   analyze:
-    if: ${{ inputs.source_audit_only == true || github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true }}
+    if: ${{ inputs.mobsf_only != true && inputs.android_native_only != true && inputs.ios_native_only != true && (inputs.source_audit_only == true || github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true) }}
     name: CodeQL (${{ matrix.language }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
@@ -209,6 +229,18 @@ jobs:
           test/features/commerce/verified_store_purchase_startup_event_test.dart
           test/features/intelligence_center/ai_boost_purchase_service_test.dart
 
+      - name: Enable and require KVM before Android native integration
+        if: matrix.flutter-build == 'android'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -r /dev/kvm
+          test -w /dev/kvm
+
       - name: Run Android 33 native integration journeys offline
         if: matrix.flutter-build == 'android'
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
@@ -232,96 +264,7 @@ jobs:
 
       - name: Run iOS 36 native integration journeys on iPhone and iPad
         if: matrix.flutter-build == 'ios'
-        shell: bash
-        run: |
-          set -euo pipefail
-          OUT=artifacts/qa/text18/ios36-simulators
-          mkdir -p "$OUT"
-          APP=build/ios/iphonesimulator/Runner.app
-          test -d "$APP"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '36'
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
-          xcodebuild -version > "$OUT/xcode-version.txt"
-          SOURCE_HEAD="$(git rev-parse HEAD)"
-          SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
-          read -r RUNTIME IPHONE_TYPE IPAD_TYPE < <(python3 - <<'PY'
-          import json
-          import re
-          import subprocess
-
-          runtimes = json.loads(subprocess.check_output(
-              ['xcrun', 'simctl', 'list', 'runtimes', 'available', '-j'],
-          ))['runtimes']
-          ios = [item for item in runtimes if item.get('isAvailable') and
-                 item.get('identifier', '').startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
-          if not ios:
-              raise SystemExit('No available iOS Simulator runtime')
-          def version(item):
-              return tuple(int(part) for part in re.findall(r'\d+', item.get('version', '0')))
-          runtime = max(ios, key=version)
-          types = json.loads(subprocess.check_output(
-              ['xcrun', 'simctl', 'list', 'devicetypes', '-j'],
-          ))['devicetypes']
-          iphones = [item for item in types if item['name'].startswith('iPhone')]
-          ipads = [item for item in types if item['name'].startswith('iPad')]
-          def select(items, preferred):
-              by_name = {item['name']: item for item in items}
-              for name in preferred:
-                  if name in by_name:
-                      return by_name[name]
-              return items[-1]
-          if not iphones or not ipads:
-              raise SystemExit('Both iPhone and iPad Simulator device types are required')
-          iphone = select(iphones, ['iPhone 16 Pro', 'iPhone 16', 'iPhone 15 Pro'])
-          ipad = select(ipads, ['iPad Pro 13-inch (M4)', 'iPad Pro (13-inch) (M4)',
-                                'iPad Pro (12.9-inch) (6th generation)'])
-          print(runtime['identifier'], iphone['identifier'], ipad['identifier'])
-          PY
-          )
-          IPHONE_UDID="$(xcrun simctl create "BIL-iPhone36-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME")"
-          IPAD_UDID="$(xcrun simctl create "BIL-iPad36-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME")"
-          for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do
-            DEVICE="${PAIR#*:}"
-            LABEL="${PAIR%%:*}"
-            xcrun simctl erase "$DEVICE"
-            xcrun simctl boot "$DEVICE"
-            xcrun simctl bootstatus "$DEVICE" -b
-            xcrun simctl ui "$DEVICE" appearance light
-            xcrun simctl install "$DEVICE" "$APP"
-            xcrun simctl launch "$DEVICE" com.bilhealth.bodyintelligencelog \
-              -AppleLanguages '(en)' -AppleLocale 'en_US' \
-              | tee "$OUT/$LABEL-build36-launch.log"
-            sleep 8
-            xcrun simctl io "$DEVICE" screenshot "$OUT/$LABEL-build36-launch.png"
-            xcrun simctl terminate "$DEVICE" com.bilhealth.bodyintelligencelog
-            flutter test integration_test/system_crypto_bridge_integration_test.dart \
-              --no-pub --device-id "$DEVICE" --reporter expanded \
-              --dart-define=BIL_ENVIRONMENT=testing \
-              --dart-define=BIL_USE_SUPABASE=false \
-              --dart-define=BIL_PAYMENTS_ENABLED=false \
-              --dart-define=BIL_ADS_ENABLED=false \
-              2>&1 | tee "$OUT/$LABEL-system-crypto.log"
-            BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-native-settings" \
-              flutter drive --device-id "$DEVICE" \
-                --driver=test_driver/native_settings_capture_driver.dart \
-                --target=integration_test/native_settings_polish_test.dart \
-                --dart-define=BIL_ENVIRONMENT=testing \
-                --dart-define=BIL_USE_SUPABASE=false \
-                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
-                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
-                2>&1 | tee "$OUT/$LABEL-native-settings.log"
-            BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-feature-splashes" \
-              flutter drive --device-id "$DEVICE" \
-                --driver=test_driver/native_feature_splashes_driver.dart \
-                --target=integration_test/native_feature_splashes_test.dart \
-                --dart-define=BIL_ENVIRONMENT=testing \
-                --dart-define=BIL_USE_SUPABASE=false \
-                --dart-define=BIL_QA_IOS_SIMULATOR=true \
-                --dart-define=BIL_QA_DEVICE_NAME=github-ios36-$LABEL \
-                --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
-                --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE" \
-                2>&1 | tee "$OUT/$LABEL-feature-splashes.log"
-          done
+        run: bash .github/scripts/bil_ios36_native_integration.sh
 
       - name: Upload iOS 36 iPhone and iPad evidence
         if: always() && matrix.flutter-build == 'ios'
@@ -333,7 +276,7 @@ jobs:
           retention-days: 14
 
   local-supabase-integration:
-    if: ${{ inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
+    if: ${{ inputs.mobsf_only != true && inputs.android_native_only != true && inputs.ios_native_only != true && inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
     name: Local Supabase migrations, SQL, Auth and RLS
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -454,9 +397,16 @@ jobs:
                   print(line, end='')
           PY
           supabase status --output env > "$RUNNER_TEMP/bil-supabase-local.env"
+          LOCAL_ANON_KEY="$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
+          LOCAL_SERVICE_KEY="$(grep '^SERVICE_ROLE_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
+          test -n "$LOCAL_ANON_KEY"
+          test -n "$LOCAL_SERVICE_KEY"
+          echo "::add-mask::$LOCAL_ANON_KEY"
+          echo "::add-mask::$LOCAL_SERVICE_KEY"
           {
             echo "API_URL=$(grep '^API_URL=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
             echo "ANON_KEY=$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
+            echo "BIL_LOCAL_SERVICE_ROLE_KEY=$LOCAL_SERVICE_KEY"
           } >> "$GITHUB_ENV"
           echo "BIL_LOCAL_DB_CONTAINER=$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)" >> "$GITHUB_ENV"
           test -n "$(grep '^API_URL=' "$RUNNER_TEMP/bil-supabase-local.env")"
@@ -464,6 +414,7 @@ jobs:
           test -n "$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
 
       - name: Apply checked-in migrations and verify local authority preconditions
+        id: checked_in_migrations
         shell: bash
         run: |
           set -euo pipefail
@@ -596,17 +547,20 @@ jobs:
           set -euo pipefail
           node --test \
             supabase/tests/local_supabase_test_support_test.mjs \
+            supabase/tests/local_supabase_storage_fixture_test.mjs \
             supabase/tests/local_supabase_auth_rls_e2e_test.mjs \
             supabase/tests/local_supabase_product_rpc_e2e_test.mjs \
             supabase/tests/local_supabase_storage_realtime_e2e_test.mjs
 
       - name: Install Flutter for the actual SQLite to Supabase restore cycle
+        if: ${{ !cancelled() && steps.checked_in_migrations.outcome == 'success' }}
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           flutter-version: 3.44.6
           cache: true
 
       - name: Restore independent SQLite databases through real local Auth and PostgREST
+        if: ${{ !cancelled() && steps.checked_in_migrations.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -636,6 +590,7 @@ jobs:
           retention-days: 14
 
       - name: Run all isolated PostgreSQL and Edge Function suites
+        if: ${{ !cancelled() && steps.checked_in_migrations.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -643,7 +598,7 @@ jobs:
           deno test --allow-env --allow-read --allow-net supabase/functions
 
   isolated-source-audit:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true }}
     name: Isolated Semgrep source audit
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -691,4 +646,117 @@ jobs:
           name: bil-source-audit-${{ github.sha }}
           path: artifacts/qa/text18/source-audit
           if-no-files-found: error
+          retention-days: 14
+
+  android-native-only:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.android_native_only == true }}
+    name: Android API 33 native integration without CodeQL tracing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Check out accepted source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve existing Flutter dependencies
+        run: flutter pub get
+      - name: Enable and require hardware acceleration on the disposable runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -r /dev/kvm
+          test -w /dev/kvm
+          free -m
+      - name: Run the existing native integration suite on API 33
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 1200
+          script: bash .github/scripts/bil_android33_native_integration.sh
+      - name: Upload native integration evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-android33-native-only-${{ github.sha }}
+          path: artifacts/qa/text18/android-api33
+          if-no-files-found: warn
+          retention-days: 14
+
+  ios-native-integration:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.ios_native_only == true }}
+    name: iPhone and iPad native tests from exact simulator bundles
+    runs-on: macos-26
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    steps:
+      - name: Check out accepted source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve existing dependencies and native pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          pod install --project-directory=ios
+      - name: Drive each actual test entrypoint on iPhone and iPad
+        run: bash .github/scripts/bil_ios36_native_integration.sh
+      - name: Upload exact native test evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-ios36-native-only-${{ github.sha }}
+          path: artifacts/qa/text18/ios36-simulators
+          if-no-files-found: warn
+          retention-days: 14
+
+  offline-mobile-static-audit:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.mobsf_only == true }}
+    name: Offline MobSF static debug APK audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Check out accepted source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Audit the existing APK in a network-disabled disposable scanner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BIL_ANDROID_ARTIFACT_RUN: ${{ inputs.android_artifact_run }}
+        run: >-
+          python3 tools/qa/bil_mobsf_offline_static.py
+          --artifact-run "$BIL_ANDROID_ARTIFACT_RUN"
+          --output artifacts/qa/text18/offline-mobsf/summary.json
+      - name: Upload sanitized static artifact evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-offline-mobsf-${{ github.sha }}
+          path: artifacts/qa/text18/offline-mobsf
+          if-no-files-found: warn
           retention-days: 14

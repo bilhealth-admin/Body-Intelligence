@@ -134,6 +134,31 @@ Gitleaks للـstaged diff التقط اثنتين من بصمات ملفات mi
 
 أُلغي شرط نافذة PowerShell المنفصلة من runner القديم طبقًا لأمر المالك؛ البروتوكول الكامل يبقى داخل المحادثة وlog. حُمي عنوان shutdown من ملف config تالف بحيث لا يرسل POST لخادم خارجي، واجتازت حالات العنوان الآمن/الخبيث/الملتبس الثلاثة محليًا. لم تتغير معادلات أو شاشات التطبيق.
 
+## نتائج المصدر 73785549 والإصلاحات التالية
+
+`7378554969fa5249e4aa071bea769062caa5cc1a` محفوظ ومرفوع fast-forward. ما سبق عن «جارٍ» أو «NOT RUN» يمثل وقت بدء التشغيل؛ النتائج المحددة هنا هي الأحدث:
+
+| التشغيل | النتيجة الفعلية | سبب الإعادة المحدودة |
+|---|---|---|
+| Supabase `38729694517` | جميع migrations وملفات SQL التسعة PASS؛ API: **28/29 PASS** بلا skip؛ جلسات GoTrue وبلاغ AI وRestore V2 وCAS والعزل نجحت | فشل تجهيز Storage، قبل إثبات Storage/Realtime كاملين؛ لم تصل الخطوات اللاحقة إلى دورة Flutter أو NPM/Deno |
+| Source audit `38729699048` | الوظائف الأربع PASS؛ Semgrep: **5,135 مسارًا، 13 finding، صفر أخطاء**؛ لا يسمى clean | انتهى timeout السابق؛ findings تبقى معلنة وفق مراجعة حدود الإدخال أعلاه |
+| Android `38726365073` | debug APK33 وJava/Kotlin CodeQL و**97/97** اختبارات شراء PASS؛ native لم يبدأ | log يثبت منع الوصول إلى `/dev/kvm`، وإقلاع software استغرق 774,668ms ثم فشل unlock قبل test |
+| iOS `38713591000` | debug36 وSwift CodeQL PASS، صورة launch فعلية على Simulator محفوظة | تحميل اختبار crypto فشل عند `TARGET_BUILD_DIR` بعد Xcode build؛ صفر assertions native؛ ليس timeout أو فشل تشفير مثبتًا |
+
+الـStorage fixture كان يولد `CREATE POLICY bil-ci-…_select` دون quoting؛ أُعيد إنتاج syntax error على PostgreSQL 17.6 ثم نجح DDL بعد استعمال أسماء آمنة محدودة ومعاملة تجهيز واحدة. cleanup القديم عبر SQL فشل وغطى الخطأ الأول؛ أصبح حذف الملفات/الدلو عبر Storage API للدلو التركيبي المحدد فقط، مع إظهار سبب العملية الأصلية وأخطاء التنظيف منفصلين. 8/8 اختبارات helper/selector محلية PASS، وDDL قبل/بعد وcleanup PASS. صلاحية service role المستعملة للتنظيف تخص stack CI المحلي فقط؛ اختبارات المستخدم نفسها تستعمل JWT موقعة وanon key. لا تغيير migration أو RLS منتج.
+
+أضيفت خطوة KVM نفسها التي نجحت في workflow الإقلاع ذي APIs الست، مع شرط read/write صريح؛ لا تمديد أعمى للمهلة. المسار `android_native_only` يشغل الملفات الأصلية الثلاثة على runner جديد، دون إعادة CodeQL أو اختبارات الشراء الناجحة.
+
+كود Flutter المثبت 3.44.6 يبين أن طلب إعدادات Xcode الخاص بـdevice يمكن أن يعيد map فارغة، بينما generic simulator build نجح. لا يثبت السجل السبب الأعمق للطلب الفارغ لغياب verbose لذلك الاستدعاء؛ لم يُخمن عيب Xcode project. مشغّل iOS الجديد يبني **كل entrypoint اختباري حقيقي** لـgeneric simulator ثم يستعمل `--use-application-binary` لتشغيل نفس bundle على iPhone وiPad. دعم `.app` مثبت في `IOSApp.fromPrebuiltApp` بالمصدر المثبت، وdriver التشفير مأخوذ من integration_test المثبتة؛ لا تغيير Flutter SDK أو app. المسار native-only على ARM لا يكرر Swift CodeQL المنجز. Syntax وactionlint للـ60 workflow PASS؛ تنفيذ Simulator الجديد ما زال مطلوبًا.
+
+على Windows أُنشئ AVD مستقل API36/WHPX ثم ثبت فعليًا أن broadcast القديم مرفوض من shell UID2000 وأن أمر ConnectivityService الجديد يعمل ويستعيد الحالة الأصلية؛ `android-api36-connectivity.json`. محاولة تشغيل حالة crypto اصطدمت قبل الاختبار بـJava loopback في Gradle. probe صغير أثبت أن مجلد temp قصيرًا لهذه العملية يحل selector/TCP؛ إعادة الاختبار الأصلي بهذا الإعداد جارية، ولا يدعى نجاحها. لم تتغير إعدادات الجهاز العامة أو SDK التطبيق. WSL يفشل بـ`HCS_E_SERVICE_NOT_AVAILABLE`؛ لا تفعيل ميزات Windows أو restart.
+
+### فحص APK المعزول المطلوب في 16–18
+
+أُعد MobSF المجاني v4.5.3 من الصورة الرسمية المثبتة بالبصمة `sha256:5113fbad0727445dda01afdccafea5e107bfa8632ead8a169492f5caa8aa1b7c`. المدخل هو debug APK33 المحفوظ من build الناجح أعلاه، مع التحقق من SHA-256 ومن أن الفروق اللاحقة QA فقط. الحاوية بلا شبكة أو ports أو host mounts؛ REST الداخلي loopback فقط. لا إرسال APK/source إلى SaaS ولا اختبار ديناميكي أو خدمة مدفوعة. يرفع ملخص قواعد وشدة وعداد ملفات دون قيم مطابقة أو مفاتيح أو source خام. 3/3 اختبارات تنقيح/هوية/فشل نقص أقسام PASS محليًا. **الفحص نفسه لم ينفذ بعد**؛ لا يتحول تجهيز الأداة إلى نتيجة MASVS أو release AAB.
+
+المراجع الأولية: [MobSF v4.5.3](https://github.com/MobSF/Mobile-Security-Framework-MobSF/releases/tag/v4.5.3)، [Storage bucket API](https://github.com/supabase/storage-js/blob/master/src/StorageBucketApi.ts). قرئت 15 أكتوبر 2026.
+
 ## آخر إجراء وخطوة تالية
 
-آخر إجراء: اكتمل التحقق المحلي والدفع `d362c8e4` وبدء الوظائف الثلاث أعلاه. لا تغيير `lib` أو Golden أو migration منتج في هذه المرحلة. SDK Android بصورة API36 وتسريع WHPX موجودان، دون AVD سابق أو جهاز متصل؛ أُطلق محاكي تركيبي منفصل، لكن خدمة connectivity لم تكن جاهزة في أول فحص، فلا يثبت ذلك رحلة تطبيق. Ubuntu مسجلة في WSL لكن تشغيلها فشل بـ`HCS_E_SERVICE_NOT_AVAILABLE`؛ لا تعديل ميزات Windows أو إعادة تشغيل الجهاز. الخطوة التالية: متابعة النتائج، حفظ أسباب أي إخفاق جديد وإصلاحه محليًا أولًا، ثم إعادة الجزء المتأثر وحده؛ لا تكرار iOS أو الشاملة السابقة.
+تُحفظ إصلاحات تجهيز Storage وKVM وتشغيل iOS وMobSF بعد فحوصها المحلية، ثم تُشغل وظائفها المعزولة المتأثرة فقط. الفشل في API لا يمنع جمع دليل دورة SQLite أو Deno المستقلة بعد نجاح migrations؛ يبقى job فاشلًا إذا فشلت أي خطوة، دون `continue-on-error` لإخفائها. لا إعادة للشاملة أو شراء أو حساب حي أو Production أو تغيير واجهات أو Golden.

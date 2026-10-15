@@ -1,0 +1,11 @@
+{
+  "started_at_utc": "2026-10-15T11:59:11.199099+00:00",
+  "scope": "real PostgreSQL DDL syntax only; not Storage API or Realtime",
+  "result": "PASS",
+  "before_exit": 3,
+  "before_error": "ERROR:  syntax error at or near \"-\"\nLINE 1: CREATE POLICY bil-ci-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_select...\n                         ^",
+  "after_exit": 0,
+  "cleanup_ddl_exit": 0,
+  "cluster_stopped": true,
+  "finished_at_utc": "2026-10-15T11:59:47.752504+00:00"
+}

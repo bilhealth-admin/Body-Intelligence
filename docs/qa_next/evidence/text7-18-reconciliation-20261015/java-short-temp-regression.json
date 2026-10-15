@@ -1,0 +1,14 @@
+[
+  {
+    "mode": "temurin17",
+    "exit": 1,
+    "stdout": "",
+    "error": "Exception in thread \"main\" java.io.IOException: Unable to establish loopback connection\n\tat java.base/sun.nio.ch.PipeImpl$Initializer.run(PipeImpl.java:103)\n\tat java.base/sun.nio.ch.PipeImpl$Initializer.run(PipeImpl.java"
+  },
+  {
+    "mode": "jdk21-short-temp",
+    "exit": 0,
+    "stdout": "selector=ready\ntcp-loopback=ready",
+    "error": ""
+  }
+]
