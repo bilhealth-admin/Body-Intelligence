@@ -1,0 +1,38 @@
+# Android 33 — Release Candidate Readiness
+
+## تحديث الأدلة — 15 أكتوبر 2026
+
+مصدر الإقلاع المختبر هو aca3afbd91fce9cf146e9ecd1aa22283897c4e7 بعد 533a68d9. كانت 38673538296 خضراء في CI لكنها رُفضت بعد فتح artifacts: خمسة محاكيات عرضت splash أزرقًا وAPI 35 وحده عرض Welcome. أضاف aca حدًا لظهور محتوى التطبيق وزرًا مفعّلًا في UIAutomator. تشغيل 38675377553 نجح على API 26/29/33/34/35/36 بعد إعادة الوظيفتين الفاشلتين فقط. عُزل تعطل API 26 الأول في نافذة Android Messages، وخطأ API 36 في تنزيل NDK قبل بناء التطبيق؛ لم يتكررا. كل لقطة نهائية تعرض Welcome وتحقق محتوى وزرًا تفاعليًا. النتيجة تثبت إقلاع APK debug offline فقط، ولا تثبت AAB موقعًا أو جهازًا أو حساب Play.
+
+## الحكم
+
+**غير جاهز للنشر أو لتقديم الاستئناف.** اجتازت شيفرة التطبيق واختباراتها المصدرية الإغلاق السابق، لكن لا يوجد AAB 33 موقّع، ولا تثبيت نظيف على محاكي/جهاز من الحزمة نفسها، ولا جلسة دخول لمراجع Play على ذلك الـAAB. سجل الإصدار ما زال `STAGING_MANIFEST_COMPLETE: NO` و`CANDIDATE_FROZEN_OR_ACCEPTED: NO`، وفيه خمسة ملفات مراجعة Google غير مغلقة على artifact جديد.
+
+## ما ثبت
+
+| البوابة | النتيجة |
+|---|---|
+| كود Flutter والاختبارات | 9,843 اختبارًا ناجحًا، 0 فشل/خطأ/تخطٍّ، و1,356 ملف اختبار؛ `flutter analyze --no-pub` بلا مشكلات. الدليل على SHA التطبيق `ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` وبصمة مدخلات `80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`. |
+| GitHub focused QA | [Run 38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976) ناجح على SHA التطبيق نفسه؛ ليس اختبار Emulator أو Play. |
+| CodeQL Java/Kotlin | Run 38675377540 اكتمل في اللغات الخمس؛ تظهر 47 تنبيهًا مفتوحًا في Code Scanning، منها ReDoS عالي في web worker مولّد ومربوط بمصدر stack_trace. راجع سجل التغطية؛ لا يمثل هذا AAB متجرًا أو اختبار UI. |
+| إعداد Android بالمصدر | `compileSdk=36`, `targetSdk=36`, `minSdk=26`. المصدر يطلب Health Connect للخطوات والمسافة والسعرات النشطة فقط؛ يلزم فحص merged manifest من AAB النهائي. |
+| اعتماديات Cloudflare | OSV 0 بعد الإصلاح؛ `npm run check` اجتاز التحقق من TypeScript و5 اختبارات staging، و`npm test` اجتاز 49 اختبارًا. هذه لا تثبت حزمة Android. |
+| رقم الإصدار | manifest التحضيري: `1.0.0 (33)`. `pubspec.yaml` يحتفظ بـ`1.0.0+8` لأن رقم 33 يدخل عبر مسار المرشح؛ لم أغيّر أرقام المتاجر أو إعداداتها. |
+
+## ما لم يُختبر
+
+لم يُبنَ AAB Android 33 أو يُختبر على حزمة إصدار. تشغيل Emulator المعزول المذكور أعلاه لا يستخدم توقيعًا أو حسابًا أو خدمات Production، ولا يثبت سلامة AAB. فحصت Workflows المرشحة للإصدار ووجدت أنها تتطلب أسرار توقيع/إعدادات Production؛ لم أطلقها.
+
+لم يُختبر AAB من حيث التثبيت النظيف، API 26/29/33/34/35/36، Android 16، 16 KB alignment على binary نهائي، Back التنبؤي، تدوير Activity، TalkBack/Dynamic Font Scaling، انقطاع الشبكة، أو ترقية بيانات إصدار سابق. لم يُجر شراء Play أو Restore أو Refund أو اختبار Account Access فعلي.
+
+حالة Play وملفات المراجعة مسجلة في [ملف أدلة استئناف Google](BIL_20261014_GOOGLE_APPEAL_EVIDENCE_AR.md). آخر فحص Console الموثق ذكر أن BIL معلّق وأن سجل Appeal السابق غير محسوم؛ لم أفتح النموذج أو أرسل استئنافًا. وظهر على GitHub تنبيه مفتوح لمفتاح Google API عام في `google-services.json`، وتظل قيود المفتاح وصلاحيته بحاجة إلى مراجعة مالك Google Cloud. لم تتغير build 32 أو Play Console خلال هذه المرحلة.
+
+## شروط إعلان الجاهزية
+
+1. مراجعة ملفات Google الخمسة غير المغلقة وتأكيد حالة Appeal السابقة من Console.
+2. مراجعة قيد Google API key في Cloud Console؛ لا يكفي وجود Firebase `google-services.json` لتأكيد أن APIs المستخدمة مقيّدة بالشكل المناسب.
+3. بعد الموافقة على مسار التوقيع، بناء AAB 33 من SHA المصدر المقبول، والتحقق من شهادة الرفع وmerged manifest والـBilling/API level و16 KB alignment، وحفظ hash وSBOM ونتيجة توقيع دون نشر.
+4. تثبيت AAB نفسه نظيفًا على Emulator، ثم جهاز Android فعلي، وإثبات الدخول ووصول المراجع والميزات المجانية والمدفوعة وشراء/استعادة Sandbox دون استخدام حساب المالك.
+5. بعد جمع الدليل فقط، يقرر المالك استخدام مسار Appeal الرسمي. لا يوجد رفع أو Appeal ضمن هذا التقرير.
+
+راجع مصفوفة الفحوص والقيود في [سجل التغطية الشامل](BIL_MAXIMUM_TEST_COVERAGE_REGISTER_20261015.md).
