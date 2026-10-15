@@ -46,6 +46,7 @@ insert into public.bil_community_moderators(user_id)
 values ('14100000-0000-4000-8000-000000000002');
 
 create temporary table ai_coach_safety_report_test_state (
+  singleton boolean primary key default true check (singleton),
   first_report jsonb,
   duplicate_report jsonb,
   initial_queue jsonb,
@@ -125,12 +126,11 @@ begin
   end if;
 end
 $moderator_identity_assert$;
-insert into pg_temp.ai_coach_safety_report_test_state(initial_queue)
-select report_entry
-from public.bil_list_ai_coach_safety_reports_v1() as queue(report_entry)
-where report_entry->>'report_id' = (
-  select first_report->>'report_id'
-  from pg_temp.ai_coach_safety_report_test_state
+update pg_temp.ai_coach_safety_report_test_state state
+set initial_queue = (
+  select report_entry
+  from public.bil_list_ai_coach_safety_reports_v1() as queue(report_entry)
+  where report_entry->>'report_id' = state.first_report->>'report_id'
 );
 do $review_input_assert$
 declare
@@ -160,25 +160,23 @@ begin
   end if;
 end
 $review_input_assert$;
-insert into pg_temp.ai_coach_safety_report_test_state(review_receipt)
-select public.bil_review_ai_coach_safety_report_v1(
+update pg_temp.ai_coach_safety_report_test_state
+set review_receipt = public.bil_review_ai_coach_safety_report_v1(
   (first_report->>'report_id')::uuid,
   'confirmed_safety_issue',
   '14100000-0000-4000-8000-000000000098'
-)
-from pg_temp.ai_coach_safety_report_test_state;
+);
 update pg_temp.ai_coach_safety_report_test_state
 set duplicate_review = public.bil_review_ai_coach_safety_report_v1(
   (first_report->>'report_id')::uuid,
   'confirmed_safety_issue',
   '14100000-0000-4000-8000-000000000098'
 );
-insert into pg_temp.ai_coach_safety_report_test_state(reviewed_queue)
-select report_entry
-from public.bil_list_ai_coach_safety_reports_v1() as queue(report_entry)
-where report_entry->>'report_id' = (
-  select first_report->>'report_id'
-  from pg_temp.ai_coach_safety_report_test_state
+update pg_temp.ai_coach_safety_report_test_state state
+set reviewed_queue = (
+  select report_entry
+  from public.bil_list_ai_coach_safety_reports_v1() as queue(report_entry)
+  where report_entry->>'report_id' = state.first_report->>'report_id'
 );
 reset role;
 

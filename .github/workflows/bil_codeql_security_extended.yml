@@ -30,6 +30,11 @@ on:
         required: false
         type: boolean
         default: false
+      source_audit_only:
+        description: Run Semgrep plus Actions, JavaScript and Python CodeQL without native builds
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   actions: read
@@ -39,7 +44,7 @@ permissions:
 
 jobs:
   analyze:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true }}
+    if: ${{ inputs.source_audit_only == true || github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true }}
     name: CodeQL (${{ matrix.language }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
@@ -47,7 +52,9 @@ jobs:
       fail-fast: false
       matrix: >-
         ${{ fromJSON(
-          inputs.android_only == true && inputs.ios_only == true &&
+          inputs.source_audit_only == true &&
+            '{"include":[{"language":"actions","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"javascript-typescript","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"python","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false}]}'
+          || inputs.android_only == true && inputs.ios_only == true &&
             '{"include":[{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"},{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
           || inputs.android_only == true &&
             '{"include":[{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"}]}'
@@ -135,6 +142,16 @@ jobs:
           --dart-define=BIL_ADS_ENABLED=false
           --dart-define=BIL_COMMUNITY_ENABLED=false
           --dart-define=BIL_PUSH_ENABLED=false
+
+      - name: Preserve the isolated Android debug APK for static inspection
+        if: matrix.flutter-build == 'android'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=artifacts/qa/text18/android-api33
+          mkdir -p "$OUT"
+          cp build/app/outputs/flutter-apk/app-debug.apk "$OUT/offline-debug-build33.apk"
+          sha256sum "$OUT/offline-debug-build33.apk" > "$OUT/apk.sha256"
 
       - name: Diagnose iOS simulator build settings after Flutter failure
         if: ${{ failure() && matrix.flutter-build == 'ios' }}
@@ -316,7 +333,7 @@ jobs:
           retention-days: 14
 
   local-supabase-integration:
-    if: ${{ github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true }}
+    if: ${{ inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
     name: Local Supabase migrations, SQL, Auth and RLS
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -560,7 +577,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          supabase test db --local supabase/tests/*_test.sql
+          # These suites use RAISE/DO assertions, not the pgTAP protocol.
+          # Preserve every assertion and propagate the first SQL error.
+          sql_tests=(supabase/tests/*_test.sql)
+          test -f "${sql_tests[0]}"
+          for sql_test in "${sql_tests[@]}"; do
+            printf 'RUN SQL assertion suite: %s\n' "$sql_test"
+            docker exec -i "$BIL_LOCAL_DB_CONTAINER" \
+              psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres < "$sql_test"
+            printf 'PASS SQL assertion suite: %s\n' "$sql_test"
+          done
+          printf 'SQL assertion suites passed: %s\n' "${#sql_tests[@]}" \
+            >> "$GITHUB_STEP_SUMMARY"
 
       - name: Exercise Auth sessions and owner-scoped RLS through local APIs
         shell: bash
@@ -568,6 +596,7 @@ jobs:
           set -euo pipefail
           node --test \
             supabase/tests/local_supabase_auth_rls_e2e_test.mjs \
+            supabase/tests/local_supabase_product_rpc_e2e_test.mjs \
             supabase/tests/local_supabase_storage_realtime_e2e_test.mjs
 
       - name: Run all isolated PostgreSQL and Edge Function suites
@@ -576,3 +605,53 @@ jobs:
           set -euo pipefail
           npm test --prefix supabase/tests
           deno test --allow-env --allow-read --allow-net supabase/functions
+
+  isolated-source-audit:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true }}
+    name: Isolated Semgrep source audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Check out accepted source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned free scanner in a temporary environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/bil-semgrep"
+          "$RUNNER_TEMP/bil-semgrep/bin/pip" install --disable-pip-version-check 'semgrep==1.181.0'
+
+      - name: Scan locally without source upload or telemetry
+        shell: bash
+        env:
+          SEMGREP_SEND_METRICS: 'off'
+          SEMGREP_ENABLE_VERSION_CHECK: '0'
+        run: |
+          set -euo pipefail
+          OUT=artifacts/qa/text18/source-audit
+          mkdir -p "$OUT"
+          SCAN_STATUS=0
+          "$RUNNER_TEMP/bil-semgrep/bin/semgrep" scan \
+            --config p/security-audit --config p/secrets --jobs 2 \
+            --metrics off --disable-version-check --json \
+            --output "$RUNNER_TEMP/bil-semgrep-raw.json" \
+            > "$RUNNER_TEMP/bil-semgrep-private.log" 2>&1 || SCAN_STATUS=$?
+          # Successful execution and zero findings are separate outcomes.
+          # Keep matched source/credential text out of public artifacts.
+          python3 tools/qa/bil_sanitize_semgrep_evidence.py \
+            "$RUNNER_TEMP/bil-semgrep-raw.json" "$OUT/semgrep.json"
+          test "$SCAN_STATUS" -eq 0
+
+      - name: Upload sanitized source audit evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-source-audit-${{ github.sha }}
+          path: artifacts/qa/text18/source-audit
+          if-no-files-found: error
+          retention-days: 14

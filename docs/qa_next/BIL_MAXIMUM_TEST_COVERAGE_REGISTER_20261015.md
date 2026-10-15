@@ -1,12 +1,17 @@
 # BIL maximum test coverage register — 15 October 2026
 
-## Current-source correction (latest tested source: aca3afbd91fce9cf146e9ecd1aa22283897c4e7)
+## Current correction after reviewing text-7 through text-18
 
-The earlier matrix below is a dated snapshot. Source commits 533a68d9 and aca3afbd modify only the Android startup gate; the latest gate requires at least 5% foreground app content and an enabled clickable UIAutomator control, polled up to 30 times. The 9,843-case Flutter result remains bound to its original app-source SHA and fingerprint.
+The authoritative continuation is [the reconciliation report](BIL_TEXT7_18_RECONCILIATION_20261015_AR.md), started at `7a797819d882674b6b7ed83a546c23ff3922c312`. The tables and counts below are retained historical evidence from the earlier audit, not a claim that all 53 coverage entries ran on the newer source.
 
-Runs 38669439414 and 38673538296 were rejected as false-green UI evidence after artifact review (blue launch screen on five APIs, Welcome on API 35 only). Run 38671525669 exposed the incomplete guard. Commit aca3afbd added a 5% content threshold and enabled-clickable accessibility check; final run 38675377553 passed all six APIs after rerunning only failed jobs. API 26's first attempt had an Android Messages system modal; API 36's first attempt failed before app build due a corrupt NDK download. Neither recurred in final artifacts. The final startup-only run is not a full lifecycle/accessibility/resilience/16 KB certification.
+- Preserve the 9,843/9,843 full Flutter result on `ef4b9f19...`; it was not rerun.
+- Ref-specific Code Scanning now has **25 fixed instances and 26 open** on JavaScript/actions analysis `699abff3`. ReDoS alert 5 is fixed. The remaining 26 were individually inventoried; high alert 48 in generated Dart runtime metadata remains open pending a reachability decision. No finding was manually dismissed. See `evidence/text7-18-reconciliation-20261015/codeql-triage.json`.
+- SQL AI-report failure was reproduced with native PostgreSQL 17.6 and fixed in the test's singleton state; the exact SQL suite then passed. The product migration was unchanged. The SQL workflow now uses `psql` for its RAISE/DO assertions instead of incorrectly expecting pgTAP output.
+- Android run `38713591000` passed build, CodeQL and 97 purchase-fake tests; native tests did not start because a protected airplane-mode broadcast was rejected. The setup command was corrected and syntax-checked; emulator confirmation is pending. Its iPhone/iPad job is still running separately.
+- Three updated moderator/admin Flutter tests passed locally. Actual product RPC coverage was added for isolated Auth/PostgREST AI-report and encrypted two-device Restore V2. Full Supabase API execution is pending; native PostgreSQL is not relabeled as that test.
+- Semgrep and full Flutter analyze are being verified locally; only completed results enter the reconciliation report. Signed artifacts, store/reviewer phone sessions, HealthKit authorization, and Production deployment are still separate unproven gates.
 
-CodeQL run 38675377540 on exact source aca3afbd completed successfully across all five language jobs and uploaded results. GitHub Code Scanning currently reports 47 open alerts on this ref: 1 high/error, 45 warnings, and 1 note. Alert 5 (js/redos) is in the checked-in generated web/drift_worker.dart.js at line 13335; its source map resolves to stack_trace 1.12.1 trace.dart line 55. The official current stack_trace 1.12.2 source still contains the same expression, so an upstream fixed release is not available; the generated bundle was not patched. This is not a clean security scan. Earlier CodeQL runs 38669439399 (65e0268a), 38671525638 (7485c7cc), and 38673538483 (533a68d9) remain separate. Workflow inventory 60; actionlint 60/60. zizmor found no workflow/config issues but could not parse one iOS workflow. Full-history Gitleaks remains non-clean with 17,254 heuristic matches and one open Google API-key alert with unknown validity. No signed release artifact or real-device/store test exists.
+## Historical audit snapshot (tables below)
 
 ## Direct result
 

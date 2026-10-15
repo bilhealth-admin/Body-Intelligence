@@ -1,0 +1,18 @@
+{
+  "head": "e27a58984bff50b4bcf45044ea9893f344307e85",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "accepted": true,
+  "source_fingerprint": "80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e",
+  "counts": {
+    "success": 9843,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "protocol_success": true,
+  "exit_code": 0,
+  "finished_utc": "2026-10-14T23:00:13.504346+00:00",
+  "committed_source_mapping": "ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67",
+  "mapping_report": "BIL_20261014_FULL_SUITE_REPAIRS_AND_FINAL_RESULT_AR.md:151",
+  "rerun_in_this_stage": false
+}

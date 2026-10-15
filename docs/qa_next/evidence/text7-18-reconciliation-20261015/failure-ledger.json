@@ -1,0 +1,59 @@
+{
+  "recorded_at_utc": "2026-10-15T11:14:57.712366+00:00",
+  "source_at_start": "7a797819d882674b6b7ed83a546c23ff3922c312",
+  "known_failures": [
+    {
+      "id": "F01",
+      "run": 38716505124,
+      "cause": "community_policy SQL fixture inserted id without column INSERT privilege",
+      "fix": "f3ab218b: omit server-owned id; keep column grants",
+      "status": "local preflight passed; full stack rerun pending"
+    },
+    {
+      "id": "F02",
+      "run": 38716505124,
+      "cause": "AI report SQL state split across rows; queue contained the report but first state row had NULL queue",
+      "fix": "single state row with singleton primary key; UPDATE instead of INSERT",
+      "status": "reproduced before; exact SQL suite PASS on native PostgreSQL 17.6 after"
+    },
+    {
+      "id": "F03",
+      "run": 38716505124,
+      "cause": "plain SQL DO/RAISE assertions executed by pg_prove requiring a TAP plan",
+      "fix": "psql -X -v ON_ERROR_STOP=1 for every *_test.sql; no assertion removed",
+      "status": "native AI SQL PASS and workflow lint PASS; full stack rerun pending"
+    },
+    {
+      "id": "F04",
+      "run": 38713591000,
+      "cause": "protected AIRPLANE_MODE broadcast rejected before Android app tests",
+      "fix": "ConnectivityService shell airplane-mode enable and readback",
+      "status": "bash syntax PASS; local API36 and CI API33 confirmation pending"
+    },
+    {
+      "id": "F05",
+      "cause": "pre-push hook used MSYS subprocess for path lookup and failed to fork",
+      "fix": "POSIX parameter expansion supporting both path separators; same PowerShell LFS hook",
+      "status": "hook with empty stdin PASS; remote push not attempted yet"
+    },
+    {
+      "id": "F06",
+      "cause": "native Windows Semgrep core: Unix_error Invalid argument socketpair, reproduced on one synthetic rule and jobs=1",
+      "fix": "isolated Linux CE scanner job with sanitized artifact, no telemetry/source upload",
+      "status": "version is not scan success; Linux scan pending"
+    }
+  ],
+  "raw_logs_retained_locally": [
+    {
+      "file": "run-38713591000-android.log",
+      "bytes": 331122,
+      "sha256": "21c571bd857ab8c7f5fa55d16de6204780320425590251bf95a13061290e4704"
+    },
+    {
+      "file": "run-38716505124-supabase.log",
+      "bytes": 16742,
+      "sha256": "fcd375db4c3a6c5dc839858d0d014ffe7281eb6c98657c2005d9fc6ca7f18cd3"
+    }
+  ],
+  "full_suite_repeated": false
+}

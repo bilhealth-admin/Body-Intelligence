@@ -6,11 +6,10 @@ mkdir -p "$OUT"
 SOURCE_HEAD="$(git rev-parse HEAD)"
 SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
 
-adb shell settings put global airplane_mode_on 1
-adb shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true
-adb shell svc wifi disable
-adb shell svc data disable
-test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = '1'
+# ConnectivityService provides the shell command used by Android CTS. Sending
+# AIRPLANE_MODE broadcasts directly is forbidden to shell on the API 33 image.
+adb shell cmd connectivity airplane-mode enable
+test "$(adb shell cmd connectivity airplane-mode | tr -d '\r')" = 'enabled'
 
 flutter test integration_test/system_crypto_bridge_integration_test.dart \
   --no-pub --device-id emulator-5554 --reporter expanded \

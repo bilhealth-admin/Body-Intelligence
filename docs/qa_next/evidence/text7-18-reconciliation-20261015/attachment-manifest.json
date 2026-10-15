@@ -1,0 +1,62 @@
+[
+  {
+    "file": "text-7.txt",
+    "bytes": 23601,
+    "sha256": "1edc3baf3f4012a082f5a0a36073de2ead95701cd9967ed6fde6b5dfac4fb8fe"
+  },
+  {
+    "file": "text-8.txt",
+    "bytes": 2092,
+    "sha256": "323b2171c59d479acaf16d479f9905dc4c0e7d71ffe0d0ebc87ded67c0fc472e"
+  },
+  {
+    "file": "text-9.txt",
+    "bytes": 4328,
+    "sha256": "bf4390eef3a7ab18e2cd28468ffc63db046362036ce2b0c2426787a58feb6b2e"
+  },
+  {
+    "file": "text-10.txt",
+    "bytes": 11680,
+    "sha256": "bfc61936a7e2c2da74248e8d14b10bf4f83dcebf8db3ede91212986414e14c06"
+  },
+  {
+    "file": "text-11.txt",
+    "bytes": 1261,
+    "sha256": "0bb2e767381f2f8334b999d725586707098954ba0e8977fe828b916268cc5ccb"
+  },
+  {
+    "file": "text-12.txt",
+    "bytes": 2131,
+    "sha256": "b8e7a964d4b6e3a50906a9b529680cb8053eb6239ce40e555696f9878b68e533"
+  },
+  {
+    "file": "text-13.txt",
+    "bytes": 5337,
+    "sha256": "73fb6c466cc5c1db54fce6191743f58cb07b32fdc760413b806fc84b7e275821"
+  },
+  {
+    "file": "text-14.txt",
+    "bytes": 24278,
+    "sha256": "ed7bd8977bb74c635b1608a55d73b7aebbc309af1e0d694d75e84e0340ea44c5"
+  },
+  {
+    "file": "text-15.txt",
+    "bytes": 2563,
+    "sha256": "23a653f702452db9495d0234f80df5f6167c2cb3423fdd8cb4fcfc0e9fde8616"
+  },
+  {
+    "file": "text-16.txt",
+    "bytes": 24350,
+    "sha256": "e3c328dc343065383393be07afb3725310028de477e21e105888ca1a4f1267cf"
+  },
+  {
+    "file": "text-17.txt",
+    "bytes": 30227,
+    "sha256": "a5ef532ed8bc23fa80f3fd3603d19de88f5ec69e3e320846e85f8793a89376db"
+  },
+  {
+    "file": "text-18.txt",
+    "bytes": 4083,
+    "sha256": "dd30ef5cb815bd5d09bb1022a1b8cac27b2b56859f1d8f4063b88d9f278af3b3"
+  }
+]

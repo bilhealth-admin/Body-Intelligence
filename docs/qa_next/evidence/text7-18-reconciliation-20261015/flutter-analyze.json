@@ -1,0 +1,10 @@
+{
+  "source_head": "7a797819d882674b6b7ed83a546c23ff3922c312",
+  "command": "flutter analyze --no-pub",
+  "result": "PASS",
+  "message": "No issues found!",
+  "duration_seconds": 1014.9,
+  "dart_or_dependency_inputs_changed_since_head": [],
+  "log_sha256": "309fe7fbeef5134779e7609715202f1356caf4823733c83c56ee8705e4dae2cb",
+  "recorded_at_utc": "2026-10-15T11:16:14.977917+00:00"
+}

@@ -1,0 +1,30 @@
+{
+  "environment": "native PostgreSQL, loopback, synthetic Auth settings",
+  "source_head": "7a797819d882674b6b7ed83a546c23ff3922c312",
+  "port": 55434,
+  "started_at_utc": "2026-10-15T10:43:24.826964+00:00",
+  "result": "PASS",
+  "postgres_version": "PostgreSQL 17.6 on x86_64-windows, compiled by msvc-19.44.35213, 64-bit",
+  "sql_exit_code": 0,
+  "rollback_preserved_empty_fixture": true,
+  "cluster_stopped": true,
+  "inputs_sha256": [
+    {
+      "path": "supabase/migrations/20260905160000_admin_community_access_control.sql",
+      "sha256": "2d4d3bf46e9d5abc61a2146681fc459433872095d5ee40bb2d7e12888b0b43f8"
+    },
+    {
+      "path": "supabase/migrations/20261013062221_community_safety_report_review_v1.sql",
+      "sha256": "8846b0e94d6fee14b76597c05bebb3f9239d71d0e0399127698fbaec7ef30e18"
+    },
+    {
+      "path": "supabase/migrations/20261014100000_ai_coach_safety_reports_v1.sql",
+      "sha256": "aaad8ac351dd43983cffb7b4ad63491715c55aa3d59b490f1c32b0f30a13540f"
+    },
+    {
+      "path": "supabase/tests/ai_coach_safety_reports_v1_test.sql",
+      "sha256": "fefda0c2f249c0d27c379ae0667bb8b893d94d63814d51d8ff24f1ad9f62d489"
+    }
+  ],
+  "finished_at_utc": "2026-10-15T10:43:39.028154+00:00"
+}
