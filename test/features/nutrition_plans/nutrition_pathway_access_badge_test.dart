@@ -1,15 +1,74 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/nutrition_plans/domain/pathways/carb_cycling.dart';
 import 'package:body_intelligence_log/features/nutrition_plans/domain/pathways/smart_fat_loss.dart';
 import 'package:body_intelligence_log/features/nutrition_plans/presentation/nutrition_pathways_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('pathway hero fits bundled Arabic fonts at large text sizes', (
+    tester,
+  ) async {
+    final arabic = FontLoader('BILArabic')
+      ..addFont(rootBundle.load('assets/fonts/NotoNaskhArabic-Regular.ttf'))
+      ..addFont(rootBundle.load('assets/fonts/NotoNaskhArabic-Bold.ttf'));
+    final display = FontLoader('BILDisplay')
+      ..addFont(rootBundle.load('assets/fonts/Montserrat-Bold.ttf'));
+    await arabic.load();
+    await display.load();
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    for (final locale in ['ar', 'en']) {
+      for (final scale in [1.0, 2.0, 3.0]) {
+        await tester.pumpWidget(
+          ProviderScope(
+            key: ValueKey('$locale-$scale'),
+            overrides: [
+              activeNutritionPathwayProvider.overrideWithValue(
+                AsyncData(carbCyclingPathway.id),
+              ),
+            ],
+            child: MaterialApp(
+              theme: BilFlagshipTheme.light(isArabic: locale == 'ar'),
+              locale: Locale(locale),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(scale)),
+                child: child!,
+              ),
+              home: const NutritionPathwaysPage(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final hero = find.byKey(
+          Key('nutrition-pathway-access-hero-${carbCyclingPathway.id}'),
+        );
+        await tester.scrollUntilVisible(
+          hero,
+          180,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        expect(hero, findsOneWidget);
+        expect(tester.takeException(), isNull, reason: '$locale / $scale');
+      }
+    }
+  });
+
   testWidgets(
     'pathway access badges are localized without repeated Premium text',
     (tester) async {

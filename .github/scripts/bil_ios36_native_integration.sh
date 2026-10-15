@@ -63,6 +63,7 @@ DEFINES=(
 case "${BIL_NATIVE_TARGET:-all}" in
   all) KINDS=(system-crypto native-settings feature-splashes) ;;
   system-crypto) KINDS=(system-crypto) ;;
+  feature-splashes) KINDS=(feature-splashes) ;;
   *) echo 'Unsupported native entrypoint scope' >&2; exit 2 ;;
 esac
 for KIND in "${KINDS[@]}"; do

@@ -1,0 +1,76 @@
+{
+  "read_at_utc": "2026-10-15T13:46:37.689576+00:00",
+  "source_head": "be068460d52428c59c0b84e05b7f322f15461edf",
+  "changes_uncommitted": true,
+  "before": {
+    "scope": "widget/native-boundary fake, not handset",
+    "cases": 2,
+    "failed": 2,
+    "cause": "periodic foreground read queued a post-frame callback without requesting a frame on an idle screen"
+  },
+  "after": {
+    "scope": "Flutter affected health/permission/cache/lifecycle/SQLite tests; native channel and auth statuses simulated",
+    "passed": 25,
+    "failed": 0,
+    "command": "flutter test --no-pub --reporter expanded [six exact files in report]"
+  },
+  "files": [
+    {
+      "path": "lib/features/connected_health/widgets/dashboard_health_activity_refresh.dart",
+      "sha256": "f5a62cd0eedd1813c373a7780ed2dffdbfdcbc5a4e56af62a09b90ec8127bb07"
+    },
+    {
+      "path": "test/connected_health/apple_health_permission_flow_test.dart",
+      "sha256": "5167fb170ecbb0d106f07ff2167d8b0f28192082c3166806cfd93b73a574fb25"
+    },
+    {
+      "path": "lib/features/connected_health/providers/connected_health_provider.dart",
+      "sha256": "48299494faa5efe4db6ab5714193d19de4e8dfb6d330d1570001f533e60a347a"
+    },
+    {
+      "path": "ios/Runner/BILGlobalHealthBridge.swift",
+      "sha256": "7c2089a19fb7ed72e9f6246e39435543f826f5b42877537f2ca2bfca99c29fc7"
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt",
+      "sha256": "39eda63c3436abadf668de056914655fdebf79fd37c0d282f41f93075f73b988"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Apple authorizing access",
+      "url": "https://developer.apple.com/documentation/healthkit/authorizing-access-to-health-data"
+    },
+    {
+      "title": "Apple read privacy",
+      "url": "https://developer.apple.com/documentation/healthkit/hkauthorizationstatus"
+    },
+    {
+      "title": "Health Connect sync timings",
+      "url": "https://developer.android.com/health-and-fitness/health-connect/sync-data"
+    },
+    {
+      "title": "Health Connect permissions UI",
+      "url": "https://developer.android.com/health-and-fitness/health-connect/ui/permissions"
+    },
+    {
+      "title": "Health Connect aggregate/history/background",
+      "url": "https://developer.android.com/health-and-fitness/health-connect/read-data"
+    },
+    {
+      "title": "MyFitnessPal Apple Health connection",
+      "url": "https://support.myfitnesspal.com/hc/en-us/articles/360032271092-Apple-Health-connection-and-syncing"
+    },
+    {
+      "title": "MyFitnessPal Health Connect",
+      "url": "https://support.myfitnesspal.com/hc/en-us/articles/10553948248973-Health-Connect-FAQ-and-Troubleshooting"
+    }
+  ],
+  "not_claimed": [
+    "iOS35 installed binary changed",
+    "the owner incident root cause proven on handset",
+    "permission grants tested on actual HealthKit or Health Connect",
+    "background delivery enabled",
+    "new SDK/permission added"
+  ]
+}

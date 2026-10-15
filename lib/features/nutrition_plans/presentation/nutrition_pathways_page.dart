@@ -92,7 +92,14 @@ class NutritionPathwaysPage extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 334,
+            // Keep the approved normal-size card; scaled Arabic/native fonts
+            // and the optional current-plan chip need extra vertical space.
+            height:
+                334 +
+                (MediaQuery.textScalerOf(context).scale(80) - 80).clamp(
+                  0.0,
+                  double.infinity,
+                ),
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               scrollDirection: Axis.horizontal,

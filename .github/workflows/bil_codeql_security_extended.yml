@@ -52,6 +52,7 @@ on:
         options:
           - all
           - system-crypto
+          - feature-splashes
         default: all
       mobsf_only:
         description: Inspect an existing offline debug APK with pinned, network-disabled MobSF
@@ -698,6 +699,22 @@ jobs:
           cache: true
       - name: Resolve existing Flutter dependencies
         run: flutter pub get
+      - name: Verify affected health and reply regressions before the native feature run
+        if: ${{ inputs.native_target != 'system-crypto' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/qa/text18/android-api33
+          flutter test --no-pub --reporter expanded \
+            test/connected_health/apple_health_permission_flow_test.dart \
+            test/features/connected_health/health_cache_first_regression_test.dart \
+            test/features/connected_health/health_controller_disposal_test.dart \
+            test/features/connected_health/explicit_sync_deadline_test.dart \
+            test/features/connected_health/health_sync_responsiveness_test.dart \
+            test/connected_health/dashboard_health_cache_startup_contract_test.dart \
+            test/features/intelligence_center/coach_reply_arrival_test.dart \
+            tools/qa/flutter/native_visual_observer_regression_test.dart \
+            2>&1 | tee artifacts/qa/text18/android-api33/affected-source-tests.log
       - name: Enable and require hardware acceleration on the disposable runner
         shell: bash
         run: bash .github/scripts/bil_prepare_android_kvm.sh

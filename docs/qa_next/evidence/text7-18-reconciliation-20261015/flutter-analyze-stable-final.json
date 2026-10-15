@@ -1,0 +1,15 @@
+{
+  "source_head": "be068460d52428c59c0b84e05b7f322f15461edf",
+  "started_at_utc": "2026-10-15T13:56:43.599781+00:00",
+  "elapsed_seconds": 314.8872681,
+  "exit_code": 0,
+  "finished_at_utc": "2026-10-15T14:01:58.5420548Z",
+  "result": "PASS",
+  "reported_duration_seconds": 313.0,
+  "command": "flutter analyze --no-pub",
+  "input_count": 3089,
+  "input_manifest_sha256": "90d7ea1a01f572a047a617a88e8a4f6c9f08776d3689253ca6bd476ae2750c2e",
+  "inputs_changed_during_run": [],
+  "log_sha256": "b9d832ec04cbb7a8c04422d182b6e372597b14b5c6028d510bb02e5df14cd74f",
+  "scope": "Full Flutter analysis after all product and QA changes; no ignores, skipped files, dependency change or root test run."
+}

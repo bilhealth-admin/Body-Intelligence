@@ -1,0 +1,9 @@
+{
+  "recorded_at_utc": "2026-10-15T13:33:51.114649+00:00",
+  "source_head": "be068460d52428c59c0b84e05b7f322f15461edf",
+  "result": "PASS",
+  "command": "flutter analyze --no-pub",
+  "duration_seconds": 461.3,
+  "log_sha256": "cc6e47616cd403859f58d47dfb4be343b21ff6a05d5c724e48078c80182e65ca",
+  "scope": "Full analyze of the first local visual repair snapshot; subsequent QA observer/collector changes require final analyze. The only production change is scaled nutrition pathway hero height."
+}

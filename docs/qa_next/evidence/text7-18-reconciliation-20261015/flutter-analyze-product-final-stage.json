@@ -1,0 +1,14 @@
+{
+  "finished_at_utc": "2026-10-15T13:53:32.9497685Z",
+  "elapsed_seconds": 292.6522572,
+  "exit_code": 0,
+  "source_head": "be068460d52428c59c0b84e05b7f322f15461edf",
+  "result": "PASS",
+  "command": "flutter analyze --no-pub",
+  "initial_manifest_sha256": "e3279189211572d18ac115686a9d92e993ac136ef7c6a80f27c0363fa1f31bfe",
+  "input_changes_during_run": [
+    "integration_test/native_feature_splashes_test.dart"
+  ],
+  "scope": "Full analysis completed after final product fixes. QA screenshot frame flush changed during this run; final stable analysis follows.",
+  "log_sha256": "4bf04dd5e3a98573dc730432c00e89cf3f4f41e2f0f7fe7f3e30f7479fe3e121"
+}

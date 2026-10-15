@@ -1,0 +1,48 @@
+{
+  "recorded_at_utc": "2026-10-15T14:01:04.359059+00:00",
+  "qa_native_cases": {
+    "entries": {
+      "logical_scenes": 4,
+      "entry_conditions": 24,
+      "source_head": "be068460d52428c59c0b84e05b7f322f15461edf",
+      "metadata_sha256": "38576fd64cab93fdab9fef80c1c9ec72ad3d06b3c3d47cf7b685b8521b9b8881",
+      "scope": "native AndroidAPI36, timing no PNG IPC; capture correction separately verified"
+    },
+    "coach": {
+      "business_cases": 8,
+      "synthetic_gateway_calls_per_case": 1,
+      "real_remote_model_calls": 0,
+      "proof": "android-api36-coach-native-accepted.json"
+    },
+    "capture": {
+      "business_cases": 3,
+      "scene": "ar-light-reduced",
+      "actual_native_PNGs": 18,
+      "proof": "android-api36-capture-final.json"
+    }
+  },
+  "local_focused_groups": [
+    {
+      "cases": 45,
+      "result": "PASS",
+      "log": "visual-affected-final.log"
+    },
+    {
+      "cases": 59,
+      "result": "PASS",
+      "log": "coach-arrival-focused-final.log"
+    },
+    {
+      "cases": 25,
+      "result": "PASS",
+      "log": "health-permissions-affected-final.log"
+    }
+  ],
+  "note": "Groups can overlap and are not added into a claimed new full-suite count.",
+  "existing_golden": {
+    "cases": 1,
+    "result": "PASS",
+    "baseline_updated": false,
+    "name": "store snapshot iphone_69_en_08_nutrition_pathways"
+  }
+}

@@ -2,6 +2,19 @@
 
 هذا هو مدخل الاستكمال الحالي. قُرئت الملفات الاثنا عشر كاملة، من `text-7.txt` إلى `text-18.txt`، بما فيها 7 و8 لإزالة التباس نقطة البداية. تعليمات المرفقات تُراجع في ضوء أوامر المالك اللاحقة؛ لا تُنفذ أوامر نشر أو شراء أو تهيئة حساب حي بمجرد ورودها في مستند تاريخي.
 
+## خلاصة الحالة الحالية
+
+- قُرئت12 مرفقًا كاملة، وليس5 أو6 فقط؛ بصماتها محفوظة في `attachment-manifest.json`. ما أدناه بعد هذه الخلاصة سجل زمني، وكل نتيجة تُنسب إلى مصدرها وتاريخها.
+- الشاملة السابقة9,843/9,843 صحيحة ومحفوظة على مصدرها. لا إعادة لها، ولا تعني أن حالات native/idle الجديدة كانت مغطاة فيها.
+- دورة التغذية الفعلية SQLiteA→SupabaseAuth/PostgREST/PostgreSQL→SQLiteB مستقلة نجحت في38734170433. ليس النجاح نقلJSON أوmockخادم. معها9SQL،34API/helper،74PGlite و358Deno بنطاقات معلنة.
+- AndroidAPI33 nativeAES والمخزن الآمن2/2 نجحا في38738750872. مسار generic iOS أصلح التحميل وأثبتcrypto/settings علىiPhone/iPad في38734174747؛ إضافةsecurecache علىiOS في38738008732 ما زالت جارية، ولا تُحتسب ناجحة مسبقًا.
+- إصلاحات المنتج الجديدة محصورة في3 ملفات: مساحة بطاقة الدايت عند تكبير الخط، انتظار تخطيط أول ردCoach معreduce-motion، وتشغيل callback تحديث الصحة عندما تكون الشاشة ساكنة. لا تغييرHome أو شكل الساعة أو الأيقونات أو السبلاش الرئيسي أو الأسعار/Trial.
+- تحقق محلي:45 حالة مرتبطة بالدايت/السبلاش، وGolden1× دون تحديث، و59Coach/lifecycle/observer، و25health/permissions. المجموعات قد تتقاطع ولا تُجمع كأنها تشغيل شامل واحد.
+- nativeمحلي:4 مشاهد دخول/24دخولًا، ثم8حالاتCoach/24PNG، ثم3حالاتAR2x لاختبار التزامن بين الرسم واللقطة/18PNG. صُحح تأخرPixelCopy بإطارات فعلية قبل الصورة، خارج قياسTimer2.2s. راجعت الصور الجديدة؛ قياسwidget وحده لا يثبت محتوى الصورة.
+- البحث الرسمي لـApple/Google/MyFitnessPal والمطابقة والإصلاح قبل/بعد في [تقرير أذونات الصحة](BIL_HEALTH_PERMISSION_READING_RESEARCH_20261015_AR.md). لم تُضف أذونات أوSDK.
+- التحليل الكامل للمنتج نجح289.9ثانية؛ أثناءه تغير ملفQA للصور فقط. التحليل النهائي المستقل على3,089مدخلًا ثابتًا نجح313.0ثانية، دون تغيرها أثناءه؛ `flutter-analyze-stable-final.json`. لا تُنسب نتيجة المصدر المتحرك إليه.
+- لا اعتماد متجر الآن: لاAAB/IPAموقع جديد، ولا جلسة المراجع علىهاتف/Artifactنهائي. CodeQL25fixed/28open وSemgrep15findings لهماtriage، لا شهادة أمن خالية من التنبيهات. high48 ومفتاحGoogle العام وSDKtrafficالفعلي موضحة كأدلة/قرارات مستقلة.
+
 ## نقطة الاستمرار
 
 - Repository: `bilhealth-admin/Body-Intelligence`.
@@ -18,7 +31,7 @@
 |---|---|---|---|
 | R01 | حماية المصدر والأعمال والاختبارات — 7،8،14،16–18 | worktree/branch/HEAD والبعيد والتعديلات الأصلية جُردت | حفظ كل دليل جديد مع SHA؛ لا reset/clean/force/main |
 | R02 | إغلاق إخفاقات الشاملة والتحليل وGolden — 7،12،14،17 | سجل الإخفاقات التاريخية ونتيجة 9,843 النهائية موجودان؛ لا يُعاد تشغيلهما بلا أثر جديد | تحقق من السجل الأصلي وبصمة الملفات التي تغيرت بعده؛ focused فقط عند الحاجة |
-| R03 | HealthKit/Health Connect والعزل A→B→A — 7–10،14،16–18 | إغلاق المصدر موثق مع 157/157 للصحة/الصلاحيات؛ لم يتغير `lib` بعد SHA الشاملة | لا تعاد المجموعة المنجزة؛ HealthKit/Health Connect الفعليان وتدفقات النظام على جهاز تبقيان بوابة جهاز |
+| R03 | HealthKit/Health Connect والعزل A→B→A — 7–10،14،16–18 | إغلاق المصدر موثق مع 157/157 للصحة/الصلاحيات محفوظة على مصدرها؛ أضيف إصلاح مؤقت foreground بعد بحث رسمي مع25/25 حالة متأثرة | لا تعاد المجموعة المنجزة؛ HealthKit/Health Connect الفعليان وتدفقات النظام على جهاز تبقيان بوابة جهاز |
 | R04 | الصوت والنص وMeal Vision ومزود AI والموافقة — 7–10،14،16–18 | 81/81 للسياق والموافقة و132/132 لـVision/الصوت/الوحدات محفوظة؛ رفض الصوت الخام قبل الموافقة/حجز الاستخدام | لا إعادة لتلك الاختبارات؛ هذه ليست أسئلة/صور حية إلى مزود AI أو اختبار هاتف |
 | R05 | Meta/Facebook OAuth وAdMob وTracking/ATT — 7–10،14،16–18 | تقارير SDK/OAuth وقرار عدم الاستنتاج من manifest وحده موجودة | فحص مصدر الحالي؛ IPA/merged manifests وشبكة SDK الفعلية بوابات artifact/device |
 | R06 | بلاغ AI والأسباب الأربعة والبطاقة والخصوصية و`privacy` القديم — 10–18 | Flutter UI/service/admin وmigration وSQL وAPI بلاغ AI بجلسة موقعة فعلية نجحت على Supabase معزولة؛ run38734170433 | سلوك Production وartifact المراجع غير مثبتين؛ ليس نقصًا في اختبار SQL المحلي |
@@ -29,10 +42,10 @@
 | R11 | جرد كل Workflows وأمان تشغيلها وNode/runner — 16–18 | 60 workflow جردت وactionlint PASS؛ إصلاحات SQL/KVM/native-only ومشغلات معزولة ذات نطاق معلن | لا تشغيل signing/deployment أو workflows تغير المتاجر؛ GitHub checkouts لا تعني اعتماد إصدار |
 | R12 | 47 CodeQL وReDoS وعدم تعديل المولد يدويًا — 17–18 | 25 fixed/28 open في run38734392616؛ ReDoS fixed؛ ID52/53 خاصة بالجلسة التركيبية Exclusive0600؛ triage لكل ID | high48 generated RTI reachability لم يحسم؛ لا dismiss أو تغيير مولد يدويًا |
 | R13 | أسرار وتبعيات وSBOM وأمن API والتشفير — 16–18 | OSV/Grype/Trivy/Syft/Gitleaks السابقة محفوظة؛ MobSF فعلي offline APK33 اكتمل مع ملاحظات؛ AES native API36 PASS | المفتاح العام وrelease binary/final SDK/network يحتاجان دليلًا منفصلًا؛ لا ادعاء خلو كامل |
-| R14 | Android APIs وميزات حقيقية وLifecycle/16KB — 9–10،14،16–18 | 6/6 إقلاع سابق محفوظ؛ native crypto على API36/WHPX PASS؛ KVM/airplane setup صُححت مع أسبابها | وظيفة API33 native على19972310 جارية؛ لا Android هاتف أو AAB موقع |
-| R15 | iPhone/iPad كامل وSDK/permissions — 7،14،16–18 | debug36/Swift CodeQL نجحا على1478؛ فشل تحميل crypto بسبب TARGET_BUILD_DIR، لا اختبار assertion | مسار native-only generic bundles على iPhone/iPad جارٍ؛ لا إلغاء التشغيل القديم أو ادعاء نجاح مسبق |
+| R14 | Android APIs وميزات حقيقية وLifecycle/16KB — 9–10،14،16–18 | 6/6 إقلاع سابق محفوظ؛ native crypto على API36/WHPX PASS؛ KVM/airplane setup صُححت مع أسبابها | native crypto+secure cache2/2 PASS في38738750872 علىbe068460؛ وظيفة19972310 احتفظت بفشل fixture وانتهت بمهلة؛ لا هاتف/AAB موقع |
+| R15 | iPhone/iPad كامل وSDK/permissions — 7،14،16–18 | debug36/Swift CodeQL نجحا على1478؛ generic bundle أصلح TARGET_BUILD_DIR وأثبت crypto/settings علىiPhone/iPad في38734174747 | إضافة secure cache علىiOS في38738008732 ما زالت جارية؛ feature fixtures الجديدة تُغلق محليًا قبل إعادة النطاق المتأثر |
 | R16 | تفاعل التطبيق والوسائط والتنقل والتوطين وإمكانية الوصول — 7،14،16–18 | اختبارات Flutter وGolden والصور السابقة محفوظة | native journeys لا تساوي رحلة دخول حقيقية؛ مراجعة gaps من الاختبارات الموجودة |
-| R17 | أداء/fault/fuzz/mutation/coverage — 16–18 | 10,000 generated cases و380,014 تحققًا و5/5 behavioral mutants محليًا؛ تغطية VM محصورة للملف؛ benchmark السابق محفوظ | تشغيل القياس الجديد في GitHub قادم؛ لا coverage/mutation شاملة ولا قياس أداء هاتف/Production |
+| R17 | أداء/fault/fuzz/mutation/coverage — 16–18 | 10,000 generated cases و380,014 تحققًا و5/5 behavioral mutants محليًا؛ تغطية VM محصورة للملف؛ benchmark السابق محفوظ | GitHub38736058081 نجح بذات10,000 حالة و5/5 mutants؛ لا coverage/mutation شاملة أو أداء هاتف/Production |
 | R18 | Android33/iOS36 والحزم والتوقيع والنشر — 7،9،14،16–18 | أرقام المرشحين ومسار fail-closed موجودة؛ لا حزمة توزيع موقعة جديدة | حزم موقعة وأجهزة ومتاجر ونشر Production بوابات مستقلة؛ لا تتحول إلى PASS |
 
 الفهرس التفصيلي لأنواع الفحوص هو `BIL_MAXIMUM_TEST_COVERAGE_REGISTER_20261015.md`؛ التقارير السابقة تبقى أدلة تاريخية ولا تُنسخ نتائجها إلى SHA أحدث.
@@ -226,3 +239,28 @@ gh workflow run bil_codeql_security_extended.yml --ref integration/bil-qa-media-
 حفظ `b2f41184560f1f09cc5fda70ce1cfc50864a9e5e` اختبار المخزن مع التحليل الكامل الناجح. بدأ [38738008732](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38738008732) بالنطاق `native_target=system-crypto`. وظيفة iOS تستمر ولا تلغى. وظيفة Android توقفت في إعداد KVM قبل أي native assertion، لا في حالة المخزن:31ms بين طباعة قاعدة udev والخروج1، دون stat أو trace يحدد أي test-r/w فشل. لا يجوز الادعاء بأن هذا دليل على رفض Keystore أو تشخيص race قطعي.
 
 وحدت تهيئة KVM في script واحد ينتظر انتهاء queue عبر `udevadm settle --timeout=20` ثم يطبع mode/user ويتحقق read/write، بدل فحص صلاحية عقب trigger غير متزامن مباشرةً. مشغّل native يفحص `emulator -accel-check` بعد أن تثبت action الملف التنفيذي، فلا يفشل لمجرد غيابه قبل setup SDK. هذا يعالج غياب انتظار الأحداث ويضيف دليلًا للسبب إن بقي العطل؛ نتيجة Linux الفعلية تُتابع ولا تدعى مسبقًا. Syntax وactionlint محليًا PASS، وليس ذلك ادعاء تشغيل systemd على Windows. المرجع الرسمي: [systemd udevadm trigger/settle](https://github.com/systemd/systemd/blob/main/man/udevadm.xml)، قرئ15 أكتوبر2026. إعادة Android وحدها على المصدر المصحح، بلا إعادة iOS أو Supabase أو الشاملة.
+
+### Native: نتائج التهيئة وأسباب إخفاق ملف العرض، لا إعادة المنتج
+
+- [Android38738750872](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38738750872) على`be068460`: **SUCCESS**؛ mode666 على`/dev/kvm` وKVM12 قابل للاستخدام فعليًا، ثم **2/2** Native crypto/secure-cache. ثبت نجاح الإعداد بعد انتظار udev؛ بقي فشل التشغيل السابق محفوظًا ولا يعاد نفس SHA.
+- iOS38734174747 على19972310 تجاوز خطأ TARGET_BUILD_DIR فعليًا: ملف crypto وصفحتا profile/settings على **iPhone وiPad** نجحت، وصور أصلية محفوظة. فشل ملف features على iPhone عند أول AR capture ثم Arabic2x وobserver/history؛ iPad features لم يبدأ، فلا يعمم النجاح عليه.
+- **F13:** فُتحت صورة`recipes-ar-light-normal-welcome.png` الأصلية وهي فعلًا الترحيب الصحيح. assertion بعد تسليم PNG أخطأ باعتبار تأخر تسليم الصورة استمرارًا مطلوبًا لشاشة ذات Timer2.2s. فُصل قياس المدة عن زيارة التصوير، دون إطالة/تجميد Timer أو صورة بديلة؛ timestamps منفصلة ومؤشرات no-write/back/mount/timing محفوظة.
+- **F14 عيب منتج مثبت:** Overflow5px في بطاقة المسار الغذائي عند Arabic2x/خطوط NotoNaskh الفعلية. أصلحت إضافة ارتفاع عند تكبير النص فقط؛1x334px باقٍ. هذا هو **تغيير lib الوحيد الجديد**، بعد إثبات الحفظ السابق في`application-preservation.json`؛ لا يصح تعميم تطابق lib القديم عليه. حالة الشاملة تبقى تاريخية ولا تعاد تلقائيًا لهذا التكيف المحصور.
+- **F15:** مراقب post-frame كان يستدعي`tester.getRect` المحمي بينما pump ما زال جارياً؛ stack يثبت Guarded function conflict. استُبدلت قراءة المراقب بقراءة RenderBox/RenderEditable الفعليين دون API محمي؛ لا تغيير عرض المدرب نفسه. نجح اختبار مستقل داخل80 إطارًا مجدولًا. صُححت أولًا فرضيتا مدة الظهور وعدد الإطارات في اختبار الانحدار الجديد لتطابق cadence40ms وإطارات Flutter المجدولة، دون تسريع الرد أو تغيير assertion منتج.
+- **F16:** اختيار anchor كان يشترط احتواء رسالة تاريخية كبيرة كاملة داخل viewport؛ عند2x قد تكون مقروءة جزئيًا. أصبح الاختيار لرسالة قديمة مرئية تقاطعها20px على الأقل، مع بقاء شرط الانتقال الحقيقي للتاريخ وثبات offset/anchor0.5px. لا تعديل scrolling داخل app.
+
+**التحقق المحلي بعد الإصلاح:** الحالات الجديدة ثم الملفات المتأثرة، **45/45 PASS**؛ تشمل badge/fonts AR/EN1x/2x/3x مع current chip، access policy، pathways contract، وتوقيت/صور/تقليل حركة splash ومراقب الإطار. Golden القائمة`iphone_69_en_08_nutrition_pathways` **1/1 PASS** بلا update. لا قص أو تخطي اختبار أو تحديث جماعي. قُسم ملف integration الكبير إلى entrypoint640 سطرًا وCoach part683 سطرًا؛ لم تحذف أي حالة. محاكي API36 يشغّل الملف الأصلي الكامل الآن قبل رفع هذه الدفعة، والتحليل الكامل بعد آخر Dart جارٍ. إعادة GitHub التالية **feature-splashes فقط** لا crypto/settings أو Supabase أو الشاملة الناجحة.
+
+## استكمال بصري محدود وبحث أذونات الصحة — آخر العمل المحلي
+
+التحليل الكامل السابق للدفعة البصرية نجح461.3ثانية، ثم كشفت native cases فروقًا إضافية؛ لذلك لا يُنسب إلى التعديلات اللاحقة. ينتظر التحليل النهائي بعد آخر Dart. لم تُعد الشاملة9,843.
+
+- F13–F16: نجحت مشاهد السبلاش الأربعة محليًا علىAPI36، مع24 دخولًا وبقاء توقيت2.2s وفصل التوقيت عن PNG IPC. اختبارات45/45 وGolden دايت1× نجحت دون update.
+- F17/F18: اختبار المدرب القديم توقع prefix كتابة، بينما الحالي320ms complete-reply arrival. المراقب يقيس opacity والقراءة الفعلية؛ anchor التاريخ ينتظر استقرار stretch قبل وصول الرد، مع بقاء هامش0.5px وعدم سحب المستخدم.
+- F19: تشغيلAndroid19972310 انتهى بالمهلة بعد انتهاء حالات fixture الفاشلة؛ `flutter drive --timeout1200` يحفظ حدًا واضحًا وإخفاقًا ظاهرًا، لا انتظارًا بلا نهاية.
+- F20: عيب فعلي في أول رسم للرد الطويل عند reduce-motion. ينتظر الرد الجديد التخطيط الأول ثم يظهر مباشرة بلا fade؛ النص الكامل والأدوات والتصميم كما هي. نجحت59/59 من حالاتCoach/observer/lifecycle بعد الإصلاح. لا تغيير header/composer/تنقل.
+- F21: عيب حقيقي في callback مؤقت الصحة الساكن؛ قبل الإصلاح فشل اختباران ثم نجحت25/25 من الحالات المتأثرة. لا تغيير شكل الساعة أو تواتر التحديث أو نطاق الإذن.
+
+تفصيل المصادر الرسمية ومقارنةMyFitnessPal والفرق عن الحزمة35 في [تقرير الأذونات والقراءات](BIL_HEALTH_PERMISSION_READING_RESEARCH_20261015_AR.md). لا تُعاد وظائفSupabase أو crypto أو sourceaudit أو الفحوص التي لم تتأثر بهذه الدفعة. الأصل الكامل للنجاحات والأخطاء محفوظ، ولا تحديث جماعي لGoldens.
+
+الفحص النهائي المحلي: Format11ملفًا0تغيير، Flutter Analyze كامل313.0ثانيةPASS على المدخلات الثابتة، actionlint60workflow وbash-n وdiff-check ناجحة. مقارنة lib/ios/android مع مصدر الشاملة تثبت3فروق المنتج المقصودة فقط؛ `application-final-delta.json`. تنبيهات الأمن وبوابات الهاتف/المتجر ليست PASS لمجرد ذلك.

@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-10-15T12:21:53.625697+00:00",
+  "recorded_at_utc": "2026-10-15T13:20:52.044404+00:00",
   "source_at_start": "7a797819d882674b6b7ed83a546c23ff3922c312",
   "known_failures": [
     {
@@ -68,7 +68,7 @@
       "run": 38713591000,
       "cause": "iPhone native crypto test loading failed: Xcode build is missing expected TARGET_BUILD_DIR build setting; no crypto assertion executed",
       "fix": "Build the same three actual entrypoints for generic simulator; drive the exact prebuilt bundle on iPhone and iPad using supported pinned Flutter APIs; new native-only job without repeating Swift CodeQL",
-      "status": "Local script syntax and 60-workflow actionlint PASS; native execution pending; no manual SDK or Xcode project patch"
+      "status": "Generic simulator bundles fixed actual loading: crypto and native settings succeeded on both iPhone and iPad in38734174747. Separate feature-harness failures retained."
     },
     {
       "id": "F11",
@@ -81,7 +81,75 @@
       "run": 38738008732,
       "cause": "KVM setup exited 1 immediately after queued udev trigger before native test. No stat/command trace retained, so exact failing guard and final mode cannot be proven retrospectively.",
       "fix": "One shared setup waits udevadm settle with bounded20s, prints actual node mode/user then requires read/write; native script checks real emulator acceleration after action-installed binary exists.",
-      "status": "Local actionlint and bash syntax PASS; Linux runtime rerun pending. Actual native secure cache already passed2/2 on local API36/WHPX."
+      "status": "PASS: run38738750872 be068460: node mode666, emulator KVM12 usable, native AES plus secure account cache2/2 on API33."
+    },
+    {
+      "id": "F13",
+      "run": 38734174747,
+      "cause": "Correct welcome PNG captured, but screenshot encoding/host delivery completed after the real2.2s timer; post-capture widget-presence assertion falsely failed",
+      "fix": "Measure hold in first visit without PNG IPC; capture welcome in independent second visit, record both clocks, preserve all timing/navigation/write assertions and unchanged product timer",
+      "status": "PASS local native API36: all4 six-feature scenes,24 entries. Hold2.2s measured separately from PNG IPC. CI affected entrypoint pending."
+    },
+    {
+      "id": "F14",
+      "run": 38734174747,
+      "cause": "Real RenderFlex bottom overflow5px: nutrition pathway hero fixed334px cannot fit bundled Arabic font at2x",
+      "fix": "Only scaled text adds vertical room;1x height334 and all card typography/colors/assets remain exact. Native-font regression coversAR/EN1x/2x/3x and selected chip.",
+      "status": "PASS local45 focused + existing1x Golden1 without update + actual native AR2x scene; CI affected entrypoint pending."
+    },
+    {
+      "id": "F15",
+      "run": 38734174747,
+      "cause": "Post-frame geometry observer called guarded tester.getRect while tester.pump still executing; Guarded function conflict stopped measurements",
+      "fix": "Read actual render objects in passive post-frame observer; new focused test exercises80 scheduled guarded pumps and real glyph bounds",
+      "status": "PASS actual local API36 native matrix8/8,4reply+4history,24PNGs, real frame/glyph/anchor observations. Focused Coach59/59; native debug stress smoothness is not certified."
+    },
+    {
+      "id": "F16",
+      "run": 38734174747,
+      "cause": "History fixture required a fully contained old message; large2x rows can be visible without fitting entirely, causing firstWhere No element",
+      "fix": "Require a visibly intersecting old-message anchor, retain actual history scroll offset>72px and0.5px position/offset stability checks",
+      "status": "PASS actual local API36 native matrix8/8,4reply+4history,24PNGs, real frame/glyph/anchor observations. Focused Coach59/59; native debug stress smoothness is not certified."
+    },
+    {
+      "id": "F17",
+      "run": 38734174747,
+      "cause": "Native QA still expected a typewriter prefix although the already-approved production CoachReplyArrival uses a complete reply with320ms fade/position. Text in layout atopacity0 was confused with painted text.",
+      "fix": "Measure actual arrival opacity, first painted glyph bounds, complete text and reserved geometry. Preserve post-frame timing, record missed intermediate native debug frames explicitly, no product animation change.",
+      "status": "PASS actual local API36 native matrix8/8,4reply+4history,24PNGs, real frame/glyph/anchor observations. Focused Coach59/59; native debug stress smoothness is not certified."
+    },
+    {
+      "id": "F18",
+      "run": 38734174747,
+      "cause": "History baseline sampled before overscroll stretch finished; anchor moved3.6px AR/30.6px EN during PNG capture before held model reply release while scroll metrics were idle.",
+      "fix": "Require eight stable painted anchor/offset frames before baseline; retain history distance>72px and0.5px stability assertions after actual reply release.",
+      "status": "PASS actual local API36 native matrix8/8,4reply+4history,24PNGs, real frame/glyph/anchor observations. Focused Coach59/59; native debug stress smoothness is not certified."
+    },
+    {
+      "id": "F19",
+      "run": 38734174747,
+      "cause": "Android drive had no command timeout. Known native fixture failures finished at12:40UTC but driver did not close; job60-minute deadline canceled at13:23UTC. Native settings/crypto had already passed.",
+      "fix": "Add supported Flutter drive --timeout1200 to capture entrypoints; maintain fail-closed metadata validation and always-upload raw logs. Feature-only scope avoids rebuilding unaffected crypto/settings.",
+      "status": "Local driver with bounded timeout verified, affected CI pending."
+    },
+    {
+      "id": "F20",
+      "cause": "Actual native AR/EN reduced-motion long reply first frame had opacity1 but its first glyphs outside the viewport before the reading anchor settled; normal motion hidden first frame was correct.",
+      "fix": "Fresh reduced-motion CoachReplyArrival waits one layout before immediate visibility; complete text/semantics unchanged, no ticker/typewriter, restored messages remain immediate. Normal320ms entrance is unchanged.",
+      "status": "PASS actual local API36 native matrix8/8,4reply+4history,24PNGs, real frame/glyph/anchor observations. Focused Coach59/59; native debug stress smoothness is not certified.",
+      "evidence": "native-coach-local-final.log and native metadata on localAPI36 before fix, coach-arrival-focused-final.log after fix"
+    },
+    {
+      "id": "F21",
+      "cause": "Foreground minute timer scheduled a post-frame health refresh without requesting a frame; after a failed read an otherwise idle screen never retried until another repaint/user tap. Reproduced2/2 on iOS/Android Flutter variants.",
+      "fix": "Request ensureVisualUpdate after the queued callback. No new permission, polling frequency, UI, source, or background capability.",
+      "status": "PASS25/25 affected health cases, including2 new before/after regressions and paused-timer/no-passive-permission checks; actual phone incident not attributed from a widget test."
+    },
+    {
+      "id": "F22",
+      "cause": "Visual inspection, despite passing geometry assertions, found early Android PixelCopy PNGs could retain the preceding compositor buffer: a released entry still showed welcome, while Coach first was blank and mid/end showed the real reply. Layout state is not a frame-exact screen capture.",
+      "fix": "Request and paint three fresh native frames before capture, outside measured splash timing; preserve original PNGs and before/after metadata; visually verify focusedAR2x reduced scene before accepting new capture evidence.",
+      "status": "PASS localAR2x reduced native3/3,6entries+reply/history,18PNGs. Visually reviewed actual diet destination and first Coach reply; screenshots now match requested scene. Prior PNGs retained, never treated as frame-exact proof."
     }
   ],
   "raw_logs_retained_locally": [
@@ -119,6 +187,16 @@
       "file": "android-secure-cache-38738008732.log",
       "bytes": 43305,
       "sha256": "54df9145b333280eafbd2efb1e8ea877e667c1fe4a1d681efc29d5bf5aa45e1e"
+    },
+    {
+      "file": "ios-native-all-38734174747.log",
+      "bytes": 15698629,
+      "sha256": "e1fcced834d3d756b58ff81608bdd7e81f9229335bf7b0c22954ee6c84b22133"
+    },
+    {
+      "file": "android-crypto-final-38738750872.log",
+      "bytes": 71316,
+      "sha256": "2585b5ad43290364290473598202270d566fe4e2a7174603c8e28ffc7ac77534"
     }
   ],
   "full_suite_repeated": false

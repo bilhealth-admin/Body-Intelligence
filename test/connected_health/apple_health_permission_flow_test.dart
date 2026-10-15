@@ -296,6 +296,46 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
   }
+  testWidgets(
+    'idle foreground retries a failed health read without a user tap',
+    (tester) async {
+      final gateway = _StartupGateway(failFirstDailyRead: true);
+      final container = ProviderContainer(
+        overrides: [connectedHealthGatewayProvider.overrideWithValue(gateway)],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            home: DashboardHealthActivityRefresh(
+              child: Text('Quiet foreground; no clock, ticker, or user input'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(gateway.dailyReads, 1);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      // Binding.pump advances the timer but paints only if a frame was requested.
+      // Do not force scheduleFrame: that would hide the stalled retry.
+      await tester.pump(const Duration(minutes: 1));
+      await tester.pumpAndSettle();
+      expect(gateway.dailyReads, 2);
+      expect(gateway.startupChecks, 0);
+      expect(gateway.manualCalls, 0);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump(const Duration(minutes: 2));
+      expect(gateway.dailyReads, 2);
+      await tester.pumpWidget(const SizedBox.shrink());
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      expect(tester.takeException(), isNull);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+    }),
+  );
 }
 
 class _StartupGateway
@@ -303,6 +343,8 @@ class _StartupGateway
         ConnectedHealthGateway,
         ConnectedHealthStartupPermissionGateway,
         ConnectedHealthDailyActivityGateway {
+  _StartupGateway({this.failFirstDailyRead = false});
+  final bool failFirstDailyRead;
   int startupChecks = 0;
   int dailyReads = 0;
   int manualCalls = 0;
@@ -315,6 +357,9 @@ class _StartupGateway
   @override
   Future<ConnectedHealthSnapshot> loadDailyActivity() async {
     dailyReads++;
+    if (failFirstDailyRead && dailyReads == 1) {
+      throw StateError('Synthetic first read failure');
+    }
     return const ConnectedHealthSnapshot.unavailable();
   }
 

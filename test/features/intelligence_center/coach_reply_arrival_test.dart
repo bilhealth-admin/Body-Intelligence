@@ -75,6 +75,40 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('fresh reduced-motion reply waits only for its reading layout', (
+    tester,
+  ) async {
+    const messageId = 'qa-reduced-first-reading-layout';
+    final fade = find.byKey(
+      const ValueKey('coach-reply-arrival-fade-$messageId'),
+    );
+    double? firstLayoutOpacity;
+    tester.binding.addPostFrameCallback((_) {
+      firstLayoutOpacity = tester.widget<FadeTransition>(fade).opacity.value;
+    });
+    await tester.pumpWidget(
+      const MaterialApp(
+        builder: _reducedMotionBuilder,
+        home: Scaffold(
+          body: CoachReplyArrival(
+            messageId: messageId,
+            animate: true,
+            child: Text('The complete reply is already available.'),
+          ),
+        ),
+      ),
+    );
+    expect(firstLayoutOpacity, 0);
+    expect(
+      find.text('The complete reply is already available.'),
+      findsOneWidget,
+    );
+    await tester.pump();
+    expect(tester.widget<FadeTransition>(fade).opacity.value, 1);
+    expect(tester.binding.transientCallbackCount, 0);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Widget _reducedMotionBuilder(BuildContext context, Widget? child) => MediaQuery(

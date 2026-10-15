@@ -57,6 +57,9 @@ class _DashboardHealthActivityRefreshState
         _refreshTask ??= _refresh().whenComplete(() => _refreshTask = null);
       }
     });
+    // A timer on an idle screen has no pending frame. Request one so the
+    // queued read runs even when no clock, animation, or user tap repaints it.
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   Future<void> _refresh() async {

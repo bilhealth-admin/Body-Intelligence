@@ -43,11 +43,19 @@ Future<void> main() async {
       return true;
     },
     responseDataCallback: (data) async {
-      final scenes = data?['native_feature_splashes'];
+      final coachOnly = data?['native_scope'] == 'coach-only';
+      final selected = data?['native_scenes'];
+      if (selected is! List || selected.isEmpty || selected.length > 4) {
+        throw StateError('Explicit native scene selection is missing.');
+      }
+      final scenes =
+          data?['native_feature_splashes'] ?? (coachOnly ? [] : null);
       final reveal = data?['native_coach_reveal'];
       final history = data?['native_coach_history'];
       await File('${output.path}/native-metadata.json').writeAsString(
         const JsonEncoder.withIndent('  ').convert({
+          'scope': coachOnly ? 'coach-only' : 'all',
+          'selected_scenes': selected,
           'scenes': scenes,
           'coach_reveal': reveal,
           'coach_history': history,
@@ -57,7 +65,7 @@ Future<void> main() async {
       );
       // Preserve partial evidence on failure rather than manufacturing a full pass.
       if (scenes is! List ||
-          scenes.isEmpty ||
+          scenes.length != (coachOnly ? 0 : selected.length) ||
           scenes.any(
             (scene) =>
                 scene is! Map ||
@@ -69,9 +77,9 @@ Future<void> main() async {
         );
       }
       if (reveal is! List ||
-          reveal.length != scenes.length ||
+          reveal.length != selected.length ||
           history is! List ||
-          history.length != scenes.length ||
+          history.length != selected.length ||
           [...reveal, ...history].any(
             (scene) =>
                 scene is! Map ||
@@ -90,16 +98,18 @@ Future<void> main() async {
           'Required welcome/released and Coach first/mid/end/history PNGs are incomplete',
         );
       }
-      for (final scene in scenes) {
-        final label = (scene as Map)['scene'];
-        for (final kind in [
-          'recipes',
-          'videos',
-          'sleep',
-          'diet',
-          'coach',
-          'community',
-        ]) {
+      for (final label in selected) {
+        for (final kind
+            in coachOnly
+                ? <String>[]
+                : [
+                    'recipes',
+                    'videos',
+                    'sleep',
+                    'diet',
+                    'coach',
+                    'community',
+                  ]) {
           for (final phase in ['welcome', 'released']) {
             if (!names.contains('$kind-$label-$phase')) {
               throw StateError('Missing entry PNG');

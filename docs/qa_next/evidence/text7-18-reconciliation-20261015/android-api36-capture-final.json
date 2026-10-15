@@ -1,0 +1,271 @@
+{
+  "recorded_at_utc": "2026-10-15T13:58:13.667850+00:00",
+  "classification": "actual native Flutter AndroidAPI36/WHPX capture; synthetic accounts/model, AR2x reduced, no handset or Production claim",
+  "business_cases_passed": 3,
+  "framework_counter_includes_teardown": 4,
+  "scene_count": 1,
+  "entry_types": 6,
+  "captures": [
+    {
+      "name": "recipes-ar-light-reduced-released",
+      "sha256": "f38756407ba4cb906b8873b3845097953f2258019d9bc4d28f702621aafbe3e9",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 49017,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "recipes-ar-light-reduced-welcome",
+      "sha256": "294c9c4cf475643968b04458030b98d22cf1f8fb32c44ccebe498b37444ae53c",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 922511,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "videos-ar-light-reduced-released",
+      "sha256": "777dcbc8d13fd071831e7e5cac182260ad7803f62508e66f357289dce3ff9742",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 47602,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "videos-ar-light-reduced-welcome",
+      "sha256": "441ac3ecb1da2b36ac075fd43332d8e9328784cfb1d3b9f1bd8f6f51b6632bbc",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 709146,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "sleep-ar-light-reduced-released",
+      "sha256": "0fb21fe1bf47cd5553099bc7587f600d8abe890300be7b8e5aa5bd5e09294168",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 45675,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "sleep-ar-light-reduced-welcome",
+      "sha256": "dfd051bc369b52539644595f3044875409aac93584673ad5592871bb3e978379",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 1180356,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "diet-ar-light-reduced-released",
+      "sha256": "186c75c08bb9d79fe926eac4bf39366f99db0aa4dff379027361c0180f879d0f",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 959274,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "diet-ar-light-reduced-welcome",
+      "sha256": "42b035c8e5816f153263308e7b8a3af3fa39d24f8ec2811db2841bbfec4132fd",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 803857,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-ar-light-reduced-released",
+      "sha256": "f66bd9ccdb9380e4d8f35da964ce205a99cf44cde052b1938e0cf8df8ac51828",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 540098,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-ar-light-reduced-welcome",
+      "sha256": "793fe84246a99c7b08f0fb5b122e136ede777f6112d1ff8effd74560de9f8c8b",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 717954,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "community-ar-light-reduced-released",
+      "sha256": "c6c316ab7521a71e10cdca1032d19303fd4b7305e79f253afe3dbe298c8102f9",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 44201,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "community-ar-light-reduced-welcome",
+      "sha256": "b6f75ee68015dd8e5f5f4f9690d94cab0c2e04616b3b273204afe0f3331a34d6",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 978120,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-reveal-ar-light-reduced-first",
+      "sha256": "b37e3a0589cfeecb5cfefe4eeaa36c5c63d1383839af468bff8189a070f35633",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 779103,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-reveal-ar-light-reduced-mid",
+      "sha256": "547aa8324f073d987944c57cf5da17305b1597a1583000604aba290b9f074a01",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 748046,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-reveal-ar-light-reduced-end",
+      "sha256": "547aa8324f073d987944c57cf5da17305b1597a1583000604aba290b9f074a01",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 748046,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-history-ar-light-reduced-reading",
+      "sha256": "85ad0ff63a1fc69a5c471a63e0c0310e346a869d836a8045c55ba7a46e002501",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 716343,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-history-ar-light-reduced-mid",
+      "sha256": "c497c33fd0a650f8b76289ec0e10fae25562b8eca2fed847ccbd1c32a0eb76b4",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 716236,
+      "classification": "native Flutter screenshot captured by integration_test"
+    },
+    {
+      "name": "coach-history-ar-light-reduced-end",
+      "sha256": "c497c33fd0a650f8b76289ec0e10fae25562b8eca2fed847ccbd1c32a0eb76b4",
+      "width_pixels": 1080,
+      "height_pixels": 2400,
+      "byte_count": 716236,
+      "classification": "native Flutter screenshot captured by integration_test"
+    }
+  ],
+  "source_head": "be068460d52428c59c0b84e05b7f322f15461edf",
+  "source_fingerprint": "08dccbc18f4172a82e3b44b82c121000148da619cbac79b2b733c8f471990e49",
+  "capture_warmup_frames": 3,
+  "timings": [
+    {
+      "kind": "recipes",
+      "capture_started_ms": 270,
+      "capture_completed_ms": 1399,
+      "capture_separate_visit": true,
+      "last_visible_ms": 2166,
+      "first_absent_ms": 2264,
+      "observation_interval_ms": 20,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false,
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark"
+    },
+    {
+      "kind": "videos",
+      "capture_started_ms": 148,
+      "capture_completed_ms": 1541,
+      "capture_separate_visit": true,
+      "last_visible_ms": 2202,
+      "first_absent_ms": 2251,
+      "observation_interval_ms": 20,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false,
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark"
+    },
+    {
+      "kind": "sleep",
+      "capture_started_ms": 178,
+      "capture_completed_ms": 2289,
+      "capture_separate_visit": true,
+      "last_visible_ms": 2209,
+      "first_absent_ms": 2268,
+      "observation_interval_ms": 20,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false,
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark"
+    },
+    {
+      "kind": "diet",
+      "capture_started_ms": 199,
+      "capture_completed_ms": 1579,
+      "capture_separate_visit": true,
+      "last_visible_ms": 2182,
+      "first_absent_ms": 2243,
+      "observation_interval_ms": 20,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false,
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark"
+    },
+    {
+      "kind": "coach",
+      "capture_started_ms": 237,
+      "capture_completed_ms": 1632,
+      "capture_separate_visit": true,
+      "last_visible_ms": 2196,
+      "first_absent_ms": 2842,
+      "observation_interval_ms": 20,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false,
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark"
+    },
+    {
+      "kind": "community",
+      "capture_started_ms": 161,
+      "capture_completed_ms": 2064,
+      "capture_separate_visit": true,
+      "last_visible_ms": 2212,
+      "first_absent_ms": 2262,
+      "observation_interval_ms": 20,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false,
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark"
+    }
+  ],
+  "visual_review": [
+    {
+      "path": "native-api36-diet-ar-light-reduced-welcome.png",
+      "sha256": "42b035c8e5816f153263308e7b8a3af3fa39d24f8ec2811db2841bbfec4132fd",
+      "checked": true
+    },
+    {
+      "path": "native-api36-diet-ar-light-reduced-released.png",
+      "sha256": "186c75c08bb9d79fe926eac4bf39366f99db0aa4dff379027361c0180f879d0f",
+      "checked": true
+    },
+    {
+      "path": "native-api36-coach-reveal-ar-light-reduced-first.png",
+      "sha256": "b37e3a0589cfeecb5cfefe4eeaa36c5c63d1383839af468bff8189a070f35633",
+      "checked": true
+    },
+    {
+      "path": "native-api36-coach-history-ar-light-reduced-end.png",
+      "sha256": "c497c33fd0a650f8b76289ec0e10fae25562b8eca2fed847ccbd1c32a0eb76b4",
+      "checked": true
+    }
+  ]
+}

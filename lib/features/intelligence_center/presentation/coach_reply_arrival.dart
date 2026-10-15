@@ -29,6 +29,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   late final Animation<double> _opacity;
   late final Animation<Offset> _position;
   String? _handledMessageId;
+  String? _awaitingLayoutFor;
 
   @override
   void initState() {
@@ -58,6 +59,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
     if (oldWidget.messageId != widget.messageId ||
         oldWidget.animate != widget.animate) {
       _handledMessageId = null;
+      _awaitingLayoutFor = null;
       _controller.value = widget.animate ? 0 : 1;
       _syncMotionPreference();
     }
@@ -71,8 +73,28 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
         MediaQuery.disableAnimationsOf(context) ||
         View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
     if (reduceMotion) {
-      _controller.value = 1;
+      if (_awaitingLayoutFor == widget.messageId) return;
+      final firstLayout =
+          widget.animate &&
+          _handledMessageId != widget.messageId &&
+          _animatedMessageIds.add(widget.messageId);
+      _controller.stop();
       _handledMessageId = widget.messageId;
+      if (!firstLayout) {
+        _controller.value = 1;
+        return;
+      }
+      // The reversed viewport measures a long reply's reading start during
+      // its first layout. Skip motion, but let that anchor settle before
+      // painting; otherwise reduced motion briefly exposes the reply's end.
+      final messageId = widget.messageId;
+      _awaitingLayoutFor = messageId;
+      _controller.value = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _awaitingLayoutFor != messageId) return;
+        _awaitingLayoutFor = null;
+        _controller.value = 1;
+      });
       return;
     }
     if (_handledMessageId == widget.messageId) return;

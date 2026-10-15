@@ -1,0 +1,23 @@
+{
+  "recorded_at_utc": "2026-10-15T14:03:06.788311+00:00",
+  "compared_to_saved_full_suite_source": "ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67",
+  "source_head": "be068460d52428c59c0b84e05b7f322f15461edf",
+  "uncommitted_verified_changes": true,
+  "changed_product_paths": [
+    {
+      "path": "lib/features/connected_health/widgets/dashboard_health_activity_refresh.dart",
+      "sha256": "f5a62cd0eedd1813c373a7780ed2dffdbfdcbc5a4e56af62a09b90ec8127bb07"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/coach_reply_arrival.dart",
+      "sha256": "d5316f0c672ef718bfd169b8be0206a069248a987a8c3129dce64180d6312444"
+    },
+    {
+      "path": "lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart",
+      "sha256": "018a31e814f08be03439ea7569f8d34b2cec2cb88e61f137eef69525cc87ac3d"
+    }
+  ],
+  "other_lib_ios_android_unchanged": true,
+  "preserved_dirty_failure_png_count": 44,
+  "scope": "The old preservation proof remains historical. Exactly these3 bounded fixes were subsequently verified; no claim the old full suite ran on their new source."
+}
