@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-10-15T11:14:57.712366+00:00",
+  "recorded_at_utc": "2026-10-15T11:25:23.267634+00:00",
   "source_at_start": "7a797819d882674b6b7ed83a546c23ff3922c312",
   "known_failures": [
     {
@@ -7,40 +7,47 @@
       "run": 38716505124,
       "cause": "community_policy SQL fixture inserted id without column INSERT privilege",
       "fix": "f3ab218b: omit server-owned id; keep column grants",
-      "status": "local preflight passed; full stack rerun pending"
+      "status": "PASS: all 9 SQL suites on isolated Supabase run 38726355481, source d362c8e4"
     },
     {
       "id": "F02",
       "run": 38716505124,
       "cause": "AI report SQL state split across rows; queue contained the report but first state row had NULL queue",
       "fix": "single state row with singleton primary key; UPDATE instead of INSERT",
-      "status": "reproduced before; exact SQL suite PASS on native PostgreSQL 17.6 after"
+      "status": "PASS: all 9 SQL suites on isolated Supabase run 38726355481, source d362c8e4"
     },
     {
       "id": "F03",
       "run": 38716505124,
       "cause": "plain SQL DO/RAISE assertions executed by pg_prove requiring a TAP plan",
       "fix": "psql -X -v ON_ERROR_STOP=1 for every *_test.sql; no assertion removed",
-      "status": "native AI SQL PASS and workflow lint PASS; full stack rerun pending"
+      "status": "PASS: all 9 SQL suites on isolated Supabase run 38726355481, source d362c8e4"
     },
     {
       "id": "F04",
       "run": 38713591000,
       "cause": "protected AIRPLANE_MODE broadcast rejected before Android app tests",
       "fix": "ConnectivityService shell airplane-mode enable and readback",
-      "status": "bash syntax PASS; local API36 and CI API33 confirmation pending"
+      "status": "PASS on actual local API36 shell UID2000: old broadcast denied, new command enabled/read back/restored; API33 native CI pending"
     },
     {
       "id": "F05",
       "cause": "pre-push hook used MSYS subprocess for path lookup and failed to fork",
       "fix": "POSIX parameter expansion supporting both path separators; same PowerShell LFS hook",
-      "status": "hook with empty stdin PASS; remote push not attempted yet"
+      "status": "PASS: normal LFS-enforced fast-forward push to d362c8e4, no bypass"
     },
     {
       "id": "F06",
       "cause": "native Windows Semgrep core: Unix_error Invalid argument socketpair, reproduced on one synthetic rule and jobs=1",
       "fix": "isolated Linux CE scanner job with sanitized artifact, no telemetry/source upload",
-      "status": "version is not scan success; Linux scan pending"
+      "status": "Linux scanner executed: 5130 paths, 13 findings and 2 timeouts; PARTIAL, no clean claim"
+    },
+    {
+      "id": "F07",
+      "run": 38726355481,
+      "cause": "all four API parent tests rejected the valid Docker name supabase_db_Body-Intelligence using a lowercase-only selector",
+      "fix": "shared explicit container selection with exact running-name validation and fail-closed ambiguity check",
+      "status": "5/5 local regression cases PASS; real API rerun pending"
     }
   ],
   "raw_logs_retained_locally": [

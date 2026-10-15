@@ -1,0 +1,19 @@
+{
+  "head": "d362c8e4c771b474595a1b3059b562519b46b758",
+  "source_fingerprint": "7110b0544b3bd5a10767307317f78e228dedee9752cad3d5d17e3f03a299fe06",
+  "end_fingerprint": "7110b0544b3bd5a10767307317f78e228dedee9752cad3d5d17e3f03a299fe06",
+  "stable_source": true,
+  "exit_code": 0,
+  "counts": {
+    "success": 1,
+    "failure": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "protocol_success": true,
+  "started": 1792063977.0371218,
+  "finished": 1792064085.9135294,
+  "mode": "real SQLite/PostgreSQL and AES; legacy synthetic auth, not Supabase Auth",
+  "flutter_log_sha256": "112ccac0a6830e341f027462fecc54d41a0d15cfe318d4dfe535358b586fda9d",
+  "changed_client_test_sha256": "22833303e5ce7c0164792067bc9799c4d76dd80e7ea9eb8410b27bdadb8bf7b2"
+}

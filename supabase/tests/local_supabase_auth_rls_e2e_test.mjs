@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
+import { findLocalDatabase } from './local_supabase_test_support.mjs';
 
 const baseUrl = process.env.API_URL ?? process.env.SUPABASE_URL ?? '';
 const anonKey = process.env.ANON_KEY ?? process.env.SUPABASE_ANON_KEY ?? '';
@@ -41,20 +42,6 @@ function executeLocalSql(container, sql) {
     0,
     `Local PostgreSQL fixture failed with exit ${result.status}`,
   );
-}
-
-function findDatabaseContainer() {
-  const result = spawnSync(
-    'docker',
-    ['ps', '--format', '{{.Names}}'],
-    { encoding: 'utf8', windowsHide: true },
-  );
-  assert.equal(result.status, 0, 'Docker must list the isolated database');
-  const container = result.stdout
-    .split(/\r?\n/)
-    .find((name) => /^supabase_db_[a-z0-9_-]+$/.test(name));
-  assert.ok(container, 'The local Supabase PostgreSQL container must be running');
-  return container;
 }
 
 async function api(path, { token, method = 'GET', body, prefer } = {}) {
@@ -98,7 +85,7 @@ async function createUser(label) {
 
 test('isolated Supabase Auth sessions enforce owner-scoped PostgREST RLS', async (t) => {
   assertLocalApi();
-  const container = findDatabaseContainer();
+  const container = findLocalDatabase();
   const suffix = randomUUID().replaceAll('-', '');
   const table = `bil_ci_owner_${suffix}`;
   const users = [];

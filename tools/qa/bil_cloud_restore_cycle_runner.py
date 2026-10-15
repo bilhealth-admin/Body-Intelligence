@@ -8,11 +8,25 @@ import subprocess
 import time
 import threading
 import urllib.request
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('focused_runner', ROOT/'tools/qa/bil_stage1_closure_runner.py')
 focused = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(focused)
+
+
+def loopback_base(value):
+    """A corrupted fixture must not turn cleanup into a hosted POST."""
+    if not isinstance(value, str) or any(ord(char) <= 32 for char in value):
+        raise ValueError('loopback_fixture_url_required')
+    parsed = urlsplit(value)
+    if (parsed.scheme != 'http' or parsed.hostname != '127.0.0.1'
+            or parsed.username is not None or parsed.password is not None
+            or parsed.path not in ('', '/') or parsed.query or parsed.fragment
+            or parsed.port is None or not 1024 <= parsed.port <= 65535):
+        raise ValueError('loopback_fixture_url_required')
+    return f'http://127.0.0.1:{parsed.port}'
 
 def main():
     parser = argparse.ArgumentParser()
@@ -21,15 +35,8 @@ def main():
     parser.add_argument('--flutter', required=True)
     parser.add_argument('--label', required=True)
     args = parser.parse_args()
-    if os.name == 'nt':
-        import ctypes
-        from ctypes import wintypes
-        kernel = ctypes.WinDLL('kernel32')
-        user = ctypes.WinDLL('user32')
-        kernel.GetConsoleWindow.restype = wintypes.HWND
-        user.IsWindowVisible.argtypes = [wintypes.HWND]
-        if not user.IsWindowVisible(kernel.GetConsoleWindow()):
-            parser.error('A visible native console is required for this test cycle.')
+    # Stream the same complete protocol into the calling chat/CLI and logfile.
+    # The owner explicitly cancelled the separate native-console requirement.
     if not args.label.replace('-', '').isalnum(): parser.error('plain label required')
     out = ROOT/'build/cloud-restore-v2'/args.label
     out.mkdir(parents=True, exist_ok=False)
@@ -46,6 +53,7 @@ def main():
                 if bridge.poll() is not None: raise RuntimeError('isolated bridge failed; inspect server.log')
                 time.sleep(0.1)
             server = json.loads(config.read_text(encoding='utf-8'))
+            loopback_base(server['url'])
             environment = os.environ.copy()
             environment['BIL_LOCAL_RESTORE_CONFIG'] = str(config)
             environment['BIL_TEST_PWSH'] = args.pwsh
@@ -103,15 +111,20 @@ def main():
             ): record['exit_code']=79
         finally:
             if config.exists():
-                request=urllib.request.Request(json.loads(config.read_text())['url']+'/__test__/shutdown',data=b'',method='POST')
                 try:
+                    base=loopback_base(json.loads(config.read_text())['url'])
+                    request=urllib.request.Request(base+'/__test__/shutdown',data=b'',method='POST')
                     with urllib.request.urlopen(request,timeout=10): pass
                 except OSError: pass
+                except ValueError:
+                    record['unsafe_cleanup_url'] = True
             try: bridge.wait(timeout=15)
             except subprocess.TimeoutExpired: bridge.terminate();bridge.wait(timeout=5)
     record['finished']=time.time()
     record['end_fingerprint']=focused.fingerprint()
     record['stable_source']=record['end_fingerprint']==record['source_fingerprint']
+    if record.get('unsafe_cleanup_url') and record.get('exit_code')==0:
+        record['exit_code']=79
     if not record['stable_source'] and record['exit_code']==0: record['exit_code']=79
     (out/'result.json').write_text(json.dumps(record,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({k:record[k] for k in ['exit_code','counts','stable_source']},ensure_ascii=False))

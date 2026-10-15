@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createCipheriv, createDecipheriv, randomBytes, randomUUID } from 'node:crypto';
 import { test } from 'node:test';
+import { findLocalDatabase } from './local_supabase_test_support.mjs';
 
 // Deliberately refuses hosted endpoints. SQL is only fixture setup/cleanup;
 // every behavior assertion below goes through real Auth and PostgREST RPCs.
@@ -13,14 +14,7 @@ function localDatabase() {
   assert.equal(url.protocol, 'http:');
   assert.ok(['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname));
   assert.ok(anonKey, 'The disposable local anonymous key is required');
-  const containers = spawnSync('docker', ['ps', '--format', '{{.Names}}'], {
-    encoding: 'utf8', windowsHide: true,
-  });
-  assert.equal(containers.status, 0, 'Local Docker must be running');
-  const container = containers.stdout.split(/\r?\n/)
-    .find((name) => /^supabase_db_[a-z0-9_-]+$/.test(name));
-  assert.ok(container, 'A disposable Supabase database is required');
-  return container;
+  return findLocalDatabase();
 }
 
 function sql(container, statement) {

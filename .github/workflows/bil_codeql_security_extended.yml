@@ -595,9 +595,45 @@ jobs:
         run: |
           set -euo pipefail
           node --test \
+            supabase/tests/local_supabase_test_support_test.mjs \
             supabase/tests/local_supabase_auth_rls_e2e_test.mjs \
             supabase/tests/local_supabase_product_rpc_e2e_test.mjs \
             supabase/tests/local_supabase_storage_realtime_e2e_test.mjs
+
+      - name: Install Flutter for the actual SQLite to Supabase restore cycle
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Restore independent SQLite databases through real local Auth and PostgREST
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          command -v pwsh
+          PRIVATE="$RUNNER_TEMP/bil-sqlite-supabase-cycle"
+          mkdir -p "$PRIVATE"
+          node supabase/tests/local_supabase_sqlite_cycle_fixture.mjs prepare "$PRIVATE/session.json"
+          trap 'node supabase/tests/local_supabase_sqlite_cycle_fixture.mjs cleanup "$PRIVATE/session.json"' EXIT
+          BIL_LOCAL_RESTORE_CONFIG="$PRIVATE/session.json" \
+          BIL_TEST_PWSH="$(command -v pwsh)" \
+          BIL_CLOSURE_CAPTURE_STAGE=supabase-real-cycle \
+            flutter test --no-pub --concurrency=1 --timeout=10m --reporter expanded \
+              tools/qa/flutter/cloud_restore_postgres_cycle_test.dart
+          OUT=artifacts/qa/text18/supabase-sqlite-cycle
+          mkdir -p "$OUT"
+          cp "$PRIVATE/cycle-proof.json" "$OUT/cycle-proof.json"
+          cp build/stage1-closure/images/supabase-real-cycle-*.png "$OUT/"
+
+      - name: Upload restored-reader proof without sessions or databases
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-supabase-sqlite-cycle-${{ github.sha }}
+          path: artifacts/qa/text18/supabase-sqlite-cycle
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Run all isolated PostgreSQL and Edge Function suites
         shell: bash
@@ -638,6 +674,7 @@ jobs:
           SCAN_STATUS=0
           "$RUNNER_TEMP/bil-semgrep/bin/semgrep" scan \
             --config p/security-audit --config p/secrets --jobs 2 \
+            --timeout 60 --timeout-threshold 0 \
             --metrics off --disable-version-check --json \
             --output "$RUNNER_TEMP/bil-semgrep-raw.json" \
             > "$RUNNER_TEMP/bil-semgrep-private.log" 2>&1 || SCAN_STATUS=$?

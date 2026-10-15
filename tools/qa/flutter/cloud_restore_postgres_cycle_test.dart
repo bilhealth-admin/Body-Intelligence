@@ -35,8 +35,13 @@ void main() {
       }
       final config = jsonDecode(File(configPath).readAsStringSync()) as Map;
       final url = config['url']! as String;
-      if (Uri.parse(url).host != '127.0.0.1') {
+      if (Uri.parse(url).host != '127.0.0.1' ||
+          Uri.parse(url).scheme != 'http') {
         throw StateError('Loopback-only fixture');
+      }
+      final realSupabase = config['mode'] == 'supabase_local';
+      if (config['mode'] != null && !realSupabase) {
+        throw StateError('Unsupported isolated fixture mode');
       }
       final owner = config['owner_a']! as String;
       final root = Directory(File(configPath).parent.path);
@@ -48,7 +53,9 @@ void main() {
         () => HttpOverrides.runWithHttpOverrides(() async {
           client = SupabaseClient(
             url,
-            'synthetic-public-key',
+            realSupabase
+                ? config['anon_key']! as String
+                : 'synthetic-public-key',
             authOptions: const AuthClientOptions(autoRefreshToken: false),
             httpClient: CommunityOwnerHttpClient(http.Client()),
           );
@@ -65,12 +72,26 @@ void main() {
             localOwnerId: owner,
           );
           await client.auth.setInitialSession(
-            jsonEncode({
-              ...RewardsRpcFixture.session(owner),
-              'access_token':
-                  'e30.${base64Url.encode(utf8.encode(jsonEncode({'sub': owner, 'exp': 4102444800, 'role': 'authenticated'}))).replaceAll('=', '')}.synthetic',
-            }),
+            jsonEncode(
+              realSupabase
+                  ? config['auth_session']
+                  : {
+                      ...RewardsRpcFixture.session(owner),
+                      'access_token':
+                          'e30.${base64Url.encode(utf8.encode(jsonEncode({'sub': owner, 'exp': 4102444800, 'role': 'authenticated'}))).replaceAll('=', '')}.synthetic',
+                    },
+            ),
           );
+          if (realSupabase) {
+            final identity = await client.auth.getUser().timeout(
+              const Duration(seconds: 20),
+            );
+            expect(
+              identity.user?.id,
+              owner,
+              reason: 'The local Auth server must validate the signed owner',
+            );
+          }
           await LocalDataAccountBoundary(a).bindAuthenticatedOwner(owner);
           await LocalDataAccountBoundary(b).bindAuthenticatedOwner(owner);
           await LocalDataAccountBoundary(
@@ -131,6 +152,18 @@ void main() {
 
       final restoredSuccessfully = await tester.runAsync(() async {
         debugPrint('Cycle: explicit test consents and seed');
+        if (realSupabase) {
+          await client
+              .rpc(
+                'bil_record_consent',
+                params: {
+                  'p_purpose': 'cloud_sync',
+                  'p_policy_version': '1',
+                  'p_granted': true,
+                },
+              )
+              .timeout(const Duration(seconds: 20));
+        }
         for (final scope in ['nutrition', 'goals']) {
           await client
               .rpc(
@@ -285,8 +318,9 @@ void main() {
             'known_zero_cholesterol': true,
             'historical_first_food': 'done',
             'reports': reports,
-            'scope':
-                'real SQLite and PostgreSQL, synthetic auth and .NET AES, no phone/Production',
+            'scope': realSupabase
+                ? 'real SQLite A/B, local Supabase Auth/PostgREST/PostgreSQL and .NET AES; synthetic user, no phone/Production'
+                : 'real SQLite and PostgreSQL, synthetic auth and .NET AES, no phone/Production',
           }),
         );
         return true;

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
+import { findLocalDatabase } from './local_supabase_test_support.mjs';
 
 const baseUrl = process.env.API_URL ?? process.env.SUPABASE_URL ?? '';
 const anonKey = process.env.ANON_KEY ?? process.env.SUPABASE_ANON_KEY ?? '';
@@ -14,20 +15,6 @@ function assertLocalApi() {
     'The isolated API must resolve to loopback; remote endpoints are forbidden',
   );
   assert.ok(anonKey, 'The local anonymous key is required');
-}
-
-function databaseContainer() {
-  const result = spawnSync(
-    'docker',
-    ['ps', '--format', '{{.Names}}'],
-    { encoding: 'utf8', windowsHide: true },
-  );
-  assert.equal(result.status, 0, 'Docker must list the isolated database');
-  const name = result.stdout
-    .split(/\r?\n/)
-    .find((value) => /^supabase_db_[a-z0-9_-]+$/.test(value));
-  assert.ok(name, 'The local Supabase database container must be running');
-  return name;
 }
 
 function executeLocalSql(container, sql) {
@@ -234,7 +221,7 @@ async function awaitRealtimeInsert({ table, token, rowId, ownerId }) {
 
 test('isolated Supabase Storage and Realtime enforce scoped authenticated access', async (t) => {
   assertLocalApi();
-  const container = databaseContainer();
+  const container = findLocalDatabase();
   const suffix = randomUUID().replaceAll('-', '');
   const table = 'bil_ci_storage_rt_' + suffix;
   const bucket = 'bil-ci-' + suffix;

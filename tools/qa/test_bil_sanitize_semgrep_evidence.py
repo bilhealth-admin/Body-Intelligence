@@ -14,6 +14,7 @@ class SanitizedEvidenceTest(unittest.TestCase):
                              "message": "private-synthetic-token", "metavars": {
                                  "$VALUE": {"abstract_content": "private-synthetic-token"}}}}],
             "errors": [{"type": "ParseError", "level": "warn", "code": 3,
+                        "path": "tool/example.mjs", "rule_id": "slow-rule",
                         "message": "private-synthetic-token"}],
             "paths": {"scanned": ["tool/example.mjs"]},
         })
@@ -21,6 +22,8 @@ class SanitizedEvidenceTest(unittest.TestCase):
         self.assertEqual(value["result"], "PARTIAL")
         self.assertEqual(value["findings_count"], 1)
         self.assertEqual(value["scanned_paths_count"], 1)
+        self.assertEqual(value["errors"][0]["path"], "tool/example.mjs")
+        self.assertEqual(value["errors"][0]["rule_id"], "slow-rule")
 
     def test_findings_are_distinct_from_an_empty_successful_scan(self):
         value = sanitize({"version": "1", "results": [], "errors": []})
