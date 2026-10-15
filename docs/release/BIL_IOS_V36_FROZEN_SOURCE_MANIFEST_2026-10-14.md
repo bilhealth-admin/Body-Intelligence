@@ -19,10 +19,21 @@ reviewer session, current App Store Connect status, or device run was performed
 for this preparation record. Google Play findings are tracked separately in the
 Android 33 manifest and are not reclassified as Apple review findings.
 
-The current full Flutter run completed on the preceding source SHA
-`e27a58984bff50b4bcf45044ea9893f344307e85` with 9,791 pass, 22 failures,
-2 errors, and 0 skipped. It cannot attest the fixes in the isolated snapshot.
-Focused verification and full analysis remain pending before any final freeze.
+The latest full Flutter evidence is for application-source commit
+`ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` with source-input fingerprint
+`80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`:
+9,843 passed, 0 failed, 0 errors, 0 skipped across 1,356 test files, followed
+by full `flutter analyze --no-pub` with `No issues found!`. The matching focused
+GitHub run is [38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976).
+The 15 October audit adds workflow/security and Cloudflare dependency changes;
+it does not change Dart source, tests, or Flutter dependencies. See
+`../qa_next/BIL_MAXIMUM_TEST_COVERAGE_REGISTER_20261015.md` for exact scope and
+evidence boundaries.
+
+This result does not complete the release manifest: there is still no iOS 36
+signed IPA, TestFlight upload, or current App Store Connect/device validation.
+The manifest remains `STAGING_MANIFEST_COMPLETE: NO` and
+`CANDIDATE_FROZEN_OR_ACCEPTED: NO`.
 
 ## Immutable build bindings
 

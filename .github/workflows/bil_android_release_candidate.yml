@@ -35,6 +35,7 @@ jobs:
       - name: Checkout accepted source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
+          persist-credentials: false
           ref: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
 
       - name: Verify frozen Android manifest digest binding

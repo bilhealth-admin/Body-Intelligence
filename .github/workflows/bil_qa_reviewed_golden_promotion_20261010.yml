@@ -27,7 +27,7 @@ jobs:
       BIL_GOLDEN_AGGREGATE_SHA: '55b926ea496edd2dac70fc3b69c5fd452742610f2f1c0bea116d3290f6f5d3c3'
     steps:
       - name: Exact QA branch checkout, never main or deployment
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.sha }}
           persist-credentials: true
@@ -213,7 +213,7 @@ jobs:
 
       - name: Preserve manifest and changed-path evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: bil-qa-review-provenance-145
           path: /tmp/bil-reviewed-goldens/

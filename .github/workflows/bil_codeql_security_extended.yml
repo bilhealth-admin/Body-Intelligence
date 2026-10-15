@@ -1,0 +1,90 @@
+name: BIL CodeQL security-extended
+
+on:
+  push:
+    branches:
+      - main
+      - integration/bil-qa-media-policy-20261011
+  pull_request:
+    branches:
+      - main
+      - integration/bil-qa-media-policy-20261011
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: actions
+            runner: ubuntu-24.04
+            build-mode: none
+            flutter-build: false
+          - language: javascript-typescript
+            runner: ubuntu-24.04
+            build-mode: none
+            flutter-build: false
+          - language: python
+            runner: ubuntu-24.04
+            build-mode: none
+            flutter-build: false
+          - language: java-kotlin
+            runner: ubuntu-24.04
+            build-mode: manual
+            flutter-build: android
+          - language: swift
+            runner: macos-26
+            build-mode: manual
+            flutter-build: ios
+
+    steps:
+      - name: Check out accepted source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Flutter stable
+        if: matrix.flutter-build != false
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve Flutter dependencies
+        if: matrix.flutter-build != false
+        run: flutter pub get
+
+      - name: Install locked iOS pods
+        if: matrix.flutter-build == 'ios'
+        run: pod install --deployment
+        working-directory: ios
+
+      - name: Initialize CodeQL with Security Extended
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+
+      - name: Build Android plugin sources for CodeQL
+        if: matrix.flutter-build == 'android'
+        run: flutter build apk --debug --no-pub
+
+      - name: Build iOS plugin sources for CodeQL
+        if: matrix.flutter-build == 'ios'
+        run: flutter build ios --simulator --debug --no-codesign --no-pub
+
+      - name: Upload CodeQL results
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:${{ matrix.language }}

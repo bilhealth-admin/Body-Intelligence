@@ -26,7 +26,7 @@ jobs:
       BIL_SOURCE_SHA: "f385012bafb09da3b8e2608244a5b58d5f5e55e9"
     steps:
       - name: Check out exact QA commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 2
           persist-credentials: true

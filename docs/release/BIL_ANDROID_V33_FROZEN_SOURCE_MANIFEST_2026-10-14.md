@@ -15,12 +15,21 @@
 This is a fail-closed preparation record for the next Android candidate. It
 replaces the stale build-31 release bindings in the local workflow; it is not
 an accepted source freeze, a signed artifact, or permission to build or upload.
-The user-owned full Flutter run completed on source SHA
-`e27a58984bff50b4bcf45044ea9893f344307e85` with source fingerprint
-`c91dd3c449bc08efb0152badc8b4ff55e5774ea421ddef7e477cb95d922def71` and
-reported 9,791 pass, 22 failures, 2 errors, 0 skipped. Those results do not
-include the fixes now in the isolated snapshot. The focused repairs and final
-full analysis remain pending.
+The latest full Flutter evidence is for application-source commit
+`ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` with source-input fingerprint
+`80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`:
+9,843 passed, 0 failed, 0 errors, 0 skipped across 1,356 test files, followed
+by full `flutter analyze --no-pub` with `No issues found!`. The matching focused
+GitHub run is [38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976).
+The 15 October audit adds workflow/security and Cloudflare dependency changes;
+it does not change Dart source, tests, or Flutter dependencies. See
+`../qa_next/BIL_MAXIMUM_TEST_COVERAGE_REGISTER_20261015.md` for exact scope and
+evidence boundaries.
+
+This test evidence does not complete the release manifest: five historical
+Google case records still need closure against a signed build 33 and reviewer
+session. The manifest remains `STAGING_MANIFEST_COMPLETE: NO` and
+`CANDIDATE_FROZEN_OR_ACCEPTED: NO`.
 
 Five historical Google case records remain unclosed against an exact new
 artifact and reviewer session: the September 2026 broken-functionality notice,

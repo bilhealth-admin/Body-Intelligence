@@ -289,13 +289,17 @@ jobs:
           set -euo pipefail
           psql -d community_qa -c 'CREATE DATABASE bil_hidden_qa_candidate'
           node tool/release/test_community_hidden_posts_limit_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/hidden-posts-limit-sql.log
+      - name: Install pinned Deno 2.5.1
+        if: ${{ !cancelled() }}
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: 2.5.1
       - name: Run provider payload tests with mocked transports only
         if: ${{ !cancelled() }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/bil-boundaries
-          npm install --prefix /tmp/bil-deno deno@2.5.1
-          /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/bil-boundaries/push-tests.log
+          deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/bil-boundaries/push-tests.log
       - name: Record device and release boundary
         if: always()
         run: |

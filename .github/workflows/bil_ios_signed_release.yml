@@ -40,6 +40,7 @@ jobs:
       - name: Checkout accepted source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
+          persist-credentials: false
           ref: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
 
       - name: Verify frozen iOS manifest digest binding
@@ -296,12 +297,14 @@ jobs:
 
       - name: Run native AES-GCM gate on iOS Simulator
         id: native_crypto_runtime_gate
-        if: ${{ inputs.run_native_crypto_checks }}
+        if: inputs.run_native_crypto_checks
         shell: bash
+        env:
+          SIMULATOR_UDID: ${{ steps.crypto_simulator.outputs.udid }}
         run: >-
           flutter test --no-pub
           integration_test/system_crypto_bridge_integration_test.dart
-          -d "${{ steps.crypto_simulator.outputs.udid }}"
+          -d "$SIMULATOR_UDID"
           --timeout 10m
 
       - name: Remove system-crypto iOS Simulator

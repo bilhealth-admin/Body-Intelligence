@@ -21,6 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          persist-credentials: false
           fetch-depth: 0
           ref: ${{ github.sha }}
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -206,7 +207,12 @@ jobs:
           flutter pub get
           flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/sapphire-visual/visual.log
           cp assets/images/community/community_welcome_athletes.webp /tmp/sapphire-visual/welcome-asset.webp
-      - name: Isolated PostgreSQL and mocked provider contract tests
+      - name: Install pinned Deno 2.5.1
+        if: ${{ !cancelled() }}
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: 2.5.1
+      - name: Run isolated PostgreSQL and mocked provider contract tests
         if: ${{ !cancelled() }}
         env:
           PGPASSWORD: isolated-fixture-only
@@ -214,8 +220,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/sapphire-visual
           psql -h 127.0.0.1 -U postgres -d community_qa -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/sapphire-visual/sql.log
-          npm install --prefix /tmp/bil-deno deno@2.5.1
-          /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/sapphire-visual/push.log
+          deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/sapphire-visual/push.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

@@ -5,7 +5,7 @@ on:
     paths: [.github/vision_payload.part09.txt]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: bil-vision-premium-review-20261010
   cancel-in-progress: false
@@ -14,13 +14,15 @@ jobs:
     if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/bil-quality-ux-integration-20261009'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      contents: write
     outputs:
       sha: ${{ steps.commit.outputs.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false
       - name: Verify and unpack locked source payload
         shell: bash
         run: |
@@ -43,9 +45,12 @@ jobs:
           git diff --check
       - id: commit
         name: Commit scoped Vision files to QA, never main
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
+          gh auth setup-git
           git config user.name 'BIL Vision QA'
           git config user.email 'bil-vision-qa@users.noreply.github.com'
           git add -- lib/features/nutrition/presentation/meal_image_review_dialog.dart lib/features/nutrition/presentation/meal_vision_premium_review.dart lib/features/nutrition/presentation/meal_vision_premium_match.dart lib/features/daily_log/food_log_actions.dart lib/features/daily_log/daily_log_capture_actions.dart test/features/nutrition/meal_vision_premium_review_test.dart docs/qa_next/BIL_VISION_20261010_IMPLEMENTATION.md
@@ -59,9 +64,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.integrate.outputs.sha }}
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -86,9 +92,10 @@ jobs:
           - test/features/daily_log/daily_log_nutrition_evidence_test.dart
           - test/features/nutrition/meal_item_evidence_snapshot_test.dart
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.integrate.outputs.sha }}
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -100,9 +107,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.integrate.outputs.sha }}
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -114,9 +122,10 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 50
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.integrate.outputs.sha }}
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6

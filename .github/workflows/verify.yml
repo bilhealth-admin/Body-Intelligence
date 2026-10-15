@@ -29,6 +29,8 @@ jobs:
 
       - name: Check out accepted source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -42,9 +44,16 @@ jobs:
       - name: Check formatting
         shell: pwsh
         run: |
-          if ("${{ github.event_name }}" -eq "pull_request") {
-            git fetch origin "${{ github.base_ref }}" --depth=1
-            $baseSha = git rev-parse "origin/${{ github.base_ref }}"
+          if ($env:GITHUB_EVENT_NAME -eq "pull_request") {
+            $baseRef = $env:GITHUB_BASE_REF
+            if (-not $baseRef -or $baseRef.Contains("..")) {
+              throw "The pull-request base ref is missing or invalid."
+            }
+            $remoteRef = "refs/remotes/origin/$baseRef"
+            git fetch --no-tags --depth=1 origin "refs/heads/$baseRef`:$remoteRef"
+            if ($LASTEXITCODE -ne 0) { throw "Unable to fetch the pull-request base ref." }
+            $baseSha = git rev-parse $remoteRef
+            if ($LASTEXITCODE -ne 0) { throw "Unable to resolve the pull-request base SHA." }
             $targets = git diff --name-only $baseSha HEAD -- '*.dart' |
               Where-Object {
                 (Test-Path $_) -and (
@@ -174,6 +183,8 @@ jobs:
             path: test/features/nutrition/meal_image_language_regression_test.dart
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -223,6 +234,8 @@ jobs:
 
       - name: Check out accepted source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -357,6 +370,8 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -396,6 +411,8 @@ jobs:
 
       - name: Check out accepted source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2

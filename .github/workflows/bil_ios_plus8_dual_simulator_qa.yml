@@ -32,6 +32,8 @@ jobs:
 
       - name: Checkout the selected accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
 
       - name: Reject every build except the audited +8 source
         shell: bash
@@ -550,6 +552,8 @@ jobs:
 
       - name: Checkout the exact workflow revision
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
 
       - name: Re-authenticate and remove exact-run suspension and social residue
         shell: bash
