@@ -560,7 +560,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          supabase test db --local supabase/tests/*.sql
+          supabase test db --local supabase/tests/*_test.sql
 
       - name: Exercise Auth sessions and owner-scoped RLS through local APIs
         shell: bash

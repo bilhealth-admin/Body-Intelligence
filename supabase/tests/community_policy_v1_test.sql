@@ -731,9 +731,8 @@ set local role authenticated;
 do $test_blocked_relationship$
 begin
   begin
-    insert into public.bil_messages(id, sender_id, recipient_id, body)
+    insert into public.bil_messages(sender_id, recipient_id, body)
     values (
-      '10000000-0000-4000-8000-000000000201',
       '10000000-0000-4000-8000-000000000001',
       '10000000-0000-4000-8000-000000000002',
       'Safe blocked relationship test message'
@@ -748,7 +747,9 @@ begin
 
   if exists (
     select 1 from public.bil_messages message
-    where message.id = '10000000-0000-4000-8000-000000000201'
+    where message.sender_id = '10000000-0000-4000-8000-000000000001'
+      and message.recipient_id = '10000000-0000-4000-8000-000000000002'
+      and message.body = 'Safe blocked relationship test message'
   ) then
     raise exception 'test_blocked_relationship_message_persisted';
   end if;

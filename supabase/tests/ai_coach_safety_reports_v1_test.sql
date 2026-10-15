@@ -118,6 +118,13 @@ select pg_catalog.set_config('request.jwt.claim.sub', '14100000-0000-4000-8000-0
 select pg_catalog.set_config('request.jwt.claims',
   '{"sub":"14100000-0000-4000-8000-000000000002","role":"authenticated"}', true);
 set local role authenticated;
+do $moderator_identity_assert$
+begin
+  if auth.uid() is distinct from '14100000-0000-4000-8000-000000000002'::uuid then
+    raise exception 'ai_coach_safety_moderator_identity_mismatch actor=%', auth.uid();
+  end if;
+end
+$moderator_identity_assert$;
 insert into pg_temp.ai_coach_safety_report_test_state(initial_queue)
 select report_entry
 from public.bil_list_ai_coach_safety_reports_v1() as queue(report_entry)
@@ -139,7 +146,13 @@ begin
     raise exception 'ai_coach_safety_review_source_report_id_missing';
   end if;
   if v_queue_report_id is distinct from v_report_id then
-    raise exception 'ai_coach_safety_review_queue_item_missing';
+    raise exception
+      'ai_coach_safety_review_queue_item_missing actor=% source_report=% queue_report=% queue_ids=%',
+        auth.uid(), v_report_id, v_queue_report_id,
+        (select coalesce(
+          pg_catalog.jsonb_agg(report_entry->>'report_id'), '[]'::jsonb
+        ) from public.bil_list_ai_coach_safety_reports_v1() as queue(report_entry))
+      ;
   end if;
   if auth.uid() is distinct from
     '14100000-0000-4000-8000-000000000002'::uuid then
