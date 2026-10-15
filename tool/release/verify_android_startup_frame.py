@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject Android startup captures that still show only the OS launch color."""
+"""Require a visible Android app frame with accessible interactive content."""
 
 from __future__ import annotations
 
@@ -8,6 +8,10 @@ import sys
 import zlib
 from collections import Counter
 from pathlib import Path
+from xml.etree import ElementTree
+
+APP_PACKAGE = "com.bilhealth.bodyintelligencelog"
+MIN_FOREGROUND_PIXEL_SHARE = 0.05
 
 
 def _paeth(left: int, up: int, up_left: int) -> int:
@@ -107,13 +111,43 @@ def inspect_frame(path: Path) -> dict[str, int | float]:
 def frame_is_blank(result: dict[str, int | float]) -> bool:
     return (
         result["viewport_unique_rgb_colors"] < 6
-        or result["viewport_foreground_pixel_share"] < 0.001
+        or result["viewport_foreground_pixel_share"] < MIN_FOREGROUND_PIXEL_SHARE
+    )
+
+
+def has_interactive_app_content(path: Path) -> bool:
+    """Reject Android splash/transition trees without an app control."""
+    try:
+        root = ElementTree.parse(path).getroot()
+    except (OSError, ElementTree.ParseError):
+        return False
+
+    for node in root.iter("node"):
+        if node.get("package") != APP_PACKAGE:
+            continue
+        if node.get("class") != "android.widget.Button":
+            continue
+        if node.get("enabled") != "true" or node.get("clickable") != "true":
+            continue
+        if node.get("content-desc", "").strip() or node.get("text", "").strip():
+            return True
+    return False
+
+
+def startup_is_ready(
+    frame_result: dict[str, int | float], accessibility_tree: Path
+) -> bool:
+    return not frame_is_blank(frame_result) and has_interactive_app_content(
+        accessibility_tree
     )
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: verify_android_startup_frame.py <screenshot.png>", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print(
+            "usage: verify_android_startup_frame.py <screenshot.png> <accessibility-tree.xml>",
+            file=sys.stderr,
+        )
         return 2
     try:
         result = inspect_frame(Path(sys.argv[1]))
@@ -123,8 +157,20 @@ def main() -> int:
     for name, value in result.items():
         print(f"{name}={value}")
     if frame_is_blank(result):
-        print("Android app viewport is visually blank; first Flutter frame was not proven.", file=sys.stderr)
+        print(
+            "Android app viewport has too little foreground detail to prove "
+            "the startup screen is visible.",
+            file=sys.stderr,
+        )
         return 1
+    if not has_interactive_app_content(Path(sys.argv[2])):
+        print(
+            "Android accessibility tree has no enabled, clickable app button; "
+            "the capture may still be the native splash or transition frame.",
+            file=sys.stderr,
+        )
+        return 1
+    print("accessible_interactive_app_content=true")
     return 0
 
 

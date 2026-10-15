@@ -103,27 +103,38 @@ printf '%s\n' \
   'supabase=false payments=false ads=false community=false push=false' \
   > "$evidence/test-scope.txt"
 
-stage='wait-for-visible-first-frame'
+stage='wait-for-accessible-app-content-and-first-frame'
 frame_ready=false
+app_content_ready=false
 frame_attempt=0
 for attempt in {1..30}; do
   frame_attempt=$attempt
-  if adb exec-out screencap -p > "$evidence/startup.png" \
-      2> "$evidence/screencap-errors.txt" \
-      && python3 tool/release/verify_android_startup_frame.py \
-        "$evidence/startup.png" > "$evidence/startup-frame.txt" \
-        2> "$evidence/startup-frame-errors.txt"; then
-    frame_ready=true
-    break
+  if adb shell uiautomator dump /sdcard/bil-startup-window.xml \
+      > "$evidence/startup-uiautomator-poll.txt" 2>&1 \
+      && adb pull /sdcard/bil-startup-window.xml \
+        "$evidence/startup-window.xml" >/dev/null 2>&1; then
+    if adb exec-out screencap -p > "$evidence/startup.png" \
+        2> "$evidence/screencap-errors.txt" \
+        && python3 tool/release/verify_android_startup_frame.py \
+          "$evidence/startup.png" "$evidence/startup-window.xml" \
+          > "$evidence/startup-frame.txt" \
+          2> "$evidence/startup-frame-errors.txt"; then
+      app_content_ready=true
+      frame_ready=true
+      break
+    fi
   fi
   sleep 2
 done
-printf 'attempts=%s\nframe_ready=%s\n' \
-  "$frame_attempt" "$frame_ready" > "$evidence/startup-frame-wait.txt"
-sha256sum "$evidence/startup.png" > "$evidence/startup.sha256"
+printf 'attempts=%s\napp_content_ready=%s\nframe_ready=%s\n' \
+  "$frame_attempt" "$app_content_ready" "$frame_ready" \
+  > "$evidence/startup-frame-wait.txt"
+if [[ -f "$evidence/startup.png" ]]; then
+  sha256sum "$evidence/startup.png" > "$evidence/startup.sha256"
+fi
 if [[ "$frame_ready" != true ]]; then
   cat "$evidence/startup-frame.txt" >&2 || true
-  echo 'BIL did not render a visible launch frame within 60 seconds.' >&2
+  echo 'BIL did not expose interactive app content and a visible frame within the startup wait.' >&2
   exit 1
 fi
 
