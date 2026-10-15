@@ -1,0 +1,73 @@
+[
+  {
+    "variant": "debug",
+    "issues": {
+      "Error": 3,
+      "Warning": 134
+    },
+    "errors": [
+      {
+        "id": "LintError",
+        "message": "The lint detector\n    `com.google.play.policy.insights.LoginCredentialsPolicyDetector`\ncalled `context.getMainProject()` during module analysis.\n\nThis does not work correctly when running in AGP (9.0.1).\n\nIn particular, there may be false positives or false negatives because\nthe lint check may be using the minSdkVersion or manifest information\nfrom the library instead of any consuming app module.\n\nContact the vendor of the lint issue to get it fixed/updated (if\nknown, listed below), and in the meantime you can try to work around\nthis by disabling the following issues:\n\n\"LoginCredentials\"\n\nIssue Vendors:\nVendor: Play policy insights beta\n\nCall stack: Context$Companion.checkForbidden$default(Context.kt:692)\u2190Context.getMainProject(Context.kt:106)\u2190ExperimentUtils.getPackageNameForHoldout(ExperimentUtils.kt:151)\u2190ExperimentUtils.shouldHoldout(ExperimentUtils.kt:71)\u2190LoginCredentialsPolicyDetector.beforeCheckRootProject(LoginCredentialsPolicyDetector.kt:122)\u2190LintDriver.checkProject(LintDriver.kt:1053)\u2190LintDriver.checkProjectRoot(LintDriver.kt:627)\u2190LintDriver.access$checkProjectRoot(LintDriver.kt:179)\u2190LintDriver$analyzeOnly$1.invoke(LintDriver.kt:450)\u2190LintDriver$analyzeOnly$1.invoke(LintDriver.kt:447)\u2190LintDriver.doAnalyze(LintDriver.kt:506)\u2190LintDriver.analyzeOnly(LintDriver.kt:447)\u2190LintCliClient$analyzeOnly$1.invoke(LintCliClient.kt:279)\u2190LintCliClient$analyzeOnly$1.invoke(LintCliClient.kt:276)\u2190LintCliClient.run(LintCliClient.kt:333)\u2190LintCliClient.analyzeOnly(LintCliClient.kt:276)\u2190Main.run(Main.java:1777)\u2190Main.run(Main.java:283)\u2190DirectMethodHandleAccessor.invoke(null:-1)\u2190Method.invoke(null:-1)",
+        "locations": [
+          {
+            "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app"
+          }
+        ]
+      },
+      {
+        "id": "PropertyEscape",
+        "message": "Windows file separators (`\\`) and drive letter separators (':') must be escaped (`\\\\`) in property files; use C\\\\:\\\\\\\\Android\\\\\\\\SDK",
+        "locations": [
+          {
+            "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\local.properties",
+            "line": "1",
+            "column": "10"
+          }
+        ]
+      },
+      {
+        "id": "PropertyEscape",
+        "message": "Windows file separators (`\\`) and drive letter separators (':') must be escaped (`\\\\`) in property files; use G\\\\:\\\\\\\\BIL_Toolchains\\\\\\\\Flutter\\\\\\\\flutter",
+        "locations": [
+          {
+            "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\local.properties",
+            "line": "2",
+            "column": "14"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "variant": "release",
+    "issues": {
+      "Warning": 134,
+      "Error": 2
+    },
+    "errors": [
+      {
+        "id": "PropertyEscape",
+        "message": "Windows file separators (`\\`) and drive letter separators (':') must be escaped (`\\\\`) in property files; use C\\\\:\\\\\\\\Android\\\\\\\\SDK",
+        "locations": [
+          {
+            "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\local.properties",
+            "line": "1",
+            "column": "10"
+          }
+        ]
+      },
+      {
+        "id": "PropertyEscape",
+        "message": "Windows file separators (`\\`) and drive letter separators (':') must be escaped (`\\\\`) in property files; use G\\\\:\\\\\\\\BIL_Toolchains\\\\\\\\Flutter\\\\\\\\flutter",
+        "locations": [
+          {
+            "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\local.properties",
+            "line": "2",
+            "column": "14"
+          }
+        ]
+      }
+    ]
+  }
+]

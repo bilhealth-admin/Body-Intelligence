@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+import '../../../app/services/system_speech_disclosure.dart';
+export '../../../app/services/system_speech_disclosure.dart' show BilSpeechUse;
+
 enum ListenMode { confirmation }
 
 class SpeechListenOptions {
@@ -65,6 +68,8 @@ class SpeechToText {
   SpeechToText({MethodChannel? methods, EventChannel? events})
     : _methods = methods ?? const MethodChannel('bil/speech'),
       _events = events ?? const EventChannel('bil/speech/events');
+
+  final systemSpeechDisclosure = BilSystemSpeechDisclosure();
 
   final MethodChannel _methods;
   final EventChannel _events;
@@ -206,6 +211,7 @@ class SpeechToText {
   }
 
   Future<void> dispose() async {
+    systemSpeechDisclosure.resetLive();
     try {
       await cancel();
     } on Object {

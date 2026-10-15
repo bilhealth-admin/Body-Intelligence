@@ -62,6 +62,13 @@ class MealVoiceInputService {
   }) async {
     if (!VoiceCaptureLease.acquire(this)) return null;
     try {
+      if (!await _speech.systemSpeechDisclosure.authorize(
+        context,
+        use: BilSpeechUse.food,
+      )) {
+        return null;
+      }
+      if (!context.mounted) return null;
       final gate = permissionGate;
       final permissionGranted = gate == null
           ? await _ensureMicrophonePermission(context)

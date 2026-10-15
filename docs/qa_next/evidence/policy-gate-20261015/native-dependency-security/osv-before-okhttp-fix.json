@@ -1,0 +1,2206 @@
+{
+  "scope": "Read-only public OSV lookup of actual resolved release runtime Maven components, not exploitability/R8 reachability/signed artifact proof",
+  "recorded_at_utc": "2026-10-15T19:48:30.124424+00:00",
+  "graph_sha256": "fabadac394d45f1d9a450dcb6c63f71bf3820dfad0689ae851c2ba7cb23bf730",
+  "source": "https://api.osv.dev/v1/querybatch",
+  "count": 218,
+  "components": [
+    {
+      "query": {
+        "package": {
+          "name": "androidx.activity:activity",
+          "ecosystem": "Maven"
+        },
+        "version": "1.12.4"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.activity:activity-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "1.12.4"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.annotation:annotation",
+          "ecosystem": "Maven"
+        },
+        "version": "1.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.annotation:annotation-experimental",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.annotation:annotation-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "1.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.appcompat:appcompat",
+          "ecosystem": "Maven"
+        },
+        "version": "1.7.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.appcompat:appcompat-resources",
+          "ecosystem": "Maven"
+        },
+        "version": "1.7.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.arch.core:core-common",
+          "ecosystem": "Maven"
+        },
+        "version": "2.2.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.arch.core:core-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "2.2.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.asynclayoutinflater:asynclayoutinflater",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.biometric:biometric",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.browser:browser",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.camera.featurecombinationquery:featurecombinationquery",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.camera:camera-camera2",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.camera:camera-camera2-pipe",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.camera:camera-core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.camera:camera-lifecycle",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.camera:camera-video",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.collection:collection",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.collection:collection-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.collection:collection-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.compose.runtime:runtime-annotation",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.compose.runtime:runtime-annotation-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.concurrent:concurrent-futures",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.concurrent:concurrent-futures-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.constraintlayout:constraintlayout",
+          "ecosystem": "Maven"
+        },
+        "version": "2.2.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.constraintlayout:constraintlayout-core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.coordinatorlayout:coordinatorlayout",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.core:core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.18.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.core:core-backported-fixes",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.core:core-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "1.18.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.core:core-viewtree",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.credentials:credentials",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.credentials:credentials-play-services-auth",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.cursoradapter:cursoradapter",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.customview:customview",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-core-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-core-okio",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-core-okio-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-preferences",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-preferences-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-preferences-core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-preferences-core-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-preferences-external-protobuf",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.datastore:datastore-preferences-proto",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.7"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.documentfile:documentfile",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.drawerlayout:drawerlayout",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.emoji2:emoji2",
+          "ecosystem": "Maven"
+        },
+        "version": "1.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.emoji2:emoji2-views-helper",
+          "ecosystem": "Maven"
+        },
+        "version": "1.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.exifinterface:exifinterface",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.fragment:fragment",
+          "ecosystem": "Maven"
+        },
+        "version": "1.7.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.fragment:fragment-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "1.7.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.health.connect:connect-client",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.health.connect:connect-client-external-protobuf",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.health.connect:connect-client-proto",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.interpolator:interpolator",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.legacy:legacy-support-core-ui",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.legacy:legacy-support-core-utils",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-common",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-common-java8",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-common-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-livedata",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-livedata-core",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-livedata-core-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-process",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-runtime-android",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-runtime-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-runtime-ktx-android",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-service",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-viewmodel",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-viewmodel-android",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-viewmodel-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-viewmodel-savedstate",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.lifecycle:lifecycle-viewmodel-savedstate-android",
+          "ecosystem": "Maven"
+        },
+        "version": "2.10.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.loader:loader",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.localbroadcastmanager:localbroadcastmanager",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-common",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-container",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-database",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-datasource",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-decoder",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-exoplayer",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-exoplayer-dash",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-exoplayer-hls",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-exoplayer-rtsp",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-exoplayer-smoothstreaming",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-extractor",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media3:media3-muxer",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.media:media",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.navigationevent:navigationevent",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.navigationevent:navigationevent-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.preference:preference",
+          "ecosystem": "Maven"
+        },
+        "version": "1.2.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.print:print",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.privacysandbox.ads:ads-adservices",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0-beta05"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.privacysandbox.ads:ads-adservices-java",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0-beta05"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.profileinstaller:profileinstaller",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.recyclerview:recyclerview",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.resourceinspection:resourceinspection-annotation",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.room:room-common",
+          "ecosystem": "Maven"
+        },
+        "version": "2.2.5"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.room:room-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "2.2.5"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.savedstate:savedstate",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.savedstate:savedstate-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.savedstate:savedstate-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.slidingpanelayout:slidingpanelayout",
+          "ecosystem": "Maven"
+        },
+        "version": "1.2.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.sqlite:sqlite",
+          "ecosystem": "Maven"
+        },
+        "version": "2.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.sqlite:sqlite-framework",
+          "ecosystem": "Maven"
+        },
+        "version": "2.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.startup:startup-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.swiperefreshlayout:swiperefreshlayout",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.tracing:tracing",
+          "ecosystem": "Maven"
+        },
+        "version": "1.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.tracing:tracing-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.tracing:tracing-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "1.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.transition:transition",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.vectordrawable:vectordrawable",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.vectordrawable:vectordrawable-animated",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.versionedparcelable:versionedparcelable",
+          "ecosystem": "Maven"
+        },
+        "version": "1.1.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.viewpager:viewpager",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.webkit:webkit",
+          "ecosystem": "Maven"
+        },
+        "version": "1.15.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.window.extensions.core:core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.window:window",
+          "ecosystem": "Maven"
+        },
+        "version": "1.2.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.window:window-java",
+          "ecosystem": "Maven"
+        },
+        "version": "1.2.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "androidx.work:work-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "2.7.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.android.billingclient:billing",
+          "ecosystem": "Maven"
+        },
+        "version": "8.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.getkeepsafe.relinker:relinker",
+          "ecosystem": "Maven"
+        },
+        "version": "1.4.5"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.datatransport:transport-api",
+          "ecosystem": "Maven"
+        },
+        "version": "3.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.datatransport:transport-backend-cct",
+          "ecosystem": "Maven"
+        },
+        "version": "3.1.9"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.datatransport:transport-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "3.1.9"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-ads",
+          "ecosystem": "Maven"
+        },
+        "version": "25.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-ads-api",
+          "ecosystem": "Maven"
+        },
+        "version": "25.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-ads-identifier",
+          "ecosystem": "Maven"
+        },
+        "version": "18.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-appset",
+          "ecosystem": "Maven"
+        },
+        "version": "16.0.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-auth",
+          "ecosystem": "Maven"
+        },
+        "version": "21.6.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-auth-api-phone",
+          "ecosystem": "Maven"
+        },
+        "version": "18.0.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-auth-base",
+          "ecosystem": "Maven"
+        },
+        "version": "18.0.10"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-auth-blockstore",
+          "ecosystem": "Maven"
+        },
+        "version": "16.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-base",
+          "ecosystem": "Maven"
+        },
+        "version": "18.9.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-basement",
+          "ecosystem": "Maven"
+        },
+        "version": "18.9.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-cloud-messaging",
+          "ecosystem": "Maven"
+        },
+        "version": "17.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-fido",
+          "ecosystem": "Maven"
+        },
+        "version": "21.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-identity-credentials",
+          "ecosystem": "Maven"
+        },
+        "version": "16.0.0-alpha08"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-location",
+          "ecosystem": "Maven"
+        },
+        "version": "19.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-measurement-base",
+          "ecosystem": "Maven"
+        },
+        "version": "20.1.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-measurement-sdk-api",
+          "ecosystem": "Maven"
+        },
+        "version": "20.1.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-mlkit-barcode-scanning",
+          "ecosystem": "Maven"
+        },
+        "version": "18.3.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-places-placereport",
+          "ecosystem": "Maven"
+        },
+        "version": "17.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-stats",
+          "ecosystem": "Maven"
+        },
+        "version": "17.0.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.gms:play-services-tasks",
+          "ecosystem": "Maven"
+        },
+        "version": "18.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.libraries.identity.googleid:googleid",
+          "ecosystem": "Maven"
+        },
+        "version": "1.2.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.odml:image",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0-beta1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.play:core-common",
+          "ecosystem": "Maven"
+        },
+        "version": "2.0.4"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.play:hsdp",
+          "ecosystem": "Maven"
+        },
+        "version": "2.0.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.play:integrity",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.play:review",
+          "ecosystem": "Maven"
+        },
+        "version": "2.0.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.play:review-ktx",
+          "ecosystem": "Maven"
+        },
+        "version": "2.0.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.android.ump:user-messaging-platform",
+          "ecosystem": "Maven"
+        },
+        "version": "4.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.auto.value:auto-value-annotations",
+          "ecosystem": "Maven"
+        },
+        "version": "1.6.3"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.code.findbugs:jsr305",
+          "ecosystem": "Maven"
+        },
+        "version": "3.0.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.code.gson:gson",
+          "ecosystem": "Maven"
+        },
+        "version": "2.13.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.crypto.tink:tink-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.22.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.dagger:dagger",
+          "ecosystem": "Maven"
+        },
+        "version": "2.59"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.errorprone:error_prone_annotations",
+          "ecosystem": "Maven"
+        },
+        "version": "2.48.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-annotations",
+          "ecosystem": "Maven"
+        },
+        "version": "17.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-bom",
+          "ecosystem": "Maven"
+        },
+        "version": "34.19.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-common",
+          "ecosystem": "Maven"
+        },
+        "version": "22.2.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-components",
+          "ecosystem": "Maven"
+        },
+        "version": "19.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-datatransport",
+          "ecosystem": "Maven"
+        },
+        "version": "18.2.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-encoders",
+          "ecosystem": "Maven"
+        },
+        "version": "17.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-encoders-json",
+          "ecosystem": "Maven"
+        },
+        "version": "18.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-encoders-proto",
+          "ecosystem": "Maven"
+        },
+        "version": "16.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-iid-interop",
+          "ecosystem": "Maven"
+        },
+        "version": "17.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-installations",
+          "ecosystem": "Maven"
+        },
+        "version": "19.1.2"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-installations-interop",
+          "ecosystem": "Maven"
+        },
+        "version": "17.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-measurement-connector",
+          "ecosystem": "Maven"
+        },
+        "version": "19.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.firebase:firebase-messaging",
+          "ecosystem": "Maven"
+        },
+        "version": "25.1.3"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.guava:failureaccess",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.3"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.guava:guava",
+          "ecosystem": "Maven"
+        },
+        "version": "33.5.0-android"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.guava:listenablefuture",
+          "ecosystem": "Maven"
+        },
+        "version": "9999.0-empty-to-avoid-conflict-with-guava"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.j2objc:j2objc-annotations",
+          "ecosystem": "Maven"
+        },
+        "version": "3.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:barcode-scanning",
+          "ecosystem": "Maven"
+        },
+        "version": "17.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:barcode-scanning-common",
+          "ecosystem": "Maven"
+        },
+        "version": "17.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:common",
+          "ecosystem": "Maven"
+        },
+        "version": "18.11.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:language-id",
+          "ecosystem": "Maven"
+        },
+        "version": "17.0.6"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:language-id-common",
+          "ecosystem": "Maven"
+        },
+        "version": "16.1.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:translate",
+          "ecosystem": "Maven"
+        },
+        "version": "17.0.3"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:vision-common",
+          "ecosystem": "Maven"
+        },
+        "version": "17.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.google.mlkit:vision-interfaces",
+          "ecosystem": "Maven"
+        },
+        "version": "16.3.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.squareup.okhttp3:okhttp",
+          "ecosystem": "Maven"
+        },
+        "version": "3.0.0"
+      },
+      "result": {
+        "vulns": [
+          {
+            "id": "GHSA-3cqm-mf7h-prrj",
+            "modified": "2026-09-10T03:49:29.393060Z"
+          },
+          {
+            "id": "GHSA-4hc2-jh7r-wrc3",
+            "modified": "2024-02-20T05:22:26.866493Z"
+          }
+        ]
+      }
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.squareup.okio:okio",
+          "ecosystem": "Maven"
+        },
+        "version": "3.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "com.squareup.okio:okio-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "3.4.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "io.flutter:arm64_v8a_release",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0-83675ed27633283e7fc296c8bca22e841224c096"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "io.flutter:armeabi_v7a_release",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0-83675ed27633283e7fc296c8bca22e841224c096"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "io.flutter:flutter_embedding_release",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0-83675ed27633283e7fc296c8bca22e841224c096"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "io.flutter:x86_64_release",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0-83675ed27633283e7fc296c8bca22e841224c096"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "jakarta.inject:jakarta.inject-api",
+          "ecosystem": "Maven"
+        },
+        "version": "2.0.1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "javax.inject:javax.inject",
+          "ecosystem": "Maven"
+        },
+        "version": "1"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlin:kotlin-android-extensions-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.22"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlin:kotlin-bom",
+          "ecosystem": "Maven"
+        },
+        "version": "1.8.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlin:kotlin-parcelize-runtime",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.22"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlin:kotlin-stdlib",
+          "ecosystem": "Maven"
+        },
+        "version": "2.3.20"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlin:kotlin-stdlib-common",
+          "ecosystem": "Maven"
+        },
+        "version": "2.3.20"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
+          "ecosystem": "Maven"
+        },
+        "version": "1.9.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+          "ecosystem": "Maven"
+        },
+        "version": "1.8.20"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:atomicfu",
+          "ecosystem": "Maven"
+        },
+        "version": "0.28.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:atomicfu-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "0.28.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+          "ecosystem": "Maven"
+        },
+        "version": "1.11.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-coroutines-bom",
+          "ecosystem": "Maven"
+        },
+        "version": "1.11.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.11.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "1.11.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-coroutines-guava",
+          "ecosystem": "Maven"
+        },
+        "version": "1.11.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-coroutines-play-services",
+          "ecosystem": "Maven"
+        },
+        "version": "1.11.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-serialization-bom",
+          "ecosystem": "Maven"
+        },
+        "version": "1.7.3"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-serialization-core",
+          "ecosystem": "Maven"
+        },
+        "version": "1.7.3"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm",
+          "ecosystem": "Maven"
+        },
+        "version": "1.7.3"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jetbrains:annotations",
+          "ecosystem": "Maven"
+        },
+        "version": "23.0.0"
+      },
+      "result": {}
+    },
+    {
+      "query": {
+        "package": {
+          "name": "org.jspecify:jspecify",
+          "ecosystem": "Maven"
+        },
+        "version": "1.0.0"
+      },
+      "result": {}
+    }
+  ],
+  "network_or_format_errors": [],
+  "advisory_ids": [
+    "GHSA-3cqm-mf7h-prrj",
+    "GHSA-4hc2-jh7r-wrc3"
+  ],
+  "status": "FINDINGS_REQUIRE_REVIEW"
+}

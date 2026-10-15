@@ -245,6 +245,93 @@ Future<void> _captureReply(
   });
 }
 
+Future<Finder> nativeQaEnterOlderHistory(
+  WidgetTester tester, {
+  required String language,
+  required Map<String, Object?> metadata,
+  int maximumDrags = 16,
+}) async {
+  final viewport = find.byType(ChatHistoryViewport);
+  final controller = tester.widget<ChatHistoryViewport>(viewport).controller;
+  final attempts = <Map<String, Object?>>[];
+  metadata['history_anchor_search'] = attempts;
+  for (var attempt = 0; attempt < maximumDrags; attempt++) {
+    final before = controller.offset;
+    final distance = (tester.getSize(viewport).height * .55)
+        .clamp(96.0, 400.0)
+        .toDouble();
+    await tester.drag(viewport, Offset(0, distance));
+    // Pointer delivery can finish before the next layout/ballistic frame.
+    // Always observe one frame before inspecting visibility or scroll state.
+    await tester.pump(const Duration(milliseconds: 16));
+    for (
+      var frame = 0;
+      frame < 80 && controller.position.isScrollingNotifier.value;
+      frame++
+    ) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    final bounds = tester.getRect(viewport);
+    final candidates = find.byType(CoachMessageText).evaluate().where((
+      element,
+    ) {
+      final widget = element.widget as CoachMessageText;
+      if (widget.key == null ||
+          !widget.text.startsWith(
+            language == 'ar' ? 'سجل محلي تركيبي' : 'Synthetic local history',
+          )) {
+        return false;
+      }
+      final overlap = tester.getRect(find.byKey(widget.key!)).intersect(bounds);
+      return overlap.width > 0 && overlap.height >= 20;
+    }).toList();
+    attempts.add({
+      'drag_index': attempt + 1,
+      'requested_drag_dy': distance,
+      'pixels_before_drag': before,
+      'scroll_pixels': controller.offset,
+      'min_scroll_extent': controller.position.minScrollExtent,
+      'max_scroll_extent': controller.position.maxScrollExtent,
+      'viewport_height': bounds.height,
+      'axis_direction': controller.position.axisDirection.name,
+      'distance_from_newest':
+          controller.offset - controller.position.minScrollExtent,
+      'visible_history_candidates': candidates.length,
+      'mounted_history_rows': find.byType(CoachMessageText).evaluate().map((e) {
+        final row = e.widget as CoachMessageText;
+        if (row.key == null) return <String, Object?>{'key': null};
+        final rectangle = tester.getRect(find.byKey(row.key!));
+        return {
+          'key': row.key.toString(),
+          'matches_language_prefix': row.text.startsWith(
+            language == 'ar' ? 'سجل محلي تركيبي' : 'Synthetic local history',
+          ),
+          'top': rectangle.top,
+          'height': rectangle.height,
+          'visible_height': rectangle.intersect(bounds).height,
+        };
+      }).toList(),
+      'scrolling': controller.position.isScrollingNotifier.value,
+    });
+    if (candidates.isEmpty ||
+        controller.position.isScrollingNotifier.value ||
+        controller.offset - controller.position.minScrollExtent <= 72) {
+      continue;
+    }
+    final anchor = find.byKey(candidates.first.widget.key!);
+    await _settleHistoryAnchor(tester, anchor);
+    final overlap = tester.getRect(anchor).intersect(tester.getRect(viewport));
+    if (overlap.width > 0 && overlap.height >= 20) {
+      metadata['history_anchor_key'] = candidates.first.widget.key.toString();
+      return anchor;
+    }
+  }
+  throw StateError(
+    'native_history_anchor_unavailable_after_progressive_drags: '
+    '${jsonEncode(attempts)}',
+  );
+}
+
 void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
   for (final language in ['ar', 'en']) {
     for (final reduced in [false, true]) {
@@ -314,18 +401,16 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
               double? anchorBefore, offsetBefore;
               if (history) {
                 final viewport = find.byType(ChatHistoryViewport);
-                // User-owned drag dismisses the actual keyboard and enters older history.
-                await tester.drag(viewport, const Offset(0, 220));
+                // Drag until a real older row is visible on this viewport/font,
+                // rather than assuming 220 px always clears the newest turn.
+                anchor = await nativeQaEnterOlderHistory(
+                  tester,
+                  language: language,
+                  metadata: metadata,
+                );
                 final controller = tester
                     .widget<ChatHistoryViewport>(viewport)
                     .controller;
-                for (
-                  var i = 0;
-                  i < 80 && controller.position.isScrollingNotifier.value;
-                  i++
-                ) {
-                  await tester.pump(const Duration(milliseconds: 16));
-                }
                 expect(controller.position.isScrollingNotifier.value, isFalse);
                 expect(
                   controller.offset - controller.position.minScrollExtent,
@@ -333,24 +418,6 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   reason:
                       'History condition must actually leave the newest-end follow zone.',
                 );
-                final bounds = tester.getRect(viewport);
-                final candidate = find
-                    .byType(CoachMessageText)
-                    .evaluate()
-                    .firstWhere((element) {
-                      final widget = element.widget as CoachMessageText;
-                      if (!widget.text.startsWith(
-                        language == 'ar'
-                            ? 'سجل محلي تركيبي'
-                            : 'Synthetic local history',
-                      )) {
-                        return false;
-                      }
-                      final rect = tester.getRect(find.byKey(widget.key!));
-                      return rect.intersect(bounds).height >= 20;
-                    });
-                anchor = find.byKey(candidate.widget.key!);
-                await _settleHistoryAnchor(tester, anchor);
                 anchorBefore = tester.getTopLeft(anchor).dy;
                 offsetBefore = controller.offset;
                 metadata.addAll({

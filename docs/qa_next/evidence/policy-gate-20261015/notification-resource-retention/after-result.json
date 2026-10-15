@@ -1,0 +1,52 @@
+{
+    "status": "PASS_POST_R8_RESOURCE_ONLY",
+    "agp": "9.0.1",
+    "sources": [
+        {
+            "path": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\lib\\features\\notifications\\services\\bil_android_notification_presentation.dart",
+            "bytes": 2820,
+            "sha256": "9c250b3febdffdac51c8d28d949660f417300b3c46ccf8ce8850af4cba953985"
+        },
+        {
+            "path": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\lib\\features\\notifications\\services\\bil_daily_notification_grouping.dart",
+            "bytes": 5288,
+            "sha256": "e71a68285999ccf7e0d9a9a7678ba276898d4dca20a2064b4027e6c2dff0187c"
+        }
+    ],
+    "aapt2": {
+        "path": "G:\\BIL_Toolchains\\Android\\SDK\\build-tools\\36.0.0\\aapt2.exe",
+        "bytes": 5423200,
+        "sha256": "babf3122e515ddb954c5ac4669e085ce990536c035e3072de30127bddd6e3608"
+    },
+    "metadata": {
+        "path": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\build\\app\\intermediates\\optimized_processed_res\\release\\optimizeReleaseResources\\output-metadata.json",
+        "bytes": 424,
+        "sha256": "3b311c3356aa7a985cfd8b9149ce9d9a58d0e66e7a0789f256a81f83fc1b7008"
+    },
+    "outputs": [
+        {
+            "archive": {
+                "path": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\build\\app\\intermediates\\optimized_processed_res\\release\\optimizeReleaseResources\\resources-release-optimize.ap_",
+                "bytes": 938461,
+                "sha256": "5b06a113e928b5e5d808961a858fc86677e11346d9aeae00fc333caca6474bef"
+            },
+            "dump": {
+                "path": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\build\\qa\\policy-gate-20261015\\notification-resource-retention\\aapt2-resources-0.txt",
+                "bytes": 352561,
+                "sha256": "307e428d69d1f6524575de6b4089cdc047e25fc68afc9df66d30c3acb936a8e7"
+            },
+            "icons": [
+                {
+                    "name": "ic_stat_bil_notification",
+                    "type": "drawable",
+                    "present": true
+                }
+            ],
+            "versionCode": 8,
+            "versionName": "1.0.0"
+        }
+    ],
+    "signedArtifact": false,
+    "storeUpload": false,
+    "nativeNotificationDeliveryTested": false
+}

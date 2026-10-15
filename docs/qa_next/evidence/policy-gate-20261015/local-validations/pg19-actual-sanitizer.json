@@ -1,0 +1,1 @@
+{"status":"sanitized","platform":"android","removed_dev_native_plugins":[],"excluded_mobile_native_plugins":["simple_barcode_scanner"],"preserved_dev_native_plugins":true,"deferred_windows_only_override":"G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil_release_plugin_overrides\\simple_barcode_scanner"}

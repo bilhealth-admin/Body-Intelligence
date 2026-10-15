@@ -1,0 +1,32 @@
+{
+  "recorded_at_utc": "2026-10-15T18:53:37.499633+00:00",
+  "base_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "dirty_snapshot": true,
+  "store_certification": false,
+  "reviewers": [
+    {
+      "name": "apple_policy_gate",
+      "scope": "Eight pearl renders and shared production theme after analyzer hygiene; read-only, no tests/stores",
+      "result": "No visual P0/P1 found; scroll affordance at200% isP2; evidence Arabic font does not certify device system font. Owner appearance approval not inferred.",
+      "evidence": "pearl-widgets/README.md"
+    },
+    {
+      "name": "google_policy_gate",
+      "scope": "Final workflow event defaults, references, isolated regression inputs, KVM; read-only",
+      "result": "Two genuine CI findings corrected: use existing KVM settle/access helper; include exact6SQL/2package/preflight trigger inputs. FullLint remains blocked, no duplicated source-only dispatch.",
+      "evidence": ".github/workflows/bil_apple_google_policy_gate.yml and bil_android_isolated_emulator_smoke.yml"
+    },
+    {
+      "name": "reviewer_privacy_gate",
+      "scope": "PG19 own-overlay strict rebind, two affected fixtures only",
+      "result": "37PASS,23new; URI/bytes/types/links failclosed. Source hashes and untouched actual discovery captured; root later proved actual prep/native4.",
+      "evidence": "pg19-barcode-rebind-validation.json"
+    },
+    {
+      "name": "admin_policy_delta",
+      "scope": "Administration/community/cloud delta since prior audit, no tests or Production",
+      "result": "No new confirmed code defect; PG18 remains P0_BLOCKED for live readback/owner decision.125 admin/grant files compared with prior snapshot:124 unchanged, one draft whitespace bound.7 SQL receipt input hashes match. Fixed2 documentary ambiguities: historical status banner and direct G01/G37 PG18 evidence links.",
+      "evidence": "BIL_20261015_POLICY_GATE_APPENDIX_ADMIN_CLOUD_AR.md"
+    }
+  ]
+}

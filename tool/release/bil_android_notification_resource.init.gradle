@@ -1,0 +1,100 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
+
+// Prove the real dynamically requested notification icons survive release R8.
+// This produces resource intermediates, never an APK/AAB, signature or install.
+def sourceRoot = initscript.sourceFile.canonicalFile.parentFile.parentFile.parentFile
+def androidRoot = new File(sourceRoot, 'android').canonicalFile
+def out = new File(sourceRoot, 'build/qa/policy-gate-20261015/notification-resource-retention')
+def digest = { File file ->
+    def value = MessageDigest.getInstance('SHA-256')
+    file.withInputStream { stream ->
+        byte[] buffer = new byte[1048576]
+        int count
+        while ((count = stream.read(buffer)) > 0) value.update(buffer, 0, count)
+    }
+    value.digest().encodeHex().toString()
+}
+
+gradle.projectsEvaluated {
+    if (gradle.rootProject.projectDir.canonicalFile != androidRoot) return
+    def app = gradle.rootProject.findProject(':app')
+    if (app == null) throw new GradleException('Missing BIL Android app')
+    def loader = app.plugins.getPlugin('com.android.application').class.classLoader
+    def agp = Class.forName('com.android.Version', true, loader).getField('ANDROID_GRADLE_PLUGIN_VERSION').get(null)
+    if (agp != '9.0.1') throw new GradleException('Unreviewed resource optimization graph: AGP ' + agp)
+    def optimize = app.tasks.named('optimizeReleaseResources')
+    app.tasks.register('bilPolicyNotificationResource') {
+        dependsOn(optimize)
+        doLast {
+            out.mkdirs()
+            def ownedBuild = app.layout.buildDirectory.get().asFile.canonicalFile
+            def evidence = { File file ->
+                if (!file.isFile()) throw new GradleException('Missing resource proof input: ' + file.name)
+                [path: file.canonicalPath, bytes: file.length(), sha256: digest(file)]
+            }
+            def sources = [
+                new File(sourceRoot, 'lib/features/notifications/services/bil_android_notification_presentation.dart'),
+                new File(sourceRoot, 'lib/features/notifications/services/bil_daily_notification_grouping.dart'),
+            ]
+            def presentation = sources[0].getText('UTF-8') =~ /static const smallIcon = '([a-z0-9_]+)'/
+            def initialization = sources[1].getText('UTF-8') =~ /AndroidInitializationSettings\('([a-z0-9_]+)'\)/
+            if (presentation.count != 1 || initialization.count != 1) {
+                throw new GradleException('Notification icon declarations changed; review the resource proof parser')
+            }
+            def names = ([presentation[0][1], initialization[0][1]] as Set).sort()
+            def metadata = optimize.get().outputs.files.asFileTree.files.findAll { it.name == 'output-metadata.json' }
+            if (metadata.size() != 1) throw new GradleException('Expected exact AGP optimized resource metadata')
+            def data = new JsonSlurper().parse(metadata[0])
+            if (data.artifactType.type != 'OPTIMIZED_PROCESSED_RES' || data.variantName != 'release' || data.elements.empty) {
+                throw new GradleException('Unexpected optimized release resource metadata')
+            }
+            def sdk = app.extensions.getByName('androidComponents').sdkComponents.sdkDirectory.get().asFile
+            def version = app.extensions.getByName('android').buildToolsVersion
+            def aapt2 = new File(sdk, 'build-tools/' + version + '/aapt2' + (System.getProperty('os.name').startsWith('Windows') ? '.exe' : ''))
+            if (!aapt2.isFile()) throw new GradleException('Missing SDK aapt2 for the configured build-tools version')
+            def results = data.elements.withIndex().collect { element, index ->
+                def archive = new File(metadata[0].parentFile, element.outputFile).canonicalFile
+                if (!archive.path.startsWith(ownedBuild.path + File.separator)) throw new GradleException('Resource output outside app build')
+                def text = app.providers.exec {
+                    commandLine(aapt2.absolutePath, 'dump', 'resources', archive.absolutePath)
+                }.standardOutput.asText.get()
+                def dump = new File(out, 'aapt2-resources-' + index + '.txt')
+                dump.setText(text, 'UTF-8')
+                def icons = names.collect { name ->
+                    def present = (text =~ ('(?m)^\\s*resource\\s+0x[0-9a-fA-F]+\\s+drawable/' + name + '(?:\\s|$)')).find()
+                    [name: name, type: 'drawable', present: present]
+                }
+                [archive: evidence(archive), dump: evidence(dump), icons: icons,
+                 versionCode: element.versionCode, versionName: element.versionName]
+            }
+            def passed = results.every { result -> result.icons.every { it.present } }
+            def receipt = [status: passed ? 'PASS_POST_R8_RESOURCE_ONLY' : 'FAIL_ICON_REMOVED',
+                agp: agp, sources: sources.collect { evidence(it) }, aapt2: evidence(aapt2),
+                metadata: evidence(metadata[0]), outputs: results,
+                signedArtifact: false, storeUpload: false, nativeNotificationDeliveryTested: false]
+            new File(out, 'result.json').setText(JsonOutput.prettyPrint(JsonOutput.toJson(receipt)) + '\n', 'UTF-8')
+            if (!passed) throw new GradleException('A dynamically requested BIL notification icon was removed by release R8')
+            println('BIL_ANDROID_NOTIFICATION_RESOURCE=PASS')
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    if (gradle.rootProject.projectDir.canonicalFile != androidRoot) return
+    if (!graph.allTasks.any { it.path == ':app:bilPolicyNotificationResource' }) return
+    def forbidden = graph.allTasks.findAll { task ->
+        task instanceof org.gradle.api.tasks.testing.Test || task.name ==~ /connected.*AndroidTest/ ||
+        task.name ==~ /(?i)(sign|publish|upload|install|validateSigning).*/ ||
+        (task.project.path == ':app' && task.name ==~ /(?i)(assembleRelease|bundleRelease|packageRelease(Bundle|UniversalApk)?)/)
+    }
+    if (!forbidden.empty || !graph.allTasks.any { it.path == ':app:minifyReleaseWithR8' }) {
+        throw new GradleException('Unsafe or incomplete resource-only task graph: ' + forbidden.collect { it.path })
+    }
+    out.mkdirs()
+    new File(out, 'task-graph.json').setText(JsonOutput.prettyPrint(JsonOutput.toJson([
+        scope: 'Release R8/resource optimization only; no final app packaging, signing or install',
+        tasks: graph.allTasks.collect { it.path }, forbiddenTasks: forbidden.collect { it.path },
+    ])) + '\n', 'UTF-8')
+}

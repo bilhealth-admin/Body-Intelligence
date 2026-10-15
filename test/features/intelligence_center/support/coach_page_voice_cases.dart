@@ -1,5 +1,17 @@
 part of '../coach_page_lifecycle_regression_test.dart';
 
+Future<void> _acceptCoachVoiceDisclosure(WidgetTester tester) async {
+  for (
+    var frame = 0;
+    frame < 40 && find.byKey(systemSpeechDisclosureAllowKey).evaluate().isEmpty;
+    frame++
+  ) {
+    await tester.runAsync(() async => Future<void>.delayed(Duration.zero));
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+  await acceptSystemSpeechDisclosure(tester, settleAfterAccept: false);
+}
+
 Map<String, int> _mockCoachVoice(
   WidgetTester tester, {
   Future<bool>? available,
@@ -86,6 +98,7 @@ void registerCoachVoiceCases() {
             dark ? 'تحدث مع BIL' : 'Talk to BIL',
           );
           await tester.tap(voice);
+          await _acceptCoachVoiceDisclosure(tester);
           for (
             var i = 0;
             i < 20 && (calls['bil/speech:listen'] ?? 0) == 0;
@@ -168,6 +181,7 @@ void registerCoachVoiceCases() {
       final gateway = _HeldGateway();
       await _mount(tester, database: database, gateway: gateway);
       await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+      await _acceptCoachVoiceDisclosure(tester);
       await tester.pump(const Duration(milliseconds: 200));
       expect(calls['bil/speech:listen'], 1);
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
@@ -260,9 +274,11 @@ void registerCoachVoiceCases() {
       gateway: _HeldGateway(),
     );
     await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+    await _acceptCoachVoiceDisclosure(tester);
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
     await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(systemSpeechDisclosureAllowKey), findsNothing);
     expect(calls['bil/speech:available'], 1);
     router.go('/dashboard');
     await tester.pumpAndSettle();
@@ -281,6 +297,7 @@ void registerCoachVoiceCases() {
     _mockCoachVoice(tester, available: Future.value(false));
     await _mount(tester, database: database, gateway: _HeldGateway());
     await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+    await _acceptCoachVoiceDisclosure(tester);
     await tester.pumpAndSettle();
     expect(
       tester
@@ -308,6 +325,7 @@ void registerCoachVoiceCases() {
           gateway: gateway,
         );
         await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+        await _acceptCoachVoiceDisclosure(tester);
         await tester.pump(const Duration(milliseconds: 200));
         await _emitCoachVoice(tester);
         await _waitForCoachCall(tester, gateway);
@@ -348,6 +366,7 @@ void registerCoachVoiceCases() {
       final gateway = _HeldGateway();
       await _mount(tester, database: database, gateway: gateway);
       await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+      await _acceptCoachVoiceDisclosure(tester);
       await tester.pump(const Duration(milliseconds: 200));
       await _emitCoachVoice(tester);
       await _waitForCoachCall(tester, gateway);

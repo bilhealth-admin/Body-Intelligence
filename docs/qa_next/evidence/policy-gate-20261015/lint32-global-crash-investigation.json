@@ -1,0 +1,196 @@
+{
+  "recordedAtUtc": "2026-10-15T16:14:37.718279+00:00",
+  "scope": "READ_ONLY diagnosis; no Gradle, Lint, build, rule, source or dependency changes executed",
+  "status": "BLOCKED_VENDOR_LINT32_GLOBAL_FAILURE",
+  "sourceHead": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "frozenInitSha256": "cfde836ec4388a66341dfc24d331984add1e275c4240f011bb1f16b2c13f7866",
+  "observedInputSha256": "ec71146b611b32e680c222a075a4d29be6ec475087e75c16e4ad26f0ef9dd443",
+  "observedUast": {
+    "useK2Uast": true,
+    "manualSetting": null,
+    "kotlinLanguageVersion": "2.3",
+    "experimentalProjectProperty": null,
+    "projectProperty": null
+  },
+  "observedModels": 75,
+  "exception": "KotlinStringTemplateUPolyadicExpression cannot be cast to org.codehaus.groovy.ast.ASTNode",
+  "cause": {
+    "classification": "Vendor detector state leaks a parser-specific cookie across build-file contexts during GLOBAL dependency analysis.",
+    "facts": [
+      "GradleDetector stores agpVersionCheckInfo.cookie without its originating Context.",
+      "In32.0.1 the field appears only at declaration183, assignment1253, and reuse2156: it is never cleared.",
+      "afterCheckFile(context) reuses that saved cookie with the current file Context.",
+      "LintDriver chooses UastGradleVisitor for .gradle.kts, GroovyGradleVisitor for .gradle; the latter unconditionally casts the supplied cookie to Groovy ASTNode.",
+      "The observed cookie is a Kotlin UAST node while the current visitor is Groovy, matching this exact failure mechanism.",
+      "The crash occurs during analyzeLibraryProject/analyzeDependencies, with75 complete models; no source evidence indicates a BIL app runtime failure or a duplicate-classloader cast."
+    ],
+    "notProven": "The log does not identify the exact originating KTS file and succeeding Groovy file. Do not invent their names."
+  },
+  "supportedEntrypointAssessment": {
+    "currentModels": "The four AGP model collections and GLOBAL Main mode follow official AndroidLintTask inputs. The detector state defect is not fixed by a different spelling of --lint-model.",
+    "clientChange": "Main/client labels do not alter the build-script visitor selected by file suffix or reset GradleDetector state. client-id=cli additionally changes Gradle cache lookup; it is not a proven compatibility fix.",
+    "k1Change": "Kotlin AST/UAST cookies remain different from Groovy ASTNode under K1 too; no evidence supports switching away from the AGP-effective K2 for Kotlin2.3.",
+    "partialMode": "ANALYSIS_ONLY is not GLOBAL and previously conflicts with Insights getMainProject; do not substitute it or claim equivalent coverage.",
+    "orderingOrFiltering": "Reordering/excluding model or build-file inputs, disabling dependency checking, or suppressing GradleDetector would not be a correct fix.",
+    "newerVersions": "Official metadata has no32.0.2. Source inspection of32.1.0,32.2.0,32.3.3,32.4.1 still found this unowned cookie reuse pattern; no verified vendor fix was found. No upgrade performed.",
+    "decision": "No trustworthy supported CLI correction established. Keep analysis BLOCKED and request/validate an upstream fix rather than patching official detectors casually."
+  },
+  "processLifecycle": {
+    "observedByRoot": "Child PID6068 had exited main/DestroyJavaVM and AWT shutdown remained, delaying Gradle after the fatal exception. Root owns process termination and current --continue run.",
+    "proposedJvmProperty": "java.awt.headless=true",
+    "proposedTaskTimeout": "JavaExec Task.timeout 30minutes for the analysis phase only, after model dependencies. This is a proposed operational bound, not a measured performance guarantee.",
+    "proposedEntrypoint": "build/qa/policy-gate-20261015/BilBoundedLintMain.proposed.java",
+    "wrapperSha256": "5fa075c53e1b620c11d567d8f36d68880bff62f6f9f13e4daa9c6ae00d7eb0f7",
+    "behavior": "Call unchanged official Main.run with all original arguments, retain its returned exit code, and System.exit(nonzero) after uncaught Throwable with full raw stack. This fixes termination reporting only; it does not fix or hide the vendor detector crash.",
+    "integrationProposal": "build/qa/policy-gate-20261015/lint32-javaexec-lifecycle.proposed.gradle",
+    "tested": false
+  },
+  "minimumNextSteps": [
+    "Let the current Release/model work finish; preserve the original failure and do not mark the run PASS.",
+    "Use the headless/bounded exit wrapper only in a new, separately fingerprinted audit-tool run after validating normal/nonzero/uncaught-failure exits.",
+    "Escalate the cookie/context defect with a minimal mixed-KTS/Groovy GLOBAL repro to Android Lint, or review a provenance-pinned upstream fix.",
+    "Any future vendor compatibility patch needs before/after tests proving both KTS and Groovy AGP warnings retain the correct source location and all original issue IDs/scopes/severities; none was applied here."
+  ],
+  "officialSourceEvidence": [
+    {
+      "artifact": "lint-checks",
+      "version": "32.0.1",
+      "officialSourceUrl": "https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-checks/32.0.1/lint-checks-32.0.1-sources.jar",
+      "sourceJarSha256": "4c4231fcd2b52956f1d089387c96d16890d22ab26b691d6f92d0eaef95d252c6",
+      "file": "com/android/tools/lint/checks/GradleDetector.kt",
+      "fileSha256": "66cbaafd222754a51496147ce7b90fad9fc25ff51787929b4aa370135f4425ca",
+      "excerpts": [
+        {
+          "firstLine": 173,
+          "lastLine": 183,
+          "text": "173:   private class AgpVersionCheckInfo(\n174:     val newerVersion: Version,\n175:     val newerVersionIsSafe: Boolean,\n176:     val safeReplacement: Version?,\n177:     val dependency: Dependency,\n178:     val isResolved: Boolean,\n179:     val cookie: Any,\n180:   )\n181: \n182:   /** Stores information for a check of the Android gradle plugin dependency version. */\n183:   private var agpVersionCheckInfo: AgpVersionCheckInfo? = null"
+        },
+        {
+          "firstLine": 1252,
+          "lastLine": 1262,
+          "text": "1252:           if (newerVersion != null && newerVersion.isAgpNewerThan(dependency)) {\n1253:             agpVersionCheckInfo =\n1254:               AgpVersionCheckInfo(\n1255:                 newerVersion,\n1256:                 newerVersion.major == version.major && newerVersion.minor == version.minor,\n1257:                 safeReplacement,\n1258:                 dependency,\n1259:                 isResolved,\n1260:                 cookie,\n1261:               )\n1262:             maybeReportAgpVersionIssue(context)"
+        },
+        {
+          "firstLine": 2103,
+          "lastLine": 2106,
+          "text": "2103:   override fun afterCheckFile(context: Context) {\n2104:     maybeReportJavaTargetCompatibilityIssue(context)\n2105:     maybeReportAgpVersionIssue(context)\n2106:   }"
+        },
+        {
+          "firstLine": 2152,
+          "lastLine": 2189,
+          "text": "2152:   private fun maybeReportAgpVersionIssue(context: Context) {\n2153:     // b/144442233: hide check for outdated AGP if we are reasonably sure google()\n2154:     // is not in plugin resolution repositories\n2155:     if (mDeclaredGoogleMavenRepository || !mDeclaredBuildscriptRepository) {\n2156:       agpVersionCheckInfo?.let {\n2157:         val versionString = it.newerVersion.toString()\n2158:         val currentIdentifier = it.dependency.version?.toIdentifier()\n2159:         val message =\n2160:           getNewerVersionAvailableMessage(it.dependency, versionString, it.safeReplacement)\n2161:         val fix =\n2162:           when {\n2163:             it.isResolved -> null\n2164:             currentIdentifier == null -> null\n2165:             else ->\n2166:               getUpdateDependencyFix(\n2167:                 currentIdentifier,\n2168:                 versionString,\n2169:                 \"com.android.tools.build\",\n2170:                 it.newerVersionIsSafe,\n2171:                 it.safeReplacement,\n2172:               )\n2173:           }\n2174:         val clientProperties =\n2175:           LintMap().apply {\n2176:             // Record metadata for the IDE quickfix such that\n2177:             // it can link the AGP Upgrade Assistant to the suggested\n2178:             // recent version\n2179:             put(KEY_COORDINATE, APP_PLUGIN_ID)\n2180:             put(KEY_REVISION, versionString)\n2181:           }\n2182:         report(\n2183:           context,\n2184:           it.cookie,\n2185:           AGP_DEPENDENCY,\n2186:           message,\n2187:           fix,\n2188:           clientProperties = clientProperties,\n2189:         )"
+        },
+        {
+          "firstLine": 2394,
+          "lastLine": 2399,
+          "text": "2394:     context.client.runReadAction(\n2395:       Runnable {\n2396:         val enabled = context.isEnabled(issue)\n2397:         if (enabled && context is GradleContext) {\n2398:           val location = context.getLocation(cookie)\n2399:           val incident = Incident(issue, cookie, location, message, fix)"
+        }
+      ]
+    },
+    {
+      "artifact": "lint",
+      "version": "32.0.1",
+      "officialSourceUrl": "https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint/32.0.1/lint-32.0.1-sources.jar",
+      "sourceJarSha256": "0d2ba73e8e7d9ed27bda5b2e609a3b69844682c201156606b2179e977d103557",
+      "file": "com/android/tools/lint/gradle/GroovyGradleVisitor.java",
+      "fileSha256": "98228eb142736eb3a0eeae4d08af77aca4fc601519425b6700904a779c3c18d6",
+      "excerpts": [
+        {
+          "firstLine": 599,
+          "lastLine": 615,
+          "text": "599:     @NonNull\n600:     @Override\n601:     public Location createLocation(@NonNull GradleContext context, @NonNull Object cookie) {\n602:         ASTNode node = (ASTNode) cookie;\n603:         Pair<ASTNode, ASTNode> boundingNodes = getBoundingNodes(node);\n604:         ASTNode startNode = boundingNodes.getFirst();\n605:         ASTNode endNode = boundingNodes.getSecond();\n606: \n607:         Pair<Integer, Integer> offsets = getOffsets(node, context);\n608:         int fromLine = startNode.getLineNumber() - 1;\n609:         int fromColumn = startNode.getColumnNumber() - 1;\n610:         int toLine = endNode.getLastLineNumber() - 1;\n611:         int toColumn = endNode.getLastColumnNumber() - 1;\n612:         return Location.create(\n613:                 context.file,\n614:                 new DefaultPosition(fromLine, fromColumn, offsets.getFirst()),\n615:                 new DefaultPosition(toLine, toColumn, offsets.getSecond()));"
+        }
+      ]
+    },
+    {
+      "artifact": "lint-api",
+      "version": "32.0.1",
+      "officialSourceUrl": "https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-api/32.0.1/lint-api-32.0.1-sources.jar",
+      "sourceJarSha256": "33d0209d6764af9b44e263cb9a56862c8971f6ca420f6d7b462cdbc20670e6a8",
+      "file": "com/android/tools/lint/client/api/LintDriver.kt",
+      "fileSha256": "2f880f5ba1634da316a0d0e5048b4849f01232aaafe26c38539ccf5e45e5d1a9",
+      "excerpts": [
+        {
+          "firstLine": 1432,
+          "lastLine": 1477,
+          "text": "1432:       while (queue.isNotEmpty()) {\n1433:         val file = queue.removeFirst()\n1434:         val path = file.path\n1435:         if (path.endsWith(DOT_GRADLE_KTS) || path.endsWith(DOT_DECLARATIVE)) {\n1436:           val context =\n1437:             fileToKts[file]\n1438:               ?: run {\n1439:                 val newContext = JavaContext(this, project, main, file)\n1440:                 val parser = uastSourceList?.parser ?: client.getUastParser(project)\n1441:                 // Dynamically discovered KTS file (referenced from other Groovy or KTS script)\n1442:                 newContext.uastParser = parser\n1443:                 parser.prepare(listOf(newContext))\n1444:                 newContext\n1445:               }\n1446:           client.runReadAction {\n1447:             visited.add(context.file)\n1448: \n1449:             // Gradle Kotlin Script? Use Java parsing mechanism.\n1450:             //\n1451:             // TODO: Inject Gradle Project as the implicit receiver. Figure out how.\n1452:             //    Possibly related:\n1453:             //\n1454:             // platforms/core-configuration/kotlin-dsl/src/main/kotlin/org/gradle/kotlin/dsl/support/KotlinCompiler.kt\n1455:             //    in the Gradle repo. Also need to pass it in the Gradle build\n1456:             //    classpath rather than the project class path. The below really only\n1457:             //    works for simpler AST checks not relying on real API resolve.\n1458:             val uFile = context.uastParser.parse(context)\n1459:             if (uFile != null) {\n1460:               context.setJavaFile(uFile.sourcePsi) // needed for getLocation\n1461:               context.uastFile = uFile\n1462:               fireEvent(EventType.SCANNING_FILE, context)\n1463: \n1464:               val uastVisitor = UastGradleVisitor(context)\n1465:               val gradleContext =\n1466:                 createGradleContext(uastVisitor, project, main, context.file, tomlDocument, context)\n1467:               fireEvent(EventType.SCANNING_FILE, context)\n1468:               for (detector in detectors) {\n1469:                 detector.beforeCheckFile(gradleContext)\n1470:               }\n1471: \n1472:               uastVisitor.visitBuildScript(gradleContext, gradleScanners)\n1473:               for (scanner in customVisitedGradleScanners) {\n1474:                 scanner.visitBuildScript(gradleContext)\n1475:               }\n1476:               for (detector in detectors) {\n1477:                 detector.afterCheckFile(gradleContext)"
+        },
+        {
+          "firstLine": 1492,
+          "lastLine": 1513,
+          "text": "1492:         } else if (path.endsWith(DOT_GRADLE)) {\n1493:           visited.add(file)\n1494:           val fileAnalyzed =\n1495:             client.runReadAction<Boolean> {\n1496:               val gradleVisitor =\n1497:                 try {\n1498:                   project.client.getGradleVisitor()\n1499:                 } catch (e: NoClassDefFoundError) {\n1500:                   return@runReadAction (false)\n1501:                 }\n1502:               val context =\n1503:                 createGradleContext(gradleVisitor, project, main, file, tomlDocument, null)\n1504:               fireEvent(EventType.SCANNING_FILE, context)\n1505:               for (detector in detectors) {\n1506:                 detector.beforeCheckFile(context)\n1507:               }\n1508:               gradleVisitor.visitBuildScript(context, gradleScanners)\n1509:               for (scanner in customVisitedGradleScanners) {\n1510:                 scanner.visitBuildScript(context)\n1511:               }\n1512:               for (detector in detectors) {\n1513:                 detector.afterCheckFile(context)"
+        }
+      ]
+    },
+    {
+      "artifact": "lint",
+      "version": "32.0.1",
+      "officialSourceUrl": "https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint/32.0.1/lint-32.0.1-sources.jar",
+      "sourceJarSha256": "0d2ba73e8e7d9ed27bda5b2e609a3b69844682c201156606b2179e977d103557",
+      "file": "com/android/tools/lint/Main.java",
+      "fileSha256": "d39b7b764656241c915ab7323eb3ba40e490afa1270125030377c8bd695782ee",
+      "excerpts": [
+        {
+          "firstLine": 220,
+          "lastLine": 226,
+          "text": "220:     public static void main(String[] args) {\n221:         int exitCode = new Main().run(args);\n222:         System.exit(exitCode);\n223:     }\n224: \n225:     /** Hook intended for tests */\n226:     protected void initializeDriver(@NonNull LintDriver driver) {}"
+        },
+        {
+          "firstLine": 245,
+          "lastLine": 245,
+          "text": "245:         @NonNull LintDriver.DriverMode mode = LintDriver.DriverMode.GLOBAL;"
+        },
+        {
+          "firstLine": 1770,
+          "lastLine": 1782,
+          "text": "1770:     private int run(LintCliClient client, LintRequest lintRequest, ArgumentState argumentState) {\n1771:         try {\n1772:             IssueRegistry registry = getGlobalRegistry(client);\n1773:             switch (argumentState.mode) {\n1774:                 case GLOBAL:\n1775:                     return client.run(registry, lintRequest);\n1776:                 case ANALYSIS_ONLY:\n1777:                     return client.analyzeOnly(registry, lintRequest);\n1778:                 case MERGE:\n1779:                     return client.mergeOnly(registry, lintRequest);\n1780:                 default:\n1781:                     throw new IllegalStateException(\"Unexpected value: \" + argumentState.mode);\n1782:             }"
+        }
+      ]
+    },
+    {
+      "artifact": "lint-checks",
+      "version": "32.4.1",
+      "officialSourceUrl": "https://dl.google.com/dl/android/maven2/com/android/tools/lint/lint-checks/32.4.1/lint-checks-32.4.1-sources.jar",
+      "sourceJarSha256": "9c714ce6504124cdb9662d4fec47830c02bda3d2bbda31aef6669803e0cc28d0",
+      "file": "com/android/tools/lint/checks/GradleDetector.kt",
+      "fileSha256": "80eada15f69c37015d740bd65df02e03bdffd6c8d3bc974a10c0855f38e7e13a",
+      "excerpts": [
+        {
+          "firstLine": 161,
+          "lastLine": 171,
+          "text": "161:   private class AgpVersionCheckInfo(\n162:     val newerVersion: Version,\n163:     val newerVersionIsSafe: Boolean,\n164:     val safeReplacement: Version?,\n165:     val dependency: Dependency,\n166:     val isResolved: Boolean,\n167:     val cookie: Any,\n168:   )\n169: \n170:   /** Stores information for a check of the Android gradle plugin dependency version. */\n171:   private var agpVersionCheckInfo: AgpVersionCheckInfo? = null"
+        },
+        {
+          "firstLine": 2063,
+          "lastLine": 2087,
+          "text": "2063:   private fun maybeReportAgpVersionIssue(context: Context) {\n2064:     // b/144442233: hide check for outdated AGP if we are reasonably sure google()\n2065:     // is not in plugin resolution repositories\n2066:     if (mDeclaredGoogleMavenRepository || !mDeclaredBuildscriptRepository) {\n2067:       agpVersionCheckInfo?.let {\n2068:         val versionString = it.newerVersion.toString()\n2069:         val currentIdentifier = it.dependency.version?.toIdentifier()\n2070:         val message = getNewerVersionAvailableMessage(it.dependency, versionString, it.safeReplacement)\n2071:         val fix =\n2072:           when {\n2073:             it.isResolved -> null\n2074:             currentIdentifier == null -> null\n2075:             else ->\n2076:               getUpdateDependencyFix(currentIdentifier, versionString, \"com.android.tools.build\", it.newerVersionIsSafe, it.safeReplacement)\n2077:           }\n2078:         val clientProperties =\n2079:           LintMap().apply {\n2080:             // Record metadata for the IDE quickfix such that\n2081:             // it can link the AGP Upgrade Assistant to the suggested\n2082:             // recent version\n2083:             put(KEY_COORDINATE, APP_PLUGIN_ID)\n2084:             put(KEY_REVISION, versionString)\n2085:           }\n2086:         report(context, it.cookie, AGP_DEPENDENCY, message, fix, clientProperties = clientProperties)\n2087:       }"
+        }
+      ]
+    }
+  ],
+  "crashExtract": {
+    "path": "build/qa/policy-gate-20261015/lint32-global-debug-vendor-crash.extract.log",
+    "sha256": "c1d4a6beba00b0aaa51e68cb7f2b3e1d3b704f4ec77fe7510f589ee2fd674dfa"
+  },
+  "changesApplied": {
+    "frozenInit": false,
+    "productSource": false,
+    "officialDetectorOrJar": false,
+    "rulesOrSeverity": false,
+    "dependencies": false,
+    "gradleOrLintStarted": false
+  },
+  "releaseRunStatus": "Root full attempt finished FAIL; no longer running. See root_final_attempt.",
+  "root_final_attempt": {
+    "status": "FAIL_VENDOR_AND_BUILD_PREPARATION",
+    "elapsed": "38m17s",
+    "list_task": "old AGP client lacked Insights registry, later direct official Java listing14/14 succeeded",
+    "debug": "official Lint32.0.1 GLOBAL GradleDetector KTS cookie/GroovyContext ClassCastException",
+    "release": "native dev integration_test registrant included during audit prep; full sanitizer for subsequent lint removes dev-only registration",
+    "rules_disabled": false,
+    "versions_upgraded": false,
+    "no_success_inferred": true,
+    "post_sdk_partial_AGP_retest": "PENDING",
+    "current_full_gate_status": "BLOCKED_VENDOR"
+  }
+}

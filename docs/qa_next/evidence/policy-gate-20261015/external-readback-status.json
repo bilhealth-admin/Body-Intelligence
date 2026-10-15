@@ -1,0 +1,14 @@
+{
+  "observed_date_utc": "2026-10-15",
+  "supersedes_earlier_read_blockers": true,
+  "gmail": "READ_VERIFIED: official Gmail connector; latest Apple rejection notice and Google suspension original read. No matching appeal email in two bounded queries; not proof that no Console appeal exists.",
+  "play_console": "PARTIAL_READ_VERIFIED: exact BIL Policy Status remains App suspended; original policy email read. Current App Access, Data Safety and complete appeal history not read; remain BLOCKED.",
+  "app_store_connect": "READ_VERIFIED: current App Privacy22 collected types, tracking marked for User ID, Device ID and Product Interaction; latest rejection is Guideline5.1.2(i), build35, no ATT request. Submission7 items,6 non-app items. Runtime/IPA36 alignment and correction remain BLOCKED.",
+  "earlier_attempts": "Earlier CDP focus timeout and Gmail RATE_LIMIT_EXCEEDED are historical tool failures, superseded by documented Browser.tabs.get DOM reads and official Gmail connector.",
+  "no_mutations": true,
+  "no_appeal_or_review_reply_sent": true,
+  "follow_up_evidence": "live-store-ui-readback-20261015.json",
+  "related_api_readback": "live-store-api-readback-status-20261015.json",
+  "remaining_play_forms_read_attempt": "15Oct2026 fresh known Play tab repeated CDP focus-emulation timeout3s; no form contents or changes. Prior exact BIL Policy Status/enforcement read remains verified; AppAccess/DataSafety/history remain BLOCKED.",
+  "app_privacy_purposes_evidence": "live-app-privacy-purposes-20261015.json"
+}

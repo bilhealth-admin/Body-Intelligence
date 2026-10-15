@@ -1,0 +1,402 @@
+name: BIL APPLE & GOOGLE POLICY COMPLIANCE GATE
+
+# Independent evidence collection. Integration pushes run source regressions;
+# the explicit full-Lint path remains available. No signing/deployment,
+# store credentials, production RPC, paid AI calls, or full Flutter-suite rerun.
+on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_apple_google_policy_gate.yml
+      - .github/scripts/bil_native_bounded_command.py
+      - .github/scripts/test_bil_native_bounded_command.py
+      - android/**
+      - ios/**
+      - lib/**
+      - test/**
+      - integration_test/**
+      - test_driver/**
+      - supabase/functions/**
+      - supabase/tests/reviewer_administrator_moderator_chain_test.mjs
+      - supabase/tests/package.json
+      - supabase/tests/package-lock.json
+      - supabase/migrations/20260906120000_owner_approved_second_administrator.sql
+      - supabase/migrations/20261015090000_restore_single_owner_administrator.sql
+      - supabase/migrations/20260831151527_ai_coach_admin_global_individual_reset.sql
+      - supabase/migrations/202608020004_bil_community_hardening.sql
+      - supabase/migrations/202608020003_bil_commerce_foundation.sql
+      - supabase/migrations/20260821080542_ai_coach_unified_weekly_tokens.sql
+      - tools/qa/**
+      - tool/release/**
+      - tool/prebuild/store_policy_source_guard.py
+      - pubspec.yaml
+      - pubspec.lock
+      - analysis_options.yaml
+      - devtools_options.yaml
+      - .gitattributes
+      - .gitignore
+      - .metadata
+      - wrangler.site.jsonc
+  workflow_dispatch:
+    inputs:
+      evidence_scope:
+        description: Full Lint is currently vendor-blocked; source-regressions explicitly preserves that blocker
+        type: choice
+        required: true
+        default: full-with-android-lint
+        options:
+          - full-with-android-lint
+          - source-regressions
+          - evidence-attestation
+      certify_release:
+        description: Fail closed if artifact, device, service or Console evidence remains unresolved
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-store-policy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: 3.44.6
+  JAVA_VERSION: '21'
+  POLICY_OUT: build/qa/policy-gate-20261015
+  POLICY_EVIDENCE_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.evidence_scope || 'source-regressions' }}
+
+jobs:
+  automatic-policy-evidence:
+    name: Source and affected regressions; certification remains separate
+    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' && !(github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - name: Check out exact integration source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Record source and branch before any checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/integration/bil-qa-media-policy-20261011
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p "$POLICY_OUT"
+          git status --short > "$POLICY_OUT/git-status-before.txt"
+          git rev-parse HEAD > "$POLICY_OUT/source-head.txt"
+
+      - name: Install pinned Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install existing Flutter toolchain
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install pinned Deno for mocked provider regressions
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: v2.9.7
+
+      - name: Install pinned Node for generated-worker reachability regression
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: 24
+
+      - name: Resolve locked packages
+        run: flutter pub get --enforce-lockfile
+
+      - name: Verify policy records and Python regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools/qa -p 'test_bil_store_policy_gate.py' -v 2>&1 | tee "$POLICY_OUT/policy-checker-unit.log"
+          python3 -m unittest discover -s tools/qa -p 'test_android_relro_policy.py' -v 2>&1 | tee "$POLICY_OUT/relro-unit.log"
+          python3 -m unittest discover -s tool/release -p 'test_prepare_android_policy_plugin_overrides.py' -v 2>&1 | tee "$POLICY_OUT/plugin-overlay-unit.log"
+          python3 -m unittest discover -s .github/scripts -p 'test_bil_native_bounded_command.py' -v 2>&1 | tee "$POLICY_OUT/native-supervisor-unit.log"
+          python3 tool/release/verify_android_16k_alignment.py --self-test
+          python3 tools/qa/bil_store_policy_gate.py --output "$POLICY_OUT/source-checks-before-lint.json"
+          python3 tool/prebuild/store_policy_source_guard.py --json-out "$POLICY_OUT/legacy-source-policy-preflight.json"
+
+      - name: Reproduce CodeQL RTI reachability without modifying generated code
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tools/qa/test_drift_worker_rti_guards.mjs 2>&1 | tee "$POLICY_OUT/codeql48-regression.log"
+
+      - name: Replay only affected reviewer roles in isolated WASM Postgres
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix supabase/tests --ignore-scripts
+          node supabase/tests/reviewer_administrator_moderator_chain_test.mjs \
+            2>&1 | tee "$POLICY_OUT/reviewer-administrator-moderator-sql.log"
+
+      - name: Verify affected provider and consent boundaries without paid requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          deno test --allow-env --allow-net --allow-read \
+            supabase/functions/_shared/ai_provider_recipient_test.ts \
+            supabase/functions/ai-coach/provider_recipient_policy_test.ts \
+            supabase/functions/ai-coach/server_test.ts \
+            supabase/functions/analyze-meal/providers/providers_test.ts \
+            2>&1 | tee "$POLICY_OUT/provider-regression.log"
+          deno check supabase/functions/analyze-meal/index.ts \
+            2>&1 | tee "$POLICY_OUT/vision-typecheck.log"
+
+      - name: Analyze the final Dart source without rerunning the full suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter analyze --no-pub 2>&1 | tee "$POLICY_OUT/flutter-analyze.log"
+
+      - name: Run only the affected Flutter regressions
+        shell: bash
+        env:
+          BIL_POLICY_CAPTURE_DIR: ${{ github.workspace }}/build/qa/policy-gate-20261015/reviewer-widget
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 5m \
+            test/app/services/system_speech_disclosure_test.dart \
+            test/features/commerce/bil_store_copy_test.dart \
+            test/localization/closure_interfaces_runtime_copy_test.dart \
+            test/features/commerce/bil_store_plans_light_visual_test.dart \
+            test/features/commerce/apple_review_product_screenshot_test.dart \
+            tools/qa/flutter/policy_pearl_dialog_visual_test.dart \
+            test/features/nutrition/speech_bridge_capture_ownership_test.dart \
+            test/features/nutrition/voice_shared_purpose_behavior_test.dart \
+            test/features/nutrition/meal_voice_panel_behavior_test.dart \
+            test/features/community/community_voice_unicode_retention_test.dart \
+            test/parallel/bil02/coach_media_voice_overlay_test.dart \
+            test/features/daily_check_in/daily_check_in_voice_end_to_end_test.dart \
+            test/features/community/community_reference_composer_v1_test.dart \
+            test/features/nutrition/voice_logging_review_contract_test.dart \
+            test/qa_next/other_voice_window_capture_test.dart \
+            test/features/intelligence_center/coach_page_lifecycle_regression_test.dart \
+            test/platform_readiness/voice_permission_capability_copy_test.dart \
+            test/platform_readiness/community_voice_purpose_contract_test.dart \
+            test/features/weight/weight_voice_input_test.dart \
+            test/parallel/bil02/coach_voice_transcript_bridge_test.dart \
+            tools/qa/flutter/policy_reviewer_navigation_test.dart \
+            test/features/settings/nutrition_goals_widget_test.dart \
+            test/features/settings/nutrition_goal_provenance_ui_test.dart \
+            test/features/settings/reference_diary_preferences_consumption_test.dart \
+            tools/qa/flutter/native_hold_observer_regression_test.dart \
+            tools/qa/flutter/native_frame_timing_identity_test.dart \
+            tools/qa/flutter/native_history_anchor_regression_test.dart \
+            tools/qa/flutter/native_capture_manifest_test.dart \
+            tools/qa/flutter/native_capture_collection_test.dart \
+            tools/qa/flutter/native_visual_observer_regression_test.dart \
+            test/launch_readiness/release_platform_evidence_gate_test.dart \
+            test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart \
+            test/launch_readiness/flutter_release_plugin_sanitizer_test.dart \
+            test/features/nutrition/windows_camera_runtime_r1_contract_test.dart \
+            test/features/nutrition/barcode_runtime_contract_test.dart \
+            test/features/nutrition/barcode_gallery_picker_failure_test.dart \
+            test/platform_readiness/camera_photo_i18n_contract_test.dart \
+            2>&1 | tee "$POLICY_OUT/affected-flutter.log"
+
+      - name: Prepare reproducible Android library repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py \
+            > "$POLICY_OUT/android-plugin-overlays.json"
+          dart run tool/release/sanitize_flutter_release_plugins.dart \
+            --platform=android \
+            > "$POLICY_OUT/android-plugin-discovery.json"
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+
+      - name: Produce merged manifests and prove the notification icon survives R8 without app packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd android
+          ./gradlew --no-daemon --console=plain --max-workers=2 \
+            --init-script ../tool/release/bil_android_runtime_dependencies.init.gradle \
+            --init-script ../tool/release/bil_android_notification_resource.init.gradle \
+            :app:processDebugMainManifest :app:processReleaseMainManifest \
+            :app:bilPolicyRuntimeDependencies :app:bilPolicyNotificationResource \
+            2>&1 | tee "../$POLICY_OUT/android-merged-manifests.log"
+
+      - name: Prove patched Tink bytecode and synthetic cross-version compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/qa/android_tink_compatibility_probe.py \
+            --java-home "$JAVA_HOME" \
+            --new-model "$POLICY_OUT/android-runtime-dependencies.json" \
+            2>&1 | tee "$POLICY_OUT/tink-compatibility.log"
+
+      - name: Prove ML Kit OkHttp linkage and TLS verification regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tools/qa/android_okhttp_compatibility_probe.py \
+            --java-home "$JAVA_HOME" \
+            --candidate-model "$POLICY_OUT/android-runtime-dependencies.json" \
+            2>&1 | tee "$POLICY_OUT/okhttp-compatibility.log"
+
+      - name: Run every built-in and official Play Insights rule in GLOBAL mode
+        id: android_lint
+        if: env.POLICY_EVIDENCE_SCOPE == 'full-with-android-lint'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd android
+          # Both vendor failures are preserved, never marked PASS by a source-only run.
+          # AGP 9.0.1 module-partial mode crashes Insights 0.1.5 LoginCredentials.
+          # The matching official Lint 32.0.1 GLOBAL runtime uses all AGP models
+          # and all rule JARs. No detector, severity, dependency or baseline filter.
+          ./gradlew --no-daemon --console=plain --max-workers=2 --continue \
+            --init-script ../tool/release/bil_android_global_lint.init.gradle \
+            :app:bilPolicyLintList :app:bilPolicyLintDebug :app:bilPolicyLintRelease \
+            2>&1 | tee "../$POLICY_OUT/android-lint-global.log"
+
+      - name: Record merged permissions and explicit certification decision
+        if: always()
+        shell: bash
+        env:
+          BIL_LINT_OUTCOME: ${{ steps.android_lint.outcome }}
+          BIL_EVIDENCE_SCOPE: ${{ env.POLICY_EVIDENCE_SCOPE }}
+        run: |
+          set -euo pipefail
+          python3 tools/qa/bil_store_policy_gate.py --require-merged \
+            --output "$POLICY_OUT/policy-gate-result.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result_path = Path(os.environ['POLICY_OUT'], 'policy-gate-result.json')
+          r = json.loads(result_path.read_text())
+          outcome = os.environ['BIL_LINT_OUTCOME']
+          lint = 'PASS' if outcome == 'success' else ('FAIL' if outcome == 'failure' else 'BLOCKED_VENDOR_NOT_RERUN')
+          r['evidence_scope'] = os.environ['BIL_EVIDENCE_SCOPE']
+          r['full_android_lint_status'] = lint
+          r['lint_blocker_evidence'] = 'docs/qa_next/evidence/policy-gate-20261015/lint32-global-crash-investigation.json'
+          result_path.write_text(json.dumps(r, ensure_ascii=False, indent=2) + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('# BIL policy evidence — not store acceptance\n\n')
+              f.write(f"Source: `{r['source_head']}`\n\n")
+              f.write(f"Automatic checks: **{r['automatic_source_check_status']}**\n\n")
+              f.write(f"Full Android Lint + Play Insights: **{lint}**\n\n")
+              f.write(f"Pre-submission certification: **{r['pre_submission_certification']}**\n\n")
+              f.write('A green automatic-evidence job does not close device, signed artifact, live service or Console blockers.\n')
+          PY
+
+      - name: Enforce fail-closed release certification when explicitly requested
+        if: inputs.certify_release
+        run: >-
+          python3 tools/qa/bil_store_policy_gate.py --require-merged
+          --certify-release --output build/qa/policy-gate-20261015/certification-result.json
+
+      - name: Preserve all actual evidence including failed checks
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-apple-google-policy-${{ github.sha }}
+          path: |
+            build/qa/policy-gate-20261015
+            build/app/reports/lint-results-*
+            build/app/intermediates/merged_manifests/**/AndroidManifest.xml
+            !build/qa/**/private-synthetic-keysets/**
+          if-no-files-found: error
+          retention-days: 30
+
+  evidence-attestation:
+    name: Verify final documentation commit against the tested source and live CI
+    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' && github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Refuse store certification in documentation-only mode
+        if: inputs.certify_release
+        run: |
+          echo 'Evidence equivalence cannot certify a store release.' >&2
+          exit 2
+      - name: Read final commit and its tested parent
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify unchanged implementation and all required live run results
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re, subprocess, urllib.request
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          def api(path):
+              req = urllib.request.Request('https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY'] + path,
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+          def verify_run(role, record, source):
+              specs = {
+                  'policy': ('bil_apple_google_policy_gate.yml', 'push', {'Source and affected regressions; certification remains separate'}),
+                  'source_security': ('bil_codeql_security_extended.yml', 'push', {'CodeQL (actions)', 'CodeQL (javascript-typescript)', 'CodeQL (python)', 'Isolated Semgrep source audit'}),
+                  'android_startup': ('bil_android_isolated_emulator_smoke.yml', 'push', {f'Android {level} offline-config startup' for level in (26,29,33,34,35,36)}),
+                  'native_android_ios': ('bil_codeql_security_extended.yml', 'workflow_dispatch', {'Android API 33 native integration without CodeQL tracing', 'iPhone and iPad native tests from exact simulator bundles'}),
+              }
+              workflow, event, expected = specs[role]
+              run_id = str(record['run_id'])
+              assert run_id.isdecimal(), 'Invalid run ID'
+              run = api('/actions/runs/' + run_id)
+              assert run['head_sha'] == source and run['head_branch'] == 'integration/bil-qa-media-policy-20261011'
+              assert run['path'].split('@')[0] == '.github/workflows/' + workflow and run['event'] == event
+              assert run['status'] == 'completed' and run['conclusion'] == 'success', 'Required run did not pass'
+              jobs = api('/actions/runs/' + run_id + '/jobs?filter=latest&per_page=100')['jobs']
+              assert all(j['status'] == 'completed' and j['conclusion'] in ('success','skipped') for j in jobs)
+              successful = {j['name'] for j in jobs if j['conclusion'] == 'success'}
+              assert successful == expected, 'Required jobs were skipped, missing, failed, or different'
+              return {'role': role, 'run_id': int(run_id), 'url': run['html_url'], 'head_sha': run['head_sha'],
+                      'attempt': run['run_attempt'], 'verified_successful_jobs': sorted(successful)}
+          def main():
+              record = json.loads(Path('docs/qa_next/evidence/policy-gate-20261015/ci-closure.json').read_text())
+              source = record['tested_source_sha']
+              assert re.fullmatch('[0-9a-f]{40}', source)
+              head = git('rev-parse','HEAD')
+              assert head == os.environ['GITHUB_SHA'] and git('rev-parse','HEAD^') == source
+              changed = subprocess.check_output(['git','diff','--name-only','-z',source,head]).decode().split('\0')
+              changed = [p for p in changed if p]
+              assert changed and all(p.startswith('docs/qa_next/') for p in changed), 'Implementation changed after the tested source'
+              roles = ('policy','source_security','android_startup','native_android_ios')
+              runs = record['required_runs']
+              assert set(runs) == set(roles)
+              verified = [verify_run(role, runs[role], source) for role in roles]
+              result = {'status': 'PASS_SOURCE_EQUIVALENCE_AND_LIVE_CI', 'attested_commit_sha': head,
+                  'tested_source_sha': source, 'changed_paths': changed, 'verified_runs': verified,
+                  'implementation_changed': False, 'full_suite_repeated': False,
+                  'pre_submission_certification': 'BLOCKED', 'signed_build_or_store_acceptance_proven': False}
+              out = Path('build/qa/policy-gate-20261015/final-evidence-attestation.json')
+              out.parent.mkdir(parents=True, exist_ok=True)
+              out.write_text(json.dumps(result, indent=2) + '\n')
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
+                  stream.write(f'Final commit `{head}` has the same implementation as tested `{source}`. All four required live runs and 13 jobs verified. No tests repeated. Store certification remains BLOCKED.\n')
+          main()
+          PY
+      - name: Preserve final SHA attestation
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-final-evidence-attestation-${{ github.sha }}
+          path: build/qa/policy-gate-20261015/final-evidence-attestation.json
+          if-no-files-found: error
+          retention-days: 30

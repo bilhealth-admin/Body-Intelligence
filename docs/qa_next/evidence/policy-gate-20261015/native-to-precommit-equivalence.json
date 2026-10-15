@@ -1,0 +1,23 @@
+{
+  "scope": "Input equivalence, not another native run. Local UI/crypto remain bound to their own manifests; these later QA-only edits do not change lib/Android/iOS/assets or dependency inputs. Final CI still tests the final SHA.",
+  "native_ui_implementation_fingerprint": "bbc68b9d9f6b10e386f80a46e4ad71709d974d046c27982cacf6452441c89259",
+  "precommit_implementation_fingerprint": "c2eab6192119396a9f38febbeacb76a436be793975ef8f652ad8dfb532b8779b",
+  "changes": [
+    {
+      "path": ".github/scripts/bil_ios36_native_integration.sh",
+      "before_sha256": "503dfc6cad4fd3de68748f0400947110f8689a947fa2c3bd7875380df7e86480",
+      "after_sha256": "d767172c5e0b5a6f78a52398e6500265a035662ad753f7df0c26d350ca7f1980"
+    },
+    {
+      "path": "test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart",
+      "before_sha256": "450a58abcb266afe1327d56809d3c0936083e2ce49b4093e4729a0be6b67e782",
+      "after_sha256": "403ecd81b9810f8dcb69727666b256ad28e7d3ff1b0d3e4975be4d864644d9be"
+    },
+    {
+      "path": "tool/release/deferred_simple_barcode_provenance.dart",
+      "before_sha256": "b95cc1d288a84c831ec826412d419a4ef210007b67241b91dd2808fabc0ac701",
+      "after_sha256": "8c4795719745687ad82677397c7cbb7ecf3f7dfdd7c64759ce71b632ccce8f74"
+    }
+  ],
+  "product_and_android_inputs_unchanged": true
+}

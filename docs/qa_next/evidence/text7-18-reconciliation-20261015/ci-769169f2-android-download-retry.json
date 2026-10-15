@@ -1,0 +1,47 @@
+{
+  "recorded_at_utc": "2026-10-15T14:20:25.261894+00:00",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "affected_source_tests": {
+    "passed": 30,
+    "failures": 0,
+    "log": {
+      "file": "android-native-769169f2.log",
+      "bytes": 57773,
+      "sha256": "0cfe5a76dc60fbf069f0e128d90f380ff64beeb814da6db4f90051705a4e57b6"
+    }
+  },
+  "android_first_job": {
+    "run": 38748152719,
+    "job": 116467177698,
+    "conclusion": "failure",
+    "stage": "SDK_EMULATOR_DOWNLOAD_BEFORE_APP",
+    "failure_id": "F23"
+  },
+  "job_rerun_api": {
+    "status": 403,
+    "reason": "The workflow run containing this job is already running",
+    "not_an_approval_rejection": true
+  },
+  "android_only_retry": {
+    "run": 38749537030,
+    "job": 116472007681,
+    "inputs": {
+      "android_native_only": true,
+      "native_target": "feature-splashes"
+    },
+    "source_unchanged": true,
+    "status": "running; not yet accepted"
+  },
+  "ios_feature_run": {
+    "run": 38748152719,
+    "job": 116467178020,
+    "status": "running; unchanged"
+  },
+  "ios_secure_cache_run": {
+    "run": 38738008732,
+    "job": 116432155718,
+    "status": "running; unchanged"
+  },
+  "full_suite_repeated": false,
+  "product_source_changed_for_retry": false
+}

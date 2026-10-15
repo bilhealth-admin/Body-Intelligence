@@ -1,0 +1,44 @@
+{
+  "scope": "Input equivalence for the completed Tink JVM result after unrelated OkHttp constraint; not a rerun or Android proof",
+  "tested_result_sha256": "8fa9264ccd72e3c570ff6b5ab20451b00e1981bf2110fbd7eaa241e2490bef51",
+  "final_graph_sha256": "af2225dd89bde7e95ef1067bf517a0c7d902703dfd96e7f587caaa254158f649",
+  "tested_inputs": [
+    {
+      "coordinate": "androidx.annotation:annotation-jvm:1.10.0",
+      "tested_sha256": "ddd072ddbb553178e205517ce777b2f05aa9e412982d9ecb4eedc74f1212f697",
+      "final_sha256": "ddd072ddbb553178e205517ce777b2f05aa9e412982d9ecb4eedc74f1212f697",
+      "unchanged": true
+    },
+    {
+      "coordinate": "com.google.code.findbugs:jsr305:3.0.2",
+      "tested_sha256": "766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7",
+      "final_sha256": "766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7",
+      "unchanged": true
+    },
+    {
+      "coordinate": "com.google.code.gson:gson:2.13.2",
+      "tested_sha256": "dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0",
+      "final_sha256": "dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0",
+      "unchanged": true
+    },
+    {
+      "coordinate": "com.google.errorprone:error_prone_annotations:2.48.0",
+      "tested_sha256": "b49c5c958316ed67a09c699dda9aa749caf434d51d863dea599ef36a49b9c855",
+      "final_sha256": "b49c5c958316ed67a09c699dda9aa749caf434d51d863dea599ef36a49b9c855",
+      "unchanged": true
+    },
+    {
+      "coordinate": "org.jspecify:jspecify:1.0.0",
+      "tested_sha256": "1fad6e6be7557781e4d33729d49ae1cdc8fdda6fe477bb0cc68ce351eafdfbab",
+      "final_sha256": "1fad6e6be7557781e4d33729d49ae1cdc8fdda6fe477bb0cc68ce351eafdfbab",
+      "unchanged": true
+    },
+    {
+      "coordinate": "com.google.crypto.tink:tink-android:1.22.0",
+      "tested_sha256": "3738a5365b890f80703945b3fc8ad6253c93c5905e2e8bb8d99d4e06ffd914af",
+      "final_sha256": "3738a5365b890f80703945b3fc8ad6253c93c5905e2e8bb8d99d4e06ffd914af",
+      "unchanged": true
+    }
+  ],
+  "status": "PASS_SIX_JVM_INPUTS_IDENTICAL"
+}

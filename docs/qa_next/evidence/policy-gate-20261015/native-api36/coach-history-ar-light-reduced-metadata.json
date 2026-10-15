@@ -1,0 +1,2317 @@
+{
+  "classification": "native android QA production Coach page / held synthetic model, not AI-quality E2E",
+  "platform": "android",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "source_fingerprint": "03707325ec2bb3be9b7f0bbdff807e763fe545bb15db10636fb7dbd58c560aef",
+  "scene": "ar-light-reduced",
+  "mode": "history",
+  "text_scale": 2.0,
+  "reduced_motion_fixture": true,
+  "native_reduce_motion": false,
+  "fonts": "actual platform theme and bundled BIL fonts; no Evidence override",
+  "physical_size": "1080.0x2400.0",
+  "device_pixel_ratio": 2.625,
+  "capture_windows": [
+    {
+      "name": "coach-history-ar-light-reduced-reading",
+      "before": {
+        "observed_at_ms": 0,
+        "viewport_present": true,
+        "scroll_pixels": 53.7390037856147,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "history_anchor_top": 546.5627336122735,
+        "reply_row_present": false
+      },
+      "after": {
+        "observed_at_ms": 2728,
+        "viewport_present": true,
+        "scroll_pixels": 53.7390037856147,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "history_anchor_top": 546.5627336122735,
+        "reply_row_present": false
+      }
+    },
+    {
+      "name": "coach-history-ar-light-reduced-mid",
+      "before": {
+        "observed_at_ms": 4388,
+        "viewport_present": true,
+        "scroll_pixels": 53.7390037856147,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "history_anchor_top": 546.5627336122735,
+        "reply_row_present": false
+      },
+      "after": {
+        "observed_at_ms": 6747,
+        "viewport_present": true,
+        "scroll_pixels": 53.7390037856147,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "history_anchor_top": 546.5627336122735,
+        "reply_row_present": false
+      }
+    },
+    {
+      "name": "coach-history-ar-light-reduced-end",
+      "before": {
+        "observed_at_ms": 6753,
+        "viewport_present": true,
+        "scroll_pixels": 53.7390037856147,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "history_anchor_top": 546.5627336122735,
+        "reply_row_present": false
+      },
+      "after": {
+        "observed_at_ms": 8779,
+        "viewport_present": true,
+        "scroll_pixels": 53.7390037856147,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "history_anchor_top": 546.5627336122735,
+        "reply_row_present": false
+      }
+    }
+  ],
+  "completed": true,
+  "history_anchor_search": [
+    {
+      "drag_index": 1,
+      "requested_drag_dy": 270.1390037856147,
+      "pixels_before_drag": -196.4,
+      "scroll_pixels": 53.7390037856147,
+      "min_scroll_extent": -196.4,
+      "max_scroll_extent": 6277.638174935245,
+      "viewport_height": 491.161825064754,
+      "axis_direction": "up",
+      "distance_from_newest": 250.1390037856147,
+      "visible_history_candidates": 3,
+      "mounted_history_rows": [
+        {
+          "key": "[<'coach-message-text-native-history-34'>]",
+          "matches_language_prefix": true,
+          "top": 546.5627336122735,
+          "height": 150.0,
+          "visible_height": 126.9609962143852
+        },
+        {
+          "key": "[<'coach-message-text-native-history-33'>]",
+          "matches_language_prefix": true,
+          "top": 355.06273361227335,
+          "height": 72.0,
+          "visible_height": 72.0
+        },
+        {
+          "key": "[<'coach-message-text-native-history-32'>]",
+          "matches_language_prefix": true,
+          "top": 160.56273361227343,
+          "height": 149.99999999999997,
+          "visible_height": 128.20082885036865
+        }
+      ],
+      "scrolling": false
+    }
+  ],
+  "history_anchor_key": "[<'coach-message-text-native-history-34'>]",
+  "history_anchor_top_before": 546.5627336122735,
+  "scroll_pixels_before": 53.7390037856147,
+  "held_reply_released_at_ms": 2731,
+  "geometry_native_frames": [
+    {
+      "observed_at_ms": 22,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 93,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 141,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 176,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 417,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 461,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 503,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 553,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 617,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 709,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 792,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 868,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 939,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1008,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1064,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1129,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1212,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1277,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1365,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1456,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1491,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1559,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1616,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1674,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1729,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1807,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1844,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1928,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 1991,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2057,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2164,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2226,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2257,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2340,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2364,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2532,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2564,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2662,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2857,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2915,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2943,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 2991,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3095,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3224,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3255,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3339,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3404,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3511,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3557,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3605,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3637,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3693,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3738,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3771,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3821,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3880,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 3956,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4004,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4039,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4089,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4138,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4188,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4260,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4305,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4357,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4404,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4425,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4478,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4527,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4575,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4654,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4744,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4830,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4854,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4914,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 4992,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5009,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5088,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5109,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5176,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5212,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5260,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5309,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5390,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5421,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5471,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5541,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5589,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5639,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5687,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5746,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5823,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5865,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5907,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 5992,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6021,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6071,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6121,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6173,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6258,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6307,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6354,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6399,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6431,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6546,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6598,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6679,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6760,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6786,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6827,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6853,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 6941,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7109,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7222,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7241,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7278,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7341,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7360,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7410,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7457,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7505,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7555,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7609,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7662,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7705,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7769,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7792,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7837,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7888,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7937,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 7989,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8041,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8072,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8129,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8171,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8206,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8254,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8327,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8354,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8404,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8454,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8571,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8604,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8626,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    },
+    {
+      "observed_at_ms": 8700,
+      "viewport_present": true,
+      "scroll_pixels": 53.7390037856147,
+      "viewport_top": 182.36190476190475,
+      "viewport_bottom": 673.5237298266587,
+      "history_anchor_top": 546.5627336122735,
+      "reply_row_present": false
+    }
+  ],
+  "native_frame_timings": [
+    {
+      "build_us": 6521,
+      "raster_us": 57035,
+      "total_us": 119283,
+      "raster_finish_us": 4864102834
+    },
+    {
+      "build_us": 6906,
+      "raster_us": 46552,
+      "total_us": 102595,
+      "raster_finish_us": 4864152813
+    },
+    {
+      "build_us": 2158,
+      "raster_us": 51598,
+      "total_us": 91692,
+      "raster_finish_us": 4864208577
+    },
+    {
+      "build_us": 1332,
+      "raster_us": 40003,
+      "total_us": 82641,
+      "raster_finish_us": 4864249526
+    },
+    {
+      "build_us": 1548,
+      "raster_us": 64777,
+      "total_us": 105920,
+      "raster_finish_us": 4864322805
+    },
+    {
+      "build_us": 1633,
+      "raster_us": 51773,
+      "total_us": 110581,
+      "raster_finish_us": 4864377466
+    },
+    {
+      "build_us": 2066,
+      "raster_us": 38153,
+      "total_us": 82869,
+      "raster_finish_us": 4864416420
+    },
+    {
+      "build_us": 2082,
+      "raster_us": 62411,
+      "total_us": 97495,
+      "raster_finish_us": 4864481046
+    },
+    {
+      "build_us": 2116,
+      "raster_us": 93407,
+      "total_us": 158055,
+      "raster_finish_us": 4864574940
+    },
+    {
+      "build_us": 166118,
+      "raster_us": 62180,
+      "total_us": 235276,
+      "raster_finish_us": 4864718827
+    },
+    {
+      "build_us": 3426,
+      "raster_us": 57179,
+      "total_us": 77706,
+      "raster_finish_us": 4864777924
+    },
+    {
+      "build_us": 2018,
+      "raster_us": 67927,
+      "total_us": 112717,
+      "raster_finish_us": 4864846268
+    },
+    {
+      "build_us": 2375,
+      "raster_us": 98898,
+      "total_us": 162108,
+      "raster_finish_us": 4864945659
+    },
+    {
+      "build_us": 2205,
+      "raster_us": 69736,
+      "total_us": 169605,
+      "raster_finish_us": 4865019823
+    },
+    {
+      "build_us": 2742,
+      "raster_us": 74657,
+      "total_us": 144852,
+      "raster_finish_us": 4865095070
+    },
+    {
+      "build_us": 5262,
+      "raster_us": 73674,
+      "total_us": 144302,
+      "raster_finish_us": 4865177853
+    },
+    {
+      "build_us": 1969,
+      "raster_us": 61765,
+      "total_us": 142983,
+      "raster_finish_us": 4865243201
+    },
+    {
+      "build_us": 2089,
+      "raster_us": 51205,
+      "total_us": 117679,
+      "raster_finish_us": 4865301230
+    },
+    {
+      "build_us": 3278,
+      "raster_us": 57798,
+      "total_us": 117243,
+      "raster_finish_us": 4865367461
+    },
+    {
+      "build_us": 2631,
+      "raster_us": 74628,
+      "total_us": 142352,
+      "raster_finish_us": 4865442570
+    },
+    {
+      "build_us": 2387,
+      "raster_us": 65703,
+      "total_us": 141930,
+      "raster_finish_us": 4865508815
+    },
+    {
+      "build_us": 3283,
+      "raster_us": 78662,
+      "total_us": 149060,
+      "raster_finish_us": 4865599278
+    },
+    {
+      "build_us": 2903,
+      "raster_us": 68912,
+      "total_us": 152358,
+      "raster_finish_us": 4865669243
+    },
+    {
+      "build_us": 3903,
+      "raster_us": 61888,
+      "total_us": 133064,
+      "raster_finish_us": 4865733282
+    },
+    {
+      "build_us": 2748,
+      "raster_us": 58740,
+      "total_us": 126688,
+      "raster_finish_us": 4865793573
+    },
+    {
+      "build_us": 2779,
+      "raster_us": 46502,
+      "total_us": 114627,
+      "raster_finish_us": 4865848178
+    },
+    {
+      "build_us": 4162,
+      "raster_us": 47645,
+      "total_us": 108234,
+      "raster_finish_us": 4865908452
+    },
+    {
+      "build_us": 2065,
+      "raster_us": 52583,
+      "total_us": 118070,
+      "raster_finish_us": 4865968288
+    },
+    {
+      "build_us": 2842,
+      "raster_us": 47885,
+      "total_us": 106896,
+      "raster_finish_us": 4866023781
+    },
+    {
+      "build_us": 1776,
+      "raster_us": 56147,
+      "total_us": 120571,
+      "raster_finish_us": 4866087456
+    },
+    {
+      "build_us": 1604,
+      "raster_us": 71918,
+      "total_us": 130073,
+      "raster_finish_us": 4866163624
+    },
+    {
+      "build_us": 1956,
+      "raster_us": 60362,
+      "total_us": 141099,
+      "raster_finish_us": 4866224650
+    },
+    {
+      "build_us": 2494,
+      "raster_us": 62275,
+      "total_us": 129308,
+      "raster_finish_us": 4866296193
+    },
+    {
+      "build_us": 2421,
+      "raster_us": 70231,
+      "total_us": 134278,
+      "raster_finish_us": 4866367829
+    },
+    {
+      "build_us": 3290,
+      "raster_us": 61318,
+      "total_us": 136550,
+      "raster_finish_us": 4866436768
+    },
+    {
+      "build_us": 3911,
+      "raster_us": 54954,
+      "total_us": 126662,
+      "raster_finish_us": 4866493547
+    },
+    {
+      "build_us": 5949,
+      "raster_us": 50106,
+      "total_us": 102781,
+      "raster_finish_us": 4866552999
+    },
+    {
+      "build_us": 2050,
+      "raster_us": 42033,
+      "total_us": 100601,
+      "raster_finish_us": 4866600819
+    },
+    {
+      "build_us": 1542,
+      "raster_us": 60006,
+      "total_us": 126389,
+      "raster_finish_us": 4866693274
+    },
+    {
+      "build_us": 1572,
+      "raster_us": 67887,
+      "total_us": 161676,
+      "raster_finish_us": 4866761894
+    },
+    {
+      "build_us": 1548,
+      "raster_us": 56650,
+      "total_us": 137289,
+      "raster_finish_us": 4866837507
+    },
+    {
+      "build_us": 8189,
+      "raster_us": 54637,
+      "total_us": 93090,
+      "raster_finish_us": 4866893308
+    },
+    {
+      "build_us": 1497,
+      "raster_us": 38635,
+      "total_us": 99457,
+      "raster_finish_us": 4866949675
+    },
+    {
+      "build_us": 111437,
+      "raster_us": 62290,
+      "total_us": 230875,
+      "raster_finish_us": 4867164426
+    },
+    {
+      "build_us": 20604,
+      "raster_us": 57310,
+      "total_us": 90362,
+      "raster_finish_us": 4867223913
+    },
+    {
+      "build_us": 3857,
+      "raster_us": 77911,
+      "total_us": 123903,
+      "raster_finish_us": 4867307454
+    },
+    {
+      "build_us": 639,
+      "raster_us": 68457,
+      "total_us": 142827,
+      "raster_finish_us": 4867376378
+    },
+    {
+      "build_us": 454,
+      "raster_us": 70629,
+      "total_us": 131476,
+      "raster_finish_us": 4867448361
+    },
+    {
+      "build_us": 371,
+      "raster_us": 43538,
+      "total_us": 52612,
+      "raster_finish_us": 4867519497
+    },
+    {
+      "build_us": 1102,
+      "raster_us": 60732,
+      "total_us": 89435,
+      "raster_finish_us": 4867589653
+    },
+    {
+      "build_us": 334,
+      "raster_us": 58330,
+      "total_us": 65068,
+      "raster_finish_us": 4867648619
+    },
+    {
+      "build_us": 317,
+      "raster_us": 38541,
+      "total_us": 45834,
+      "raster_finish_us": 4867696052
+    },
+    {
+      "build_us": 2069,
+      "raster_us": 38340,
+      "total_us": 48556,
+      "raster_finish_us": 4867798774
+    },
+    {
+      "build_us": 748,
+      "raster_us": 35938,
+      "total_us": 42815,
+      "raster_finish_us": 4867843033
+    },
+    {
+      "build_us": 718,
+      "raster_us": 42361,
+      "total_us": 46603,
+      "raster_finish_us": 4867896821
+    },
+    {
+      "build_us": 739,
+      "raster_us": 39051,
+      "total_us": 52636,
+      "raster_finish_us": 4867936187
+    },
+    {
+      "build_us": 847,
+      "raster_us": 38461,
+      "total_us": 47535,
+      "raster_finish_us": 4867981086
+    },
+    {
+      "build_us": 550,
+      "raster_us": 41086,
+      "total_us": 45631,
+      "raster_finish_us": 4868029182
+    },
+    {
+      "build_us": 1101,
+      "raster_us": 37119,
+      "total_us": 55618,
+      "raster_finish_us": 4868072503
+    },
+    {
+      "build_us": 849,
+      "raster_us": 39149,
+      "total_us": 51158,
+      "raster_finish_us": 4868118043
+    },
+    {
+      "build_us": 1718,
+      "raster_us": 47226,
+      "total_us": 59471,
+      "raster_finish_us": 4868176356
+    },
+    {
+      "build_us": 882,
+      "raster_us": 41197,
+      "total_us": 44986,
+      "raster_finish_us": 4868245204
+    },
+    {
+      "build_us": 706,
+      "raster_us": 40078,
+      "total_us": 43645,
+      "raster_finish_us": 4868293863
+    },
+    {
+      "build_us": 508,
+      "raster_us": 52060,
+      "total_us": 68233,
+      "raster_finish_us": 4868351784
+    },
+    {
+      "build_us": 1044,
+      "raster_us": 46953,
+      "total_us": 65843,
+      "raster_finish_us": 4868399394
+    },
+    {
+      "build_us": 522,
+      "raster_us": 51348,
+      "total_us": 67884,
+      "raster_finish_us": 4868451435
+    },
+    {
+      "build_us": 1455,
+      "raster_us": 38315,
+      "total_us": 62669,
+      "raster_finish_us": 4868496220
+    },
+    {
+      "build_us": 1534,
+      "raster_us": 46079,
+      "total_us": 54747,
+      "raster_finish_us": 4868554965
+    },
+    {
+      "build_us": 1060,
+      "raster_us": 51187,
+      "total_us": 57835,
+      "raster_finish_us": 4868608053
+    },
+    {
+      "build_us": 1238,
+      "raster_us": 57053,
+      "total_us": 65876,
+      "raster_finish_us": 4868666094
+    },
+    {
+      "build_us": 1660,
+      "raster_us": 48623,
+      "total_us": 65764,
+      "raster_finish_us": 4868715982
+    },
+    {
+      "build_us": 4447,
+      "raster_us": 43261,
+      "total_us": 98991,
+      "raster_finish_us": 4868765876
+    },
+    {
+      "build_us": 582,
+      "raster_us": 48158,
+      "total_us": 97928,
+      "raster_finish_us": 4868814813
+    },
+    {
+      "build_us": 1080,
+      "raster_us": 50107,
+      "total_us": 98317,
+      "raster_finish_us": 4868865202
+    },
+    {
+      "build_us": 829,
+      "raster_us": 59707,
+      "total_us": 108360,
+      "raster_finish_us": 4868925245
+    },
+    {
+      "build_us": 622,
+      "raster_us": 115290,
+      "total_us": 180189,
+      "raster_finish_us": 4869047074
+    },
+    {
+      "build_us": 602,
+      "raster_us": 50762,
+      "total_us": 164974,
+      "raster_finish_us": 4869098525
+    },
+    {
+      "build_us": 882,
+      "raster_us": 54108,
+      "total_us": 102802,
+      "raster_finish_us": 4869153020
+    },
+    {
+      "build_us": 1125,
+      "raster_us": 43261,
+      "total_us": 107766,
+      "raster_finish_us": 4869207984
+    },
+    {
+      "build_us": 787,
+      "raster_us": 44475,
+      "total_us": 104567,
+      "raster_finish_us": 4869254785
+    },
+    {
+      "build_us": 1318,
+      "raster_us": 41997,
+      "total_us": 90171,
+      "raster_finish_us": 4869307056
+    },
+    {
+      "build_us": 6924,
+      "raster_us": 43862,
+      "total_us": 101112,
+      "raster_finish_us": 4869351330
+    },
+    {
+      "build_us": 1521,
+      "raster_us": 42777,
+      "total_us": 87353,
+      "raster_finish_us": 4869404238
+    },
+    {
+      "build_us": 865,
+      "raster_us": 47334,
+      "total_us": 103550,
+      "raster_finish_us": 4869453768
+    },
+    {
+      "build_us": 723,
+      "raster_us": 39509,
+      "total_us": 83238,
+      "raster_finish_us": 4869500123
+    },
+    {
+      "build_us": 664,
+      "raster_us": 42232,
+      "total_us": 99999,
+      "raster_finish_us": 4869550217
+    },
+    {
+      "build_us": 620,
+      "raster_us": 49948,
+      "total_us": 106057,
+      "raster_finish_us": 4869606275
+    },
+    {
+      "build_us": 1068,
+      "raster_us": 53915,
+      "total_us": 110489,
+      "raster_finish_us": 4869660707
+    },
+    {
+      "build_us": 807,
+      "raster_us": 47228,
+      "total_us": 92316,
+      "raster_finish_us": 4869709201
+    },
+    {
+      "build_us": 653,
+      "raster_us": 47901,
+      "total_us": 91760,
+      "raster_finish_us": 4869758645
+    },
+    {
+      "build_us": 665,
+      "raster_us": 60109,
+      "total_us": 109459,
+      "raster_finish_us": 4869826344
+    },
+    {
+      "build_us": 1332,
+      "raster_us": 49263,
+      "total_us": 110854,
+      "raster_finish_us": 4869877739
+    },
+    {
+      "build_us": 973,
+      "raster_us": 53930,
+      "total_us": 98746,
+      "raster_finish_us": 4869932297
+    },
+    {
+      "build_us": 806,
+      "raster_us": 53365,
+      "total_us": 102744,
+      "raster_finish_us": 4869986295
+    },
+    {
+      "build_us": 925,
+      "raster_us": 48241,
+      "total_us": 108381,
+      "raster_finish_us": 4870041932
+    },
+    {
+      "build_us": 1074,
+      "raster_us": 46393,
+      "total_us": 105430,
+      "raster_finish_us": 4870088981
+    },
+    {
+      "build_us": 620,
+      "raster_us": 52179,
+      "total_us": 97029,
+      "raster_finish_us": 4870147247
+    },
+    {
+      "build_us": 668,
+      "raster_us": 50791,
+      "total_us": 105093,
+      "raster_finish_us": 4870205311
+    },
+    {
+      "build_us": 935,
+      "raster_us": 46853,
+      "total_us": 104272,
+      "raster_finish_us": 4870254490
+    },
+    {
+      "build_us": 1083,
+      "raster_us": 55437,
+      "total_us": 93679,
+      "raster_finish_us": 4870310564
+    },
+    {
+      "build_us": 785,
+      "raster_us": 42797,
+      "total_us": 87349,
+      "raster_finish_us": 4870354234
+    },
+    {
+      "build_us": 1067,
+      "raster_us": 53292,
+      "total_us": 92797,
+      "raster_finish_us": 4870409682
+    },
+    {
+      "build_us": 1935,
+      "raster_us": 52737,
+      "total_us": 96060,
+      "raster_finish_us": 4870462945
+    },
+    {
+      "build_us": 1325,
+      "raster_us": 58213,
+      "total_us": 104928,
+      "raster_finish_us": 4870521813
+    },
+    {
+      "build_us": 1087,
+      "raster_us": 46618,
+      "total_us": 102070,
+      "raster_finish_us": 4870568955
+    },
+    {
+      "build_us": 1011,
+      "raster_us": 51954,
+      "total_us": 88276,
+      "raster_finish_us": 4870621827
+    },
+    {
+      "build_us": 1156,
+      "raster_us": 42732,
+      "total_us": 81767,
+      "raster_finish_us": 4870665318
+    },
+    {
+      "build_us": 928,
+      "raster_us": 47986,
+      "total_us": 90840,
+      "raster_finish_us": 4870724391
+    },
+    {
+      "build_us": 1002,
+      "raster_us": 47925,
+      "total_us": 116245,
+      "raster_finish_us": 4870783130
+    },
+    {
+      "build_us": 500,
+      "raster_us": 49447,
+      "total_us": 128176,
+      "raster_finish_us": 4870845061
+    },
+    {
+      "build_us": 707,
+      "raster_us": 36898,
+      "total_us": 50973,
+      "raster_finish_us": 4870884524
+    },
+    {
+      "build_us": 791,
+      "raster_us": 47363,
+      "total_us": 92234,
+      "raster_finish_us": 4870975785
+    },
+    {
+      "build_us": 440,
+      "raster_us": 39581,
+      "total_us": 98835,
+      "raster_finish_us": 4871049053
+    },
+    {
+      "build_us": 661,
+      "raster_us": 45641,
+      "total_us": 62469,
+      "raster_finish_us": 4871096020
+    },
+    {
+      "build_us": 648,
+      "raster_us": 79844,
+      "total_us": 111164,
+      "raster_finish_us": 4871178048
+    },
+    {
+      "build_us": 553,
+      "raster_us": 89867,
+      "total_us": 174791,
+      "raster_finish_us": 4871275009
+    },
+    {
+      "build_us": 367,
+      "raster_us": 54657,
+      "total_us": 225438,
+      "raster_finish_us": 4871375656
+    },
+    {
+      "build_us": 682,
+      "raster_us": 45420,
+      "total_us": 98364,
+      "raster_finish_us": 4871431915
+    },
+    {
+      "build_us": 635,
+      "raster_us": 52964,
+      "total_us": 56040,
+      "raster_finish_us": 4871506258
+    },
+    {
+      "build_us": 645,
+      "raster_us": 51108,
+      "total_us": 91616,
+      "raster_finish_us": 4871558500
+    },
+    {
+      "build_us": 1203,
+      "raster_us": 38822,
+      "total_us": 80901,
+      "raster_finish_us": 4871597785
+    },
+    {
+      "build_us": 718,
+      "raster_us": 49928,
+      "total_us": 81194,
+      "raster_finish_us": 4871648078
+    },
+    {
+      "build_us": 1075,
+      "raster_us": 38471,
+      "total_us": 96141,
+      "raster_finish_us": 4871696359
+    },
+    {
+      "build_us": 995,
+      "raster_us": 46581,
+      "total_us": 99673,
+      "raster_finish_us": 4871749891
+    },
+    {
+      "build_us": 550,
+      "raster_us": 44123,
+      "total_us": 95513,
+      "raster_finish_us": 4871795731
+    },
+    {
+      "build_us": 896,
+      "raster_us": 44906,
+      "total_us": 90961,
+      "raster_finish_us": 4871841179
+    },
+    {
+      "build_us": 851,
+      "raster_us": 42164,
+      "total_us": 86733,
+      "raster_finish_us": 4871886951
+    },
+    {
+      "build_us": 1128,
+      "raster_us": 45656,
+      "total_us": 89241,
+      "raster_finish_us": 4871939459
+    },
+    {
+      "build_us": 884,
+      "raster_us": 49106,
+      "total_us": 89142,
+      "raster_finish_us": 4871989360
+    },
+    {
+      "build_us": 809,
+      "raster_us": 44047,
+      "total_us": 83561,
+      "raster_finish_us": 4872033779
+    },
+    {
+      "build_us": 890,
+      "raster_us": 50086,
+      "total_us": 84423,
+      "raster_finish_us": 4872084641
+    },
+    {
+      "build_us": 1223,
+      "raster_us": 43397,
+      "total_us": 97030,
+      "raster_finish_us": 4872130581
+    },
+    {
+      "build_us": 518,
+      "raster_us": 45933,
+      "total_us": 93740,
+      "raster_finish_us": 4872177291
+    },
+    {
+      "build_us": 718,
+      "raster_us": 49622,
+      "total_us": 93978,
+      "raster_finish_us": 4872227529
+    },
+    {
+      "build_us": 1141,
+      "raster_us": 43466,
+      "total_us": 87966,
+      "raster_finish_us": 4872271517
+    },
+    {
+      "build_us": 2580,
+      "raster_us": 45109,
+      "total_us": 83589,
+      "raster_finish_us": 4872317140
+    },
+    {
+      "build_us": 991,
+      "raster_us": 42227,
+      "total_us": 78856,
+      "raster_finish_us": 4872362407
+    },
+    {
+      "build_us": 784,
+      "raster_us": 45209,
+      "total_us": 91178,
+      "raster_finish_us": 4872408062
+    },
+    {
+      "build_us": 965,
+      "raster_us": 41510,
+      "total_us": 83694,
+      "raster_finish_us": 4872450578
+    },
+    {
+      "build_us": 904,
+      "raster_us": 42341,
+      "total_us": 80517,
+      "raster_finish_us": 4872497401
+    },
+    {
+      "build_us": 818,
+      "raster_us": 46654,
+      "total_us": 97606,
+      "raster_finish_us": 4872547824
+    },
+    {
+      "build_us": 756,
+      "raster_us": 47103,
+      "total_us": 96992,
+      "raster_finish_us": 4872597210
+    },
+    {
+      "build_us": 1039,
+      "raster_us": 47708,
+      "total_us": 95793,
+      "raster_finish_us": 4872646011
+    },
+    {
+      "build_us": 713,
+      "raster_us": 43775,
+      "total_us": 90240,
+      "raster_finish_us": 4872690458
+    },
+    {
+      "build_us": 823,
+      "raster_us": 40248,
+      "total_us": 91117,
+      "raster_finish_us": 4872741335
+    },
+    {
+      "build_us": 534,
+      "raster_us": 46992,
+      "total_us": 88858,
+      "raster_finish_us": 4872789076
+    }
+  ],
+  "synthetic_gateway_calls": 1,
+  "synthetic_gateway_questions": [
+    "مرحبا"
+  ],
+  "synthetic_gateway_locales": [
+    "ar"
+  ],
+  "dart_network_client_creations_blocked": 0,
+  "real_model_calls": 0,
+  "real_credits_spent": 0
+}

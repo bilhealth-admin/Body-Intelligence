@@ -443,9 +443,10 @@ ReleasePluginSanitizationResult sanitizeFlutterReleaseProject({
   if (platform != 'android' && platform != 'ios') {
     throw ArgumentError.value(platform, 'platform', 'Expected android or ios.');
   }
-  if (excludedNativePluginNames.isNotEmpty && platform != 'ios') {
+  if (platform == 'android' &&
+      !iosWindowsOnlyNativePluginNames.containsAll(excludedNativePluginNames)) {
     throw ArgumentError(
-      'Production native plugin exclusion is supported only for iOS.',
+      'Android may exclude only the verified Windows-only barcode plugin.',
     );
   }
   if (!excludedNativePluginNames.containsAll(
@@ -483,7 +484,7 @@ ReleasePluginSanitizationResult sanitizeFlutterReleaseProject({
   )..removeAll(alreadyExcludedNativePluginNames);
   if (missingExclusions.isNotEmpty) {
     throw FormatException(
-      'Requested iOS production plugins are missing from native metadata: '
+      'Requested production plugins are missing from native metadata: '
       '${missingExclusions.toList()..sort()}',
     );
   }
@@ -521,7 +522,9 @@ ReleasePluginSanitizationResult sanitizeFlutterReleaseProject({
     }
     sanitizedRegistrant = sanitizeAndroidGeneratedPluginRegistrant(
       registrant.readAsStringSync(),
-      devOnlyPluginNames: removedDevNativeNames,
+      devOnlyPluginNames: removedDevNativeNames.union(
+        excludedNativePluginNames,
+      ),
       productionPluginNames: retainedNativeNames,
     );
   } else {
@@ -596,17 +599,10 @@ void main(List<String> arguments) {
         '--defer-ios-google-mobile-ads is valid only with --platform=ios.',
       );
     }
-    if (preserveDevNativePlugins == 1 && platform != 'ios') {
-      throw ArgumentError(
-        '--preserve-dev-native-plugins is valid only with --platform=ios.',
-      );
-    }
-    DeferredIosSimpleBarcodeScannerResult? deferredBarcode;
-    if (platform == 'ios') {
-      deferredBarcode = prepareDeferredIosSimpleBarcodeScannerPackage(
-        Directory.current,
-      );
-    }
+    final deferredBarcode = prepareDeferredIosSimpleBarcodeScannerPackage(
+      Directory.current,
+      removeAndroid: platform == 'android',
+    );
     DeferredIosGoogleMobileAdsResult? deferredAds;
     if (deferIosGoogleMobileAds == 1) {
       deferredAds = prepareDeferredIosGoogleMobileAdsPackage(Directory.current);
@@ -614,7 +610,7 @@ void main(List<String> arguments) {
       assertNoStaleDeferredIosGoogleMobileAdsOverride(Directory.current);
     }
     final excludedPlugins = <String>{
-      if (platform == 'ios') ...iosWindowsOnlyNativePluginNames,
+      ...iosWindowsOnlyNativePluginNames,
       if (deferIosGoogleMobileAds == 1) deferredIosGoogleMobileAdsPlugin,
     };
     final result = sanitizeFlutterReleaseProject(
@@ -622,16 +618,17 @@ void main(List<String> arguments) {
       platform: platform,
       excludedNativePluginNames: excludedPlugins,
       alreadyExcludedNativePluginNames: <String>{
-        if (deferredBarcode?.alreadyPrepared == true)
+        if (deferredBarcode.alreadyPrepared == true)
           deferredIosSimpleBarcodeScannerPlugin,
         if (deferredAds?.alreadyPrepared == true)
           deferredIosGoogleMobileAdsPlugin,
       },
       removeDevOnlyPlugins: preserveDevNativePlugins == 0,
     );
-    if (deferredBarcode != null) {
-      verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory.current);
-    }
+    verifyDeferredIosSimpleBarcodeScannerDiscovery(
+      Directory.current,
+      platform: platform,
+    );
     if (deferredAds != null) {
       verifyDeferredIosGoogleMobileAdsDiscovery(Directory.current);
     }
@@ -641,11 +638,10 @@ void main(List<String> arguments) {
         'status': 'sanitized',
         'platform': platform,
         'removed_dev_native_plugins': removed,
-        'excluded_ios_native_plugins': excludedPlugins.toList()..sort(),
+        'excluded_mobile_native_plugins': excludedPlugins.toList()..sort(),
         'preserved_dev_native_plugins': preserveDevNativePlugins == 1,
-        if (deferredBarcode != null)
-          'deferred_windows_only_override':
-              deferredBarcode.overrideDirectory.path,
+        'deferred_windows_only_override':
+            deferredBarcode.overrideDirectory.path,
         if (deferredAds != null)
           'deferred_package_override': deferredAds.overrideDirectory.path,
       }),

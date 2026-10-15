@@ -60,6 +60,13 @@ final class WeightVoiceInputService {
     if (!VoiceCaptureLease.acquire(this)) return null;
     MealVoiceSession? session;
     try {
+      if (!await _speech.systemSpeechDisclosure.authorize(
+        context,
+        use: BilSpeechUse.weight,
+      )) {
+        return null;
+      }
+      if (!context.mounted) return null;
       final gate = permissionGate;
       final permissionGranted = gate == null
           ? await _ensurePermission(context)

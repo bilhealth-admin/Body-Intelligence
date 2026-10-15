@@ -1,0 +1,106 @@
+{
+  "observed_date_utc": "2026-10-15",
+  "method": "Live read-only Chrome DOM via documented Browser.tabs.get + playwright.domSnapshot; Gmail official connector. No store changes.",
+  "apple": {
+    "version": "1.0.0",
+    "attached_build": "35",
+    "state": "REJECTED",
+    "submission_id": "d92bf043-3499-4e1f-95e9-f050ed0f66c5",
+    "review_date": "2026-10-14",
+    "review_device": "iPad Air 11-inch (M3)",
+    "guideline": "5.1.2(i)",
+    "actual_latest_reason": "ASC declares tracking of Device ID, Product Interaction and User ID; submitted build did not request ATT.",
+    "submission_items": {
+      "total": 7,
+      "app_versions": 1,
+      "subscription_groups": 1,
+      "subscriptions": 4,
+      "boost_iap": 1,
+      "non_app_items": 6
+    },
+    "other_items_state": "Ready for Review, not approved; API product READY_TO_SUBMIT is a separate state/entity.",
+    "current_privacy_label": {
+      "published_relative_text": "2 days ago",
+      "collected_types_count": 22,
+      "tracking_types": [
+        "User ID",
+        "Device ID",
+        "Product Interaction"
+      ],
+      "collected_types": [
+        "Search History",
+        "Other User Content",
+        "Emails or Text Messages",
+        "User ID",
+        "Name",
+        "Other Data Types",
+        "Health",
+        "Photos or Videos",
+        "Customer Support",
+        "Purchase History",
+        "Device ID",
+        "Phone Number",
+        "Fitness",
+        "Product Interaction",
+        "Performance Data",
+        "Email Address",
+        "Crash Data",
+        "Other Diagnostic Data",
+        "Other Usage Data",
+        "Coarse Location",
+        "Contacts",
+        "Advertising Data"
+      ],
+      "privacy_url": "https://www.bilhealth.com/privacy",
+      "privacy_choices_url": "https://www.bilhealth.com/account-deletion",
+      "decision": "READ_VERIFIED; runtime/SDK/IPA alignment and approved corrections remain BLOCKED. NSPrivacyTracking=false/NPA alone is insufficient."
+    },
+    "urls": {
+      "privacy": "https://appstoreconnect.apple.com/apps/6805349703/distribution/privacy",
+      "rejection": "https://appstoreconnect.apple.com/apps/6805349703/distribution/reviewsubmissions/details/d92bf043-3499-4e1f-95e9-f050ed0f66c5"
+    }
+  },
+  "google": {
+    "app": "Body Intelligence Log",
+    "package": "com.bilhealth.bodyintelligencelog",
+    "app_id": "4974243137795319021",
+    "developer_id": "7540824385820504578",
+    "current_state": "App suspended",
+    "displayed_enforcement_time": "8 Oct 2026, 22:38",
+    "time_zone_not_assumed": true,
+    "reason": "Enforcement Process: repeated non-compliance, multiple prior rejections; prior versions removed too.",
+    "original_notice_mail_id": "1a11d06ac8638e5b",
+    "correct_route": "Owner-approved Appeal button inside the current BIL Policy Status page; not a copied email footer.",
+    "footer_appeal_link_has_non_BIL_aid": true,
+    "footer_link_followed": false,
+    "appeal_button_pressed": false,
+    "appeal_sent": false,
+    "app_content_attempt": "Clicked existing App content sidebar; subsequent snapshot stayed Policy Status/App suspended. Current Data Safety/App Access answers not established by this action.",
+    "policy_url": "https://play.google.com/console/u/0/developers/7540824385820504578/app/4974243137795319021/policy-center"
+  },
+  "gmail": {
+    "connected_account": "bilhealth.app@gmail.com",
+    "connector_status": "Current read succeeded; earlier FORBIDDEN was historical.",
+    "current_message_ids_read": [
+      "1a11d06ac8638e5b",
+      "1a137e8f35fc0eb7"
+    ],
+    "searches": [
+      {
+        "query": "(\"Body Intelligence\" OR \"com.bilhealth.bodyintelligencelog\") subject:(appeal)",
+        "results": 0
+      },
+      {
+        "query": "in:anywhere (from:googleplay-developer-support@google.com OR to:googleplay-developer-support@google.com) after:2026/09/01",
+        "results": 0
+      }
+    ],
+    "previous_appeal_decision": "Not proven absent. Zero matches do not exclude a Console form submission; verify case/history before any submission.",
+    "messages_sent": 0
+  },
+  "production": {
+    "changed": false,
+    "roles_changed": false
+  },
+  "signed_candidate_created": false
+}

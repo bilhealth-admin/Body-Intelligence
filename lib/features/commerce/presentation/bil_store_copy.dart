@@ -8,6 +8,7 @@ abstract final class BilStoreCopy {
     'premium_store_title': 'Know your body. Progress intelligently.',
     'premium_detail': 'No ads',
     'premium_ai_detail': 'BIL Free + every paid feature + AI Coach',
+    // Keep the legacy lookup key; its localized display values cover all videos.
     'premium_benefit_workouts': '300+ home workout videos',
     'premium_benefit_community': 'Friends and requests',
     'premium_benefit_messages': 'Messages',
@@ -107,7 +108,7 @@ abstract final class BilStoreCopy {
       'premium_benefit_barcode': 'Scan food barcode',
       'premium_benefit_dashboard': 'Macro and nutrient trends',
       'premium_benefit_recipes': '1,500 recipes',
-      'premium_benefit_workouts': '300+ home workout videos',
+      'premium_benefit_workouts': '300+ workout videos',
       'premium_benefit_strength_plans':
           '100+ video-guided weight-training plans',
       'premium_benefit_meal_plan': 'Personal weekly meal plan',
@@ -207,7 +208,7 @@ abstract final class BilStoreCopy {
       'premium_benefit_barcode': 'ماسح باركود الطعام',
       'premium_benefit_dashboard': 'دوائر المغذيات وصحة القلب والأهداف المخصصة',
       'premium_benefit_recipes': '1,500 وصفة مع القيم الغذائية',
-      'premium_benefit_workouts': 'أكثر من 300 فيديو تمارين منزلية',
+      'premium_benefit_workouts': 'أكثر من 300 فيديو تمارين',
       'premium_benefit_strength_plans':
           'أكثر من 100 خطة تمارين رفع أثقال بالفيديو',
       'premium_benefit_meal_plan': 'خطة وجبات أسبوعية شخصية',
@@ -308,8 +309,7 @@ abstract final class BilStoreCopy {
           'Cercles des nutriments et de la santé cardiaque, objectifs personnalisés',
       'premium_benefit_recipes':
           '1 500 recettes avec informations nutritionnelles',
-      'premium_benefit_workouts':
-          'Plus de 300 vidéos d’entraînement à domicile',
+      'premium_benefit_workouts': 'Plus de 300 vidéos d’entraînement',
       'premium_benefit_strength_plans':
           'Plus de 100 programmes de musculation guidés en vidéo',
       'premium_benefit_meal_plan': 'Plan de repas hebdomadaire personnalisé',
@@ -414,7 +414,7 @@ abstract final class BilStoreCopy {
       'premium_benefit_dashboard':
           'Círculos de nutrientes y salud cardíaca con objetivos personalizados',
       'premium_benefit_recipes': '1.500 recetas con información nutricional',
-      'premium_benefit_workouts': 'Más de 300 vídeos de entrenamiento en casa',
+      'premium_benefit_workouts': 'Más de 300 vídeos de entrenamiento',
       'premium_benefit_strength_plans':
           'Más de 100 planes de pesas guiados en vídeo',
       'premium_benefit_meal_plan': 'Plan semanal de comidas personalizado',
@@ -518,7 +518,7 @@ abstract final class BilStoreCopy {
       'premium_benefit_dashboard':
           'Besin ve kalp sağlığı halkaları ile özel hedefler',
       'premium_benefit_recipes': 'Besin değerleriyle 1.500 tarif',
-      'premium_benefit_workouts': '300+ ev antrenmanı videosu',
+      'premium_benefit_workouts': '300+ antrenman videosu',
       'premium_benefit_strength_plans':
           '100+ video rehberli ağırlık antrenmanı planı',
       'premium_benefit_meal_plan': 'Kişisel haftalık öğün planı',

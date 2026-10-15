@@ -1,0 +1,37 @@
+{
+  "readAtUtc": "2026-10-15T16:20:52.790027+00:00",
+  "authenticatedRequestsPerformed": false,
+  "apple": {
+    "ok": true,
+    "url": "https://developer.apple.com/sample-code/app-store-connect/app-store-connect-openapi-specification.zip",
+    "zipSha256": "7b826ae9ca3e45b0e7df2643cbb811c9930632640944db11a8af4586fab9db46",
+    "version": "4.5.1",
+    "pathCount": 1001,
+    "matchingPrivacyPaths": [],
+    "matchingPrivacySchemaNames": [],
+    "privacyPolicyLocalizationPaths": [
+      "/v1/appInfoLocalizations",
+      "/v1/appInfoLocalizations/{id}",
+      "/v1/appInfos/{id}/relationships/appInfoLocalizations",
+      "/v1/appInfos/{id}/appInfoLocalizations"
+    ]
+  },
+  "google": {
+    "ok": true,
+    "url": "https://androidpublisher.googleapis.com/$discovery/rest?version=v3",
+    "discoverySha256": "5ad17626e943ebb08fd4108a5d43b1a053c10e1d8de43f8e9ef62e92e811ed16",
+    "revision": "20261015",
+    "relevantMethods": [
+      {
+        "name": "applications.dataSafety",
+        "method": "POST",
+        "path": "androidpublisher/v3/applications/{packageName}/dataSafety"
+      },
+      {
+        "name": "applications.tracks.releases.list",
+        "method": "GET",
+        "path": "androidpublisher/v3/{+parent}/releases"
+      }
+    ]
+  }
+}

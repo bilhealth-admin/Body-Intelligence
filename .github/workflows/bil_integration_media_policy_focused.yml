@@ -2,15 +2,9 @@ name: BIL isolated integration focused QA
 
 # Scope is restricted to the post-Codex media+policy integration only.
 # No full 8-shard run, builds, secrets, deployment, or source writeback.
+# Historical media scope stays manually available; current policy changes have
+# an explicit affected-regression gate, avoiding an unrelated duplicate on push.
 on:
-  push:
-    branches:
-      - integration/bil-qa-media-policy-20261011
-    paths:
-      - .github/workflows/bil_integration_media_policy_focused.yml
-      - lib/**
-      - test/**
-      - tool/prebuild/**
   workflow_dispatch:
 
 permissions:

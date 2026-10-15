@@ -1,0 +1,238 @@
+{
+  "recorded_at_utc": "2026-10-15T20:50:49.065679+00:00",
+  "base_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "dirty_source": true,
+  "real_AI_requests": 0,
+  "real_account_changes": 0,
+  "logs": [
+    {
+      "file": "local-validations/recipient-before.log",
+      "bytes": 11685,
+      "sha256": "7cf20ca43ff5638fbc35c2d1810ec67dfbb54ccb900993d43fdbb80cf23be8f5",
+      "scope": "FAIL before recipient fix;10 cases"
+    },
+    {
+      "file": "local-validations/recipient-after.log",
+      "bytes": 1288,
+      "sha256": "3ca8572037ff0a3c79679c4775ee73daaf7f3139311bf9a162997f8a6898b256",
+      "scope": "PASS recipient-only;included in68"
+    },
+    {
+      "file": "local-validations/provider-final-focused.log",
+      "bytes": 6222,
+      "sha256": "0941b2ec375f610fb72cafd45ba68dc929b09d68ed9eca5b478ff487e4dee08e",
+      "scope": "PASS68 mocked provider cases;0 actual paid requests"
+    },
+    {
+      "file": "local-validations/relro-before.log",
+      "bytes": 2691,
+      "sha256": "6193b76896fa45aa2da48a7baae66d38b36de697be1beacf2d2f246a48dc34b1",
+      "scope": "FAIL4 of5 before RELRO fix"
+    },
+    {
+      "file": "local-validations/relro-after.log",
+      "bytes": 108,
+      "sha256": "f7dc1c65d9bf1c31f1cb9a0be1fc0c0840290cbe7f978a8864c6557dbd2fbb5e",
+      "scope": "PASS5 RELRO unit tests;no finalAAB"
+    },
+    {
+      "file": "local-validations/bounded-supervisor-python-tests-final.raw.log",
+      "bytes": 4566,
+      "sha256": "d10c34bf5cfc5ebec9d65fcaf3a784a75c1d200227bf111fe47cb0afe8f8a47e",
+      "scope": "PASS20 bounded supervisor cases"
+    },
+    {
+      "file": "local-validations/policy-checker-unit-final-inputs.log",
+      "bytes": 1543,
+      "sha256": "640cb0ba0c65c8df337f3590beb40ae3d6f10ede6388f5f02b1fea0da6411d89",
+      "scope": "PASS9 gate/evidence schema cases"
+    },
+    {
+      "file": "local-validations/post-analyzer-fixes-focused.log",
+      "bytes": 70728,
+      "sha256": "f1a8dbe7f9e8d577267294ffce13b1bd9660030b9125a9d6b4c390674d211a60",
+      "scope": "PASS115 affected Flutter cases before PG19 tool change"
+    },
+    {
+      "file": "local-validations/post-analyzer-fixes-focused-result.json",
+      "bytes": 866,
+      "sha256": "1644fa3f4c9853013d799eba5319b01aeae036c3519b0b75741035a65e503cea",
+      "scope": "OS receipt process0 for115"
+    },
+    {
+      "file": "local-validations/pg19-barcode-rebind-before.log",
+      "bytes": 123,
+      "sha256": "6a472064b91a19205c5e9bdc9d36f1ba39da9d6e4cf6f5c04f2abafa382f82fb",
+      "scope": "FAIL actual old prep;preserved"
+    },
+    {
+      "file": "local-validations/pg19-barcode-rebind-before.json",
+      "bytes": 1144,
+      "sha256": "1c53a615a512eab26a0115ea3719c70ccf0275fceb502c064c02834bbce954aa",
+      "scope": "OS receipt old prep failure"
+    },
+    {
+      "file": "local-validations/pg19-barcode-rebind-red.log",
+      "bytes": 1581,
+      "sha256": "f2f47f6bce2f55e3b50f72fb5bad1a5828b1d8f93b4ff73e92e406493fe31998",
+      "scope": "FAIL0/2 new regressions before fix"
+    },
+    {
+      "file": "local-validations/pg19-barcode-rebind-focused-final.log",
+      "bytes": 7998,
+      "sha256": "44f6c721090d73f33e0c36218f691c153d8eb7a1f1f9371073c92690826ef3cc",
+      "scope": "PASS37 includes23new cases"
+    },
+    {
+      "file": "local-validations/pg19-barcode-rebind-validation.json",
+      "bytes": 4208,
+      "sha256": "9ccb13507ca9fbcd5b7b3a9441f99b0d4bf7d597bad4e3abbca192c2ec45d9b9",
+      "scope": "Exact input hashes and before/after fixture results"
+    },
+    {
+      "file": "local-validations/final-flutter-analyze.log",
+      "bytes": 3927,
+      "sha256": "d3dcea889934e413e1579886ee8fff0a31793d0b7c92efcfac4f4db971973a06",
+      "scope": "FAIL16 initial diagnostics"
+    },
+    {
+      "file": "local-validations/final-flutter-analyze-result.json",
+      "bytes": 828,
+      "sha256": "74a5a825f2a31bf088b4ee7dbda3616d166e2e06a37f53b0537d19f5364379e1",
+      "scope": "OS receipt original analyzer fail"
+    },
+    {
+      "file": "local-validations/final-flutter-analyze-clean.log",
+      "bytes": 98,
+      "sha256": "c970700703e157da76297dc95a8b45b2870bcffacf61225c73b304eb5e4ffd71",
+      "scope": "PASS359.2s full analyzer beforePG19"
+    },
+    {
+      "file": "local-validations/final-flutter-analyze-clean-result.json",
+      "bytes": 832,
+      "sha256": "aacf466a99c06d95002c525c5c98e872ddee8c8273b44f29e4a6f47fbd771e43",
+      "scope": "OS receipt full analyzer0 beforePG19"
+    },
+    {
+      "file": "local-validations/copy-and-pearl-visual-focused.log",
+      "bytes": 9305,
+      "sha256": "984c8cb444452c5b8e9d775349ebe11eca2fcc4be542d5ac8bdce014c178ef07",
+      "scope": "PASS20 copy/Golden cases,unchanged baselines"
+    },
+    {
+      "file": "local-validations/goal-editor-and-copy-regression-final.log",
+      "bytes": 12773,
+      "sha256": "f15d160737f4c1476dbaea9b0767ba2bf56ade4c32d34c1959eceb669cdf08bf",
+      "scope": "PASS48 goal+localization cases"
+    },
+    {
+      "file": "local-validations/pearl-accessibility-corrected.log",
+      "bytes": 624,
+      "sha256": "35ae45bcc9aeb2294da23db5aab4bd66ee8abed027a7e8970ea53b0a229042d9",
+      "scope": "PASS4 after fixture SemanticsHandle fix"
+    },
+    {
+      "file": "local-validations/native-capture-concurrency-focused.log",
+      "bytes": 3264,
+      "sha256": "18c77529f991fd0269fec52bb18cb129d34d79eb136f7d4bdaeedf2e221184e4",
+      "scope": "PASS25 manifest/transport cases"
+    },
+    {
+      "file": "local-validations/native-frame-identity-focused.log",
+      "bytes": 761,
+      "sha256": "6b4d93f2f11a0ae737d0fd88a36006965e3256091fe445db35e1c60243ad439d",
+      "scope": "PASS8 actual frame identity cases"
+    },
+    {
+      "file": "local-validations/legacy-source-policy-preflight.json",
+      "bytes": 3787,
+      "sha256": "040243cd44f8c46225623fba7468cf7cf70edea029889991319a77424c53d615",
+      "scope": "PASS18 source heuristics;11 manual gates remain"
+    },
+    {
+      "file": "local-validations/pg19-actual-sdk-prep.json",
+      "bytes": 2235,
+      "sha256": "c9d97d924edc01771a72b803d7346c081ddadea0de045d155ea9df0249041e96",
+      "scope": "Actual pinned4SDK preparation PASS"
+    },
+    {
+      "file": "local-validations/pg19-actual-sanitizer.json",
+      "bytes": 335,
+      "sha256": "debd8d78b2b57b6f1da6c35eae76d845827c226e6069e714233f9bb2fb727dba",
+      "scope": "Actual preparation preserve-dev PASS"
+    },
+    {
+      "file": "local-validations/pg19-actual-release-sanitizer.json",
+      "bytes": 354,
+      "sha256": "619be88ac7ec408f6d921c10019fb04f534f54b72c276b252b2c21c296131894",
+      "scope": "Actual full prep PASS;integration_test native registration removed"
+    },
+    {
+      "file": "final-local-validations/clean-final-flutter-analyze.log",
+      "bytes": 98,
+      "sha256": "36e8e77e9b1c5bfaeb04d5c12601265928477eeaf88845f3a2b00de5d91202b3",
+      "scope": "PASS full Dart analyze327.6s,0issues; see scoped input equivalence for subsequent workflow-only change"
+    },
+    {
+      "file": "final-local-validations/clean-final-flutter-analyze-result.json",
+      "bytes": 832,
+      "sha256": "41751395f28cf4a0830b4a7cc0e49fbcedd64fa102c3fee96e0cd0f7755902ca",
+      "scope": "Actual process331.385s exit0,not inferred from logs"
+    },
+    {
+      "file": "final-local-validations/final-barcode-focused.log",
+      "bytes": 7977,
+      "sha256": "798571bcac757d4f0ba153acea4877931c9da75bb8e954b35df55271a873d25d",
+      "scope": "PASS37 affected provenance/sanitizer tests after two equivalent style fixes; overlaps previous37 scope"
+    },
+    {
+      "file": "final-local-validations/final-barcode-focused-result.json",
+      "bytes": 869,
+      "sha256": "c68edc95c1e0056620692fb9ed9c4615248be382b6b76bd1baa5fe5e96a099b7",
+      "scope": "Actual focused process exit0"
+    },
+    {
+      "file": "final-local-validations/attestation-fixtures.json",
+      "bytes": 645,
+      "sha256": "403e4e943d8eb3341ed3bff2364678d585cf26cfb560e2789ad2ea49ef64cd74",
+      "scope": "PASS12 exact inline CI attestation positive/negative controls, mock API only"
+    },
+    {
+      "file": "native-pearl-android/after-native-pearl-result.json",
+      "bytes": 871,
+      "sha256": "e7e8790cf494ccbc9d99d55f4f60f57d0bc73ddfff9ef041fb44849f28bdb9a6",
+      "scope": "PASS native Android UI1testWidgets/4calorie saves+readbacks/4speech declines/10PNG; QA harness only"
+    },
+    {
+      "file": "native-pearl-android/crypto-result.json",
+      "bytes": 860,
+      "sha256": "3d562f44708a4150fbf93a37ef35de4a2352e9658d3f9e1027ffc3ccef08d2b1",
+      "scope": "PASS2 real native Android AES/secure-cache tests after final Tink/OkHttp graph; synthetic keys only"
+    },
+    {
+      "file": "notification-resource-retention/final-android-security-resource-result.json",
+      "bytes": 839,
+      "sha256": "fa4a6bade7fd641ae85b1eddbaea7c5bd78f3eddce93fb87c8fcde9d8abaf5ed",
+      "scope": "PASS actual final graph/R8 resource task,768.244s; no package/sign/install"
+    },
+    {
+      "file": "native-dependency-security/okhttp-final-runtime-jvm.json",
+      "bytes": 8425,
+      "sha256": "6c0267c574a2457ff039e1a322e6eca67a8ffb124070e0f06ad7ed66a5918c0b",
+      "scope": "PASS actual graph75linkage+21functional; old2failures intentional; not Android/TLS network"
+    }
+  ],
+  "scope_note": "Per-run counts below overlap; not a sum of unique tests or proof of signed/device/reviewer/store compliance.",
+  "latest_preparation": "Actual SDK overlays PASS; both preserve-dev and full sanitizer PASS after owned scanner rebind. Strict provenance unchanged.",
+  "latest_native": "notification-native-rebound/receipt.json:4/4 actual SDK API36 with compiled guard and exact before/after bindings; not community/push/backend E2E.",
+  "latest_api33": "native-api33-coach/receipt.json:2/2 business cases,6 PNG,process0; not final Android33 artifact.",
+  "latest_full_analyze": "PASS359.2s before PG19 tool change; final tool-source full analysis pending after sequential AGP lint.",
+  "receipt_note": "These are scoped, overlapping evidence logs; failed originals are kept. Full final analyzer and AGP receipts will be added after completion. Private mail/Console exports/local.properties/tokens are excluded.",
+  "public_evidence_secrets_scan": {
+    "status": "PASS",
+    "findings": 0,
+    "scope": "Current policy-gate evidence directory,5.94MB scanned before final receipts; final staged scan still required",
+    "no_private_logs_or_tokens_published": true
+  },
+  "final_implementation_input_fingerprint": "2eda8ec179519b20398fe6b08980814f9194a649a0caf8a7d82cca36eadbbbb9"
+}

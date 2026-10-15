@@ -1,0 +1,20 @@
+{
+  "scope": "Exact inline read-only final-CI attestation logic; mocked API and commit metadata only, no GitHub success claimed",
+  "checks_passed": 12,
+  "checks": [
+    "valid_policy",
+    "valid_source_security",
+    "valid_android_startup",
+    "valid_native_android_ios",
+    "reject_wrong_sha",
+    "reject_wrong_workflow",
+    "reject_wrong_event",
+    "reject_failed_run",
+    "reject_skipped_required_job",
+    "reject_unexpected_success_job",
+    "docs_only_parent_and_13_jobs_pass",
+    "reject_changed_implementation"
+  ],
+  "inline_sha256": "f3e22efe9ef9cc6b282e58c4da156909514c1ef7ca9a430487f87b5cebb33a00",
+  "network_calls": 0
+}

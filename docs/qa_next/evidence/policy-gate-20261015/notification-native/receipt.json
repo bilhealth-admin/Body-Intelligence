@@ -1,0 +1,94 @@
+{
+  "scope": "Real local notification SDK on owned API36 emulator, unsigned debug; not community/push/backend/store E2E",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "source_input_fingerprint_v2": "2e42fce8c87fdfcd9a85b9546d259891f07a0781a80507057bd8160beb8fb0d6",
+  "business_cases": 4,
+  "passed": 4,
+  "files": [
+    {
+      "file": "denied-plain.json",
+      "sha256": "93155772961797690b4e0fdfe465326618672728d7215fc4b6bbe1fe60d7879a",
+      "status": "PASS",
+      "permission": "denied",
+      "variant": "plain"
+    },
+    {
+      "file": "denied-tagged.json",
+      "sha256": "3a1dade0eb0107c6123ec7fa3eec9f616a2e115646c939c35f566a17c87086ee",
+      "status": "PASS",
+      "permission": "denied",
+      "variant": "tagged"
+    },
+    {
+      "file": "granted-plain.json",
+      "sha256": "6e957ff722b2b67406561a622720231cb8db76d9581187d108954c4ec853def1",
+      "status": "PASS",
+      "permission": "granted",
+      "variant": "plain"
+    },
+    {
+      "file": "granted-tagged.json",
+      "sha256": "faefa8aa67b31cc404a421d51867589a7dd33a7e7d354b2dc085c240febae55d",
+      "status": "PASS",
+      "permission": "granted",
+      "variant": "tagged"
+    }
+  ],
+  "production_changes": false,
+  "signed_store_build": false,
+  "dart_http_attempts": 0,
+  "apk_sha256": {
+    "denied": "487107cc5da28f5f6f0b4d8fae411ea5ac793d5e6b0414c9ec481a71d6ddd77e",
+    "granted": "08cd7f77b7c9f61011bfeaca559af9d67a6dbc048d4859337b3d2b1d51541480"
+  },
+  "supervisor_receipts": {
+    "denied": {
+      "label": "notification-denied-final",
+      "started_at_utc": "2026-10-15T17:07:17.576624+00:00",
+      "elapsed_seconds": 88.718,
+      "bootstrap_timeout_seconds": 1800.0,
+      "native_test_timeout_seconds": 300.0,
+      "summary_grace_seconds": 30.0,
+      "first_test_after_seconds": 83.612,
+      "terminal_summary_after_seconds": 87.734,
+      "native_summary": "00:04 +2: All tests passed!",
+      "native_failure_summary_seen": false,
+      "timed_out": false,
+      "reason": "process_exit",
+      "raw_returncode": 0,
+      "supervisor_error": null,
+      "cleanup_attempted": false,
+      "cleanup": null,
+      "effective_returncode": 0,
+      "output_bytes": 3195,
+      "output_sha256": "9bf4ceb026a8a2a2c68fc00c388488059138ecae8f2e552fa517c5c19bfa6c82",
+      "output_complete": true,
+      "output_drain_limited": false,
+      "success_basis": "process exit 0 and no native failure summary; never inferred from a log alone"
+    },
+    "granted": {
+      "label": "notification-granted-final",
+      "started_at_utc": "2026-10-15T17:09:51.863554+00:00",
+      "elapsed_seconds": 60.527,
+      "bootstrap_timeout_seconds": 1800.0,
+      "native_test_timeout_seconds": 300.0,
+      "summary_grace_seconds": 30.0,
+      "first_test_after_seconds": 56.519,
+      "terminal_summary_after_seconds": 59.577,
+      "native_summary": "00:03 +2: All tests passed!",
+      "native_failure_summary_seen": false,
+      "timed_out": false,
+      "reason": "process_exit",
+      "raw_returncode": 0,
+      "supervisor_error": null,
+      "cleanup_attempted": false,
+      "cleanup": null,
+      "effective_returncode": 0,
+      "output_bytes": 3494,
+      "output_sha256": "addcdc38e8fbc5081b5af6cddc64d335e09c43487092bb558695ecb1394fa2a8",
+      "output_complete": true,
+      "output_drain_limited": false,
+      "success_basis": "process exit 0 and no native failure summary; never inferred from a log alone"
+    }
+  }
+}

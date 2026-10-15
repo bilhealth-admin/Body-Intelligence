@@ -1,0 +1,19 @@
+{
+  "scope": "Full input-hash comparison after full local Dart analysis. Later read-only CI attestation workflow and raw evidence whitespace attributes do not change any Dart/native/product/dependency bytes.",
+  "analyzed_implementation_fingerprint": "c2eab6192119396a9f38febbeacb76a436be793975ef8f652ad8dfb532b8779b",
+  "final_implementation_fingerprint": "2eda8ec179519b20398fe6b08980814f9194a649a0caf8a7d82cca36eadbbbb9",
+  "changes": [
+    {
+      "path": ".gitattributes",
+      "before": "fd38afd589e6f7fae8b35c9373dd9ac520c1a056b8456ae3403cde5e6f722961",
+      "after": "27efdb4144c666b1078d4c3e457dc4baf26b7c2f50653aee07d32cde42f15113"
+    },
+    {
+      "path": ".github/workflows/bil_apple_google_policy_gate.yml",
+      "before": "72c1da364c6999780637f074dca9b7065c03eff277930019ae7948439d2be342",
+      "after": "077924ae6425260d42dea84001e551b0ec615999b52d9a4824b4f636e7f22484"
+    }
+  ],
+  "dart_and_product_inputs_identical": true,
+  "status": "PASS_SCOPED_INPUT_EQUIVALENCE"
+}

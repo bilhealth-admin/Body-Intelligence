@@ -54,6 +54,16 @@ on:
           - system-crypto
           - feature-splashes
         default: all
+      android_native_target:
+        description: Android-only scope override when iOS needs a different affected entrypoint
+        required: false
+        type: choice
+        options:
+          - inherit
+          - all
+          - system-crypto
+          - feature-splashes
+        default: inherit
       mobsf_only:
         description: Inspect an existing offline debug APK with pinned, network-disabled MobSF
         required: false
@@ -81,7 +91,7 @@ jobs:
       fail-fast: false
       matrix: >-
         ${{ fromJSON(
-          inputs.source_audit_only == true &&
+          (inputs.source_audit_only == true || (github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011')) &&
             '{"include":[{"language":"actions","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"javascript-typescript","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"python","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false}]}'
           || inputs.android_only == true && inputs.ios_only == true &&
             '{"include":[{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"},{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
@@ -108,6 +118,15 @@ jobs:
       - name: Resolve Flutter dependencies
         if: matrix.flutter-build != false
         run: flutter pub get
+
+      - name: Prepare pinned Android policy library repairs
+        if: matrix.flutter-build == 'android'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+
 
       - name: Prepare iOS pods and verify simulator build settings before CodeQL tracing
         if: matrix.flutter-build == 'ios'
@@ -278,7 +297,7 @@ jobs:
           retention-days: 14
 
   local-supabase-integration:
-    if: ${{ inputs.mobsf_only != true && inputs.android_native_only != true && inputs.ios_native_only != true && inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') && inputs.mobsf_only != true && inputs.android_native_only != true && inputs.ios_native_only != true && inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
     name: Local Supabase migrations, SQL, Auth and RLS
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -600,7 +619,7 @@ jobs:
           deno test --allow-env --allow-read --allow-net supabase/functions
 
   isolated-source-audit:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true }}
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
     name: Isolated Semgrep source audit
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -687,6 +706,8 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: read
+    env:
+      BIL_NATIVE_TARGET: ${{ inputs.android_native_target != 'inherit' && inputs.android_native_target || inputs.native_target }}
     steps:
       - name: Check out accepted source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -700,7 +721,7 @@ jobs:
       - name: Resolve existing Flutter dependencies
         run: flutter pub get
       - name: Verify affected health and reply regressions before the native feature run
-        if: ${{ inputs.native_target != 'system-crypto' }}
+        if: env.BIL_NATIVE_TARGET != 'system-crypto'
         shell: bash
         run: |
           set -euo pipefail
@@ -720,8 +741,6 @@ jobs:
         run: bash .github/scripts/bil_prepare_android_kvm.sh
       - name: Run the existing native integration suite on API 33
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
-        env:
-          BIL_NATIVE_TARGET: ${{ inputs.native_target }}
         with:
           api-level: 33
           arch: x86_64

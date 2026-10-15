@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/intelligence_center/coach_review_actions_regression_test.dart'
     as base;
+import '../../support/system_speech_disclosure_test_support.dart';
 
 final class _VoiceFixture {
   _VoiceFixture(this.database, this.gateway, this.router, this.nativeCalls);
@@ -111,6 +112,15 @@ Future<_VoiceFixture> _mount(WidgetTester tester) async {
 
 Future<void> _startVoice(WidgetTester tester, _VoiceFixture fixture) async {
   await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+  for (
+    var turn = 0;
+    turn < 40 && find.byKey(systemSpeechDisclosureAllowKey).evaluate().isEmpty;
+    turn++
+  ) {
+    await _drain(tester);
+  }
+  expect(fixture.nativeCalls['bil/speech:listen'] ?? 0, 0);
+  await acceptSystemSpeechDisclosure(tester, settleAfterAccept: false);
   for (
     var turn = 0;
     turn < 40 && (fixture.nativeCalls['bil/speech:listen'] ?? 0) == 0;

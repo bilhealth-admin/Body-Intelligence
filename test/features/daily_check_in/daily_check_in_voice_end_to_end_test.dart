@@ -16,6 +16,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../support/system_speech_disclosure_test_support.dart';
+
 void main() {
   testWidgets(
     'spoken pounds flow through review and daily check-in into kilograms only',
@@ -188,11 +190,15 @@ void main() {
 }
 
 Future<void> _startVoiceCapture(WidgetTester tester) async {
+  addTearDown(() async {
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+  });
   final action = find.byKey(const Key('daily-check-in-weight-voice'));
   await tester.ensureVisible(action);
   await tester.pumpAndSettle();
   await tester.tap(action);
-  await tester.pumpAndSettle();
+  await acceptSystemSpeechDisclosure(tester);
 }
 
 GoRouter _dailyCheckInRouter({required DailyCheckInVoiceCapture voiceCapture}) {

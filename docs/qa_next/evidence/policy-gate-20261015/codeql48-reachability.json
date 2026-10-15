@@ -1,0 +1,1726 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-15T15:52:24.578Z",
+  "scope": "Only CodeQL alert 48 reachability; read-only product source and existing GitHub analysis",
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "sourceHead": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "alert": {
+    "number": 48,
+    "rule": "js/remote-property-injection",
+    "url": "https://github.com/bilhealth-admin/Body-Intelligence/security/code-scanning/48",
+    "githubState": "OPEN_UNCHANGED",
+    "historicalAnalysisCommit": "19972310fea6284b59f3cfba5874223fac3f4607",
+    "latestReadAnalysisId": 1959431365,
+    "latestReadAnalysisCommit": "bb5611d58c7f3b5097a3c27fbb754019ef7799c0",
+    "analysisCreatedAtUtc": "2026-10-15T12:39:58Z",
+    "sink": {
+      "path": "web/drift_worker.dart.js",
+      "line": 1226,
+      "expression": "n[b]=o"
+    },
+    "reportedSource": {
+      "path": "web/drift_worker.dart.js",
+      "line": 381,
+      "expression": "self.location.href"
+    },
+    "sarifSha256": "99813a6168e3f3996926a5ce42ea88eb7f03ceaca48bf372b58944d40fcf9d37",
+    "codeFlowCount": 4,
+    "codeFlows": [
+      {
+        "locations": 68,
+        "head": [
+          {
+            "line": 381,
+            "expression": "self.location.href"
+          },
+          {
+            "line": 2691,
+            "expression": "A.uT()"
+          },
+          {
+            "line": 2691,
+            "expression": "q"
+          },
+          {
+            "line": 2695,
+            "expression": "q"
+          }
+        ],
+        "tail": [
+          {
+            "line": 6020,
+            "expression": "q"
+          },
+          {
+            "line": 999,
+            "expression": "a"
+          },
+          {
+            "line": 1000,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "s"
+          },
+          {
+            "line": 1003,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s.name"
+          },
+          {
+            "line": 1219,
+            "expression": "b"
+          },
+          {
+            "line": 1226,
+            "expression": "b"
+          }
+        ]
+      },
+      {
+        "locations": 76,
+        "head": [
+          {
+            "line": 381,
+            "expression": "self.location.href"
+          },
+          {
+            "line": 2691,
+            "expression": "A.uT()"
+          },
+          {
+            "line": 2691,
+            "expression": "q"
+          },
+          {
+            "line": 2695,
+            "expression": "q"
+          }
+        ],
+        "tail": [
+          {
+            "line": 5652,
+            "expression": "this"
+          },
+          {
+            "line": 999,
+            "expression": "a"
+          },
+          {
+            "line": 1000,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "s"
+          },
+          {
+            "line": 1003,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s.name"
+          },
+          {
+            "line": 1219,
+            "expression": "b"
+          },
+          {
+            "line": 1226,
+            "expression": "b"
+          }
+        ]
+      },
+      {
+        "locations": 187,
+        "head": [
+          {
+            "line": 381,
+            "expression": "self.location.href"
+          },
+          {
+            "line": 2691,
+            "expression": "A.uT()"
+          },
+          {
+            "line": 2691,
+            "expression": "q"
+          },
+          {
+            "line": 2695,
+            "expression": "q"
+          }
+        ],
+        "tail": [
+          {
+            "line": 5571,
+            "expression": "s"
+          },
+          {
+            "line": 999,
+            "expression": "a"
+          },
+          {
+            "line": 1000,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "s"
+          },
+          {
+            "line": 1003,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s.name"
+          },
+          {
+            "line": 1219,
+            "expression": "b"
+          },
+          {
+            "line": 1226,
+            "expression": "b"
+          }
+        ]
+      },
+      {
+        "locations": 135,
+        "head": [
+          {
+            "line": 381,
+            "expression": "self.location.href"
+          },
+          {
+            "line": 2691,
+            "expression": "A.uT()"
+          },
+          {
+            "line": 2691,
+            "expression": "q"
+          },
+          {
+            "line": 2695,
+            "expression": "q"
+          }
+        ],
+        "tail": [
+          {
+            "line": 5700,
+            "expression": "this"
+          },
+          {
+            "line": 999,
+            "expression": "a"
+          },
+          {
+            "line": 1000,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "a"
+          },
+          {
+            "line": 1001,
+            "expression": "s"
+          },
+          {
+            "line": 1003,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "b"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s"
+          },
+          {
+            "line": 1004,
+            "expression": "s.name"
+          },
+          {
+            "line": 1219,
+            "expression": "b"
+          },
+          {
+            "line": 1226,
+            "expression": "b"
+          }
+        ]
+      }
+    ]
+  },
+  "sourceIdentity": {
+    "workerSha256": "e18724169edf818cd2289268b41adf6bc8a501bcedc55938e222ab0546540f8f",
+    "workerGitBlob": "f4edc5a25a883af8bd705dc10c4d24c6fb042474",
+    "matchesHistoricalAnalysisBytes": true,
+    "producerPath": "tool/drift_worker.dart",
+    "producerSha256": "16a172503e2c7e7b6b3229427c59ae8f8c428cfccd2ae3a783a6f8d6f9dae662",
+    "sourceMapSha256": "b11a76704029ece87c44fd3d4559b29c63503bcf4a3fc2b2f31f81fc882bbcae",
+    "dartSdkVersion": "3.12.2",
+    "driftVersion": "2.34.2",
+    "sqliteVersion": "3.4.0",
+    "sdkRtiSource": {
+      "path": "G:/BIL_Toolchains/Flutter/flutter/bin/cache/dart-sdk/lib/_internal/js_shared/lib/rti.dart",
+      "sha256": "685dc43fa40a998146ca919d63819689e33942543dbd2132a43d34c9a188bf77",
+      "officialUrl": "https://github.com/dart-lang/sdk/blob/3.12.2/sdk/lib/_internal/js_shared/lib/rti.dart"
+    }
+  },
+  "producer": {
+    "entrypoint": "void main() => WasmDatabase.workerMainForOpen();",
+    "generationWorkflow": ".github/workflows/bil_codeql_security_extended.yml:217-222",
+    "generationCommand": "dart compile js -O2 -o web/drift_worker.dart.js tool/drift_worker.dart",
+    "generatedFileEdited": false,
+    "recompiled": false
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "kind": "SOURCE_FACT",
+      "evidence": "web/drift_worker.dart.js:1219-1227",
+      "statement": "The assignment at1226 is inside typeof metadata[key] === \"number\". Missing keys use the separate Map-backed eval cache; nonnumeric values return without assigning metadata."
+    },
+    {
+      "id": "F2",
+      "kind": "SOURCE_FACT",
+      "evidence": "web/drift_worker.dart.js:13982",
+      "statement": "The only numeric erased-type metadata initializer in this bundle is compiler-owned JSON {e8:1,ho:2,aG:1,fx:2,cj:1,u9:1}. These six keys are disjoint from __proto__, constructor, prototype and other inherited object property names."
+    },
+    {
+      "id": "F3",
+      "kind": "SOURCE_FACT",
+      "evidence": "web/drift_worker.dart.js:999-1006",
+      "statement": "The only call site for A.w0 passes effectiveConstructor.name. String fields in Uri/database/query data are not copied into a constructor name."
+    },
+    {
+      "id": "F4",
+      "kind": "SOURCE_FACT",
+      "evidence": "web/drift_worker.dart.js:98-107;56-77",
+      "statement": "instanceType uses compiler Dart class constructors or interceptors. Plain structured-clone shapes are handled by fixed JS-object interceptors; an own constructor:{name:...} data field is not used as their Dart class constructor."
+    },
+    {
+      "id": "F5",
+      "kind": "SOURCE_FACT",
+      "evidence": "web/drift_worker.dart.js:13980;DartSDK rti.dart:2116-2129",
+      "statement": "The metadata uses ordinary object literals, not null-prototype objects. Safety at this sink comes from the numeric-probe branch and compiler-owned key set, not a nonexistent null-prototype defense."
+    },
+    {
+      "id": "F6",
+      "kind": "REPORTED_FLOW_REVIEW",
+      "evidence": "Existing SARIF analysis1959431365 has four paths, all starting at self.location.href and ending after a.constructor / effectiveConstructor.name.",
+      "statement": "The taint path conflates the data content of URI/list/map instances with their compiler-owned constructor identity. None of these four SARIF paths demonstrates rewriting the metadata key or its numeric-entry initializer."
+    },
+    {
+      "id": "F7",
+      "kind": "PUBLIC_MESSAGE_BOUNDARY_REVIEW",
+      "evidence": "Drift2.34.2 protocol.dart:83-108,284-301;worker:3883-3917,10619-10621",
+      "statement": "The initialization event reads a fixed protocol type, then converts string fields and constructs compiled Dart message classes. Unknown types and nonstring database/URI fields reject. The Node cases invoke the real A.kw event adapter and parser; the handler after parsing is intercepted to avoid database operations."
+    },
+    {
+      "id": "F8",
+      "kind": "RPC_BOUNDARY_REVIEW",
+      "evidence": "web/drift_worker.dart.js:10490-10503;3540-3542;9667-9692",
+      "statement": "Legacy RPC deserialization converts cloned data to Dart values; modern RPC parsing constructs fixed compiled message types. Synthetic row/query-text shapes and modern error text were probed without executing SQL or touching browser storage."
+    },
+    {
+      "id": "F9",
+      "kind": "PLATFORM_SCOPE",
+      "evidence": "lib/data/database/connection/database_connection.dart:3-5;database_connection_web.dart:10-13",
+      "statement": "This worker is selected by the web/js_interop database connection. Native Android/iOS use the ffi connection. This is not a waiver for the web asset or a claim that a signed app artifact was inspected."
+    }
+  ],
+  "proof": {
+    "argument": "For the exact hashed bundle and its unmodified compiler metadata, any execution of the reported assignment requires its property key to be one of six compiler-generated, non-prototype keys. Even arbitrary string-key control alone would not satisfy the assignment precondition for __proto__/constructor/prototype. URL and message data cannot change that key set through this sink. The bounded probes corroborate this argument and positively exercise all six numeric entries.",
+    "limits": [
+      "Node VM is not a browser Worker/MessagePort or end-to-end SQLite test.",
+      "A diagnostic closure export was inserted in memory only; A.w0 itself was wrapped to observe calls and the metadata object was proxied to observe writes. Disk source stayed byte-identical.",
+      "Serve parser cases use inert object port placeholders and intercept the post-parse handler; no claim of valid native MessagePort behavior.",
+      "No network, SQL, browser storage, application account, production or privileged operation occurs in the probe.",
+      "This conclusion is pinned to this worker SHA and numeric initializer; compiler regeneration or SDK/dependency change requires revalidation.",
+      "No GitHub dismissal, suppression, CodeQL rescan or change of severity was performed."
+    ],
+    "assumptions": [
+      "The worker runs with its pinned, unmodified compiler-owned metadata initializer.",
+      "No pre-existing arbitrary JavaScript execution or separate prototype-pollution vulnerability has changed the worker realm or runtime metadata. Such a separate compromise is not established by alert48."
+    ]
+  },
+  "hostProbe": {
+    "nodeVersion": "v24.18.0",
+    "kind": "Bounded matching-source parser/RTI reachability test",
+    "cases": 45,
+    "passed": 45,
+    "failed": 0,
+    "results": [
+      {
+        "id": "positive-compiler-e8",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "e8"
+        ],
+        "writes": [
+          {
+            "key": "e8",
+            "previousType": "number",
+            "nextType": "object"
+          }
+        ],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "positive-compiler-ho",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "ho"
+        ],
+        "writes": [
+          {
+            "key": "ho",
+            "previousType": "number",
+            "nextType": "object"
+          }
+        ],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "positive-compiler-aG",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "aG"
+        ],
+        "writes": [
+          {
+            "key": "aG",
+            "previousType": "number",
+            "nextType": "object"
+          }
+        ],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "positive-compiler-fx",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "fx"
+        ],
+        "writes": [
+          {
+            "key": "fx",
+            "previousType": "number",
+            "nextType": "object"
+          }
+        ],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "positive-compiler-cj",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "cj"
+        ],
+        "writes": [
+          {
+            "key": "cj",
+            "previousType": "number",
+            "nextType": "object"
+          }
+        ],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "positive-compiler-u9",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "u9"
+        ],
+        "writes": [
+          {
+            "key": "u9",
+            "previousType": "number",
+            "nextType": "object"
+          }
+        ],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reserved-key-__proto__",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "__proto__"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reserved-key-constructor",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "constructor"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reserved-key-prototype",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "prototype"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reserved-key-toString",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "toString"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reserved-key-hasOwnProperty",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "hasOwnProperty"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reserved-key-__defineGetter__",
+        "kind": "sink",
+        "rejected": false,
+        "error": null,
+        "value": "internal branch precondition",
+        "constructorKeys": [
+          "__defineGetter__"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-0",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/__proto__/drift_worker.dart.js",
+        "constructorKeys": [
+          "bn"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-1",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/drift_worker.dart.js?__proto__%5Bbil_probe%5D=1",
+        "constructorKeys": [
+          "hj"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-2",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/drift_worker.dart.js?constructor%5Bprototype%5D%5Bbil_probe%5D=1",
+        "constructorKeys": [
+          "hj"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-3",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/__proto__/drift_worker.dart.js",
+        "constructorKeys": [
+          "hj"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-4",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/drift_worker.dart.js#constructor.prototype.bil_probe",
+        "constructorKeys": [
+          "bn"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-5",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/__proto__/drift_worker.dart.js",
+        "constructorKeys": [
+          "hj"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-6",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/drift_worker.dart.js?e8=__proto__&ho=constructor",
+        "constructorKeys": [
+          "bn"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-7",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/a/__proto__?x=prototype",
+        "constructorKeys": [
+          "hj"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-8",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "https://bil-audit.invalid/drift_worker.dart.js?name=%7B%22constructor%22%3A%7B%22name%22%3A%22__proto__%22%7D%7D",
+        "constructorKeys": [
+          "hj"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "reported-url-source-9",
+        "kind": "uri",
+        "rejected": false,
+        "error": null,
+        "value": "file:///bil-audit/__proto__/drift_worker.dart.js",
+        "constructorKeys": [
+          "bn"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-database-__proto__",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:dd",
+        "constructorKeys": [
+          "dd"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-serve-parser-__proto__",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:cK",
+        "constructorKeys": [
+          "cK"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-database-constructor",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:dd",
+        "constructorKeys": [
+          "dd"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-serve-parser-constructor",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:cK",
+        "constructorKeys": [
+          "cK"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-database-prototype",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:dd",
+        "constructorKeys": [
+          "dd"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-serve-parser-prototype",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:cK",
+        "constructorKeys": [
+          "cK"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-database-constructor.prototype.bil_probe",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:dd",
+        "constructorKeys": [
+          "dd"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-serve-parser-constructor.prototype.bil_probe",
+        "kind": "init",
+        "rejected": false,
+        "error": null,
+        "value": "minified:cK",
+        "constructorKeys": [
+          "cK"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-unknown-rejected",
+        "kind": "init",
+        "rejected": true,
+        "error": "Invalid argument(s): Unknown type __proto__",
+        "value": null,
+        "constructorKeys": [],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-object-database-rejected",
+        "kind": "init",
+        "rejected": true,
+        "error": "TypeError: Instance of 'minified:iw': type 'minified:iw' is not a subtype of type 'String'",
+        "value": null,
+        "constructorKeys": [
+          "iw"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "public-init-invalid-sqlite-rejected",
+        "kind": "init",
+        "rejected": true,
+        "error": "TypeError: Instance of 'minified:iw': type 'minified:iw' is not a subtype of type 'String'",
+        "value": null,
+        "constructorKeys": [
+          "iw"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "legacy-rpc-data-0",
+        "kind": "legacyRpc",
+        "rejected": false,
+        "error": null,
+        "value": "minified:c3<Object?, Object?>",
+        "constructorKeys": [],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "legacy-rpc-data-1",
+        "kind": "legacyRpc",
+        "rejected": false,
+        "error": null,
+        "value": "minified:z<dynamic>",
+        "constructorKeys": [],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "legacy-rpc-data-2",
+        "kind": "legacyRpc",
+        "rejected": false,
+        "error": null,
+        "value": "minified:c3<Object?, Object?>",
+        "constructorKeys": [],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "modern-rpc-error-text-__proto__",
+        "kind": "modernRpc",
+        "rejected": false,
+        "error": null,
+        "value": "minified:bK",
+        "constructorKeys": [
+          "bK"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "modern-rpc-error-text-constructor",
+        "kind": "modernRpc",
+        "rejected": false,
+        "error": null,
+        "value": "minified:bK",
+        "constructorKeys": [
+          "bK"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "modern-rpc-error-text-prototype",
+        "kind": "modernRpc",
+        "rejected": false,
+        "error": null,
+        "value": "minified:bK",
+        "constructorKeys": [
+          "bK"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "modern-rpc-cancel-id",
+        "kind": "modernRpc",
+        "rejected": false,
+        "error": null,
+        "value": "minified:c_",
+        "constructorKeys": [
+          "c_"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "external-clone-shape-runtime-type-0",
+        "kind": "externalType",
+        "rejected": false,
+        "error": null,
+        "value": "minified:iw",
+        "constructorKeys": [
+          "iw"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "external-clone-shape-runtime-type-1",
+        "kind": "externalType",
+        "rejected": false,
+        "error": null,
+        "value": "minified:iw",
+        "constructorKeys": [
+          "iw"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "external-clone-shape-runtime-type-2",
+        "kind": "externalType",
+        "rejected": false,
+        "error": null,
+        "value": "minified:iw",
+        "constructorKeys": [
+          "iw"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "external-clone-shape-runtime-type-3",
+        "kind": "externalType",
+        "rejected": false,
+        "error": null,
+        "value": "minified:z<dynamic>",
+        "constructorKeys": [],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      },
+      {
+        "id": "external-clone-shape-runtime-type-4",
+        "kind": "externalType",
+        "rejected": false,
+        "error": null,
+        "value": "minified:cy",
+        "constructorKeys": [
+          "cy"
+        ],
+        "writes": [],
+        "allowedCompilerKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "objectPrototypeUnchanged": true,
+        "metadataPrototypeUnchanged": true,
+        "writesOnlyCompilerKeys": true,
+        "operationAsExpected": true,
+        "controlAsExpected": true,
+        "passed": true
+      }
+    ],
+    "reproductionProgramSha256": "4ff2fa8b2562038cd2eb91d50f3dcb997d93d96fbbc209f2e1c9a1bfb11a06fc",
+    "reproductionProgram": "const fs=require(\"node:fs\");\nconst runProbeSuite=function runProbeSuite(source, cases) {\n  const vm = require('node:vm');\n  const marker = 'var s=A.y_\\nif(typeof dartMainRunner';\n  if (source.split(marker).length !== 2) throw new Error('Diagnostic export marker is not unique.');\n  const result = [];\n  for (const spec of cases) {\n    const sandbox = { dartMainRunner() {} };\n    sandbox.self = sandbox;\n    sandbox.location = { href: 'https://bil-audit.invalid/drift_worker.dart.js' };\n    vm.createContext(sandbox);\n    vm.runInContext(source.replace(marker, 'globalThis.__bilAudit={A:A,J:J,B:B,v:v};'+marker), sandbox, { timeout: 2000 });\n    sandbox.__caseJson = JSON.stringify(spec);\n    result.push(vm.runInContext(`(() => {\n      const {A,v}=__bilAudit, spec=JSON.parse(__caseJson);\n      const metadata=v.typeUniverse.eT;\n      const allowed=Object.keys(metadata).filter(k=>typeof metadata[k]==='number');\n      const objectBefore=Object.getOwnPropertyDescriptors(Object.prototype);\n      const metadataPrototype=Object.getPrototypeOf(metadata);\n      const writes=[], calls=[];\n      v.typeUniverse.eT=new Proxy(metadata,{set(target,key,value){\n        writes.push({key:String(key),previousType:typeof target[key],nextType:typeof value});\n        return Reflect.set(target,key,value);\n      }});\n      const original=A.w0;\n      A.w0=function(universe,key){calls.push(String(key));return original(universe,key)};\n      let value=null, rejected=false, error=null;\n      const recordType=message => { value=A.aY(A.aJ(message),null); };\n      try {\n        const payload=spec.valueJson===undefined?null:JSON.parse(spec.valueJson);\n        if(spec.kind==='sink') { A.w0(v.typeUniverse,spec.key);value='internal branch precondition'; }\n        else if(spec.kind==='uri') { self.location.href=spec.uri;const uri=A.iR();recordType(uri);value=uri.i(0); }\n        else if(spec.kind==='init') { A.kw.prototype.$1.call({a:{ak:recordType}},{data:payload}); }\n        else if(spec.kind==='legacyRpc'||spec.kind==='modernRpc') {\n          const receiver={a:false,c:spec.kind==='modernRpc',b:{a:{a:{l(_unused,message){recordType(message)}}}},d:new A.j1(A.oO(3))};\n          A.mn.prototype.$1.call(receiver,{data:payload});\n        } else if(spec.kind==='externalType') { recordType(payload); }\n        else throw new Error('Unknown probe kind');\n      } catch(e) { rejected=true;error=String(e).slice(0,180); }\n      const objectAfter=Object.getOwnPropertyDescriptors(Object.prototype);\n      const beforeKeys=Reflect.ownKeys(objectBefore),afterKeys=Reflect.ownKeys(objectAfter);\n      const objectPrototypeUnchanged=beforeKeys.length===afterKeys.length&&beforeKeys.every(k=>{\n        const a=objectBefore[k],b=objectAfter[k];\n        return b&&['value','get','set','enumerable','configurable','writable'].every(p=>a[p]===b[p]);\n      });\n      const metadataPrototypeUnchanged=Object.getPrototypeOf(metadata)===metadataPrototype;\n      const writesOnlyCompilerKeys=writes.every(w=>allowed.includes(w.key)&&w.previousType==='number');\n      const operationAsExpected=rejected===Boolean(spec.expectReject);\n      const controlAsExpected=spec.control==='positive'?writes.length===1&&writes[0].key===spec.key:\n        spec.kind==='sink'?writes.length===0:true;\n      return {id:spec.id,kind:spec.kind,rejected,error,value,constructorKeys:[...new Set(calls)],writes,\n        allowedCompilerKeys:allowed,objectPrototypeUnchanged,metadataPrototypeUnchanged,writesOnlyCompilerKeys,\n        operationAsExpected,controlAsExpected,\n        passed:objectPrototypeUnchanged&&metadataPrototypeUnchanged&&writesOnlyCompilerKeys&&operationAsExpected&&controlAsExpected};\n    })()`, sandbox, { timeout: 1000 }));\n  }\n  return {cases:result.length,passed:result.filter(x=>x.passed).length,failed:result.filter(x=>!x.passed).length,results:result};\n};\nconst cases=[\n  {\n    \"id\": \"positive-compiler-e8\",\n    \"kind\": \"sink\",\n    \"key\": \"e8\",\n    \"control\": \"positive\"\n  },\n  {\n    \"id\": \"positive-compiler-ho\",\n    \"kind\": \"sink\",\n    \"key\": \"ho\",\n    \"control\": \"positive\"\n  },\n  {\n    \"id\": \"positive-compiler-aG\",\n    \"kind\": \"sink\",\n    \"key\": \"aG\",\n    \"control\": \"positive\"\n  },\n  {\n    \"id\": \"positive-compiler-fx\",\n    \"kind\": \"sink\",\n    \"key\": \"fx\",\n    \"control\": \"positive\"\n  },\n  {\n    \"id\": \"positive-compiler-cj\",\n    \"kind\": \"sink\",\n    \"key\": \"cj\",\n    \"control\": \"positive\"\n  },\n  {\n    \"id\": \"positive-compiler-u9\",\n    \"kind\": \"sink\",\n    \"key\": \"u9\",\n    \"control\": \"positive\"\n  },\n  {\n    \"id\": \"reserved-key-__proto__\",\n    \"kind\": \"sink\",\n    \"key\": \"__proto__\"\n  },\n  {\n    \"id\": \"reserved-key-constructor\",\n    \"kind\": \"sink\",\n    \"key\": \"constructor\"\n  },\n  {\n    \"id\": \"reserved-key-prototype\",\n    \"kind\": \"sink\",\n    \"key\": \"prototype\"\n  },\n  {\n    \"id\": \"reserved-key-toString\",\n    \"kind\": \"sink\",\n    \"key\": \"toString\"\n  },\n  {\n    \"id\": \"reserved-key-hasOwnProperty\",\n    \"kind\": \"sink\",\n    \"key\": \"hasOwnProperty\"\n  },\n  {\n    \"id\": \"reserved-key-__defineGetter__\",\n    \"kind\": \"sink\",\n    \"key\": \"__defineGetter__\"\n  },\n  {\n    \"id\": \"reported-url-source-0\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/__proto__/drift_worker.dart.js\"\n  },\n  {\n    \"id\": \"reported-url-source-1\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/drift_worker.dart.js?__proto__[bil_probe]=1\"\n  },\n  {\n    \"id\": \"reported-url-source-2\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/drift_worker.dart.js?constructor[prototype][bil_probe]=1\"\n  },\n  {\n    \"id\": \"reported-url-source-3\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/a/../__proto__/./drift_worker.dart.js\"\n  },\n  {\n    \"id\": \"reported-url-source-4\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/drift_worker.dart.js#constructor.prototype.bil_probe\"\n  },\n  {\n    \"id\": \"reported-url-source-5\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/%5F%5Fproto%5F%5F/drift_worker.dart.js\"\n  },\n  {\n    \"id\": \"reported-url-source-6\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/drift_worker.dart.js?e8=__proto__&ho=constructor\"\n  },\n  {\n    \"id\": \"reported-url-source-7\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/a//b/../../__proto__?x=prototype\"\n  },\n  {\n    \"id\": \"reported-url-source-8\",\n    \"kind\": \"uri\",\n    \"uri\": \"https://bil-audit.invalid/drift_worker.dart.js?name=%7B%22constructor%22%3A%7B%22name%22%3A%22__proto__%22%7D%7D\"\n  },\n  {\n    \"id\": \"reported-url-source-9\",\n    \"kind\": \"uri\",\n    \"uri\": \"file:///bil-audit/__proto__/drift_worker.dart.js\"\n  },\n  {\n    \"id\": \"public-init-database-__proto__\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"RequestCompatibilityCheck\\\",\\\"payload\\\":\\\"__proto__\\\"}\"\n  },\n  {\n    \"id\": \"public-init-serve-parser-__proto__\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"ServeDriftDatabase\\\",\\\"payload\\\":{\\\"v\\\":3,\\\"sqlite\\\":\\\"https://bil-audit.invalid/__proto__/sqlite3.wasm\\\",\\\"port\\\":{},\\\"storage\\\":\\\"inMemory\\\",\\\"database\\\":\\\"__proto__\\\",\\\"initPort\\\":null,\\\"migrations\\\":true,\\\"new_serialization\\\":true,\\\"constructor\\\":{\\\"name\\\":\\\"__proto__\\\"}}}\"\n  },\n  {\n    \"id\": \"public-init-database-constructor\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"RequestCompatibilityCheck\\\",\\\"payload\\\":\\\"constructor\\\"}\"\n  },\n  {\n    \"id\": \"public-init-serve-parser-constructor\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"ServeDriftDatabase\\\",\\\"payload\\\":{\\\"v\\\":3,\\\"sqlite\\\":\\\"https://bil-audit.invalid/constructor/sqlite3.wasm\\\",\\\"port\\\":{},\\\"storage\\\":\\\"inMemory\\\",\\\"database\\\":\\\"constructor\\\",\\\"initPort\\\":null,\\\"migrations\\\":true,\\\"new_serialization\\\":true,\\\"constructor\\\":{\\\"name\\\":\\\"__proto__\\\"}}}\"\n  },\n  {\n    \"id\": \"public-init-database-prototype\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"RequestCompatibilityCheck\\\",\\\"payload\\\":\\\"prototype\\\"}\"\n  },\n  {\n    \"id\": \"public-init-serve-parser-prototype\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"ServeDriftDatabase\\\",\\\"payload\\\":{\\\"v\\\":3,\\\"sqlite\\\":\\\"https://bil-audit.invalid/prototype/sqlite3.wasm\\\",\\\"port\\\":{},\\\"storage\\\":\\\"inMemory\\\",\\\"database\\\":\\\"prototype\\\",\\\"initPort\\\":null,\\\"migrations\\\":true,\\\"new_serialization\\\":true,\\\"constructor\\\":{\\\"name\\\":\\\"__proto__\\\"}}}\"\n  },\n  {\n    \"id\": \"public-init-database-constructor.prototype.bil_probe\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"RequestCompatibilityCheck\\\",\\\"payload\\\":\\\"constructor.prototype.bil_probe\\\"}\"\n  },\n  {\n    \"id\": \"public-init-serve-parser-constructor.prototype.bil_probe\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"ServeDriftDatabase\\\",\\\"payload\\\":{\\\"v\\\":3,\\\"sqlite\\\":\\\"https://bil-audit.invalid/constructor.prototype.bil_probe/sqlite3.wasm\\\",\\\"port\\\":{},\\\"storage\\\":\\\"inMemory\\\",\\\"database\\\":\\\"constructor.prototype.bil_probe\\\",\\\"initPort\\\":null,\\\"migrations\\\":true,\\\"new_serialization\\\":true,\\\"constructor\\\":{\\\"name\\\":\\\"__proto__\\\"}}}\"\n  },\n  {\n    \"id\": \"public-init-unknown-rejected\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"__proto__\\\",\\\"payload\\\":{}}\",\n    \"expectReject\": true\n  },\n  {\n    \"id\": \"public-init-object-database-rejected\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"RequestCompatibilityCheck\\\",\\\"payload\\\":{\\\"constructor\\\":{\\\"name\\\":\\\"__proto__\\\"}}}\",\n    \"expectReject\": true\n  },\n  {\n    \"id\": \"public-init-invalid-sqlite-rejected\",\n    \"kind\": \"init\",\n    \"valueJson\": \"{\\\"type\\\":\\\"ServeDriftDatabase\\\",\\\"payload\\\":{\\\"v\\\":3,\\\"sqlite\\\":{\\\"constructor\\\":{\\\"name\\\":\\\"__proto__\\\"}}}}\",\n    \"expectReject\": true\n  },\n  {\n    \"id\": \"legacy-rpc-data-0\",\n    \"kind\": \"legacyRpc\",\n    \"valueJson\": \"{\\\"__proto__\\\":{\\\"bil_probe\\\":true},\\\"constructor\\\":{\\\"prototype\\\":{\\\"bil_probe\\\":true},\\\"name\\\":\\\"__proto__\\\"},\\\"fat\\\":20}\"\n  },\n  {\n    \"id\": \"legacy-rpc-data-1\",\n    \"kind\": \"legacyRpc\",\n    \"valueJson\": \"[{\\\"name\\\":\\\"__proto__\\\",\\\"value\\\":\\\"constructor.prototype\\\"},0,null,40]\"\n  },\n  {\n    \"id\": \"legacy-rpc-data-2\",\n    \"kind\": \"legacyRpc\",\n    \"valueJson\": \"{\\\"query\\\":\\\"select ?\\\",\\\"arguments\\\":[\\\"__proto__\\\",\\\"constructor\\\",\\\"prototype\\\"],\\\"database\\\":\\\"__proto__\\\"}\"\n  },\n  {\n    \"id\": \"modern-rpc-error-text-__proto__\",\n    \"kind\": \"modernRpc\",\n    \"valueJson\": \"[2,[17,\\\"__proto__\\\",null]]\"\n  },\n  {\n    \"id\": \"modern-rpc-error-text-constructor\",\n    \"kind\": \"modernRpc\",\n    \"valueJson\": \"[2,[17,\\\"constructor\\\",null]]\"\n  },\n  {\n    \"id\": \"modern-rpc-error-text-prototype\",\n    \"kind\": \"modernRpc\",\n    \"valueJson\": \"[2,[17,\\\"prototype\\\",null]]\"\n  },\n  {\n    \"id\": \"modern-rpc-cancel-id\",\n    \"kind\": \"modernRpc\",\n    \"valueJson\": \"[3,17]\"\n  },\n  {\n    \"id\": \"external-clone-shape-runtime-type-0\",\n    \"kind\": \"externalType\",\n    \"valueJson\": \"{\\\"constructor\\\":{\\\"name\\\":\\\"__proto__\\\"}}\"\n  },\n  {\n    \"id\": \"external-clone-shape-runtime-type-1\",\n    \"kind\": \"externalType\",\n    \"valueJson\": \"{\\\"__proto__\\\":{\\\"bil_probe\\\":true}}\"\n  },\n  {\n    \"id\": \"external-clone-shape-runtime-type-2\",\n    \"kind\": \"externalType\",\n    \"valueJson\": \"{\\\"constructor\\\":{\\\"name\\\":\\\"e8\\\"}}\"\n  },\n  {\n    \"id\": \"external-clone-shape-runtime-type-3\",\n    \"kind\": \"externalType\",\n    \"valueJson\": \"[\\\"__proto__\\\",\\\"constructor\\\"]\"\n  },\n  {\n    \"id\": \"external-clone-shape-runtime-type-4\",\n    \"kind\": \"externalType\",\n    \"valueJson\": \"\\\"__proto__\\\"\"\n  }\n];\nconsole.log(JSON.stringify(runProbeSuite(fs.readFileSync(process.argv[2]||\"web/drift_worker.dart.js\",\"utf8\"),cases),null,2));\n",
+    "summaryByKind": {
+      "sink": {
+        "cases": 12,
+        "passed": 12,
+        "writes": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9"
+        ],
+        "constructorKeys": [
+          "e8",
+          "ho",
+          "aG",
+          "fx",
+          "cj",
+          "u9",
+          "__proto__",
+          "constructor",
+          "prototype",
+          "toString",
+          "hasOwnProperty",
+          "__defineGetter__"
+        ]
+      },
+      "uri": {
+        "cases": 10,
+        "passed": 10,
+        "writes": [],
+        "constructorKeys": [
+          "bn",
+          "hj"
+        ]
+      },
+      "init": {
+        "cases": 11,
+        "passed": 11,
+        "writes": [],
+        "constructorKeys": [
+          "dd",
+          "cK",
+          "iw"
+        ]
+      },
+      "legacyRpc": {
+        "cases": 3,
+        "passed": 3,
+        "writes": [],
+        "constructorKeys": []
+      },
+      "modernRpc": {
+        "cases": 4,
+        "passed": 4,
+        "writes": [],
+        "constructorKeys": [
+          "bK",
+          "c_"
+        ]
+      },
+      "externalType": {
+        "cases": 5,
+        "passed": 5,
+        "writes": [],
+        "constructorKeys": [
+          "iw",
+          "cy"
+        ]
+      }
+    }
+  },
+  "decision": {
+    "vulnerabilityReproduced": false,
+    "reportedPrototypePollutionPath": "NOT_REACHABLE_WITH_MATCHING_COMPILER_METADATA",
+    "falsePositiveAssessment": "Evidence supports a false positive for this specific URL-to-RTI property-injection report; this is not a blanket assessment of generated JavaScript.",
+    "githubAlert": "REMAINS_OPEN_NO_DISMISSAL",
+    "minimalProductFixRequiredForThisSink": "None demonstrated; do not hand-edit generated JavaScript, suppress the rule, or introduce a broad dependency upgrade solely to silence this alert.",
+    "remainingAction": "Root/security reviewer can review the pinned argument and replay the embedded Node program. Formal GitHub triage/disposition remains a separate authorized action; keep current open status until that review.",
+    "browserRuntimeStatus": "NOT_TESTED",
+    "signedArtifactStatus": "NOT_TESTED"
+  },
+  "mutations": {
+    "generatedSource": false,
+    "productSource": false,
+    "dependencies": false,
+    "github": false,
+    "reportOnly": "build/qa/policy-gate-20261015/codeql48-reachability.json"
+  },
+  "durableRegression": {
+    "path": "tools/qa/test_drift_worker_rti_guards.mjs",
+    "scriptSha256": "f8d3b0c32416b2513a16c4c5f5760a39195348355e8dea54937da23bc9425247",
+    "workerSha256": "e18724169edf818cd2289268b41adf6bc8a501bcedc55938e222ab0546540f8f",
+    "command": "node --test --test-reporter=tap tools/qa/test_drift_worker_rti_guards.mjs",
+    "counts": {
+      "tests": 45,
+      "pass": 45,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "nodeDurationMs": 3275.8145,
+    "rawOutput": {
+      "path": "build/qa/policy-gate-20261015/codeql48-regression.raw.log",
+      "sha256": "7740aa8d9c410f941f4a817bd1fd06acbc5273f50c57bb70be55af8d07770188",
+      "bytes": 16397
+    },
+    "positiveControlKeys": [
+      "e8",
+      "ho",
+      "aG",
+      "fx",
+      "cj",
+      "u9"
+    ],
+    "allSixPositiveControlsAssertExactNumericToObjectWrite": true,
+    "existingSarifFlowCount": 4,
+    "existingSarifAnalysisId": 1959431365,
+    "newCodeqlScan": false,
+    "sourceOrGeneratedWorkerChanged": false,
+    "completedAtUtc": "2026-10-15T16:05:16.548621+00:00"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "observed_date_utc": "2026-10-15",
+  "finding": "Generated package config was reset by a host command using a different default PUB_CACHE. SDK guard rejected source_uri mismatch; no underlying package bytes differed across the4 original SDK trees.",
+  "upstream_tree_and_patch_hash_equivalence": {
+    "camera_android_camerax": "identical",
+    "mobile_scanner": "identical",
+    "google_mobile_ads": "identical",
+    "flutter_local_notifications": "identical"
+  },
+  "ignored_or_disabled_checks": 0,
+  "versions_changed": false,
+  "pubspec_and_lock_changed": false,
+  "fix": "PUB_CACHE=G pinned, pub get --enforce-lockfile, SDK overlays prepared/verified again; scanner-rebind remains separately tested.",
+  "native_scope_limit": "Previous native UI runs prove their actual UI/driver behavior. Do not claim the Ccache-based UI run proves patched native SDK composition. Final CI runner prepares the exact audited overlays after pub get.",
+  "notification_runtime_source_binding_recheck": "PASS:4/4 API36 with exact owned discovery roots+markers verified before/after; patched guard present in compiled classes6.dex; notification-native-rebound/receipt.json."
+}

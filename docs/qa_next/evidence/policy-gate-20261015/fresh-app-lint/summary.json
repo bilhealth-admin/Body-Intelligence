@@ -1,0 +1,58 @@
+{
+  "recorded_at_utc": "2026-10-15T19:59:37.255272+00:00",
+  "scope": "Fresh app analyze/report with all rules and dependencies retained; other SDK cache reused; separate from GLOBAL failed audit",
+  "variants": [
+    {
+      "variant": "debug",
+      "xml_sha256": "b7413599009ae1e191b1ed51ca5d83594af7e3eccee36e360237857c5843b106",
+      "errors": [],
+      "warnings": 133
+    },
+    {
+      "variant": "release",
+      "xml_sha256": "19d4e928fe1c9a3ed2623548cb3acb5433ed196aa3fdabb2547033147368a3c2",
+      "errors": [
+        {
+          "id": "LintError",
+          "message": "The lint detector\n    `com.google.play.policy.insights.LoginCredentialsPolicyDetector`\ncalled `context.getMainProject()` during module analysis.\n\nThis does not work correctly when running in AGP (9.0.1).\n\nIn particular, there may be false positives or false negatives because\nthe lint check may be using the minSdkVersion or manifest information\nfrom the library instead of any consuming app module.\n\nContact the vendor of the lint issue to get it fixed/updated (if\nknown, listed below), and in the meantime you can try to work around\nthis by disabling the following issues:\n\n\"LoginCredentials\"\n\nIssue Vendors:\nVendor: Play policy insights beta\n\nCall stack: Context$Companion.checkForbidden$default(Context.kt:692)\u2190Context.getMainProject(Context.kt:106)\u2190ExperimentUtils.getPackageNameForHoldout(ExperimentUtils.kt:151)\u2190ExperimentUtils.shouldHoldout(ExperimentUtils.kt:71)\u2190LoginCredentialsPolicyDetector.beforeCheckRootProject(LoginCredentialsPolicyDetector.kt:122)\u2190LintDriver.checkProject(LintDriver.kt:1053)\u2190LintDriver.checkProjectRoot(LintDriver.kt:627)\u2190LintDriver.access$checkProjectRoot(LintDriver.kt:179)\u2190LintDriver$analyzeOnly$1.invoke(LintDriver.kt:450)\u2190LintDriver$analyzeOnly$1.invoke(LintDriver.kt:447)\u2190LintDriver.doAnalyze(LintDriver.kt:506)\u2190LintDriver.analyzeOnly(LintDriver.kt:447)\u2190LintCliClient$analyzeOnly$1.invoke(LintCliClient.kt:279)\u2190LintCliClient$analyzeOnly$1.invoke(LintCliClient.kt:276)\u2190LintCliClient.run(LintCliClient.kt:333)\u2190LintCliClient.analyzeOnly(LintCliClient.kt:276)\u2190Main.run(Main.java:1777)\u2190Main.run(Main.java:283)\u2190DirectMethodHandleAccessor.invoke(null:-1)\u2190Method.invoke(null:-1)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app"
+            }
+          ]
+        }
+      ],
+      "warnings": 133
+    }
+  ],
+  "fresh_task_execution_records": [
+    {
+      "task": ":app:lintAnalyzeRelease",
+      "localPropertiesSha256": "f5b47d9672d91488ea05cf0173bc3a72ae10f798c9f262fc5b72e905c88782d6",
+      "filtersAdded": false,
+      "severityChanges": false,
+      "timestamp": "2026-10-15T19:56:14.379079900Z"
+    },
+    {
+      "task": ":app:lintAnalyzeDebug",
+      "localPropertiesSha256": "f5b47d9672d91488ea05cf0173bc3a72ae10f798c9f262fc5b72e905c88782d6",
+      "filtersAdded": false,
+      "severityChanges": false,
+      "timestamp": "2026-10-15T19:56:29.515282300Z"
+    },
+    {
+      "task": ":app:lintReportRelease",
+      "localPropertiesSha256": "f5b47d9672d91488ea05cf0173bc3a72ae10f798c9f262fc5b72e905c88782d6",
+      "filtersAdded": false,
+      "severityChanges": false,
+      "timestamp": "2026-10-15T19:58:25.689176300Z"
+    },
+    {
+      "task": ":app:lintReportDebug",
+      "localPropertiesSha256": "f5b47d9672d91488ea05cf0173bc3a72ae10f798c9f262fc5b72e905c88782d6",
+      "filtersAdded": false,
+      "severityChanges": false,
+      "timestamp": "2026-10-15T19:58:25.933462200Z"
+    }
+  ]
+}

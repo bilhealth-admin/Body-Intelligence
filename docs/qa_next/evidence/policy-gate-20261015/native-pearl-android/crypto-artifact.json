@@ -1,0 +1,8 @@
+{
+  "Scope": "Synthetic Android API33 AES/secure-cache, not signed artifact",
+  "ApkSha256": "a79a32231071dbf5446e1268cdc243d02e3f2c3dfedaa68291c448ef37750517",
+  "SourceHead": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "ImplementationFingerprint": "52cc203978283fe041e549f1f70f33d9b1896b38fb4ecbafb8cd3f38b07ff483",
+  "TestsPassed": 2,
+  "TestsFailed": 0
+}

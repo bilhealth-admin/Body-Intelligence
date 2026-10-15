@@ -100,11 +100,11 @@ abstract final class CoachRuntimeCopy {
       "tr": "200 rehberli egzersiz hareketi",
     },
     "300+ home workout videos": {
-      'en': "300+ home workout videos",
-      "ar": "أكثر من 300 فيديو تمارين منزلية",
-      "fr": "Plus de 300 vidéos d’entraînement à domicile",
-      "es": "Más de 300 vídeos de entrenamiento en casa",
-      "tr": "300+ ev antrenmanı videosu",
+      'en': "300+ workout videos",
+      "ar": "أكثر من 300 فيديو تمارين",
+      "fr": "Plus de 300 vidéos d’entraînement",
+      "es": "Más de 300 vídeos de entrenamiento",
+      "tr": "300+ antrenman videosu",
     },
     "100+ video-guided weight-training plans": {
       'en': "100+ video-guided weight-training plans",

@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'meal_voice_session_test.dart' show ControlledMealSpeech;
 import '../../visual_closure/visual_evidence_font.dart';
 import '../../visual_closure/closure_surface_capture.dart';
+import '../../support/system_speech_disclosure_test_support.dart';
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
@@ -85,9 +86,9 @@ void main() {
         localeId: 'en',
         arabic: false,
       );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await acceptSystemSpeechDisclosure(tester);
       expect(await second, isNull);
+      expect(find.byKey(systemSpeechDisclosureAllowKey), findsNothing);
       expect(find.text('Preparing microphone…'), findsOneWidget);
       expect(speech.listens, 0);
       await tester.tap(find.byKey(const Key('cancel-voice-food-candidate')));
@@ -105,10 +106,18 @@ void main() {
   ) async {
     final context = await mount(tester);
     final speech = ControlledMealSpeech();
-    final value = await MealVoiceInputService(
+    var permissionChecks = 0;
+    final pending = MealVoiceInputService(
       speech,
-      permissionGate: (_) async => false,
+      permissionGate: (_) async {
+        permissionChecks++;
+        return false;
+      },
     ).capture(context: context, localeId: 'en', arabic: false);
+    expect(permissionChecks, 0);
+    await acceptSystemSpeechDisclosure(tester);
+    final value = await pending;
+    expect(permissionChecks, 1);
     expect(value, isNull);
     expect(speech.listens, 0);
     expect(speech.disposals, 1);
@@ -122,7 +131,7 @@ void main() {
       speech,
       permissionGate: (_) async => true,
     ).capture(context: context, localeId: 'en', arabic: false);
-    await tester.pumpAndSettle();
+    await acceptSystemSpeechDisclosure(tester);
     expect(speech.listening, isTrue);
     for (final state in [
       AppLifecycleState.inactive,
@@ -172,7 +181,7 @@ void main() {
                   localeId: language,
                   arabic: language == 'ar',
                 );
-            await tester.pumpAndSettle();
+            await acceptSystemSpeechDisclosure(tester);
             final editor = find.byKey(
               const Key('editable-voice-food-candidate'),
             );

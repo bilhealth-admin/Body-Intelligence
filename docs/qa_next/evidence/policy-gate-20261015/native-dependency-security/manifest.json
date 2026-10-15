@@ -1,0 +1,96 @@
+{
+  "recorded_at_utc": "2026-10-15T20:14:57.944864+00:00",
+  "scope": "Allowlisted QA proof; no keys, SDK/JAR binaries, private fixtures, user accounts or receipts",
+  "files": [
+    {
+      "file": "GHSA-3cqm-mf7h-prrj.json",
+      "bytes": 2429,
+      "sha256": "4cdcd52a73ba353d50a709aab83c5317f6897840daedbdbe297f91a00c45b319"
+    },
+    {
+      "file": "GHSA-4hc2-jh7r-wrc3.json",
+      "bytes": 2212,
+      "sha256": "53e948fe42d13adad4f3c9039161c1ab272476a96fb5454736e843203f176475"
+    },
+    {
+      "file": "okhttp-baseline-functional.log",
+      "bytes": 841,
+      "sha256": "d80f5100c77b3bf09420990eb59ff5ca582e480f30c6be62f3fdb2aa8b966b85"
+    },
+    {
+      "file": "okhttp-baseline-linkage.log",
+      "bytes": 165,
+      "sha256": "6148fcf186743f3638ae08b397b8a248bedf073fcd45d28860b5f907bb8b751e"
+    },
+    {
+      "file": "okhttp-candidate-functional.log",
+      "bytes": 843,
+      "sha256": "adb09825b19210160c38d2214ee5b0a9a38420a3898c6edaac9ed5c4b30ddd53"
+    },
+    {
+      "file": "okhttp-candidate-linkage.log",
+      "bytes": 165,
+      "sha256": "6930f38ce0b32d8dc023f86e12a3eb7e531a3e3aa5708e8d92e190bcbc28f291"
+    },
+    {
+      "file": "okhttp-final-runtime-jvm.json",
+      "bytes": 8425,
+      "sha256": "6c0267c574a2457ff039e1a322e6eca67a8ffb124070e0f06ad7ed66a5918c0b"
+    },
+    {
+      "file": "okhttp-mlkit-okhttp-okio-symbols.tsv",
+      "bytes": 1932,
+      "sha256": "0c0bed951852e3cfbb256b14e2fe6ac41508b303092978bd9b592fb09ac62890"
+    },
+    {
+      "file": "okhttp-parser-guards.json",
+      "bytes": 832,
+      "sha256": "64d4588b20aec998db689c6dbcfa75bad0ec8d39cd8138e5191af788487f3e47"
+    },
+    {
+      "file": "osv-after-okhttp-fix.json",
+      "bytes": 45931,
+      "sha256": "0bf8cc35abd7c0c25c59656aa631ea086758e80873e591b4bea1717751e2f3cb"
+    },
+    {
+      "file": "osv-before-okhttp-fix.json",
+      "bytes": 46375,
+      "sha256": "43aaf72ab6f5663a91a063476a0a8aab1ed4e9d374a3cce7bba25a84480ad6ae"
+    },
+    {
+      "file": "resolved-runtime-after-okhttp-fix.json",
+      "bytes": 34196,
+      "sha256": "af2225dd89bde7e95ef1067bf517a0c7d902703dfd96e7f587caaa254158f649"
+    },
+    {
+      "file": "resolved-runtime-before-okhttp-fix.json",
+      "bytes": 32740,
+      "sha256": "fabadac394d45f1d9a450dcb6c63f71bf3820dfad0689ae851c2ba7cb23bf730"
+    },
+    {
+      "file": "tink-final-runtime-jvm.json",
+      "bytes": 9638,
+      "sha256": "8fa9264ccd72e3c570ff6b5ab20451b00e1981bf2110fbd7eaa241e2490bef51"
+    },
+    {
+      "file": "tink-input-equivalence-after-okhttp.json",
+      "bytes": 2072,
+      "sha256": "3172c25516641ab8f416bfeabf2833ed9cd5febb2dce1de428f8c73d2ade5b64"
+    },
+    {
+      "file": "tink-parser-checks.json",
+      "bytes": 732,
+      "sha256": "d64eae3759966e3fb6f13c9d7d1ddbe5bc5f1b4efbb0e4bf4452a48423d0acbc"
+    },
+    {
+      "file": "tink-patched-verifyMac-javap.txt",
+      "bytes": 3019,
+      "sha256": "9224519f867b0a0bef42eedf6326ce8eccf0202f5af21cdfc328dbfc2d2cb4cd"
+    },
+    {
+      "file": "tink-reject-old-runtime-control.json",
+      "bytes": 2291,
+      "sha256": "a4132d452cf5a9fe11b6b4e88e56f363e4107ba51f8d0fd815ae7f5773e63cb2"
+    }
+  ]
+}

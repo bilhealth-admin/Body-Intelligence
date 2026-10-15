@@ -42,6 +42,13 @@ jobs:
           flutter pub get
           flutter test --no-pub             test/launch_readiness/android_release_build_contract_test.dart             test/launch_readiness/system_crypto_export_compliance_contract_test.dart             test/platform_readiness/native_permission_dialog_contract_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             --timeout 5m
 
+      - name: Prepare pinned Android policy library repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+
       - name: Prepare optional release signing
         id: signing
         shell: bash

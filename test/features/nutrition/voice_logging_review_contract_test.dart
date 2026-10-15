@@ -5,6 +5,8 @@ import 'package:body_intelligence_log/features/nutrition/services/meal_voice_inp
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/system_speech_disclosure_test_support.dart';
+
 void main() {
   test('voice logging requires editable review and never writes a meal', () {
     final service = File(
@@ -69,6 +71,10 @@ void main() {
     tester,
   ) async {
     final speech = _UnavailableSpeechToText();
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
     final service = MealVoiceInputService(
       speech,
       permissionGate: (_) async => true,
@@ -90,7 +96,7 @@ void main() {
       localeId: 'en',
       arabic: false,
     );
-    await tester.pumpAndSettle();
+    await acceptSystemSpeechDisclosure(tester);
     expect(
       find.text('This device has no available speech recognition service.'),
       findsOneWidget,

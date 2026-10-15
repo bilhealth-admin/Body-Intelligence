@@ -1,0 +1,71 @@
+{
+  "recorded_at_utc": "2026-10-15T18:45:52.417483+00:00",
+  "bindings": [
+    {
+      "name": "camera_android_camerax",
+      "package_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\camera_android_camerax-0.7.4+3",
+      "metadata_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\camera_android_camerax-0.7.4+3\\",
+      "markers": [
+        {
+          "name": ".bil-android-policy-overlay.json",
+          "sha256": "9968a5372d3d12bf25c206ed57993f9c545930df0ac3f84fc624349f7158f806"
+        }
+      ]
+    },
+    {
+      "name": "mobile_scanner",
+      "package_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\mobile_scanner-7.4.0",
+      "metadata_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\mobile_scanner-7.4.0\\",
+      "markers": [
+        {
+          "name": ".bil-android-policy-overlay.json",
+          "sha256": "825a9b81b0f3a230c40c9d1f484cf3e589a587b5909ea911de86a17e0602f5d0"
+        }
+      ]
+    },
+    {
+      "name": "google_mobile_ads",
+      "package_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0",
+      "metadata_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\",
+      "markers": [
+        {
+          "name": ".bil-android-policy-overlay.json",
+          "sha256": "4e469bdfe0c0a920281da13e01011dd4d83c4f2382de780acf0f0bac270bb072"
+        }
+      ]
+    },
+    {
+      "name": "flutter_local_notifications",
+      "package_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0",
+      "metadata_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\",
+      "markers": [
+        {
+          "name": ".bil-android-policy-overlay.json",
+          "sha256": "33098c543272df263c936678e35b8ebd13001731ce9d64297ee27487864d2dfd"
+        }
+      ]
+    },
+    {
+      "name": "simple_barcode_scanner",
+      "package_root": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil_release_plugin_overrides\\simple_barcode_scanner",
+      "metadata_root": null,
+      "markers": [
+        {
+          "name": ".bil-deferred-ios-simple-barcode-scanner.json",
+          "sha256": "f106735052f77eb6e52730cf7c58dcb5c3da286fee3be921277884ee86c9f176"
+        }
+      ]
+    }
+  ],
+  "discovery_files": [
+    {
+      "path": ".dart_tool\\package_config.json",
+      "sha256": "7be17d8b53645c7f187277f97fb87eb791c17b693b4bb4025a96e0e7f3426a29"
+    },
+    {
+      "path": ".flutter-plugins-dependencies",
+      "sha256": "53fb3641cb72bf427265aad7e5614cc3f07e052b887c60a6966c69be9e9e16cb"
+    }
+  ],
+  "status": "PASS"
+}

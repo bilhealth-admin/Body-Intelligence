@@ -1,64 +1,5 @@
 part of 'intelligence_center_page.dart';
 
-@visibleForTesting
-List<BilRuntimeCapability> coachRuntimePermissionSequence({
-  required BilRuntimeCapability capability,
-  required bool includeSpeechRecognition,
-  required TargetPlatform platform,
-}) =>
-    capability == BilRuntimeCapability.microphone &&
-        includeSpeechRecognition &&
-        platform == TargetPlatform.iOS
-    ? const [
-        BilRuntimeCapability.microphone,
-        BilRuntimeCapability.speechRecognition,
-      ]
-    : [capability];
-
-@visibleForTesting
-({
-  String englishName,
-  String arabicName,
-  String englishRationale,
-  String arabicRationale,
-})
-coachRuntimePermissionPresentation(
-  BilRuntimeCapability capability,
-) => switch (capability) {
-  BilRuntimeCapability.camera => (
-    englishName: 'camera',
-    arabicName: 'الكاميرا',
-    englishRationale:
-        'BIL opens the camera only for the food photo you selected and never at startup.',
-    arabicRationale:
-        'يفتح BIL الكاميرا فقط لصورة الطعام التي اخترتها وليس عند بدء التطبيق.',
-  ),
-  BilRuntimeCapability.microphone => (
-    englishName: 'microphone',
-    arabicName: 'الميكروفون',
-    englishRationale:
-        'BIL uses speech recognition only after you start voice input. Recognized text is sent after you pause.',
-    arabicRationale:
-        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي. يُرسل النص المتعرف عليه بعد أن تتوقف عن الكلام.',
-  ),
-  BilRuntimeCapability.speechRecognition => (
-    englishName: 'speech recognition',
-    arabicName: 'التعرف على الكلام',
-    englishRationale:
-        'BIL uses speech recognition only after you start voice input. Recognized text is sent after you pause.',
-    arabicRationale:
-        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي. يُرسل النص المتعرف عليه بعد أن تتوقف عن الكلام.',
-  ),
-  BilRuntimeCapability.notifications => (
-    englishName: 'notifications',
-    arabicName: 'الإشعارات',
-    englishRationale:
-        'BIL asks for notifications only when you choose to receive timely updates.',
-    arabicRationale:
-        'يطلب BIL إذن الإشعارات فقط عندما تختار تلقي التحديثات في وقتها.',
-  ),
-};
-
 extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   Future<bool> _ensureCoachRuntimePermission(
     BilRuntimeCapability capability, {
@@ -194,6 +135,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
 
   Future<void> _toggleLiveCall() async {
     if (!mounted || !conversationReady || coachInBackground) return;
+    speech.systemSpeechDisclosure.resetLive();
     if (voiceMode == _CoachVoiceMode.liveCall) {
       if (liveCallPaused) {
         liveCallPaused = false;
@@ -379,6 +321,35 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     required void Function(String) writeTranscript,
     required bool Function() hasUserEdited,
   }) async {
+    final liveDatabase = request.owner.database;
+    final liveOwner = liveDatabase.localOwnerId;
+    final liveEpoch = conversationPersistenceEpoch;
+    final accepted = await speech.systemSpeechDisclosure.authorize(
+      context,
+      use: BilSpeechUse.coach,
+      liveScope: voiceMode == _CoachVoiceMode.liveCall
+          ? (liveDatabase, liveOwner, liveEpoch)
+          : null,
+      isCurrent: () =>
+          _voiceRequestCurrent(request, generation) && _canCaptureVoice,
+      isLiveCurrent: () =>
+          _voiceRouteIsCurrent &&
+          voiceMode == _CoachVoiceMode.liveCall &&
+          !liveCallPaused &&
+          conversationPersistenceEpoch == liveEpoch &&
+          !coachMessageVisitCancelled &&
+          identical(ref.read(databaseProvider), liveDatabase) &&
+          (coachMessageOwnerWitness == null ||
+              coachMessageOwnerWitness!.readOwner() == liveOwner),
+    );
+    if (!_voiceRequestCurrent(request, generation)) return;
+    if (!accepted) {
+      if (voiceMode == _CoachVoiceMode.liveCall) {
+        _updateState(() => liveCallPaused = true);
+      }
+      await _stopVoiceCapture(resetMode: voiceMode != _CoachVoiceMode.liveCall);
+      return;
+    }
     final permissionGranted = await _ensureCoachRuntimePermission(
       BilRuntimeCapability.microphone,
       includeSpeechRecognition: true,
@@ -591,12 +562,20 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
 
   bool _voiceRequestCurrent(_CoachMediaPageRequest request, int generation) {
     if (!_voiceRouteIsCurrent) {
+      if (identical(voiceMediaRequest, request)) {
+        speech.systemSpeechDisclosure.resetLive();
+      }
       request.attempt.cancel();
       return false;
     }
-    return generation == voiceCaptureGeneration &&
+    final current =
+        generation == voiceCaptureGeneration &&
         identical(voiceMediaRequest, request) &&
         request.attempt.isCurrent;
+    if (!current && identical(voiceMediaRequest, request)) {
+      speech.systemSpeechDisclosure.resetLive();
+    }
+    return current;
   }
 
   Future<bool> _voiceRequestAllowed(
@@ -663,6 +642,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       return;
     }
     voiceTranscriptBridge.finish(request.attempt);
+    speech.systemSpeechDisclosure.resetLive();
     voiceSilenceTimer?.cancel();
     final shouldStop = listening || voiceCaptureStarting;
     _updateState(() {
@@ -708,19 +688,5 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       userInitiated: true,
     );
     return true;
-  }
-
-  Future<List<String>> _coachSpeechLocaleAllowList() async {
-    try {
-      final available = (await speech.locales())
-          .map((locale) => locale.localeId.trim())
-          .where((locale) => locale.isNotEmpty)
-          .toList(growable: false);
-      return _matchCoachSpeechLocales(available);
-    } on Object {
-      // Recognition remains usable on platforms with an empty/unavailable
-      // locale inventory; the native bridge will use its normal fallback.
-      return const <String>[];
-    }
   }
 }

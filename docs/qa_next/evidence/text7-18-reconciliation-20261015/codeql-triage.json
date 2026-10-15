@@ -436,7 +436,9 @@
       "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
       "path": "web/drift_worker.dart.js",
       "line": 1226,
-      "review": "generated_dart_rti_reachability_unconfirmed_keep_open"
+      "review": "reviewed_numeric_compiler_metadata_guard_45_regressions_pass_keep_open",
+      "proof": "../policy-gate-20261015/codeql48-reachability.json",
+      "limits": "Actual generated-worker JS in isolated Node VM with diagnostic export; 6 positive controls reach the write. Not a browser Worker/SQL/native E2E proof. No alert dismissal or generated-source edit."
     },
     {
       "number": 49,

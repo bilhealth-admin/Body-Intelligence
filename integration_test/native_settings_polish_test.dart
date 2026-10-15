@@ -1,17 +1,22 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/services/system_speech_disclosure.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/features/nutrition/providers/nutrition_goal_defaults_provider.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/profile_auth_identity_provider.dart';
 import 'package:body_intelligence_log/features/settings/reference_settings_home_page.dart';
+import 'package:body_intelligence_log/features/settings/reference_preferences_pages.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_native_settings_icon.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +68,12 @@ void main() {
       ownerId: 'native-ui-test-only',
       email: 'long.profile.email.for.layout@example.invalid',
     );
-    Widget harness(Widget page) => ProviderScope(
+    Widget harness(
+      Widget page, {
+      bool premiumFixture = false,
+      bool dark = false,
+      String language = 'ar',
+    }) => ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
         profileAuthIdentityProvider.overrideWith(
@@ -72,26 +82,51 @@ void main() {
         verifiedSubscriptionStateProvider.overrideWithValue(
           AsyncData(
             SubscriptionState(
-              plan: CommercePlan.free,
-              entitlements: const {},
-              authority: EntitlementAuthority.localDefault,
+              plan: premiumFixture
+                  ? CommercePlan.premiumAiCoach
+                  : CommercePlan.free,
+              entitlements: premiumFixture
+                  ? PaidPlanCatalog.composedEntitlementsFor(
+                      CommercePlan.premiumAiCoach,
+                    )
+                  : const {},
+              authority: premiumFixture
+                  ? EntitlementAuthority.verifiedServer
+                  : EntitlementAuthority.localDefault,
+              currentPeriodEndsAt: premiumFixture
+                  ? DateTime.now().toUtc().add(const Duration(days: 1))
+                  : null,
               isPurchasable: false,
               canRestorePurchases: false,
             ),
           ),
         ),
+        nutritionGoalDefaultsProvider.overrideWithValue(const {
+          'goal.calories': 1800,
+          'goal.carbsPercent': 45,
+          'goal.proteinPercent': 30,
+          'goal.fatPercent': 25,
+        }),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: BilFlagshipTheme.light(
-          isArabic: true,
-        ).copyWith(platform: platform),
-        locale: const Locale('ar'),
+        theme:
+            (dark
+                    ? BilFlagshipTheme.dark(isArabic: language == 'ar')
+                    : BilFlagshipTheme.light(isArabic: language == 'ar'))
+                .copyWith(platform: platform),
+        locale: Locale(language),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(dark ? 2 : 1)),
+          child: child!,
+        ),
         home: page,
       ),
     );
@@ -114,7 +149,7 @@ void main() {
     expect(tester.takeException(), isNull);
     if (Platform.isAndroid) await binding.convertFlutterSurfaceToImage();
     await tester.pumpAndSettle();
-    await _capture(binding, 'profile-ar-${platform.name}');
+    await _capture(binding, tester, 'profile-ar-${platform.name}');
 
     await tester.pumpWidget(harness(const ReferenceSettingsHomePage()));
     await tester.pumpAndSettle();
@@ -124,7 +159,96 @@ void main() {
       findsNothing,
     );
     expect(tester.takeException(), isNull);
-    await _capture(binding, 'settings-ar-${platform.name}');
+    await _capture(binding, tester, 'settings-ar-${platform.name}');
+
+    // Capture the production dialogs with the real platform font. The Widget
+    // evidence loader intentionally uses Naskh; it must not stand in for this.
+    final preferences = PreferencesRepository(database);
+    final captures = <String>[];
+    for (final language in ['ar', 'en']) {
+      for (final dark in [false, true]) {
+        await preferences.set('goal.calories', '1800');
+        await tester.pumpWidget(
+          harness(
+            const ReferenceNutritionGoalsPage(),
+            premiumFixture: true,
+            language: language,
+            dark: dark,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('nutrition-goal-goal.calories')),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsOneWidget);
+        await tester.enterText(find.byType(TextField), '1875');
+        expect(find.byType(FilledButton).last.hitTestable(), findsOneWidget);
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pumpAndSettle();
+        final prefix = '$language-${dark ? 'dark-200' : 'light'}';
+        final goalCapture = 'pearl-goal-$prefix-${platform.name}';
+        await _capture(binding, tester, goalCapture);
+        captures.add(goalCapture);
+        await tester.tap(find.byType(FilledButton).last);
+        for (var frame = 0; frame < 100; frame++) {
+          await tester.pump(const Duration(milliseconds: 100));
+          if (find.byType(AlertDialog).evaluate().isEmpty) break;
+        }
+        expect(find.byType(AlertDialog), findsNothing);
+        // MacroGoalAllocation persists doubles (1875.0); validate the saved
+        // quantity, not an unrelated integer/string serialization choice.
+        expect(
+          double.tryParse(await preferences.get('goal.calories') ?? ''),
+          1875,
+        );
+        expect(tester.takeException(), isNull);
+
+        if (Platform.isAndroid) {
+          final disclosure = BilSystemSpeechDisclosure();
+          final context = tester.element(
+            find.byType(ReferenceNutritionGoalsPage),
+          );
+          final decision = disclosure.authorize(
+            context,
+            use: BilSpeechUse.food,
+          );
+          await tester.pumpAndSettle();
+          final decline = find.byKey(
+            const Key('system-speech-disclosure-decline'),
+          );
+          expect(decline.hitTestable(), findsOneWidget);
+          final voiceCapture = 'pearl-voice-$prefix-${platform.name}';
+          await _capture(binding, tester, voiceCapture);
+          captures.add(voiceCapture);
+          await tester.tap(decline);
+          await tester.pumpAndSettle();
+          expect(await decision, isFalse);
+          disclosure.resetLive();
+          expect(tester.takeException(), isNull);
+        }
+      }
+    }
+    final root = Platform.isAndroid
+        ? (await getExternalStorageDirectory())!
+        : await getApplicationDocumentsDirectory();
+    final metadata = File('${root.path}/platform-polish/pearl-native.json');
+    await metadata.writeAsString(
+      jsonEncode({
+        'platform': Platform.operatingSystem,
+        'source_head': const String.fromEnvironment('BIL_QA_SOURCE_HEAD'),
+        'source_tree': const String.fromEnvironment(
+          'BIL_QA_SOURCE_FINGERPRINT',
+        ),
+        'platform_font_unmodified': true,
+        'synthetic_premium_fixture_only': true,
+        'real_reviewer_account_tested': false,
+        'microphone_or_cloud_called': false,
+        'calorie_save_and_readback_variants': 4,
+        'captures': captures,
+      }),
+      flush: true,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
     await database.close();
@@ -133,8 +257,12 @@ void main() {
 
 Future<void> _capture(
   IntegrationTestWidgetsFlutterBinding binding,
+  WidgetTester tester,
   String name,
 ) async {
+  for (var frame = 0; frame < 3; frame++) {
+    await tester.pump(const Duration(milliseconds: 16));
+  }
   final bytes = await binding.takeScreenshot(name);
   final root = Platform.isAndroid
       ? (await getExternalStorageDirectory())!

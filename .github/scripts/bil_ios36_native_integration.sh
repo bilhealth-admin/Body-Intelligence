@@ -6,12 +6,60 @@ set -euo pipefail
 # then drive that exact bundle on both devices without another Xcode build.
 OUT=artifacts/qa/text18/ios36-simulators
 mkdir -p "$OUT"
+BOUND=.github/scripts/bil_native_bounded_command.py
 SOURCE_HEAD="$(git rev-parse HEAD)"
 SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
 export BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE"
-xcodebuild -version > "$OUT/xcode-version.txt"
-xcrun simctl list runtimes available -j > "$OUT/runtimes.json"
-xcrun simctl list devicetypes -j > "$OUT/device-types.json"
+
+stage() {
+  local label="$1" seconds="$2" log="$3"
+  shift 3
+  python3 "$BOUND" --label "$label" --log "$log" \
+    --receipt "$OUT/$label-result.json" --timeout-seconds "$seconds" -- "$@"
+}
+collect_app_files() {
+  local label="$1" device="$2" container
+  if stage "$label-app-container" 30 "$OUT/$label-app-container.log" \
+      xcrun simctl get_app_container "$device" com.bilhealth.bodyintelligencelog data; then
+    container="$(tr -d '\r\n' < "$OUT/$label-app-container.log")"
+    # Only synthetic QA screenshots/metadata; do not archive the app database,
+    # account preferences or the Simulator's Keychain / Health data.
+    for directory in feature-splashes-native platform-polish; do
+      if [ -d "$container/Documents/$directory" ]; then
+        stage "$label-copy-$directory" 60 "$OUT/$label-copy-$directory.log" \
+          cp -R "$container/Documents/$directory" "$OUT/$label-device-$directory"
+      fi
+    done
+  fi
+}
+IPHONE_UDID=''
+IPAD_UDID=''
+ACTIVE_DEVICE=''
+cleanup() {
+  local original_status=$? label device
+  trap - EXIT
+  set +e
+  for pair in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do
+    device="${pair#*:}"
+    label="${pair%%:*}"
+    [ -n "$device" ] || continue
+    if [ "$original_status" -ne 0 ]; then
+      stage "$label-failure-screen" 30 "$OUT/$label-failure-screen.log" \
+        xcrun simctl io "$device" screenshot "$OUT/$label-failure.png"
+      collect_app_files "$label" "$device"
+    fi
+    if [ "$device" = "$ACTIVE_DEVICE" ]; then
+      stage "$label-shutdown" 30 "$OUT/$label-shutdown.log" xcrun simctl shutdown "$device"
+    fi
+    stage "$label-delete" 30 "$OUT/$label-delete.log" xcrun simctl delete "$device"
+  done
+  exit "$original_status"
+}
+trap cleanup EXIT
+
+stage xcode-version 120 "$OUT/xcode-version.txt" xcodebuild -version
+stage list-runtimes 120 "$OUT/runtimes.json" xcrun simctl list runtimes available -j
+stage list-device-types 120 "$OUT/device-types.json" xcrun simctl list devicetypes -j
 read -r RUNTIME IPHONE_TYPE IPAD_TYPE < <(python3 - "$OUT" <<'PY'
 import json
 import pathlib
@@ -37,15 +85,14 @@ ipad = select('iPad', ['iPad Pro 13-inch (M4)', 'iPad Pro (13-inch) (M4)',
 print(runtime['identifier'], iphone['identifier'], ipad['identifier'])
 PY
 )
-IPHONE_UDID="$(xcrun simctl create "BIL-iPhone36-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME")"
-IPAD_UDID="$(xcrun simctl create "BIL-iPad36-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME")"
-cleanup() {
-  for DEVICE in "$IPHONE_UDID" "$IPAD_UDID"; do
-    xcrun simctl shutdown "$DEVICE" || true
-    xcrun simctl delete "$DEVICE" || true
-  done
-}
-trap cleanup EXIT
+stage create-iphone 120 "$OUT/create-iphone.log" xcrun simctl create \
+  "BIL-iPhone36-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME"
+IPHONE_UDID="$(tr -d '\r\n' < "$OUT/create-iphone.log")"
+[[ "$IPHONE_UDID" =~ ^[0-9A-Fa-f-]{36}$ ]]
+stage create-ipad 120 "$OUT/create-ipad.log" xcrun simctl create \
+  "BIL-iPad36-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME"
+IPAD_UDID="$(tr -d '\r\n' < "$OUT/create-ipad.log")"
+[[ "$IPAD_UDID" =~ ^[0-9A-Fa-f-]{36}$ ]]
 
 # Reuse Flutter's pinned integration driver; pass this project's package map.
 CRYPTO_DRIVER="$OUT/crypto-driver.dart"
@@ -78,25 +125,82 @@ for KIND in "${KINDS[@]}"; do
       TARGET=integration_test/native_feature_splashes_test.dart
       DRIVER=test_driver/native_feature_splashes_driver.dart ;;
   esac
-  flutter --verbose build ios --simulator --debug --no-codesign --no-pub \
-    --build-number 36 --target "$TARGET" "${DEFINES[@]}" \
-    2>&1 | tee "$OUT/$KIND-generic-build.log"
+  stage "$KIND-generic-build" 1800 "$OUT/$KIND-generic-build.log" \
+    flutter --verbose build ios --simulator --debug --no-codesign --no-pub \
+    --build-number 36 --target "$TARGET" "${DEFINES[@]}"
   APP="$GITHUB_WORKSPACE/build/ios/iphonesimulator/Runner.app"
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '36'
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
   shasum -a 256 "$APP/Runner" > "$OUT/$KIND-binary.sha256"
+  # Export only compiled SDK declarations/versions; no app data or secrets.
+  # This reuses the existing generic QA bundle, not another build or signing.
+  python3 - "$APP" "$OUT/$KIND-privacy-inventory.json" "$SOURCE_HEAD" <<'BIL_PRIVACY_PY'
+import hashlib
+import json
+from pathlib import Path
+import plistlib
+import sys
+
+bundle, output, source_head = Path(sys.argv[1]).resolve(), Path(sys.argv[2]), sys.argv[3]
+if bundle.suffix != '.app' or not bundle.is_dir():
+    raise ValueError('Expected the existing QA simulator app bundle')
+def inside(path):
+    path.resolve().relative_to(bundle)
+    return path
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+manifests = []
+fields = ('NSPrivacyTracking', 'NSPrivacyTrackingDomains',
+          'NSPrivacyCollectedDataTypes', 'NSPrivacyAccessedAPITypes')
+for path in sorted(bundle.rglob('*.xcprivacy')):
+    data = plistlib.loads(inside(path).read_bytes())
+    if not isinstance(data, dict):
+        raise ValueError('Privacy manifest must be a dictionary')
+    if 'NSPrivacyTracking' in data and not isinstance(data['NSPrivacyTracking'], bool):
+        raise ValueError('Privacy tracking must be a Boolean when declared')
+    manifests.append({'path': path.relative_to(bundle).as_posix(),
+                      'sha256': digest(path), 'declarations': {key: data.get(key) for key in fields}})
+frameworks = []
+for path in sorted(bundle.glob('Frameworks/*.framework/Info.plist')):
+    data = plistlib.loads(inside(path).read_bytes())
+    frameworks.append({'path': path.relative_to(bundle).as_posix(), 'sha256': digest(path),
+                       'identifier': data.get('CFBundleIdentifier'), 'version': data.get('CFBundleShortVersionString'),
+                       'build': data.get('CFBundleVersion')})
+pod = Path('ios/Podfile.lock')
+pods, in_pods = [], False
+if pod.is_file():
+    for line in pod.read_text().splitlines():
+        if line == 'PODS:': in_pods = True
+        elif line and not line.startswith(' '): in_pods = False
+        if in_pods and line.startswith('  - '): pods.append(line[4:].split(':', 1)[0])
+output.parent.mkdir(parents=True, exist_ok=True)
+output.write_text(json.dumps({'scope': 'Compiled simulator declarations only; not actual data use, tracking, SDK signatures or signed-release certification',
+    'source_head': source_head, 'privacy_manifests': manifests, 'frameworks': frameworks,
+    'pod_lock_sha256': digest(pod) if pod.is_file() else None, 'resolved_pods': pods,
+    'signed_release': False, 'sdk_signatures_verified': False, 'network_collection_verified': False}, indent=2) + '\n')
+BIL_PRIVACY_PY
   for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do
     DEVICE="${PAIR#*:}"
     LABEL="${PAIR%%:*}"
-    xcrun simctl boot "$DEVICE"
-    xcrun simctl bootstatus "$DEVICE" -b
-    xcrun simctl ui "$DEVICE" appearance light
+    ACTIVE_DEVICE="$DEVICE"
+    stage "$LABEL-$KIND-boot" 120 "$OUT/$LABEL-$KIND-boot.log" xcrun simctl boot "$DEVICE"
+    stage "$LABEL-$KIND-bootstatus" 180 "$OUT/$LABEL-$KIND-bootstatus.log" \
+      xcrun simctl bootstatus "$DEVICE" -b
+    stage "$LABEL-$KIND-appearance" 120 "$OUT/$LABEL-$KIND-appearance.log" \
+      xcrun simctl ui "$DEVICE" appearance light
+    BIL_NATIVE_CAPTURE_DEVICE_ID="$DEVICE" \
     BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-native-settings" \
     BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-feature-splashes" \
-      flutter drive --no-pub --device-id "$DEVICE" --timeout 1200 \
+      python3 "$BOUND" --label "$LABEL-$KIND-drive" \
+        --log "$OUT/$LABEL-$KIND.log" --receipt "$OUT/$LABEL-$KIND-drive-result.json" \
+        --timeout-seconds 1800 --running-timeout-seconds 1200 \
+        --summary-grace-seconds 60 -- \
+        flutter drive --no-pub --device-id "$DEVICE" --timeout 1200 \
         --use-application-binary "$APP" --target "$TARGET" --driver "$DRIVER" \
-        --test-arguments="--packages=$GITHUB_WORKSPACE/.dart_tool/package_config.json" \
-        2>&1 | tee "$OUT/$LABEL-$KIND.log"
-    xcrun simctl shutdown "$DEVICE"
+        --test-arguments="--packages=$GITHUB_WORKSPACE/.dart_tool/package_config.json"
+    collect_app_files "$LABEL-$KIND" "$DEVICE"
+    stage "$LABEL-$KIND-shutdown" 30 "$OUT/$LABEL-$KIND-shutdown.log" \
+      xcrun simctl shutdown "$DEVICE"
+    ACTIVE_DEVICE=''
   done
 done

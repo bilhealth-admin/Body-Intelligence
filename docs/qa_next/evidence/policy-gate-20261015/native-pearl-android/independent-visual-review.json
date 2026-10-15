@@ -1,0 +1,31 @@
+{
+  "reviewer": "apple_policy_gate",
+  "scope": "Read-only review of10 actual Android native QA PNG, not signed Apple/store/owner visual approval",
+  "files_reviewed": [
+    "pearl-goal-ar-dark-200-android.png",
+    "pearl-goal-ar-light-android.png",
+    "pearl-goal-en-dark-200-android.png",
+    "pearl-goal-en-light-android.png",
+    "pearl-voice-ar-dark-200-android.png",
+    "pearl-voice-ar-light-android.png",
+    "pearl-voice-en-dark-200-android.png",
+    "pearl-voice-en-light-android.png",
+    "profile-ar-android.png",
+    "settings-ar-android.png"
+  ],
+  "clipping_or_overlap_p0_p1": [],
+  "buttons_or_value_unreadable": [],
+  "existing_theme_surface_consistent": true,
+  "p2_optional": [
+    {
+      "files": [
+        "pearl-voice-ar-dark-200-android.png",
+        "pearl-voice-en-dark-200-android.png"
+      ],
+      "note": "Scrollable remainder is below the visible content at200%, with no explicit scroll cue; actions remain visible. Not a proven policy violation."
+    }
+  ],
+  "platform_font_override": false,
+  "ios_font_verified": false,
+  "whole_app_polish_certified": false
+}

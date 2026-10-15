@@ -37,6 +37,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../support/system_speech_disclosure_test_support.dart';
+
 part 'support/coach_page_accessibility_cases.dart';
 part 'support/coach_page_presentation_cases.dart';
 part 'support/coach_page_voice_cases.dart';

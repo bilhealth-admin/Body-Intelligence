@@ -1,0 +1,26 @@
+{
+  "recorded_at_utc": "2026-10-15T14:05:45.064431+00:00",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "run": 38748152719,
+  "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38748152719",
+  "inputs": {
+    "android_native_only": true,
+    "ios_native_only": true,
+    "native_target": "feature-splashes"
+  },
+  "not_repeated": [
+    "full9843",
+    "system_crypto",
+    "native_settings",
+    "Supabase",
+    "macro_generated",
+    "source_audit",
+    "signing",
+    "store_submission"
+  ],
+  "local_validation": "flutter-analyze-stable-final.json and local-final-validation-summary.json",
+  "status": "DISPATCHED; result must be recorded separately",
+  "secure_cache_iOS_run": 38738008732,
+  "secure_cache_iOS_status": "running at dispatch; not counted passed"
+}

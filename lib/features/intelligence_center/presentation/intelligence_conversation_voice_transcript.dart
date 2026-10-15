@@ -1,5 +1,64 @@
 part of 'intelligence_center_page.dart';
 
+@visibleForTesting
+List<BilRuntimeCapability> coachRuntimePermissionSequence({
+  required BilRuntimeCapability capability,
+  required bool includeSpeechRecognition,
+  required TargetPlatform platform,
+}) =>
+    capability == BilRuntimeCapability.microphone &&
+        includeSpeechRecognition &&
+        platform == TargetPlatform.iOS
+    ? const [
+        BilRuntimeCapability.microphone,
+        BilRuntimeCapability.speechRecognition,
+      ]
+    : [capability];
+
+@visibleForTesting
+({
+  String englishName,
+  String arabicName,
+  String englishRationale,
+  String arabicRationale,
+})
+coachRuntimePermissionPresentation(
+  BilRuntimeCapability capability,
+) => switch (capability) {
+  BilRuntimeCapability.camera => (
+    englishName: 'camera',
+    arabicName: 'الكاميرا',
+    englishRationale:
+        'BIL opens the camera only for the food photo you selected and never at startup.',
+    arabicRationale:
+        'يفتح BIL الكاميرا فقط لصورة الطعام التي اخترتها وليس عند بدء التطبيق.',
+  ),
+  BilRuntimeCapability.microphone => (
+    englishName: 'microphone',
+    arabicName: 'الميكروفون',
+    englishRationale:
+        'BIL uses speech recognition only after you start voice input. Recognized text is sent after you pause.',
+    arabicRationale:
+        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي. يُرسل النص المتعرف عليه بعد أن تتوقف عن الكلام.',
+  ),
+  BilRuntimeCapability.speechRecognition => (
+    englishName: 'speech recognition',
+    arabicName: 'التعرف على الكلام',
+    englishRationale:
+        'BIL uses speech recognition only after you start voice input. Recognized text is sent after you pause.',
+    arabicRationale:
+        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي. يُرسل النص المتعرف عليه بعد أن تتوقف عن الكلام.',
+  ),
+  BilRuntimeCapability.notifications => (
+    englishName: 'notifications',
+    arabicName: 'الإشعارات',
+    englishRationale:
+        'BIL asks for notifications only when you choose to receive timely updates.',
+    arabicRationale:
+        'يطلب BIL إذن الإشعارات فقط عندما تختار تلقي التحديثات في وقتها.',
+  ),
+};
+
 extension _IntelligenceConversationVoiceTranscript
     on _IntelligenceCenterPageState {
   Future<void> _submitVoiceTranscript({
@@ -100,6 +159,7 @@ extension _IntelligenceConversationVoiceTranscript
   }) {
     request.dispose();
     if (!identical(voiceMediaRequest, request)) return;
+    if (pauseLiveCall || resetMode) speech.systemSpeechDisclosure.resetLive();
     voiceMediaRequest = null;
     voiceTranscriptBridge.cancel();
     voiceSilenceTimer?.cancel();
@@ -136,6 +196,7 @@ extension _IntelligenceConversationVoiceTranscript
   }
 
   Future<void> _stopVoiceCapture({bool resetMode = false}) async {
+    speech.systemSpeechDisclosure.resetLive();
     voiceCaptureGeneration++;
     voiceSilenceTimer?.cancel();
     final request = voiceMediaRequest;
@@ -278,6 +339,20 @@ extension _IntelligenceConversationVoiceTranscript
         ),
       ),
     );
+  }
+
+  Future<List<String>> _coachSpeechLocaleAllowList() async {
+    try {
+      final available = (await speech.locales())
+          .map((locale) => locale.localeId.trim())
+          .where((locale) => locale.isNotEmpty)
+          .toList(growable: false);
+      return _matchCoachSpeechLocales(available);
+    } on Object {
+      // Recognition remains usable on platforms with an empty/unavailable
+      // locale inventory; the native bridge will use its normal fallback.
+      return const <String>[];
+    }
   }
 }
 

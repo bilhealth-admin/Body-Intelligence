@@ -1,0 +1,2162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.0.1">
+
+    <issue
+        id="LintError"
+        severity="Error"
+        message="The lint detector&#xA;    `com.google.play.policy.insights.LoginCredentialsPolicyDetector`&#xA;called `context.getMainProject()` during module analysis.&#xA;&#xA;This does not work correctly when running in AGP (9.0.1).&#xA;&#xA;In particular, there may be false positives or false negatives because&#xA;the lint check may be using the minSdkVersion or manifest information&#xA;from the library instead of any consuming app module.&#xA;&#xA;Contact the vendor of the lint issue to get it fixed/updated (if&#xA;known, listed below), and in the meantime you can try to work around&#xA;this by disabling the following issues:&#xA;&#xA;&quot;LoginCredentials&quot;&#xA;&#xA;Issue Vendors:&#xA;Vendor: Play policy insights beta&#xA;&#xA;Call stack: Context$Companion.checkForbidden$default(Context.kt:692)←Context.getMainProject(Context.kt:106)←ExperimentUtils.getPackageNameForHoldout(ExperimentUtils.kt:151)←ExperimentUtils.shouldHoldout(ExperimentUtils.kt:71)←LoginCredentialsPolicyDetector.beforeCheckRootProject(LoginCredentialsPolicyDetector.kt:122)←LintDriver.checkProject(LintDriver.kt:1053)←LintDriver.checkProjectRoot(LintDriver.kt:627)←LintDriver.access$checkProjectRoot(LintDriver.kt:179)←LintDriver$analyzeOnly$1.invoke(LintDriver.kt:450)←LintDriver$analyzeOnly$1.invoke(LintDriver.kt:447)←LintDriver.doAnalyze(LintDriver.kt:506)←LintDriver.analyzeOnly(LintDriver.kt:447)←LintCliClient$analyzeOnly$1.invoke(LintCliClient.kt:279)←LintCliClient$analyzeOnly$1.invoke(LintCliClient.kt:276)←LintCliClient.run(LintCliClient.kt:333)←LintCliClient.analyzeOnly(LintCliClient.kt:276)←Main.run(Main.java:1777)←Main.run(Main.java:283)←DirectMethodHandleAccessor.invoke(null:-1)←Method.invoke(null:-1)"
+        category="Lint"
+        priority="10"
+        summary="Lint Failure"
+        explanation="This issue type represents a problem running lint itself. Examples include failure to find bytecode for source files (which means certain detectors could not be run), parsing errors in lint configuration files, etc.&#xA;&#xA;These errors are not errors in your own code, but they are shown to make it clear that some checks were not completed.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app"/>
+    </issue>
+
+    <issue
+        id="ScopedStorage"
+        severity="Warning"
+        message="READ_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to query or interact with MediaStore or media files on the shared storage, you should instead use one or more new storage permissions: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` or `READ_MEDIA_AUDIO`."
+        category="Correctness"
+        priority="8"
+        summary="Affected by scoped storage"
+        explanation="Scoped storage is enforced on Android 10+ (or Android 11+ if using `requestLegacyExternalStorage`). In particular, `WRITE_EXTERNAL_STORAGE` will no longer provide write access to all files; it will provide the equivalent of `READ_EXTERNAL_STORAGE` instead.&#xA;&#xA;As of Android 13, if you need to query or interact with MediaStore or media files on the shared storage, you should be using instead one or more new storage permissions:&#xA;* `android.permission.READ_MEDIA_IMAGES`&#xA;* `android.permission.READ_MEDIA_VIDEO`&#xA;* `android.permission.READ_MEDIA_AUDIO`&#xA;&#xA;and then add `maxSdkVersion=&quot;33&quot;` to the older permission. See the developer guide for how to do this: https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions&#xA;&#xA;The `MANAGE_EXTERNAL_STORAGE` permission can be used to manage all files, but it is rarely necessary and most apps on Google Play are not allowed to use it. Most apps should instead migrate to use scoped storage. To modify or delete files, apps should request write access from the user as described at https://goo.gle/android-mediastore-createwriterequest.&#xA;&#xA;To learn more, read these resources: Play policy: https://goo.gle/policy-storage-help Allowable use cases: https://goo.gle/policy-storage-usecases"
+        url="https://goo.gle/android-storage-usecases"
+        urls="https://goo.gle/android-storage-usecases"
+        errorLine1="        android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot;"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="40"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="ScopedStorage"
+        severity="Warning"
+        message="WRITE_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to write to shared storage, use the `MediaStore.createWriteRequest` intent."
+        category="Correctness"
+        priority="8"
+        summary="Affected by scoped storage"
+        explanation="Scoped storage is enforced on Android 10+ (or Android 11+ if using `requestLegacyExternalStorage`). In particular, `WRITE_EXTERNAL_STORAGE` will no longer provide write access to all files; it will provide the equivalent of `READ_EXTERNAL_STORAGE` instead.&#xA;&#xA;As of Android 13, if you need to query or interact with MediaStore or media files on the shared storage, you should be using instead one or more new storage permissions:&#xA;* `android.permission.READ_MEDIA_IMAGES`&#xA;* `android.permission.READ_MEDIA_VIDEO`&#xA;* `android.permission.READ_MEDIA_AUDIO`&#xA;&#xA;and then add `maxSdkVersion=&quot;33&quot;` to the older permission. See the developer guide for how to do this: https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions&#xA;&#xA;The `MANAGE_EXTERNAL_STORAGE` permission can be used to manage all files, but it is rarely necessary and most apps on Google Play are not allowed to use it. Most apps should instead migrate to use scoped storage. To modify or delete files, apps should request write access from the user as described at https://goo.gle/android-mediastore-createwriterequest.&#xA;&#xA;To learn more, read these resources: Play policy: https://goo.gle/policy-storage-help Allowable use cases: https://goo.gle/policy-storage-usecases"
+        url="https://goo.gle/android-storage-usecases"
+        urls="https://goo.gle/android-storage-usecases"
+        errorLine1="        android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="43"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="                keyRestoreEditor.commit();"
+        errorLine2="                                 ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\FlutterSecureStorage.java"
+            line="1416"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="                    keyRevertEditor.commit();"
+        errorLine2="                                    ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\FlutterSecureStorage.java"
+            line="1425"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="            espEditor.commit();"
+        errorLine2="                      ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\MigrationBackup.java"
+            line="254"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="        dataEditor.commit();"
+        errorLine2="                   ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\MigrationBackup.java"
+            line="266"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="        keyEditor.commit();"
+        errorLine2="                  ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\MigrationBackup.java"
+            line="277"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="        dataEditor.commit();"
+        errorLine2="                   ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\MigrationBackup.java"
+            line="333"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="ApplySharedPref"
+        severity="Warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+        category="Correctness"
+        priority="6"
+        summary="Use `apply()` on `SharedPreferences`"
+        explanation="Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+        errorLine1="            keyEditor.commit();"
+        errorLine2="                      ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\MigrationBackup.java"
+            line="349"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        severity="Warning"
+        message="Field requires API level 31 (current min is 26): `android.Manifest.permission#SCHEDULE_EXACT_ALARM`"
+        category="Correctness"
+        priority="6"
+        summary="Using inlined constants on older versions"
+        explanation="This check scans through all the Android API field references in the application and flags certain constants, such as static final integers and Strings, which were introduced in later versions. These will actually be copied into the class files rather than being referenced, which means that the value is available even when running on older devices. In some cases that&apos;s fine, and in other cases it can result in a runtime crash or incorrect behavior. It depends on the context, so consider the code carefully and decide whether it&apos;s safe and can be suppressed or whether the code needs to be guarded.&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level."
+        errorLine1="                    permissionNames.add(Manifest.permission.SCHEDULE_EXACT_ALARM);"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\PermissionUtils.java"
+            line="355"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="KotlinNullnessAnnotation"
+        severity="Warning"
+        message="Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`"
+        category="Correctness"
+        priority="6"
+        summary="Kotlin nullability annotation"
+        explanation="In Kotlin, nullness is part of the type system; `s: String` is **never** null and `s: String?` is sometimes null, whether or not you add in additional annotations stating `@NonNull` or `@Nullable`. These are likely copy/paste mistakes, and are misleading."
+        errorLine1="    override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {"
+        errorLine2="                                    ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_timezone-5.1.0\android\src\main\kotlin\net\wolverinebeach\flutter_timezone\FlutterTimezonePlugin.kt"
+            line="19"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="KotlinNullnessAnnotation"
+        severity="Warning"
+        message="Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`"
+        category="Correctness"
+        priority="6"
+        summary="Kotlin nullability annotation"
+        explanation="In Kotlin, nullness is part of the type system; `s: String` is **never** null and `s: String?` is sometimes null, whether or not you add in additional annotations stating `@NonNull` or `@Nullable`. These are likely copy/paste mistakes, and are misleading."
+        errorLine1="    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {"
+        errorLine2="                                      ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_timezone-5.1.0\android\src\main\kotlin\net\wolverinebeach\flutter_timezone\FlutterTimezonePlugin.kt"
+            line="24"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="KotlinNullnessAnnotation"
+        severity="Warning"
+        message="Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`"
+        category="Correctness"
+        priority="6"
+        summary="Kotlin nullability annotation"
+        explanation="In Kotlin, nullness is part of the type system; `s: String` is **never** null and `s: String?` is sometimes null, whether or not you add in additional annotations stating `@NonNull` or `@Nullable`. These are likely copy/paste mistakes, and are misleading."
+        errorLine1="  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {"
+        errorLine2="                                  ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\src\main\kotlin\com\aboutyou\dart_packages\sign_in_with_apple\SignInWithApplePlugin.kt"
+            line="29"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="KotlinNullnessAnnotation"
+        severity="Warning"
+        message="Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`"
+        category="Correctness"
+        priority="6"
+        summary="Kotlin nullability annotation"
+        explanation="In Kotlin, nullness is part of the type system; `s: String` is **never** null and `s: String?` is sometimes null, whether or not you add in additional annotations stating `@NonNull` or `@Nullable`. These are likely copy/paste mistakes, and are misleading."
+        errorLine1="  override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {"
+        errorLine2="                                    ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\src\main\kotlin\com\aboutyou\dart_packages\sign_in_with_apple\SignInWithApplePlugin.kt"
+            line="34"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="KotlinNullnessAnnotation"
+        severity="Warning"
+        message="Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `MethodCall` **not** ending with `?`"
+        category="Correctness"
+        priority="6"
+        summary="Kotlin nullability annotation"
+        explanation="In Kotlin, nullness is part of the type system; `s: String` is **never** null and `s: String?` is sometimes null, whether or not you add in additional annotations stating `@NonNull` or `@Nullable`. These are likely copy/paste mistakes, and are misleading."
+        errorLine1="  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {"
+        errorLine2="                            ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\src\main\kotlin\com\aboutyou\dart_packages\sign_in_with_apple\SignInWithApplePlugin.kt"
+            line="44"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="KotlinNullnessAnnotation"
+        severity="Warning"
+        message="Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `Result` **not** ending with `?`"
+        category="Correctness"
+        priority="6"
+        summary="Kotlin nullability annotation"
+        explanation="In Kotlin, nullness is part of the type system; `s: String` is **never** null and `s: String?` is sometimes null, whether or not you add in additional annotations stating `@NonNull` or `@Nullable`. These are likely copy/paste mistakes, and are misleading."
+        errorLine1="  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {"
+        errorLine2="                                                       ~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\src\main\kotlin\com\aboutyou\dart_packages\sign_in_with_apple\SignInWithApplePlugin.kt"
+            line="44"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="PropertyEscape"
+        severity="Error"
+        message="Windows file separators (`\`) and drive letter separators (&apos;:&apos;) must be escaped (`\\`) in property files; use C\\:\\\\Android\\\\SDK"
+        category="Correctness"
+        priority="6"
+        summary="Incorrect property escapes"
+        explanation="All backslashes and colons in .property files must be escaped with a backslash (\). This means that when writing a Windows path, you must escape the file separators, so the path \My\Files should be written as `key=\\My\\Files.`"
+        errorLine1="sdk.dir=C:\\Android\\SDK"
+        errorLine2="         ~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\local.properties"
+            line="1"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="PropertyEscape"
+        severity="Error"
+        message="Windows file separators (`\`) and drive letter separators (&apos;:&apos;) must be escaped (`\\`) in property files; use G\\:\\\\BIL_Toolchains\\\\Flutter\\\\flutter"
+        category="Correctness"
+        priority="6"
+        summary="Incorrect property escapes"
+        explanation="All backslashes and colons in .property files must be escaped with a backslash (\). This means that when writing a Windows path, you must escape the file separators, so the path \My\Files should be written as `key=\\My\\Files.`"
+        errorLine1="flutter.sdk=G:\\BIL_Toolchains\\Flutter\\flutter"
+        errorLine2="             ~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\local.properties"
+            line="2"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        severity="Warning"
+        message="Attribute `usesPermissionFlags` is only used in API level 31 and higher (current min is 26)"
+        category="Correctness"
+        priority="6"
+        summary="Attribute unused on older versions"
+        explanation="This check finds attributes set in XML files that were introduced in a version newer than the oldest version targeted by your application (with the `minSdkVersion` attribute).&#xA;&#xA;This is not an error; the application will simply ignore the attribute. However, if the attribute is important to the appearance or functionality of your application, you should consider finding an alternative way to achieve the same result with only available attributes, and then you can optionally create a copy of the layout in a layout-vNN folder which will be used on API NN or higher where you can take advantage of the newer attribute.&#xA;&#xA;Note: This check does not only apply to attributes. For example, some tags can be unused too, such as the new `&lt;tag>` element in layouts introduced in API 21."
+        errorLine1="        android:usesPermissionFlags=&quot;neverForLocation&quot;/>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="32"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        severity="Warning"
+        message="Attribute `localeConfig` is only used in API level 33 and higher (current min is 26)"
+        category="Correctness"
+        priority="6"
+        summary="Attribute unused on older versions"
+        explanation="This check finds attributes set in XML files that were introduced in a version newer than the oldest version targeted by your application (with the `minSdkVersion` attribute).&#xA;&#xA;This is not an error; the application will simply ignore the attribute. However, if the attribute is important to the appearance or functionality of your application, you should consider finding an alternative way to achieve the same result with only available attributes, and then you can optionally create a copy of the layout in a layout-vNN folder which will be used on API NN or higher where you can take advantage of the newer attribute.&#xA;&#xA;Note: This check does not only apply to attributes. For example, some tags can be unused too, such as the new `&lt;tag>` element in layouts introduced in API 21."
+        errorLine1="        android:localeConfig=&quot;@xml/locales_config&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="85"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        severity="Warning"
+        message="Attribute `enableOnBackInvokedCallback` is only used in API level 33 and higher (current min is 26)"
+        category="Correctness"
+        priority="6"
+        summary="Attribute unused on older versions"
+        explanation="This check finds attributes set in XML files that were introduced in a version newer than the oldest version targeted by your application (with the `minSdkVersion` attribute).&#xA;&#xA;This is not an error; the application will simply ignore the attribute. However, if the attribute is important to the appearance or functionality of your application, you should consider finding an alternative way to achieve the same result with only available attributes, and then you can optionally create a copy of the layout in a layout-vNN folder which will be used on API NN or higher where you can take advantage of the newer attribute.&#xA;&#xA;Note: This check does not only apply to attributes. For example, some tags can be unused too, such as the new `&lt;tag>` element in layouts introduced in API 21."
+        errorLine1="        android:enableOnBackInvokedCallback=&quot;true&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="87"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="BatteryLife"
+        severity="Warning"
+        message="Use of `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html"
+        category="Correctness"
+        priority="5"
+        summary="Battery Life Issues"
+        explanation="This issue flags code that either&#xA;* negatively affects battery life, or&#xA;* uses APIs that have recently changed behavior to prevent background tasks from consuming memory and battery excessively.&#xA;&#xA;Generally, you should be using `WorkManager` instead.&#xA;&#xA;For more details on how to update your code, please see https://developer.android.com/topic/performance/background-optimization"
+        url="https://developer.android.com/topic/performance/background-optimization"
+        urls="https://developer.android.com/topic/performance/background-optimization"
+        errorLine1="                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\PermissionManager.java"
+            line="393"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 8.0.2 is available: 9.4.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath &apos;com.android.tools.build:gradle:8.0.2&apos;"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\build.gradle"
+            line="11"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 8.11.1 is available: 9.4.1. (There is also a newer version of 8.11.𝑥 available, if upgrading to 9.4.1 is difficult: 8.11.2)"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath &apos;com.android.tools.build:gradle:8.11.1&apos;"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="11"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 8.12.1 is available: 9.4.1. (There is also a newer version of 8.12.𝑥 available, if upgrading to 9.4.1 is difficult: 8.12.3)"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath &apos;com.android.tools.build:gradle:8.12.1&apos;"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\connectivity_plus-7.1.0\android\build.gradle"
+            line="11"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 8.13.2 is available: 9.4.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath &apos;com.android.tools.build:gradle:8.13.2&apos;"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\build.gradle"
+            line="11"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 7.3.0 is available: 9.4.1. (There is also a newer version of 7.3.𝑥 available, if upgrading to 9.4.1 is difficult: 7.3.1)"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath &apos;com.android.tools.build:gradle:7.3.0&apos;"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_timezone-5.1.0\android\build.gradle"
+            line="12"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 8.11.1 is available: 9.4.1. (There is also a newer version of 8.11.𝑥 available, if upgrading to 9.4.1 is difficult: 8.11.2)"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath &apos;com.android.tools.build:gradle:8.11.1&apos;"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\build.gradle"
+            line="12"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 8.7.3 is available: 9.4.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath(&quot;com.android.tools.build:gradle:8.7.3&quot;)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\in_app_review-2.0.12\android\build.gradle"
+            line="12"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of com.android.tools.build:gradle than 8.12.1 is available: 9.4.1. (There is also a newer version of 8.12.𝑥 available, if upgrading to 9.4.1 is difficult: 8.12.3)"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        classpath(&quot;com.android.tools.build:gradle:8.12.1&quot;)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\share_plus-13.2.1\android\build.gradle.kts"
+            line="13"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="AndroidGradlePluginVersion"
+        severity="Warning"
+        message="A newer version of Gradle than 9.1.0 is available: 9.8.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Android Gradle Plugin Version"
+        explanation="This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-all.zip"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\gradle\wrapper\gradle-wrapper.properties"
+            line="6"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of `compileSdk` than 35 is available: 36"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    compileSdk 35"
+        errorLine2="    ~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\jni_flutter-1.0.1\android\build.gradle"
+            line="27"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of `compileSdkVersion` than 35 is available: 36"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    compileSdkVersion 35"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\build.gradle"
+            line="29"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of `compileSdk` than 35 is available: 36"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    compileSdk = 35"
+        errorLine2="    ~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\in_app_review-2.0.12\android\build.gradle"
+            line="30"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of `compileSdkVersion` than 35 is available: 36"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    compileSdkVersion 35"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_timezone-5.1.0\android\build.gradle"
+            line="39"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.core:core than 1.18.0 is available: 1.19.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        implementation &quot;androidx.core:core:1.18.0&quot;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\connectivity_plus-7.1.0\android\build.gradle"
+            line="42"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of com.android.tools:desugar_jdk_libs than 2.1.4 is available: 2.1.5"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    coreLibraryDesugaring &apos;com.android.tools:desugar_jdk_libs:2.1.4&apos;"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="45"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.core:core than 1.3.0 is available: 1.19.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation &quot;androidx.core:core:1.3.0&quot;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="46"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.media:media than 1.1.0 is available: 1.8.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation &quot;androidx.media:media:1.1.0&quot;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="47"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of `compileSdk` than 35 is available: 36"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    compileSdk 35"
+        errorLine2="    ~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\jni-1.0.0\android\build.gradle"
+            line="50"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.test:core than 1.2.0 is available: 1.7.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    testImplementation &apos;androidx.test:core:1.2.0&apos;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="52"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of com.google.android.gms:play-services-base than 18.7.2 is available: 18.11.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        implementation &apos;com.google.android.gms:play-services-base:18.7.2&apos;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\in_app_review-2.0.12\android\build.gradle"
+            line="57"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.browser:browser than 1.8.0 is available: 1.10.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation &quot;androidx.browser:browser:1.8.0&quot;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\build.gradle"
+            line="59"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of com.google.firebase:firebase-bom than 34.19.0 is available: 35.0.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    implementation(platform(&quot;com.google.firebase:firebase-bom:34.19.0&quot;))"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\build.gradle.kts"
+            line="14"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.core:core-ktx than 1.16.0 is available: 1.19.1"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        implementation(&quot;androidx.core:core-ktx:1.16.0&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\share_plus-13.2.1\android\build.gradle.kts"
+            line="61"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.annotation:annotation than 1.9.1 is available: 1.11.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="        implementation(&quot;androidx.annotation:annotation:1.9.1&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\share_plus-13.2.1\android\build.gradle.kts"
+            line="62"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of com.android.tools:desugar_jdk_libs than 2.1.4 is available: 2.1.5"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    coreLibraryDesugaring(&quot;com.android.tools:desugar_jdk_libs:2.1.4&quot;)"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\build.gradle.kts"
+            line="126"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        severity="Warning"
+        message="A newer version of com.google.code.gson:gson than 2.12.0 is available: 2.14.0"
+        category="Correctness"
+        priority="4"
+        summary="Newer Library Versions Available"
+        explanation="This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+        errorLine1="    implementation &quot;com.google.code.gson:gson:2.12.0&quot;"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="48"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        severity="Warning"
+        message="A newer version of junit:junit than 4.12 is available: 4.13.2"
+        category="Correctness"
+        priority="4"
+        summary="Newer Library Versions Available"
+        explanation="This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+        errorLine1="    testImplementation &apos;junit:junit:4.12&apos;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="50"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        severity="Warning"
+        message="A newer version of org.mockito:mockito-core than 3.10.0 is available: 5.24.0"
+        category="Correctness"
+        priority="4"
+        summary="Newer Library Versions Available"
+        explanation="This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+        errorLine1="    testImplementation &apos;org.mockito:mockito-core:3.10.0&apos;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="51"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        severity="Warning"
+        message="A newer version of org.mockito:mockito-core than 5.0.0 is available: 5.24.0"
+        category="Correctness"
+        priority="4"
+        summary="Newer Library Versions Available"
+        explanation="This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+        errorLine1="        testImplementation(&quot;org.mockito:mockito-core:5.0.0&quot;)"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\in_app_review-2.0.12\android\build.gradle"
+            line="52"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        severity="Warning"
+        message="A newer version of org.robolectric:robolectric than 4.14.1 is available: 4.17"
+        category="Correctness"
+        priority="4"
+        summary="Newer Library Versions Available"
+        explanation="This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+        errorLine1="    testImplementation &quot;org.robolectric:robolectric:4.14.1&quot;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\build.gradle"
+            line="53"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        severity="Warning"
+        message="A newer version of com.google.crypto.tink:tink-android than 1.21.0 is available: 1.23.0"
+        category="Correctness"
+        priority="4"
+        summary="Newer Library Versions Available"
+        explanation="This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+        errorLine1="    implementation(&quot;com.google.crypto.tink:tink-android:1.21.0&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\build.gradle"
+            line="85"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        severity="Warning"
+        message="A newer version of org.robolectric:robolectric than 4.16.1 is available: 4.17"
+        category="Correctness"
+        priority="4"
+        summary="Newer Library Versions Available"
+        explanation="This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+        errorLine1="    testImplementation &apos;org.robolectric:robolectric:4.16.1&apos;"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\build.gradle"
+            line="88"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="SwitchIntDef"
+        severity="Warning"
+        message="Switch statement on an `int` with known associated constant missing case `PermissionConstants.PERMISSION_GROUP_ASSISTANT`"
+        category="Correctness"
+        priority="3"
+        summary="Missing @IntDef in Switch"
+        explanation="This check warns if a `switch` statement does not explicitly include all the values declared by the typedef `@IntDef` declaration."
+        errorLine1="        switch (permission) {"
+        errorLine2="        ~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\PermissionUtils.java"
+            line="107"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        severity="Warning"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        category="Correctness"
+        priority="2"
+        summary="Using discouraged APIs"
+        explanation="Discouraged APIs are allowed and are not deprecated, but they may be unfit for common use (e.g. due to slow performance or subtle behavior)."
+        errorLine1="    return context.getResources().getIdentifier(name, DRAWABLE, context.getPackageName());"
+        errorLine2="                                  ~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="854"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        severity="Warning"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        category="Correctness"
+        priority="2"
+        summary="Using discouraged APIs"
+        explanation="Discouraged APIs are allowed and are not deprecated, but they may be unfit for common use (e.g. due to slow performance or subtle behavior)."
+        errorLine1="    int resourceId = context.getResources().getIdentifier(name, DRAWABLE, context.getPackageName());"
+        errorLine2="                                            ~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="1314"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        severity="Warning"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        category="Correctness"
+        priority="2"
+        summary="Using discouraged APIs"
+        explanation="Discouraged APIs are allowed and are not deprecated, but they may be unfit for common use (e.g. due to slow performance or subtle behavior)."
+        errorLine1="              .getIdentifier(notificationDetails.sound, &quot;raw&quot;, applicationContext.getPackageName());"
+        errorLine2="               ~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="1803"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UseRequiresApi"
+        severity="Warning"
+        message="Use `@RequiresApi(22) instead of `@TargetApi` to propagate the requirement to callers of `getManifestNames`"
+        category="Correctness"
+        priority="2"
+        summary="Use `@RequiresApi` instead of `@TargetApi`"
+        explanation="The `@TargetApi` annotation only *suppresses* API warnings locally. `@RequiresApi` on the other hand will propagate the requirement out to any *callers* of this API, making sure that they either perform API level checks (using for example `SDK_INT`), or defining `@RequiresApi` annotations themselves.&#xA;&#xA;(The `@TargetApi` annotation predates `@RequiresApi`, and was introduced as an early way to *suppress* lint API warnings for a particular API level. Accidentally using `@TargetApi` can lead to crashes since there is no check that other calls to this method actually check that the call is safe.)"
+        errorLine1="    @TargetApi(22)"
+        errorLine2="    ~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\PermissionUtils.java"
+            line="103"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedTranslation"
+        severity="Warning"
+        message="The language `in (Indonesian)` is present in this project, but not declared in the `localeConfig` resource"
+        category="Correctness:Messages"
+        priority="2"
+        summary="Unused Translation"
+        explanation="If an application defines a translation for a language which is not included in the app&apos;s `localeConfig` file (when declared in the manifest), that language will be &quot;unused&quot;; it will not be presented to the user. Usually this means you have forgotten to include it in the locale config file."
+        url="https://developer.android.com/about/versions/13/features/app-languages"
+        urls="https://developer.android.com/about/versions/13/features/app-languages"
+        errorLine1="        android:localeConfig=&quot;@xml/locales_config&quot;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="85"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="HealthConnectPolicy"
+        severity="Warning"
+        message="Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency."
+        category="Play Policy"
+        priority="6"
+        summary="Health Connect Insights"
+        explanation="Access to Health Connect data is restricted to apps with approved health, fitness, medical care, or health research core use cases. You must strictly limit data access to the minimum scope necessary for these approved functions and obtain explicit user consent before sharing any health data with third parties. Transparency is key, so provide clear disclosures and a comprehensive privacy policy explaining data collection, use, management, and deletion. Secure user data against unauthorized access and comply with all applicable laws and regulations (e.g., HIPAA, GDPR).&#xA;&#xA;**Dos:**&#xA;&#xA;- Your app must also comply with the Health apps policy if it qualifies as a health app or has health-related features and accesses health data including Health Connect data.&#xA;- See Health Connect policy requirement FAQs to request access to Health Connect data types and other FAQs.&#xA;- Submit a declaration form in your Play Console. For each permission requested, provide a clear and detailed justification explaining how your app will use the data to benefit the user.&#xA;- Request only the minimum necessary data types.&#xA;- Securely handle user data (e.g., use modern cryptography).&#xA;&#xA;**Don&apos;ts:**&#xA;&#xA;- Use Health Connect in high-risk apps (e.g., aviation, control of life-critical systems such as pacemakers) or for children.&#xA;- Sell or transfer user data for advertising, creditworthiness, or data brokers.&#xA;- Use with medical devices without required regulatory compliance/clearances.&#xA;- Access Health Connect data for secondary or unapproved purposes.&#xA;- Request data permissions beyond your app&apos;s core functionality.&#xA;&#xA;**Helpful Links:**&#xA;&#xA;See Policy page: https://goo.gle/play-policy-health-connect  &#xA;See Help Center article: https://goo.gle/play-help-health-connect &#xA;See Declaration form:  https://goo.gle/play-permission-decl-form&#xA;&#xA;Always review the full policy in the Policy Center to ensure compliance."
+        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.health.READ_STEPS&quot;/>"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="70"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="HealthConnectPolicy"
+        severity="Warning"
+        message="Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency."
+        category="Play Policy"
+        priority="6"
+        summary="Health Connect Insights"
+        explanation="Access to Health Connect data is restricted to apps with approved health, fitness, medical care, or health research core use cases. You must strictly limit data access to the minimum scope necessary for these approved functions and obtain explicit user consent before sharing any health data with third parties. Transparency is key, so provide clear disclosures and a comprehensive privacy policy explaining data collection, use, management, and deletion. Secure user data against unauthorized access and comply with all applicable laws and regulations (e.g., HIPAA, GDPR).&#xA;&#xA;**Dos:**&#xA;&#xA;- Your app must also comply with the Health apps policy if it qualifies as a health app or has health-related features and accesses health data including Health Connect data.&#xA;- See Health Connect policy requirement FAQs to request access to Health Connect data types and other FAQs.&#xA;- Submit a declaration form in your Play Console. For each permission requested, provide a clear and detailed justification explaining how your app will use the data to benefit the user.&#xA;- Request only the minimum necessary data types.&#xA;- Securely handle user data (e.g., use modern cryptography).&#xA;&#xA;**Don&apos;ts:**&#xA;&#xA;- Use Health Connect in high-risk apps (e.g., aviation, control of life-critical systems such as pacemakers) or for children.&#xA;- Sell or transfer user data for advertising, creditworthiness, or data brokers.&#xA;- Use with medical devices without required regulatory compliance/clearances.&#xA;- Access Health Connect data for secondary or unapproved purposes.&#xA;- Request data permissions beyond your app&apos;s core functionality.&#xA;&#xA;**Helpful Links:**&#xA;&#xA;See Policy page: https://goo.gle/play-policy-health-connect  &#xA;See Help Center article: https://goo.gle/play-help-health-connect &#xA;See Declaration form:  https://goo.gle/play-permission-decl-form&#xA;&#xA;Always review the full policy in the Policy Center to ensure compliance."
+        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.health.READ_DISTANCE&quot;/>"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="71"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="HealthConnectPolicy"
+        severity="Warning"
+        message="Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency."
+        category="Play Policy"
+        priority="6"
+        summary="Health Connect Insights"
+        explanation="Access to Health Connect data is restricted to apps with approved health, fitness, medical care, or health research core use cases. You must strictly limit data access to the minimum scope necessary for these approved functions and obtain explicit user consent before sharing any health data with third parties. Transparency is key, so provide clear disclosures and a comprehensive privacy policy explaining data collection, use, management, and deletion. Secure user data against unauthorized access and comply with all applicable laws and regulations (e.g., HIPAA, GDPR).&#xA;&#xA;**Dos:**&#xA;&#xA;- Your app must also comply with the Health apps policy if it qualifies as a health app or has health-related features and accesses health data including Health Connect data.&#xA;- See Health Connect policy requirement FAQs to request access to Health Connect data types and other FAQs.&#xA;- Submit a declaration form in your Play Console. For each permission requested, provide a clear and detailed justification explaining how your app will use the data to benefit the user.&#xA;- Request only the minimum necessary data types.&#xA;- Securely handle user data (e.g., use modern cryptography).&#xA;&#xA;**Don&apos;ts:**&#xA;&#xA;- Use Health Connect in high-risk apps (e.g., aviation, control of life-critical systems such as pacemakers) or for children.&#xA;- Sell or transfer user data for advertising, creditworthiness, or data brokers.&#xA;- Use with medical devices without required regulatory compliance/clearances.&#xA;- Access Health Connect data for secondary or unapproved purposes.&#xA;- Request data permissions beyond your app&apos;s core functionality.&#xA;&#xA;**Helpful Links:**&#xA;&#xA;See Policy page: https://goo.gle/play-policy-health-connect  &#xA;See Help Center article: https://goo.gle/play-help-health-connect &#xA;See Declaration form:  https://goo.gle/play-permission-decl-form&#xA;&#xA;Always review the full policy in the Policy Center to ensure compliance."
+        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.health.READ_ACTIVE_CALORIES_BURNED&quot;/>"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\AndroidManifest.xml"
+            line="72"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 26"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.O) return"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\BILFirebaseMessagingService.kt"
+            line="57"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (VERSION.SDK_INT >= VERSION_CODES.M) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="277"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="      if (VERSION.SDK_INT >= VERSION_CODES.M) {"
+        errorLine2="          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="311"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="          if (VERSION.SDK_INT >= VERSION_CODES.M) {"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="345"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="      if (VERSION.SDK_INT >= VERSION_CODES.N) {"
+        errorLine2="          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="434"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (VERSION.SDK_INT >= VERSION_CODES.N) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="575"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (VERSION.SDK_INT >= VERSION_CODES.M) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="690"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (VERSION.SDK_INT &lt; VERSION_CODES.M) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="1641"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (VERSION.SDK_INT &lt; VERSION_CODES.M) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="2007"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (VERSION.SDK_INT &lt; VERSION_CODES.M) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="2041"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    if (VERSION.SDK_INT &lt; VERSION_CODES.M) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="2145"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 24"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        &amp;&amp; VERSION.SDK_INT >= VERSION_CODES.M) {"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\flutter_local_notifications-22.2.0\android\src\main\java\com\dexterous\flutterlocalnotifications\FlutterLocalNotificationsPlugin.java"
+            line="2421"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 23"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.M) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\ciphers\KeyCipherImplementationRSA18.java"
+            line="108"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 23"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="            if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.M) {"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\ciphers\KeyCipherImplementationRSA18.java"
+            line="152"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 23"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    @RequiresApi(api = Build.VERSION_CODES.M)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\flutter_secure_storage-10.3.1\android\src\main\java\com\it_nomads\fluttersecurestorage\ciphers\KeyCipherImplementationRSAOAEP.java"
+            line="33"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 22"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    @TargetApi(22)"
+        errorLine2="    ~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\PermissionUtils.java"
+            line="103"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 22"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\PermissionUtils.java"
+            line="190"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 23"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    @RequiresApi(api = Build.VERSION_CODES.M)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\PermissionUtils.java"
+            line="538"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT` is always true here (`SDK_INT` ≥ 19 and &lt; 28)"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\ServiceManager.java"
+            line="109"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 19"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        if (Build.VERSION.SDK_INT &lt; VERSION_CODES.KITKAT) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\ServiceManager.java"
+            line="121"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 19"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        if (VERSION.SDK_INT >= VERSION_CODES.KITKAT)"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\ServiceManager.java"
+            line="144"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is never &lt; 19"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="        if (android.os.Build.VERSION.SDK_INT &lt; android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\permission_handler_android-13.0.1\android\src\main\java\com\baseflow\permissionhandler\ServiceManager.java"
+            line="156"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; `SDK_INT` is always >= 22"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\share_plus-13.2.1\android\src\main\kotlin\dev\fluttercommunity\plus\share\SharePlusPendingIntent.kt"
+            line="25"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="This folder configuration (`v21`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `drawable`."
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\drawable-v21"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`."
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\mipmap-anydpi-v26"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.drawable.bil_launch_premium_background` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="&lt;layer-list xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\drawable\bil_launch_premium_background.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.drawable.bil_splash_identity` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\drawable-nodpi\bil_splash_identity.png"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.drawable.bil_splash_wordmark` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\drawable-nodpi\bil_splash_wordmark.png"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.color.gnt_test_background_color` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;color name=&quot;gnt_test_background_color&quot;>#00F4F4F4&lt;/color>"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\colors.xml"
+            line="3"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.color.gnt_test_background_color_2` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;color name=&quot;gnt_test_background_color_2&quot;>#00A3A3A3&lt;/color>"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\colors.xml"
+            line="4"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.color.gnt_black` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;color name=&quot;gnt_black&quot;>#000000&lt;/color>"
+        errorLine2="         ~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\colors.xml"
+            line="5"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.color.gnt_red` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;color name=&quot;gnt_red&quot;>#FF0000&lt;/color>"
+        errorLine2="         ~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\colors.xml"
+            line="7"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.color.gnt_green` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;color name=&quot;gnt_green&quot;>#00FF00&lt;/color>"
+        errorLine2="         ~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\colors.xml"
+            line="8"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.dimen.gnt_medium_template_bottom_weight` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;item name=&quot;gnt_medium_template_bottom_weight&quot; format=&quot;float&quot; type=&quot;dimen&quot;>0.4&lt;/item>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\dimens.xml"
+            line="3"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.dimen.gnt_media_view_weight` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;item name=&quot;gnt_media_view_weight&quot; format=&quot;float&quot; type=&quot;dimen&quot;>1.0&lt;/item>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\dimens.xml"
+            line="5"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.dimen.gnt_medium_template_top_weight` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;item name=&quot;gnt_medium_template_top_weight&quot; format=&quot;float&quot; type=&quot;dimen&quot;>0.2&lt;/item>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\dimens.xml"
+            line="6"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.dimen.gnt_ad_indicator_bar_height` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;dimen name=&quot;gnt_ad_indicator_bar_height&quot;>30dp&lt;/dimen>"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\dimens.xml"
+            line="13"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.dimen.gnt_ad_indicator_bottom_margin` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;dimen name=&quot;gnt_ad_indicator_bottom_margin&quot;>10dp&lt;/dimen>"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\dimens.xml"
+            line="15"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.dimen.gnt_small_cta_button_height` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;dimen name=&quot;gnt_small_cta_button_height&quot;>30dp&lt;/dimen>"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\dimens.xml"
+            line="17"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.dimen.gnt_medium_cta_button_height` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="  &lt;dimen name=&quot;gnt_medium_cta_button_height&quot;>50dp&lt;/dimen>"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\main\res\values\dimens.xml"
+            line="18"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.mipmap.ic_launcher_foreground` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\mipmap-hdpi\ic_launcher_foreground.png"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.drawable.ic_stat_bil_notification` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2="^">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\drawable\ic_stat_bil_notification.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        severity="Warning"
+        message="The resource `R.style.FlutterHostTheme` appears to be unused"
+        category="Performance"
+        priority="3"
+        summary="Unused resources"
+        explanation="Unused resources make applications larger and slow down builds.&#xA;&#xA;&#xA;The unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.&#xA;&#xA;You can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests =true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests =true.&#xA;,"
+        errorLine1="    &lt;style name=&quot;FlutterHostTheme&quot; parent=&quot;@android:style/Theme.Light.NoTitleBar&quot;>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\values\styles.xml"
+            line="18"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        severity="Warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details"
+        category="Usability:Icons"
+        priority="6"
+        summary="The launcher icon shape should use a distinct silhouette"
+        explanation="According to the Android Design Guide (https://d.android.com/r/studio-ui/designer/material/iconography) your launcher icons should &quot;use a distinct silhouette&quot;, a &quot;three-dimensional, front view, with a slight perspective as if viewed from above, so that users perceive some depth.&quot;&#xA;&#xA;The unique silhouette implies that your launcher icon should not be a filled square.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\mipmap-hdpi\ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        severity="Warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details"
+        category="Usability:Icons"
+        priority="6"
+        summary="The launcher icon shape should use a distinct silhouette"
+        explanation="According to the Android Design Guide (https://d.android.com/r/studio-ui/designer/material/iconography) your launcher icons should &quot;use a distinct silhouette&quot;, a &quot;three-dimensional, front view, with a slight perspective as if viewed from above, so that users perceive some depth.&quot;&#xA;&#xA;The unique silhouette implies that your launcher icon should not be a filled square.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\mipmap-mdpi\ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        severity="Warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details"
+        category="Usability:Icons"
+        priority="6"
+        summary="The launcher icon shape should use a distinct silhouette"
+        explanation="According to the Android Design Guide (https://d.android.com/r/studio-ui/designer/material/iconography) your launcher icons should &quot;use a distinct silhouette&quot;, a &quot;three-dimensional, front view, with a slight perspective as if viewed from above, so that users perceive some depth.&quot;&#xA;&#xA;The unique silhouette implies that your launcher icon should not be a filled square.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\mipmap-xhdpi\ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        severity="Warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details"
+        category="Usability:Icons"
+        priority="6"
+        summary="The launcher icon shape should use a distinct silhouette"
+        explanation="According to the Android Design Guide (https://d.android.com/r/studio-ui/designer/material/iconography) your launcher icons should &quot;use a distinct silhouette&quot;, a &quot;three-dimensional, front view, with a slight perspective as if viewed from above, so that users perceive some depth.&quot;&#xA;&#xA;The unique silhouette implies that your launcher icon should not be a filled square.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\mipmap-xxhdpi\ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        severity="Warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details"
+        category="Usability:Icons"
+        priority="6"
+        summary="The launcher icon shape should use a distinct silhouette"
+        explanation="According to the Android Design Guide (https://d.android.com/r/studio-ui/designer/material/iconography) your launcher icons should &quot;use a distinct silhouette&quot;, a &quot;three-dimensional, front view, with a slight perspective as if viewed from above, so that users perceive some depth.&quot;&#xA;&#xA;The unique silhouette implies that your launcher icon should not be a filled square.">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\mipmap-xxxhdpi\ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        severity="Warning"
+        message="Found bitmap drawable `res/drawable/ic_launcher_monochrome.png` in densityless folder"
+        category="Usability:Icons"
+        priority="5"
+        summary="Image defined in density-independent drawable folder"
+        explanation="The res/drawable folder is intended for density-independent graphics such as shapes defined in XML. For bitmaps, move it to `drawable-mdpi` and consider providing higher and lower resolution versions in `drawable-ldpi`, `drawable-hdpi` and `drawable-xhdpi`. If the icon **really** is density independent (for example a solid color) you can place it in `drawable-nodpi`."
+        url="https://developer.android.com/guide/practices/screens_support.html"
+        urls="https://developer.android.com/guide/practices/screens_support.html">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\res\drawable\ic_launcher_monochrome.png"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)"
+        errorLine2="        ^">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\BILFirebaseMessagingService.kt"
+            line="15"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            runCatching { android.net.Uri.parse(value).scheme.equals(&quot;bil&quot;, true) }"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\BILFirebaseMessagingService.kt"
+            line="53"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                    Intent(Intent.ACTION_VIEW, Uri.parse(&quot;market://details?id=com.google.android.apps.healthdata&quot;))"
+        errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\BILGlobalHealthBridge.kt"
+            line="72"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX function `createBitmap` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                val bitmap = Bitmap.createBitmap(pixels, pixels, Bitmap.Config.ARGB_8888)"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\BILSettingsSymbolsBridge.kt"
+            line="79"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="            runCatching { android.net.Uri.parse(it).scheme.equals(&quot;bil&quot;, ignoreCase = true) }"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\MainActivity.kt"
+            line="260"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toColorInt` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val pageBackground = Color.parseColor(if (isDark) &quot;#030405&quot; else &quot;#F6F8FC&quot;)"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="52"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toColorInt` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val surface = Color.parseColor(if (isDark) &quot;#0B0D10&quot; else &quot;#FFFFFF&quot;)"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="53"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toColorInt` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val primaryText = Color.parseColor(if (isDark) &quot;#F7F9FC&quot; else &quot;#101828&quot;)"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="54"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toColorInt` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val secondaryText = Color.parseColor(if (isDark) &quot;#AEB7C4&quot; else &quot;#536170&quot;)"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="55"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toColorInt` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val outline = Color.parseColor(if (isDark) &quot;#2A3038&quot; else &quot;#DDE5EF&quot;)"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="56"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toColorInt` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val accent = Color.parseColor(&quot;#0A84FF&quot;)"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="57"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toColorInt` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        val accentEnd = Color.parseColor(&quot;#6D4AE8&quot;)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="58"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="                val privacyPolicy = Uri.parse("
+        errorLine2="                                    ^">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\android\app\src\main\kotlin\com\bilhealth\bodyintelligencelog\PermissionsRationaleActivity.kt"
+            line="130"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        customTabsIntent.intent.data = Uri.parse(url)"
+        errorLine2="                                       ~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\src\main\kotlin\com\aboutyou\dart_packages\sign_in_with_apple\SignInWithApplePlugin.kt"
+            line="78"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        severity="Warning"
+        message="Use the KTX extension function `String.toUri` instead?"
+        category="Productivity"
+        priority="6"
+        summary="Use KTX extension function"
+        explanation="The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+        errorLine1="        customTabsIntent.intent.data = Uri.parse(url)"
+        errorLine2="                                       ~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Toolchains\pub-cache\hosted\pub.dev\sign_in_with_apple-8.2.0\android\src\main\kotlin\com\aboutyou\dart_packages\sign_in_with_apple\SignInWithApplePlugin.kt"
+            line="78"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="ContentDescription"
+        severity="Warning"
+        message="Missing `contentDescription` attribute on image"
+        category="Accessibility"
+        priority="3"
+        summary="Image without `contentDescription`"
+        explanation="Non-textual widgets like ImageViews and ImageButtons should use the `contentDescription` attribute to specify a textual description of the widget such that screen readers and other accessibility tools can adequately describe the user interface.&#xA;&#xA;Note that elements in application screens that are purely decorative and do not provide any content or enable a user action should not have accessibility content descriptions. In this case, set their descriptions to `@null`. If your app&apos;s minSdkVersion is 16 or higher, you can instead set these graphical elements&apos; `android:importantForAccessibility` attributes to `no`.&#xA;&#xA;Note that for text fields, you should not set both the `hint` and the `contentDescription` attributes since the hint will never be shown. Just set the `hint`."
+        url="https://developer.android.com/guide/topics/ui/accessibility/apps#special-cases"
+        urls="https://developer.android.com/guide/topics/ui/accessibility/apps#special-cases"
+        errorLine1="          &lt;ImageView"
+        errorLine2="           ~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_medium_template_view.xml"
+            line="55"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="ContentDescription"
+        severity="Warning"
+        message="Missing `contentDescription` attribute on image"
+        category="Accessibility"
+        priority="3"
+        summary="Image without `contentDescription`"
+        explanation="Non-textual widgets like ImageViews and ImageButtons should use the `contentDescription` attribute to specify a textual description of the widget such that screen readers and other accessibility tools can adequately describe the user interface.&#xA;&#xA;Note that elements in application screens that are purely decorative and do not provide any content or enable a user action should not have accessibility content descriptions. In this case, set their descriptions to `@null`. If your app&apos;s minSdkVersion is 16 or higher, you can instead set these graphical elements&apos; `android:importantForAccessibility` attributes to `no`.&#xA;&#xA;Note that for text fields, you should not set both the `hint` and the `contentDescription` attributes since the hint will never be shown. Just set the `hint`."
+        url="https://developer.android.com/guide/topics/ui/accessibility/apps#special-cases"
+        urls="https://developer.android.com/guide/topics/ui/accessibility/apps#special-cases"
+        errorLine1="        &lt;ImageView"
+        errorLine2="         ~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_small_template_view.xml"
+            line="33"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        severity="Warning"
+        message="Hardcoded string &quot;Ad&quot;, should use `@string` resource"
+        category="Internationalization"
+        priority="5"
+        summary="Hardcoded text"
+        explanation="Hardcoding text attributes directly in layout files is bad for several reasons:&#xA;&#xA;* When creating configuration variations (for example for landscape or portrait) you have to repeat the actual text (and keep it up to date when making changes)&#xA;&#xA;* The application cannot be translated to other languages by just adding new translations for existing string resources.&#xA;&#xA;There are quickfixes to automatically extract this hardcoded string into a resource lookup."
+        errorLine1="                  android:text=&quot;Ad&quot;"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_medium_template_view.xml"
+            line="137"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        severity="Warning"
+        message="Hardcoded string &quot;Ad&quot;, should use `@string` resource"
+        category="Internationalization"
+        priority="5"
+        summary="Hardcoded text"
+        explanation="Hardcoding text attributes directly in layout files is bad for several reasons:&#xA;&#xA;* When creating configuration variations (for example for landscape or portrait) you have to repeat the actual text (and keep it up to date when making changes)&#xA;&#xA;* The application cannot be translated to other languages by just adding new translations for existing string resources.&#xA;&#xA;There are quickfixes to automatically extract this hardcoded string into a resource lookup."
+        errorLine1="                android:text=&quot;Ad&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_small_template_view.xml"
+            line="114"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="RtlSymmetry"
+        severity="Warning"
+        message="When you define `paddingLeft` you should probably also define `paddingRight` for right-to-left symmetry"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Padding and margin symmetry"
+        explanation="If you specify padding or margin on the left side of a layout, you should probably also specify padding on the right side (and vice versa) for right-to-left layout symmetry."
+        errorLine1="          android:paddingLeft=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="          ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_medium_template_view.xml"
+            line="199"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="RtlSymmetry"
+        severity="Warning"
+        message="When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Padding and margin symmetry"
+        explanation="If you specify padding or margin on the left side of a layout, you should probably also specify padding on the right side (and vice versa) for right-to-left layout symmetry."
+        errorLine1="          android:paddingStart=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="          ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_medium_template_view.xml"
+            line="209"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        severity="Warning"
+        message="Redundant attribute `layout_marginLeft`; already defining `layout_marginStart` with `targetSdkVersion` 36"
+        category="Internationalization:Bidirectional Text"
+        priority="5"
+        summary="Using left/right instead of start/end attributes"
+        explanation="Using `Gravity#LEFT` and `Gravity#RIGHT` can lead to problems when a layout is rendered in locales where text flows from right to left. Use `Gravity#START` and `Gravity#END` instead. Similarly, in XML `gravity` and `layout_gravity` attributes, use `start` rather than `left`.&#xA;&#xA;For XML attributes such as paddingLeft and `layout_marginLeft`, use `paddingStart` and `layout_marginStart`. **NOTE**: If your `minSdkVersion` is less than 17, you should add **both** the older left/right attributes **as well as** the new start/end attributes. On older platforms, where RTL is not supported and the start/end attributes are unknown and therefore ignored, you need the older left/right attributes. There is a separate lint check which catches that type of error.&#xA;&#xA;(Note: For `Gravity#LEFT` and `Gravity#START`, you can use these constants even when targeting older platforms, because the `start` bitmask is a superset of the `left` bitmask. Therefore, you can use `gravity=&quot;start&quot;` rather than `gravity=&quot;left|start&quot;`.)"
+        errorLine1="              android:layout_marginLeft=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_medium_template_view.xml"
+            line="77"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        severity="Warning"
+        message="Use &quot;`start`&quot; instead of &quot;`left`&quot; to ensure correct behavior in right-to-left locales"
+        category="Internationalization:Bidirectional Text"
+        priority="5"
+        summary="Using left/right instead of start/end attributes"
+        explanation="Using `Gravity#LEFT` and `Gravity#RIGHT` can lead to problems when a layout is rendered in locales where text flows from right to left. Use `Gravity#START` and `Gravity#END` instead. Similarly, in XML `gravity` and `layout_gravity` attributes, use `start` rather than `left`.&#xA;&#xA;For XML attributes such as paddingLeft and `layout_marginLeft`, use `paddingStart` and `layout_marginStart`. **NOTE**: If your `minSdkVersion` is less than 17, you should add **both** the older left/right attributes **as well as** the new start/end attributes. On older platforms, where RTL is not supported and the start/end attributes are unknown and therefore ignored, you need the older left/right attributes. There is a separate lint check which catches that type of error.&#xA;&#xA;(Note: For `Gravity#LEFT` and `Gravity#START`, you can use these constants even when targeting older platforms, because the `start` bitmask is a superset of the `left` bitmask. Therefore, you can use `gravity=&quot;start&quot;` rather than `gravity=&quot;left|start&quot;`.)"
+        errorLine1="                android:gravity=&quot;left&quot;"
+        errorLine2="                                 ~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_medium_template_view.xml"
+            line="90"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        severity="Warning"
+        message="Redundant attribute `paddingLeft`; already defining `paddingStart` with `targetSdkVersion` 36"
+        category="Internationalization:Bidirectional Text"
+        priority="5"
+        summary="Using left/right instead of start/end attributes"
+        explanation="Using `Gravity#LEFT` and `Gravity#RIGHT` can lead to problems when a layout is rendered in locales where text flows from right to left. Use `Gravity#START` and `Gravity#END` instead. Similarly, in XML `gravity` and `layout_gravity` attributes, use `start` rather than `left`.&#xA;&#xA;For XML attributes such as paddingLeft and `layout_marginLeft`, use `paddingStart` and `layout_marginStart`. **NOTE**: If your `minSdkVersion` is less than 17, you should add **both** the older left/right attributes **as well as** the new start/end attributes. On older platforms, where RTL is not supported and the start/end attributes are unknown and therefore ignored, you need the older left/right attributes. There is a separate lint check which catches that type of error.&#xA;&#xA;(Note: For `Gravity#LEFT` and `Gravity#START`, you can use these constants even when targeting older platforms, because the `start` bitmask is a superset of the `left` bitmask. Therefore, you can use `gravity=&quot;start&quot;` rather than `gravity=&quot;left|start&quot;`.)"
+        errorLine1="          android:paddingLeft=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="          ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="G:\BIL_Project\worktrees\bil-ios36-audit-snapshot-20261014\.dart_tool\bil-android-policy-overrides\google_mobile_ads-9.1.0\android\src\playServices\res\layout\gnt_medium_template_view.xml"
+            line="199"
+            column="11"/>
+    </issue>
+
+</issues>

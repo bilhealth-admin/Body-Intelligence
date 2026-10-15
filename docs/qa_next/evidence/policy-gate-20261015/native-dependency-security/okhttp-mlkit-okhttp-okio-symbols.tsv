@@ -1,0 +1,32 @@
+C	okhttp3/Call
+C	okhttp3/Headers
+C	okhttp3/Headers$Builder
+C	okhttp3/MediaType
+C	okhttp3/OkHttpClient
+C	okhttp3/OkHttpClient$Builder
+C	okhttp3/Request
+C	okhttp3/Request$Builder
+C	okhttp3/RequestBody
+C	okhttp3/Response
+C	okhttp3/ResponseBody
+M	okhttp3/Call	execute	()Lokhttp3/Response;	invokeinterface
+M	okhttp3/Headers$Builder	<init>	()V	invokespecial
+M	okhttp3/Headers$Builder	add	(Ljava/lang/String;Ljava/lang/String;)Lokhttp3/Headers$Builder;	invokevirtual
+M	okhttp3/Headers$Builder	build	()Lokhttp3/Headers;	invokevirtual
+M	okhttp3/MediaType	parse	(Ljava/lang/String;)Lokhttp3/MediaType;	invokestatic
+M	okhttp3/OkHttpClient	newCall	(Lokhttp3/Request;)Lokhttp3/Call;	invokevirtual
+M	okhttp3/OkHttpClient$Builder	<init>	()V	invokespecial
+M	okhttp3/OkHttpClient$Builder	build	()Lokhttp3/OkHttpClient;	invokevirtual
+M	okhttp3/OkHttpClient$Builder	connectTimeout	(JLjava/util/concurrent/TimeUnit;)Lokhttp3/OkHttpClient$Builder;	invokevirtual
+M	okhttp3/OkHttpClient$Builder	readTimeout	(JLjava/util/concurrent/TimeUnit;)Lokhttp3/OkHttpClient$Builder;	invokevirtual
+M	okhttp3/OkHttpClient$Builder	writeTimeout	(JLjava/util/concurrent/TimeUnit;)Lokhttp3/OkHttpClient$Builder;	invokevirtual
+M	okhttp3/Request$Builder	<init>	()V	invokespecial
+M	okhttp3/Request$Builder	build	()Lokhttp3/Request;	invokevirtual
+M	okhttp3/Request$Builder	headers	(Lokhttp3/Headers;)Lokhttp3/Request$Builder;	invokevirtual
+M	okhttp3/Request$Builder	post	(Lokhttp3/RequestBody;)Lokhttp3/Request$Builder;	invokevirtual
+M	okhttp3/Request$Builder	url	(Ljava/lang/String;)Lokhttp3/Request$Builder;	invokevirtual
+M	okhttp3/RequestBody	create	(Lokhttp3/MediaType;Ljava/lang/String;)Lokhttp3/RequestBody;	invokestatic
+M	okhttp3/Response	body	()Lokhttp3/ResponseBody;	invokevirtual
+M	okhttp3/Response	code	()I	invokevirtual
+M	okhttp3/ResponseBody	close	()V	invokevirtual
+M	okhttp3/ResponseBody	string	()Ljava/lang/String;	invokevirtual

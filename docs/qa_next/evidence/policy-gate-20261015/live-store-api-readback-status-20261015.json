@@ -1,0 +1,162 @@
+{
+  "generatedAtUtc": "2026-10-15T16:22:29.239754+00:00",
+  "sourceHead": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "sourceBranch": "integration/bil-qa-media-policy-20261011",
+  "overallStatus": "PARTIAL_LIVE_READBACK_COMPLETE",
+  "safety": {
+    "storeWrites": 0,
+    "consoleEditsCreated": 0,
+    "newRemoteLoginSessions": 0,
+    "existingAscApiKeyUsedInternallyByPreparedTool": true,
+    "localJwtSignatureGeneratedWithoutPrinting": true,
+    "secretFilesManuallyReadOrSearched": false,
+    "secretValuesPrintedOrReported": false,
+    "paidServicesUsed": false,
+    "buildsTestsOrNativeEditsPerformed": false,
+    "imagesDownloaded": false,
+    "cdpUsed": false
+  },
+  "apple": {
+    "liveReadbackStatus": "PASS",
+    "readAtUtc": "2026-10-15T16:20:52.265788+00:00",
+    "methodCounts": {
+      "GET": 31
+    },
+    "httpStatusCounts": {
+      "200": 31
+    },
+    "version": {
+      "id": "7a132506-d5a8-4810-a51f-b2dc2bd636cf",
+      "versionString": "1.0.0",
+      "platform": "IOS",
+      "state": "REJECTED",
+      "buildAttached": true
+    },
+    "linkedBuildNumberStatus": "PASS_LIVE_GET_ATTACHED_BUILD_35; this is not build36 verification",
+    "products": [
+      {
+        "productId": "bil_premium",
+        "state": "READY_TO_SUBMIT"
+      },
+      {
+        "productId": "bil_premium_annual",
+        "state": "READY_TO_SUBMIT"
+      },
+      {
+        "productId": "bil_premium_ai_coach",
+        "state": "READY_TO_SUBMIT"
+      },
+      {
+        "productId": "bil_premium_ai_coach_annual",
+        "state": "READY_TO_SUBMIT"
+      },
+      {
+        "productId": "bil_ai_boost",
+        "state": "READY_TO_SUBMIT"
+      }
+    ],
+    "reviewConfigurationPresenceOnly": {
+      "exists": true,
+      "contact": {
+        "firstName": true,
+        "lastName": true,
+        "email": true,
+        "phone": true
+      },
+      "demoAccountRequired": true,
+      "demoAccountNamePresent": true,
+      "demoAccountPasswordPresent": true,
+      "notesPresent": true
+    },
+    "actualReviewerLoginOrEntitlementTestPerformed": false,
+    "appPrivacyAnswers": {
+      "status": "BLOCKED_PUBLIC_API_SURFACE",
+      "reason": "Official current OpenAPI 4.5.1 has 1001 paths and no App Privacy answer/data usage resources; policy URL presence is not questionnaire readback. Authenticated web/export is still required."
+    },
+    "latestOfficialRejectionText": {
+      "status": "BLOCKED_NOT_RETURNED_BY_PREPARED_PUBLIC_API_INSPECTOR",
+      "reason": "REJECTED is live; inspector reads developer review-detail presence, not Apple review correspondence. The prior 14-Oct report remains historical evidence only."
+    },
+    "attachedBuild": {
+      "id": "e695f185-2e54-4196-9153-a55653518cc2",
+      "buildNumber": "35",
+      "uploadedDate": "2026-10-04T13:41:17-07:00",
+      "processingState": "VALID",
+      "expired": false
+    },
+    "appIdentity": {
+      "id": "6805349703",
+      "bundleId": "com.bilhealth.bodyintelligencelog",
+      "sku": "BIL-IOS-2026-001",
+      "name": "Body Intelligence Log",
+      "primaryLocale": "en-US"
+    },
+    "additionalExactIdentityReadAtUtc": "2026-10-15T16:23:17.701667+00:00",
+    "publicMetadataReadback": {
+      "status": "PASS_GET_ONLY",
+      "targetedGetCount": 4,
+      "readAtUtc": "2026-10-15T16:44:06.423224+00:00",
+      "textEvidence": "asc-public-metadata-text-sanitized.json",
+      "matchEvidence": "asc-public-metadata-source-match-20261015.json",
+      "signedCandidate36Verified": false
+    }
+  },
+  "google": {
+    "liveReadbackStatus": "BLOCKED_AUTH_NOT_PRECONFIGURED_FOR_EXISTING_GET_CLIENT",
+    "environmentCredentialVariablePresent": false,
+    "reason": "Prepared catalog GET client exists but requires an explicit service-account file path. Current inspected client/docs provide no documented usable path, and GOOGLE_APPLICATION_CREDENTIALS is absent. Normal existing-client OAuth service authentication would be allowed with a known prepared path; it is not the prohibited action. No secret directory search, impersonation or reviewer session was attempted.",
+    "releaseSurfaceToolNotExecuted": "It creates an App Edit via POST and deletes it; that is outside this no-change task even without commit.",
+    "newReadOnlyReleaseApiAvailable": [
+      {
+        "name": "applications.dataSafety",
+        "method": "POST",
+        "path": "androidpublisher/v3/applications/{packageName}/dataSafety"
+      },
+      {
+        "name": "applications.tracks.releases.list",
+        "method": "GET",
+        "path": "androidpublisher/v3/{+parent}/releases"
+      }
+    ],
+    "consoleSuspensionAppealAppAccessAndDeclarations": "NOT_LIVE_VERIFIED_IN_THIS_TASK; no inference from historical JSON or HTTP availability",
+    "ordinaryExistingServiceOauthAuthorized": true,
+    "knownPreparedCredentialPathFound": false,
+    "credentialFileManuallySearchedOrRead": false
+  },
+  "evidence": [
+    {
+      "file": "build\\qa\\policy-gate-20261015\\asc-live-readback-sanitized.json",
+      "sha256": "d65f3cf6c5a28d197be3343a9d9e41220d014148b81d3b777b2b8ff47358dbbc"
+    },
+    {
+      "file": "build\\qa\\policy-gate-20261015\\current-public-store-api-surface.json",
+      "sha256": "8311b11931d0c601cc03931ca2be7c39a222bbdefcefe95ac3dcd3473370fbc4"
+    },
+    {
+      "file": "build\\qa\\policy-gate-20261015\\asc-attached-build-app-identity-sanitized.json",
+      "sha256": "5d5e15ed32c70d1f350870ea89a13fc91778ec639e38e18d93ebe72b0a7b5a87"
+    },
+    {
+      "file": "build\\qa\\policy-gate-20261015\\asc-public-metadata-text-sanitized.json",
+      "sha256": "07abd227671c0868bee23ca453aaa27fed39e17343988ea5641a82694a104d35"
+    },
+    {
+      "file": "build\\qa\\policy-gate-20261015\\asc-public-links-live-sanitized.json",
+      "sha256": "9d6fc7a7a510194d96d750d30ee0621994b01011aa4d6bf0048997b94e2fe30f"
+    },
+    {
+      "file": "build\\qa\\policy-gate-20261015\\asc-public-metadata-source-match-20261015.json",
+      "sha256": "a40c2abc5ea6b5795c3db47ba65ebe0e901b496695c3969ef4c1efb270ebd929"
+    },
+    {
+      "file": "build\\qa\\policy-gate-20261015\\workout-count-copy-fix-receipt.json",
+      "sha256": "b5361b6aa5803f8afb4b5dda5c7b7099a2481359dec6d0a4a75ab296f717a276"
+    }
+  ],
+  "nextMinimumSteps": [
+    "Read/export current App Privacy answers and Apple rejection correspondence from an authenticated supported UI path when available; API status does not close Guideline5.1.2(i).",
+    "Provide the already prepared explicit Google service-account credential path to the existing GET-only client. Ordinary service OAuth refresh is authorized; do not create an App Edit. Current official API supports GET applications.tracks.releases.list without an App Edit.",
+    "Google Data Safety API is POST-only for writing; no declaration update was attempted. Use existing authenticated Console read/export for actual declaration answers."
+  ],
+  "updatedAtUtc": "2026-10-15T17:06:01.759225+00:00"
+}

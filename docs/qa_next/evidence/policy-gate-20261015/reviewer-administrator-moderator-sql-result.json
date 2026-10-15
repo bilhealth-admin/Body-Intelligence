@@ -1,0 +1,360 @@
+{
+  "schema": 1,
+  "classification": "isolated actual PostgreSQL migration execution, synthetic rows; not live/signed/device evidence",
+  "command": "node supabase/tests/reviewer_administrator_moderator_chain_test.mjs",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_files": [
+    {
+      "path": "supabase/tests/reviewer_administrator_moderator_chain_test.mjs",
+      "sha256": "c3564aec37b4b7f7224f88deadd21c08f8d8dbde505ad022804a8884c298884e"
+    },
+    {
+      "path": "supabase/migrations/20260906120000_owner_approved_second_administrator.sql",
+      "sha256": "bba5e0ee71446c68c7179ecd2983d0e67b91c0869bfbbd45e5d63cba4d4ba2f8"
+    },
+    {
+      "path": "supabase/migrations/20261015090000_restore_single_owner_administrator.sql",
+      "sha256": "4e46262ba06f8aa368c508a1f0937d28dd931f5642feeecffca943ab2a9be973"
+    },
+    {
+      "path": "supabase/migrations/20260831151527_ai_coach_admin_global_individual_reset.sql",
+      "sha256": "e4e8c4d6ec2f25dc14d092f1e88463cb32d491fccfdaa90cab8af0236570ecb6"
+    },
+    {
+      "path": "supabase/migrations/202608020004_bil_community_hardening.sql",
+      "sha256": "ccf5efaf871eaa56bb93461d4a2bfda6a0e3c897c4976d58d60ba2e414cbcf1e"
+    },
+    {
+      "path": "supabase/migrations/202608020003_bil_commerce_foundation.sql",
+      "sha256": "82b00e3aa5f8239d20733a6c48f7a9dcced16aca416af06a9b3223f350fd5a49"
+    },
+    {
+      "path": "supabase/migrations/20260821080542_ai_coach_unified_weekly_tokens.sql",
+      "sha256": "89cfa8ce3b4792a3994a874c25f5c6af85fe9427cbd37ffa12b75cc8ff39aeb8"
+    }
+  ],
+  "schema_sources": [
+    {
+      "table": "private.bil_ai_coach_admins",
+      "path": "supabase/migrations/20260831151527_ai_coach_admin_global_individual_reset.sql",
+      "ddl_sha256": "7f522ae922cd5a462be915a490286d6d1fc0f6d1eef30f552f598e868aeb7b41",
+      "line": 9
+    },
+    {
+      "table": "public.bil_community_moderators",
+      "path": "supabase/migrations/202608020004_bil_community_hardening.sql",
+      "ddl_sha256": "0f89fee58e055cae691729facc7095c932262aebd79acbd8f1206ef8934ece3e",
+      "line": 18
+    },
+    {
+      "table": "public.bil_entitlements",
+      "path": "supabase/migrations/202608020003_bil_commerce_foundation.sql",
+      "ddl_sha256": "24a0e1812fb33900fcd51323d83918506f28d4aa5b4aa2cadd44fec99ea9c31a",
+      "line": 19
+    },
+    {
+      "table": "public.bil_ai_credit_balances",
+      "path": "supabase/migrations/20260821080542_ai_coach_unified_weekly_tokens.sql",
+      "ddl_sha256": "75d767cae10635550542a01c467e7e3eaf28938cc965a172d46356d7279b0abe",
+      "line": 27
+    }
+  ],
+  "tests": [
+    {
+      "name": "minimum original schemas and exactly four synthetic identities",
+      "result": "PASS"
+    },
+    {
+      "name": "original legacy SQL grants secondary Admin and Moderator, preserves money",
+      "result": "PASS"
+    },
+    {
+      "name": "legacy SQL rerun is idempotent for roles and all financial sentinels",
+      "result": "PASS"
+    },
+    {
+      "name": "original restore SQL leaves owner as sole active Admin but reviewer Moderator remains",
+      "result": "PASS"
+    },
+    {
+      "name": "ordinary Free acquires no Admin, Moderator, Premium or Tokens",
+      "result": "PASS"
+    },
+    {
+      "name": "actual restored unique index rejects a second active administrator",
+      "result": "PASS"
+    },
+    {
+      "name": "restore SQL rerun is idempotent without revoking bought-right sentinel or balance",
+      "result": "PASS"
+    },
+    {
+      "name": "replaying original legacy then restore converges to the same owner-only Admin state",
+      "result": "PASS"
+    },
+    {
+      "name": "20260906120000_owner_approved_second_administrator.sql fails closed when owner is absent",
+      "result": "PASS"
+    },
+    {
+      "name": "20261015090000_restore_single_owner_administrator.sql fails closed when owner is absent",
+      "result": "PASS"
+    }
+  ],
+  "finding": {
+    "status": "P0_BLOCKED_OWNER_APPROVAL_FOR_LIVE_READBACK/CHANGE",
+    "observed_in_isolated_source_chain": true,
+    "reviewer_admin_active": false,
+    "reviewer_moderator_membership_remains": true,
+    "financial_admin_claimed": false,
+    "action": "Owner-authorized least-privilege live readback, then a separately approved exact-UUID role change if an unwanted moderator membership is confirmed. Preserve unrelated moderators and paid rights."
+  },
+  "compliance_status": "BLOCKED",
+  "production_access": false,
+  "limits": [
+    "Four fake UUIDs; known emails resolve only synthetic auth.users rows.",
+    "Minimum original table DDL, projected auth.users(id,email), no health data or live accounts.",
+    "No complete migration replay, RLS/RPC authorization, store transaction, or real reviewer journey tested.",
+    "No claim that either migration was deployed or that any live role matches the fixture.",
+    "The wider play-review migration is not executed; this test proves only the bilhealth.app chain."
+  ],
+  "engine": {
+    "name": "PGlite",
+    "installed_version": "0.5.8",
+    "storage": "in-memory; no connection URL",
+    "postgres": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit"
+  },
+  "schema_columns": [
+    {
+      "table_schema": "auth",
+      "table_name": "users",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "auth",
+      "table_name": "users",
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_schema": "private",
+      "table_name": "bil_ai_coach_admins",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "private",
+      "table_name": "bil_ai_coach_admins",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "true"
+    },
+    {
+      "table_schema": "private",
+      "table_name": "bil_ai_coach_admins",
+      "column_name": "granted_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_schema": "private",
+      "table_name": "bil_ai_coach_admins",
+      "column_name": "granted_by",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_schema": "private",
+      "table_name": "bil_ai_coach_admins",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": "'owner_approved'::text"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_ai_credit_balances",
+      "column_name": "owner_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_ai_credit_balances",
+      "column_name": "granted",
+      "data_type": "bigint",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_ai_credit_balances",
+      "column_name": "used",
+      "data_type": "bigint",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_ai_credit_balances",
+      "column_name": "reserved",
+      "data_type": "bigint",
+      "is_nullable": "NO",
+      "column_default": "0"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_ai_credit_balances",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_community_moderators",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_community_moderators",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "owner_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "entitlement_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "product_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "provider",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "starts_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "expires_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "source_transaction_id",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bil_entitlements",
+      "column_name": "server_updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    }
+  ],
+  "roles_after_chain": [
+    {
+      "alias": "owner",
+      "fake_uuid": "15150000-0000-4000-8000-000000000001",
+      "administrator_active": true,
+      "moderator_member": false,
+      "preexisting_synthetic_premium": false
+    },
+    {
+      "alias": "reviewer",
+      "fake_uuid": "15150000-0000-4000-8000-000000000002",
+      "administrator_active": false,
+      "moderator_member": true,
+      "preexisting_synthetic_premium": true
+    },
+    {
+      "alias": "ordinaryFree",
+      "fake_uuid": "15150000-0000-4000-8000-000000000003",
+      "administrator_active": false,
+      "moderator_member": false,
+      "preexisting_synthetic_premium": false
+    },
+    {
+      "alias": "independentModerator",
+      "fake_uuid": "15150000-0000-4000-8000-000000000004",
+      "administrator_active": false,
+      "moderator_member": true,
+      "preexisting_synthetic_premium": false
+    }
+  ],
+  "final_counts": {
+    "auth_users": 4,
+    "administrator_history": 2,
+    "active_administrators": 1,
+    "moderators": 2,
+    "entitlements": 1,
+    "token_balances": 4
+  },
+  "entitlements_and_tokens_unchanged": true,
+  "recorded_at_utc": "2026-10-15T18:20:11.116Z",
+  "sql_regression_result": "PASS",
+  "counts": {
+    "passed": 10,
+    "failed": 0,
+    "execution_errors": 0
+  }
+}

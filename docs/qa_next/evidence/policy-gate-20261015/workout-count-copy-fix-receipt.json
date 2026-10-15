@@ -1,0 +1,93 @@
+{
+  "createdAtUtc": "2026-10-15T16:51:32.045171+00:00",
+  "sourceHead": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "reason": "Plans claim says 300+ home videos; approved release registry has 200 home +102 gym =302 total. Preserve compatibility keys and change only translated display values.",
+  "authorizedScope": [
+    "lib/features/commerce/presentation/bil_store_copy.dart",
+    "lib/app/localization/runtime_copy_coach.dart",
+    "lib/app/localization/runtime_copy_extended.dart",
+    "test/features/commerce/bil_store_copy_test.dart"
+  ],
+  "originals": [
+    {
+      "path": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "sha256": "5b26bda6e8fb1f86a118de2b04e60738fafd0714a312b834b8a515dc3fa7615e",
+      "lines": 651
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach.dart",
+      "sha256": "828b710b69113789bd2b80a4450aea9f43b43ebffae343dcbebd03a2baf9f87b",
+      "lines": 1441
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_extended.dart",
+      "sha256": "ed3093e7e980247e398b25c03547b483bc887612703a240b57897bdb37491610",
+      "lines": 87168
+    },
+    {
+      "path": "test/features/commerce/bil_store_copy_test.dart",
+      "sha256": "29ea8df79553eb59017e24ac236e6d81ceb0d7242cebd47fae8fb68cbd166169",
+      "lines": 349
+    }
+  ],
+  "testsRunByThisAgent": false,
+  "goldensUpdated": false,
+  "updatedAtUtc": "2026-10-15T17:06:01.759225+00:00",
+  "changeStatus": "FIXED_SOURCE_FOCUSED_VERIFIED_BY_ROOT",
+  "after": [
+    {
+      "path": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "sha256": "c4a96400202e4ef669b947fbfd6678de15bef1b6196fcea6a36a82ae051e69e6",
+      "lines": 651
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach.dart",
+      "sha256": "f97c74da982b1f317be290190269b5e62ea47029f9626f1720369f98fc310fdc",
+      "lines": 1441
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_extended.dart",
+      "sha256": "653a686a463ef9ac41de2fd42c133b8fc63f133e454ff65d7a8d1e244417e6ee",
+      "lines": 87163
+    },
+    {
+      "path": "test/features/commerce/bil_store_copy_test.dart",
+      "sha256": "8499a09d82647c3458089a500608f6cdc060ea7f32821a370bbb9d5ea785a91f",
+      "lines": 383
+    }
+  ],
+  "displayLocalesUpdated": 25,
+  "lookupKeysPreserved": true,
+  "pricesProductIdsTrialsAndFeaturesChanged": false,
+  "existingRegressionCaseExpanded": "workout benefit describes the approved home and gym inventory",
+  "newTestCasesAdded": 0,
+  "formatCommand": "dart format lib/features/commerce/presentation/bil_store_copy.dart lib/app/localization/runtime_copy_coach.dart lib/app/localization/runtime_copy_extended.dart test/features/commerce/bil_store_copy_test.dart",
+  "formatExitCode": 0,
+  "focusedTestCommandForRoot": "flutter test test/features/commerce/bil_store_copy_test.dart",
+  "testStatus": "PASS_ROOT_20_OF_20_COPY_AND_GOLDEN_SCOPE",
+  "goldenBaselineChanges": 0,
+  "priorChangeStatus": "FIXED_SOURCE_FORMATTED_NOT_TESTED",
+  "priorTestStatus": "NOT_RUN_BY_THIS_AGENT; root coordinates current verification",
+  "verificationByRoot": {
+    "verifiedAtUtc": "2026-10-15T17:06:01.759225+00:00",
+    "executedBy": "root",
+    "sourceScope": "Current dirty integration source; the four copy/test input hashes are preserved in the receipt. This is not signed build36 verification.",
+    "rawLog": "docs/qa_next/evidence/policy-gate-20261015/copy-and-pearl-visual-focused.log",
+    "rawSha256": "984c8cb444452c5b8e9d775349ebe11eca2fcc4be542d5ac8bdce014c178ef07",
+    "rawWholeRunPassed": 36,
+    "scopePassed": 20,
+    "scopeBreakdown": {
+      "bil_store_copy": 13,
+      "plans_goldens": 2,
+      "apple_review_product_goldens": 5
+    },
+    "otherCasesInSameRawRun": {
+      "system_speech_disclosure": 14,
+      "policy_reviewer_navigation": 2
+    },
+    "runMode": "Normal Golden run without update, as confirmed by root execution record; log preserves actual results.",
+    "agentRanTests": false,
+    "signedBuild36Verified": false,
+    "storeStateChanged": false
+  }
+}

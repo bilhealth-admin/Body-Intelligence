@@ -1,0 +1,19 @@
+{
+  "recorded_at_utc": "2026-10-15T20:52:54.276361+00:00",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "base_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "implementation_fingerprint": "2eda8ec179519b20398fe6b08980814f9194a649a0caf8a7d82cca36eadbbbb9",
+  "dart_format_files": 50,
+  "dart_format_changed": 0,
+  "flutter_analyze_tool_seconds": 327.6,
+  "flutter_analyze_exit": 0,
+  "actionlint_exit": 0,
+  "android_and_ios_bash_syntax_exit": 0,
+  "policy_source_checks": 14,
+  "policy_source_check_status": "PASS",
+  "staged_gitleaks_findings": 0,
+  "protected_inputs_unchanged": 886,
+  "generated_failure_png_excluded": 44,
+  "full_9843_repeated": false,
+  "pre_submission_certification": "BLOCKED"
+}

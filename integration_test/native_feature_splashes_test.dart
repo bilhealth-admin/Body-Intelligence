@@ -42,8 +42,13 @@ import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../tools/qa/flutter/native_hold_observer.dart';
+import '../tools/qa/flutter/native_capture_manifest.dart';
+
+part 'native_feature_capture.dart';
 part 'native_feature_splashes_coach.dart';
 part 'native_feature_splashes_observer.dart';
+part 'native_feature_splashes_warmup.dart';
 
 // Standalone QA entrypoint. Does not call lib/main.dart or initialize cloud,
 // Firebase, purchases, ads, production Auth, First Use, or startup animations.
@@ -201,6 +206,20 @@ Finder _welcome(String kind) => find.byKey(
       ? const Key('community-welcome-loading')
       : ValueKey('feature-entry-splash-$kind'),
 );
+Map<String, Object?> _welcomeFrameDetails(String kind) {
+  final indicators = find
+      .descendant(
+        of: _welcome(kind),
+        matching: find.byType(CupertinoActivityIndicator),
+      )
+      .evaluate();
+  final indicator = indicators.single.widget as CupertinoActivityIndicator;
+  return {
+    'indicator_animating': indicator.animating,
+    'indicator_radius': indicator.radius,
+  };
+}
+
 String _location(String kind) => switch (kind) {
   'diet' => '/nutrition-plans',
   'coach' => '/intelligence-center',
@@ -218,23 +237,6 @@ Future<Directory> _output() async {
   final directory = Directory('${root.path}/feature-splashes-native');
   await directory.create(recursive: true);
   return directory;
-}
-
-Future<void> _capture(
-  IntegrationTestWidgetsFlutterBinding binding,
-  String name,
-  Directory output,
-) async {
-  // Layout/post-frame state can precede the Android compositor's image buffer.
-  // Request and paint fresh frames before PixelCopy, including static/reduced
-  // motion scenes. This is outside the separately measured welcome timer.
-  for (var frame = 0; frame < 3; frame++) {
-    binding.scheduleFrame();
-    await binding.pump(const Duration(milliseconds: 16));
-  }
-  final bytes = await binding.takeScreenshot(name);
-  expect(bytes.take(8).toList(), [137, 80, 78, 71, 13, 10, 26, 10]);
-  await File('${output.path}/$name.png').writeAsBytes(bytes, flush: true);
 }
 
 Future<void> _returnToNativeOrigin(
@@ -341,7 +343,8 @@ void main() {
           'sample_size_per_entry_condition': 1,
           'timings': timings,
         };
-        final watches = <String, Stopwatch>{};
+        final holdObservers = <String, NativeHoldObserver>{};
+        final warmupTraces = <_NativeEntryWarmupTrace>[];
         final mounted = <String, int>{};
         final destinationMounts = <String, int>{};
         Widget entry(String kind, GoRouterState state, BuildContext context) {
@@ -378,7 +381,14 @@ void main() {
           return _MountProbe(
             onMount: () {
               mounted[kind] = (mounted[kind] ?? 0) + 1;
-              watches[kind] = Stopwatch()..start();
+              holdObservers[kind]?.stop();
+              holdObservers[kind] = NativeHoldObserver(
+                welcome: _welcome(kind),
+                readVisibleFrame: () => _welcomeFrameDetails(kind),
+              )..start();
+              if (warmupTraces.isNotEmpty) {
+                warmupTraces.last.attach(kind, holdObservers[kind]!);
+              }
             },
             child: child,
           );
@@ -509,20 +519,48 @@ void main() {
           }
           await tester.pump();
           for (final kind in _kinds) {
+            // Prime this real route's native text/raster work in an independent
+            // QA visit. No production hold is frozen or extended for warm-up.
+            await tester.ensureVisible(
+              find.byKey(ValueKey('native-open-$kind')),
+            );
+            final warmup = _NativeEntryWarmupTrace(kind)..start();
+            warmupTraces.add(warmup);
+            try {
+              await tester.tap(find.byKey(ValueKey('native-open-$kind')));
+              await warmup.complete(tester);
+            } finally {
+              warmup.stop();
+            }
+            router.pop();
+            await _nativeSettle(tester);
+            mounted.remove(kind);
+            destinationMounts.remove(kind);
             await tester.ensureVisible(
               find.byKey(ValueKey('native-open-$kind')),
             );
             await tester.tap(find.byKey(ValueKey('native-open-$kind')));
             await tester.pump();
-            await tester.pump(const Duration(milliseconds: 80));
-            final watch = watches[kind]!;
-            expect(_welcome(kind), findsOneWidget);
-            final indicator = tester.widget<CupertinoActivityIndicator>(
-              find.byType(CupertinoActivityIndicator),
+            final observer = holdObservers[kind]!;
+            expect(
+              observer.timeline.firstFrameVisible,
+              isTrue,
+              reason:
+                  'The measured welcome must be present in its actual first frame.',
             );
-            expect(indicator.animating, !scene.reduced);
-            expect(indicator.radius, 12);
+            expect(
+              observer.firstVisibleFrame?['indicator_animating'],
+              !scene.reduced,
+            );
+            expect(observer.firstVisibleFrame?['indicator_radius'], 12);
             expect(mounted[kind], 1);
+            if (kind == 'community') {
+              while (destinationMounts[kind] == null &&
+                  observer.watch.elapsedMilliseconds < 1900) {
+                await tester.pump(const Duration(milliseconds: 20));
+              }
+              expect(_welcome(kind), findsOneWidget);
+            }
             if (!['diet', 'coach'].contains(kind)) {
               expect(
                 destinationMounts[kind],
@@ -539,25 +577,11 @@ void main() {
             // Measure the real unmodified hold without screenshot IPC. Native
             // PNG encoding/host delivery can finish after the 2.2s Timer even
             // when the PNG correctly contains the early welcome frame.
-            var lastVisible = watch.elapsedMilliseconds;
-            while (_welcome(kind).evaluate().isNotEmpty &&
-                watch.elapsedMilliseconds < 4500) {
-              lastVisible = watch.elapsedMilliseconds;
-              await tester.pump(const Duration(milliseconds: 20));
-            }
-            final absentAt = watch.elapsedMilliseconds;
+            final observed = await observeNativeHoldEnd(tester, observer);
             expect(
               _welcome(kind),
               findsNothing,
               reason: 'no extra asset or data readiness hold',
-            );
-            expect(lastVisible, greaterThanOrEqualTo(2100));
-            expect(absentAt, greaterThanOrEqualTo(2180));
-            expect(
-              absentAt,
-              lessThan(3200),
-              reason:
-                  'documented debug-emulator observation budget, not a production SLA',
             );
             expect(mounted[kind], 1);
             if (!['diet', 'coach'].contains(kind)) {
@@ -575,7 +599,8 @@ void main() {
             await tester.tap(find.byKey(ValueKey('native-open-$kind')));
             await tester.pump();
             await tester.pump(const Duration(milliseconds: 80));
-            final captureWatch = watches[kind]!;
+            final captureObserver = holdObservers[kind]!;
+            final captureWatch = captureObserver.watch;
             expect(_welcome(kind), findsOneWidget);
             final captureAt = captureWatch.elapsedMilliseconds;
             expect(captureAt, lessThan(1900));
@@ -586,6 +611,7 @@ void main() {
               await tester.pump(const Duration(milliseconds: 20));
             }
             expect(_welcome(kind), findsNothing);
+            captureObserver.stop();
             expect(tester.takeException(), isNull);
             expect(mounted[kind], 2);
             await _returnToNativeOrigin(tester, router, kind);
@@ -597,9 +623,9 @@ void main() {
               'capture_started_ms': captureAt,
               'capture_completed_ms': captureCompleteAt,
               'capture_separate_visit': true,
-              'last_visible_ms': lastVisible,
-              'first_absent_ms': absentAt,
-              'observation_interval_ms': 20,
+              ...observed,
+              'requested_observation_interval_ms': 20,
+              'qa_warmup_separate_visit': true,
               'return_verified': true,
               'mounted_once': timedMountCount == 1,
               'capture_visit_mounted_once': mounted[kind] == 2,
@@ -631,6 +657,16 @@ void main() {
           source['model_calls'] = gateway.calls;
           source['profile_writes'] = community.writes;
         } finally {
+          source['cold_warmup_observations'] = [
+            for (final trace in warmupTraces) trace.toJson(),
+          ];
+          source['last_visit_hold_observations'] = {
+            for (final entry in holdObservers.entries)
+              entry.key: entry.value.toJson(),
+          };
+          for (final observer in holdObservers.values) {
+            observer.stop();
+          }
           source['dart_network_client_creations_blocked'] =
               _dartNetworkDeny.blockedClientCreations;
           await File('${output.path}/$name-metadata.json').writeAsString(

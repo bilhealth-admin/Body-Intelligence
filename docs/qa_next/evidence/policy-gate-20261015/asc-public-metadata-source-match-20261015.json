@@ -1,0 +1,358 @@
+{
+  "createdAtUtc": "2026-10-15T16:55:24.360131+00:00",
+  "sourceHead": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "sourceBranch": "integration/bil-qa-media-policy-20261011",
+  "dirtySourceAcknowledged": true,
+  "exactLiveStoreVersion": "1.0.0",
+  "exactLiveAttachedBuild": "35",
+  "finalCandidateBuild36Verified": false,
+  "metadataReadAtUtc": "2026-10-15T16:44:06.423224+00:00",
+  "publicAscGetCount": 4,
+  "publicAscAllHttp200": true,
+  "publicTextEvidence": "asc-public-metadata-text-sanitized.json",
+  "sourceMatchMeaning": "Source/document-only verification is distinct from signed artifact, device, live backend and store acceptance. PASS rows state their limited evidence scope.",
+  "storeWrites": 0,
+  "secretValuesIncluded": false,
+  "appReviewDetailCapture": false,
+  "imageDownloads": 0,
+  "buildsTestsOrCIPerformedByThisAgent": false,
+  "rowCount": 22,
+  "statusCounts": {
+    "PASS": 17,
+    "BLOCKED": 5
+  },
+  "sourceEvidenceHashes": [
+    {
+      "path": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "sha256": "c4a96400202e4ef669b947fbfd6678de15bef1b6196fcea6a36a82ae051e69e6"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach.dart",
+      "sha256": "f97c74da982b1f317be290190269b5e62ea47029f9626f1720369f98fc310fdc"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_extended.dart",
+      "sha256": "653a686a463ef9ac41de2fd42c133b8fc63f133e454ff65d7a8d1e244417e6ee"
+    },
+    {
+      "path": "test/features/commerce/bil_store_copy_test.dart",
+      "sha256": "8499a09d82647c3458089a500608f6cdc060ea7f32821a370bbb9d5ea785a91f"
+    },
+    {
+      "path": "lib/features/commerce/domain/store_catalog_configuration.dart",
+      "sha256": "34a1b04c6dee409ae1770a5f78b00bc93b8a44a7745b6c293911bed174c1a8b6"
+    },
+    {
+      "path": "lib/features/commerce/domain/paid_plan_catalog.dart",
+      "sha256": "535a9186f9e5502ab204de33f408af9f228c3a295a3464fddf8d83d4808db4e4"
+    },
+    {
+      "path": "lib/features/commerce/domain/free_plan.dart",
+      "sha256": "9d2d9af7d310ff6119170216e40a49d85926f362ccce2ac17c3e78dcdd893f56"
+    },
+    {
+      "path": "lib/app/localization/bil_locale_rollout_manifest.dart",
+      "sha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433"
+    },
+    {
+      "path": "artifacts/workout_media/workout_release_bundle_registry_v1.json",
+      "sha256": "90bd7cd4ce7d9c1a2652720b79b67e0ede885da1cf979d86632a3f8f3c345a3f"
+    },
+    {
+      "path": "assets/catalogs/recipes/v1/recipe-index.json",
+      "sha256": "6c9f4773f6221f5468c28e02d3897271009e6e36c3f0d9dd6bdca2fe66628638"
+    },
+    {
+      "path": "assets/catalogs/recipes/v1/release-manifest.json",
+      "sha256": "a966bbedf7ada7dcf16d483c1d9c2fe94a810dffff504eb9944ed9b56bd86b53"
+    },
+    {
+      "path": "ios/Runner/BILSpeechBridge.swift",
+      "sha256": "13746972cbe09a074486bbd3c32873451a7ba0563d737b9e467bd8d077918656"
+    },
+    {
+      "path": "lib/features/intelligence_center/services/remote_ai_consent_coordinator.dart",
+      "sha256": "80fc59d26f7f4739c97686b9ea85658c79c72d0597b9e5eab0b5570167d6ccbb"
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart",
+      "sha256": "44320fc810156c9b4c727b574c9f3879dcd0b0200ec7c47621415ee9590d4202"
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_capture_actions.dart",
+      "sha256": "745b3feb3589b0eb32450cfafa9e31113c74d193a3153a3182a3cdc1b03d52d9"
+    },
+    {
+      "path": "lib/features/daily_log/food_log_actions.dart",
+      "sha256": "0ac51bf1da30af333f21ba75a8e849a890f62ec3827b3c3d9f48d028d13108f8"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_vision_flow.dart",
+      "sha256": "ba1b337bab05dfc0559c00a89d304497db96a98c11b517bdc9383768147cad4f"
+    }
+  ],
+  "rows": [
+    {
+      "id": "ASC-M01",
+      "field": "Exact version/build association",
+      "status": "PASS",
+      "sourceMatch": "NOT_A_CANDIDATE_BINARY_CHECK",
+      "reason": "Live metadata belongs to iOS1.0.0 REJECTED and attached build35, not build36.",
+      "sourceEvidence": "asc-attached-build-app-identity-sanitized.json",
+      "remaining": "Signed candidate36 identity and runtime remain separate.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M02",
+      "field": "Name/subtitle/keywords/category",
+      "status": "PASS",
+      "sourceMatch": "PASS_SOURCE_SCOPE",
+      "reason": "Body Intelligence Log; Nutrition, Fitness & Progress; nutrition/fitness keywords; HEALTH_AND_FITNESS and LIFESTYLE describe implemented wellness tracking.",
+      "sourceEvidence": "lib/features/daily_log/; lib/features/wellness/; lib/features/connected_health/",
+      "remaining": "No medical-device status inferred from category.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M03",
+      "field": "Description: core logging and offline behavior",
+      "status": "PASS",
+      "sourceMatch": "PASS_SOURCE_SCOPE",
+      "reason": "Public description limits camera/voice/photo to service availability and distinguishes estimates/missing values; core local logging and authenticated optional cloud paths exist.",
+      "sourceEvidence": "lib/features/daily_log/; lib/features/commerce/domain/free_plan.dart",
+      "remaining": "No offline device journey performed here.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M04",
+      "field": "Description: 1,500 recipes",
+      "status": "PASS",
+      "sourceMatch": "PASS_STATIC_INVENTORY",
+      "reason": "Current signed index declares and contains1500 recipe entries; no reference-image data was used.",
+      "sourceEvidence": "assets/catalogs/recipes/v1/recipe-index.json; assets/catalogs/recipes/v1/release-manifest.json",
+      "remaining": "Runtime loading/offline playback not verified by inventory alone.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M05",
+      "field": "Description: 300+ workout videos",
+      "status": "PASS",
+      "sourceMatch": "PASS_STATIC_INVENTORY",
+      "reason": "ASC accurately describes total302 playable catalog entries:200 home +102 gym.301 unique payloads are explicitly distinct from302 records.",
+      "sourceEvidence": "artifacts/workout_media/workout_release_bundle_registry_v1.json; lib/features/wellness/repositories/workout_release_catalog_repository.dart:13",
+      "remaining": "This does not certify every hosted media URL or count unique instructional videos as302.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M06",
+      "field": "In-app Plans workout scope",
+      "status": "PASS",
+      "sourceMatch": "PASS_SOURCE_SCOPE",
+      "reason": "The misleading 300+ home claim was corrected in all 25 display locales to 300+ workout videos, preserving legacy lookup keys. Root verified 13 copy tests, 2 Plans Goldens and 5 Apple review product Goldens, all PASS in a normal run without updating baselines.",
+      "sourceEvidence": "lib/features/commerce/presentation/bil_store_copy.dart:111; lib/app/localization/runtime_copy_coach.dart:102; lib/app/localization/runtime_copy_extended.dart:65874; test/features/commerce/bil_store_copy_test.dart:304",
+      "remaining": "This closes only the source copy and affected Golden regression scope. Signed build 36, live deployed backend, App Privacy and store acceptance remain independent blocked gates.",
+      "priority": "P1",
+      "verification": {
+        "verifiedAtUtc": "2026-10-15T17:06:01.759225+00:00",
+        "executedBy": "root",
+        "sourceScope": "Current dirty integration source; the four copy/test input hashes are preserved in the receipt. This is not signed build36 verification.",
+        "rawLog": "docs/qa_next/evidence/policy-gate-20261015/copy-and-pearl-visual-focused.log",
+        "rawSha256": "984c8cb444452c5b8e9d775349ebe11eca2fcc4be542d5ac8bdce014c178ef07",
+        "rawWholeRunPassed": 36,
+        "scopePassed": 20,
+        "scopeBreakdown": {
+          "bil_store_copy": 13,
+          "plans_goldens": 2,
+          "apple_review_product_goldens": 5
+        },
+        "otherCasesInSameRawRun": {
+          "system_speech_disclosure": 14,
+          "policy_reviewer_navigation": 2
+        },
+        "runMode": "Normal Golden run without update, as confirmed by root execution record; log preserves actual results.",
+        "agentRanTests": false,
+        "signedBuild36Verified": false,
+        "storeStateChanged": false
+      }
+    },
+    {
+      "id": "ASC-M07",
+      "field": "Description: 25 languages",
+      "status": "PASS",
+      "sourceMatch": "PASS_DECLARED_RELEASE_TARGETS",
+      "reason": "Release target set contains25 locale tags; public metadata does not claim25 storefront localizations.",
+      "sourceEvidence": "lib/app/localization/bil_locale_rollout_manifest.dart:151",
+      "remaining": "Only en-US storefront localization currently exists; app locale runtime and accessibility remain separately tested.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M08",
+      "field": "Description: AI recipient and consent",
+      "status": "BLOCKED",
+      "sourceMatch": "SOURCE_BOUNDARY_PRESENT_DEPLOYMENT_UNVERIFIED",
+      "reason": "Public text names Google Gemini, describes selected question/context and opt-in/revocation. Current source contains the consent coordinator and minimum-recipient enforcement being repaired by root.",
+      "sourceEvidence": "lib/features/intelligence_center/services/remote_ai_consent_coordinator.dart; lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart; supabase/functions/_shared/ai_provider_recipient.ts",
+      "remaining": "Need exact deployed provider configuration/terms and signed36 first-use + withdrawal journey. A local recipient fix is not evidence of deployment.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M09",
+      "field": "Description: microphone audio and Gemini",
+      "status": "PASS",
+      "sourceMatch": "PASS_IOS_SOURCE_SCOPE",
+      "reason": "The description paragraph concerns Gemini requests. Native iOS requires on-device recognition; backend receives recognized text rather than a raw microphone payload. The public web policy separately identifies platform speech processing.",
+      "sourceEvidence": "ios/Runner/BILSpeechBridge.swift:110; ios/Runner/BILSpeechBridge.swift:118; public-bil-web-app-20261015.js:88",
+      "remaining": "No device/network capture; do not generalize iOS on-device behavior to Android recognition services.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M10",
+      "field": "Description: meal photo separate consent and review",
+      "status": "BLOCKED",
+      "sourceMatch": "PASS_SOURCE_ORDER_CHECK",
+      "reason": "Source consent precedes direct photo selection/camera and suggested-food review; public text says suggestions are logged only after confirmation.",
+      "sourceEvidence": "lib/features/daily_log/daily_log_capture_actions.dart:238; lib/features/daily_log/food_log_actions.dart:367; lib/features/intelligence_center/presentation/intelligence_vision_flow.dart:302",
+      "remaining": "Signed36/network capture + deployed Gemini recipient and confirmed logging journey are not established by this readback.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M11",
+      "field": "Description: Community/friends/private messaging",
+      "status": "PASS",
+      "sourceMatch": "PASS_SOURCE_ACCESS_MODEL",
+      "reason": "ASC says signed-in access; Free catalog explicitly includes communityFriends. Premium is not asserted as a prerequisite in this public description.",
+      "sourceEvidence": "lib/features/commerce/domain/free_plan.dart:10; lib/features/community/",
+      "remaining": "Real reviewer access, push destination, moderation response and message isolation require their separate E2E evidence.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M12",
+      "field": "Description: non-medical and promotional text",
+      "status": "PASS",
+      "sourceMatch": "PASS_SOURCE_SCOPE",
+      "reason": "Text presents wellness, measurement limitations and professional-care advice; no unsupported treatment/cure claim was found in fetched public text.",
+      "sourceEvidence": "lib/features/settings/legal_document_page.dart; https://www.bilhealth.com/terms",
+      "remaining": "Disclaimer does not itself certify underlying clinical accuracy.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M13",
+      "field": "Support/marketing URLs",
+      "status": "PASS",
+      "sourceMatch": "PASS_LIVE_PUBLIC_GET",
+      "reason": "marketing home and support URL returned HTTP200; support content names account, purchases, health, privacy and safety paths.",
+      "sourceEvidence": "asc-public-links-live-sanitized.json; public-bil-web-app-20261015.js:162",
+      "remaining": "HTTP + document content checked; no rendered browser or actual support response claim.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M14",
+      "field": "Privacy Policy URL and optional Privacy Choices URL",
+      "status": "PASS",
+      "sourceMatch": "PASS_LINK_AND_DOCUMENT_SCOPE",
+      "reason": "Privacy URL and privacyChoices/account-deletion URL returned200 with readable non-JavaScript legal/deletion fallback; interactive privacy identifies Gemini, platform speech and processors.",
+      "sourceEvidence": "asc-public-links-live-sanitized.json; public-bil-web-app-20261015.js:88; public-bil-web-app-20261015.js:112",
+      "remaining": "These links do not disclose the actual ASC App Privacy questionnaire answers.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M15",
+      "field": "Terms/EULA and Community Guidelines links",
+      "status": "PASS",
+      "sourceMatch": "PASS_DISTINCT_LEGAL_PURPOSES",
+      "reason": "ASC description links Apple standard EULA; in-app Plans defaults to BIL service terms and BIL privacy. Different domains for store license versus service terms are not inherently contradictory. BIL terms preserve store checkout authority and rights required by law. Community Guidelines live route returns200 and has real English/Arabic policy content.",
+      "sourceEvidence": "lib/features/commerce/domain/store_catalog_configuration.dart:18; public-bil-web-app-20261015.js:97; public-bil-web-app-20261015.js:172; https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
+      "remaining": "No new legal certification; links/content read only.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M16",
+      "field": "Age rating and adult eligibility",
+      "status": "PASS",
+      "sourceMatch": "PASS_CONFIGURATION_SCOPE",
+      "reason": "Current questionnaire: legacy17+, overrideV2=18+, Brazil self-rated18. BIL terms are18+. Apple documents OS-version-dependent rating representations, so legacy17+/new18+ is not itself a contradiction.",
+      "sourceEvidence": "ASC appInfo included ageRatingDeclarations; public-bil-web-app-20261015.js:102; https://developer.apple.com/help/app-store-connect/manage-app-information/set-an-app-age-rating/",
+      "remaining": "Self-declared age and ageAssurance=false are not treated as equivalent to legal age verification; country-specific legal requirements not inferred.",
+      "priority": "P1"
+    },
+    {
+      "id": "ASC-M17",
+      "field": "Age rating content flags",
+      "status": "BLOCKED",
+      "sourceMatch": "NO_NEW_STATIC_CONTRADICTION_FOUND",
+      "reason": "Messaging/chat, socialMedia, UGC and health/wellness are true; medical information isINFREQUENT. Advertising=true describes attached35 and is not evidence for candidate36 SDK behavior.",
+      "sourceEvidence": "asc-public-metadata-text-sanitized.json#/result/results/appInfo",
+      "remaining": "Reconcile advertising flag with final36 artifact/configuration before submission. Do not change questionnaire from source assumptions alone.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M18",
+      "field": "Subscription identifiers and periods",
+      "status": "PASS",
+      "sourceMatch": "PASS_SOURCE_BINDINGS",
+      "reason": "Four live subscriptions match exact source IDs: Premium and AI Coach each ONE_MONTH/ONE_YEAR. No cross-platform URL/product substitution observed in these public fields.",
+      "sourceEvidence": "lib/features/commerce/domain/store_catalog_configuration.dart:39; lib/features/commerce/domain/store_catalog_configuration.dart:65",
+      "remaining": "No prices/trials/territories were requested or changed; sandbox purchase/renewal/restore is not proved.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M19",
+      "field": "Subscription display names and public benefit descriptions",
+      "status": "PASS",
+      "sourceMatch": "PASS_SOURCE_TIER_RELATIONSHIP",
+      "reason": "Premium monthly/annual public descriptions cover nutrition, fitness, sleep, insights. AI Coach products say all Premium plus multilingual AI Coach, matching paid plan inheritance.",
+      "sourceEvidence": "lib/features/commerce/domain/paid_plan_catalog.dart:15; asc-public-metadata-text-sanitized.json#/result/results/subscriptions",
+      "remaining": "READY_TO_SUBMIT is not review approval; PREPARE_FOR_SUBMISSION localization is not proof of a missing required metadata field.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M20",
+      "field": "AI Boost public localization/type",
+      "status": "PASS",
+      "sourceMatch": "PASS_SKU_AND_COPY_SCOPE",
+      "reason": "Live bil_ai_boost is CONSUMABLE with public display2500tokens and description adding2500AI Coach tokens; source SKU and visible copy agree.",
+      "sourceEvidence": "lib/features/commerce/domain/store_catalog_configuration.dart:60; lib/features/commerce/presentation/bil_store_copy.dart:135",
+      "remaining": "Server crediting/idempotency/ownership and real transaction result require separate checks.",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M21",
+      "field": "App Privacy four-way reconciliation and latest rejection text",
+      "status": "BLOCKED",
+      "sourceMatch": "NO_LIVE_QUESTIONNAIRE_OR_CORRESPONDENCE",
+      "reason": "Public API readback establishes current REJECTED/build35 but not current App Privacy answers or Apple rejection correspondence. Current official OpenAPI has no App Privacy questionnaire resource.",
+      "sourceEvidence": "current-public-store-api-surface.json; live-store-api-readback-status-20261015.json",
+      "remaining": "Authenticated supported UI/export for exact App Privacy and rejection message, then final artifact/network comparison. Privacy URL or NSPrivacyTracking=false does not close5.1.2(i).",
+      "priority": "P0"
+    },
+    {
+      "id": "ASC-M22",
+      "field": "Screenshots against final candidate",
+      "status": "BLOCKED",
+      "sourceMatch": "NOT_REVIEWED_FROM_COUNT",
+      "reason": "No image was downloaded or rendered in this task. Existing prior screenshot sync/hash records may be reused only for the old verified assets; count8 cannot establish candidate36 visual/content match.",
+      "sourceEvidence": "docs/release/BIL_STORE_BRAND_LIVE_READONLY_AUDIT_2026-09-06.md; previous repository screenshot sync evidence",
+      "remaining": "Compare final intended36 screenshot set and actual source/device screens; do not infer from metadata counts.",
+      "priority": "P1"
+    }
+  ],
+  "officialPolicyReferences": [
+    {
+      "url": "https://developer.apple.com/app-store/review/guidelines/",
+      "sections": [
+        "2.3",
+        "3.1.1",
+        "3.1.2",
+        "5.1.1",
+        "5.1.2(i)",
+        "5.1.3"
+      ],
+      "readDate": "2026-10-15"
+    },
+    {
+      "url": "https://developer.apple.com/help/app-store-connect/manage-app-information/set-an-app-age-rating/",
+      "readDate": "2026-10-15"
+    }
+  ],
+  "updatedAtUtc": "2026-10-15T17:06:01.759225+00:00",
+  "rootFocusedVerificationUpdate": "Only ASC-M06 changed. All other metadata rows and certification blockers are preserved."
+}

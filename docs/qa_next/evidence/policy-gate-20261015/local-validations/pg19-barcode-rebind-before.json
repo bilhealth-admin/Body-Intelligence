@@ -1,0 +1,31 @@
+{
+  "pub_cache": "G:/BIL_Toolchains/pub-cache",
+  "files": [
+    {
+      "path": "tool/release/defer_ios_simple_barcode_scanner.dart",
+      "sha256": "a02610982ed74aa2d1f97d3bab1efc409072ad5b33c07d520da51a9a12e647d5",
+      "unchanged_after_expected_rejection": true
+    },
+    {
+      "path": ".dart_tool/package_config.json",
+      "sha256": "1c2f02260161e29866927b207030caff1de656be60f84efd3f89554c1fb56710",
+      "unchanged_after_expected_rejection": true
+    },
+    {
+      "path": ".flutter-plugins-dependencies",
+      "sha256": "1257b7289b42b1bbcb590fda4f7ad72f2d205a2f3679ffa28af42fbb3dcbccc4",
+      "unchanged_after_expected_rejection": true
+    },
+    {
+      "path": "pubspec.yaml",
+      "sha256": "4420b2ce0aee9beb0fc92a9b5013411171b098312e5b93e339f010b76f4fcf26",
+      "unchanged_after_expected_rejection": true
+    },
+    {
+      "path": "pubspec.lock",
+      "sha256": "bb70bc2d38114dc61a0d28fd6feb21f2b91957ac1f82c54b14573898cfde2c54",
+      "unchanged_after_expected_rejection": true
+    }
+  ],
+  "expected_failure": "Refusing to overwrite a pre-existing simple_barcode_scanner override"
+}

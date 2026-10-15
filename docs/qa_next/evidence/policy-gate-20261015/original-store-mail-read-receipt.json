@@ -1,0 +1,20 @@
+{
+  "read_date_utc": "2026-10-15",
+  "method": "official Gmail connector batch_read_email; business facts also read in exact store UI",
+  "messages": [
+    {
+      "message_id": "1a11d06ac8638e5b",
+      "bytes": 2916,
+      "plaintext_sha256": "006d15f14756006ea2c0957215c9b553a5fbf1e0c40b6c0b24ced05b83fe3da9",
+      "local_raw_copy_committed": false
+    },
+    {
+      "message_id": "1a137e8f35fc0eb7",
+      "bytes": 746,
+      "plaintext_sha256": "18baeb80290c1ebd62ae86683ab0eff8333f70fd01d5b4d68f7a5839e87d32a4",
+      "local_raw_copy_committed": false
+    }
+  ],
+  "no_send_or_draft": true,
+  "no_raw_mime_headers_or_credentials_in_git": true
+}

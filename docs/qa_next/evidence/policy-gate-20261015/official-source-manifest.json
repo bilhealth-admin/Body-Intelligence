@@ -1,0 +1,164 @@
+[
+  {
+    "id": "apple-guidelines",
+    "url": "https://developer.apple.com/app-store/review/guidelines/",
+    "final_url": "https://developer.apple.com/app-store/review/guidelines/",
+    "read_at_utc": "2026-10-15T14:45:57.321466+00:00",
+    "bytes": 238264,
+    "sha256": "247ed6016623131cab3e94bf4c92b1fd8f61f37c2e24af59c0c88c27b729e137",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-policies",
+    "url": "https://play.google.com/about/developer-content-policy/",
+    "final_url": "https://play.google/developer-content-policy/",
+    "read_at_utc": "2026-10-15T14:45:57.669982+00:00",
+    "bytes": 116834,
+    "sha256": "59510092bded4549d733e51123f50575da61751cf398828f76f61e2aba92a2e6",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-health",
+    "url": "https://support.google.com/googleplay/android-developer/answer/14738291?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/14738291?hl=en",
+    "read_at_utc": "2026-10-15T14:45:58.223665+00:00",
+    "bytes": 1629665,
+    "sha256": "09758fa014eeb8528e5dad381ef1f5581f29d278220c694a3bac6c2f5c174e40",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-account-type",
+    "url": "https://support.google.com/googleplay/android-developer/answer/13634885?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/13634885?hl=en",
+    "read_at_utc": "2026-10-15T14:45:58.704508+00:00",
+    "bytes": 1637018,
+    "sha256": "f2621a5a4c5f615fb2ea961d59b6283974edab73f2f349a5021fa4607f7b07b7",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-user-data",
+    "url": "https://support.google.com/googleplay/android-developer/answer/10144311?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/10144311?hl=en",
+    "read_at_utc": "2026-10-15T14:45:59.570886+00:00",
+    "bytes": 1680694,
+    "sha256": "ae4f7535cf8e2dab74b67a663bff537462930314c8932dacca4a6e955a49241f",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-data-safety",
+    "url": "https://support.google.com/googleplay/android-developer/answer/10787469?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/10787469?hl=en",
+    "read_at_utc": "2026-10-15T14:45:59.877517+00:00",
+    "bytes": 1727661,
+    "sha256": "f8a52eabbba68eebfeb6a903aafd3989d12dac7b0acbf0cc2ac5373df343a9ff",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-ai",
+    "url": "https://support.google.com/googleplay/android-developer/answer/13985936?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/13985936?hl=en",
+    "read_at_utc": "2026-10-15T14:46:00.495681+00:00",
+    "bytes": 1628039,
+    "sha256": "e39ec52c5a961add30cbff91f94144115f8d76bd520a8fa000d75bf6eed0de68",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-ugc",
+    "url": "https://support.google.com/googleplay/android-developer/answer/9876937?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/9876937?hl=en",
+    "read_at_utc": "2026-10-15T14:45:59.348330+00:00",
+    "bytes": 1637528,
+    "sha256": "21a20a4cb88ae23b44b149734a09a87cf267dbf6374eb07256f5f8061421f825",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-target",
+    "url": "https://support.google.com/googleplay/android-developer/answer/11926878?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/11926878?hl=en",
+    "read_at_utc": "2026-10-15T14:45:59.974911+00:00",
+    "bytes": 1662121,
+    "sha256": "301d6ffe10b0bde2ca6ec203f6b75c130d5fa02c54e11ff9733da4c258873210",
+    "status": "retrieved"
+  },
+  {
+    "id": "apple-sdk",
+    "url": "https://developer.apple.com/support/third-party-SDK-requirements/",
+    "final_url": "https://developer.apple.com/support/third-party-SDK-requirements/",
+    "read_at_utc": "2026-10-15T14:45:59.438878+00:00",
+    "bytes": 108969,
+    "sha256": "5ec3066bbed08aec329d3f4bd9e543dae62a948f79aba78504460580597782d2",
+    "status": "retrieved"
+  },
+  {
+    "id": "apple-submission",
+    "url": "https://developer.apple.com/news/upcoming-requirements/",
+    "final_url": "https://developer.apple.com/news/upcoming-requirements/",
+    "read_at_utc": "2026-10-15T14:45:59.983881+00:00",
+    "bytes": 137188,
+    "sha256": "80a797968dc41a4a7ff2c0305e7e8ade2620735e7814ac1f1962d71eb882eab5",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-16kb",
+    "url": "https://developer.android.com/guide/practices/page-sizes",
+    "final_url": "https://developer.android.com/guide/practices/page-sizes",
+    "read_at_utc": "2026-10-15T14:46:00.405795+00:00",
+    "bytes": 306800,
+    "sha256": "b43d1c4e7fcec7ecb6751c864d9bbd8c76a72657eccf83eb01d78b37031d7bac",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-ads-disclosure",
+    "url": "https://developers.google.com/admob/ios/privacy/data-disclosure",
+    "final_url": "https://developers.google.com/admob/ios/privacy/data-disclosure",
+    "read_at_utc": "2026-10-15T14:46:00.983030+00:00",
+    "bytes": 133434,
+    "sha256": "bb912d482d139372ae9bab5855d1ea11f4bee0faed9c9b536453cc5aed7c9b35",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-ad-serving",
+    "url": "https://developers.google.com/admob/ios/privacy/strategies",
+    "final_url": "https://developers.google.com/admob/ios/privacy/strategies",
+    "read_at_utc": "2026-10-15T14:46:01.116712+00:00",
+    "bytes": 161435,
+    "sha256": "6bcbd9a2cf8084f24a10274a4048c866390bd22b7a26b1ad7e2ec07aa70ba836",
+    "status": "retrieved"
+  },
+  {
+    "id": "firebase-privacy",
+    "url": "https://firebase.google.com/support/privacy",
+    "final_url": "https://firebase.google.com/support/privacy",
+    "read_at_utc": "2026-10-15T14:46:01.107141+00:00",
+    "bytes": 187837,
+    "sha256": "48410b1866a99cd9c86002a5f3f4f09dce2e75b7390b335c628b55ebcc9e89d2",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-account-deletion",
+    "url": "https://support.google.com/googleplay/android-developer/answer/13327111?hl=en",
+    "final_url": "https://support.google.com/googleplay/android-developer/answer/13327111?hl=en",
+    "read_at_utc": "2026-10-15T14:46:01.079700+00:00",
+    "bytes": 1660446,
+    "sha256": "bbee99b3b44298b98d112f36192a3dc6e7cfabdf51d5f51ed0d208279e854874",
+    "status": "retrieved"
+  },
+  {
+    "id": "google-billing",
+    "url": "https://developer.android.com/google/play/billing/integrate",
+    "final_url": "https://developer.android.com/google/play/billing/integrate",
+    "read_at_utc": "2026-10-15T14:46:01.853101+00:00",
+    "bytes": 406204,
+    "sha256": "226dc96e4d95b3690d14e313b3ea0c9fcf6b281c2f12b8f5995611a0788d30fb",
+    "status": "retrieved"
+  },
+  {
+    "id": "apple-privacy-labels",
+    "url": "https://developer.apple.com/app-store/app-privacy-details/",
+    "final_url": "https://developer.apple.com/app-store/app-privacy-details/",
+    "read_at_utc": "2026-10-15T14:46:01.090695+00:00",
+    "bytes": 134919,
+    "sha256": "7d3e3539a0f7905f28871eab8a06c153db8b91cd8963dcde85fd043575cee9af",
+    "status": "retrieved"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "scope": "Local ignored android/local.properties, not tracked application source or store metadata",
+  "error_ids_fixed": [
+    "PropertyEscape",
+    "PropertyEscape"
+  ],
+  "only_keys_changed": [
+    "sdk.dir",
+    "flutter.sdk"
+  ],
+  "other_file_bytes_identical": true,
+  "canonical_before_after_verification": "PASS via actual java.util.Properties and Path.toRealPath comparison for sdk.dir/flutter.sdk",
+  "before_sha256": "145ecb460f846ba6a46ae978a9409dc4ce544981e79005be4af0d8d14aa0596b",
+  "after_sha256": "f5b47d9672d91488ea05cf0173bc3a72ae10f798c9f262fc5b72e905c88782d6",
+  "private_backup_published": false,
+  "source_or_lock_versions_changed": false,
+  "focused_AGP_recheck": "Fresh app analyze/report executed4/4, propertyErrors0 both variants; Debug0errors133warnings;Release1InsightsLintError133warnings. Overall exit1 vendor failure, not PropertyEscape. GLOBAL not rerun.",
+  "fresh_evidence": "fresh-app-lint/summary.json;fresh-app-lint/executed.jsonl;fresh-app-lint/process-result.json"
+}

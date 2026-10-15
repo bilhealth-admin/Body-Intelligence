@@ -10,6 +10,7 @@ import '../features/nutrition/meal_voice_session_test.dart'
     show ControlledMealSpeech;
 import '../visual_closure/visual_evidence_font.dart';
 import '../visual_closure/closure_surface_capture.dart';
+import '../support/system_speech_disclosure_test_support.dart';
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
@@ -21,6 +22,10 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      });
       final speech = ControlledMealSpeech();
       late BuildContext context;
       await tester.pumpWidget(
@@ -56,7 +61,7 @@ void main() {
               context: context,
               fallbackSystem: MeasurementSystem.metric,
             );
-      await tester.pumpAndSettle();
+      await acceptSystemSpeechDisclosure(tester);
       speech.emit(
         kind == 'community' ? 'مسودة منشور للمراجعة فقط' : 'وزني ٨٢٫٥ كيلوغرام',
         finalResult: true,

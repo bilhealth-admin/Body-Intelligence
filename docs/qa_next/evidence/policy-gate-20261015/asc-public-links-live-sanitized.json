@@ -1,0 +1,95 @@
+{
+  "readAtUtc": "2026-10-15T16:49:39.804417+00:00",
+  "mode": "public-web-GET-only",
+  "downloadedImages": false,
+  "results": [
+    {
+      "url": "https://www.bilhealth.com/",
+      "finalUrl": "https://www.bilhealth.com/",
+      "status": 200,
+      "contentType": "text/html",
+      "byteCount": 7832,
+      "sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2",
+      "staticLegalFallbackPresent": true,
+      "supportContactPresent": true,
+      "deletionContactPresent": true,
+      "staticPolicyGeminiNamed": true,
+      "static18PlusPresent": true
+    },
+    {
+      "url": "https://www.bilhealth.com/privacy",
+      "finalUrl": "https://www.bilhealth.com/privacy",
+      "status": 200,
+      "contentType": "text/html",
+      "byteCount": 7846,
+      "sha256": "56a32cf27de55b0e2b2dd0b5226e6d7b6f87ede15b1714f1797bf531986cf1ee",
+      "staticLegalFallbackPresent": true,
+      "supportContactPresent": true,
+      "deletionContactPresent": true,
+      "staticPolicyGeminiNamed": true,
+      "static18PlusPresent": true
+    },
+    {
+      "url": "https://www.bilhealth.com/support",
+      "finalUrl": "https://www.bilhealth.com/support",
+      "status": 200,
+      "contentType": "text/html",
+      "byteCount": 7846,
+      "sha256": "42892c9fd5dc520f12b54a3cc194eda8e6a2957c3e5c9dbb9a3fac626cf4bf71",
+      "staticLegalFallbackPresent": true,
+      "supportContactPresent": true,
+      "deletionContactPresent": true,
+      "staticPolicyGeminiNamed": true,
+      "static18PlusPresent": true
+    },
+    {
+      "url": "https://www.bilhealth.com/account-deletion",
+      "finalUrl": "https://www.bilhealth.com/account-deletion",
+      "status": 200,
+      "contentType": "text/html",
+      "byteCount": 7864,
+      "sha256": "323cfa8d4048805c271b8248640d93be143543b070112f9f01d4d453c06ab36f",
+      "staticLegalFallbackPresent": true,
+      "supportContactPresent": true,
+      "deletionContactPresent": true,
+      "staticPolicyGeminiNamed": true,
+      "static18PlusPresent": true
+    },
+    {
+      "url": "https://www.bilhealth.com/terms",
+      "finalUrl": "https://www.bilhealth.com/terms",
+      "status": 200,
+      "contentType": "text/html",
+      "byteCount": 7842,
+      "sha256": "5870fc8c8e68441faa165d691ad758fc6db4cd104b92f867323fd57b27471f39",
+      "staticLegalFallbackPresent": true,
+      "supportContactPresent": true,
+      "deletionContactPresent": true,
+      "staticPolicyGeminiNamed": true,
+      "static18PlusPresent": true
+    },
+    {
+      "url": "https://www.bilhealth.com/community-guidelines",
+      "finalUrl": "https://www.bilhealth.com/community-guidelines",
+      "status": 200,
+      "contentType": "text/html",
+      "byteCount": 7872,
+      "sha256": "533b1247cd7b962c3e28c31a292005b3c7083790e81a3618a3ea532aec4a2980",
+      "staticLegalFallbackPresent": true,
+      "supportContactPresent": true,
+      "deletionContactPresent": true,
+      "staticPolicyGeminiNamed": true,
+      "static18PlusPresent": true
+    },
+    {
+      "url": "https://www.bilhealth.com/app.js",
+      "finalUrl": "https://www.bilhealth.com/app.js",
+      "status": 200,
+      "contentType": "text/javascript",
+      "byteCount": 91515,
+      "sha256": "fe4e2d57c36c870af6a63ae241206bef4b19afe1b1732796e813275c0cf5c533",
+      "publicTextSavedTo": "build/qa/policy-gate-20261015/public-bil-web-app-20261015.js"
+    }
+  ],
+  "limits": "HTTP/static fallback and public application source read only; no authenticated Console or rendered browser interaction."
+}

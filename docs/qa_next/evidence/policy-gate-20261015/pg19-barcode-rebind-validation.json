@@ -1,0 +1,93 @@
+{
+  "schema": "bil.qa.pg19.barcode-owned-overlay-rebind.v1",
+  "timestamp_utc": "2026-10-15T18:43:18.319426+00:00",
+  "head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "pub_cache": "G:/BIL_Toolchains/pub-cache",
+  "original_failure": {
+    "sanitizer_exit_code": 1,
+    "log": "pg19-barcode-rebind-before.log",
+    "receipt": "pg19-barcode-rebind-before.json",
+    "message": "Refusing to overwrite a pre-existing simple_barcode_scanner override"
+  },
+  "regression_before": {
+    "passed": 0,
+    "failed": 2,
+    "exit_code": 1,
+    "log": "pg19-barcode-rebind-red.log",
+    "cases": "pub-get reset rebinds owned ios/android overlay before metadata sanitizer"
+  },
+  "focused_final": {
+    "command": "PUB_CACHE=G:/BIL_Toolchains/pub-cache dart.exe G:/BIL_Toolchains/Flutter/flutter/bin/cache/flutter_tools.snapshot test --no-pub --reporter expanded test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart test/launch_readiness/flutter_release_plugin_sanitizer_test.dart",
+    "exit_code": 0,
+    "passed": 37,
+    "failed": 0,
+    "skipped": 0,
+    "files": 2,
+    "scanner_cases": 27,
+    "sanitizer_cases": 10,
+    "added_cases": 23,
+    "log": "pg19-barcode-rebind-focused-final.log",
+    "log_sha256": "44f6c721090d73f33e0c36218f691c153d8eb7a1f1f9371073c92690826ef3cc"
+  },
+  "source_files": [
+    {
+      "path": "tool/release/defer_ios_simple_barcode_scanner.dart",
+      "sha256": "5fa06926a06a079e6fa06b05779e9949b7241553216be28d5097a8a829705072",
+      "lines": 637
+    },
+    {
+      "path": "tool/release/deferred_simple_barcode_provenance.dart",
+      "sha256": "b95cc1d288a84c831ec826412d419a4ef210007b67241b91dd2808fabc0ac701",
+      "lines": 196
+    },
+    {
+      "path": "test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart",
+      "sha256": "450a58abcb266afe1327d56809d3c0936083e2ce49b4093e4729a0be6b67e782",
+      "lines": 688
+    },
+    {
+      "path": "test/launch_readiness/flutter_release_plugin_sanitizer_test.dart",
+      "sha256": "1ce68ef5f100c86728675cdde912440c3fd5d9261255c17f911e802c0e84fa70",
+      "lines": 531
+    }
+  ],
+  "protected_files_unchanged": [
+    {
+      "path": ".dart_tool/package_config.json",
+      "before_sha256": "1c2f02260161e29866927b207030caff1de656be60f84efd3f89554c1fb56710",
+      "after_sha256": "1c2f02260161e29866927b207030caff1de656be60f84efd3f89554c1fb56710",
+      "unchanged": true
+    },
+    {
+      "path": ".flutter-plugins-dependencies",
+      "before_sha256": "1257b7289b42b1bbcb590fda4f7ad72f2d205a2f3679ffa28af42fbb3dcbccc4",
+      "after_sha256": "1257b7289b42b1bbcb590fda4f7ad72f2d205a2f3679ffa28af42fbb3dcbccc4",
+      "unchanged": true
+    },
+    {
+      "path": "pubspec.yaml",
+      "before_sha256": "4420b2ce0aee9beb0fc92a9b5013411171b098312e5b93e339f010b76f4fcf26",
+      "after_sha256": "4420b2ce0aee9beb0fc92a9b5013411171b098312e5b93e339f010b76f4fcf26",
+      "unchanged": true
+    },
+    {
+      "path": "pubspec.lock",
+      "before_sha256": "bb70bc2d38114dc61a0d28fd6feb21f2b91957ac1f82c54b14573898cfde2c54",
+      "after_sha256": "bb70bc2d38114dc61a0d28fd6feb21f2b91957ac1f82c54b14573898cfde2c54",
+      "unchanged": true
+    }
+  ],
+  "actual_scanner_root_uri_after_focused": "file:///G:/BIL_Toolchains/pub-cache/hosted/pub.dev/simple_barcode_scanner-0.6.0",
+  "scope_and_limits": [
+    "Owned destination reused only after canonical upstream provenance and complete byte/type/path inventory verification",
+    "Only authorized pubspec surgery and own marker may differ from upstream",
+    "Rebind changes package_config entry only; metadata remains for existing sanitizer",
+    "Tamper, wrong source URI, noncanonical URI, unknown or missing paths, and links fail closed",
+    "Existing owned empty-plugin upgrade preserved",
+    "Real G-cache discovery metadata was not altered by this focused run",
+    "Actual project prep, full analysis, native replay, CI, signed builds and deployment not executed by this task"
+  ],
+  "format_check": "dart format 3 files: 0 changed",
+  "git_diff_check": "PASS for the owned paths"
+}

@@ -9,6 +9,8 @@ plugins {
 }
 
 dependencies {
+    // Official Google Play pre-review guidance. Lint-only: not packaged in BIL.
+    lintChecks("com.google.play.policy.insights:insights-lint:0.1.5")
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-messaging")
 }
@@ -93,6 +95,14 @@ android {
             excludes += setOf("**/armeabi-v7a/**")
         }
     }
+
+    lint {
+        abortOnError = true
+        checkDependencies = true
+        xmlReport = true
+        htmlReport = true
+        sarifReport = true
+    }
 }
 
 kotlin {
@@ -107,6 +117,16 @@ flutter {
 
 dependencies {
     constraints {
+        // Secure-storage migration can initialize Tink. Keep its wire format
+        // while requiring the upstream constant-time verification repair.
+        implementation("com.google.crypto.tink:tink-android:1.22.0") {
+            because("CVE-2026-15432: constant-time ChunkedMac verification")
+        }
+        // ML Kit Translate requests OkHttp 3.0.0. Keep its public Java API,
+        // requiring the upstream certificate/hostname verification repairs.
+        implementation("com.squareup.okhttp3:okhttp:4.9.2") {
+            because("CVE-2021-0341 and CVE-2016-2402: TLS verification repairs")
+        }
         // Flutter's integration-test plugin brings JUnit 4.12 into debug.
         // A constraint upgrades it only when present; it adds no release API.
         implementation("junit:junit:4.13.2") {

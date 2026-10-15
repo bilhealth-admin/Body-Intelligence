@@ -1,0 +1,68 @@
+{
+  "schema": "bil.qa.tink.jvm.compatibility.v1",
+  "status": "FAIL",
+  "versions": [
+    "1.21.0",
+    "1.22.0"
+  ],
+  "phases": [],
+  "constant_time_measured": false,
+  "native_keystore_or_esp_migration_tested": false,
+  "legacy_121_is_intentionally_the_affected_baseline": true,
+  "public_evidence_allowlist": [
+    "result.json",
+    "patched-verifyMac-javap.txt"
+  ],
+  "never_upload": [
+    "**/private-synthetic-keysets/**"
+  ],
+  "coverage": {
+    "templates": [
+      "AES256_GCM",
+      "AES256_SIV",
+      "HMAC_SHA256_128BITTAG",
+      "AES_CMAC"
+    ],
+    "value_categories": [
+      "English",
+      "Arabic",
+      "empty",
+      "mixed Unicode",
+      "binary"
+    ],
+    "associated_data": [
+      "empty",
+      "nonempty",
+      "wrong must reject"
+    ],
+    "keysets": [
+      "raw binary",
+      "software-AEAD protected",
+      "tampered must reject"
+    ]
+  },
+  "limits": [
+    "Synthetic JVM keysets and software AEAD only",
+    "Not Android Keystore, device ESP migration, signed APK/AAB or store proof",
+    "MAC tests check correctness/rejection, not constant-time execution"
+  ],
+  "source": {
+    "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\tools\\qa\\android_tink_compatibility_probe.py": "a6fc92cb4d4b10379c441e762647e5d4c30ce8a5bda98d1639b1a11bf1437026",
+    "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\tools\\qa\\jvm\\TinkCompatibilityProbe.java": "da3dee7eb27f26326893ad95f312d6280b65d081af1a40ffc3d19a6599f7ad55"
+  },
+  "failures": [
+    {
+      "type": "ValueError",
+      "message": "Candidate graph must resolve the tested 1.22.0; another version needs fresh proof, not a force"
+    }
+  ],
+  "java": "openjdk version \"21.0.10\" 2026-01-20",
+  "private_storage": "Windows ACL: inherited access removed; current user and SYSTEM only",
+  "new_graph_evidence": {
+    "release-artifact-libraries.xml": "f46b417e9951e95e8bebd54a6a3bc8fcd3281b51ce82cfe6919a18f14d57b3c0",
+    "release-artifact-dependencies.xml": "4850da3d112e6a9667572f280a8b9455a509012b776c0df884d90e524cfb49d0"
+  },
+  "new_model_sha256": "f46b417e9951e95e8bebd54a6a3bc8fcd3281b51ce82cfe6919a18f14d57b3c0",
+  "new_runtime_graph_is_final_122": false,
+  "elapsed_seconds": 10.299
+}

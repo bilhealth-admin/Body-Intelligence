@@ -1,0 +1,432 @@
+{
+  "attemptedAtUtc": "2026-10-15T16:20:52.265788+00:00",
+  "tool": "tool/apple_store_connect/asc_review_assets_inspect.mjs",
+  "toolSha256": "fa572364b8135045d68700935d3445709e5f0896c1c60b181ad06293849b005d",
+  "mode": "existing-api-key-read-only-get-guard",
+  "secretValuesPrinted": false,
+  "newUserAuthSessionsCreated": false,
+  "storeMutationsPerformed": false,
+  "downloadsEnabled": false,
+  "result": {
+    "ok": true,
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/apps/6805349703/appStoreVersions",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/apps/6805349703/appInfos",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appInfos/7dc45a4b-fc74-41ad-aa58-afe4c8591122/appInfoLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appStoreVersions/7a132506-d5a8-4810-a51f-b2dc2bd636cf/appStoreVersionLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appStoreVersionLocalizations/3866ba6c-b637-4f70-9c53-d6274c37bc62/appScreenshotSets",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appScreenshotSets/4a9bbef2-a708-4c15-8da4-f795119ced68/appScreenshots",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appScreenshotSets/6bd5a51a-d06f-46d3-a5f5-487412a9c968/appScreenshots",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appStoreVersions/7a132506-d5a8-4810-a51f-b2dc2bd636cf/appStoreReviewDetail",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appStoreReviewDetails/ce559d08-1073-4d88-9887-7f31d1951533/appStoreReviewAttachments",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/appStoreVersions/7a132506-d5a8-4810-a51f-b2dc2bd636cf/build",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555342",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555342/appStoreReviewScreenshot",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555342/subscriptionLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555198",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555198/appStoreReviewScreenshot",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555198/subscriptionLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555282",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555282/appStoreReviewScreenshot",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555282/subscriptionLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555344",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555344/appStoreReviewScreenshot",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptions/6806555344/subscriptionLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptionGroups/22343739",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptionGroups/22343739/subscriptionGroupLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/apps/6805349703/inAppPurchasesV2",
+        "status": 200
+      }
+    ],
+    "data": {
+      "generatedAt": "2026-10-15T16:21:19.934Z",
+      "appId": "6805349703",
+      "version": {
+        "id": "7a132506-d5a8-4810-a51f-b2dc2bd636cf",
+        "versionString": "1.0.0",
+        "platform": "IOS",
+        "state": "REJECTED",
+        "buildAttached": true
+      },
+      "appInformation": [
+        {
+          "state": "REJECTED",
+          "localizations": [
+            {
+              "locale": "en-US",
+              "privacyPolicyUrlPresent": true,
+              "privacyChoicesUrlPresent": true,
+              "subtitlePresent": true
+            }
+          ]
+        }
+      ],
+      "localizations": [
+        {
+          "locale": "en-US",
+          "metadata": {
+            "description": true,
+            "keywords": true,
+            "marketingUrl": true,
+            "promotionalText": true,
+            "supportUrl": true
+          },
+          "screenshotSets": [
+            {
+              "displayType": "APP_IPHONE_67",
+              "count": 8,
+              "assets": [
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 1290,
+                  "height": 2796,
+                  "hasFileName": true
+                }
+              ]
+            },
+            {
+              "displayType": "APP_IPAD_PRO_3GEN_129",
+              "count": 8,
+              "assets": [
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                },
+                {
+                  "state": "COMPLETE",
+                  "width": 2064,
+                  "height": 2752,
+                  "hasFileName": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "appReview": {
+        "exists": true,
+        "contact": {
+          "firstName": true,
+          "lastName": true,
+          "email": true,
+          "phone": true
+        },
+        "demoAccountRequired": true,
+        "demoAccountNamePresent": true,
+        "demoAccountPasswordPresent": true,
+        "notesPresent": true,
+        "attachmentCount": 0
+      },
+      "subscriptionGroup": {
+        "id": "22343739",
+        "exists": true,
+        "referenceNamePresent": true,
+        "localizations": [
+          {
+            "locale": "en-US",
+            "namePresent": true,
+            "customAppNamePresent": true,
+            "state": "PREPARE_FOR_SUBMISSION"
+          }
+        ]
+      },
+      "subscriptions": [
+        {
+          "id": "6806555342",
+          "exists": true,
+          "referenceName": "BIL Premium Monthly",
+          "state": "READY_TO_SUBMIT",
+          "productId": "bil_premium",
+          "period": "ONE_MONTH",
+          "reviewNotePresent": true,
+          "reviewScreenshot": {
+            "state": "COMPLETE",
+            "width": 1170,
+            "height": 2532,
+            "hasFileName": true,
+            "downloaded": false
+          },
+          "localizations": [
+            {
+              "locale": "en-US",
+              "namePresent": true,
+              "descriptionPresent": true
+            }
+          ]
+        },
+        {
+          "id": "6806555198",
+          "exists": true,
+          "referenceName": "BIL Premium Annual",
+          "state": "READY_TO_SUBMIT",
+          "productId": "bil_premium_annual",
+          "period": "ONE_YEAR",
+          "reviewNotePresent": true,
+          "reviewScreenshot": {
+            "state": "COMPLETE",
+            "width": 1170,
+            "height": 2532,
+            "hasFileName": true,
+            "downloaded": false
+          },
+          "localizations": [
+            {
+              "locale": "en-US",
+              "namePresent": true,
+              "descriptionPresent": true
+            }
+          ]
+        },
+        {
+          "id": "6806555282",
+          "exists": true,
+          "referenceName": "BIL Premium AI Coach Monthly",
+          "state": "READY_TO_SUBMIT",
+          "productId": "bil_premium_ai_coach",
+          "period": "ONE_MONTH",
+          "reviewNotePresent": true,
+          "reviewScreenshot": {
+            "state": "COMPLETE",
+            "width": 1170,
+            "height": 2532,
+            "hasFileName": true,
+            "downloaded": false
+          },
+          "localizations": [
+            {
+              "locale": "en-US",
+              "namePresent": true,
+              "descriptionPresent": true
+            }
+          ]
+        },
+        {
+          "id": "6806555344",
+          "exists": true,
+          "referenceName": "BIL Premium AI Coach Annual",
+          "state": "READY_TO_SUBMIT",
+          "productId": "bil_premium_ai_coach_annual",
+          "period": "ONE_YEAR",
+          "reviewNotePresent": true,
+          "reviewScreenshot": {
+            "state": "COMPLETE",
+            "width": 1170,
+            "height": 2532,
+            "hasFileName": true,
+            "downloaded": false
+          },
+          "localizations": [
+            {
+              "locale": "en-US",
+              "namePresent": true,
+              "descriptionPresent": true
+            }
+          ]
+        }
+      ],
+      "inAppPurchases": [
+        {
+          "id": "6806561724",
+          "productId": "bil_ai_boost",
+          "referenceName": "BIL AI Boost 2,500 Tokens",
+          "type": "CONSUMABLE",
+          "state": "READY_TO_SUBMIT",
+          "reviewNotePresent": true,
+          "reviewScreenshot": {
+            "state": "COMPLETE",
+            "width": 1170,
+            "height": 2532,
+            "hasFileName": true,
+            "downloaded": false
+          },
+          "localizations": [
+            {
+              "locale": "en-US",
+              "namePresent": true,
+              "descriptionPresent": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "processExitCode": 0
+}

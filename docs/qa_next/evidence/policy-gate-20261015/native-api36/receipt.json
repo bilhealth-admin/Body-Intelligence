@@ -1,0 +1,341 @@
+{
+  "observed_date_utc": "2026-10-15",
+  "classification": "API36 native debug synthetic Flutter QA; not reviewer login, paid AI, Sandbox or store build",
+  "business_cases": {
+    "pass": 12,
+    "fail": 0,
+    "sdk_counter_with_teardown": 13
+  },
+  "driver_supervisor_status": "FAIL_RESULT_DELIVERY_TIMEOUT_EXIT124",
+  "recovery": "Read-only adb pull of the exact owned emulator5580 QA directory after native terminal summary; no app database or account data",
+  "original_png_count": 72,
+  "all_png_sha256_byte_count_dimensions_every_chunk_crc_verified": true,
+  "api": 36,
+  "image_build": "BE2A.250530.026.D1",
+  "qa_apk_version_code": 8,
+  "version_name": "1.0.0",
+  "min_sdk": 26,
+  "target_sdk": 36,
+  "android33_store_artifact_tested": false,
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "implementation_input_fingerprint": "03707325ec2bb3be9b7f0bbdff807e763fe545bb15db10636fb7dbd58c560aef",
+  "cold_scope": "Diagnostic first route visit after shared asset precache, not cold app startup",
+  "cold_visits": [
+    {
+      "scene": "ar-light-normal",
+      "kind": "recipes",
+      "first_absent_ms": 2255,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 727782
+    },
+    {
+      "scene": "ar-light-normal",
+      "kind": "videos",
+      "first_absent_ms": 2253,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 116441
+    },
+    {
+      "scene": "ar-light-normal",
+      "kind": "sleep",
+      "first_absent_ms": 2227,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 99193
+    },
+    {
+      "scene": "ar-light-normal",
+      "kind": "diet",
+      "first_absent_ms": 2288,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 963289
+    },
+    {
+      "scene": "ar-light-normal",
+      "kind": "coach",
+      "first_absent_ms": 3034,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 805142
+    },
+    {
+      "scene": "ar-light-normal",
+      "kind": "community",
+      "first_absent_ms": 2248,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 83237
+    },
+    {
+      "scene": "ar-light-reduced",
+      "kind": "recipes",
+      "first_absent_ms": 2246,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 62338
+    },
+    {
+      "scene": "ar-light-reduced",
+      "kind": "videos",
+      "first_absent_ms": 2242,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 77442
+    },
+    {
+      "scene": "ar-light-reduced",
+      "kind": "sleep",
+      "first_absent_ms": 2232,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 68700
+    },
+    {
+      "scene": "ar-light-reduced",
+      "kind": "diet",
+      "first_absent_ms": 2226,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 67417
+    },
+    {
+      "scene": "ar-light-reduced",
+      "kind": "coach",
+      "first_absent_ms": 2316,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 136233
+    },
+    {
+      "scene": "ar-light-reduced",
+      "kind": "community",
+      "first_absent_ms": 2231,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 55796
+    },
+    {
+      "scene": "en-light-normal",
+      "kind": "recipes",
+      "first_absent_ms": 2239,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 69470
+    },
+    {
+      "scene": "en-light-normal",
+      "kind": "videos",
+      "first_absent_ms": 2277,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 77242
+    },
+    {
+      "scene": "en-light-normal",
+      "kind": "sleep",
+      "first_absent_ms": 2270,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 69923
+    },
+    {
+      "scene": "en-light-normal",
+      "kind": "diet",
+      "first_absent_ms": 2264,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 99032
+    },
+    {
+      "scene": "en-light-normal",
+      "kind": "coach",
+      "first_absent_ms": 2373,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 192634
+    },
+    {
+      "scene": "en-light-normal",
+      "kind": "community",
+      "first_absent_ms": 2260,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 72079
+    },
+    {
+      "scene": "en-light-reduced",
+      "kind": "recipes",
+      "first_absent_ms": 2222,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 61451
+    },
+    {
+      "scene": "en-light-reduced",
+      "kind": "videos",
+      "first_absent_ms": 2245,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 51583
+    },
+    {
+      "scene": "en-light-reduced",
+      "kind": "sleep",
+      "first_absent_ms": 2218,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 52319
+    },
+    {
+      "scene": "en-light-reduced",
+      "kind": "diet",
+      "first_absent_ms": 2279,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 119049
+    },
+    {
+      "scene": "en-light-reduced",
+      "kind": "coach",
+      "first_absent_ms": 2425,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 261508
+    },
+    {
+      "scene": "en-light-reduced",
+      "kind": "community",
+      "first_absent_ms": 2238,
+      "budget_met": true,
+      "frame_timing_status": "matched_frame_identity",
+      "maximum_frame_gap_us": 147727
+    }
+  ],
+  "coach_reveal": [
+    {
+      "scene": "ar-light-normal",
+      "completed": true,
+      "first_nonempty_native_frame": {
+        "observed_at_ms": 772,
+        "viewport_present": true,
+        "scroll_pixels": 1514.438174935246,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "reply_row_present": true,
+        "message_height": 1871.9999999999998,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 1783,
+        "first_glyphs_visible_area": 13844.81250276696
+      },
+      "intermediate_opacity_observed": false
+    },
+    {
+      "scene": "ar-light-reduced",
+      "completed": true,
+      "first_nonempty_native_frame": {
+        "observed_at_ms": 272,
+        "viewport_present": true,
+        "scroll_pixels": 1514.438174935246,
+        "viewport_top": 182.36190476190475,
+        "viewport_bottom": 673.5237298266587,
+        "reply_row_present": true,
+        "message_height": 1871.9999999999998,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 1783,
+        "first_glyphs_visible_area": 13844.81250276696
+      },
+      "intermediate_opacity_observed": null
+    },
+    {
+      "scene": "en-light-normal",
+      "completed": true,
+      "first_nonempty_native_frame": {
+        "observed_at_ms": 316,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 0.9570609403308481,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      },
+      "intermediate_opacity_observed": true
+    },
+    {
+      "scene": "en-light-reduced",
+      "completed": true,
+      "first_nonempty_native_frame": {
+        "observed_at_ms": 290,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      },
+      "intermediate_opacity_observed": null
+    }
+  ],
+  "history": [
+    {
+      "scene": "ar-light-normal",
+      "completed": true,
+      "max_anchor_drift_pixels": 0.0
+    },
+    {
+      "scene": "ar-light-reduced",
+      "completed": true,
+      "max_anchor_drift_pixels": 0.0
+    },
+    {
+      "scene": "en-light-normal",
+      "completed": true,
+      "max_anchor_drift_pixels": 0.0
+    },
+    {
+      "scene": "en-light-reduced",
+      "completed": true,
+      "max_anchor_drift_pixels": 0.0
+    }
+  ],
+  "limitations": [
+    "AR normal intermediate opacity not observed on this slow host; EN normal was observed. No all-device smoothness certification.",
+    "Original recovery does not rewrite the failed host process receipt. Bounded4 collector separately verified."
+  ],
+  "real_AI_requests": 0,
+  "real_credits_spent": 0,
+  "production_changed": false,
+  "selected_original_images": [
+    "recipes-ar-light-normal-welcome.png",
+    "videos-ar-light-normal-welcome.png",
+    "sleep-ar-light-normal-welcome.png",
+    "diet-ar-light-normal-welcome.png",
+    "coach-ar-light-normal-welcome.png",
+    "community-ar-light-normal-welcome.png",
+    "coach-reveal-ar-light-normal-first.png",
+    "coach-reveal-ar-light-normal-mid.png",
+    "coach-reveal-ar-light-normal-end.png",
+    "coach-reveal-en-light-normal-first.png",
+    "coach-reveal-en-light-normal-mid.png",
+    "coach-reveal-en-light-normal-end.png"
+  ],
+  "raw_log": {
+    "file": "native-community-prewarm-api36.log",
+    "sha256": "b2152d82fd2a9aca3480dda424c5d4b5e40a153cacb833249a17fac7ee11a25d",
+    "bytes": 29417
+  },
+  "measurement_metadata_files": 12,
+  "capture_manifest_files": 1
+}

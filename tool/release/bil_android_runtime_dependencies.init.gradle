@@ -1,0 +1,80 @@
+import groovy.json.JsonOutput
+import java.security.MessageDigest
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.attributes.Attribute
+
+// Resolve the actual app runtime graph without packaging/signing a release.
+// Invoke from android/: gradlew -I ../tool/release/bil_android_runtime_dependencies.init.gradle
+//   :app:bilPolicyRuntimeDependencies
+def sourceRoot = initscript.sourceFile.canonicalFile.parentFile.parentFile.parentFile
+def androidRoot = new File(sourceRoot, 'android').canonicalFile
+def sha256 = { File file ->
+    def digest = MessageDigest.getInstance('SHA-256')
+    file.withInputStream { stream ->
+        byte[] buffer = new byte[1048576]
+        int count
+        while ((count = stream.read(buffer)) > 0) digest.update(buffer, 0, count)
+    }
+    digest.digest().encodeHex().toString()
+}
+
+gradle.projectsEvaluated {
+    if (gradle.rootProject.projectDir.canonicalFile != androidRoot) return
+    def app = gradle.rootProject.findProject(':app')
+    if (app == null) throw new GradleException('Missing BIL Android app')
+    app.tasks.register('bilPolicyRuntimeDependencies') {
+        doLast {
+            def runtime = app.configurations.getByName('releaseRuntimeClasspath')
+            // AGP exposes multiple secondary artifacts on Flutter projects.
+            // Resolve components for the full inventory, and select only the
+            // external JARs used by the JVM proof with an explicit artifact type.
+            def selected = ['com.google.crypto.tink:tink-android',
+                'com.google.code.gson:gson', 'androidx.annotation:annotation-jvm',
+                'com.google.code.findbugs:jsr305',
+                'com.google.errorprone:error_prone_annotations', 'org.jspecify:jspecify',
+                'com.squareup.okhttp3:okhttp', 'com.squareup.okio:okio-jvm',
+                'org.jetbrains.kotlin:kotlin-stdlib'] as Set
+            def components = runtime.incoming.resolutionResult.allComponents.findAll {
+                it.id instanceof ModuleComponentIdentifier
+            }.collect { component ->
+                def id = component.id
+                [group: id.group, name: id.module, version: id.version]
+            }.sort { a, b -> (a.group + ':' + a.name) <=> (b.group + ':' + b.name) }
+            def artifactsFor = { names, type ->
+                runtime.incoming.artifactView {
+                    componentFilter { id -> id instanceof ModuleComponentIdentifier && names.contains(id.group + ':' + id.module) }
+                    attributes { attribute(Attribute.of('artifactType', String), type) }
+                }.artifacts.artifacts.collect { artifact ->
+                    def id = artifact.id.componentIdentifier
+                    [coordinate: "${id.group}:${id.module}:${id.version}".toString(),
+                     path: artifact.file.canonicalPath, sha256: sha256(artifact.file)]
+                }
+            }
+            def artifacts = (artifactsFor(selected, 'jar') +
+                artifactsFor(['com.google.mlkit:translate'] as Set, 'aar'))
+                .sort { a, b -> a.coordinate <=> b.coordinate }
+            if (artifacts.empty) throw new GradleException('Empty app release runtime graph')
+            def out = new File(sourceRoot, 'build/qa/policy-gate-20261015/android-runtime-dependencies.json')
+            out.parentFile.mkdirs()
+            out.setText(JsonOutput.prettyPrint(JsonOutput.toJson([
+                scope: 'Resolved release runtime dependencies; no APK/AAB or signing',
+                artifacts: artifacts, runtimeComponents: components,
+                signedArtifact: false, storeUpload: false,
+            ])) + '\n', 'UTF-8')
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    if (gradle.rootProject.projectDir.canonicalFile != androidRoot) return
+    if (!graph.allTasks.any { it.path == ':app:bilPolicyRuntimeDependencies' }) return
+    def forbidden = graph.allTasks.findAll { task ->
+        task instanceof org.gradle.api.tasks.testing.Test ||
+        task.name ==~ /connected.*AndroidTest/ ||
+        task.name ==~ /(?i)(sign|publish|upload|install|validateSigning).*/ ||
+        (task.project.path == ':app' && task.name ==~ /(?i)(assembleRelease|bundleRelease|packageRelease(Bundle|UniversalApk)?)/)
+    }
+    if (!forbidden.empty) {
+        throw new GradleException('Forbidden action in dependency-only audit: ' + forbidden.collect { it.path })
+    }
+}

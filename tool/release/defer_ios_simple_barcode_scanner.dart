@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+part 'deferred_simple_barcode_provenance.dart';
+
 const String deferredIosSimpleBarcodeScannerPlugin = 'simple_barcode_scanner';
 const String _expectedVersion = '0.6.0';
 const String _overrideDirectoryName = 'bil_release_plugin_overrides';
@@ -128,9 +130,16 @@ void _verifyPackageIdentity(String source) {
   }
 }
 
-void _verifySupportedPlatforms(List<String> lines) {
+void _verifySupportedPlatforms(
+  List<String> lines, {
+  bool androidRemoved = false,
+}) {
   final declaredPlatforms = _directKey(lines, 'platforms');
-  for (final platform in const <String>['android', 'web', 'windows']) {
+  for (final platform in <String>[
+    if (!androidRemoved) 'android',
+    'web',
+    'windows',
+  ]) {
     _directKey(lines, platform, parent: declaredPlatforms);
   }
   if (_directKeys(lines, 'ios', parent: declaredPlatforms).isNotEmpty) {
@@ -140,10 +149,27 @@ void _verifySupportedPlatforms(List<String> lines) {
   }
 
   final flutter = _directKey(lines, 'flutter');
+  if (androidRemoved) {
+    if (_directKeys(lines, 'plugin', parent: flutter).isNotEmpty) {
+      throw const FormatException(
+        'Dart-only Windows barcode must not declare an empty native plugin.',
+      );
+    }
+    return;
+  }
   final plugin = _directKey(lines, 'plugin', parent: flutter);
   final pluginPlatforms = _directKey(lines, 'platforms', parent: plugin);
-  final android = _directKey(lines, 'android', parent: pluginPlatforms);
-  if (!_mappingText(lines, android).contains('FlutterBarcodeScannerPlugin')) {
+  final androidKeys = _directKeys(lines, 'android', parent: pluginPlatforms);
+  if (androidRemoved ? androidKeys.isNotEmpty : androidKeys.length != 1) {
+    throw const FormatException(
+      'Unexpected Android barcode plugin declaration.',
+    );
+  }
+  if (!androidRemoved &&
+      !_mappingText(
+        lines,
+        androidKeys.single,
+      ).contains('FlutterBarcodeScannerPlugin')) {
     throw const FormatException(
       'Deferred simple_barcode_scanner pubspec lost its Android plugin.',
     );
@@ -367,8 +393,27 @@ Directory _validatedOverrideDirectory(
   return destination;
 }
 
+// Mobile BIL uses mobile_scanner; this legacy package remains for Windows.
+String removeAndroidPlatformFromDeferredBarcodePubspec(String source) {
+  _verifyPackageIdentity(source);
+  final lines = _lines(source);
+  _verifySupportedPlatforms(lines);
+  _removeMapping(
+    lines,
+    _directKey(lines, 'android', parent: _directKey(lines, 'platforms')),
+  );
+  final flutter = _directKey(lines, 'flutter');
+  final plugin = _directKey(lines, 'plugin', parent: flutter);
+  _removeMapping(lines, plugin);
+  _verifySupportedPlatforms(lines, androidRemoved: true);
+  return '${lines.join(source.contains('\r\n') ? '\r\n' : '\n')}\n';
+}
+
 DeferredIosSimpleBarcodeScannerResult
-prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
+prepareDeferredIosSimpleBarcodeScannerPackage(
+  Directory projectRoot, {
+  bool removeAndroid = false,
+}) {
   final packageConfigFile = _packageConfig(projectRoot);
   if (!packageConfigFile.existsSync()) {
     throw StateError(
@@ -390,25 +435,66 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
     createParent: true,
   );
   final marker = File(destination.path + Platform.pathSeparator + _markerName);
-  if (_sameDirectory(source, destination)) {
-    if (!marker.existsSync()) {
-      throw StateError(
-        'Existing simple_barcode_scanner override is missing its provenance marker.',
-      );
-    }
-    final markerPayload = _readJsonMap(marker, 'deferred override marker');
-    if (markerPayload['status'] != 'ios-native-platform-removed' ||
-        markerPayload['plugin'] != deferredIosSimpleBarcodeScannerPlugin ||
-        markerPayload['version'] != _expectedVersion) {
-      throw StateError(
-        'Existing simple_barcode_scanner override has invalid provenance.',
-      );
-    }
-    final pubspec = File(
+  final alreadyBound = _sameDirectory(source, destination);
+  if (destination.existsSync()) {
+    final markerPayload = _verifyOwnedBarcodeOverride(
+      destination,
+      expectedSource: alreadyBound ? null : source,
+    );
+    var pubspec = File(
       '${destination.path}${Platform.pathSeparator}pubspec.yaml',
     ).readAsStringSync();
     _verifyPackageIdentity(pubspec);
-    _verifySupportedPlatforms(_lines(pubspec));
+    final androidRemoved = markerPayload['android_removed'] == true;
+    // Upgrade only our owned early mobile overlay: an empty plugin mapping is
+    // invalid for Flutter discovery. The Dart/Windows library remains intact.
+    if (androidRemoved) {
+      final lines = _lines(pubspec);
+      final flutter = _directKey(lines, 'flutter');
+      final plugins = _directKeys(lines, 'plugin', parent: flutter);
+      if (plugins.length == 1) {
+        final platforms = _directKey(
+          lines,
+          'platforms',
+          parent: plugins.single,
+        );
+        if (_directKeys(lines, 'android', parent: platforms).isNotEmpty ||
+            _directKeys(lines, 'ios', parent: platforms).isNotEmpty) {
+          throw const FormatException(
+            'Owned mobile override unexpectedly contains native declarations.',
+          );
+        }
+        _removeMapping(lines, plugins.single);
+        pubspec = '${lines.join('\n')}\n';
+        _verifySupportedPlatforms(_lines(pubspec), androidRemoved: true);
+        File(
+          '${destination.path}${Platform.pathSeparator}pubspec.yaml',
+        ).writeAsStringSync(pubspec, flush: true);
+      }
+    }
+    if (removeAndroid && !androidRemoved) {
+      File(
+        '${destination.path}${Platform.pathSeparator}pubspec.yaml',
+      ).writeAsStringSync(
+        removeAndroidPlatformFromDeferredBarcodePubspec(pubspec),
+        flush: true,
+      );
+      markerPayload['android_removed'] = true;
+      marker.writeAsStringSync('${jsonEncode(markerPayload)}\n', flush: true);
+    } else {
+      _verifySupportedPlatforms(
+        _lines(pubspec),
+        androidRemoved: androidRemoved,
+      );
+    }
+    if (!alreadyBound) {
+      _bindDeferredBarcodeConfiguration(
+        packageConfigFile,
+        packageConfig,
+        entry,
+        destination,
+      );
+    }
     return DeferredIosSimpleBarcodeScannerResult(
       overrideDirectory: destination,
       alreadyPrepared: true,
@@ -423,15 +509,16 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
       'simple_barcode_scanner pubspec is missing: ${sourcePubspec.path}',
     );
   }
-  final sanitizedPubspec = removeIosPlatformFromSimpleBarcodeScannerPubspec(
+  var sanitizedPubspec = removeIosPlatformFromSimpleBarcodeScannerPubspec(
     sourcePubspec.readAsStringSync(),
   );
 
-  if (destination.existsSync()) {
-    throw StateError(
-      'Refusing to overwrite a pre-existing simple_barcode_scanner override.',
+  if (removeAndroid) {
+    sanitizedPubspec = removeAndroidPlatformFromDeferredBarcodePubspec(
+      sanitizedPubspec,
     );
   }
+
   final resolvedSource = _canonical(source);
   final resolvedOverrideParent = _canonical(destination.parent);
   final resolvedDestination = _normalized(
@@ -453,23 +540,16 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
     '${destination.path}${Platform.pathSeparator}pubspec.yaml',
   ).writeAsStringSync(sanitizedPubspec, flush: true);
   marker.writeAsStringSync(
-    '${jsonEncode(<String, Object?>{'status': 'ios-native-platform-removed', 'plugin': deferredIosSimpleBarcodeScannerPlugin, 'version': _expectedVersion, 'source_root_uri': source.uri.toString()})}\n',
+    '${jsonEncode(<String, Object?>{'status': 'ios-native-platform-removed', 'plugin': deferredIosSimpleBarcodeScannerPlugin, 'version': _expectedVersion, 'source_root_uri': Directory(source.resolveSymbolicLinksSync()).uri.toString(), 'android_removed': removeAndroid})}\n',
     flush: true,
   );
 
-  entry['rootUri'] =
-      '$_overrideDirectoryName/$deferredIosSimpleBarcodeScannerPlugin/';
-  packageConfigFile.writeAsStringSync(
-    '${jsonEncode(packageConfig)}\n',
-    flush: true,
+  _bindDeferredBarcodeConfiguration(
+    packageConfigFile,
+    packageConfig,
+    entry,
+    destination,
   );
-  final written = _readJsonMap(packageConfigFile, 'package_config.json');
-  final writtenRoot = _entryRoot(packageConfigFile, _packageEntry(written));
-  if (!_sameDirectory(writtenRoot, destination)) {
-    throw StateError(
-      'package_config.json did not resolve simple_barcode_scanner to the override.',
-    );
-  }
 
   return DeferredIosSimpleBarcodeScannerResult(
     overrideDirectory: destination,
@@ -477,7 +557,10 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
   );
 }
 
-void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
+void verifyDeferredIosSimpleBarcodeScannerDiscovery(
+  Directory projectRoot, {
+  String platform = 'ios',
+}) {
   final packageConfigFile = _packageConfig(projectRoot);
   final packageConfig = _readJsonMap(packageConfigFile, 'package_config.json');
   final root = _entryRoot(packageConfigFile, _packageEntry(packageConfig));
@@ -494,7 +577,13 @@ void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
     '${root.path}${Platform.pathSeparator}pubspec.yaml',
   ).readAsStringSync();
   _verifyPackageIdentity(pubspec);
-  _verifySupportedPlatforms(_lines(pubspec));
+  final androidRemoved =
+      _readJsonMap(
+        File('${root.path}${Platform.pathSeparator}$_markerName'),
+        'override marker',
+      )['android_removed'] ==
+      true;
+  _verifySupportedPlatforms(_lines(pubspec), androidRemoved: androidRemoved);
 
   final dependencies = _readJsonMap(
     File(
@@ -517,9 +606,9 @@ void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
   bool containsPlugin(List<Object?> entries) => entries
       .whereType<Map<String, Object?>>()
       .any((entry) => entry['name'] == deferredIosSimpleBarcodeScannerPlugin);
-  if (containsPlugin(ios) || !containsPlugin(android)) {
+  if (platform == 'ios' ? containsPlugin(ios) : containsPlugin(android)) {
     throw StateError(
-      'Deferred metadata must remove simple_barcode_scanner only from iOS.',
+      'Deferred metadata must remove the selected mobile barcode plugin.',
     );
   }
 
@@ -533,6 +622,9 @@ void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
     );
   }
 
+  if (platform != 'ios') {
+    return;
+  }
   final registrant = File(
     '${projectRoot.absolute.path}${Platform.pathSeparator}ios${Platform.pathSeparator}Runner${Platform.pathSeparator}GeneratedPluginRegistrant.m',
   ).readAsStringSync();

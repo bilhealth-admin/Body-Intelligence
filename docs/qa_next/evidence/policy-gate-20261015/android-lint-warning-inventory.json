@@ -1,0 +1,3744 @@
+{
+  "recorded_at_utc": "2026-10-15T19:30:50.278560+00:00",
+  "scope": "Original actual AGP partial reports before Tink security fix; warnings identical by variant, not 268 unique issues. Errors and GLOBAL/vendor incompleteness are separate. BIL means own android source; owned plugin overlays remain SDK.",
+  "variants": [
+    {
+      "variant": "debug",
+      "source_xml_sha256": "8d90dde1fd14809efcbdf0cc2f6c4a72cbcd5b6be98a8f3bb7dce8a7dd954a32",
+      "warnings": 134,
+      "groups": [
+        {
+          "id": "AndroidGradlePluginVersion",
+          "scope": "BIL",
+          "count": 1
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "scope": "SDK",
+          "count": 8
+        },
+        {
+          "id": "ApplySharedPref",
+          "scope": "SDK",
+          "count": 7
+        },
+        {
+          "id": "BatteryLife",
+          "scope": "SDK",
+          "count": 1
+        },
+        {
+          "id": "ContentDescription",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "DiscouragedApi",
+          "scope": "SDK",
+          "count": 3
+        },
+        {
+          "id": "GradleDependency",
+          "scope": "BIL",
+          "count": 2
+        },
+        {
+          "id": "GradleDependency",
+          "scope": "SDK",
+          "count": 14
+        },
+        {
+          "id": "HardcodedText",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "scope": "BIL",
+          "count": 3
+        },
+        {
+          "id": "IconLauncherShape",
+          "scope": "BIL",
+          "count": 5
+        },
+        {
+          "id": "IconLocation",
+          "scope": "BIL",
+          "count": 1
+        },
+        {
+          "id": "InlinedApi",
+          "scope": "SDK",
+          "count": 1
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "scope": "SDK",
+          "count": 6
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "scope": "SDK",
+          "count": 7
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "scope": "BIL",
+          "count": 3
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "scope": "SDK",
+          "count": 22
+        },
+        {
+          "id": "RtlHardcoded",
+          "scope": "SDK",
+          "count": 3
+        },
+        {
+          "id": "RtlSymmetry",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "ScopedStorage",
+          "scope": "BIL",
+          "count": 2
+        },
+        {
+          "id": "SwitchIntDef",
+          "scope": "SDK",
+          "count": 1
+        },
+        {
+          "id": "UnusedAttribute",
+          "scope": "BIL",
+          "count": 3
+        },
+        {
+          "id": "UnusedResources",
+          "scope": "BIL",
+          "count": 6
+        },
+        {
+          "id": "UnusedResources",
+          "scope": "SDK",
+          "count": 12
+        },
+        {
+          "id": "UnusedTranslation",
+          "scope": "BIL",
+          "count": 1
+        },
+        {
+          "id": "UseKtx",
+          "scope": "BIL",
+          "count": 13
+        },
+        {
+          "id": "UseKtx",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "UseRequiresApi",
+          "scope": "SDK",
+          "count": 1
+        }
+      ],
+      "findings": [
+        {
+          "id": "ScopedStorage",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "READ_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to query or interact with MediaStore or media files on the shared storage, you should instead use one or more new storage permissions: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` or `READ_MEDIA_AUDIO`.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "40",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "ScopedStorage",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "WRITE_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to write to shared storage, use the `MediaStore.createWriteRequest` intent.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "43",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\FlutterSecureStorage.java",
+              "line": "1416",
+              "column": "34"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\FlutterSecureStorage.java",
+              "line": "1425",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "254",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "266",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "277",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "333",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "349",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "InlinedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Field requires API level 31 (current min is 26): `android.Manifest.permission#SCHEDULE_EXACT_ALARM`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "355",
+              "column": "41"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\src\\main\\kotlin\\net\\wolverinebeach\\flutter_timezone\\FlutterTimezonePlugin.kt",
+              "line": "19",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\src\\main\\kotlin\\net\\wolverinebeach\\flutter_timezone\\FlutterTimezonePlugin.kt",
+              "line": "24",
+              "column": "39"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "29",
+              "column": "35"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "34",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `MethodCall` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "44",
+              "column": "29"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `Result` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "44",
+              "column": "56"
+            }
+          ]
+        },
+        {
+          "id": "UnusedAttribute",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Attribute `usesPermissionFlags` is only used in API level 31 and higher (current min is 26)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "32",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedAttribute",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Attribute `localeConfig` is only used in API level 33 and higher (current min is 26)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "85",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedAttribute",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Attribute `enableOnBackInvokedCallback` is only used in API level 33 and higher (current min is 26)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "87",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "BatteryLife",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionManager.java",
+              "line": "393",
+              "column": "30"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.0.2 is available: 9.4.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.11.1 is available: 9.4.1. (There is also a newer version of 8.11.𝑥 available, if upgrading to 9.4.1 is difficult: 8.11.2)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.12.1 is available: 9.4.1. (There is also a newer version of 8.12.𝑥 available, if upgrading to 9.4.1 is difficult: 8.12.3)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\connectivity_plus-7.1.0\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.13.2 is available: 9.4.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 7.3.0 is available: 9.4.1. (There is also a newer version of 7.3.𝑥 available, if upgrading to 9.4.1 is difficult: 7.3.1)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\build.gradle",
+              "line": "12",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.11.1 is available: 9.4.1. (There is also a newer version of 8.11.𝑥 available, if upgrading to 9.4.1 is difficult: 8.11.2)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\build.gradle",
+              "line": "12",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.7.3 is available: 9.4.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "12",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.12.1 is available: 9.4.1. (There is also a newer version of 8.12.𝑥 available, if upgrading to 9.4.1 is difficult: 8.12.3)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\build.gradle.kts",
+              "line": "13",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "A newer version of Gradle than 9.1.0 is available: 9.8.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\gradle\\wrapper\\gradle-wrapper.properties",
+              "line": "6",
+              "column": "17"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdk` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\jni_flutter-1.0.1\\android\\build.gradle",
+              "line": "27",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdkVersion` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\build.gradle",
+              "line": "29",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdk` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "30",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdkVersion` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\build.gradle",
+              "line": "39",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.core:core than 1.18.0 is available: 1.19.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\connectivity_plus-7.1.0\\android\\build.gradle",
+              "line": "42",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools:desugar_jdk_libs than 2.1.4 is available: 2.1.5",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "45",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.core:core than 1.3.0 is available: 1.19.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "46",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.media:media than 1.1.0 is available: 1.8.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "47",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdk` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\jni-1.0.0\\android\\build.gradle",
+              "line": "50",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.test:core than 1.2.0 is available: 1.7.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "52",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.google.android.gms:play-services-base than 18.7.2 is available: 18.11.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "57",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.browser:browser than 1.8.0 is available: 1.10.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\build.gradle",
+              "line": "59",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "A newer version of com.google.firebase:firebase-bom than 34.19.0 is available: 35.0.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\build.gradle.kts",
+              "line": "14",
+              "column": "29"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.core:core-ktx than 1.16.0 is available: 1.19.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\build.gradle.kts",
+              "line": "61",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.annotation:annotation than 1.9.1 is available: 1.11.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\build.gradle.kts",
+              "line": "62",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "A newer version of com.android.tools:desugar_jdk_libs than 2.1.4 is available: 2.1.5",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\build.gradle.kts",
+              "line": "126",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.google.code.gson:gson than 2.12.0 is available: 2.14.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "48",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of junit:junit than 4.12 is available: 4.13.2",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "50",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.mockito:mockito-core than 3.10.0 is available: 5.24.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "51",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.mockito:mockito-core than 5.0.0 is available: 5.24.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "52",
+              "column": "28"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.robolectric:robolectric than 4.14.1 is available: 4.17",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "53",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.google.crypto.tink:tink-android than 1.21.0 is available: 1.23.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\build.gradle",
+              "line": "85",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.robolectric:robolectric than 4.16.1 is available: 4.17",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\build.gradle",
+              "line": "88",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "SwitchIntDef",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Switch statement on an `int` with known associated constant missing case `PermissionConstants.PERMISSION_GROUP_ASSISTANT`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "107",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "DiscouragedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "854",
+              "column": "35"
+            }
+          ]
+        },
+        {
+          "id": "DiscouragedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "1314",
+              "column": "45"
+            }
+          ]
+        },
+        {
+          "id": "DiscouragedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "1803",
+              "column": "16"
+            }
+          ]
+        },
+        {
+          "id": "UseRequiresApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use `@RequiresApi(22) instead of `@TargetApi` to propagate the requirement to callers of `getManifestNames`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "103",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "UnusedTranslation",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The language `in (Indonesian)` is present in this project, but not declared in the `localeConfig` resource",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "85",
+              "column": "31"
+            }
+          ]
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "70",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "71",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "72",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Unnecessary; `SDK_INT` is never < 26",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILFirebaseMessagingService.kt",
+              "line": "57",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "277",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "311",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "345",
+              "column": "15"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "434",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "575",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "690",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "1641",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2007",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2041",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2145",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2421",
+              "column": "12"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\ciphers\\KeyCipherImplementationRSA18.java",
+              "line": "108",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\ciphers\\KeyCipherImplementationRSA18.java",
+              "line": "152",
+              "column": "17"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\ciphers\\KeyCipherImplementationRSAOAEP.java",
+              "line": "33",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 22",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "103",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 22",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "190",
+              "column": "21"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "538",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT` is always true here (`SDK_INT` ≥ 19 and < 28)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "109",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 19",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "121",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 19",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "144",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 19",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "156",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 22",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\src\\main\\kotlin\\dev\\fluttercommunity\\plus\\share\\SharePlusPendingIntent.kt",
+              "line": "25",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "This folder configuration (`v21`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `drawable`.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable-v21"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-anydpi-v26"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.bil_launch_premium_background` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable\\bil_launch_premium_background.xml",
+              "line": "2",
+              "column": "1"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.bil_splash_identity` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable-nodpi\\bil_splash_identity.png"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.bil_splash_wordmark` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable-nodpi\\bil_splash_wordmark.png"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_test_background_color` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "3",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_test_background_color_2` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "4",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_black` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "5",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_red` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "7",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_green` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "8",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_medium_template_bottom_weight` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "3",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_media_view_weight` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "5",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_medium_template_top_weight` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "6",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_ad_indicator_bar_height` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "13",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_ad_indicator_bottom_margin` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "15",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_small_cta_button_height` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "17",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_medium_cta_button_height` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "18",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.mipmap.ic_launcher_foreground` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_foreground.png"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.ic_stat_bil_notification` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable\\ic_stat_bil_notification.xml",
+              "line": "2",
+              "column": "1"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.style.FlutterHostTheme` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\values\\styles.xml",
+              "line": "18",
+              "column": "12"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLocation",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Found bitmap drawable `res/drawable/ic_launcher_monochrome.png` in densityless folder",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable\\ic_launcher_monochrome.png"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILFirebaseMessagingService.kt",
+              "line": "15",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILFirebaseMessagingService.kt",
+              "line": "53",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILGlobalHealthBridge.kt",
+              "line": "72",
+              "column": "48"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX function `createBitmap` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILSettingsSymbolsBridge.kt",
+              "line": "79",
+              "column": "30"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\MainActivity.kt",
+              "line": "260",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "52",
+              "column": "30"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "53",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "54",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "55",
+              "column": "29"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "56",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "57",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "58",
+              "column": "25"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "130",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "78",
+              "column": "40"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "78",
+              "column": "40"
+            }
+          ]
+        },
+        {
+          "id": "ContentDescription",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Missing `contentDescription` attribute on image",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "55",
+              "column": "12"
+            }
+          ]
+        },
+        {
+          "id": "ContentDescription",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Missing `contentDescription` attribute on image",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_small_template_view.xml",
+              "line": "33",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "HardcodedText",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Hardcoded string \"Ad\", should use `@string` resource",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "137",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "HardcodedText",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Hardcoded string \"Ad\", should use `@string` resource",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_small_template_view.xml",
+              "line": "114",
+              "column": "17"
+            }
+          ]
+        },
+        {
+          "id": "RtlSymmetry",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "When you define `paddingLeft` you should probably also define `paddingRight` for right-to-left symmetry",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "199",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "RtlSymmetry",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "209",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "RtlHardcoded",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Redundant attribute `layout_marginLeft`; already defining `layout_marginStart` with `targetSdkVersion` 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "77",
+              "column": "15"
+            }
+          ]
+        },
+        {
+          "id": "RtlHardcoded",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use \"`start`\" instead of \"`left`\" to ensure correct behavior in right-to-left locales",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "90",
+              "column": "34"
+            }
+          ]
+        },
+        {
+          "id": "RtlHardcoded",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Redundant attribute `paddingLeft`; already defining `paddingStart` with `targetSdkVersion` 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "199",
+              "column": "11"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "variant": "release",
+      "source_xml_sha256": "143f6d4b3a46b9545f624914153df6d56d7b0a79c7b997959083309cdd539456",
+      "warnings": 134,
+      "groups": [
+        {
+          "id": "AndroidGradlePluginVersion",
+          "scope": "BIL",
+          "count": 1
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "scope": "SDK",
+          "count": 8
+        },
+        {
+          "id": "ApplySharedPref",
+          "scope": "SDK",
+          "count": 7
+        },
+        {
+          "id": "BatteryLife",
+          "scope": "SDK",
+          "count": 1
+        },
+        {
+          "id": "ContentDescription",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "DiscouragedApi",
+          "scope": "SDK",
+          "count": 3
+        },
+        {
+          "id": "GradleDependency",
+          "scope": "BIL",
+          "count": 2
+        },
+        {
+          "id": "GradleDependency",
+          "scope": "SDK",
+          "count": 14
+        },
+        {
+          "id": "HardcodedText",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "scope": "BIL",
+          "count": 3
+        },
+        {
+          "id": "IconLauncherShape",
+          "scope": "BIL",
+          "count": 5
+        },
+        {
+          "id": "IconLocation",
+          "scope": "BIL",
+          "count": 1
+        },
+        {
+          "id": "InlinedApi",
+          "scope": "SDK",
+          "count": 1
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "scope": "SDK",
+          "count": 6
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "scope": "SDK",
+          "count": 7
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "scope": "BIL",
+          "count": 3
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "scope": "SDK",
+          "count": 22
+        },
+        {
+          "id": "RtlHardcoded",
+          "scope": "SDK",
+          "count": 3
+        },
+        {
+          "id": "RtlSymmetry",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "ScopedStorage",
+          "scope": "BIL",
+          "count": 2
+        },
+        {
+          "id": "SwitchIntDef",
+          "scope": "SDK",
+          "count": 1
+        },
+        {
+          "id": "UnusedAttribute",
+          "scope": "BIL",
+          "count": 3
+        },
+        {
+          "id": "UnusedResources",
+          "scope": "BIL",
+          "count": 6
+        },
+        {
+          "id": "UnusedResources",
+          "scope": "SDK",
+          "count": 12
+        },
+        {
+          "id": "UnusedTranslation",
+          "scope": "BIL",
+          "count": 1
+        },
+        {
+          "id": "UseKtx",
+          "scope": "BIL",
+          "count": 13
+        },
+        {
+          "id": "UseKtx",
+          "scope": "SDK",
+          "count": 2
+        },
+        {
+          "id": "UseRequiresApi",
+          "scope": "SDK",
+          "count": 1
+        }
+      ],
+      "findings": [
+        {
+          "id": "ScopedStorage",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "READ_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to query or interact with MediaStore or media files on the shared storage, you should instead use one or more new storage permissions: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` or `READ_MEDIA_AUDIO`.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "40",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "ScopedStorage",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "WRITE_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to write to shared storage, use the `MediaStore.createWriteRequest` intent.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "43",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\FlutterSecureStorage.java",
+              "line": "1416",
+              "column": "34"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\FlutterSecureStorage.java",
+              "line": "1425",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "254",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "266",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "277",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "333",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "ApplySharedPref",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\MigrationBackup.java",
+              "line": "349",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "InlinedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Field requires API level 31 (current min is 26): `android.Manifest.permission#SCHEDULE_EXACT_ALARM`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "355",
+              "column": "41"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\src\\main\\kotlin\\net\\wolverinebeach\\flutter_timezone\\FlutterTimezonePlugin.kt",
+              "line": "19",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\src\\main\\kotlin\\net\\wolverinebeach\\flutter_timezone\\FlutterTimezonePlugin.kt",
+              "line": "24",
+              "column": "39"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "29",
+              "column": "35"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `FlutterPlugin.FlutterPluginBinding` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "34",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `MethodCall` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "44",
+              "column": "29"
+            }
+          ]
+        },
+        {
+          "id": "KotlinNullnessAnnotation",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Do not use `@NonNull` in Kotlin; the nullability is already implied by the Kotlin type `Result` **not** ending with `?`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "44",
+              "column": "56"
+            }
+          ]
+        },
+        {
+          "id": "UnusedAttribute",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Attribute `usesPermissionFlags` is only used in API level 31 and higher (current min is 26)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "32",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedAttribute",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Attribute `localeConfig` is only used in API level 33 and higher (current min is 26)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "85",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedAttribute",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Attribute `enableOnBackInvokedCallback` is only used in API level 33 and higher (current min is 26)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "87",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "BatteryLife",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionManager.java",
+              "line": "393",
+              "column": "30"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.0.2 is available: 9.4.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.11.1 is available: 9.4.1. (There is also a newer version of 8.11.𝑥 available, if upgrading to 9.4.1 is difficult: 8.11.2)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.12.1 is available: 9.4.1. (There is also a newer version of 8.12.𝑥 available, if upgrading to 9.4.1 is difficult: 8.12.3)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\connectivity_plus-7.1.0\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.13.2 is available: 9.4.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\build.gradle",
+              "line": "11",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 7.3.0 is available: 9.4.1. (There is also a newer version of 7.3.𝑥 available, if upgrading to 9.4.1 is difficult: 7.3.1)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\build.gradle",
+              "line": "12",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.11.1 is available: 9.4.1. (There is also a newer version of 8.11.𝑥 available, if upgrading to 9.4.1 is difficult: 8.11.2)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\build.gradle",
+              "line": "12",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.7.3 is available: 9.4.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "12",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools.build:gradle than 8.12.1 is available: 9.4.1. (There is also a newer version of 8.12.𝑥 available, if upgrading to 9.4.1 is difficult: 8.12.3)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\build.gradle.kts",
+              "line": "13",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "AndroidGradlePluginVersion",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "A newer version of Gradle than 9.1.0 is available: 9.8.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\gradle\\wrapper\\gradle-wrapper.properties",
+              "line": "6",
+              "column": "17"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdk` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\jni_flutter-1.0.1\\android\\build.gradle",
+              "line": "27",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdkVersion` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\build.gradle",
+              "line": "29",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdk` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "30",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdkVersion` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_timezone-5.1.0\\android\\build.gradle",
+              "line": "39",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.core:core than 1.18.0 is available: 1.19.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\connectivity_plus-7.1.0\\android\\build.gradle",
+              "line": "42",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.android.tools:desugar_jdk_libs than 2.1.4 is available: 2.1.5",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "45",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.core:core than 1.3.0 is available: 1.19.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "46",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.media:media than 1.1.0 is available: 1.8.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "47",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of `compileSdk` than 35 is available: 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\jni-1.0.0\\android\\build.gradle",
+              "line": "50",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.test:core than 1.2.0 is available: 1.7.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "52",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.google.android.gms:play-services-base than 18.7.2 is available: 18.11.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "57",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.browser:browser than 1.8.0 is available: 1.10.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\build.gradle",
+              "line": "59",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "A newer version of com.google.firebase:firebase-bom than 34.19.0 is available: 35.0.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\build.gradle.kts",
+              "line": "14",
+              "column": "29"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.core:core-ktx than 1.16.0 is available: 1.19.1",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\build.gradle.kts",
+              "line": "61",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of androidx.annotation:annotation than 1.9.1 is available: 1.11.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\build.gradle.kts",
+              "line": "62",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "GradleDependency",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "A newer version of com.android.tools:desugar_jdk_libs than 2.1.4 is available: 2.1.5",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\build.gradle.kts",
+              "line": "126",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.google.code.gson:gson than 2.12.0 is available: 2.14.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "48",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of junit:junit than 4.12 is available: 4.13.2",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "50",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.mockito:mockito-core than 3.10.0 is available: 5.24.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "51",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.mockito:mockito-core than 5.0.0 is available: 5.24.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\in_app_review-2.0.12\\android\\build.gradle",
+              "line": "52",
+              "column": "28"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.robolectric:robolectric than 4.14.1 is available: 4.17",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\build.gradle",
+              "line": "53",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of com.google.crypto.tink:tink-android than 1.21.0 is available: 1.23.0",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\build.gradle",
+              "line": "85",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "A newer version of org.robolectric:robolectric than 4.16.1 is available: 4.17",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\build.gradle",
+              "line": "88",
+              "column": "24"
+            }
+          ]
+        },
+        {
+          "id": "SwitchIntDef",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Switch statement on an `int` with known associated constant missing case `PermissionConstants.PERMISSION_GROUP_ASSISTANT`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "107",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "DiscouragedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "854",
+              "column": "35"
+            }
+          ]
+        },
+        {
+          "id": "DiscouragedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "1314",
+              "column": "45"
+            }
+          ]
+        },
+        {
+          "id": "DiscouragedApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "1803",
+              "column": "16"
+            }
+          ]
+        },
+        {
+          "id": "UseRequiresApi",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use `@RequiresApi(22) instead of `@TargetApi` to propagate the requirement to callers of `getManifestNames`",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "103",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "UnusedTranslation",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The language `in (Indonesian)` is present in this project, but not declared in the `localeConfig` resource",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "85",
+              "column": "31"
+            }
+          ]
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "70",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "71",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "HealthConnectPolicy",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Health Connect permission is restricted to approved core Health or Fitness functions use only and requires strict data access and handling, user consent and transparency.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\AndroidManifest.xml",
+              "line": "72",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Unnecessary; `SDK_INT` is never < 26",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILFirebaseMessagingService.kt",
+              "line": "57",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "277",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "311",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "345",
+              "column": "15"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "434",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "575",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "690",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "1641",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2007",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2041",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2145",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 24",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\flutter_local_notifications-22.2.0\\android\\src\\main\\java\\com\\dexterous\\flutterlocalnotifications\\FlutterLocalNotificationsPlugin.java",
+              "line": "2421",
+              "column": "12"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\ciphers\\KeyCipherImplementationRSA18.java",
+              "line": "108",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\ciphers\\KeyCipherImplementationRSA18.java",
+              "line": "152",
+              "column": "17"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\flutter_secure_storage-10.3.1\\android\\src\\main\\java\\com\\it_nomads\\fluttersecurestorage\\ciphers\\KeyCipherImplementationRSAOAEP.java",
+              "line": "33",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 22",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "103",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 22",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "190",
+              "column": "21"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 23",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\PermissionUtils.java",
+              "line": "538",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT` is always true here (`SDK_INT` ≥ 19 and < 28)",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "109",
+              "column": "20"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 19",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "121",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 19",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "144",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is never < 19",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\permission_handler_android-13.0.1\\android\\src\\main\\java\\com\\baseflow\\permissionhandler\\ServiceManager.java",
+              "line": "156",
+              "column": "13"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Unnecessary; `SDK_INT` is always >= 22",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\share_plus-13.2.1\\android\\src\\main\\kotlin\\dev\\fluttercommunity\\plus\\share\\SharePlusPendingIntent.kt",
+              "line": "25",
+              "column": "5"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "This folder configuration (`v21`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `drawable`.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable-v21"
+            }
+          ]
+        },
+        {
+          "id": "ObsoleteSdkInt",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`.",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-anydpi-v26"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.bil_launch_premium_background` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable\\bil_launch_premium_background.xml",
+              "line": "2",
+              "column": "1"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.bil_splash_identity` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable-nodpi\\bil_splash_identity.png"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.bil_splash_wordmark` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable-nodpi\\bil_splash_wordmark.png"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_test_background_color` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "3",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_test_background_color_2` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "4",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_black` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "5",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_red` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "7",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.color.gnt_green` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\colors.xml",
+              "line": "8",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_medium_template_bottom_weight` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "3",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_media_view_weight` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "5",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_medium_template_top_weight` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "6",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_ad_indicator_bar_height` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "13",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_ad_indicator_bottom_margin` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "15",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_small_cta_button_height` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "17",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "The resource `R.dimen.gnt_medium_cta_button_height` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\main\\res\\values\\dimens.xml",
+              "line": "18",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.mipmap.ic_launcher_foreground` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_foreground.png"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.drawable.ic_stat_bil_notification` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable\\ic_stat_bil_notification.xml",
+              "line": "2",
+              "column": "1"
+            }
+          ]
+        },
+        {
+          "id": "UnusedResources",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "The resource `R.style.FlutterHostTheme` appears to be unused",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\values\\styles.xml",
+              "line": "18",
+              "column": "12"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLauncherShape",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Launcher icons should not fill every pixel of their square region; see the design guide for details",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png"
+            }
+          ]
+        },
+        {
+          "id": "IconLocation",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Found bitmap drawable `res/drawable/ic_launcher_monochrome.png` in densityless folder",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\res\\drawable\\ic_launcher_monochrome.png"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILFirebaseMessagingService.kt",
+              "line": "15",
+              "column": "9"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILFirebaseMessagingService.kt",
+              "line": "53",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILGlobalHealthBridge.kt",
+              "line": "72",
+              "column": "48"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX function `createBitmap` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\BILSettingsSymbolsBridge.kt",
+              "line": "79",
+              "column": "30"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\MainActivity.kt",
+              "line": "260",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "52",
+              "column": "30"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "53",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "54",
+              "column": "27"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "55",
+              "column": "29"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "56",
+              "column": "23"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "57",
+              "column": "22"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toColorInt` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "58",
+              "column": "25"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "BIL",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\android\\app\\src\\main\\kotlin\\com\\bilhealth\\bodyintelligencelog\\PermissionsRationaleActivity.kt",
+              "line": "130",
+              "column": "37"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "78",
+              "column": "40"
+            }
+          ]
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use the KTX extension function `String.toUri` instead?",
+          "locations": [
+            {
+              "file": "G:\\BIL_Toolchains\\pub-cache\\hosted\\pub.dev\\sign_in_with_apple-8.2.0\\android\\src\\main\\kotlin\\com\\aboutyou\\dart_packages\\sign_in_with_apple\\SignInWithApplePlugin.kt",
+              "line": "78",
+              "column": "40"
+            }
+          ]
+        },
+        {
+          "id": "ContentDescription",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Missing `contentDescription` attribute on image",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "55",
+              "column": "12"
+            }
+          ]
+        },
+        {
+          "id": "ContentDescription",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Missing `contentDescription` attribute on image",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_small_template_view.xml",
+              "line": "33",
+              "column": "10"
+            }
+          ]
+        },
+        {
+          "id": "HardcodedText",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Hardcoded string \"Ad\", should use `@string` resource",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "137",
+              "column": "19"
+            }
+          ]
+        },
+        {
+          "id": "HardcodedText",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Hardcoded string \"Ad\", should use `@string` resource",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_small_template_view.xml",
+              "line": "114",
+              "column": "17"
+            }
+          ]
+        },
+        {
+          "id": "RtlSymmetry",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "When you define `paddingLeft` you should probably also define `paddingRight` for right-to-left symmetry",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "199",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "RtlSymmetry",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "209",
+              "column": "11"
+            }
+          ]
+        },
+        {
+          "id": "RtlHardcoded",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Redundant attribute `layout_marginLeft`; already defining `layout_marginStart` with `targetSdkVersion` 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "77",
+              "column": "15"
+            }
+          ]
+        },
+        {
+          "id": "RtlHardcoded",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Use \"`start`\" instead of \"`left`\" to ensure correct behavior in right-to-left locales",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "90",
+              "column": "34"
+            }
+          ]
+        },
+        {
+          "id": "RtlHardcoded",
+          "severity": "Warning",
+          "scope": "SDK",
+          "message": "Redundant attribute `paddingLeft`; already defining `paddingStart` with `targetSdkVersion` 36",
+          "locations": [
+            {
+              "file": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\.dart_tool\\bil-android-policy-overrides\\google_mobile_ads-9.1.0\\android\\src\\playServices\\res\\layout\\gnt_medium_template_view.xml",
+              "line": "199",
+              "column": "11"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

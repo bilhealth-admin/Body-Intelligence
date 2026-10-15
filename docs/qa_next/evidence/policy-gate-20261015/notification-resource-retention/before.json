@@ -1,0 +1,51 @@
+{
+  "scope": "Actual AGP9.0.1 post-R8 resource archive; not an APK/AAB or signed Android33 artifact",
+  "recorded_at_utc": "2026-10-15T19:43:21.768233+00:00",
+  "status": "FAIL_ICON_REMOVED",
+  "icon": "drawable/ic_stat_bil_notification",
+  "original_resource_id": "0x7f0800b9",
+  "original_resource_in_R_txt": true,
+  "post_r8_name_present": false,
+  "shrinker_marks_not_reachable": true,
+  "files": [
+    {
+      "path": "build/app/intermediates/optimized_processed_res/release/optimizeReleaseResources/resources-release-optimize.ap_",
+      "bytes": 937877,
+      "sha256": "aa80fac3ab2746aa1d962f5730b9eca42af5a81a43ba84803cfb8b231319f4ac"
+    },
+    {
+      "path": "build/app/intermediates/optimized_processed_res/release/optimizeReleaseResources/output-metadata.json",
+      "bytes": 424,
+      "sha256": "3b311c3356aa7a985cfd8b9149ce9d9a58d0e66e7a0789f256a81f83fc1b7008"
+    },
+    {
+      "path": "build/app/outputs/mapping/release/resources.txt",
+      "bytes": 168728,
+      "sha256": "be94e642d8c25931a3655fe57a223f500977b989a633e0a93d0fc8c976effdbc"
+    },
+    {
+      "path": "build/qa/policy-gate-20261015/post-r8-resources.txt",
+      "bytes": 352465,
+      "sha256": "2726c0d6eb2d3bd0302fc0f5d3f6edb3b90df57f4fe8ccf8c41d33ef0b996fba"
+    },
+    {
+      "path": "build/qa/policy-gate-20261015/resource-retention.log",
+      "bytes": 403833,
+      "sha256": "cd6728ab5b7b5af70b786c11b56b472bb68c6d99fa63703c0314d906e1038b9d"
+    },
+    {
+      "path": "build/qa/policy-gate-20261015/resource-retention-result.json",
+      "bytes": 836,
+      "sha256": "1e32b1517ab7d2055f400200d9c6fab6046b1a497f4d77cfdca981af32242d94"
+    },
+    {
+      "path": "build/app/intermediates/runtime_symbol_list/release/processReleaseResources/R.txt",
+      "bytes": 199002,
+      "sha256": "dbed1d1ed722dd6b6e4deadd279e8c802faa0db952e476a79992ba376ba5661e"
+    }
+  ],
+  "reporter_error_separate": "R8/convert/optimize completed. QA collection task then failed selecting untyped secondary artifacts on Flutter projects. That is a QA adapter bug, not an R8 compilation failure.",
+  "version_code_in_intermediate": 8,
+  "signed_artifact_created": false,
+  "store_upload": false
+}

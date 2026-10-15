@@ -1,0 +1,231 @@
+{
+  "schema": "bil.qa.tink.jvm.compatibility.v1",
+  "status": "PASS_JVM_ONLY",
+  "versions": [
+    "1.21.0",
+    "1.22.0"
+  ],
+  "phases": [
+    {
+      "origin": "1.21.0",
+      "peer": "1.22.0",
+      "schema": "bil.qa.tink.jvm.phase.v1",
+      "phase": "create",
+      "tink_version": "1.21.0",
+      "passed": 146,
+      "failed": 0,
+      "constant_time_measured": false
+    },
+    {
+      "origin": "1.21.0",
+      "peer": "1.22.0",
+      "schema": "bil.qa.tink.jvm.phase.v1",
+      "phase": "peer",
+      "tink_version": "1.22.0",
+      "passed": 176,
+      "failed": 0,
+      "constant_time_measured": false
+    },
+    {
+      "origin": "1.21.0",
+      "peer": "1.22.0",
+      "schema": "bil.qa.tink.jvm.phase.v1",
+      "phase": "return",
+      "tink_version": "1.21.0",
+      "passed": 146,
+      "failed": 0,
+      "constant_time_measured": false
+    },
+    {
+      "origin": "1.22.0",
+      "peer": "1.21.0",
+      "schema": "bil.qa.tink.jvm.phase.v1",
+      "phase": "create",
+      "tink_version": "1.22.0",
+      "passed": 146,
+      "failed": 0,
+      "constant_time_measured": false
+    },
+    {
+      "origin": "1.22.0",
+      "peer": "1.21.0",
+      "schema": "bil.qa.tink.jvm.phase.v1",
+      "phase": "peer",
+      "tink_version": "1.21.0",
+      "passed": 176,
+      "failed": 0,
+      "constant_time_measured": false
+    },
+    {
+      "origin": "1.22.0",
+      "peer": "1.21.0",
+      "schema": "bil.qa.tink.jvm.phase.v1",
+      "phase": "return",
+      "tink_version": "1.22.0",
+      "passed": 146,
+      "failed": 0,
+      "constant_time_measured": false
+    }
+  ],
+  "constant_time_measured": false,
+  "native_keystore_or_esp_migration_tested": false,
+  "legacy_121_is_intentionally_the_affected_baseline": true,
+  "public_evidence_allowlist": [
+    "result.json",
+    "patched-verifyMac-javap.txt"
+  ],
+  "never_upload": [
+    "**/private-synthetic-keysets/**"
+  ],
+  "coverage": {
+    "templates": [
+      "AES256_GCM",
+      "AES256_SIV",
+      "HMAC_SHA256_128BITTAG",
+      "AES_CMAC"
+    ],
+    "value_categories": [
+      "English",
+      "Arabic",
+      "empty",
+      "mixed Unicode",
+      "binary"
+    ],
+    "associated_data": [
+      "empty",
+      "nonempty",
+      "wrong must reject"
+    ],
+    "keysets": [
+      "raw binary",
+      "software-AEAD protected",
+      "tampered must reject"
+    ]
+  },
+  "limits": [
+    "Synthetic JVM keysets and software AEAD only",
+    "Not Android Keystore, device ESP migration, signed APK/AAB or store proof",
+    "MAC tests check correctness/rejection, not constant-time execution"
+  ],
+  "source": {
+    "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\tools\\qa\\android_tink_compatibility_probe.py": "a6fc92cb4d4b10379c441e762647e5d4c30ce8a5bda98d1639b1a11bf1437026",
+    "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\tools\\qa\\jvm\\TinkCompatibilityProbe.java": "da3dee7eb27f26326893ad95f312d6280b65d081af1a40ffc3d19a6599f7ad55"
+  },
+  "failures": [],
+  "java": "openjdk version \"21.0.10\" 2026-01-20",
+  "private_storage": "Windows ACL: inherited access removed; current user and SYSTEM only",
+  "new_graph_evidence": {
+    "android-runtime-dependencies.json": "fabadac394d45f1d9a450dcb6c63f71bf3820dfad0689ae851c2ba7cb23bf730"
+  },
+  "new_model_sha256": "fabadac394d45f1d9a450dcb6c63f71bf3820dfad0689ae851c2ba7cb23bf730",
+  "new_runtime_graph_is_final_122": true,
+  "downloads": [
+    {
+      "url": "https://repo.maven.apache.org/maven2/com/google/crypto/tink/tink-android/1.22.0/tink-android-1.22.0.jar",
+      "sha256": "3738a5365b890f80703945b3fc8ad6253c93c5905e2e8bb8d99d4e06ffd914af",
+      "sha512_matches_maven": true,
+      "size": 3309074
+    },
+    {
+      "url": "https://repo.maven.apache.org/maven2/com/google/crypto/tink/tink-android/1.22.0/tink-android-1.22.0.pom",
+      "sha256": "fe2b859f7c0be36cda46d5ddb5e3cb489cf695088875477d96b50467ff3464bf",
+      "sha512_matches_maven": true,
+      "size": 4083
+    }
+  ],
+  "old_graph_evidence": {
+    "release-artifact-libraries.xml": "f46b417e9951e95e8bebd54a6a3bc8fcd3281b51ce82cfe6919a18f14d57b3c0",
+    "release-artifact-dependencies.xml": "4850da3d112e6a9667572f280a8b9455a509012b776c0df884d90e524cfb49d0"
+  },
+  "old_model_sha256": "f46b417e9951e95e8bebd54a6a3bc8fcd3281b51ce82cfe6919a18f14d57b3c0",
+  "old_baseline": "Original AGP graph and cached 1.21.0 artifact/POM",
+  "actual_candidate_jar_sha256_matches_maven": true,
+  "runtime_dependencies": {
+    "1.21.0": [
+      {
+        "ga": "androidx.annotation:annotation-jvm",
+        "declared_version": "1.8.2",
+        "resolved": "androidx.annotation:annotation-jvm:1.10.0",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\androidx.annotation\\annotation-jvm\\1.10.0\\388cfaa79001d0f024d28f6a13d5a3dfc2f0e18f\\annotation-jvm-1.10.0.jar",
+        "sha256": "ddd072ddbb553178e205517ce777b2f05aa9e412982d9ecb4eedc74f1212f697"
+      },
+      {
+        "ga": "com.google.code.findbugs:jsr305",
+        "declared_version": "3.0.2",
+        "resolved": "com.google.code.findbugs:jsr305:3.0.2",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.code.findbugs\\jsr305\\3.0.2\\25ea2e8b0c338a877313bd4672d3fe056ea78f0d\\jsr305-3.0.2.jar",
+        "sha256": "766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7"
+      },
+      {
+        "ga": "com.google.code.gson:gson",
+        "declared_version": "2.13.2",
+        "resolved": "com.google.code.gson:gson:2.13.2",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.code.gson\\gson\\2.13.2\\48b8230771e573b54ce6e867a9001e75977fe78e\\gson-2.13.2.jar",
+        "sha256": "dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0"
+      },
+      {
+        "ga": "com.google.errorprone:error_prone_annotations",
+        "declared_version": "2.41.0",
+        "resolved": "com.google.errorprone:error_prone_annotations:2.48.0",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.errorprone\\error_prone_annotations\\2.48.0\\bbe30942a31d1778c74cb272321267eca82dc708\\error_prone_annotations-2.48.0.jar",
+        "sha256": "b49c5c958316ed67a09c699dda9aa749caf434d51d863dea599ef36a49b9c855"
+      },
+      {
+        "ga": "org.jspecify:jspecify",
+        "transitive": true,
+        "resolved": "org.jspecify:jspecify:1.0.0",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\org.jspecify\\jspecify\\1.0.0\\7425a601c1c7ec76645a78d22b8c6a627edee507\\jspecify-1.0.0.jar",
+        "sha256": "1fad6e6be7557781e4d33729d49ae1cdc8fdda6fe477bb0cc68ce351eafdfbab"
+      }
+    ],
+    "1.22.0": [
+      {
+        "ga": "androidx.annotation:annotation-jvm",
+        "declared_version": "1.8.2",
+        "resolved": "androidx.annotation:annotation-jvm:1.10.0",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\androidx.annotation\\annotation-jvm\\1.10.0\\388cfaa79001d0f024d28f6a13d5a3dfc2f0e18f\\annotation-jvm-1.10.0.jar",
+        "sha256": "ddd072ddbb553178e205517ce777b2f05aa9e412982d9ecb4eedc74f1212f697"
+      },
+      {
+        "ga": "com.google.code.findbugs:jsr305",
+        "declared_version": "3.0.2",
+        "resolved": "com.google.code.findbugs:jsr305:3.0.2",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.code.findbugs\\jsr305\\3.0.2\\25ea2e8b0c338a877313bd4672d3fe056ea78f0d\\jsr305-3.0.2.jar",
+        "sha256": "766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7"
+      },
+      {
+        "ga": "com.google.code.gson:gson",
+        "declared_version": "2.13.2",
+        "resolved": "com.google.code.gson:gson:2.13.2",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.code.gson\\gson\\2.13.2\\48b8230771e573b54ce6e867a9001e75977fe78e\\gson-2.13.2.jar",
+        "sha256": "dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0"
+      },
+      {
+        "ga": "com.google.errorprone:error_prone_annotations",
+        "declared_version": "2.41.0",
+        "resolved": "com.google.errorprone:error_prone_annotations:2.48.0",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.errorprone\\error_prone_annotations\\2.48.0\\bbe30942a31d1778c74cb272321267eca82dc708\\error_prone_annotations-2.48.0.jar",
+        "sha256": "b49c5c958316ed67a09c699dda9aa749caf434d51d863dea599ef36a49b9c855"
+      },
+      {
+        "ga": "org.jspecify:jspecify",
+        "transitive": true,
+        "resolved": "org.jspecify:jspecify:1.0.0",
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\org.jspecify\\jspecify\\1.0.0\\7425a601c1c7ec76645a78d22b8c6a627edee507\\jspecify-1.0.0.jar",
+        "sha256": "1fad6e6be7557781e4d33729d49ae1cdc8fdda6fe477bb0cc68ce351eafdfbab"
+      }
+    ]
+  },
+  "artifact_sha256": {
+    "1.21.0": "61d60f28640b16a92f74c5c34191432f639da4fd79ce7b50a4b7af35fbafaf7d",
+    "1.22.0": "3738a5365b890f80703945b3fc8ad6253c93c5905e2e8bb8d99d4e06ffd914af"
+  },
+  "pom_sha256": {
+    "1.21.0": "171bc6e7a1b2b0b454f63df7d3d24c27c2d12835e167bc1c2b3f447ee58bac57",
+    "1.22.0": "fe2b859f7c0be36cda46d5ddb5e3cb489cf695088875477d96b50467ff3464bf"
+  },
+  "patched_comparison_bytecode": "MessageDigest.isEqual present; Bytes.equals absent",
+  "passed": 936,
+  "failed": 0,
+  "elapsed_seconds": 19.674
+}

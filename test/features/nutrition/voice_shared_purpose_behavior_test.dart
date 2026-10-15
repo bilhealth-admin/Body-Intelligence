@@ -9,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'meal_voice_session_test.dart' show ControlledMealSpeech;
 import '../../visual_closure/visual_evidence_font.dart';
+import '../../support/system_speech_disclosure_test_support.dart';
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
@@ -17,6 +18,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     tester.view.viewInsets = const FakeViewPadding(bottom: 280);
     addTearDown(tester.view.reset);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
     late BuildContext context;
     await tester.pumpWidget(
       MaterialApp(
@@ -54,21 +59,39 @@ void main() {
     BuildContext context,
     ControlledMealSpeech speech, {
     bool allowed = true,
+    VoidCallback? onPermissionCheck,
   }) => kind == 'community'
       ? CommunityComposerVoiceInputService(
           speech,
-          permissionGate: (_) async => allowed,
+          permissionGate: (_) async {
+            onPermissionCheck?.call();
+            return allowed;
+          },
         ).capture(context)
       : WeightVoiceInputService(
           speech,
-          permissionGate: (_) async => allowed,
+          permissionGate: (_) async {
+            onPermissionCheck?.call();
+            return allowed;
+          },
         ).capture(context: context, fallbackSystem: MeasurementSystem.metric);
   for (final kind in ['community', 'weight']) {
     testWidgets(
       '$kind voice permission denial cannot return or persist a value',
       (tester) async {
         final context = await mount(tester), speech = ControlledMealSpeech();
-        expect(await capture(kind, context, speech, allowed: false), isNull);
+        var permissionChecks = 0;
+        final pending = capture(
+          kind,
+          context,
+          speech,
+          allowed: false,
+          onPermissionCheck: () => permissionChecks++,
+        );
+        expect(permissionChecks, 0);
+        await acceptSystemSpeechDisclosure(tester);
+        expect(await pending, isNull);
+        expect(permissionChecks, 1);
         expect(speech.listens, 0);
         expect(speech.disposals, 1);
         expect(find.byType(Dialog), findsNothing);
@@ -80,7 +103,7 @@ void main() {
         final context = await mount(tester),
             speech = ControlledMealSpeech()..available = Completer<bool>();
         final pending = capture(kind, context, speech);
-        await tester.pumpAndSettle();
+        await acceptSystemSpeechDisclosure(tester);
         expect(find.text('جارٍ تهيئة الميكروفون…'), findsOneWidget);
         final another = ControlledMealSpeech();
         expect(
@@ -92,6 +115,7 @@ void main() {
         );
         expect(another.disposals, 0);
         expect(another.listens, 0);
+        expect(find.byKey(systemSpeechDisclosureAllowKey), findsNothing);
         final cancel = find.byKey(const Key('cancel-voice-food-candidate'));
         await tester.ensureVisible(cancel);
         await tester.tap(cancel);
@@ -108,7 +132,7 @@ void main() {
       (tester) async {
         final context = await mount(tester), speech = ControlledMealSpeech();
         final pending = capture(kind, context, speech);
-        await tester.pumpAndSettle();
+        await acceptSystemSpeechDisclosure(tester);
         speech.emit(kind == 'community' ? 'نص جزئي' : 'وزني ٨٢ كيلوغرام');
         await tester.pumpAndSettle();
         final field = find.byKey(
@@ -159,7 +183,7 @@ void main() {
       (tester) async {
         final context = await mount(tester), speech = ControlledMealSpeech();
         final pending = capture(kind, context, speech);
-        await tester.pumpAndSettle();
+        await acceptSystemSpeechDisclosure(tester);
         expect(speech.listening, isTrue);
         for (final state in [
           AppLifecycleState.inactive,

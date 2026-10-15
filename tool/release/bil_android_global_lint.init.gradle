@@ -1,0 +1,395 @@
+import groovy.json.JsonOutput
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.time.Instant
+import javax.xml.XMLConstants
+import javax.xml.parsers.DocumentBuilderFactory
+import org.gradle.api.GradleException
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.testing.Test
+
+// Explicit audit entrypoint; normal AGP lint/build/release tasks are unchanged.
+// AGP 9.0.1 AndroidLintTask.kt:370-394 supplies the four model collections.
+// Lint 32.0.1 Main defaults to GLOBAL; no partial analysis/report mode is used.
+// Invoke from android/: gradlew -I ../tool/release/bil_android_global_lint.init.gradle
+//   :app:bilPolicyLintList :app:bilPolicyLintDebug --console=plain
+// Model producers can require compilation/resources; this never runs a test,
+// signs/packages a release, publishes, or depends on an AGP lint analyzer/report.
+
+def expectedAgp = '9.0.1'
+def expectedLint = '32.0.1'
+def expectedInsights = '0.1.5'
+def expectedInsightsSha256 = '5d40a84c35ed9664b8b3aad9abd556a23299cdb49be7ddf9b251439d5529a083'
+// All fourteen IDs were read from the pinned JAR's PolicyInsightsIssueRegistry.
+// This is an inventory assertion, never a --check filter on analysis.
+def expectedInsightsIds = [
+    'AccessibilityPolicy', 'AdvertisingIdPolicy', 'AllFilesAccessPolicy',
+    'ExactAlarmPolicy', 'ForegroundServicesPolicy', 'FullScreenIntentPolicy',
+    'HealthConnectPolicy', 'BackgroundLocationPolicy', 'LoginCredentials',
+    'PackageVisibilityPolicy', 'PhotoAndVideoPolicy', 'RequestInstallPackagesPolicy',
+    'SmsAndCallLogPolicy', 'VpnServicePolicy',
+]
+def auditTaskNames = ['bilPolicyLintDebug', 'bilPolicyLintRelease', 'bilPolicyLintList'] as Set
+def modelPropertyNames = [
+    'lintModels', 'nestedComponentLintModels',
+    'dynamicFeatureLintModels', 'mainDependencyLintModels',
+]
+// Init scripts also run in Flutter's included Gradle build. Derive the one
+// Android root from this script's actual file, not the included build's root.
+def entrypointFile = initscript.sourceFile?.canonicalFile
+if (entrypointFile == null || !entrypointFile.isFile()) {
+    throw new GradleException('BIL GLOBAL lint requires a local, identifiable init script.')
+}
+def sourceRoot = entrypointFile.parentFile.parentFile.parentFile
+def androidRoot = new File(sourceRoot, 'android').canonicalFile
+
+def sha256File = { File file ->
+    if (!file.isFile()) throw new GradleException("Missing audit input: ${file}")
+    def digest = MessageDigest.getInstance('SHA-256')
+    file.withInputStream { stream ->
+        byte[] buffer = new byte[1024 * 1024]
+        int count
+        while ((count = stream.read(buffer)) != -1) digest.update(buffer, 0, count)
+    }
+    digest.digest().encodeHex().toString()
+}
+def sha256Text = { String value ->
+    MessageDigest.getInstance('SHA-256')
+        .digest(value.getBytes(StandardCharsets.UTF_8)).encodeHex().toString()
+}
+def fileEvidence = { File file ->
+    [path: file.canonicalPath, bytes: file.length(), sha256: sha256File(file)]
+}
+// Capture while this init executes, rather than hashing a possibly edited file
+// later when a model producer has finished and JavaExec begins.
+def entrypointEvidence = fileEvidence(entrypointFile)
+def writeJson = { File target, Map payload ->
+    if (!target.parentFile.isDirectory() && !target.parentFile.mkdirs()) {
+        throw new GradleException("Cannot create audit output directory: ${target.parentFile}")
+    }
+    target.setText(JsonOutput.prettyPrint(JsonOutput.toJson(payload)) + '\n', 'UTF-8')
+}
+def xmlRoot = { File file ->
+    def factory = DocumentBuilderFactory.newInstance()
+    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
+    factory.setFeature('http://apache.org/xml/features/disallow-doctype-decl', true)
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, '')
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, '')
+    factory.setExpandEntityReferences(false)
+    factory.newDocumentBuilder().parse(file).documentElement
+}
+// Lint's path-list format uses a trailing semicolon even on Unix. A native
+// pathSeparator here would misparse a single path or Windows drive letters.
+def lintPaths = { List<File> files -> files.collect { it.absolutePath }.join(';') + ';' }
+
+gradle.projectsEvaluated {
+    if (gradle.rootProject.projectDir.canonicalFile != androidRoot) return
+    def app = gradle.rootProject.findProject(':app')
+    if (app == null || !app.plugins.hasPlugin('com.android.application')) {
+        throw new GradleException('BIL GLOBAL lint requires the Android :app application project.')
+    }
+    def outputRoot = new File(sourceRoot, 'build/qa/policy-gate-20261015/android-lint-global')
+    def reports = [:]
+    ['debug', 'release'].each { variant ->
+        def reportName = "lintReport${variant.capitalize()}"
+        def provider = app.tasks.findByName(reportName)
+        if (provider == null) throw new GradleException("Missing AGP model authority :app:${reportName}")
+        reports[variant] = provider
+    }
+
+    def validateRuntimeAndRules = { JavaExec task, report ->
+        def agpVersion = report.class.classLoader.loadClass('com.android.Version')
+            .getField('ANDROID_GRADLE_PLUGIN_VERSION').get(null).toString()
+        if (agpVersion != expectedAgp || report.lintTool.versionKey.get() != expectedLint) {
+            throw new GradleException("Expected AGP ${expectedAgp}/Lint ${expectedLint}; found " +
+                "${agpVersion}/${report.lintTool.versionKey.get()}.")
+        }
+        def runtime = task.classpath.files.toList().sort { it.canonicalPath }
+        ['lint', 'lint-api', 'lint-checks', 'lint-gradle', 'lint-model'].each { artifact ->
+            if (runtime.count { it.name == "${artifact}-${expectedLint}.jar" } != 1) {
+                throw new GradleException("The AGP runtime must contain exactly one ${artifact}-${expectedLint}.jar.")
+            }
+        }
+        if (runtime.any { !it.isFile() }) throw new GradleException('Incomplete AGP lint runtime classpath.')
+        def rules = report.lintRuleJars.files.findAll { it.isFile() }
+            .toList().unique { it.canonicalPath }.sort { it.canonicalPath }
+        def insights = rules.findAll { it.name == "insights-lint-${expectedInsights}.jar" }
+        if (insights.size() != 1 || sha256File(insights[0]) != expectedInsightsSha256) {
+            throw new GradleException('The complete official Insights 0.1.5 rule JAR is missing or has an unexpected SHA-256.')
+        }
+        def otherInsights = rules.findAll {
+            it.name.startsWith('insights-lint-') && it.name != "insights-lint-${expectedInsights}.jar"
+        }
+        if (!otherInsights.empty) throw new GradleException('Mixed Play Policy Insights versions are forbidden.')
+        if (System.getenv('ANDROID_LINT_JARS')?.trim()) {
+            throw new GradleException('ANDROID_LINT_JARS would add unrecorded custom rules; unset it for this audit.')
+        }
+        def sdkHome = report.androidSdkHome.orNull
+        def jdkHome = report.systemPropertyInputs.javaHome.get()
+        def javaExecutable = new File(jdkHome, "bin/java${System.getProperty('os.name').startsWith('Windows') ? '.exe' : ''}")
+        if (!sdkHome || !new File(sdkHome).isDirectory() || !javaExecutable.isFile()) {
+            throw new GradleException('AGP did not supply an existing SDK home and JDK executable.')
+        }
+        task.executable = javaExecutable.absolutePath
+        [runtime: runtime, rules: rules, sdkHome: sdkHome, jdkHome: jdkHome]
+    }
+
+    def declaredComponentScope = { String variant ->
+        def cap = variant.capitalize()
+        def unitProducer = app.tasks.findByName("generate${cap}UnitTestLintModel")
+        def instrumentationProducer = app.tasks.findByName("generate${cap}AndroidTestLintModel")
+        def android = app.extensions.getByName('android')
+        def unitSourceSetNames = ['test', "test${cap}".toString()]
+        def unitSourceSets = android.sourceSets.findAll { unitSourceSetNames.contains(it.name) }
+        def unitRoots = unitSourceSets.collectMany {
+            it.java.srcDirs.toList() + [new File(app.projectDir, "src/${it.name}/kotlin")]
+        }.unique { it.canonicalPath }
+        def unitSources = unitRoots.collectMany { directory ->
+            app.fileTree(directory) { include '**/*.java', '**/*.kt' }.files.toList()
+        }.unique { it.canonicalPath }.sort { it.canonicalPath }
+        def requiredTypes = ['MAIN'] as Set
+        if (unitProducer != null || !unitSources.empty) requiredTypes.add('UNIT_TEST')
+        if (instrumentationProducer != null) requiredTypes.add('INSTRUMENTATION_TEST')
+        [requiredTypes: requiredTypes, testBuildType: android.testBuildType,
+            unitTestModelProducer: unitProducer?.path,
+            instrumentationModelProducer: instrumentationProducer?.path,
+            unitTestSourceSets: unitSourceSets.collect { it.name }.sort(),
+            unitTestSources: unitSources.collect { fileEvidence(it) }]
+    }
+
+    def collectModels = { report, String variant ->
+        def groups = modelPropertyNames.collectEntries { name ->
+            [(name): report."${name}".files.toList().sort { it.canonicalPath }]
+        }
+        if (groups.lintModels.empty) throw new GradleException("Missing primary ${variant} AGP lint model.")
+        def models = groups.values().flatten().unique { it.canonicalPath }
+        def appTypes = [] as Set
+        def evidence = models.collect { File directory ->
+            def moduleFile = new File(directory, 'module.xml')
+            if (!directory.isDirectory() || !moduleFile.isFile()) {
+                throw new GradleException("Incomplete lint model directory: ${directory}")
+            }
+            def module = xmlRoot(moduleFile)
+            if (module.nodeName != 'lint-module' || module.getAttribute('agpVersion') != expectedAgp) {
+                throw new GradleException("Unexpected AGP model identity: ${moduleFile}")
+            }
+            def moduleDirectory = new File(module.getAttribute('dir')).canonicalFile
+            def isApp = moduleDirectory == app.projectDir.canonicalFile
+            def variants = module.getElementsByTagName('variant')
+            def declared = (0..<variants.length).collect { variants.item(it).getAttribute('name') }
+            if (declared.empty || declared.any { !it }) {
+                throw new GradleException("Model has no declared variant: ${moduleFile}")
+            }
+            if (isApp && !declared.contains(variant)) {
+                throw new GradleException("App model does not declare requested variant ${variant}: ${moduleFile}")
+            }
+            def options = module.getElementsByTagName('lintOptions')
+            def optionEvidence = options.length == 0 ? [:] : (0..<options.item(0).attributes.length).collectEntries { n ->
+                def attribute = options.item(0).attributes.item(n)
+                [(attribute.nodeName): attribute.nodeValue]
+            }
+            if (isApp && (optionEvidence.ignoreWarnings == 'true' ||
+                ['baseline', 'baselineFile', 'checkOnly', 'disable'].any { optionEvidence[it]?.trim() })) {
+                throw new GradleException("App model narrows checks or uses a baseline: ${moduleFile}")
+            }
+            if (isApp && optionEvidence.checkDependencies != 'true') {
+                throw new GradleException('The app model must enable dependency checking for GLOBAL lint.')
+            }
+            def variantEvidence = declared.collect { String name ->
+                def file = new File(directory, "${name}.xml")
+                if (!file.isFile()) throw new GradleException("Missing declared variant model: ${file}")
+                def model = xmlRoot(file)
+                if (model.nodeName != 'variant' || model.getAttribute('name') != name) {
+                    throw new GradleException("Invalid variant model: ${file}")
+                }
+                def artifacts = model.getElementsByTagName('artifact')
+                def types = (0..<artifacts.length).collect { artifacts.item(it).getAttribute('type') }.unique()
+                if (isApp && name == variant) appTypes.addAll(types)
+                def mergedPath = model.getAttribute('mergedManifest')
+                def merged = mergedPath ? new File(mergedPath) : null
+                if (merged == null || !merged.isFile()) {
+                    throw new GradleException("Missing merged manifest referenced by model: ${file}")
+                }
+                [variant: name, artifactTypes: types, mergedManifest: fileEvidence(merged)]
+            }
+            def xmlFiles = directory.listFiles().findAll { it.isFile() && it.name.endsWith('.xml') }
+                .toList().sort { it.name }
+            [directory: directory.canonicalPath, module: module.getAttribute('name'),
+                declaredVariants: declared, lintOptions: optionEvidence,
+                artifacts: variantEvidence, files: xmlFiles.collect { fileEvidence(it) }]
+        }
+        // AGP serializes AndroidTest as INSTRUMENTATION_TEST. Require only
+        // components AGP actually defines, plus native unit-test sources.
+        // testBuildType=debug does not define release instrumentation tests.
+        def componentScope = declaredComponentScope(variant)
+        def missing = componentScope.requiredTypes - appTypes
+        if (!missing.empty) throw new GradleException(
+            "Incomplete ${variant} app model scope: missing ${missing.sort()}. " +
+            'No alternate variant or fabricated test component is substituted.')
+        [directories: models, evidence: evidence, appTypes: appTypes.toList().sort(),
+            declaredComponents: componentScope,
+            groups: groups.collectEntries { name, files -> [(name): files.collect { it.canonicalPath }] }]
+    }
+
+    ['debug', 'release'].each { String variant ->
+        def report = reports[variant]
+        def modelSets = modelPropertyNames.collect { report."${it}" }
+        app.tasks.register("bilPolicyLint${variant.capitalize()}", JavaExec) { task ->
+            task.group = 'verification'
+            task.description = "Complete GLOBAL Android lint/Insights for ${variant}; no signing or publishing."
+            task.classpath = report.lintTool.classpath
+            task.mainClass.set('com.android.tools.lint.Main')
+            task.systemProperty('file.encoding', 'UTF-8')
+            task.systemProperty('java.awt.headless', 'true')
+            task.timeout.set(java.time.Duration.ofMinutes(30))
+            task.maxHeapSize = report.lintTool.workerHeapSize.orNull ?: '3g'
+            task.ignoreExitValue = false
+            task.dependsOn(modelSets)
+            task.inputs.files(modelSets)
+            task.inputs.files(report.lintRuleJars)
+            task.inputs.property('bilAgpVersion', expectedAgp)
+            task.inputs.property('bilLintVersion', expectedLint)
+            task.inputs.property('bilInsightsSha256', expectedInsightsSha256)
+            ['xml', 'sarif', 'txt', 'inputs.json', 'result.json'].each { suffix ->
+                task.outputs.file(new File(outputRoot, "${variant}.${suffix}"))
+            }
+            task.outputs.upToDateWhen { false }
+            task.doFirst {
+                // A failed retry must not leave a previous PASS marker looking
+                // current. JavaExec itself remains fail-closed on a nonzero exit.
+                writeJson(new File(outputRoot, "${variant}.result.json"),
+                    [startedAtUtc: Instant.now().toString(), status: 'NOT_COMPLETED',
+                     mode: 'GLOBAL', variant: variant])
+                def authority = validateRuntimeAndRules(task, report)
+                def models = collectModels(report, variant)
+                if (!report.checkOnly.get().empty || report.fatalOnly.get() || report.autoFix.get()) {
+                    throw new GradleException('GLOBAL audit forbids narrowed checks, fatal-only analysis, or automatic fixes.')
+                }
+                def xml = new File(outputRoot, "${variant}.xml")
+                def sarif = new File(outputRoot, "${variant}.sarif")
+                def text = new File(outputRoot, "${variant}.txt")
+                def useK2Uast = report.uastInputs.useK2Uast
+                def uastEvidence = [useK2Uast: useK2Uast,
+                    manualSetting: report.uastInputs.useK2UastManualSetting.orNull,
+                    kotlinLanguageVersion: report.uastInputs.kotlinLanguageVersion,
+                    experimentalProjectProperty: app.findProperty('android.experimental.lint.useK2Uast'),
+                    projectProperty: app.findProperty('android.lint.useK2Uast')]
+                def arguments = [
+                    '--client-id', 'gradle', '--client-name', 'BIL Android Lint GLOBAL',
+                    '--client-version', expectedAgp,
+                    '--lint-model', lintPaths(models.directories), '--variant', variant,
+                    '--lint-rule-jars', lintPaths(authority.rules),
+                    '--sdk-home', authority.sdkHome, '--jdk-home', authority.jdkHome,
+                    '--exitcode', '--stacktrace',
+                    '--xml', xml.absolutePath, '--sarif', sarif.absolutePath, '--text', text.absolutePath,
+                    useK2Uast ? '--XuseK2Uast' : '--XuseK1Uast',
+                    '--cache-dir', new File(outputRoot, "cache/${expectedLint}/${variant}").absolutePath,
+                ]
+                if (report.offline.get()) arguments.add('--offline')
+                def forbidden = ['--analyze-only', '--report-only', '--disable', '--check',
+                    '--baseline', '--update-baseline', '--ignore', '--fatalOnly', '--apply-suggestions']
+                if (arguments.any { forbidden.contains(it) }) throw new GradleException('Unsafe/narrowed lint arguments.')
+                def provenance = [
+                    scope: 'AGP models, referenced merged manifests, complete rule/runtime JARs, and this entrypoint',
+                    mode: 'GLOBAL', variant: variant, agp: expectedAgp, lint: expectedLint,
+                    insights: expectedInsights, insightsSha256: expectedInsightsSha256,
+                    sdkHome: authority.sdkHome, jdkHome: authority.jdkHome,
+                    modelCollections: models.groups, appArtifactTypes: models.appTypes,
+                    declaredComponents: models.declaredComponents, uast: uastEvidence,
+                    models: models.evidence, rules: authority.rules.collect { fileEvidence(it) },
+                    runtime: authority.runtime.collect { fileEvidence(it) }, arguments: arguments,
+                    entrypoint: entrypointEvidence,
+                ]
+                writeJson(new File(outputRoot, "${variant}.inputs.json"),
+                    [startedAtUtc: Instant.now().toString(), inputSha256: sha256Text(JsonOutput.toJson(provenance)), inputs: provenance])
+                task.setArgs(arguments)
+                task.logger.lifecycle("BIL GLOBAL ${variant}: ${models.directories.size()} models, " +
+                    "${authority.rules.size()} complete rule JARs; Insights ${expectedInsights} SHA-256 verified; " +
+                    "UAST=${useK2Uast ? 'K2' : 'K1'} (AGP effective setting).")
+            }
+            task.doLast {
+                def reportsEvidence = ['xml', 'sarif', 'txt'].collect { suffix ->
+                    def file = new File(outputRoot, "${variant}.${suffix}")
+                    if (!file.isFile() || file.length() == 0) throw new GradleException("Missing GLOBAL report: ${file}")
+                    fileEvidence(file)
+                }
+                writeJson(new File(outputRoot, "${variant}.result.json"),
+                    [completedAtUtc: Instant.now().toString(), status: 'PASS', mode: 'GLOBAL',
+                     variant: variant, reports: reportsEvidence,
+                     inputs: fileEvidence(new File(outputRoot, "${variant}.inputs.json"))])
+            }
+        }
+    }
+
+    app.tasks.register('bilPolicyLintList', JavaExec) { task ->
+        def report = reports.debug
+        def listing = new ByteArrayOutputStream()
+        task.group = 'verification'
+        task.description = 'List builtin and complete pinned Insights checks; does not analyze app sources.'
+        task.classpath = report.lintTool.classpath
+        task.mainClass.set('com.android.tools.lint.Main')
+        task.systemProperty('file.encoding', 'UTF-8')
+        task.systemProperty('java.awt.headless', 'true')
+        task.timeout.set(java.time.Duration.ofMinutes(30))
+        task.ignoreExitValue = false
+        task.dependsOn(report.lintRuleJars)
+        task.standardOutput = listing
+        task.outputs.file(new File(outputRoot, 'issues.txt'))
+        task.outputs.file(new File(outputRoot, 'issues.inputs.json'))
+        task.outputs.upToDateWhen { false }
+        task.doFirst {
+            def authority = validateRuntimeAndRules(task, report)
+            // Main --list only loads GLOBAL registries, before project discovery.
+            // In Lint32, --lint-rule-jars overrides findRuleJars(project), while
+            // findGlobalRuleJars ignores ANDROID_LINT_JARS for client-id=gradle.
+            // The CLI inventory therefore uses its official global-rule path.
+            // Only this child JVM receives the full, already validated rule set.
+            def childRulePath = authority.rules.collect { it.absolutePath }.join(File.pathSeparator)
+            task.environment('ANDROID_LINT_JARS', childRulePath)
+            def arguments = ['--client-id', 'cli', '--client-name', 'BIL Android Lint GLOBAL rule inventory',
+                '--client-version', expectedAgp, '--lint-rule-jars', lintPaths(authority.rules), '--list']
+            writeJson(new File(outputRoot, 'issues.inputs.json'),
+                [startedAtUtc: Instant.now().toString(), mode: 'LIST_ONLY', agp: expectedAgp, lint: expectedLint,
+                 insights: expectedInsights, insightsSha256: expectedInsightsSha256,
+                 expectedInsightsIds: expectedInsightsIds, entrypoint: entrypointEvidence,
+                 childEnvironment: [ANDROID_LINT_JARS: childRulePath],
+                 rules: authority.rules.collect { fileEvidence(it) },
+                 runtime: authority.runtime.collect { fileEvidence(it) }, arguments: arguments])
+            task.setArgs(arguments)
+        }
+        task.doLast {
+            def value = listing.toString('UTF-8')
+            new File(outputRoot, 'issues.txt').setText(value, 'UTF-8')
+            def missingIds = expectedInsightsIds.findAll { !value.contains('"' + it + '"') }
+            if (!missingIds.empty) {
+                throw new GradleException("Listing did not register all Insights 0.1.5 checks: ${missingIds}")
+            }
+            task.logger.lifecycle("BIL lint registry includes all ${expectedInsightsIds.size()} Insights 0.1.5 checks " +
+                "and builtin checks; full list: ${outputRoot}/issues.txt")
+        }
+    }
+
+    gradle.taskGraph.whenReady { graph ->
+        if (graph.allTasks.any { it.project == app && auditTaskNames.contains(it.name) }) {
+            ['debug', 'release'].each { variant ->
+                if (graph.allTasks.any { it.project == app && it.name == "bilPolicyLint${variant.capitalize()}" }) {
+                    writeJson(new File(outputRoot, "${variant}.result.json"),
+                        [startedAtUtc: Instant.now().toString(), status: 'NOT_COMPLETED',
+                         mode: 'GLOBAL', variant: variant, stage: 'MODEL_PRODUCERS_PENDING'])
+                }
+            }
+            def forbidden = graph.allTasks.findAll {
+                it instanceof Test || it.name ==~ /connected.*AndroidTest/ ||
+                    it.name ==~ /lint(?:Analyze|Report|VitalAnalyze|VitalReport).*/ ||
+                    it.name ==~ /(?i)(?:publish|upload|install|sign).*/ ||
+                    (it.project == app && (
+                        it.name ==~ /assemble(?:Debug|Release).*/ ||
+                        it.name ==~ /bundle(?:Debug|Release)/ ||
+                        it.name ==~ /package(?:Debug|Release)(?:AndroidTest|Bundle|UniversalApk)?/))
+            }
+            if (!forbidden.empty) throw new GradleException(
+                'GLOBAL lint graph contains test execution, partial lint, packaging, signing or publication tasks: ' +
+                forbidden.collect { it.path }.join(', '))
+        }
+    }
+}

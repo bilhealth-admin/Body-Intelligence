@@ -65873,41 +65873,36 @@ abstract final class ExtendedRuntimeCopy {
     },
     "300+ home workout videos\n100+ video-guided weight-training plans": {
       "de":
-          "Über 300 Heimtrainingsvideos\nÜber 100 videogeführte Krafttrainingspläne",
+          "Über 300 Trainingsvideos\nÜber 100 videogeführte Krafttrainingspläne",
       "it":
-          "Oltre 300 video di allenamento a casa\nOltre 100 piani di allenamento con i pesi videoguidati",
+          "Oltre 300 video di allenamento\nOltre 100 piani di allenamento con i pesi videoguidati",
       "pt-BR":
-          "Mais de 300 vídeos de exercícios em casa\nMais de 100 planos de treinamento com pesos guiados por vídeo",
+          "Mais de 300 vídeos de exercícios\nMais de 100 planos de treinamento com pesos guiados por vídeo",
       "pt-PT":
-          "Mais de 300 vídeos de exercícios em casa\nMais de 100 planos de treino com pesos guiados por vídeo",
-      "ur":
-          "300+ گھریلو ورزش کی ویڈیوز\n100+ ویڈیو گائیڈڈ وزن کی تربیت کے منصوبے",
-      "fa":
-          "بیش از 300 فیلم تمرین خانگی\n100+ برنامه تمرین وزنه با هدایت ویدیویی",
-      "hi":
-          "300+ घरेलू कसरत वीडियो\n100+ वीडियो-निर्देशित वजन-प्रशिक्षण योजनाएँ",
-      "id":
-          "300+ video latihan di rumah\n100+ rencana latihan beban yang dipandu video",
-      "ms":
-          "300+ video senaman di rumah\n100+ pelan latihan berat berpandukan video",
-      "ja": "300本以上のホームトレーニングビデオ\n100 以上のビデオガイド付きウェイトトレーニング プラン",
-      "ko": "300개 이상의 홈 트레이닝 비디오\n100개 이상의 비디오 안내 웨이트 트레이닝 계획",
-      "zh-Hans": "300 多个家庭锻炼视频\n100 多个视频指导重量训练计划",
-      "zh-Hant": "300 多個家庭鍛煉視頻\n100 多個影片指導重量訓練計劃",
+          "Mais de 300 vídeos de exercícios\nMais de 100 planos de treino com pesos guiados por vídeo",
+      "ur": "300+ ورزش کی ویڈیوز\n100+ ویڈیو گائیڈڈ وزن کی تربیت کے منصوبے",
+      "fa": "بیش از 300 فیلم تمرین\n100+ برنامه تمرین وزنه با هدایت ویدیویی",
+      "hi": "300+ कसरत वीडियो\n100+ वीडियो-निर्देशित वजन-प्रशिक्षण योजनाएँ",
+      "id": "300+ video latihan\n100+ rencana latihan beban yang dipandu video",
+      "ms": "300+ video senaman\n100+ pelan latihan berat berpandukan video",
+      "ja": "300本以上のトレーニングビデオ\n100 以上のビデオガイド付きウェイトトレーニング プラン",
+      "ko": "300개 이상의 트레이닝 비디오\n100개 이상의 비디오 안내 웨이트 트레이닝 계획",
+      "zh-Hans": "300 多个锻炼视频\n100 多个视频指导重量训练计划",
+      "zh-Hant": "300 多個鍛煉視頻\n100 多個影片指導重量訓練計劃",
       "ru":
-          "Более 300 видео домашних тренировок\nБолее 100 планов силовых тренировок с видеоинструкциями",
+          "Более 300 видео тренировок\nБолее 100 планов силовых тренировок с видеоинструкциями",
       "bn":
-          "300+ হোম ওয়ার্কআউট ভিডিও\n100+ ভিডিও-নির্দেশিত ওজন-প্রশিক্ষণ পরিকল্পনা",
+          "300+ ওয়ার্কআউট ভিডিও\n100+ ভিডিও-নির্দেশিত ওজন-প্রশিক্ষণ পরিকল্পনা",
       "vi":
-          "Hơn 300 video tập luyện tại nhà\nHơn 100 kế hoạch tập tạ có hướng dẫn bằng video",
+          "Hơn 300 video tập luyện\nHơn 100 kế hoạch tập tạ có hướng dẫn bằng video",
       "th":
-          "วิดีโอออกกำลังกายที่บ้านมากกว่า 300 รายการ\nแผนการฝึกยกน้ำหนักพร้อมวิดีโอแนะนำมากกว่า 100 รายการ",
+          "วิดีโอออกกำลังกายมากกว่า 300 รายการ\nแผนการฝึกยกน้ำหนักพร้อมวิดีโอแนะนำมากกว่า 100 รายการ",
       "pl":
-          "Ponad 300 filmów z ćwiczeniami w domu\nPonad 100 planów treningu siłowego z przewodnikiem wideo",
+          "Ponad 300 filmów z ćwiczeniami\nPonad 100 planów treningu siłowego z przewodnikiem wideo",
       "nl":
-          "300+ thuistrainingsvideo's\nMeer dan 100 videogeleide krachttrainingsplannen",
+          "300+ trainingsvideo's\nMeer dan 100 videogeleide krachttrainingsplannen",
       "uk":
-          "Понад 300 відео тренувань вдома\nПонад 100 відеопланів силових тренувань",
+          "Понад 300 відео тренувань\nПонад 100 відеопланів силових тренувань",
     },
     "Home workouts and strength plans": {
       "de": "Heimtraining und Kraftpläne",
@@ -65970,26 +65965,26 @@ abstract final class ExtendedRuntimeCopy {
           "Тренуйтеся вдома або дотримуйтесь структурованих планів силових тренувань із чіткими відеоінструкціями.",
     },
     "300+ home workout videos": {
-      "de": "Über 300 Heimtrainingsvideos",
-      "it": "Oltre 300 video di allenamento a casa",
-      "pt-BR": "Mais de 300 vídeos de exercícios em casa",
-      "pt-PT": "Mais de 300 vídeos de exercícios em casa",
-      "ur": "300+ گھریلو ورزش کی ویڈیوز",
-      "fa": "بیش از 300 فیلم تمرین خانگی",
-      "hi": "300+ घरेलू कसरत वीडियो",
-      "id": "300+ video latihan di rumah",
-      "ms": "300+ video senaman di rumah",
-      "ja": "300本以上のホームトレーニングビデオ",
-      "ko": "300개 이상의 홈 트레이닝 비디오",
-      "zh-Hans": "300 多个家庭锻炼视频",
-      "zh-Hant": "300 多個家庭鍛煉視頻",
-      "ru": "Более 300 видео домашних тренировок",
-      "bn": "300+ হোম ওয়ার্কআউট ভিডিও",
-      "vi": "Hơn 300 video tập luyện tại nhà",
-      "th": "วิดีโอออกกำลังกายที่บ้านมากกว่า 300 รายการ",
-      "pl": "Ponad 300 filmów z ćwiczeniami w domu",
-      "nl": "300+ thuistrainingsvideo's",
-      "uk": "Понад 300 відео тренувань вдома",
+      "de": "Über 300 Trainingsvideos",
+      "it": "Oltre 300 video di allenamento",
+      "pt-BR": "Mais de 300 vídeos de exercícios",
+      "pt-PT": "Mais de 300 vídeos de exercícios",
+      "ur": "300+ ورزش کی ویڈیوز",
+      "fa": "بیش از 300 فیلم تمرین",
+      "hi": "300+ कसरत वीडियो",
+      "id": "300+ video latihan",
+      "ms": "300+ video senaman",
+      "ja": "300本以上のトレーニングビデオ",
+      "ko": "300개 이상의 트레이닝 비디오",
+      "zh-Hans": "300 多个锻炼视频",
+      "zh-Hant": "300 多個鍛煉視頻",
+      "ru": "Более 300 видео тренировок",
+      "bn": "300+ ওয়ার্কআউট ভিডিও",
+      "vi": "Hơn 300 video tập luyện",
+      "th": "วิดีโอออกกำลังกายมากกว่า 300 รายการ",
+      "pl": "Ponad 300 filmów z ćwiczeniami",
+      "nl": "300+ trainingsvideo's",
+      "uk": "Понад 300 відео тренувань",
     },
     "100+ video-guided weight-training plans": {
       "de": "Über 100 videogeführte Krafttrainingspläne",

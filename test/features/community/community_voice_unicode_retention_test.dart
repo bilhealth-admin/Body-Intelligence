@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/system_speech_disclosure_test_support.dart';
+
 String _repeat(String value, int times) => List.filled(times, value).join();
 
 final class _SpeechFixture extends SpeechToText {
@@ -65,6 +67,10 @@ void main() {
         );
         String? accepted;
         var returned = false;
+        addTearDown(() async {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        });
         await tester.pumpWidget(
           MaterialApp(
             locale: const Locale('en'),
@@ -83,7 +89,7 @@ void main() {
           ),
         );
         await tester.tap(find.byKey(const Key('begin-unicode-voice')));
-        await tester.pumpAndSettle();
+        await acceptSystemSpeechDisclosure(tester);
 
         final editor = find.byKey(const Key('community-voice-transcript'));
         final useText = find.byKey(const Key('community-use-voice-transcript'));

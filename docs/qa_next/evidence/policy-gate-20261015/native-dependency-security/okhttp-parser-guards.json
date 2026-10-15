@@ -1,0 +1,18 @@
+{
+  "schema": "bil.qa.okhttp.ci-guards.v1",
+  "passed": 7,
+  "failed": 0,
+  "checks": [
+    "typed AAR matches supplied path/suffix/SHA256",
+    "typed AAR SHA mismatch rejected",
+    "typed AAR refuses a valid-hash JAR of the wrong suffix",
+    "candidate JAR supplied SHA mismatch rejected",
+    "POM still resolves separately from supplied AAR",
+    "official Maven checksum mismatch rejected",
+    "valid SHA1 alone cannot override pinned JAR SHA256"
+  ],
+  "candidate_fixture_is_synthetic": true,
+  "source_graph_sha256": "fabadac394d45f1d9a450dcb6c63f71bf3820dfad0689ae851c2ba7cb23bf730",
+  "helper_sha256": "3840b24c526c2222c775ab447750338c43f1ef1c28b9b6b9ba0fc0b361fdce6e",
+  "candidate_fixture": "build\\qa\\policy-gate-20261015\\okhttp-ci-mode-fixtures-20261015T230501\\synthetic-candidate-4.9.2.json"
+}

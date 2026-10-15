@@ -1,0 +1,17 @@
+{
+  "scope": "Android13 API33 native Coach AR normal2x; synthetic held model; no cloud or paid AI",
+  "business_cases": {
+    "pass": 2,
+    "fail": 0,
+    "sdk_counter_includes_teardown": 3
+  },
+  "process_exit": 0,
+  "pngs": 6,
+  "collector": "bounded4, exact-path/SHA/CRC/byte count/dimension validation",
+  "all72_transfer_in60s_proven": false,
+  "source": "7e8564e1a198e5333495bc2461c0f8dcc9faffa12f6cd0344999078c8dc234d0",
+  "apk_sha256": "9aeaaf0963e4c60fc30d6fefac7e81c69026a77c0b7a95ef6822a09e092177e8",
+  "apk_bytes": 286125726,
+  "not_android_build33_store_artifact": true,
+  "native_metadata": "native-metadata.json"
+}

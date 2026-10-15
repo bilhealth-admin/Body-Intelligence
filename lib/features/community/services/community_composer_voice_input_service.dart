@@ -30,6 +30,13 @@ final class CommunityComposerVoiceInputService {
     if (!VoiceCaptureLease.acquire(this)) return null;
     MealVoiceSession? session;
     try {
+      if (!await _speech.systemSpeechDisclosure.authorize(
+        context,
+        use: BilSpeechUse.community,
+      )) {
+        return null;
+      }
+      if (!context.mounted) return null;
       final gate = permissionGate;
       final allowed = gate == null
           ? await _ensurePermission(context)

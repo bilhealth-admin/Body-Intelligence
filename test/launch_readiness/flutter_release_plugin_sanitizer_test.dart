@@ -42,6 +42,73 @@ void main() {
     );
   });
 
+  test(
+    'Android excludes the unused legacy scanner while retaining camera and mobile scanner',
+    () {
+      final root = Directory.systemTemp.createTempSync(
+        'bil-android-barcode-exclusion-',
+      );
+      addTearDown(() => root.deleteSync(recursive: true));
+      final metadata = File('${root.path}/.flutter-plugins-dependencies')
+        ..createSync(recursive: true);
+      metadata.writeAsStringSync(
+        jsonEncode(
+          _document(
+            android: [
+              _plugin('mobile_scanner', dev: false),
+              _plugin('camera_android_camerax', dev: false),
+              _plugin('simple_barcode_scanner', dev: false),
+              _plugin('integration_test', dev: true),
+            ],
+            ios: [_plugin('simple_barcode_scanner', dev: false)],
+            graph: [
+              _graph('mobile_scanner'),
+              _graph('camera_android_camerax'),
+              _graph('simple_barcode_scanner'),
+              _graph('integration_test'),
+            ],
+          ),
+        ),
+      );
+      final registrant = File(
+        '${root.path}/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+      )..createSync(recursive: true);
+      final entries = <String, String>{
+        'mobile_scanner': 'dev.steenbakker.MobileScannerPlugin',
+        'camera_android_camerax': 'io.flutter.CameraPlugin',
+        'simple_barcode_scanner': 'com.amolg.FlutterBarcodeScannerPlugin',
+        'integration_test': 'dev.flutter.IntegrationTestPlugin',
+      };
+      registrant.writeAsStringSync(
+        'package io.flutter.plugins;\nimport io.flutter.embedding.engine.FlutterEngine;\npublic final class GeneratedPluginRegistrant {\n public static void registerWith(FlutterEngine flutterEngine) {\n${entries.entries.map((entry) => '    try {\n      flutterEngine.getPlugins().add(new ${entry.value}());\n    } catch (Exception e) {\n      Log.e(TAG, "Error registering plugin ${entry.key}, ${entry.value}", e);\n    }').join('\n')}\n  }\n}\n',
+      );
+      sanitizeFlutterReleaseProject(
+        projectRoot: root,
+        platform: 'android',
+        excludedNativePluginNames: iosWindowsOnlyNativePluginNames,
+        removeDevOnlyPlugins: false,
+      );
+      final text = registrant.readAsStringSync();
+      expect(text, contains('MobileScannerPlugin'));
+      expect(text, contains('CameraPlugin'));
+      expect(text, contains('IntegrationTestPlugin'));
+      expect(text, isNot(contains('FlutterBarcodeScannerPlugin')));
+      final persisted = jsonDecode(metadata.readAsStringSync()) as Map;
+      expect(
+        (persisted['plugins'] as Map)['ios'].toString(),
+        contains('simple_barcode_scanner'),
+      );
+      expect(
+        () => sanitizeFlutterReleaseProject(
+          projectRoot: root,
+          platform: 'android',
+          excludedNativePluginNames: {'mobile_scanner'},
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
+
   test('sanitizer is idempotent', () {
     final first = sanitizeFlutterPluginDependencies(
       _document(
@@ -338,7 +405,9 @@ void _expectWorkflowOrder(
   required String build,
 }) {
   final tests = workflow.lastIndexOf('flutter test');
-  final sanitizer = workflow.indexOf(
+  // An early preserve-dev pass prepares Lint/native QA; the final pass
+  // must still remove test plugins after the release contracts.
+  final sanitizer = workflow.lastIndexOf(
     'dart run tool/release/sanitize_flutter_release_plugins.dart '
     '--platform=$platform',
   );

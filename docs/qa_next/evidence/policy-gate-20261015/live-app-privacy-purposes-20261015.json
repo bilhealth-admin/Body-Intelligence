@@ -1,0 +1,234 @@
+{
+  "read_date_utc": "2026-10-15",
+  "method": "Live App Store Connect privacy DOM read, no edit controls used",
+  "url": "https://appstoreconnect.apple.com/apps/6805349703/distribution/privacy",
+  "observed_published_text": "2 days ago",
+  "rows": [
+    {
+      "data_type": "Name",
+      "collected": true,
+      "displayed_purposes": [
+        "Product Personalization",
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Email Address",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Phone Number",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Health",
+      "collected": true,
+      "displayed_purposes": [
+        "Product Personalization",
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Fitness",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Product Personalization"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Coarse Location",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Third-Party Advertising",
+        "Analytics"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Contacts",
+      "collected": true,
+      "displayed_purposes": [
+        "Product Personalization",
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Emails or Text Messages",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Photos or Videos",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Customer Support",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Other User Content",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Product Personalization"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Search History",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "User ID",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Product Personalization",
+        "Third-Party Advertising"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": true
+    },
+    {
+      "data_type": "Device ID",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Analytics",
+        "Third-Party Advertising"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": true
+    },
+    {
+      "data_type": "Purchase History",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Product Interaction",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Analytics",
+        "Product Personalization",
+        "Third-Party Advertising"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": true
+    },
+    {
+      "data_type": "Advertising Data",
+      "collected": true,
+      "displayed_purposes": [
+        "Analytics",
+        "Third-Party Advertising"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Other Usage Data",
+      "collected": true,
+      "displayed_purposes": [
+        "Analytics"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Crash Data",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Analytics"
+      ],
+      "linked_identity_bullet_observed": null,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Performance Data",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Third-Party Advertising",
+        "Analytics"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Other Diagnostic Data",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Analytics",
+        "Third-Party Advertising"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    },
+    {
+      "data_type": "Other Data Types",
+      "collected": true,
+      "displayed_purposes": [
+        "App Functionality",
+        "Product Personalization",
+        "Analytics"
+      ],
+      "linked_identity_bullet_observed": true,
+      "tracking_bullet_observed": false
+    }
+  ],
+  "limits": [
+    "Crash Data displayed no linked-identity bullet; null preserves that observation without inferring a radio answer not opened.",
+    "Purchase History shown under Purchases; Other Data Types shown under Other Data; type mapping is to the explicit22-type collected list.",
+    "Not opening edit dialogs means no answers changed; runtime SDK and final IPA remain unverified."
+  ],
+  "changes": 0
+}

@@ -17,6 +17,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../support/system_speech_disclosure_test_support.dart';
+
 const _owner = '11111111-1111-4111-8111-111111111111';
 const _collaborator = '22222222-2222-4222-8222-222222222222';
 late SupabaseClient _testClient;
@@ -475,6 +477,10 @@ void main() {
       permissionGate: (_) async => true,
     );
     String? accepted;
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
 
     await tester.pumpWidget(
       MaterialApp(
@@ -494,7 +500,7 @@ void main() {
     );
 
     await tester.tap(find.text('Voice'));
-    await tester.pumpAndSettle();
+    await acceptSystemSpeechDisclosure(tester);
 
     final field = tester.widget<TextField>(
       find.byKey(const Key('community-voice-transcript')),
@@ -518,6 +524,10 @@ void main() {
           permissionGate: (_) async => true,
         );
         String? accepted;
+        addTearDown(() async {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        });
         await tester.pumpWidget(
           MaterialApp(
             home: Builder(
@@ -533,7 +543,7 @@ void main() {
           ),
         );
         await tester.tap(find.text('Voice'));
-        await tester.pumpAndSettle();
+        await acceptSystemSpeechDisclosure(tester);
         final accept = find.byKey(const Key('community-use-voice-transcript'));
         final editor = find.byKey(const Key('community-voice-transcript'));
         expect(

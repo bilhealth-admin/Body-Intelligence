@@ -379,7 +379,7 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
                       return StatefulBuilder(
                         builder: (dialogContext, setDialogState) => PopScope(
                           canPop: !dialogSaving,
-                          child: AlertDialog(
+                          child: BilPearlAlertDialog(
                             title: Row(
                               children: [
                                 Expanded(
@@ -402,12 +402,80 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
                                 children: [
                                   TextField(
                                     controller: controller,
+                                    style: Theme.of(dialogContext)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: Theme.of(
+                                        dialogContext,
+                                      ).colorScheme.surfaceContainerLow,
+                                      suffixText: widget.suffix.isEmpty
+                                          ? null
+                                          : widget.suffix,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
                                     autofocus: true,
                                     enabled: !dialogSaving,
                                     keyboardType:
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                    key: ValueKey(
+                                      'restore-suggested-${widget.keyName}',
+                                    ),
+                                    onPressed: dialogSaving
+                                        ? null
+                                        : () async {
+                                            setDialogState(
+                                              () => dialogSaving = true,
+                                            );
+                                            try {
+                                              final restored =
+                                                  await _restoreGoalSuggestion(
+                                                    context,
+                                                    editorRepository,
+                                                    widget.keyName,
+                                                    () => _editorIsCurrent(
+                                                      editorRepository,
+                                                    ),
+                                                  );
+                                              if (restored &&
+                                                  dialogContext.mounted) {
+                                                Navigator.pop(
+                                                  dialogContext,
+                                                  '',
+                                                );
+                                              } else if (dialogContext
+                                                  .mounted) {
+                                                setDialogState(
+                                                  () => dialogSaving = false,
+                                                );
+                                              }
+                                            } on Object {
+                                              if (dialogContext.mounted) {
+                                                setDialogState(() {
+                                                  dialogSaving = false;
+                                                  dialogError = context.strings
+                                                      .text(
+                                                        'Could not save changes.',
+                                                      );
+                                                });
+                                              }
+                                            }
+                                          },
+                                    child: Text(
+                                      arabic
+                                          ? 'استعادة المقترح'
+                                          : 'Restore suggestion',
+                                    ),
                                   ),
                                   if (resolved?.needsReview == true)
                                     const _GoalEditorNotice(),
@@ -430,52 +498,6 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
                               ),
                             ),
                             actions: [
-                              TextButton(
-                                key: ValueKey(
-                                  'restore-suggested-${widget.keyName}',
-                                ),
-                                onPressed: dialogSaving
-                                    ? null
-                                    : () async {
-                                        setDialogState(
-                                          () => dialogSaving = true,
-                                        );
-                                        try {
-                                          final restored =
-                                              await _restoreGoalSuggestion(
-                                                context,
-                                                editorRepository,
-                                                widget.keyName,
-                                                () => _editorIsCurrent(
-                                                  editorRepository,
-                                                ),
-                                              );
-                                          if (restored &&
-                                              dialogContext.mounted) {
-                                            Navigator.pop(dialogContext, '');
-                                          } else if (dialogContext.mounted) {
-                                            setDialogState(
-                                              () => dialogSaving = false,
-                                            );
-                                          }
-                                        } on Object {
-                                          if (dialogContext.mounted) {
-                                            setDialogState(() {
-                                              dialogSaving = false;
-                                              dialogError = context.strings
-                                                  .text(
-                                                    'Could not save changes.',
-                                                  );
-                                            });
-                                          }
-                                        }
-                                      },
-                                child: Text(
-                                  arabic
-                                      ? 'استعادة المقترح'
-                                      : 'Restore suggestion',
-                                ),
-                              ),
                               TextButton(
                                 onPressed: dialogSaving
                                     ? null

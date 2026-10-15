@@ -1,0 +1,53 @@
+{
+  "scope": "Same8 actual widget renderings after import/braces/null-check/EOL hygiene fixes; no updated Goldens or UI drift",
+  "images": [
+    {
+      "file": "ar-dark-paid-editor.png",
+      "public_sha256": "9b308dbe9d6c5dd5e8dd6a91b1effdc328d85928b1c4da4979259b9068deb36b",
+      "post_analyzer_fixes_sha256": "9b308dbe9d6c5dd5e8dd6a91b1effdc328d85928b1c4da4979259b9068deb36b",
+      "identical": true
+    },
+    {
+      "file": "ar-paid-editor.png",
+      "public_sha256": "1e37f1e0f16f16e842527202fb7be7805f2d379f9560c530e3f67bf55e6720da",
+      "post_analyzer_fixes_sha256": "1e37f1e0f16f16e842527202fb7be7805f2d379f9560c530e3f67bf55e6720da",
+      "identical": true
+    },
+    {
+      "file": "ar-voice-dark-200-small.png",
+      "public_sha256": "fa566ee4f14c5b168361c3ba29052869e2b7296a9a16a78970d3c964cc287dec",
+      "post_analyzer_fixes_sha256": "fa566ee4f14c5b168361c3ba29052869e2b7296a9a16a78970d3c964cc287dec",
+      "identical": true
+    },
+    {
+      "file": "ar-voice-light.png",
+      "public_sha256": "1f712c7bfc9f1fbc6849d41cc98fc72b5578db7fca3c11339caf61768038a719",
+      "post_analyzer_fixes_sha256": "1f712c7bfc9f1fbc6849d41cc98fc72b5578db7fca3c11339caf61768038a719",
+      "identical": true
+    },
+    {
+      "file": "en-dark-paid-editor.png",
+      "public_sha256": "9a941a0c459c90c792e79db80d16e9233dc8e705045aa89aaff38f96cd4c2250",
+      "post_analyzer_fixes_sha256": "9a941a0c459c90c792e79db80d16e9233dc8e705045aa89aaff38f96cd4c2250",
+      "identical": true
+    },
+    {
+      "file": "en-paid-editor.png",
+      "public_sha256": "37ace5f7b3faa801c23c1103d87d983095eba041ab77421ddfa7dbf04f0ee7fe",
+      "post_analyzer_fixes_sha256": "37ace5f7b3faa801c23c1103d87d983095eba041ab77421ddfa7dbf04f0ee7fe",
+      "identical": true
+    },
+    {
+      "file": "en-voice-dark-200-small.png",
+      "public_sha256": "4428949d149807e946ac37f3910be6ad5962ffdfb8cc436d0b8cb202012dcdcb",
+      "post_analyzer_fixes_sha256": "4428949d149807e946ac37f3910be6ad5962ffdfb8cc436d0b8cb202012dcdcb",
+      "identical": true
+    },
+    {
+      "file": "en-voice-light.png",
+      "public_sha256": "53dc31ab528a0045672d51980e0040e1ae9639f30e431a716316d90d6a9e57dd",
+      "post_analyzer_fixes_sha256": "53dc31ab528a0045672d51980e0040e1ae9639f30e431a716316d90d6a9e57dd",
+      "identical": true
+    }
+  ]
+}

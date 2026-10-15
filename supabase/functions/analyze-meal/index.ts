@@ -1,3 +1,4 @@
+import { fetchDisclosedProvider } from "../_shared/ai_provider_recipient.ts";
 // The Deno runtime resolves URL imports; the workspace TypeScript server does
 // not unless the Deno VS Code extension is active.
 // @ts-ignore Deno URL import
@@ -276,14 +277,14 @@ deno.serve(async (request: Request) => {
           mimeType: body.mime_type,
           requestedLocale,
         });
-        upstream = await fetch(providerRequest.url, {
+        upstream = await fetchDisclosedProvider(fetch, providerRequest.url, {
           method: "POST",
           signal: abort.signal,
           headers: providerRequest.headers,
           body: providerRequest.body,
         });
       } else {
-        upstream = await fetch(gatewayUrl!, {
+        upstream = await fetchDisclosedProvider(fetch, gatewayUrl!, {
           method: "POST",
           signal: abort.signal,
           headers: {
@@ -333,7 +334,9 @@ deno.serve(async (request: Request) => {
     return reply({
       error: invalidProviderBody
         ? "invalid_vision_response"
-        : directConfig ? "vision_provider_failed" : "vision_gateway_failed",
+        : directConfig
+        ? "vision_provider_failed"
+        : "vision_gateway_failed",
     }, 502);
   }
   if (!upstream.ok) {

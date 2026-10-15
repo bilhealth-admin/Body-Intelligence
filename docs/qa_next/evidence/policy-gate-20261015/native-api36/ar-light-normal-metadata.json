@@ -1,0 +1,6741 @@
+{
+  "classification": "native android Flutter debug QA entrypoint",
+  "platform": "android",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "source_fingerprint": "03707325ec2bb3be9b7f0bbdff807e763fe545bb15db10636fb7dbd58c560aef",
+  "scene": "ar-light-normal",
+  "platform_version": "BE2A.250530.026.D1",
+  "device_name": "local-api36-owned",
+  "fonts": "actual platform theme; production BILDisplay/BILArabic overrides retained",
+  "text_scale": 1.0,
+  "reduce_motion_source": "controlled MediaQuery fixture override",
+  "physical_size": "1080.0x2400.0",
+  "device_pixel_ratio": 2.625,
+  "native_reduce_motion": false,
+  "sample_size_per_entry_condition": 1,
+  "timings": [
+    {
+      "kind": "recipes",
+      "capture_started_ms": 183,
+      "capture_completed_ms": 2000,
+      "capture_separate_visit": true,
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 71,
+      "last_visible_ms": 2200,
+      "first_absent_ms": 2259,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 58698,
+      "maximum_frame_gap_us": 66062,
+      "samples": [
+        {
+          "at_us": 71687,
+          "visible": true
+        },
+        {
+          "at_us": 111116,
+          "visible": true
+        },
+        {
+          "at_us": 135462,
+          "visible": true
+        },
+        {
+          "at_us": 150455,
+          "visible": true
+        },
+        {
+          "at_us": 181483,
+          "visible": true
+        },
+        {
+          "at_us": 228275,
+          "visible": true
+        },
+        {
+          "at_us": 268599,
+          "visible": true
+        },
+        {
+          "at_us": 318064,
+          "visible": true
+        },
+        {
+          "at_us": 377795,
+          "visible": true
+        },
+        {
+          "at_us": 413717,
+          "visible": true
+        },
+        {
+          "at_us": 448464,
+          "visible": true
+        },
+        {
+          "at_us": 495322,
+          "visible": true
+        },
+        {
+          "at_us": 547741,
+          "visible": true
+        },
+        {
+          "at_us": 578715,
+          "visible": true
+        },
+        {
+          "at_us": 628626,
+          "visible": true
+        },
+        {
+          "at_us": 682353,
+          "visible": true
+        },
+        {
+          "at_us": 747771,
+          "visible": true
+        },
+        {
+          "at_us": 769798,
+          "visible": true
+        },
+        {
+          "at_us": 813219,
+          "visible": true
+        },
+        {
+          "at_us": 854777,
+          "visible": true
+        },
+        {
+          "at_us": 896499,
+          "visible": true
+        },
+        {
+          "at_us": 945764,
+          "visible": true
+        },
+        {
+          "at_us": 996009,
+          "visible": true
+        },
+        {
+          "at_us": 1045230,
+          "visible": true
+        },
+        {
+          "at_us": 1108204,
+          "visible": true
+        },
+        {
+          "at_us": 1140668,
+          "visible": true
+        },
+        {
+          "at_us": 1187388,
+          "visible": true
+        },
+        {
+          "at_us": 1234070,
+          "visible": true
+        },
+        {
+          "at_us": 1272690,
+          "visible": true
+        },
+        {
+          "at_us": 1330167,
+          "visible": true
+        },
+        {
+          "at_us": 1361429,
+          "visible": true
+        },
+        {
+          "at_us": 1400272,
+          "visible": true
+        },
+        {
+          "at_us": 1440598,
+          "visible": true
+        },
+        {
+          "at_us": 1494708,
+          "visible": true
+        },
+        {
+          "at_us": 1529622,
+          "visible": true
+        },
+        {
+          "at_us": 1586385,
+          "visible": true
+        },
+        {
+          "at_us": 1614591,
+          "visible": true
+        },
+        {
+          "at_us": 1660982,
+          "visible": true
+        },
+        {
+          "at_us": 1696273,
+          "visible": true
+        },
+        {
+          "at_us": 1743715,
+          "visible": true
+        },
+        {
+          "at_us": 1778838,
+          "visible": true
+        },
+        {
+          "at_us": 1826997,
+          "visible": true
+        },
+        {
+          "at_us": 1860793,
+          "visible": true
+        },
+        {
+          "at_us": 1910223,
+          "visible": true
+        },
+        {
+          "at_us": 1950046,
+          "visible": true
+        },
+        {
+          "at_us": 1976546,
+          "visible": true
+        },
+        {
+          "at_us": 2042608,
+          "visible": true
+        },
+        {
+          "at_us": 2060129,
+          "visible": true
+        },
+        {
+          "at_us": 2111692,
+          "visible": true
+        },
+        {
+          "at_us": 2145626,
+          "visible": true
+        },
+        {
+          "at_us": 2200347,
+          "visible": true
+        },
+        {
+          "at_us": 2259045,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "requested_observation_interval_ms": 20,
+      "qa_warmup_separate_visit": true,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false
+    },
+    {
+      "kind": "videos",
+      "capture_started_ms": 270,
+      "capture_completed_ms": 2258,
+      "capture_separate_visit": true,
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 63,
+      "last_visible_ms": 2186,
+      "first_absent_ms": 2256,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 70220,
+      "maximum_frame_gap_us": 101457,
+      "samples": [
+        {
+          "at_us": 63366,
+          "visible": true
+        },
+        {
+          "at_us": 106847,
+          "visible": true
+        },
+        {
+          "at_us": 117664,
+          "visible": true
+        },
+        {
+          "at_us": 149385,
+          "visible": true
+        },
+        {
+          "at_us": 199048,
+          "visible": true
+        },
+        {
+          "at_us": 240118,
+          "visible": true
+        },
+        {
+          "at_us": 295834,
+          "visible": true
+        },
+        {
+          "at_us": 318685,
+          "visible": true
+        },
+        {
+          "at_us": 363539,
+          "visible": true
+        },
+        {
+          "at_us": 439055,
+          "visible": true
+        },
+        {
+          "at_us": 466773,
+          "visible": true
+        },
+        {
+          "at_us": 518850,
+          "visible": true
+        },
+        {
+          "at_us": 573151,
+          "visible": true
+        },
+        {
+          "at_us": 634373,
+          "visible": true
+        },
+        {
+          "at_us": 691442,
+          "visible": true
+        },
+        {
+          "at_us": 749639,
+          "visible": true
+        },
+        {
+          "at_us": 798914,
+          "visible": true
+        },
+        {
+          "at_us": 900371,
+          "visible": true
+        },
+        {
+          "at_us": 932727,
+          "visible": true
+        },
+        {
+          "at_us": 990148,
+          "visible": true
+        },
+        {
+          "at_us": 1049875,
+          "visible": true
+        },
+        {
+          "at_us": 1102724,
+          "visible": true
+        },
+        {
+          "at_us": 1168096,
+          "visible": true
+        },
+        {
+          "at_us": 1237357,
+          "visible": true
+        },
+        {
+          "at_us": 1297376,
+          "visible": true
+        },
+        {
+          "at_us": 1381770,
+          "visible": true
+        },
+        {
+          "at_us": 1446712,
+          "visible": true
+        },
+        {
+          "at_us": 1500986,
+          "visible": true
+        },
+        {
+          "at_us": 1586939,
+          "visible": true
+        },
+        {
+          "at_us": 1635042,
+          "visible": true
+        },
+        {
+          "at_us": 1706321,
+          "visible": true
+        },
+        {
+          "at_us": 1738628,
+          "visible": true
+        },
+        {
+          "at_us": 1812458,
+          "visible": true
+        },
+        {
+          "at_us": 1851206,
+          "visible": true
+        },
+        {
+          "at_us": 1916414,
+          "visible": true
+        },
+        {
+          "at_us": 1963856,
+          "visible": true
+        },
+        {
+          "at_us": 2014476,
+          "visible": true
+        },
+        {
+          "at_us": 2063299,
+          "visible": true
+        },
+        {
+          "at_us": 2114013,
+          "visible": true
+        },
+        {
+          "at_us": 2186547,
+          "visible": true
+        },
+        {
+          "at_us": 2256767,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "requested_observation_interval_ms": 20,
+      "qa_warmup_separate_visit": true,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false
+    },
+    {
+      "kind": "sleep",
+      "capture_started_ms": 163,
+      "capture_completed_ms": 2646,
+      "capture_separate_visit": true,
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 49,
+      "last_visible_ms": 2198,
+      "first_absent_ms": 2247,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 49248,
+      "maximum_frame_gap_us": 74212,
+      "samples": [
+        {
+          "at_us": 49817,
+          "visible": true
+        },
+        {
+          "at_us": 81672,
+          "visible": true
+        },
+        {
+          "at_us": 112862,
+          "visible": true
+        },
+        {
+          "at_us": 140557,
+          "visible": true
+        },
+        {
+          "at_us": 177308,
+          "visible": true
+        },
+        {
+          "at_us": 224852,
+          "visible": true
+        },
+        {
+          "at_us": 273678,
+          "visible": true
+        },
+        {
+          "at_us": 311262,
+          "visible": true
+        },
+        {
+          "at_us": 359389,
+          "visible": true
+        },
+        {
+          "at_us": 417243,
+          "visible": true
+        },
+        {
+          "at_us": 444227,
+          "visible": true
+        },
+        {
+          "at_us": 512701,
+          "visible": true
+        },
+        {
+          "at_us": 523283,
+          "visible": true
+        },
+        {
+          "at_us": 575016,
+          "visible": true
+        },
+        {
+          "at_us": 624581,
+          "visible": true
+        },
+        {
+          "at_us": 673606,
+          "visible": true
+        },
+        {
+          "at_us": 725108,
+          "visible": true
+        },
+        {
+          "at_us": 777362,
+          "visible": true
+        },
+        {
+          "at_us": 824302,
+          "visible": true
+        },
+        {
+          "at_us": 879377,
+          "visible": true
+        },
+        {
+          "at_us": 925899,
+          "visible": true
+        },
+        {
+          "at_us": 976552,
+          "visible": true
+        },
+        {
+          "at_us": 1024700,
+          "visible": true
+        },
+        {
+          "at_us": 1093891,
+          "visible": true
+        },
+        {
+          "at_us": 1106312,
+          "visible": true
+        },
+        {
+          "at_us": 1157781,
+          "visible": true
+        },
+        {
+          "at_us": 1192389,
+          "visible": true
+        },
+        {
+          "at_us": 1243201,
+          "visible": true
+        },
+        {
+          "at_us": 1294611,
+          "visible": true
+        },
+        {
+          "at_us": 1357375,
+          "visible": true
+        },
+        {
+          "at_us": 1409717,
+          "visible": true
+        },
+        {
+          "at_us": 1460949,
+          "visible": true
+        },
+        {
+          "at_us": 1508943,
+          "visible": true
+        },
+        {
+          "at_us": 1540614,
+          "visible": true
+        },
+        {
+          "at_us": 1592340,
+          "visible": true
+        },
+        {
+          "at_us": 1656415,
+          "visible": true
+        },
+        {
+          "at_us": 1684786,
+          "visible": true
+        },
+        {
+          "at_us": 1725082,
+          "visible": true
+        },
+        {
+          "at_us": 1773687,
+          "visible": true
+        },
+        {
+          "at_us": 1839574,
+          "visible": true
+        },
+        {
+          "at_us": 1862119,
+          "visible": true
+        },
+        {
+          "at_us": 1912921,
+          "visible": true
+        },
+        {
+          "at_us": 1941230,
+          "visible": true
+        },
+        {
+          "at_us": 2012394,
+          "visible": true
+        },
+        {
+          "at_us": 2034077,
+          "visible": true
+        },
+        {
+          "at_us": 2074595,
+          "visible": true
+        },
+        {
+          "at_us": 2123914,
+          "visible": true
+        },
+        {
+          "at_us": 2198126,
+          "visible": true
+        },
+        {
+          "at_us": 2247374,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "requested_observation_interval_ms": 20,
+      "qa_warmup_separate_visit": true,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false
+    },
+    {
+      "kind": "diet",
+      "capture_started_ms": 267,
+      "capture_completed_ms": 2411,
+      "capture_separate_visit": true,
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 140,
+      "last_visible_ms": 2185,
+      "first_absent_ms": 2263,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 77528,
+      "maximum_frame_gap_us": 77528,
+      "samples": [
+        {
+          "at_us": 140274,
+          "visible": true
+        },
+        {
+          "at_us": 188025,
+          "visible": true
+        },
+        {
+          "at_us": 199747,
+          "visible": true
+        },
+        {
+          "at_us": 235927,
+          "visible": true
+        },
+        {
+          "at_us": 283639,
+          "visible": true
+        },
+        {
+          "at_us": 351944,
+          "visible": true
+        },
+        {
+          "at_us": 385925,
+          "visible": true
+        },
+        {
+          "at_us": 435200,
+          "visible": true
+        },
+        {
+          "at_us": 500456,
+          "visible": true
+        },
+        {
+          "at_us": 524251,
+          "visible": true
+        },
+        {
+          "at_us": 567446,
+          "visible": true
+        },
+        {
+          "at_us": 620802,
+          "visible": true
+        },
+        {
+          "at_us": 668828,
+          "visible": true
+        },
+        {
+          "at_us": 723608,
+          "visible": true
+        },
+        {
+          "at_us": 793728,
+          "visible": true
+        },
+        {
+          "at_us": 826357,
+          "visible": true
+        },
+        {
+          "at_us": 885632,
+          "visible": true
+        },
+        {
+          "at_us": 945599,
+          "visible": true
+        },
+        {
+          "at_us": 988312,
+          "visible": true
+        },
+        {
+          "at_us": 1040315,
+          "visible": true
+        },
+        {
+          "at_us": 1094465,
+          "visible": true
+        },
+        {
+          "at_us": 1134540,
+          "visible": true
+        },
+        {
+          "at_us": 1185735,
+          "visible": true
+        },
+        {
+          "at_us": 1234753,
+          "visible": true
+        },
+        {
+          "at_us": 1287806,
+          "visible": true
+        },
+        {
+          "at_us": 1342504,
+          "visible": true
+        },
+        {
+          "at_us": 1400884,
+          "visible": true
+        },
+        {
+          "at_us": 1451019,
+          "visible": true
+        },
+        {
+          "at_us": 1501062,
+          "visible": true
+        },
+        {
+          "at_us": 1551542,
+          "visible": true
+        },
+        {
+          "at_us": 1601633,
+          "visible": true
+        },
+        {
+          "at_us": 1651794,
+          "visible": true
+        },
+        {
+          "at_us": 1701454,
+          "visible": true
+        },
+        {
+          "at_us": 1735338,
+          "visible": true
+        },
+        {
+          "at_us": 1801135,
+          "visible": true
+        },
+        {
+          "at_us": 1852242,
+          "visible": true
+        },
+        {
+          "at_us": 1899722,
+          "visible": true
+        },
+        {
+          "at_us": 1952478,
+          "visible": true
+        },
+        {
+          "at_us": 2004184,
+          "visible": true
+        },
+        {
+          "at_us": 2050745,
+          "visible": true
+        },
+        {
+          "at_us": 2119184,
+          "visible": true
+        },
+        {
+          "at_us": 2185566,
+          "visible": true
+        },
+        {
+          "at_us": 2263094,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "requested_observation_interval_ms": 20,
+      "qa_warmup_separate_visit": true,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false
+    },
+    {
+      "kind": "coach",
+      "capture_started_ms": 141,
+      "capture_completed_ms": 1618,
+      "capture_separate_visit": true,
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 40,
+      "last_visible_ms": 2204,
+      "first_absent_ms": 2453,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 249564,
+      "maximum_frame_gap_us": 249564,
+      "samples": [
+        {
+          "at_us": 40139,
+          "visible": true
+        },
+        {
+          "at_us": 108714,
+          "visible": true
+        },
+        {
+          "at_us": 132854,
+          "visible": true
+        },
+        {
+          "at_us": 177111,
+          "visible": true
+        },
+        {
+          "at_us": 195741,
+          "visible": true
+        },
+        {
+          "at_us": 213597,
+          "visible": true
+        },
+        {
+          "at_us": 274573,
+          "visible": true
+        },
+        {
+          "at_us": 285919,
+          "visible": true
+        },
+        {
+          "at_us": 331154,
+          "visible": true
+        },
+        {
+          "at_us": 367276,
+          "visible": true
+        },
+        {
+          "at_us": 437719,
+          "visible": true
+        },
+        {
+          "at_us": 455582,
+          "visible": true
+        },
+        {
+          "at_us": 479554,
+          "visible": true
+        },
+        {
+          "at_us": 516514,
+          "visible": true
+        },
+        {
+          "at_us": 547668,
+          "visible": true
+        },
+        {
+          "at_us": 580895,
+          "visible": true
+        },
+        {
+          "at_us": 614790,
+          "visible": true
+        },
+        {
+          "at_us": 647693,
+          "visible": true
+        },
+        {
+          "at_us": 683022,
+          "visible": true
+        },
+        {
+          "at_us": 718111,
+          "visible": true
+        },
+        {
+          "at_us": 748363,
+          "visible": true
+        },
+        {
+          "at_us": 797798,
+          "visible": true
+        },
+        {
+          "at_us": 823046,
+          "visible": true
+        },
+        {
+          "at_us": 850362,
+          "visible": true
+        },
+        {
+          "at_us": 885985,
+          "visible": true
+        },
+        {
+          "at_us": 931784,
+          "visible": true
+        },
+        {
+          "at_us": 970208,
+          "visible": true
+        },
+        {
+          "at_us": 1005779,
+          "visible": true
+        },
+        {
+          "at_us": 1036366,
+          "visible": true
+        },
+        {
+          "at_us": 1065227,
+          "visible": true
+        },
+        {
+          "at_us": 1099020,
+          "visible": true
+        },
+        {
+          "at_us": 1133133,
+          "visible": true
+        },
+        {
+          "at_us": 1181785,
+          "visible": true
+        },
+        {
+          "at_us": 1202999,
+          "visible": true
+        },
+        {
+          "at_us": 1232056,
+          "visible": true
+        },
+        {
+          "at_us": 1282875,
+          "visible": true
+        },
+        {
+          "at_us": 1303774,
+          "visible": true
+        },
+        {
+          "at_us": 1349076,
+          "visible": true
+        },
+        {
+          "at_us": 1395175,
+          "visible": true
+        },
+        {
+          "at_us": 1423165,
+          "visible": true
+        },
+        {
+          "at_us": 1452161,
+          "visible": true
+        },
+        {
+          "at_us": 1510598,
+          "visible": true
+        },
+        {
+          "at_us": 1532465,
+          "visible": true
+        },
+        {
+          "at_us": 1567828,
+          "visible": true
+        },
+        {
+          "at_us": 1604792,
+          "visible": true
+        },
+        {
+          "at_us": 1649398,
+          "visible": true
+        },
+        {
+          "at_us": 1699910,
+          "visible": true
+        },
+        {
+          "at_us": 1720382,
+          "visible": true
+        },
+        {
+          "at_us": 1766707,
+          "visible": true
+        },
+        {
+          "at_us": 1803506,
+          "visible": true
+        },
+        {
+          "at_us": 1830936,
+          "visible": true
+        },
+        {
+          "at_us": 1872013,
+          "visible": true
+        },
+        {
+          "at_us": 1897717,
+          "visible": true
+        },
+        {
+          "at_us": 1949256,
+          "visible": true
+        },
+        {
+          "at_us": 1991783,
+          "visible": true
+        },
+        {
+          "at_us": 2013357,
+          "visible": true
+        },
+        {
+          "at_us": 2077955,
+          "visible": true
+        },
+        {
+          "at_us": 2101832,
+          "visible": true
+        },
+        {
+          "at_us": 2122554,
+          "visible": true
+        },
+        {
+          "at_us": 2152785,
+          "visible": true
+        },
+        {
+          "at_us": 2204043,
+          "visible": true
+        },
+        {
+          "at_us": 2453607,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "requested_observation_interval_ms": 20,
+      "qa_warmup_separate_visit": true,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false
+    },
+    {
+      "kind": "community",
+      "capture_started_ms": 167,
+      "capture_completed_ms": 2393,
+      "capture_separate_visit": true,
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 34,
+      "last_visible_ms": 2165,
+      "first_absent_ms": 2233,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 67080,
+      "maximum_frame_gap_us": 72243,
+      "samples": [
+        {
+          "at_us": 34719,
+          "visible": true
+        },
+        {
+          "at_us": 99138,
+          "visible": true
+        },
+        {
+          "at_us": 117841,
+          "visible": true
+        },
+        {
+          "at_us": 150803,
+          "visible": true
+        },
+        {
+          "at_us": 187487,
+          "visible": true
+        },
+        {
+          "at_us": 214643,
+          "visible": true
+        },
+        {
+          "at_us": 248875,
+          "visible": true
+        },
+        {
+          "at_us": 299711,
+          "visible": true
+        },
+        {
+          "at_us": 331978,
+          "visible": true
+        },
+        {
+          "at_us": 395666,
+          "visible": true
+        },
+        {
+          "at_us": 430556,
+          "visible": true
+        },
+        {
+          "at_us": 486864,
+          "visible": true
+        },
+        {
+          "at_us": 533171,
+          "visible": true
+        },
+        {
+          "at_us": 563806,
+          "visible": true
+        },
+        {
+          "at_us": 616409,
+          "visible": true
+        },
+        {
+          "at_us": 664975,
+          "visible": true
+        },
+        {
+          "at_us": 729383,
+          "visible": true
+        },
+        {
+          "at_us": 765583,
+          "visible": true
+        },
+        {
+          "at_us": 816379,
+          "visible": true
+        },
+        {
+          "at_us": 869435,
+          "visible": true
+        },
+        {
+          "at_us": 933125,
+          "visible": true
+        },
+        {
+          "at_us": 1005368,
+          "visible": true
+        },
+        {
+          "at_us": 1056447,
+          "visible": true
+        },
+        {
+          "at_us": 1089089,
+          "visible": true
+        },
+        {
+          "at_us": 1132443,
+          "visible": true
+        },
+        {
+          "at_us": 1202409,
+          "visible": true
+        },
+        {
+          "at_us": 1248563,
+          "visible": true
+        },
+        {
+          "at_us": 1275282,
+          "visible": true
+        },
+        {
+          "at_us": 1324003,
+          "visible": true
+        },
+        {
+          "at_us": 1385192,
+          "visible": true
+        },
+        {
+          "at_us": 1433515,
+          "visible": true
+        },
+        {
+          "at_us": 1490032,
+          "visible": true
+        },
+        {
+          "at_us": 1534285,
+          "visible": true
+        },
+        {
+          "at_us": 1587912,
+          "visible": true
+        },
+        {
+          "at_us": 1653489,
+          "visible": true
+        },
+        {
+          "at_us": 1716752,
+          "visible": true
+        },
+        {
+          "at_us": 1749045,
+          "visible": true
+        },
+        {
+          "at_us": 1800542,
+          "visible": true
+        },
+        {
+          "at_us": 1856260,
+          "visible": true
+        },
+        {
+          "at_us": 1915478,
+          "visible": true
+        },
+        {
+          "at_us": 1967635,
+          "visible": true
+        },
+        {
+          "at_us": 2021583,
+          "visible": true
+        },
+        {
+          "at_us": 2069219,
+          "visible": true
+        },
+        {
+          "at_us": 2122145,
+          "visible": true
+        },
+        {
+          "at_us": 2165934,
+          "visible": true
+        },
+        {
+          "at_us": 2233014,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "native debug QA renderer; PNG delivery observed in separate visit, not a production performance benchmark",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "requested_observation_interval_ms": 20,
+      "qa_warmup_separate_visit": true,
+      "return_verified": true,
+      "mounted_once": true,
+      "capture_visit_mounted_once": true,
+      "surface_conversion_during_timing": false,
+      "native_screenshot_during_timing": false
+    }
+  ],
+  "early_community_return_cancelled": true,
+  "cloud_sends": 0,
+  "model_calls": 0,
+  "profile_writes": 0,
+  "cold_warmup_observations": [
+    {
+      "kind": "recipes",
+      "visit": "cold QA warm-up, separate from measured repeat visit",
+      "preparation_scope": "first full route visit in this QA case, after shared asset precache; not a cold app launch",
+      "completed_to_destination": true,
+      "warmup_evidence_complete": true,
+      "destination_ready_at_us": 2274456,
+      "coach_composer_enabled_verified": null,
+      "cold_observation_budget_met": true,
+      "cold_scope": "diagnostic cold visit; repeat-visit success does not certify cold performance",
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 347,
+      "last_visible_ms": 2206,
+      "first_absent_ms": 2255,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 49026,
+      "maximum_frame_gap_us": 727782,
+      "samples": [
+        {
+          "at_us": 347979,
+          "visible": true
+        },
+        {
+          "at_us": 416840,
+          "visible": true
+        },
+        {
+          "at_us": 1144622,
+          "visible": true
+        },
+        {
+          "at_us": 1191866,
+          "visible": true
+        },
+        {
+          "at_us": 1224301,
+          "visible": true
+        },
+        {
+          "at_us": 1291067,
+          "visible": true
+        },
+        {
+          "at_us": 1348828,
+          "visible": true
+        },
+        {
+          "at_us": 1374260,
+          "visible": true
+        },
+        {
+          "at_us": 1391092,
+          "visible": true
+        },
+        {
+          "at_us": 1428404,
+          "visible": true
+        },
+        {
+          "at_us": 1477374,
+          "visible": true
+        },
+        {
+          "at_us": 1526857,
+          "visible": true
+        },
+        {
+          "at_us": 1565418,
+          "visible": true
+        },
+        {
+          "at_us": 1577970,
+          "visible": true
+        },
+        {
+          "at_us": 1640558,
+          "visible": true
+        },
+        {
+          "at_us": 1658349,
+          "visible": true
+        },
+        {
+          "at_us": 1694648,
+          "visible": true
+        },
+        {
+          "at_us": 1758191,
+          "visible": true
+        },
+        {
+          "at_us": 1777644,
+          "visible": true
+        },
+        {
+          "at_us": 1814760,
+          "visible": true
+        },
+        {
+          "at_us": 1859269,
+          "visible": true
+        },
+        {
+          "at_us": 1898018,
+          "visible": true
+        },
+        {
+          "at_us": 1950991,
+          "visible": true
+        },
+        {
+          "at_us": 1982280,
+          "visible": true
+        },
+        {
+          "at_us": 2026755,
+          "visible": true
+        },
+        {
+          "at_us": 2162333,
+          "visible": true
+        },
+        {
+          "at_us": 2198627,
+          "visible": true
+        },
+        {
+          "at_us": 2206830,
+          "visible": true
+        },
+        {
+          "at_us": 2255856,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "engine_origin_frame_number": 9,
+      "engine_end_frame_number": 108,
+      "first_absent_frame_number": 106,
+      "engine_origin_presentation_target_us": 4594316896,
+      "engine_end_presentation_target_us": 4596683562,
+      "first_absent_presentation_target_us": 4596600229,
+      "first_absent_reported_vsync_start_us": 4596583562,
+      "first_absent_target_minus_vsync_start_us": 16667,
+      "first_absent_frame_timing_received": true,
+      "first_absent_frame_timing_status": "matched_frame_identity",
+      "first_absent_reported_frame_timing": {
+        "frame_number": 106,
+        "vsync_start_us": 4596583562,
+        "build_start_us": 4596591861,
+        "build_finish_us": 4596598469,
+        "raster_start_us": 4596599679,
+        "raster_finish_us": 4596603336,
+        "build_us": 6608,
+        "raster_us": 3657,
+        "total_us": 19774,
+        "callback_observed_at_us": 2287596
+      },
+      "engine_timestamp_semantics": "post-frame raw timestamp is presentation target, not vsync start; correlation uses exact engine frame_number, never nearest timestamp or a fixed frame-period adjustment",
+      "native_frame_timings": [
+        {
+          "frame_number": 9,
+          "vsync_start_us": 4594300229,
+          "build_start_us": 4594301371,
+          "build_finish_us": 4594673753,
+          "raster_start_us": 4594674166,
+          "raster_finish_us": 4595501641,
+          "build_us": 372382,
+          "raster_us": 827475,
+          "total_us": 1201412,
+          "callback_observed_at_us": 1266552
+        },
+        {
+          "frame_number": 10,
+          "vsync_start_us": 4594733562,
+          "build_start_us": 4594735230,
+          "build_finish_us": 4594761446,
+          "raster_start_us": 4595502322,
+          "raster_finish_us": 4595537919,
+          "build_us": 26216,
+          "raster_us": 35597,
+          "total_us": 804357,
+          "callback_observed_at_us": 1266818
+        },
+        {
+          "frame_number": 53,
+          "vsync_start_us": 4595500229,
+          "build_start_us": 4595504226,
+          "build_finish_us": 4595508338,
+          "raster_start_us": 4595538270,
+          "raster_finish_us": 4595576227,
+          "build_us": 4112,
+          "raster_us": 37957,
+          "total_us": 75998,
+          "callback_observed_at_us": 1266848
+        },
+        {
+          "frame_number": 56,
+          "vsync_start_us": 4595550229,
+          "build_start_us": 4595552968,
+          "build_finish_us": 4595555543,
+          "raster_start_us": 4595592414,
+          "raster_finish_us": 4595624787,
+          "build_us": 2575,
+          "raster_us": 32373,
+          "total_us": 74558,
+          "callback_observed_at_us": 1266874
+        },
+        {
+          "frame_number": 57,
+          "vsync_start_us": 4595566896,
+          "build_start_us": 4595585126,
+          "build_finish_us": 4595587473,
+          "raster_start_us": 4595632042,
+          "raster_finish_us": 4595665233,
+          "build_us": 2347,
+          "raster_us": 33191,
+          "total_us": 98337,
+          "callback_observed_at_us": 1458056
+        },
+        {
+          "frame_number": 59,
+          "vsync_start_us": 4595633562,
+          "build_start_us": 4595634879,
+          "build_finish_us": 4595654780,
+          "raster_start_us": 4595666463,
+          "raster_finish_us": 4595703218,
+          "build_us": 19901,
+          "raster_us": 36755,
+          "total_us": 69656,
+          "callback_observed_at_us": 1458101
+        },
+        {
+          "frame_number": 60,
+          "vsync_start_us": 4595666896,
+          "build_start_us": 4595701917,
+          "build_finish_us": 4595710141,
+          "raster_start_us": 4595711340,
+          "raster_finish_us": 4595745270,
+          "build_us": 8224,
+          "raster_us": 33930,
+          "total_us": 78374,
+          "callback_observed_at_us": 1458164
+        },
+        {
+          "frame_number": 61,
+          "vsync_start_us": 4595733562,
+          "build_start_us": 4595735109,
+          "build_finish_us": 4595738163,
+          "raster_start_us": 4595746141,
+          "raster_finish_us": 4595781010,
+          "build_us": 3054,
+          "raster_us": 34869,
+          "total_us": 47448,
+          "callback_observed_at_us": 1458210
+        },
+        {
+          "frame_number": 62,
+          "vsync_start_us": 4595750229,
+          "build_start_us": 4595751562,
+          "build_finish_us": 4595754719,
+          "raster_start_us": 4595787668,
+          "raster_finish_us": 4595819499,
+          "build_us": 3157,
+          "raster_us": 31831,
+          "total_us": 69270,
+          "callback_observed_at_us": 1458247
+        },
+        {
+          "frame_number": 64,
+          "vsync_start_us": 4595783562,
+          "build_start_us": 4595788201,
+          "build_finish_us": 4595792202,
+          "raster_start_us": 4595820763,
+          "raster_finish_us": 4595857486,
+          "build_us": 4001,
+          "raster_us": 36723,
+          "total_us": 73924,
+          "callback_observed_at_us": 1647126
+        },
+        {
+          "frame_number": 67,
+          "vsync_start_us": 4595833562,
+          "build_start_us": 4595834493,
+          "build_finish_us": 4595838621,
+          "raster_start_us": 4595863724,
+          "raster_finish_us": 4595897826,
+          "build_us": 4128,
+          "raster_us": 34102,
+          "total_us": 64264,
+          "callback_observed_at_us": 1647171
+        },
+        {
+          "frame_number": 69,
+          "vsync_start_us": 4595866895,
+          "build_start_us": 4595888264,
+          "build_finish_us": 4595890692,
+          "raster_start_us": 4595898104,
+          "raster_finish_us": 4595933364,
+          "build_us": 2428,
+          "raster_us": 35260,
+          "total_us": 66469,
+          "callback_observed_at_us": 1647211
+        },
+        {
+          "frame_number": 70,
+          "vsync_start_us": 4595900229,
+          "build_start_us": 4595923654,
+          "build_finish_us": 4595926482,
+          "raster_start_us": 4595933995,
+          "raster_finish_us": 4595971862,
+          "build_us": 2828,
+          "raster_us": 37867,
+          "total_us": 71633,
+          "callback_observed_at_us": 1647247
+        },
+        {
+          "frame_number": 71,
+          "vsync_start_us": 4595933562,
+          "build_start_us": 4595937656,
+          "build_finish_us": 4595941392,
+          "raster_start_us": 4595972263,
+          "raster_finish_us": 4596010308,
+          "build_us": 3736,
+          "raster_us": 38045,
+          "total_us": 76746,
+          "callback_observed_at_us": 1647286
+        },
+        {
+          "frame_number": 74,
+          "vsync_start_us": 4595983562,
+          "build_start_us": 4596000874,
+          "build_finish_us": 4596003755,
+          "raster_start_us": 4596010826,
+          "raster_finish_us": 4596048600,
+          "build_us": 2881,
+          "raster_us": 37774,
+          "total_us": 65038,
+          "callback_observed_at_us": 1847060
+        },
+        {
+          "frame_number": 75,
+          "vsync_start_us": 4596016895,
+          "build_start_us": 4596018699,
+          "build_finish_us": 4596021917,
+          "raster_start_us": 4596049643,
+          "raster_finish_us": 4596088116,
+          "build_us": 3218,
+          "raster_us": 38473,
+          "total_us": 71221,
+          "callback_observed_at_us": 1847111
+        },
+        {
+          "frame_number": 77,
+          "vsync_start_us": 4596050229,
+          "build_start_us": 4596055237,
+          "build_finish_us": 4596057968,
+          "raster_start_us": 4596088968,
+          "raster_finish_us": 4596130228,
+          "build_us": 2731,
+          "raster_us": 41260,
+          "total_us": 79999,
+          "callback_observed_at_us": 1847150
+        },
+        {
+          "frame_number": 80,
+          "vsync_start_us": 4596100229,
+          "build_start_us": 4596118160,
+          "build_finish_us": 4596122020,
+          "raster_start_us": 4596130896,
+          "raster_finish_us": 4596167963,
+          "build_us": 3860,
+          "raster_us": 37067,
+          "total_us": 67734,
+          "callback_observed_at_us": 1847191
+        },
+        {
+          "frame_number": 81,
+          "vsync_start_us": 4596133562,
+          "build_start_us": 4596138193,
+          "build_finish_us": 4596140915,
+          "raster_start_us": 4596172089,
+          "raster_finish_us": 4596209628,
+          "build_us": 2722,
+          "raster_us": 37539,
+          "total_us": 76066,
+          "callback_observed_at_us": 1847228
+        },
+        {
+          "frame_number": 83,
+          "vsync_start_us": 4596166895,
+          "build_start_us": 4596175035,
+          "build_finish_us": 4596178513,
+          "raster_start_us": 4596210604,
+          "raster_finish_us": 4596249821,
+          "build_us": 3478,
+          "raster_us": 39217,
+          "total_us": 82926,
+          "callback_observed_at_us": 2140758
+        },
+        {
+          "frame_number": 86,
+          "vsync_start_us": 4596216895,
+          "build_start_us": 4596219375,
+          "build_finish_us": 4596222980,
+          "raster_start_us": 4596256635,
+          "raster_finish_us": 4596290212,
+          "build_us": 3605,
+          "raster_us": 33577,
+          "total_us": 73317,
+          "callback_observed_at_us": 2140835
+        },
+        {
+          "frame_number": 88,
+          "vsync_start_us": 4596250229,
+          "build_start_us": 4596258566,
+          "build_finish_us": 4596261883,
+          "raster_start_us": 4596290811,
+          "raster_finish_us": 4596331381,
+          "build_us": 3317,
+          "raster_us": 40570,
+          "total_us": 81152,
+          "callback_observed_at_us": 2140880
+        },
+        {
+          "frame_number": 91,
+          "vsync_start_us": 4596300229,
+          "build_start_us": 4596306025,
+          "build_finish_us": 4596313321,
+          "raster_start_us": 4596331803,
+          "raster_finish_us": 4596375583,
+          "build_us": 7296,
+          "raster_us": 43780,
+          "total_us": 75354,
+          "callback_observed_at_us": 2140921
+        },
+        {
+          "frame_number": 92,
+          "vsync_start_us": 4596333562,
+          "build_start_us": 4596339858,
+          "build_finish_us": 4596345856,
+          "raster_start_us": 4596376074,
+          "raster_finish_us": 4596493802,
+          "build_us": 5998,
+          "raster_us": 117728,
+          "total_us": 160240,
+          "callback_observed_at_us": 2140964
+        },
+        {
+          "frame_number": 95,
+          "vsync_start_us": 4596383562,
+          "build_start_us": 4596385798,
+          "build_finish_us": 4596390578,
+          "raster_start_us": 4596499778,
+          "raster_finish_us": 4596548601,
+          "build_us": 4780,
+          "raster_us": 48823,
+          "total_us": 165039,
+          "callback_observed_at_us": 2287483
+        },
+        {
+          "frame_number": 102,
+          "vsync_start_us": 4596500229,
+          "build_start_us": 4596508582,
+          "build_finish_us": 4596523731,
+          "raster_start_us": 4596548958,
+          "raster_finish_us": 4596559670,
+          "build_us": 15149,
+          "raster_us": 10712,
+          "total_us": 59441,
+          "callback_observed_at_us": 2287513
+        },
+        {
+          "frame_number": 104,
+          "vsync_start_us": 4596550229,
+          "build_start_us": 4596552995,
+          "build_finish_us": 4596562295,
+          "raster_start_us": 4596562691,
+          "raster_finish_us": 4596570551,
+          "build_us": 9300,
+          "raster_us": 7860,
+          "total_us": 20322,
+          "callback_observed_at_us": 2287537
+        },
+        {
+          "frame_number": 105,
+          "vsync_start_us": 4596566895,
+          "build_start_us": 4596568095,
+          "build_finish_us": 4596569734,
+          "raster_start_us": 4596571185,
+          "raster_finish_us": 4596580052,
+          "build_us": 1639,
+          "raster_us": 8867,
+          "total_us": 13157,
+          "callback_observed_at_us": 2287558
+        },
+        {
+          "frame_number": 106,
+          "vsync_start_us": 4596583562,
+          "build_start_us": 4596591861,
+          "build_finish_us": 4596598469,
+          "raster_start_us": 4596599679,
+          "raster_finish_us": 4596603336,
+          "build_us": 6608,
+          "raster_us": 3657,
+          "total_us": 19774,
+          "callback_observed_at_us": 2287596
+        },
+        {
+          "frame_number": 107,
+          "vsync_start_us": 4596633562,
+          "build_start_us": 4596635131,
+          "build_finish_us": 4596636106,
+          "raster_start_us": 4596637018,
+          "raster_finish_us": 4596640791,
+          "build_us": 975,
+          "raster_us": 3773,
+          "total_us": 7229,
+          "callback_observed_at_us": 2287619
+        }
+      ],
+      "frame_timings_truncated": false
+    },
+    {
+      "kind": "videos",
+      "visit": "cold QA warm-up, separate from measured repeat visit",
+      "preparation_scope": "first full route visit in this QA case, after shared asset precache; not a cold app launch",
+      "completed_to_destination": true,
+      "warmup_evidence_complete": true,
+      "destination_ready_at_us": 2254868,
+      "coach_composer_enabled_verified": null,
+      "cold_observation_budget_met": true,
+      "cold_scope": "diagnostic cold visit; repeat-visit success does not certify cold performance",
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 72,
+      "last_visible_ms": 2136,
+      "first_absent_ms": 2253,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 116441,
+      "maximum_frame_gap_us": 116441,
+      "samples": [
+        {
+          "at_us": 72091,
+          "visible": true
+        },
+        {
+          "at_us": 124172,
+          "visible": true
+        },
+        {
+          "at_us": 153060,
+          "visible": true
+        },
+        {
+          "at_us": 180409,
+          "visible": true
+        },
+        {
+          "at_us": 216669,
+          "visible": true
+        },
+        {
+          "at_us": 268464,
+          "visible": true
+        },
+        {
+          "at_us": 298828,
+          "visible": true
+        },
+        {
+          "at_us": 348989,
+          "visible": true
+        },
+        {
+          "at_us": 404270,
+          "visible": true
+        },
+        {
+          "at_us": 429838,
+          "visible": true
+        },
+        {
+          "at_us": 481979,
+          "visible": true
+        },
+        {
+          "at_us": 532317,
+          "visible": true
+        },
+        {
+          "at_us": 579550,
+          "visible": true
+        },
+        {
+          "at_us": 639221,
+          "visible": true
+        },
+        {
+          "at_us": 667575,
+          "visible": true
+        },
+        {
+          "at_us": 720137,
+          "visible": true
+        },
+        {
+          "at_us": 763393,
+          "visible": true
+        },
+        {
+          "at_us": 823157,
+          "visible": true
+        },
+        {
+          "at_us": 870619,
+          "visible": true
+        },
+        {
+          "at_us": 897056,
+          "visible": true
+        },
+        {
+          "at_us": 947904,
+          "visible": true
+        },
+        {
+          "at_us": 1012443,
+          "visible": true
+        },
+        {
+          "at_us": 1052838,
+          "visible": true
+        },
+        {
+          "at_us": 1087563,
+          "visible": true
+        },
+        {
+          "at_us": 1132872,
+          "visible": true
+        },
+        {
+          "at_us": 1185976,
+          "visible": true
+        },
+        {
+          "at_us": 1231755,
+          "visible": true
+        },
+        {
+          "at_us": 1268089,
+          "visible": true
+        },
+        {
+          "at_us": 1330986,
+          "visible": true
+        },
+        {
+          "at_us": 1380368,
+          "visible": true
+        },
+        {
+          "at_us": 1401540,
+          "visible": true
+        },
+        {
+          "at_us": 1486138,
+          "visible": true
+        },
+        {
+          "at_us": 1499559,
+          "visible": true
+        },
+        {
+          "at_us": 1538249,
+          "visible": true
+        },
+        {
+          "at_us": 1585469,
+          "visible": true
+        },
+        {
+          "at_us": 1632794,
+          "visible": true
+        },
+        {
+          "at_us": 1683475,
+          "visible": true
+        },
+        {
+          "at_us": 1732557,
+          "visible": true
+        },
+        {
+          "at_us": 1800275,
+          "visible": true
+        },
+        {
+          "at_us": 1813088,
+          "visible": true
+        },
+        {
+          "at_us": 1865773,
+          "visible": true
+        },
+        {
+          "at_us": 1913064,
+          "visible": true
+        },
+        {
+          "at_us": 1967656,
+          "visible": true
+        },
+        {
+          "at_us": 2017718,
+          "visible": true
+        },
+        {
+          "at_us": 2083566,
+          "visible": true
+        },
+        {
+          "at_us": 2136592,
+          "visible": true
+        },
+        {
+          "at_us": 2253033,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "engine_origin_frame_number": 391,
+      "engine_end_frame_number": 511,
+      "first_absent_frame_number": 508,
+      "engine_origin_presentation_target_us": 4603266895,
+      "engine_end_presentation_target_us": 4605566895,
+      "first_absent_presentation_target_us": 4605500228,
+      "first_absent_reported_vsync_start_us": 4605483562,
+      "first_absent_target_minus_vsync_start_us": 16666,
+      "first_absent_frame_timing_received": true,
+      "first_absent_frame_timing_status": "matched_frame_identity",
+      "first_absent_reported_frame_timing": {
+        "frame_number": 508,
+        "vsync_start_us": 4605483562,
+        "build_start_us": 4605486533,
+        "build_finish_us": 4605491476,
+        "raster_start_us": 4605538983,
+        "raster_finish_us": 4605550658,
+        "build_us": 4943,
+        "raster_us": 11675,
+        "total_us": 67096,
+        "callback_observed_at_us": 2384780
+      },
+      "engine_timestamp_semantics": "post-frame raw timestamp is presentation target, not vsync start; correlation uses exact engine frame_number, never nearest timestamp or a fixed frame-period adjustment",
+      "native_frame_timings": [
+        {
+          "frame_number": 391,
+          "vsync_start_us": 4603250229,
+          "build_start_us": 4603253209,
+          "build_finish_us": 4603323990,
+          "raster_start_us": 4603325000,
+          "raster_finish_us": 4603365875,
+          "build_us": 70781,
+          "raster_us": 40875,
+          "total_us": 115646,
+          "callback_observed_at_us": 258039
+        },
+        {
+          "frame_number": 392,
+          "vsync_start_us": 4603366895,
+          "build_start_us": 4603374468,
+          "build_finish_us": 4603379839,
+          "raster_start_us": 4603380370,
+          "raster_finish_us": 4603420965,
+          "build_us": 5371,
+          "raster_us": 40595,
+          "total_us": 54070,
+          "callback_observed_at_us": 258063
+        },
+        {
+          "frame_number": 393,
+          "vsync_start_us": 4603400229,
+          "build_start_us": 4603404051,
+          "build_finish_us": 4603411550,
+          "raster_start_us": 4603421309,
+          "raster_finish_us": 4603460742,
+          "build_us": 7499,
+          "raster_us": 39433,
+          "total_us": 60513,
+          "callback_observed_at_us": 258080
+        },
+        {
+          "frame_number": 395,
+          "vsync_start_us": 4603433562,
+          "build_start_us": 4603435144,
+          "build_finish_us": 4603438750,
+          "raster_start_us": 4603461538,
+          "raster_finish_us": 4603507196,
+          "build_us": 3606,
+          "raster_us": 45658,
+          "total_us": 73634,
+          "callback_observed_at_us": 258514
+        },
+        {
+          "frame_number": 397,
+          "vsync_start_us": 4603466895,
+          "build_start_us": 4603471704,
+          "build_finish_us": 4603474624,
+          "raster_start_us": 4603507885,
+          "raster_finish_us": 4603552074,
+          "build_us": 2920,
+          "raster_us": 44189,
+          "total_us": 85179,
+          "callback_observed_at_us": 431983
+        },
+        {
+          "frame_number": 400,
+          "vsync_start_us": 4603516895,
+          "build_start_us": 4603522847,
+          "build_finish_us": 4603526535,
+          "raster_start_us": 4603554008,
+          "raster_finish_us": 4603603034,
+          "build_us": 3688,
+          "raster_us": 49026,
+          "total_us": 86139,
+          "callback_observed_at_us": 432019
+        },
+        {
+          "frame_number": 402,
+          "vsync_start_us": 4603550229,
+          "build_start_us": 4603553204,
+          "build_finish_us": 4603556378,
+          "raster_start_us": 4603603728,
+          "raster_finish_us": 4603641653,
+          "build_us": 3174,
+          "raster_us": 37925,
+          "total_us": 91424,
+          "callback_observed_at_us": 432038
+        },
+        {
+          "frame_number": 405,
+          "vsync_start_us": 4603600229,
+          "build_start_us": 4603603404,
+          "build_finish_us": 4603606935,
+          "raster_start_us": 4603641983,
+          "raster_finish_us": 4603685339,
+          "build_us": 3531,
+          "raster_us": 43356,
+          "total_us": 85110,
+          "callback_observed_at_us": 432054
+        },
+        {
+          "frame_number": 408,
+          "vsync_start_us": 4603650229,
+          "build_start_us": 4603658906,
+          "build_finish_us": 4603662226,
+          "raster_start_us": 4603685810,
+          "raster_finish_us": 4603731609,
+          "build_us": 3320,
+          "raster_us": 45799,
+          "total_us": 81380,
+          "callback_observed_at_us": 622112
+        },
+        {
+          "frame_number": 410,
+          "vsync_start_us": 4603683562,
+          "build_start_us": 4603685849,
+          "build_finish_us": 4603688389,
+          "raster_start_us": 4603737449,
+          "raster_finish_us": 4603778952,
+          "build_us": 2540,
+          "raster_us": 41503,
+          "total_us": 95390,
+          "callback_observed_at_us": 622127
+        },
+        {
+          "frame_number": 413,
+          "vsync_start_us": 4603733562,
+          "build_start_us": 4603738191,
+          "build_finish_us": 4603740621,
+          "raster_start_us": 4603779309,
+          "raster_finish_us": 4603825035,
+          "build_us": 2430,
+          "raster_us": 45726,
+          "total_us": 91473,
+          "callback_observed_at_us": 622130
+        },
+        {
+          "frame_number": 416,
+          "vsync_start_us": 4603783562,
+          "build_start_us": 4603786907,
+          "build_finish_us": 4603790210,
+          "raster_start_us": 4603825415,
+          "raster_finish_us": 4603873797,
+          "build_us": 3303,
+          "raster_us": 48382,
+          "total_us": 90235,
+          "callback_observed_at_us": 622134
+        },
+        {
+          "frame_number": 419,
+          "vsync_start_us": 4603833562,
+          "build_start_us": 4603834917,
+          "build_finish_us": 4603838042,
+          "raster_start_us": 4603880351,
+          "raster_finish_us": 4603922019,
+          "build_us": 3125,
+          "raster_us": 41668,
+          "total_us": 88457,
+          "callback_observed_at_us": 839591
+        },
+        {
+          "frame_number": 422,
+          "vsync_start_us": 4603883562,
+          "build_start_us": 4603889324,
+          "build_finish_us": 4603897259,
+          "raster_start_us": 4603923375,
+          "raster_finish_us": 4603966969,
+          "build_us": 7935,
+          "raster_us": 43594,
+          "total_us": 83407,
+          "callback_observed_at_us": 839606
+        },
+        {
+          "frame_number": 424,
+          "vsync_start_us": 4603916895,
+          "build_start_us": 4603922996,
+          "build_finish_us": 4603925861,
+          "raster_start_us": 4603971915,
+          "raster_finish_us": 4604010371,
+          "build_us": 2865,
+          "raster_us": 38456,
+          "total_us": 93476,
+          "callback_observed_at_us": 839612
+        },
+        {
+          "frame_number": 427,
+          "vsync_start_us": 4603966895,
+          "build_start_us": 4603973978,
+          "build_finish_us": 4603977404,
+          "raster_start_us": 4604011978,
+          "raster_finish_us": 4604056187,
+          "build_us": 3426,
+          "raster_us": 44209,
+          "total_us": 89292,
+          "callback_observed_at_us": 839617
+        },
+        {
+          "frame_number": 430,
+          "vsync_start_us": 4604016895,
+          "build_start_us": 4604018761,
+          "build_finish_us": 4604021644,
+          "raster_start_us": 4604056762,
+          "raster_finish_us": 4604097626,
+          "build_us": 2883,
+          "raster_us": 40864,
+          "total_us": 80731,
+          "callback_observed_at_us": 839627
+        },
+        {
+          "frame_number": 433,
+          "vsync_start_us": 4604066895,
+          "build_start_us": 4604077199,
+          "build_finish_us": 4604080927,
+          "raster_start_us": 4604098298,
+          "raster_finish_us": 4604144469,
+          "build_us": 3728,
+          "raster_us": 46171,
+          "total_us": 77574,
+          "callback_observed_at_us": 1038404
+        },
+        {
+          "frame_number": 434,
+          "vsync_start_us": 4604100228,
+          "build_start_us": 4604106607,
+          "build_finish_us": 4604118473,
+          "raster_start_us": 4604145229,
+          "raster_finish_us": 4604191668,
+          "build_us": 11866,
+          "raster_us": 46439,
+          "total_us": 91440,
+          "callback_observed_at_us": 1038413
+        },
+        {
+          "frame_number": 436,
+          "vsync_start_us": 4604150228,
+          "build_start_us": 4604152274,
+          "build_finish_us": 4604155284,
+          "raster_start_us": 4604192098,
+          "raster_finish_us": 4604237528,
+          "build_us": 3010,
+          "raster_us": 45430,
+          "total_us": 87300,
+          "callback_observed_at_us": 1038417
+        },
+        {
+          "frame_number": 439,
+          "vsync_start_us": 4604200228,
+          "build_start_us": 4604202884,
+          "build_finish_us": 4604205994,
+          "raster_start_us": 4604237979,
+          "raster_finish_us": 4604289044,
+          "build_us": 3110,
+          "raster_us": 51065,
+          "total_us": 88816,
+          "callback_observed_at_us": 1038423
+        },
+        {
+          "frame_number": 442,
+          "vsync_start_us": 4604250228,
+          "build_start_us": 4604266427,
+          "build_finish_us": 4604270384,
+          "raster_start_us": 4604296668,
+          "raster_finish_us": 4604333096,
+          "build_us": 3957,
+          "raster_us": 36428,
+          "total_us": 82868,
+          "callback_observed_at_us": 1214541
+        },
+        {
+          "frame_number": 444,
+          "vsync_start_us": 4604300228,
+          "build_start_us": 4604308486,
+          "build_finish_us": 4604311121,
+          "raster_start_us": 4604340525,
+          "raster_finish_us": 4604379804,
+          "build_us": 2635,
+          "raster_us": 39279,
+          "total_us": 79576,
+          "callback_observed_at_us": 1214558
+        },
+        {
+          "frame_number": 446,
+          "vsync_start_us": 4604333562,
+          "build_start_us": 4604342067,
+          "build_finish_us": 4604345420,
+          "raster_start_us": 4604380584,
+          "raster_finish_us": 4604429046,
+          "build_us": 3353,
+          "raster_us": 48462,
+          "total_us": 95484,
+          "callback_observed_at_us": 1214568
+        },
+        {
+          "frame_number": 449,
+          "vsync_start_us": 4604383562,
+          "build_start_us": 4604387262,
+          "build_finish_us": 4604391024,
+          "raster_start_us": 4604429812,
+          "raster_finish_us": 4604471221,
+          "build_us": 3762,
+          "raster_us": 41409,
+          "total_us": 87659,
+          "callback_observed_at_us": 1214574
+        },
+        {
+          "frame_number": 452,
+          "vsync_start_us": 4604433562,
+          "build_start_us": 4604440102,
+          "build_finish_us": 4604443770,
+          "raster_start_us": 4604472470,
+          "raster_finish_us": 4604515027,
+          "build_us": 3668,
+          "raster_us": 42557,
+          "total_us": 81465,
+          "callback_observed_at_us": 1389023
+        },
+        {
+          "frame_number": 455,
+          "vsync_start_us": 4604483562,
+          "build_start_us": 4604485554,
+          "build_finish_us": 4604489541,
+          "raster_start_us": 4604515604,
+          "raster_finish_us": 4604558252,
+          "build_us": 3987,
+          "raster_us": 42648,
+          "total_us": 74690,
+          "callback_observed_at_us": 1389043
+        },
+        {
+          "frame_number": 457,
+          "vsync_start_us": 4604516895,
+          "build_start_us": 4604523354,
+          "build_finish_us": 4604526602,
+          "raster_start_us": 4604558705,
+          "raster_finish_us": 4604603743,
+          "build_us": 3248,
+          "raster_us": 45038,
+          "total_us": 86848,
+          "callback_observed_at_us": 1389049
+        },
+        {
+          "frame_number": 460,
+          "vsync_start_us": 4604566895,
+          "build_start_us": 4604568373,
+          "build_finish_us": 4604588769,
+          "raster_start_us": 4604605829,
+          "raster_finish_us": 4604640154,
+          "build_us": 20396,
+          "raster_us": 34325,
+          "total_us": 73259,
+          "callback_observed_at_us": 1389055
+        },
+        {
+          "frame_number": 462,
+          "vsync_start_us": 4604616895,
+          "build_start_us": 4604635417,
+          "build_finish_us": 4604638733,
+          "raster_start_us": 4604641066,
+          "raster_finish_us": 4604687309,
+          "build_us": 3316,
+          "raster_us": 46243,
+          "total_us": 70414,
+          "callback_observed_at_us": 1572934
+        },
+        {
+          "frame_number": 463,
+          "vsync_start_us": 4604650228,
+          "build_start_us": 4604655369,
+          "build_finish_us": 4604659434,
+          "raster_start_us": 4604687929,
+          "raster_finish_us": 4604743958,
+          "build_us": 4065,
+          "raster_us": 56029,
+          "total_us": 93730,
+          "callback_observed_at_us": 1572951
+        },
+        {
+          "frame_number": 466,
+          "vsync_start_us": 4604700228,
+          "build_start_us": 4604723145,
+          "build_finish_us": 4604728514,
+          "raster_start_us": 4604744334,
+          "raster_finish_us": 4604782918,
+          "build_us": 5369,
+          "raster_us": 38584,
+          "total_us": 82690,
+          "callback_observed_at_us": 1572957
+        },
+        {
+          "frame_number": 467,
+          "vsync_start_us": 4604750228,
+          "build_start_us": 4604753682,
+          "build_finish_us": 4604756708,
+          "raster_start_us": 4604783923,
+          "raster_finish_us": 4604830699,
+          "build_us": 3026,
+          "raster_us": 46776,
+          "total_us": 80471,
+          "callback_observed_at_us": 1572967
+        },
+        {
+          "frame_number": 469,
+          "vsync_start_us": 4604783562,
+          "build_start_us": 4604791436,
+          "build_finish_us": 4604795926,
+          "raster_start_us": 4604831426,
+          "raster_finish_us": 4604877391,
+          "build_us": 4490,
+          "raster_us": 45965,
+          "total_us": 93829,
+          "callback_observed_at_us": 1778911
+        },
+        {
+          "frame_number": 472,
+          "vsync_start_us": 4604833562,
+          "build_start_us": 4604838932,
+          "build_finish_us": 4604843480,
+          "raster_start_us": 4604878371,
+          "raster_finish_us": 4604925433,
+          "build_us": 4548,
+          "raster_us": 47062,
+          "total_us": 91871,
+          "callback_observed_at_us": 1778928
+        },
+        {
+          "frame_number": 475,
+          "vsync_start_us": 4604883562,
+          "build_start_us": 4604885725,
+          "build_finish_us": 4604889193,
+          "raster_start_us": 4604925737,
+          "raster_finish_us": 4604974895,
+          "build_us": 3468,
+          "raster_us": 49158,
+          "total_us": 91333,
+          "callback_observed_at_us": 1778937
+        },
+        {
+          "frame_number": 478,
+          "vsync_start_us": 4604933562,
+          "build_start_us": 4604938453,
+          "build_finish_us": 4604941256,
+          "raster_start_us": 4604975487,
+          "raster_finish_us": 4605023815,
+          "build_us": 2803,
+          "raster_us": 48328,
+          "total_us": 90253,
+          "callback_observed_at_us": 1778944
+        },
+        {
+          "frame_number": 481,
+          "vsync_start_us": 4604983562,
+          "build_start_us": 4604986593,
+          "build_finish_us": 4604990813,
+          "raster_start_us": 4605024652,
+          "raster_finish_us": 4605065306,
+          "build_us": 4220,
+          "raster_us": 40654,
+          "total_us": 81744,
+          "callback_observed_at_us": 1953889
+        },
+        {
+          "frame_number": 484,
+          "vsync_start_us": 4605033562,
+          "build_start_us": 4605055057,
+          "build_finish_us": 4605058218,
+          "raster_start_us": 4605067254,
+          "raster_finish_us": 4605111847,
+          "build_us": 3161,
+          "raster_us": 44593,
+          "total_us": 78285,
+          "callback_observed_at_us": 1953907
+        },
+        {
+          "frame_number": 485,
+          "vsync_start_us": 4605066895,
+          "build_start_us": 4605068286,
+          "build_finish_us": 4605071331,
+          "raster_start_us": 4605116061,
+          "raster_finish_us": 4605158329,
+          "build_us": 3045,
+          "raster_us": 42268,
+          "total_us": 91434,
+          "callback_observed_at_us": 1953913
+        },
+        {
+          "frame_number": 488,
+          "vsync_start_us": 4605116895,
+          "build_start_us": 4605120642,
+          "build_finish_us": 4605124293,
+          "raster_start_us": 4605162325,
+          "raster_finish_us": 4605204920,
+          "build_us": 3651,
+          "raster_us": 42595,
+          "total_us": 88025,
+          "callback_observed_at_us": 1953925
+        },
+        {
+          "frame_number": 491,
+          "vsync_start_us": 4605166895,
+          "build_start_us": 4605168135,
+          "build_finish_us": 4605171097,
+          "raster_start_us": 4605205498,
+          "raster_finish_us": 4605256141,
+          "build_us": 2962,
+          "raster_us": 50643,
+          "total_us": 89246,
+          "callback_observed_at_us": 2218154
+        },
+        {
+          "frame_number": 494,
+          "vsync_start_us": 4605216895,
+          "build_start_us": 4605218776,
+          "build_finish_us": 4605222885,
+          "raster_start_us": 4605256945,
+          "raster_finish_us": 4605321081,
+          "build_us": 4109,
+          "raster_us": 64136,
+          "total_us": 104186,
+          "callback_observed_at_us": 2218172
+        },
+        {
+          "frame_number": 497,
+          "vsync_start_us": 4605266895,
+          "build_start_us": 4605273593,
+          "build_finish_us": 4605275923,
+          "raster_start_us": 4605321551,
+          "raster_finish_us": 4605382042,
+          "build_us": 2330,
+          "raster_us": 60491,
+          "total_us": 115147,
+          "callback_observed_at_us": 2218178
+        },
+        {
+          "frame_number": 500,
+          "vsync_start_us": 4605333562,
+          "build_start_us": 4605337407,
+          "build_finish_us": 4605341732,
+          "raster_start_us": 4605388426,
+          "raster_finish_us": 4605470844,
+          "build_us": 4325,
+          "raster_us": 82418,
+          "total_us": 137282,
+          "callback_observed_at_us": 2218187
+        },
+        {
+          "frame_number": 503,
+          "vsync_start_us": 4605383562,
+          "build_start_us": 4605390335,
+          "build_finish_us": 4605393984,
+          "raster_start_us": 4605477051,
+          "raster_finish_us": 4605538647,
+          "build_us": 3649,
+          "raster_us": 61596,
+          "total_us": 155085,
+          "callback_observed_at_us": 2384763
+        },
+        {
+          "frame_number": 508,
+          "vsync_start_us": 4605483562,
+          "build_start_us": 4605486533,
+          "build_finish_us": 4605491476,
+          "raster_start_us": 4605538983,
+          "raster_finish_us": 4605550658,
+          "build_us": 4943,
+          "raster_us": 11675,
+          "total_us": 67096,
+          "callback_observed_at_us": 2384780
+        },
+        {
+          "frame_number": 511,
+          "vsync_start_us": 4605550228,
+          "build_start_us": 4605553676,
+          "build_finish_us": 4605557040,
+          "raster_start_us": 4605558937,
+          "raster_finish_us": 4605563192,
+          "build_us": 3364,
+          "raster_us": 4255,
+          "total_us": 12964,
+          "callback_observed_at_us": 2384786
+        }
+      ],
+      "frame_timings_truncated": false
+    },
+    {
+      "kind": "sleep",
+      "visit": "cold QA warm-up, separate from measured repeat visit",
+      "preparation_scope": "first full route visit in this QA case, after shared asset precache; not a cold app launch",
+      "completed_to_destination": true,
+      "warmup_evidence_complete": true,
+      "destination_ready_at_us": 2229113,
+      "coach_composer_enabled_verified": null,
+      "cold_observation_budget_met": true,
+      "cold_scope": "diagnostic cold visit; repeat-visit success does not certify cold performance",
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 68,
+      "last_visible_ms": 2146,
+      "first_absent_ms": 2227,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 81066,
+      "maximum_frame_gap_us": 99193,
+      "samples": [
+        {
+          "at_us": 68111,
+          "visible": true
+        },
+        {
+          "at_us": 108719,
+          "visible": true
+        },
+        {
+          "at_us": 195688,
+          "visible": true
+        },
+        {
+          "at_us": 232353,
+          "visible": true
+        },
+        {
+          "at_us": 288395,
+          "visible": true
+        },
+        {
+          "at_us": 331338,
+          "visible": true
+        },
+        {
+          "at_us": 379654,
+          "visible": true
+        },
+        {
+          "at_us": 432902,
+          "visible": true
+        },
+        {
+          "at_us": 483933,
+          "visible": true
+        },
+        {
+          "at_us": 512355,
+          "visible": true
+        },
+        {
+          "at_us": 561036,
+          "visible": true
+        },
+        {
+          "at_us": 612074,
+          "visible": true
+        },
+        {
+          "at_us": 663818,
+          "visible": true
+        },
+        {
+          "at_us": 716479,
+          "visible": true
+        },
+        {
+          "at_us": 762169,
+          "visible": true
+        },
+        {
+          "at_us": 812205,
+          "visible": true
+        },
+        {
+          "at_us": 860321,
+          "visible": true
+        },
+        {
+          "at_us": 911968,
+          "visible": true
+        },
+        {
+          "at_us": 962354,
+          "visible": true
+        },
+        {
+          "at_us": 1011300,
+          "visible": true
+        },
+        {
+          "at_us": 1061814,
+          "visible": true
+        },
+        {
+          "at_us": 1117399,
+          "visible": true
+        },
+        {
+          "at_us": 1161569,
+          "visible": true
+        },
+        {
+          "at_us": 1211316,
+          "visible": true
+        },
+        {
+          "at_us": 1265628,
+          "visible": true
+        },
+        {
+          "at_us": 1310087,
+          "visible": true
+        },
+        {
+          "at_us": 1381956,
+          "visible": true
+        },
+        {
+          "at_us": 1429903,
+          "visible": true
+        },
+        {
+          "at_us": 1460081,
+          "visible": true
+        },
+        {
+          "at_us": 1510968,
+          "visible": true
+        },
+        {
+          "at_us": 1544826,
+          "visible": true
+        },
+        {
+          "at_us": 1624313,
+          "visible": true
+        },
+        {
+          "at_us": 1664342,
+          "visible": true
+        },
+        {
+          "at_us": 1763535,
+          "visible": true
+        },
+        {
+          "at_us": 1781074,
+          "visible": true
+        },
+        {
+          "at_us": 1828403,
+          "visible": true
+        },
+        {
+          "at_us": 1884346,
+          "visible": true
+        },
+        {
+          "at_us": 1925826,
+          "visible": true
+        },
+        {
+          "at_us": 1980268,
+          "visible": true
+        },
+        {
+          "at_us": 2028026,
+          "visible": true
+        },
+        {
+          "at_us": 2077022,
+          "visible": true
+        },
+        {
+          "at_us": 2146113,
+          "visible": true
+        },
+        {
+          "at_us": 2227179,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "engine_origin_frame_number": 769,
+      "engine_end_frame_number": 888,
+      "first_absent_frame_number": 886,
+      "engine_origin_presentation_target_us": 4611483562,
+      "engine_end_presentation_target_us": 4613750228,
+      "first_absent_presentation_target_us": 4613700228,
+      "first_absent_reported_vsync_start_us": 4613683561,
+      "first_absent_target_minus_vsync_start_us": 16667,
+      "first_absent_frame_timing_received": true,
+      "first_absent_frame_timing_status": "matched_frame_identity",
+      "first_absent_reported_frame_timing": {
+        "frame_number": 886,
+        "vsync_start_us": 4613683561,
+        "build_start_us": 4613686563,
+        "build_finish_us": 4613698948,
+        "raster_start_us": 4613736285,
+        "raster_finish_us": 4613745841,
+        "build_us": 12385,
+        "raster_us": 9556,
+        "total_us": 62280,
+        "callback_observed_at_us": 2299528
+      },
+      "engine_timestamp_semantics": "post-frame raw timestamp is presentation target, not vsync start; correlation uses exact engine frame_number, never nearest timestamp or a fixed frame-period adjustment",
+      "native_frame_timings": [
+        {
+          "frame_number": 769,
+          "vsync_start_us": 4611466895,
+          "build_start_us": 4611468441,
+          "build_finish_us": 4611536993,
+          "raster_start_us": 4611541184,
+          "raster_finish_us": 4611653185,
+          "build_us": 68552,
+          "raster_us": 112001,
+          "total_us": 186290,
+          "callback_observed_at_us": 319561
+        },
+        {
+          "frame_number": 770,
+          "vsync_start_us": 4611566895,
+          "build_start_us": 4611574284,
+          "build_finish_us": 4611582812,
+          "raster_start_us": 4611653992,
+          "raster_finish_us": 4611701917,
+          "build_us": 8528,
+          "raster_us": 47925,
+          "total_us": 135022,
+          "callback_observed_at_us": 319575
+        },
+        {
+          "frame_number": 775,
+          "vsync_start_us": 4611666895,
+          "build_start_us": 4611669330,
+          "build_finish_us": 4611673222,
+          "raster_start_us": 4611708066,
+          "raster_finish_us": 4611745686,
+          "build_us": 3892,
+          "raster_us": 37620,
+          "total_us": 78791,
+          "callback_observed_at_us": 319580
+        },
+        {
+          "frame_number": 777,
+          "vsync_start_us": 4611700228,
+          "build_start_us": 4611708180,
+          "build_finish_us": 4611710029,
+          "raster_start_us": 4611746079,
+          "raster_finish_us": 4611795034,
+          "build_us": 1849,
+          "raster_us": 48955,
+          "total_us": 94806,
+          "callback_observed_at_us": 319585
+        },
+        {
+          "frame_number": 780,
+          "vsync_start_us": 4611750228,
+          "build_start_us": 4611762645,
+          "build_finish_us": 4611765701,
+          "raster_start_us": 4611796158,
+          "raster_finish_us": 4611841484,
+          "build_us": 3056,
+          "raster_us": 45326,
+          "total_us": 91256,
+          "callback_observed_at_us": 514767
+        },
+        {
+          "frame_number": 782,
+          "vsync_start_us": 4611800228,
+          "build_start_us": 4611805745,
+          "build_finish_us": 4611808375,
+          "raster_start_us": 4611841871,
+          "raster_finish_us": 4611887829,
+          "build_us": 2630,
+          "raster_us": 45958,
+          "total_us": 87601,
+          "callback_observed_at_us": 514781
+        },
+        {
+          "frame_number": 785,
+          "vsync_start_us": 4611850228,
+          "build_start_us": 4611853327,
+          "build_finish_us": 4611857101,
+          "raster_start_us": 4611888525,
+          "raster_finish_us": 4611937251,
+          "build_us": 3774,
+          "raster_us": 48726,
+          "total_us": 87023,
+          "callback_observed_at_us": 514784
+        },
+        {
+          "frame_number": 788,
+          "vsync_start_us": 4611900228,
+          "build_start_us": 4611907591,
+          "build_finish_us": 4611910643,
+          "raster_start_us": 4611938555,
+          "raster_finish_us": 4611979527,
+          "build_us": 3052,
+          "raster_us": 40972,
+          "total_us": 79299,
+          "callback_observed_at_us": 514787
+        },
+        {
+          "frame_number": 791,
+          "vsync_start_us": 4611950228,
+          "build_start_us": 4611952029,
+          "build_finish_us": 4611961006,
+          "raster_start_us": 4611990681,
+          "raster_finish_us": 4612035880,
+          "build_us": 8977,
+          "raster_us": 45199,
+          "total_us": 85652,
+          "callback_observed_at_us": 710861
+        },
+        {
+          "frame_number": 793,
+          "vsync_start_us": 4611983562,
+          "build_start_us": 4611987711,
+          "build_finish_us": 4611990029,
+          "raster_start_us": 4612036523,
+          "raster_finish_us": 4612081546,
+          "build_us": 2318,
+          "raster_us": 45023,
+          "total_us": 97984,
+          "callback_observed_at_us": 710885
+        },
+        {
+          "frame_number": 796,
+          "vsync_start_us": 4612033562,
+          "build_start_us": 4612036408,
+          "build_finish_us": 4612039056,
+          "raster_start_us": 4612084551,
+          "raster_finish_us": 4612128744,
+          "build_us": 2648,
+          "raster_us": 44193,
+          "total_us": 95182,
+          "callback_observed_at_us": 710890
+        },
+        {
+          "frame_number": 798,
+          "vsync_start_us": 4612083562,
+          "build_start_us": 4612086686,
+          "build_finish_us": 4612089629,
+          "raster_start_us": 4612129568,
+          "raster_finish_us": 4612177450,
+          "build_us": 2943,
+          "raster_us": 47882,
+          "total_us": 93888,
+          "callback_observed_at_us": 710895
+        },
+        {
+          "frame_number": 801,
+          "vsync_start_us": 4612133562,
+          "build_start_us": 4612138947,
+          "build_finish_us": 4612141721,
+          "raster_start_us": 4612185721,
+          "raster_finish_us": 4612228522,
+          "build_us": 2774,
+          "raster_us": 42801,
+          "total_us": 94960,
+          "callback_observed_at_us": 904248
+        },
+        {
+          "frame_number": 804,
+          "vsync_start_us": 4612183562,
+          "build_start_us": 4612189600,
+          "build_finish_us": 4612194343,
+          "raster_start_us": 4612229387,
+          "raster_finish_us": 4612279511,
+          "build_us": 4743,
+          "raster_us": 50124,
+          "total_us": 95949,
+          "callback_observed_at_us": 904261
+        },
+        {
+          "frame_number": 807,
+          "vsync_start_us": 4612233562,
+          "build_start_us": 4612236427,
+          "build_finish_us": 4612240000,
+          "raster_start_us": 4612279941,
+          "raster_finish_us": 4612325708,
+          "build_us": 3573,
+          "raster_us": 45767,
+          "total_us": 92146,
+          "callback_observed_at_us": 904269
+        },
+        {
+          "frame_number": 810,
+          "vsync_start_us": 4612283562,
+          "build_start_us": 4612286465,
+          "build_finish_us": 4612289638,
+          "raster_start_us": 4612326414,
+          "raster_finish_us": 4612379510,
+          "build_us": 3173,
+          "raster_us": 53096,
+          "total_us": 95948,
+          "callback_observed_at_us": 904275
+        },
+        {
+          "frame_number": 813,
+          "vsync_start_us": 4612333562,
+          "build_start_us": 4612335312,
+          "build_finish_us": 4612337960,
+          "raster_start_us": 4612381245,
+          "raster_finish_us": 4612429694,
+          "build_us": 2648,
+          "raster_us": 48449,
+          "total_us": 96132,
+          "callback_observed_at_us": 1106960
+        },
+        {
+          "frame_number": 816,
+          "vsync_start_us": 4612383562,
+          "build_start_us": 4612386112,
+          "build_finish_us": 4612389636,
+          "raster_start_us": 4612430534,
+          "raster_finish_us": 4612477195,
+          "build_us": 3524,
+          "raster_us": 46661,
+          "total_us": 93633,
+          "callback_observed_at_us": 1106972
+        },
+        {
+          "frame_number": 819,
+          "vsync_start_us": 4612433561,
+          "build_start_us": 4612437728,
+          "build_finish_us": 4612440312,
+          "raster_start_us": 4612483801,
+          "raster_finish_us": 4612527773,
+          "build_us": 2584,
+          "raster_us": 43972,
+          "total_us": 94212,
+          "callback_observed_at_us": 1106978
+        },
+        {
+          "frame_number": 822,
+          "vsync_start_us": 4612483561,
+          "build_start_us": 4612485711,
+          "build_finish_us": 4612488659,
+          "raster_start_us": 4612528223,
+          "raster_finish_us": 4612576413,
+          "build_us": 2948,
+          "raster_us": 48190,
+          "total_us": 92852,
+          "callback_observed_at_us": 1106982
+        },
+        {
+          "frame_number": 825,
+          "vsync_start_us": 4612533561,
+          "build_start_us": 4612536446,
+          "build_finish_us": 4612539471,
+          "raster_start_us": 4612583737,
+          "raster_finish_us": 4612626731,
+          "build_us": 3025,
+          "raster_us": 42994,
+          "total_us": 93170,
+          "callback_observed_at_us": 1297161
+        },
+        {
+          "frame_number": 828,
+          "vsync_start_us": 4612583561,
+          "build_start_us": 4612587071,
+          "build_finish_us": 4612594529,
+          "raster_start_us": 4612628459,
+          "raster_finish_us": 4612675042,
+          "build_us": 7458,
+          "raster_us": 46583,
+          "total_us": 91481,
+          "callback_observed_at_us": 1297177
+        },
+        {
+          "frame_number": 830,
+          "vsync_start_us": 4612633561,
+          "build_start_us": 4612636465,
+          "build_finish_us": 4612639197,
+          "raster_start_us": 4612675827,
+          "raster_finish_us": 4612727035,
+          "build_us": 2732,
+          "raster_us": 51208,
+          "total_us": 93474,
+          "callback_observed_at_us": 1297183
+        },
+        {
+          "frame_number": 833,
+          "vsync_start_us": 4612683561,
+          "build_start_us": 4612685430,
+          "build_finish_us": 4612688716,
+          "raster_start_us": 4612727530,
+          "raster_finish_us": 4612773608,
+          "build_us": 3286,
+          "raster_us": 46078,
+          "total_us": 90047,
+          "callback_observed_at_us": 1297191
+        },
+        {
+          "frame_number": 836,
+          "vsync_start_us": 4612733561,
+          "build_start_us": 4612735410,
+          "build_finish_us": 4612742906,
+          "raster_start_us": 4612774627,
+          "raster_finish_us": 4612829589,
+          "build_us": 7496,
+          "raster_us": 54962,
+          "total_us": 96028,
+          "callback_observed_at_us": 1497405
+        },
+        {
+          "frame_number": 839,
+          "vsync_start_us": 4612783561,
+          "build_start_us": 4612785581,
+          "build_finish_us": 4612787992,
+          "raster_start_us": 4612830209,
+          "raster_finish_us": 4612870932,
+          "build_us": 2411,
+          "raster_us": 40723,
+          "total_us": 87371,
+          "callback_observed_at_us": 1497422
+        },
+        {
+          "frame_number": 842,
+          "vsync_start_us": 4612833561,
+          "build_start_us": 4612857573,
+          "build_finish_us": 4612860000,
+          "raster_start_us": 4612877854,
+          "raster_finish_us": 4612919893,
+          "build_us": 2427,
+          "raster_us": 42039,
+          "total_us": 86332,
+          "callback_observed_at_us": 1497428
+        },
+        {
+          "frame_number": 844,
+          "vsync_start_us": 4612883561,
+          "build_start_us": 4612904662,
+          "build_finish_us": 4612907317,
+          "raster_start_us": 4612920720,
+          "raster_finish_us": 4612972578,
+          "build_us": 2655,
+          "raster_us": 51858,
+          "total_us": 89017,
+          "callback_observed_at_us": 1497442
+        },
+        {
+          "frame_number": 846,
+          "vsync_start_us": 4612933561,
+          "build_start_us": 4612934663,
+          "build_finish_us": 4612937659,
+          "raster_start_us": 4612973195,
+          "raster_finish_us": 4613017968,
+          "build_us": 2996,
+          "raster_us": 44773,
+          "total_us": 84407,
+          "callback_observed_at_us": 1722792
+        },
+        {
+          "frame_number": 849,
+          "vsync_start_us": 4612983561,
+          "build_start_us": 4612985307,
+          "build_finish_us": 4612988445,
+          "raster_start_us": 4613019928,
+          "raster_finish_us": 4613078717,
+          "build_us": 3138,
+          "raster_us": 58789,
+          "total_us": 95156,
+          "callback_observed_at_us": 1723026
+        },
+        {
+          "frame_number": 851,
+          "vsync_start_us": 4613016895,
+          "build_start_us": 4613019603,
+          "build_finish_us": 4613022592,
+          "raster_start_us": 4613079403,
+          "raster_finish_us": 4613139689,
+          "build_us": 2989,
+          "raster_us": 60286,
+          "total_us": 122794,
+          "callback_observed_at_us": 1723035
+        },
+        {
+          "frame_number": 855,
+          "vsync_start_us": 4613083561,
+          "build_start_us": 4613087168,
+          "build_finish_us": 4613102231,
+          "raster_start_us": 4613141140,
+          "raster_finish_us": 4613189569,
+          "build_us": 15063,
+          "raster_us": 48429,
+          "total_us": 106008,
+          "callback_observed_at_us": 1723040
+        },
+        {
+          "frame_number": 857,
+          "vsync_start_us": 4613133561,
+          "build_start_us": 4613139810,
+          "build_finish_us": 4613142250,
+          "raster_start_us": 4613194568,
+          "raster_finish_us": 4613245921,
+          "build_us": 2440,
+          "raster_us": 51353,
+          "total_us": 112360,
+          "callback_observed_at_us": 1919760
+        },
+        {
+          "frame_number": 860,
+          "vsync_start_us": 4613200228,
+          "build_start_us": 4613235160,
+          "build_finish_us": 4613237365,
+          "raster_start_us": 4613246379,
+          "raster_finish_us": 4613290633,
+          "build_us": 2205,
+          "raster_us": 44254,
+          "total_us": 90405,
+          "callback_observed_at_us": 1919903
+        },
+        {
+          "frame_number": 861,
+          "vsync_start_us": 4613250228,
+          "build_start_us": 4613252568,
+          "build_finish_us": 4613255650,
+          "raster_start_us": 4613290994,
+          "raster_finish_us": 4613348471,
+          "build_us": 3082,
+          "raster_us": 57477,
+          "total_us": 98243,
+          "callback_observed_at_us": 1919910
+        },
+        {
+          "frame_number": 864,
+          "vsync_start_us": 4613300228,
+          "build_start_us": 4613302103,
+          "build_finish_us": 4613305148,
+          "raster_start_us": 4613349002,
+          "raster_finish_us": 4613392837,
+          "build_us": 3045,
+          "raster_us": 43835,
+          "total_us": 92609,
+          "callback_observed_at_us": 1919914
+        },
+        {
+          "frame_number": 867,
+          "vsync_start_us": 4613350228,
+          "build_start_us": 4613358093,
+          "build_finish_us": 4613361821,
+          "raster_start_us": 4613395871,
+          "raster_finish_us": 4613445136,
+          "build_us": 3728,
+          "raster_us": 49265,
+          "total_us": 94908,
+          "callback_observed_at_us": 2139623
+        },
+        {
+          "frame_number": 869,
+          "vsync_start_us": 4613400228,
+          "build_start_us": 4613401301,
+          "build_finish_us": 4613403500,
+          "raster_start_us": 4613453406,
+          "raster_finish_us": 4613494334,
+          "build_us": 2199,
+          "raster_us": 40928,
+          "total_us": 94106,
+          "callback_observed_at_us": 2139640
+        },
+        {
+          "frame_number": 872,
+          "vsync_start_us": 4613450228,
+          "build_start_us": 4613454409,
+          "build_finish_us": 4613457682,
+          "raster_start_us": 4613502456,
+          "raster_finish_us": 4613549693,
+          "build_us": 3273,
+          "raster_us": 47237,
+          "total_us": 99465,
+          "callback_observed_at_us": 2139645
+        },
+        {
+          "frame_number": 875,
+          "vsync_start_us": 4613500228,
+          "build_start_us": 4613502599,
+          "build_finish_us": 4613505062,
+          "raster_start_us": 4613550403,
+          "raster_finish_us": 4613614540,
+          "build_us": 2463,
+          "raster_us": 64137,
+          "total_us": 114312,
+          "callback_observed_at_us": 2139654
+        },
+        {
+          "frame_number": 878,
+          "vsync_start_us": 4613550228,
+          "build_start_us": 4613552388,
+          "build_finish_us": 4613554551,
+          "raster_start_us": 4613615328,
+          "raster_finish_us": 4613672359,
+          "build_us": 2163,
+          "raster_us": 57031,
+          "total_us": 122131,
+          "callback_observed_at_us": 2299495
+        },
+        {
+          "frame_number": 882,
+          "vsync_start_us": 4613616895,
+          "build_start_us": 4613620044,
+          "build_finish_us": 4613623837,
+          "raster_start_us": 4613673575,
+          "raster_finish_us": 4613733317,
+          "build_us": 3793,
+          "raster_us": 59742,
+          "total_us": 116422,
+          "callback_observed_at_us": 2299522
+        },
+        {
+          "frame_number": 886,
+          "vsync_start_us": 4613683561,
+          "build_start_us": 4613686563,
+          "build_finish_us": 4613698948,
+          "raster_start_us": 4613736285,
+          "raster_finish_us": 4613745841,
+          "build_us": 12385,
+          "raster_us": 9556,
+          "total_us": 62280,
+          "callback_observed_at_us": 2299528
+        },
+        {
+          "frame_number": 888,
+          "vsync_start_us": 4613733561,
+          "build_start_us": 4613737436,
+          "build_finish_us": 4613738335,
+          "raster_start_us": 4613746127,
+          "raster_finish_us": 4613757635,
+          "build_us": 899,
+          "raster_us": 11508,
+          "total_us": 24074,
+          "callback_observed_at_us": 2299533
+        }
+      ],
+      "frame_timings_truncated": false
+    },
+    {
+      "kind": "diet",
+      "visit": "cold QA warm-up, separate from measured repeat visit",
+      "preparation_scope": "first full route visit in this QA case, after shared asset precache; not a cold app launch",
+      "completed_to_destination": true,
+      "warmup_evidence_complete": true,
+      "destination_ready_at_us": 2290548,
+      "coach_composer_enabled_verified": null,
+      "cold_observation_budget_met": true,
+      "cold_scope": "diagnostic cold visit; repeat-visit success does not certify cold performance",
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 399,
+      "last_visible_ms": 2193,
+      "first_absent_ms": 2288,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 95630,
+      "maximum_frame_gap_us": 963289,
+      "samples": [
+        {
+          "at_us": 399008,
+          "visible": true
+        },
+        {
+          "at_us": 561051,
+          "visible": true
+        },
+        {
+          "at_us": 1524340,
+          "visible": true
+        },
+        {
+          "at_us": 1570518,
+          "visible": true
+        },
+        {
+          "at_us": 1740374,
+          "visible": true
+        },
+        {
+          "at_us": 1856357,
+          "visible": true
+        },
+        {
+          "at_us": 1902845,
+          "visible": true
+        },
+        {
+          "at_us": 1953785,
+          "visible": true
+        },
+        {
+          "at_us": 2002337,
+          "visible": true
+        },
+        {
+          "at_us": 2037927,
+          "visible": true
+        },
+        {
+          "at_us": 2093603,
+          "visible": true
+        },
+        {
+          "at_us": 2137382,
+          "visible": true
+        },
+        {
+          "at_us": 2193148,
+          "visible": true
+        },
+        {
+          "at_us": 2288778,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "engine_origin_frame_number": 1177,
+      "engine_end_frame_number": 1280,
+      "first_absent_frame_number": 1278,
+      "engine_origin_presentation_target_us": 4619733561,
+      "engine_end_presentation_target_us": 4622066894,
+      "first_absent_presentation_target_us": 4621983561,
+      "first_absent_reported_vsync_start_us": 4621966894,
+      "first_absent_target_minus_vsync_start_us": 16667,
+      "first_absent_frame_timing_received": true,
+      "first_absent_frame_timing_status": "matched_frame_identity",
+      "first_absent_reported_frame_timing": {
+        "frame_number": 1278,
+        "vsync_start_us": 4621966894,
+        "build_start_us": 4621975097,
+        "build_finish_us": 4621982279,
+        "raster_start_us": 4621985801,
+        "raster_finish_us": 4622004348,
+        "build_us": 7182,
+        "raster_us": 18547,
+        "total_us": 37454,
+        "callback_observed_at_us": 2352212
+      },
+      "engine_timestamp_semantics": "post-frame raw timestamp is presentation target, not vsync start; correlation uses exact engine frame_number, never nearest timestamp or a fixed frame-period adjustment",
+      "native_frame_timings": [
+        {
+          "frame_number": 1177,
+          "vsync_start_us": 4619716895,
+          "build_start_us": 4619719257,
+          "build_finish_us": 4620126181,
+          "raster_start_us": 4620126692,
+          "raster_finish_us": 4621248269,
+          "build_us": 406924,
+          "raster_us": 1121577,
+          "total_us": 1531374,
+          "callback_observed_at_us": 1840418
+        },
+        {
+          "frame_number": 1178,
+          "vsync_start_us": 4620166895,
+          "build_start_us": 4620171061,
+          "build_finish_us": 4620288812,
+          "raster_start_us": 4621249025,
+          "raster_finish_us": 4621286230,
+          "build_us": 117751,
+          "raster_us": 37205,
+          "total_us": 1119335,
+          "callback_observed_at_us": 1840433
+        },
+        {
+          "frame_number": 1236,
+          "vsync_start_us": 4621250228,
+          "build_start_us": 4621253929,
+          "build_finish_us": 4621260329,
+          "raster_start_us": 4621291071,
+          "raster_finish_us": 4621459584,
+          "build_us": 6400,
+          "raster_us": 168513,
+          "total_us": 209356,
+          "callback_observed_at_us": 1840436
+        },
+        {
+          "frame_number": 1239,
+          "vsync_start_us": 4621300228,
+          "build_start_us": 4621302793,
+          "build_finish_us": 4621306445,
+          "raster_start_us": 4621460098,
+          "raster_finish_us": 4621575391,
+          "build_us": 3652,
+          "raster_us": 115293,
+          "total_us": 275163,
+          "callback_observed_at_us": 1840443
+        },
+        {
+          "frame_number": 1249,
+          "vsync_start_us": 4621466894,
+          "build_start_us": 4621469903,
+          "build_finish_us": 4621472141,
+          "raster_start_us": 4621575871,
+          "raster_finish_us": 4621619169,
+          "build_us": 2238,
+          "raster_us": 43298,
+          "total_us": 152275,
+          "callback_observed_at_us": 2028936
+        },
+        {
+          "frame_number": 1256,
+          "vsync_start_us": 4621583561,
+          "build_start_us": 4621588719,
+          "build_finish_us": 4621591403,
+          "raster_start_us": 4621620334,
+          "raster_finish_us": 4621681064,
+          "build_us": 2684,
+          "raster_us": 60730,
+          "total_us": 97503,
+          "callback_observed_at_us": 2028951
+        },
+        {
+          "frame_number": 1259,
+          "vsync_start_us": 4621633561,
+          "build_start_us": 4621635380,
+          "build_finish_us": 4621637812,
+          "raster_start_us": 4621686473,
+          "raster_finish_us": 4621725181,
+          "build_us": 2432,
+          "raster_us": 38708,
+          "total_us": 91620,
+          "callback_observed_at_us": 2028955
+        },
+        {
+          "frame_number": 1261,
+          "vsync_start_us": 4621683561,
+          "build_start_us": 4621686990,
+          "build_finish_us": 4621689215,
+          "raster_start_us": 4621725774,
+          "raster_finish_us": 4621764887,
+          "build_us": 2225,
+          "raster_us": 39113,
+          "total_us": 81326,
+          "callback_observed_at_us": 2028962
+        },
+        {
+          "frame_number": 1264,
+          "vsync_start_us": 4621733561,
+          "build_start_us": 4621735734,
+          "build_finish_us": 4621738193,
+          "raster_start_us": 4621765361,
+          "raster_finish_us": 4621802305,
+          "build_us": 2459,
+          "raster_us": 36944,
+          "total_us": 68744,
+          "callback_observed_at_us": 2236906
+        },
+        {
+          "frame_number": 1266,
+          "vsync_start_us": 4621766894,
+          "build_start_us": 4621770329,
+          "build_finish_us": 4621773294,
+          "raster_start_us": 4621803342,
+          "raster_finish_us": 4621854317,
+          "build_us": 2965,
+          "raster_us": 50975,
+          "total_us": 87423,
+          "callback_observed_at_us": 2236920
+        },
+        {
+          "frame_number": 1269,
+          "vsync_start_us": 4621816894,
+          "build_start_us": 4621826092,
+          "build_finish_us": 4621829213,
+          "raster_start_us": 4621855080,
+          "raster_finish_us": 4621907743,
+          "build_us": 3121,
+          "raster_us": 52663,
+          "total_us": 90849,
+          "callback_observed_at_us": 2236922
+        },
+        {
+          "frame_number": 1272,
+          "vsync_start_us": 4621866894,
+          "build_start_us": 4621869878,
+          "build_finish_us": 4621872424,
+          "raster_start_us": 4621913735,
+          "raster_finish_us": 4621967910,
+          "build_us": 2546,
+          "raster_us": 54175,
+          "total_us": 101016,
+          "callback_observed_at_us": 2236925
+        },
+        {
+          "frame_number": 1275,
+          "vsync_start_us": 4621916894,
+          "build_start_us": 4621920026,
+          "build_finish_us": 4621924368,
+          "raster_start_us": 4621969241,
+          "raster_finish_us": 4621984373,
+          "build_us": 4342,
+          "raster_us": 15132,
+          "total_us": 67479,
+          "callback_observed_at_us": 2352198
+        },
+        {
+          "frame_number": 1278,
+          "vsync_start_us": 4621966894,
+          "build_start_us": 4621975097,
+          "build_finish_us": 4621982279,
+          "raster_start_us": 4621985801,
+          "raster_finish_us": 4622004348,
+          "build_us": 7182,
+          "raster_us": 18547,
+          "total_us": 37454,
+          "callback_observed_at_us": 2352212
+        },
+        {
+          "frame_number": 1279,
+          "vsync_start_us": 4622033561,
+          "build_start_us": 4622036417,
+          "build_finish_us": 4622036834,
+          "raster_start_us": 4622038446,
+          "raster_finish_us": 4622046905,
+          "build_us": 417,
+          "raster_us": 8459,
+          "total_us": 13344,
+          "callback_observed_at_us": 2352216
+        },
+        {
+          "frame_number": 1280,
+          "vsync_start_us": 4622050228,
+          "build_start_us": 4622052739,
+          "build_finish_us": 4622053281,
+          "raster_start_us": 4622055182,
+          "raster_finish_us": 4622065160,
+          "build_us": 542,
+          "raster_us": 9978,
+          "total_us": 14932,
+          "callback_observed_at_us": 2352222
+        }
+      ],
+      "frame_timings_truncated": false
+    },
+    {
+      "kind": "coach",
+      "visit": "cold QA warm-up, separate from measured repeat visit",
+      "preparation_scope": "first full route visit in this QA case, after shared asset precache; not a cold app launch",
+      "completed_to_destination": true,
+      "warmup_evidence_complete": true,
+      "destination_ready_at_us": 3048402,
+      "coach_composer_enabled_verified": true,
+      "cold_observation_budget_met": true,
+      "cold_scope": "diagnostic cold visit; repeat-visit success does not certify cold performance",
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 98,
+      "last_visible_ms": 2229,
+      "first_absent_ms": 3034,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 805142,
+      "maximum_frame_gap_us": 805142,
+      "samples": [
+        {
+          "at_us": 98816,
+          "visible": true
+        },
+        {
+          "at_us": 300512,
+          "visible": true
+        },
+        {
+          "at_us": 346508,
+          "visible": true
+        },
+        {
+          "at_us": 381523,
+          "visible": true
+        },
+        {
+          "at_us": 394093,
+          "visible": true
+        },
+        {
+          "at_us": 464246,
+          "visible": true
+        },
+        {
+          "at_us": 494403,
+          "visible": true
+        },
+        {
+          "at_us": 511417,
+          "visible": true
+        },
+        {
+          "at_us": 570983,
+          "visible": true
+        },
+        {
+          "at_us": 611447,
+          "visible": true
+        },
+        {
+          "at_us": 633359,
+          "visible": true
+        },
+        {
+          "at_us": 664805,
+          "visible": true
+        },
+        {
+          "at_us": 707789,
+          "visible": true
+        },
+        {
+          "at_us": 727368,
+          "visible": true
+        },
+        {
+          "at_us": 779373,
+          "visible": true
+        },
+        {
+          "at_us": 808401,
+          "visible": true
+        },
+        {
+          "at_us": 861187,
+          "visible": true
+        },
+        {
+          "at_us": 899741,
+          "visible": true
+        },
+        {
+          "at_us": 943348,
+          "visible": true
+        },
+        {
+          "at_us": 978384,
+          "visible": true
+        },
+        {
+          "at_us": 1024451,
+          "visible": true
+        },
+        {
+          "at_us": 1060909,
+          "visible": true
+        },
+        {
+          "at_us": 1110526,
+          "visible": true
+        },
+        {
+          "at_us": 1142437,
+          "visible": true
+        },
+        {
+          "at_us": 1177876,
+          "visible": true
+        },
+        {
+          "at_us": 1234373,
+          "visible": true
+        },
+        {
+          "at_us": 1261363,
+          "visible": true
+        },
+        {
+          "at_us": 1301576,
+          "visible": true
+        },
+        {
+          "at_us": 1327839,
+          "visible": true
+        },
+        {
+          "at_us": 1379024,
+          "visible": true
+        },
+        {
+          "at_us": 1398516,
+          "visible": true
+        },
+        {
+          "at_us": 1453645,
+          "visible": true
+        },
+        {
+          "at_us": 1476284,
+          "visible": true
+        },
+        {
+          "at_us": 1508666,
+          "visible": true
+        },
+        {
+          "at_us": 1541970,
+          "visible": true
+        },
+        {
+          "at_us": 1577776,
+          "visible": true
+        },
+        {
+          "at_us": 1627591,
+          "visible": true
+        },
+        {
+          "at_us": 1660861,
+          "visible": true
+        },
+        {
+          "at_us": 1703702,
+          "visible": true
+        },
+        {
+          "at_us": 1733355,
+          "visible": true
+        },
+        {
+          "at_us": 1776310,
+          "visible": true
+        },
+        {
+          "at_us": 1792528,
+          "visible": true
+        },
+        {
+          "at_us": 1828922,
+          "visible": true
+        },
+        {
+          "at_us": 1877785,
+          "visible": true
+        },
+        {
+          "at_us": 1918359,
+          "visible": true
+        },
+        {
+          "at_us": 1925465,
+          "visible": true
+        },
+        {
+          "at_us": 1966531,
+          "visible": true
+        },
+        {
+          "at_us": 1994176,
+          "visible": true
+        },
+        {
+          "at_us": 2041594,
+          "visible": true
+        },
+        {
+          "at_us": 2075022,
+          "visible": true
+        },
+        {
+          "at_us": 2126828,
+          "visible": true
+        },
+        {
+          "at_us": 2167493,
+          "visible": true
+        },
+        {
+          "at_us": 2202048,
+          "visible": true
+        },
+        {
+          "at_us": 2229434,
+          "visible": true
+        },
+        {
+          "at_us": 3034576,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "engine_origin_frame_number": 1596,
+      "engine_end_frame_number": 1739,
+      "first_absent_frame_number": 1690,
+      "engine_origin_presentation_target_us": 4629133561,
+      "engine_end_presentation_target_us": 4633283561,
+      "first_absent_presentation_target_us": 4631400227,
+      "first_absent_reported_vsync_start_us": 4631383561,
+      "first_absent_target_minus_vsync_start_us": 16666,
+      "first_absent_frame_timing_received": true,
+      "first_absent_frame_timing_status": "matched_frame_identity",
+      "first_absent_reported_frame_timing": {
+        "frame_number": 1690,
+        "vsync_start_us": 4631383561,
+        "build_start_us": 4631384853,
+        "build_finish_us": 4632115977,
+        "raster_start_us": 4632116665,
+        "raster_finish_us": 4633265151,
+        "build_us": 731124,
+        "raster_us": 1148486,
+        "total_us": 1881590,
+        "callback_observed_at_us": 4366221
+      },
+      "engine_timestamp_semantics": "post-frame raw timestamp is presentation target, not vsync start; correlation uses exact engine frame_number, never nearest timestamp or a fixed frame-period adjustment",
+      "native_frame_timings": [
+        {
+          "frame_number": 1596,
+          "vsync_start_us": 4629116894,
+          "build_start_us": 4629118681,
+          "build_finish_us": 4629209792,
+          "raster_start_us": 4629210415,
+          "raster_finish_us": 4629245539,
+          "build_us": 91111,
+          "raster_us": 35124,
+          "total_us": 128645,
+          "callback_observed_at_us": 241537
+        },
+        {
+          "frame_number": 1597,
+          "vsync_start_us": 4629383561,
+          "build_start_us": 4629421985,
+          "build_finish_us": 4629426731,
+          "raster_start_us": 4629427360,
+          "raster_finish_us": 4629450746,
+          "build_us": 4746,
+          "raster_us": 23386,
+          "total_us": 67185,
+          "callback_observed_at_us": 471157
+        },
+        {
+          "frame_number": 1598,
+          "vsync_start_us": 4629450227,
+          "build_start_us": 4629473328,
+          "build_finish_us": 4629475125,
+          "raster_start_us": 4629475809,
+          "raster_finish_us": 4629502490,
+          "build_us": 1797,
+          "raster_us": 26681,
+          "total_us": 52263,
+          "callback_observed_at_us": 471168
+        },
+        {
+          "frame_number": 1599,
+          "vsync_start_us": 4629500227,
+          "build_start_us": 4629508488,
+          "build_finish_us": 4629509789,
+          "raster_start_us": 4629511174,
+          "raster_finish_us": 4629549130,
+          "build_us": 1301,
+          "raster_us": 37956,
+          "total_us": 48903,
+          "callback_observed_at_us": 471378
+        },
+        {
+          "frame_number": 1600,
+          "vsync_start_us": 4629516894,
+          "build_start_us": 4629520562,
+          "build_finish_us": 4629522531,
+          "raster_start_us": 4629552841,
+          "raster_finish_us": 4629597639,
+          "build_us": 1969,
+          "raster_us": 44798,
+          "total_us": 80745,
+          "callback_observed_at_us": 471383
+        },
+        {
+          "frame_number": 1602,
+          "vsync_start_us": 4629566894,
+          "build_start_us": 4629592185,
+          "build_finish_us": 4629593141,
+          "raster_start_us": 4629598068,
+          "raster_finish_us": 4629629813,
+          "build_us": 956,
+          "raster_us": 31745,
+          "total_us": 62919,
+          "callback_observed_at_us": 612479
+        },
+        {
+          "frame_number": 1603,
+          "vsync_start_us": 4629600227,
+          "build_start_us": 4629617371,
+          "build_finish_us": 4629622964,
+          "raster_start_us": 4629630815,
+          "raster_finish_us": 4629660193,
+          "build_us": 5593,
+          "raster_us": 29378,
+          "total_us": 59966,
+          "callback_observed_at_us": 612486
+        },
+        {
+          "frame_number": 1604,
+          "vsync_start_us": 4629633561,
+          "build_start_us": 4629638168,
+          "build_finish_us": 4629639721,
+          "raster_start_us": 4629662876,
+          "raster_finish_us": 4629699396,
+          "build_us": 1553,
+          "raster_us": 36520,
+          "total_us": 65835,
+          "callback_observed_at_us": 612490
+        },
+        {
+          "frame_number": 1605,
+          "vsync_start_us": 4629650227,
+          "build_start_us": 4629689930,
+          "build_finish_us": 4629695175,
+          "raster_start_us": 4629704428,
+          "raster_finish_us": 4629731227,
+          "build_us": 5245,
+          "raster_us": 26799,
+          "total_us": 81000,
+          "callback_observed_at_us": 612492
+        },
+        {
+          "frame_number": 1606,
+          "vsync_start_us": 4629733561,
+          "build_start_us": 4629738609,
+          "build_finish_us": 4629740088,
+          "raster_start_us": 4629740657,
+          "raster_finish_us": 4629770544,
+          "build_us": 1479,
+          "raster_us": 29887,
+          "total_us": 36983,
+          "callback_observed_at_us": 797386
+        },
+        {
+          "frame_number": 1607,
+          "vsync_start_us": 4629750227,
+          "build_start_us": 4629760098,
+          "build_finish_us": 4629762256,
+          "raster_start_us": 4629778069,
+          "raster_finish_us": 4629804817,
+          "build_us": 2158,
+          "raster_us": 26748,
+          "total_us": 54590,
+          "callback_observed_at_us": 797399
+        },
+        {
+          "frame_number": 1609,
+          "vsync_start_us": 4629783561,
+          "build_start_us": 4629790385,
+          "build_finish_us": 4629793386,
+          "raster_start_us": 4629811556,
+          "raster_finish_us": 4629844003,
+          "build_us": 3001,
+          "raster_us": 32447,
+          "total_us": 60442,
+          "callback_observed_at_us": 797401
+        },
+        {
+          "frame_number": 1611,
+          "vsync_start_us": 4629816894,
+          "build_start_us": 4629834214,
+          "build_finish_us": 4629836455,
+          "raster_start_us": 4629847890,
+          "raster_finish_us": 4629884117,
+          "build_us": 2241,
+          "raster_us": 36227,
+          "total_us": 67223,
+          "callback_observed_at_us": 797404
+        },
+        {
+          "frame_number": 1612,
+          "vsync_start_us": 4629850227,
+          "build_start_us": 4629853574,
+          "build_finish_us": 4629855640,
+          "raster_start_us": 4629885108,
+          "raster_finish_us": 4629919232,
+          "build_us": 2066,
+          "raster_us": 34124,
+          "total_us": 69005,
+          "callback_observed_at_us": 797410
+        },
+        {
+          "frame_number": 1614,
+          "vsync_start_us": 4629883561,
+          "build_start_us": 4629891095,
+          "build_finish_us": 4629893102,
+          "raster_start_us": 4629939790,
+          "raster_finish_us": 4629983963,
+          "build_us": 2007,
+          "raster_us": 44173,
+          "total_us": 100402,
+          "callback_observed_at_us": 1015584
+        },
+        {
+          "frame_number": 1616,
+          "vsync_start_us": 4629933561,
+          "build_start_us": 4629935123,
+          "build_finish_us": 4629937211,
+          "raster_start_us": 4629986896,
+          "raster_finish_us": 4630018493,
+          "build_us": 2088,
+          "raster_us": 31597,
+          "total_us": 84932,
+          "callback_observed_at_us": 1015593
+        },
+        {
+          "frame_number": 1619,
+          "vsync_start_us": 4629983561,
+          "build_start_us": 4629987237,
+          "build_finish_us": 4629989798,
+          "raster_start_us": 4630025421,
+          "raster_finish_us": 4630060945,
+          "build_us": 2561,
+          "raster_us": 35524,
+          "total_us": 77384,
+          "callback_observed_at_us": 1015599
+        },
+        {
+          "frame_number": 1621,
+          "vsync_start_us": 4630016894,
+          "build_start_us": 4630024397,
+          "build_finish_us": 4630027542,
+          "raster_start_us": 4630061319,
+          "raster_finish_us": 4630098320,
+          "build_us": 3145,
+          "raster_us": 37001,
+          "total_us": 81426,
+          "callback_observed_at_us": 1015601
+        },
+        {
+          "frame_number": 1623,
+          "vsync_start_us": 4630066894,
+          "build_start_us": 4630069758,
+          "build_finish_us": 4630072175,
+          "raster_start_us": 4630099058,
+          "raster_finish_us": 4630138465,
+          "build_us": 2417,
+          "raster_us": 39407,
+          "total_us": 71571,
+          "callback_observed_at_us": 1015603
+        },
+        {
+          "frame_number": 1625,
+          "vsync_start_us": 4630100227,
+          "build_start_us": 4630104442,
+          "build_finish_us": 4630106881,
+          "raster_start_us": 4630138992,
+          "raster_finish_us": 4630181268,
+          "build_us": 2439,
+          "raster_us": 42276,
+          "total_us": 81041,
+          "callback_observed_at_us": 1225538
+        },
+        {
+          "frame_number": 1627,
+          "vsync_start_us": 4630150227,
+          "build_start_us": 4630151347,
+          "build_finish_us": 4630153144,
+          "raster_start_us": 4630191567,
+          "raster_finish_us": 4630222738,
+          "build_us": 1797,
+          "raster_us": 31171,
+          "total_us": 72511,
+          "callback_observed_at_us": 1225570
+        },
+        {
+          "frame_number": 1629,
+          "vsync_start_us": 4630183561,
+          "build_start_us": 4630188255,
+          "build_finish_us": 4630189943,
+          "raster_start_us": 4630223391,
+          "raster_finish_us": 4630257135,
+          "build_us": 1688,
+          "raster_us": 33744,
+          "total_us": 73574,
+          "callback_observed_at_us": 1225575
+        },
+        {
+          "frame_number": 1632,
+          "vsync_start_us": 4630233561,
+          "build_start_us": 4630237125,
+          "build_finish_us": 4630239174,
+          "raster_start_us": 4630263308,
+          "raster_finish_us": 4630297384,
+          "build_us": 2049,
+          "raster_us": 34076,
+          "total_us": 63823,
+          "callback_observed_at_us": 1225578
+        },
+        {
+          "frame_number": 1634,
+          "vsync_start_us": 4630266894,
+          "build_start_us": 4630269342,
+          "build_finish_us": 4630271244,
+          "raster_start_us": 4630302481,
+          "raster_finish_us": 4630335019,
+          "build_us": 1902,
+          "raster_us": 32538,
+          "total_us": 68125,
+          "callback_observed_at_us": 1225587
+        },
+        {
+          "frame_number": 1636,
+          "vsync_start_us": 4630300227,
+          "build_start_us": 4630303938,
+          "build_finish_us": 4630306391,
+          "raster_start_us": 4630341193,
+          "raster_finish_us": 4630370443,
+          "build_us": 2453,
+          "raster_us": 29250,
+          "total_us": 70216,
+          "callback_observed_at_us": 1414542
+        },
+        {
+          "frame_number": 1638,
+          "vsync_start_us": 4630333561,
+          "build_start_us": 4630357318,
+          "build_finish_us": 4630363296,
+          "raster_start_us": 4630371188,
+          "raster_finish_us": 4630409714,
+          "build_us": 5978,
+          "raster_us": 38526,
+          "total_us": 76153,
+          "callback_observed_at_us": 1414566
+        },
+        {
+          "frame_number": 1640,
+          "vsync_start_us": 4630383561,
+          "build_start_us": 4630388057,
+          "build_finish_us": 4630390085,
+          "raster_start_us": 4630411330,
+          "raster_finish_us": 4630443782,
+          "build_us": 2028,
+          "raster_us": 32452,
+          "total_us": 60221,
+          "callback_observed_at_us": 1414571
+        },
+        {
+          "frame_number": 1642,
+          "vsync_start_us": 4630416894,
+          "build_start_us": 4630424663,
+          "build_finish_us": 4630430079,
+          "raster_start_us": 4630450660,
+          "raster_finish_us": 4630481157,
+          "build_us": 5416,
+          "raster_us": 30497,
+          "total_us": 64263,
+          "callback_observed_at_us": 1414575
+        },
+        {
+          "frame_number": 1643,
+          "vsync_start_us": 4630450227,
+          "build_start_us": 4630454755,
+          "build_finish_us": 4630456677,
+          "raster_start_us": 4630481686,
+          "raster_finish_us": 4630519055,
+          "build_us": 1922,
+          "raster_us": 37369,
+          "total_us": 68828,
+          "callback_observed_at_us": 1415614
+        },
+        {
+          "frame_number": 1645,
+          "vsync_start_us": 4630483561,
+          "build_start_us": 4630490193,
+          "build_finish_us": 4630492153,
+          "raster_start_us": 4630525040,
+          "raster_finish_us": 4630562208,
+          "build_us": 1960,
+          "raster_us": 37168,
+          "total_us": 78647,
+          "callback_observed_at_us": 1575098
+        },
+        {
+          "frame_number": 1646,
+          "vsync_start_us": 4630516894,
+          "build_start_us": 4630524833,
+          "build_finish_us": 4630527037,
+          "raster_start_us": 4630562800,
+          "raster_finish_us": 4630590949,
+          "build_us": 2204,
+          "raster_us": 28149,
+          "total_us": 74055,
+          "callback_observed_at_us": 1575114
+        },
+        {
+          "frame_number": 1648,
+          "vsync_start_us": 4630566894,
+          "build_start_us": 4630580118,
+          "build_finish_us": 4630581704,
+          "raster_start_us": 4630597005,
+          "raster_finish_us": 4630626515,
+          "build_us": 1586,
+          "raster_us": 29510,
+          "total_us": 59621,
+          "callback_observed_at_us": 1575118
+        },
+        {
+          "frame_number": 1649,
+          "vsync_start_us": 4630600227,
+          "build_start_us": 4630601922,
+          "build_finish_us": 4630604043,
+          "raster_start_us": 4630630986,
+          "raster_finish_us": 4630661980,
+          "build_us": 2121,
+          "raster_us": 30994,
+          "total_us": 61753,
+          "callback_observed_at_us": 1575123
+        },
+        {
+          "frame_number": 1651,
+          "vsync_start_us": 4630633561,
+          "build_start_us": 4630635497,
+          "build_finish_us": 4630637426,
+          "raster_start_us": 4630664766,
+          "raster_finish_us": 4630702995,
+          "build_us": 1929,
+          "raster_us": 38229,
+          "total_us": 69434,
+          "callback_observed_at_us": 1575130
+        },
+        {
+          "frame_number": 1653,
+          "vsync_start_us": 4630666894,
+          "build_start_us": 4630669080,
+          "build_finish_us": 4630670733,
+          "raster_start_us": 4630703576,
+          "raster_finish_us": 4630735299,
+          "build_us": 1653,
+          "raster_us": 31723,
+          "total_us": 68405,
+          "callback_observed_at_us": 1756281
+        },
+        {
+          "frame_number": 1655,
+          "vsync_start_us": 4630700227,
+          "build_start_us": 4630704660,
+          "build_finish_us": 4630706406,
+          "raster_start_us": 4630737131,
+          "raster_finish_us": 4630770267,
+          "build_us": 1746,
+          "raster_us": 33136,
+          "total_us": 70040,
+          "callback_observed_at_us": 1756297
+        },
+        {
+          "frame_number": 1658,
+          "vsync_start_us": 4630750227,
+          "build_start_us": 4630752932,
+          "build_finish_us": 4630756372,
+          "raster_start_us": 4630770937,
+          "raster_finish_us": 4630805324,
+          "build_us": 3440,
+          "raster_us": 34387,
+          "total_us": 55097,
+          "callback_observed_at_us": 1756306
+        },
+        {
+          "frame_number": 1660,
+          "vsync_start_us": 4630783561,
+          "build_start_us": 4630786278,
+          "build_finish_us": 4630789047,
+          "raster_start_us": 4630811680,
+          "raster_finish_us": 4630839687,
+          "build_us": 2769,
+          "raster_us": 28007,
+          "total_us": 56126,
+          "callback_observed_at_us": 1756314
+        },
+        {
+          "frame_number": 1662,
+          "vsync_start_us": 4630816894,
+          "build_start_us": 4630830732,
+          "build_finish_us": 4630832743,
+          "raster_start_us": 4630840351,
+          "raster_finish_us": 4630874884,
+          "build_us": 2011,
+          "raster_us": 34533,
+          "total_us": 57990,
+          "callback_observed_at_us": 1756321
+        },
+        {
+          "frame_number": 1663,
+          "vsync_start_us": 4630850227,
+          "build_start_us": 4630858372,
+          "build_finish_us": 4630861700,
+          "raster_start_us": 4630875637,
+          "raster_finish_us": 4630910561,
+          "build_us": 3328,
+          "raster_us": 34924,
+          "total_us": 60334,
+          "callback_observed_at_us": 1926479
+        },
+        {
+          "frame_number": 1665,
+          "vsync_start_us": 4630883561,
+          "build_start_us": 4630898561,
+          "build_finish_us": 4630902238,
+          "raster_start_us": 4630911405,
+          "raster_finish_us": 4630954053,
+          "build_us": 3677,
+          "raster_us": 42648,
+          "total_us": 70492,
+          "callback_observed_at_us": 1926491
+        },
+        {
+          "frame_number": 1666,
+          "vsync_start_us": 4630916894,
+          "build_start_us": 4630918208,
+          "build_finish_us": 4630920959,
+          "raster_start_us": 4630954958,
+          "raster_finish_us": 4630985833,
+          "build_us": 2751,
+          "raster_us": 30875,
+          "total_us": 68939,
+          "callback_observed_at_us": 1926503
+        },
+        {
+          "frame_number": 1667,
+          "vsync_start_us": 4630950227,
+          "build_start_us": 4630955051,
+          "build_finish_us": 4630957295,
+          "raster_start_us": 4630986387,
+          "raster_finish_us": 4631017458,
+          "build_us": 2244,
+          "raster_us": 31071,
+          "total_us": 67231,
+          "callback_observed_at_us": 1926508
+        },
+        {
+          "frame_number": 1670,
+          "vsync_start_us": 4631000227,
+          "build_start_us": 4631003172,
+          "build_finish_us": 4631006319,
+          "raster_start_us": 4631017992,
+          "raster_finish_us": 4631051453,
+          "build_us": 3147,
+          "raster_us": 33461,
+          "total_us": 51226,
+          "callback_observed_at_us": 1926512
+        },
+        {
+          "frame_number": 1671,
+          "vsync_start_us": 4631016894,
+          "build_start_us": 4631033322,
+          "build_finish_us": 4631036112,
+          "raster_start_us": 4631052056,
+          "raster_finish_us": 4631085099,
+          "build_us": 2790,
+          "raster_us": 33043,
+          "total_us": 68205,
+          "callback_observed_at_us": 2109152
+        },
+        {
+          "frame_number": 1672,
+          "vsync_start_us": 4631050227,
+          "build_start_us": 4631052090,
+          "build_finish_us": 4631054163,
+          "raster_start_us": 4631085821,
+          "raster_finish_us": 4631119946,
+          "build_us": 2073,
+          "raster_us": 34125,
+          "total_us": 69719,
+          "callback_observed_at_us": 2109164
+        },
+        {
+          "frame_number": 1674,
+          "vsync_start_us": 4631083561,
+          "build_start_us": 4631092409,
+          "build_finish_us": 4631095103,
+          "raster_start_us": 4631120565,
+          "raster_finish_us": 4631156865,
+          "build_us": 2694,
+          "raster_us": 36300,
+          "total_us": 73304,
+          "callback_observed_at_us": 2109167
+        },
+        {
+          "frame_number": 1676,
+          "vsync_start_us": 4631116894,
+          "build_start_us": 4631120704,
+          "build_finish_us": 4631122517,
+          "raster_start_us": 4631163214,
+          "raster_finish_us": 4631194987,
+          "build_us": 1813,
+          "raster_us": 31773,
+          "total_us": 78093,
+          "callback_observed_at_us": 2109172
+        },
+        {
+          "frame_number": 1679,
+          "vsync_start_us": 4631166894,
+          "build_start_us": 4631168430,
+          "build_finish_us": 4631170432,
+          "raster_start_us": 4631201248,
+          "raster_finish_us": 4631231478,
+          "build_us": 2002,
+          "raster_us": 30230,
+          "total_us": 64584,
+          "callback_observed_at_us": 2109174
+        },
+        {
+          "frame_number": 1681,
+          "vsync_start_us": 4631200227,
+          "build_start_us": 4631201960,
+          "build_finish_us": 4631203933,
+          "raster_start_us": 4631232341,
+          "raster_finish_us": 4631273905,
+          "build_us": 1973,
+          "raster_us": 41564,
+          "total_us": 73678,
+          "callback_observed_at_us": 3056616
+        },
+        {
+          "frame_number": 1683,
+          "vsync_start_us": 4631233561,
+          "build_start_us": 4631241760,
+          "build_finish_us": 4631255429,
+          "raster_start_us": 4631274668,
+          "raster_finish_us": 4631304633,
+          "build_us": 13669,
+          "raster_us": 29965,
+          "total_us": 71072,
+          "callback_observed_at_us": 3056629
+        },
+        {
+          "frame_number": 1685,
+          "vsync_start_us": 4631283561,
+          "build_start_us": 4631291513,
+          "build_finish_us": 4631295649,
+          "raster_start_us": 4631310492,
+          "raster_finish_us": 4631339483,
+          "build_us": 4136,
+          "raster_us": 28991,
+          "total_us": 55922,
+          "callback_observed_at_us": 3056638
+        },
+        {
+          "frame_number": 1687,
+          "vsync_start_us": 4631316894,
+          "build_start_us": 4631329397,
+          "build_finish_us": 4631331026,
+          "raster_start_us": 4631345710,
+          "raster_finish_us": 4631382441,
+          "build_us": 1629,
+          "raster_us": 36731,
+          "total_us": 65547,
+          "callback_observed_at_us": 3056642
+        },
+        {
+          "frame_number": 1688,
+          "vsync_start_us": 4631350227,
+          "build_start_us": 4631355102,
+          "build_finish_us": 4631357979,
+          "raster_start_us": 4631382736,
+          "raster_finish_us": 4631420950,
+          "build_us": 2877,
+          "raster_us": 38214,
+          "total_us": 70723,
+          "callback_observed_at_us": 3063026
+        },
+        {
+          "frame_number": 1690,
+          "vsync_start_us": 4631383561,
+          "build_start_us": 4631384853,
+          "build_finish_us": 4632115977,
+          "raster_start_us": 4632116665,
+          "raster_finish_us": 4633265151,
+          "build_us": 731124,
+          "raster_us": 1148486,
+          "total_us": 1881590,
+          "callback_observed_at_us": 4366221
+        },
+        {
+          "frame_number": 1691,
+          "vsync_start_us": 4632183561,
+          "build_start_us": 4632214524,
+          "build_finish_us": 4632425506,
+          "raster_start_us": 4633266011,
+          "raster_finish_us": 4633306051,
+          "build_us": 210982,
+          "raster_us": 40040,
+          "total_us": 1122490,
+          "callback_observed_at_us": 4366233
+        },
+        {
+          "frame_number": 1739,
+          "vsync_start_us": 4633266894,
+          "build_start_us": 4633269968,
+          "build_finish_us": 4633277447,
+          "raster_start_us": 4633310809,
+          "raster_finish_us": 4633454690,
+          "build_us": 7479,
+          "raster_us": 143881,
+          "total_us": 187796,
+          "callback_observed_at_us": 4366235
+        }
+      ],
+      "frame_timings_truncated": false
+    },
+    {
+      "kind": "community",
+      "visit": "cold QA warm-up, separate from measured repeat visit",
+      "preparation_scope": "first full route visit in this QA case, after shared asset precache; not a cold app launch",
+      "completed_to_destination": true,
+      "warmup_evidence_complete": true,
+      "destination_ready_at_us": 2249352,
+      "coach_composer_enabled_verified": null,
+      "cold_observation_budget_met": true,
+      "cold_scope": "diagnostic cold visit; repeat-visit success does not certify cold performance",
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 61,
+      "last_visible_ms": 2200,
+      "first_absent_ms": 2248,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 47972,
+      "maximum_frame_gap_us": 83237,
+      "samples": [
+        {
+          "at_us": 61988,
+          "visible": true
+        },
+        {
+          "at_us": 145225,
+          "visible": true
+        },
+        {
+          "at_us": 183647,
+          "visible": true
+        },
+        {
+          "at_us": 205411,
+          "visible": true
+        },
+        {
+          "at_us": 231984,
+          "visible": true
+        },
+        {
+          "at_us": 264319,
+          "visible": true
+        },
+        {
+          "at_us": 321039,
+          "visible": true
+        },
+        {
+          "at_us": 363086,
+          "visible": true
+        },
+        {
+          "at_us": 410250,
+          "visible": true
+        },
+        {
+          "at_us": 447015,
+          "visible": true
+        },
+        {
+          "at_us": 480406,
+          "visible": true
+        },
+        {
+          "at_us": 531203,
+          "visible": true
+        },
+        {
+          "at_us": 569374,
+          "visible": true
+        },
+        {
+          "at_us": 620074,
+          "visible": true
+        },
+        {
+          "at_us": 672795,
+          "visible": true
+        },
+        {
+          "at_us": 707496,
+          "visible": true
+        },
+        {
+          "at_us": 734805,
+          "visible": true
+        },
+        {
+          "at_us": 785541,
+          "visible": true
+        },
+        {
+          "at_us": 815063,
+          "visible": true
+        },
+        {
+          "at_us": 865755,
+          "visible": true
+        },
+        {
+          "at_us": 899302,
+          "visible": true
+        },
+        {
+          "at_us": 963066,
+          "visible": true
+        },
+        {
+          "at_us": 999692,
+          "visible": true
+        },
+        {
+          "at_us": 1030894,
+          "visible": true
+        },
+        {
+          "at_us": 1077450,
+          "visible": true
+        },
+        {
+          "at_us": 1125155,
+          "visible": true
+        },
+        {
+          "at_us": 1151477,
+          "visible": true
+        },
+        {
+          "at_us": 1231158,
+          "visible": true
+        },
+        {
+          "at_us": 1257550,
+          "visible": true
+        },
+        {
+          "at_us": 1281648,
+          "visible": true
+        },
+        {
+          "at_us": 1322104,
+          "visible": true
+        },
+        {
+          "at_us": 1363430,
+          "visible": true
+        },
+        {
+          "at_us": 1398792,
+          "visible": true
+        },
+        {
+          "at_us": 1447568,
+          "visible": true
+        },
+        {
+          "at_us": 1483486,
+          "visible": true
+        },
+        {
+          "at_us": 1532831,
+          "visible": true
+        },
+        {
+          "at_us": 1567026,
+          "visible": true
+        },
+        {
+          "at_us": 1615713,
+          "visible": true
+        },
+        {
+          "at_us": 1652605,
+          "visible": true
+        },
+        {
+          "at_us": 1703664,
+          "visible": true
+        },
+        {
+          "at_us": 1748871,
+          "visible": true
+        },
+        {
+          "at_us": 1799290,
+          "visible": true
+        },
+        {
+          "at_us": 1832050,
+          "visible": true
+        },
+        {
+          "at_us": 1869564,
+          "visible": true
+        },
+        {
+          "at_us": 1915637,
+          "visible": true
+        },
+        {
+          "at_us": 1981128,
+          "visible": true
+        },
+        {
+          "at_us": 1999337,
+          "visible": true
+        },
+        {
+          "at_us": 2066868,
+          "visible": true
+        },
+        {
+          "at_us": 2098084,
+          "visible": true
+        },
+        {
+          "at_us": 2147429,
+          "visible": true
+        },
+        {
+          "at_us": 2200068,
+          "visible": true
+        },
+        {
+          "at_us": 2248040,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout",
+      "engine_origin_frame_number": 2045,
+      "engine_end_frame_number": 2161,
+      "first_absent_frame_number": 2159,
+      "engine_origin_presentation_target_us": 4640566894,
+      "engine_end_presentation_target_us": 4642850227,
+      "first_absent_presentation_target_us": 4642800227,
+      "first_absent_reported_vsync_start_us": 4642783560,
+      "first_absent_target_minus_vsync_start_us": 16667,
+      "first_absent_frame_timing_received": true,
+      "first_absent_frame_timing_status": "matched_frame_identity",
+      "first_absent_reported_frame_timing": {
+        "frame_number": 2159,
+        "vsync_start_us": 4642783560,
+        "build_start_us": 4642787004,
+        "build_finish_us": 4642794280,
+        "raster_start_us": 4642831923,
+        "raster_finish_us": 4642843571,
+        "build_us": 7276,
+        "raster_us": 11648,
+        "total_us": 60011,
+        "callback_observed_at_us": 2382975
+      },
+      "engine_timestamp_semantics": "post-frame raw timestamp is presentation target, not vsync start; correlation uses exact engine frame_number, never nearest timestamp or a fixed frame-period adjustment",
+      "native_frame_timings": [
+        {
+          "frame_number": 2045,
+          "vsync_start_us": 4640550227,
+          "build_start_us": 4640552125,
+          "build_finish_us": 4640615732,
+          "raster_start_us": 4640616141,
+          "raster_finish_us": 4640657169,
+          "build_us": 63607,
+          "raster_us": 41028,
+          "total_us": 106942,
+          "callback_observed_at_us": 219491
+        },
+        {
+          "frame_number": 2046,
+          "vsync_start_us": 4640650227,
+          "build_start_us": 4640658625,
+          "build_finish_us": 4640697987,
+          "raster_start_us": 4640699046,
+          "raster_finish_us": 4640731629,
+          "build_us": 39362,
+          "raster_us": 32583,
+          "total_us": 81402,
+          "callback_observed_at_us": 219501
+        },
+        {
+          "frame_number": 2047,
+          "vsync_start_us": 4640733560,
+          "build_start_us": 4640737787,
+          "build_finish_us": 4640739461,
+          "raster_start_us": 4640740730,
+          "raster_finish_us": 4640769894,
+          "build_us": 1674,
+          "raster_us": 29164,
+          "total_us": 36334,
+          "callback_observed_at_us": 219503
+        },
+        {
+          "frame_number": 2048,
+          "vsync_start_us": 4640750227,
+          "build_start_us": 4640757863,
+          "build_finish_us": 4640761800,
+          "raster_start_us": 4640775993,
+          "raster_finish_us": 4640813487,
+          "build_us": 3937,
+          "raster_us": 37494,
+          "total_us": 63260,
+          "callback_observed_at_us": 399950
+        },
+        {
+          "frame_number": 2050,
+          "vsync_start_us": 4640783560,
+          "build_start_us": 4640785719,
+          "build_finish_us": 4640788313,
+          "raster_start_us": 4640814714,
+          "raster_finish_us": 4640861106,
+          "build_us": 2594,
+          "raster_us": 46392,
+          "total_us": 77546,
+          "callback_observed_at_us": 399962
+        },
+        {
+          "frame_number": 2052,
+          "vsync_start_us": 4640816894,
+          "build_start_us": 4640818879,
+          "build_finish_us": 4640820535,
+          "raster_start_us": 4640861352,
+          "raster_finish_us": 4640916875,
+          "build_us": 1656,
+          "raster_us": 55523,
+          "total_us": 99981,
+          "callback_observed_at_us": 399965
+        },
+        {
+          "frame_number": 2055,
+          "vsync_start_us": 4640866894,
+          "build_start_us": 4640875899,
+          "build_finish_us": 4640877648,
+          "raster_start_us": 4640917184,
+          "raster_finish_us": 4640952652,
+          "build_us": 1749,
+          "raster_us": 35468,
+          "total_us": 85758,
+          "callback_observed_at_us": 399971
+        },
+        {
+          "frame_number": 2058,
+          "vsync_start_us": 4640916894,
+          "build_start_us": 4640918045,
+          "build_finish_us": 4640919247,
+          "raster_start_us": 4640955833,
+          "raster_finish_us": 4640994720,
+          "build_us": 1202,
+          "raster_us": 38887,
+          "total_us": 77826,
+          "callback_observed_at_us": 608153
+        },
+        {
+          "frame_number": 2059,
+          "vsync_start_us": 4640933560,
+          "build_start_us": 4640962780,
+          "build_finish_us": 4640964796,
+          "raster_start_us": 4641001378,
+          "raster_finish_us": 4641034710,
+          "build_us": 2016,
+          "raster_us": 33332,
+          "total_us": 101150,
+          "callback_observed_at_us": 608165
+        },
+        {
+          "frame_number": 2061,
+          "vsync_start_us": 4641000227,
+          "build_start_us": 4641002115,
+          "build_finish_us": 4641003508,
+          "raster_start_us": 4641035598,
+          "raster_finish_us": 4641074836,
+          "build_us": 1393,
+          "raster_us": 39238,
+          "total_us": 74609,
+          "callback_observed_at_us": 608168
+        },
+        {
+          "frame_number": 2063,
+          "vsync_start_us": 4641033560,
+          "build_start_us": 4641035729,
+          "build_finish_us": 4641037159,
+          "raster_start_us": 4641076558,
+          "raster_finish_us": 4641118039,
+          "build_us": 1430,
+          "raster_us": 41481,
+          "total_us": 84479,
+          "callback_observed_at_us": 608170
+        },
+        {
+          "frame_number": 2066,
+          "vsync_start_us": 4641083560,
+          "build_start_us": 4641085870,
+          "build_finish_us": 4641087774,
+          "raster_start_us": 4641118694,
+          "raster_finish_us": 4641159304,
+          "build_us": 1904,
+          "raster_us": 40610,
+          "total_us": 75744,
+          "callback_observed_at_us": 608172
+        },
+        {
+          "frame_number": 2068,
+          "vsync_start_us": 4641116894,
+          "build_start_us": 4641122902,
+          "build_finish_us": 4641125766,
+          "raster_start_us": 4641164889,
+          "raster_finish_us": 4641202885,
+          "build_us": 2864,
+          "raster_us": 37996,
+          "total_us": 85991,
+          "callback_observed_at_us": 808818
+        },
+        {
+          "frame_number": 2071,
+          "vsync_start_us": 4641166894,
+          "build_start_us": 4641170561,
+          "build_finish_us": 4641172823,
+          "raster_start_us": 4641208532,
+          "raster_finish_us": 4641246262,
+          "build_us": 2262,
+          "raster_us": 37730,
+          "total_us": 79368,
+          "callback_observed_at_us": 808829
+        },
+        {
+          "frame_number": 2074,
+          "vsync_start_us": 4641216894,
+          "build_start_us": 4641224553,
+          "build_finish_us": 4641229248,
+          "raster_start_us": 4641246630,
+          "raster_finish_us": 4641283010,
+          "build_us": 4695,
+          "raster_us": 36380,
+          "total_us": 66116,
+          "callback_observed_at_us": 808836
+        },
+        {
+          "frame_number": 2076,
+          "vsync_start_us": 4641250227,
+          "build_start_us": 4641261678,
+          "build_finish_us": 4641263690,
+          "raster_start_us": 4641287864,
+          "raster_finish_us": 4641322875,
+          "build_us": 2012,
+          "raster_us": 35011,
+          "total_us": 72648,
+          "callback_observed_at_us": 808839
+        },
+        {
+          "frame_number": 2078,
+          "vsync_start_us": 4641283560,
+          "build_start_us": 4641288394,
+          "build_finish_us": 4641290275,
+          "raster_start_us": 4641323114,
+          "raster_finish_us": 4641364738,
+          "build_us": 1881,
+          "raster_us": 41624,
+          "total_us": 81178,
+          "callback_observed_at_us": 808844
+        },
+        {
+          "frame_number": 2081,
+          "vsync_start_us": 4641333560,
+          "build_start_us": 4641337943,
+          "build_finish_us": 4641341596,
+          "raster_start_us": 4641365226,
+          "raster_finish_us": 4641403230,
+          "build_us": 3653,
+          "raster_us": 38004,
+          "total_us": 69670,
+          "callback_observed_at_us": 980666
+        },
+        {
+          "frame_number": 2083,
+          "vsync_start_us": 4641366894,
+          "build_start_us": 4641369772,
+          "build_finish_us": 4641371590,
+          "raster_start_us": 4641403582,
+          "raster_finish_us": 4641446674,
+          "build_us": 1818,
+          "raster_us": 43092,
+          "total_us": 79780,
+          "callback_observed_at_us": 980681
+        },
+        {
+          "frame_number": 2086,
+          "vsync_start_us": 4641416894,
+          "build_start_us": 4641418513,
+          "build_finish_us": 4641422074,
+          "raster_start_us": 4641447481,
+          "raster_finish_us": 4641491185,
+          "build_us": 3561,
+          "raster_us": 43704,
+          "total_us": 74291,
+          "callback_observed_at_us": 980685
+        },
+        {
+          "frame_number": 2088,
+          "vsync_start_us": 4641450227,
+          "build_start_us": 4641453755,
+          "build_finish_us": 4641455929,
+          "raster_start_us": 4641491787,
+          "raster_finish_us": 4641535446,
+          "build_us": 2174,
+          "raster_us": 43659,
+          "total_us": 85219,
+          "callback_observed_at_us": 980688
+        },
+        {
+          "frame_number": 2091,
+          "vsync_start_us": 4641500227,
+          "build_start_us": 4641501828,
+          "build_finish_us": 4641519560,
+          "raster_start_us": 4641536955,
+          "raster_finish_us": 4641573619,
+          "build_us": 17732,
+          "raster_us": 36664,
+          "total_us": 73392,
+          "callback_observed_at_us": 1142556
+        },
+        {
+          "frame_number": 2093,
+          "vsync_start_us": 4641550227,
+          "build_start_us": 4641552919,
+          "build_finish_us": 4641555761,
+          "raster_start_us": 4641580519,
+          "raster_finish_us": 4641616076,
+          "build_us": 2842,
+          "raster_us": 35557,
+          "total_us": 65849,
+          "callback_observed_at_us": 1142579
+        },
+        {
+          "frame_number": 2095,
+          "vsync_start_us": 4641583560,
+          "build_start_us": 4641585651,
+          "build_finish_us": 4641587618,
+          "raster_start_us": 4641616761,
+          "raster_finish_us": 4641663210,
+          "build_us": 1967,
+          "raster_us": 46449,
+          "total_us": 79650,
+          "callback_observed_at_us": 1142584
+        },
+        {
+          "frame_number": 2097,
+          "vsync_start_us": 4641616894,
+          "build_start_us": 4641623399,
+          "build_finish_us": 4641632741,
+          "raster_start_us": 4641664428,
+          "raster_finish_us": 4641698375,
+          "build_us": 9342,
+          "raster_us": 33947,
+          "total_us": 81481,
+          "callback_observed_at_us": 1142587
+        },
+        {
+          "frame_number": 2099,
+          "vsync_start_us": 4641666894,
+          "build_start_us": 4641678165,
+          "build_finish_us": 4641681672,
+          "raster_start_us": 4641699002,
+          "raster_finish_us": 4641737953,
+          "build_us": 3507,
+          "raster_us": 38951,
+          "total_us": 71059,
+          "callback_observed_at_us": 1351918
+        },
+        {
+          "frame_number": 2100,
+          "vsync_start_us": 4641700227,
+          "build_start_us": 4641703377,
+          "build_finish_us": 4641706713,
+          "raster_start_us": 4641739894,
+          "raster_finish_us": 4641778461,
+          "build_us": 3336,
+          "raster_us": 38567,
+          "total_us": 78234,
+          "callback_observed_at_us": 1351932
+        },
+        {
+          "frame_number": 2103,
+          "vsync_start_us": 4641750227,
+          "build_start_us": 4641751731,
+          "build_finish_us": 4641787396,
+          "raster_start_us": 4641787990,
+          "raster_finish_us": 4641824173,
+          "build_us": 35665,
+          "raster_us": 36183,
+          "total_us": 73946,
+          "callback_observed_at_us": 1351937
+        },
+        {
+          "frame_number": 2104,
+          "vsync_start_us": 4641800227,
+          "build_start_us": 4641811084,
+          "build_finish_us": 4641813542,
+          "raster_start_us": 4641825375,
+          "raster_finish_us": 4641864385,
+          "build_us": 2458,
+          "raster_us": 39010,
+          "total_us": 64158,
+          "callback_observed_at_us": 1351949
+        },
+        {
+          "frame_number": 2105,
+          "vsync_start_us": 4641833560,
+          "build_start_us": 4641835349,
+          "build_finish_us": 4641837199,
+          "raster_start_us": 4641865305,
+          "raster_finish_us": 4641906112,
+          "build_us": 1850,
+          "raster_us": 40807,
+          "total_us": 72552,
+          "callback_observed_at_us": 1351953
+        },
+        {
+          "frame_number": 2107,
+          "vsync_start_us": 4641866894,
+          "build_start_us": 4641869501,
+          "build_finish_us": 4641872210,
+          "raster_start_us": 4641906731,
+          "raster_finish_us": 4641947433,
+          "build_us": 2709,
+          "raster_us": 40702,
+          "total_us": 80539,
+          "callback_observed_at_us": 1559949
+        },
+        {
+          "frame_number": 2110,
+          "vsync_start_us": 4641916894,
+          "build_start_us": 4641918164,
+          "build_finish_us": 4641920010,
+          "raster_start_us": 4641953172,
+          "raster_finish_us": 4641987428,
+          "build_us": 1846,
+          "raster_us": 34256,
+          "total_us": 70534,
+          "callback_observed_at_us": 1559964
+        },
+        {
+          "frame_number": 2112,
+          "vsync_start_us": 4641950227,
+          "build_start_us": 4641953551,
+          "build_finish_us": 4641955193,
+          "raster_start_us": 4641987917,
+          "raster_finish_us": 4642034272,
+          "build_us": 1642,
+          "raster_us": 46355,
+          "total_us": 84045,
+          "callback_observed_at_us": 1559971
+        },
+        {
+          "frame_number": 2115,
+          "vsync_start_us": 4642000227,
+          "build_start_us": 4642001670,
+          "build_finish_us": 4642003988,
+          "raster_start_us": 4642035470,
+          "raster_finish_us": 4642071017,
+          "build_us": 2318,
+          "raster_us": 35547,
+          "total_us": 70790,
+          "callback_observed_at_us": 1559976
+        },
+        {
+          "frame_number": 2117,
+          "vsync_start_us": 4642033560,
+          "build_start_us": 4642035232,
+          "build_finish_us": 4642039859,
+          "raster_start_us": 4642071690,
+          "raster_finish_us": 4642115539,
+          "build_us": 4627,
+          "raster_us": 43849,
+          "total_us": 81979,
+          "callback_observed_at_us": 1559980
+        },
+        {
+          "frame_number": 2120,
+          "vsync_start_us": 4642083560,
+          "build_start_us": 4642087253,
+          "build_finish_us": 4642089445,
+          "raster_start_us": 4642116408,
+          "raster_finish_us": 4642158008,
+          "build_us": 2192,
+          "raster_us": 41600,
+          "total_us": 74448,
+          "callback_observed_at_us": 1780867
+        },
+        {
+          "frame_number": 2122,
+          "vsync_start_us": 4642116894,
+          "build_start_us": 4642119588,
+          "build_finish_us": 4642122902,
+          "raster_start_us": 4642159552,
+          "raster_finish_us": 4642198790,
+          "build_us": 3314,
+          "raster_us": 39238,
+          "total_us": 81896,
+          "callback_observed_at_us": 1780884
+        },
+        {
+          "frame_number": 2125,
+          "vsync_start_us": 4642166894,
+          "build_start_us": 4642168987,
+          "build_finish_us": 4642172393,
+          "raster_start_us": 4642206440,
+          "raster_finish_us": 4642248863,
+          "build_us": 3406,
+          "raster_us": 42423,
+          "total_us": 81969,
+          "callback_observed_at_us": 1780888
+        },
+        {
+          "frame_number": 2127,
+          "vsync_start_us": 4642200227,
+          "build_start_us": 4642206040,
+          "build_finish_us": 4642208288,
+          "raster_start_us": 4642250660,
+          "raster_finish_us": 4642292450,
+          "build_us": 2248,
+          "raster_us": 41790,
+          "total_us": 92223,
+          "callback_observed_at_us": 1780896
+        },
+        {
+          "frame_number": 2130,
+          "vsync_start_us": 4642250227,
+          "build_start_us": 4642252519,
+          "build_finish_us": 4642256269,
+          "raster_start_us": 4642295312,
+          "raster_finish_us": 4642336550,
+          "build_us": 3750,
+          "raster_us": 41238,
+          "total_us": 86323,
+          "callback_observed_at_us": 1780900
+        },
+        {
+          "frame_number": 2133,
+          "vsync_start_us": 4642300227,
+          "build_start_us": 4642302593,
+          "build_finish_us": 4642305078,
+          "raster_start_us": 4642337281,
+          "raster_finish_us": 4642378798,
+          "build_us": 2485,
+          "raster_us": 41517,
+          "total_us": 78571,
+          "callback_observed_at_us": 1994605
+        },
+        {
+          "frame_number": 2136,
+          "vsync_start_us": 4642350227,
+          "build_start_us": 4642353549,
+          "build_finish_us": 4642355580,
+          "raster_start_us": 4642380049,
+          "raster_finish_us": 4642418170,
+          "build_us": 2031,
+          "raster_us": 38121,
+          "total_us": 67943,
+          "callback_observed_at_us": 1994622
+        },
+        {
+          "frame_number": 2138,
+          "vsync_start_us": 4642383560,
+          "build_start_us": 4642386172,
+          "build_finish_us": 4642388427,
+          "raster_start_us": 4642419050,
+          "raster_finish_us": 4642463602,
+          "build_us": 2255,
+          "raster_us": 44552,
+          "total_us": 80042,
+          "callback_observed_at_us": 1994626
+        },
+        {
+          "frame_number": 2139,
+          "vsync_start_us": 4642416894,
+          "build_start_us": 4642422702,
+          "build_finish_us": 4642425436,
+          "raster_start_us": 4642464030,
+          "raster_finish_us": 4642505104,
+          "build_us": 2734,
+          "raster_us": 41074,
+          "total_us": 88210,
+          "callback_observed_at_us": 1994630
+        },
+        {
+          "frame_number": 2142,
+          "vsync_start_us": 4642466894,
+          "build_start_us": 4642470721,
+          "build_finish_us": 4642472396,
+          "raster_start_us": 4642505507,
+          "raster_finish_us": 4642550403,
+          "build_us": 1675,
+          "raster_us": 44896,
+          "total_us": 83509,
+          "callback_observed_at_us": 1994637
+        },
+        {
+          "frame_number": 2145,
+          "vsync_start_us": 4642516894,
+          "build_start_us": 4642535284,
+          "build_finish_us": 4642537564,
+          "raster_start_us": 4642551056,
+          "raster_finish_us": 4642603793,
+          "build_us": 2280,
+          "raster_us": 52737,
+          "total_us": 86899,
+          "callback_observed_at_us": 2227133
+        },
+        {
+          "frame_number": 2146,
+          "vsync_start_us": 4642550227,
+          "build_start_us": 4642553273,
+          "build_finish_us": 4642555612,
+          "raster_start_us": 4642604535,
+          "raster_finish_us": 4642645986,
+          "build_us": 2339,
+          "raster_us": 41451,
+          "total_us": 95759,
+          "callback_observed_at_us": 2227147
+        },
+        {
+          "frame_number": 2150,
+          "vsync_start_us": 4642616894,
+          "build_start_us": 4642619213,
+          "build_finish_us": 4642622217,
+          "raster_start_us": 4642648449,
+          "raster_finish_us": 4642686798,
+          "build_us": 3004,
+          "raster_us": 38349,
+          "total_us": 69904,
+          "callback_observed_at_us": 2227150
+        },
+        {
+          "frame_number": 2152,
+          "vsync_start_us": 4642650227,
+          "build_start_us": 4642652719,
+          "build_finish_us": 4642654574,
+          "raster_start_us": 4642688753,
+          "raster_finish_us": 4642727692,
+          "build_us": 1855,
+          "raster_us": 38939,
+          "total_us": 77465,
+          "callback_observed_at_us": 2227152
+        },
+        {
+          "frame_number": 2155,
+          "vsync_start_us": 4642700227,
+          "build_start_us": 4642701140,
+          "build_finish_us": 4642703496,
+          "raster_start_us": 4642728581,
+          "raster_finish_us": 4642774838,
+          "build_us": 2356,
+          "raster_us": 46257,
+          "total_us": 74611,
+          "callback_observed_at_us": 2227158
+        },
+        {
+          "frame_number": 2157,
+          "vsync_start_us": 4642733560,
+          "build_start_us": 4642735193,
+          "build_finish_us": 4642737290,
+          "raster_start_us": 4642781724,
+          "raster_finish_us": 4642827742,
+          "build_us": 2097,
+          "raster_us": 46018,
+          "total_us": 94182,
+          "callback_observed_at_us": 2382962
+        },
+        {
+          "frame_number": 2159,
+          "vsync_start_us": 4642783560,
+          "build_start_us": 4642787004,
+          "build_finish_us": 4642794280,
+          "raster_start_us": 4642831923,
+          "raster_finish_us": 4642843571,
+          "build_us": 7276,
+          "raster_us": 11648,
+          "total_us": 60011,
+          "callback_observed_at_us": 2382975
+        },
+        {
+          "frame_number": 2161,
+          "vsync_start_us": 4642833560,
+          "build_start_us": 4642834846,
+          "build_finish_us": 4642835285,
+          "raster_start_us": 4642844368,
+          "raster_finish_us": 4642853397,
+          "build_us": 439,
+          "raster_us": 9029,
+          "total_us": 19837,
+          "callback_observed_at_us": 2382978
+        }
+      ],
+      "frame_timings_truncated": false
+    }
+  ],
+  "last_visit_hold_observations": {
+    "recipes": {
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 59,
+      "last_visible_ms": 2196,
+      "first_absent_ms": 2251,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": true,
+      "expiry_observation_precision_us": 55487,
+      "maximum_frame_gap_us": 160443,
+      "samples": [
+        {
+          "at_us": 59903,
+          "visible": true
+        },
+        {
+          "at_us": 98914,
+          "visible": true
+        },
+        {
+          "at_us": 115309,
+          "visible": true
+        },
+        {
+          "at_us": 150306,
+          "visible": true
+        },
+        {
+          "at_us": 182434,
+          "visible": true
+        },
+        {
+          "at_us": 216382,
+          "visible": true
+        },
+        {
+          "at_us": 264335,
+          "visible": true
+        },
+        {
+          "at_us": 299171,
+          "visible": true
+        },
+        {
+          "at_us": 405380,
+          "visible": true
+        },
+        {
+          "at_us": 455889,
+          "visible": true
+        },
+        {
+          "at_us": 490430,
+          "visible": true
+        },
+        {
+          "at_us": 532152,
+          "visible": true
+        },
+        {
+          "at_us": 566380,
+          "visible": true
+        },
+        {
+          "at_us": 617942,
+          "visible": true
+        },
+        {
+          "at_us": 664626,
+          "visible": true
+        },
+        {
+          "at_us": 732240,
+          "visible": true
+        },
+        {
+          "at_us": 753069,
+          "visible": true
+        },
+        {
+          "at_us": 805999,
+          "visible": true
+        },
+        {
+          "at_us": 873849,
+          "visible": true
+        },
+        {
+          "at_us": 919552,
+          "visible": true
+        },
+        {
+          "at_us": 964769,
+          "visible": true
+        },
+        {
+          "at_us": 1026927,
+          "visible": true
+        },
+        {
+          "at_us": 1054490,
+          "visible": true
+        },
+        {
+          "at_us": 1117332,
+          "visible": true
+        },
+        {
+          "at_us": 1176013,
+          "visible": true
+        },
+        {
+          "at_us": 1199034,
+          "visible": true
+        },
+        {
+          "at_us": 1256885,
+          "visible": true
+        },
+        {
+          "at_us": 1320915,
+          "visible": true
+        },
+        {
+          "at_us": 1365992,
+          "visible": true
+        },
+        {
+          "at_us": 1437566,
+          "visible": true
+        },
+        {
+          "at_us": 1470496,
+          "visible": true
+        },
+        {
+          "at_us": 1518747,
+          "visible": true
+        },
+        {
+          "at_us": 1642310,
+          "visible": true
+        },
+        {
+          "at_us": 1664835,
+          "visible": true
+        },
+        {
+          "at_us": 1722004,
+          "visible": true
+        },
+        {
+          "at_us": 1882447,
+          "visible": true
+        },
+        {
+          "at_us": 1916935,
+          "visible": true
+        },
+        {
+          "at_us": 2005546,
+          "visible": true
+        },
+        {
+          "at_us": 2035257,
+          "visible": true
+        },
+        {
+          "at_us": 2082128,
+          "visible": true
+        },
+        {
+          "at_us": 2114943,
+          "visible": true
+        },
+        {
+          "at_us": 2196092,
+          "visible": true
+        },
+        {
+          "at_us": 2251579,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout"
+    },
+    "videos": {
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 54,
+      "last_visible_ms": 2268,
+      "first_absent_ms": 2289,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 20350,
+      "maximum_frame_gap_us": 110221,
+      "samples": [
+        {
+          "at_us": 54000,
+          "visible": true
+        },
+        {
+          "at_us": 102393,
+          "visible": true
+        },
+        {
+          "at_us": 115637,
+          "visible": true
+        },
+        {
+          "at_us": 152975,
+          "visible": true
+        },
+        {
+          "at_us": 244454,
+          "visible": true
+        },
+        {
+          "at_us": 266073,
+          "visible": true
+        },
+        {
+          "at_us": 287827,
+          "visible": true
+        },
+        {
+          "at_us": 342924,
+          "visible": true
+        },
+        {
+          "at_us": 388814,
+          "visible": true
+        },
+        {
+          "at_us": 421293,
+          "visible": true
+        },
+        {
+          "at_us": 531514,
+          "visible": true
+        },
+        {
+          "at_us": 565828,
+          "visible": true
+        },
+        {
+          "at_us": 625914,
+          "visible": true
+        },
+        {
+          "at_us": 668275,
+          "visible": true
+        },
+        {
+          "at_us": 715657,
+          "visible": true
+        },
+        {
+          "at_us": 765845,
+          "visible": true
+        },
+        {
+          "at_us": 815405,
+          "visible": true
+        },
+        {
+          "at_us": 870161,
+          "visible": true
+        },
+        {
+          "at_us": 917511,
+          "visible": true
+        },
+        {
+          "at_us": 950012,
+          "visible": true
+        },
+        {
+          "at_us": 1006557,
+          "visible": true
+        },
+        {
+          "at_us": 1059669,
+          "visible": true
+        },
+        {
+          "at_us": 1101015,
+          "visible": true
+        },
+        {
+          "at_us": 1165059,
+          "visible": true
+        },
+        {
+          "at_us": 1199927,
+          "visible": true
+        },
+        {
+          "at_us": 1250831,
+          "visible": true
+        },
+        {
+          "at_us": 1300456,
+          "visible": true
+        },
+        {
+          "at_us": 1339582,
+          "visible": true
+        },
+        {
+          "at_us": 1419732,
+          "visible": true
+        },
+        {
+          "at_us": 1441735,
+          "visible": true
+        },
+        {
+          "at_us": 1497269,
+          "visible": true
+        },
+        {
+          "at_us": 1565053,
+          "visible": true
+        },
+        {
+          "at_us": 1587502,
+          "visible": true
+        },
+        {
+          "at_us": 1637461,
+          "visible": true
+        },
+        {
+          "at_us": 1687883,
+          "visible": true
+        },
+        {
+          "at_us": 1733863,
+          "visible": true
+        },
+        {
+          "at_us": 1785490,
+          "visible": true
+        },
+        {
+          "at_us": 1838790,
+          "visible": true
+        },
+        {
+          "at_us": 1901462,
+          "visible": true
+        },
+        {
+          "at_us": 1996851,
+          "visible": true
+        },
+        {
+          "at_us": 2035872,
+          "visible": true
+        },
+        {
+          "at_us": 2057724,
+          "visible": true
+        },
+        {
+          "at_us": 2148408,
+          "visible": true
+        },
+        {
+          "at_us": 2183357,
+          "visible": true
+        },
+        {
+          "at_us": 2268896,
+          "visible": true
+        },
+        {
+          "at_us": 2289246,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout"
+    },
+    "sleep": {
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 39,
+      "last_visible_ms": 2213,
+      "first_absent_ms": 2296,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 82432,
+      "maximum_frame_gap_us": 98918,
+      "samples": [
+        {
+          "at_us": 39875,
+          "visible": true
+        },
+        {
+          "at_us": 69685,
+          "visible": true
+        },
+        {
+          "at_us": 102339,
+          "visible": true
+        },
+        {
+          "at_us": 119911,
+          "visible": true
+        },
+        {
+          "at_us": 162723,
+          "visible": true
+        },
+        {
+          "at_us": 199694,
+          "visible": true
+        },
+        {
+          "at_us": 259354,
+          "visible": true
+        },
+        {
+          "at_us": 281611,
+          "visible": true
+        },
+        {
+          "at_us": 321445,
+          "visible": true
+        },
+        {
+          "at_us": 420363,
+          "visible": true
+        },
+        {
+          "at_us": 484774,
+          "visible": true
+        },
+        {
+          "at_us": 519886,
+          "visible": true
+        },
+        {
+          "at_us": 576927,
+          "visible": true
+        },
+        {
+          "at_us": 616938,
+          "visible": true
+        },
+        {
+          "at_us": 669577,
+          "visible": true
+        },
+        {
+          "at_us": 715632,
+          "visible": true
+        },
+        {
+          "at_us": 780174,
+          "visible": true
+        },
+        {
+          "at_us": 802238,
+          "visible": true
+        },
+        {
+          "at_us": 870386,
+          "visible": true
+        },
+        {
+          "at_us": 883085,
+          "visible": true
+        },
+        {
+          "at_us": 933320,
+          "visible": true
+        },
+        {
+          "at_us": 984240,
+          "visible": true
+        },
+        {
+          "at_us": 1017741,
+          "visible": true
+        },
+        {
+          "at_us": 1066209,
+          "visible": true
+        },
+        {
+          "at_us": 1120601,
+          "visible": true
+        },
+        {
+          "at_us": 1166943,
+          "visible": true
+        },
+        {
+          "at_us": 1216720,
+          "visible": true
+        },
+        {
+          "at_us": 1252143,
+          "visible": true
+        },
+        {
+          "at_us": 1303126,
+          "visible": true
+        },
+        {
+          "at_us": 1350421,
+          "visible": true
+        },
+        {
+          "at_us": 1401104,
+          "visible": true
+        },
+        {
+          "at_us": 1467215,
+          "visible": true
+        },
+        {
+          "at_us": 1485619,
+          "visible": true
+        },
+        {
+          "at_us": 1539033,
+          "visible": true
+        },
+        {
+          "at_us": 1586318,
+          "visible": true
+        },
+        {
+          "at_us": 1633173,
+          "visible": true
+        },
+        {
+          "at_us": 1702676,
+          "visible": true
+        },
+        {
+          "at_us": 1732726,
+          "visible": true
+        },
+        {
+          "at_us": 1793607,
+          "visible": true
+        },
+        {
+          "at_us": 1844132,
+          "visible": true
+        },
+        {
+          "at_us": 1865059,
+          "visible": true
+        },
+        {
+          "at_us": 1932486,
+          "visible": true
+        },
+        {
+          "at_us": 1973315,
+          "visible": true
+        },
+        {
+          "at_us": 2021706,
+          "visible": true
+        },
+        {
+          "at_us": 2085289,
+          "visible": true
+        },
+        {
+          "at_us": 2119849,
+          "visible": true
+        },
+        {
+          "at_us": 2213718,
+          "visible": true
+        },
+        {
+          "at_us": 2296150,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout"
+    },
+    "diet": {
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 135,
+      "last_visible_ms": 2232,
+      "first_absent_ms": 2365,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 132473,
+      "maximum_frame_gap_us": 132473,
+      "samples": [
+        {
+          "at_us": 135032,
+          "visible": true
+        },
+        {
+          "at_us": 184744,
+          "visible": true
+        },
+        {
+          "at_us": 207788,
+          "visible": true
+        },
+        {
+          "at_us": 254081,
+          "visible": true
+        },
+        {
+          "at_us": 281941,
+          "visible": true
+        },
+        {
+          "at_us": 386494,
+          "visible": true
+        },
+        {
+          "at_us": 400133,
+          "visible": true
+        },
+        {
+          "at_us": 444318,
+          "visible": true
+        },
+        {
+          "at_us": 499180,
+          "visible": true
+        },
+        {
+          "at_us": 614680,
+          "visible": true
+        },
+        {
+          "at_us": 681414,
+          "visible": true
+        },
+        {
+          "at_us": 720818,
+          "visible": true
+        },
+        {
+          "at_us": 771765,
+          "visible": true
+        },
+        {
+          "at_us": 830662,
+          "visible": true
+        },
+        {
+          "at_us": 903358,
+          "visible": true
+        },
+        {
+          "at_us": 936475,
+          "visible": true
+        },
+        {
+          "at_us": 982518,
+          "visible": true
+        },
+        {
+          "at_us": 1024178,
+          "visible": true
+        },
+        {
+          "at_us": 1065868,
+          "visible": true
+        },
+        {
+          "at_us": 1119327,
+          "visible": true
+        },
+        {
+          "at_us": 1165630,
+          "visible": true
+        },
+        {
+          "at_us": 1215554,
+          "visible": true
+        },
+        {
+          "at_us": 1264628,
+          "visible": true
+        },
+        {
+          "at_us": 1345266,
+          "visible": true
+        },
+        {
+          "at_us": 1365482,
+          "visible": true
+        },
+        {
+          "at_us": 1417971,
+          "visible": true
+        },
+        {
+          "at_us": 1466894,
+          "visible": true
+        },
+        {
+          "at_us": 1522306,
+          "visible": true
+        },
+        {
+          "at_us": 1569676,
+          "visible": true
+        },
+        {
+          "at_us": 1614463,
+          "visible": true
+        },
+        {
+          "at_us": 1681508,
+          "visible": true
+        },
+        {
+          "at_us": 1715118,
+          "visible": true
+        },
+        {
+          "at_us": 1751148,
+          "visible": true
+        },
+        {
+          "at_us": 1811533,
+          "visible": true
+        },
+        {
+          "at_us": 1848553,
+          "visible": true
+        },
+        {
+          "at_us": 1900095,
+          "visible": true
+        },
+        {
+          "at_us": 1948035,
+          "visible": true
+        },
+        {
+          "at_us": 1984996,
+          "visible": true
+        },
+        {
+          "at_us": 2101135,
+          "visible": true
+        },
+        {
+          "at_us": 2134219,
+          "visible": true
+        },
+        {
+          "at_us": 2232974,
+          "visible": true
+        },
+        {
+          "at_us": 2365447,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout"
+    },
+    "coach": {
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 41,
+      "last_visible_ms": 2200,
+      "first_absent_ms": 2408,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": true,
+      "visible_at_or_after_deadline": true,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 207925,
+      "maximum_frame_gap_us": 207925,
+      "samples": [
+        {
+          "at_us": 41753,
+          "visible": true
+        },
+        {
+          "at_us": 86842,
+          "visible": true
+        },
+        {
+          "at_us": 117686,
+          "visible": true
+        },
+        {
+          "at_us": 141102,
+          "visible": true
+        },
+        {
+          "at_us": 164933,
+          "visible": true
+        },
+        {
+          "at_us": 200269,
+          "visible": true
+        },
+        {
+          "at_us": 216894,
+          "visible": true
+        },
+        {
+          "at_us": 252538,
+          "visible": true
+        },
+        {
+          "at_us": 298702,
+          "visible": true
+        },
+        {
+          "at_us": 380979,
+          "visible": true
+        },
+        {
+          "at_us": 421908,
+          "visible": true
+        },
+        {
+          "at_us": 450558,
+          "visible": true
+        },
+        {
+          "at_us": 508632,
+          "visible": true
+        },
+        {
+          "at_us": 551480,
+          "visible": true
+        },
+        {
+          "at_us": 566463,
+          "visible": true
+        },
+        {
+          "at_us": 620209,
+          "visible": true
+        },
+        {
+          "at_us": 681358,
+          "visible": true
+        },
+        {
+          "at_us": 766785,
+          "visible": true
+        },
+        {
+          "at_us": 789312,
+          "visible": true
+        },
+        {
+          "at_us": 800483,
+          "visible": true
+        },
+        {
+          "at_us": 855300,
+          "visible": true
+        },
+        {
+          "at_us": 866080,
+          "visible": true
+        },
+        {
+          "at_us": 899431,
+          "visible": true
+        },
+        {
+          "at_us": 955491,
+          "visible": true
+        },
+        {
+          "at_us": 983359,
+          "visible": true
+        },
+        {
+          "at_us": 1017916,
+          "visible": true
+        },
+        {
+          "at_us": 1049870,
+          "visible": true
+        },
+        {
+          "at_us": 1099423,
+          "visible": true
+        },
+        {
+          "at_us": 1139255,
+          "visible": true
+        },
+        {
+          "at_us": 1166883,
+          "visible": true
+        },
+        {
+          "at_us": 1198817,
+          "visible": true
+        },
+        {
+          "at_us": 1232633,
+          "visible": true
+        },
+        {
+          "at_us": 1271394,
+          "visible": true
+        },
+        {
+          "at_us": 1314908,
+          "visible": true
+        },
+        {
+          "at_us": 1351027,
+          "visible": true
+        },
+        {
+          "at_us": 1427758,
+          "visible": true
+        },
+        {
+          "at_us": 1451476,
+          "visible": true
+        },
+        {
+          "at_us": 1530335,
+          "visible": true
+        },
+        {
+          "at_us": 1556836,
+          "visible": true
+        },
+        {
+          "at_us": 1624302,
+          "visible": true
+        },
+        {
+          "at_us": 1631685,
+          "visible": true
+        },
+        {
+          "at_us": 1677228,
+          "visible": true
+        },
+        {
+          "at_us": 1698793,
+          "visible": true
+        },
+        {
+          "at_us": 1741504,
+          "visible": true
+        },
+        {
+          "at_us": 1825474,
+          "visible": true
+        },
+        {
+          "at_us": 1875823,
+          "visible": true
+        },
+        {
+          "at_us": 1900586,
+          "visible": true
+        },
+        {
+          "at_us": 1916913,
+          "visible": true
+        },
+        {
+          "at_us": 1948213,
+          "visible": true
+        },
+        {
+          "at_us": 1982536,
+          "visible": true
+        },
+        {
+          "at_us": 2027276,
+          "visible": true
+        },
+        {
+          "at_us": 2066448,
+          "visible": true
+        },
+        {
+          "at_us": 2099725,
+          "visible": true
+        },
+        {
+          "at_us": 2132688,
+          "visible": true
+        },
+        {
+          "at_us": 2173358,
+          "visible": true
+        },
+        {
+          "at_us": 2200081,
+          "visible": true
+        },
+        {
+          "at_us": 2408006,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout"
+    },
+    "community": {
+      "required_hold_ms": 2200,
+      "first_frame_visible": true,
+      "first_visible_ms": 49,
+      "last_visible_ms": 49,
+      "first_absent_ms": 104,
+      "negative_frame_recorded": true,
+      "deadline_consistent_with_observations": false,
+      "visible_at_or_after_deadline": false,
+      "deadline_inside_observation_gap": false,
+      "expiry_observation_precision_us": 55208,
+      "maximum_frame_gap_us": 55208,
+      "samples": [
+        {
+          "at_us": 49586,
+          "visible": true
+        },
+        {
+          "at_us": 104794,
+          "visible": false
+        }
+      ],
+      "measurement_scope": "post-frame wall clock; expiry is bracketed by actual positive and negative frames, never inferred from the requested pump interval",
+      "first_visible_frame": {
+        "indicator_animating": true,
+        "indicator_radius": 12.0
+      },
+      "observation_origin": "route mount, before the first child layout"
+    }
+  },
+  "dart_network_client_creations_blocked": 0
+}

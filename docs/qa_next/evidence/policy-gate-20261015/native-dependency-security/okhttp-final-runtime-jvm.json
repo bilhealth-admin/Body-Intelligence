@@ -1,0 +1,231 @@
+{
+  "schema": "bil.qa.okhttp.compatibility.v1",
+  "status": "PASS_ISOLATED_CANDIDATE_WITH_BASELINE_REGRESSION_REPRODUCED",
+  "phases": [
+    {
+      "label": "baseline",
+      "schema": "bil.qa.okhttp.jvm.v1",
+      "mode": "linkage",
+      "version": "3.0.0",
+      "passed": 75,
+      "failed": 0,
+      "symbols_checked": 32,
+      "network_requests": 0,
+      "real_tls_chain_tested": false
+    },
+    {
+      "label": "baseline",
+      "schema": "bil.qa.okhttp.jvm.v1",
+      "mode": "functional",
+      "version": "3.0.0",
+      "passed": 18,
+      "failed": 2,
+      "symbols_checked": 0,
+      "network_requests": 0,
+      "real_tls_chain_tested": false
+    },
+    {
+      "label": "candidate",
+      "schema": "bil.qa.okhttp.jvm.v1",
+      "mode": "linkage",
+      "version": "4.9.2",
+      "passed": 75,
+      "failed": 0,
+      "symbols_checked": 32,
+      "network_requests": 0,
+      "real_tls_chain_tested": false
+    },
+    {
+      "label": "candidate",
+      "schema": "bil.qa.okhttp.jvm.v1",
+      "mode": "functional",
+      "version": "4.9.2",
+      "passed": 21,
+      "failed": 0,
+      "symbols_checked": 0,
+      "network_requests": 0,
+      "real_tls_chain_tested": false
+    }
+  ],
+  "candidate": "4.9.2",
+  "actual_candidate_graph_verified": true,
+  "network_app_requests": 0,
+  "private_keys_created": false,
+  "limits": [
+    "JVM reflection checks actual ML Kit symbolic linkage, not execution of Translation or its network",
+    "Synthetic X509 SAN/public keys only; no real certificate/TLS trust chain",
+    "CVE-2021-0341 direct-verifier regression, not proof of exploitable BIL input",
+    "CertificatePinner functionality only; CVE-2016-2402 exact chain attack not reproduced",
+    "No Android ART/R8/native/device/signed-artifact claim"
+  ],
+  "failures": [],
+  "sources": {
+    "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\tools\\qa\\android_okhttp_compatibility_probe.py": "3840b24c526c2222c775ab447750338c43f1ef1c28b9b6b9ba0fc0b361fdce6e",
+    "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\tools\\qa\\jvm\\OkHttpCompatibilityProbe.java": "4299008b1b1a50ae11ab61f0fd6d0f1ed61a7cb97f395a4dc7cf4a43e1c3ca61"
+  },
+  "downloads": [
+    {
+      "url": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp/4.9.2/okhttp-4.9.2.pom",
+      "sha256": "72a233eae8a5b5a0d7dd626798c6f004dfd2baef216f1396e8217d9cb876e26e",
+      "maven_sha1_matches": true,
+      "pinned_sha256_matches": false,
+      "size": 1809
+    },
+    {
+      "url": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.pom",
+      "sha256": "7c737040a9419522e7c50cc027416a70fe7c7629e52b219935ade6b4119c7d38",
+      "maven_sha1_matches": true,
+      "pinned_sha256_matches": false,
+      "size": 1816
+    },
+    {
+      "url": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp/4.9.2/okhttp-4.9.2.jar",
+      "sha256": "3b2ee1b768c1df28c30d2fe6b38dda4d2c519210e30ca3d27950618c563c92de",
+      "maven_sha1_matches": true,
+      "pinned_sha256_matches": true,
+      "size": 792108
+    }
+  ],
+  "baseline_is_old_apk_graph": false,
+  "original_graph_sha256": "fabadac394d45f1d9a450dcb6c63f71bf3820dfad0689ae851c2ba7cb23bf730",
+  "baseline_evidence_kind": "saved actual 3.0.0 runtime graph; no APK execution claim",
+  "candidate_graph_sha256": "af2225dd89bde7e95ef1067bf517a0c7d902703dfd96e7f587caaa254158f649",
+  "candidate_graph_is_synthetic": false,
+  "mlkit_pom_dependencies": [
+    {
+      "group": "androidx.core",
+      "name": "core",
+      "version": "1.9.0"
+    },
+    {
+      "group": "com.google.android.datatransport",
+      "name": "transport-api",
+      "version": "2.2.1"
+    },
+    {
+      "group": "com.google.android.datatransport",
+      "name": "transport-backend-cct",
+      "version": "2.3.3"
+    },
+    {
+      "group": "com.google.android.datatransport",
+      "name": "transport-runtime",
+      "version": "2.2.6"
+    },
+    {
+      "group": "com.google.android.gms",
+      "name": "play-services-base",
+      "version": "18.5.0"
+    },
+    {
+      "group": "com.google.android.gms",
+      "name": "play-services-basement",
+      "version": "18.4.0"
+    },
+    {
+      "group": "com.google.android.gms",
+      "name": "play-services-tasks",
+      "version": "18.2.0"
+    },
+    {
+      "group": "com.google.firebase",
+      "name": "firebase-components",
+      "version": "16.1.0"
+    },
+    {
+      "group": "com.google.firebase",
+      "name": "firebase-encoders",
+      "version": "16.1.0"
+    },
+    {
+      "group": "com.google.firebase",
+      "name": "firebase-encoders-json",
+      "version": "17.1.0"
+    },
+    {
+      "group": "com.google.mlkit",
+      "name": "common",
+      "version": "18.11.0"
+    },
+    {
+      "group": "com.squareup.okhttp3",
+      "name": "okhttp",
+      "version": "3.0.0"
+    }
+  ],
+  "candidate_pom_comparison": {
+    "4.9.2": [
+      {
+        "group": "com.squareup.okio",
+        "name": "okio",
+        "version": "2.8.0"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "name": "kotlin-stdlib",
+        "version": "1.4.10"
+      }
+    ],
+    "4.12.0": [
+      {
+        "group": "com.squareup.okio",
+        "name": "okio",
+        "version": "3.6.0"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "name": "kotlin-stdlib-jdk8",
+        "version": "1.8.21"
+      }
+    ]
+  },
+  "candidate_graph_jars_verified": true,
+  "classpaths": {
+    "baseline": [
+      {
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.squareup.okhttp3\\okhttp\\3.0.0\\10924c16dba25791695468206d4bd9428d7fe8ae\\okhttp-3.0.0.jar",
+        "sha256": "8f25394193dffd55b11d70eede78086afef736174ccdf74a1e3f6f51b1a2e4aa"
+      },
+      {
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.squareup.okio\\okio-jvm\\3.4.0\\4e8bd78a52ab935ce383d0092646922154295e54\\okio-jvm-3.4.0.jar",
+        "sha256": "0139ec7a506dbbd54cad62291b019cb850534be097c8c66c1000d5fbe8edef3e"
+      },
+      {
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\org.jetbrains.kotlin\\kotlin-stdlib\\2.3.20\\ed866de74ad3d49086a27bbd75952cd186479436\\kotlin-stdlib-2.3.20.jar",
+        "sha256": "0ae12504a5040ebaf37703908483420d1a5624dd1d93f357665f8c77c848a01e"
+      }
+    ],
+    "candidate": [
+      {
+        "path": "G:\\BIL_Project\\worktrees\\bil-ios36-audit-snapshot-20261014\\build\\qa\\policy-gate-20261015\\okhttp-compatibility-20261015T231007\\okhttp-4.9.2.jar",
+        "sha256": "3b2ee1b768c1df28c30d2fe6b38dda4d2c519210e30ca3d27950618c563c92de"
+      },
+      {
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.squareup.okio\\okio-jvm\\3.4.0\\4e8bd78a52ab935ce383d0092646922154295e54\\okio-jvm-3.4.0.jar",
+        "sha256": "0139ec7a506dbbd54cad62291b019cb850534be097c8c66c1000d5fbe8edef3e"
+      },
+      {
+        "path": "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\org.jetbrains.kotlin\\kotlin-stdlib\\2.3.20\\ed866de74ad3d49086a27bbd75952cd186479436\\kotlin-stdlib-2.3.20.jar",
+        "sha256": "0ae12504a5040ebaf37703908483420d1a5624dd1d93f357665f8c77c848a01e"
+      }
+    ]
+  },
+  "mlkit_artifacts": {
+    "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.mlkit\\translate\\17.0.3\\7188883b661bc7a2c95f174fe2d47b04ff20f2e2\\translate-17.0.3.aar": "b6194f7b42034309cf8299784b2d5d70a82a2e9287fbe1650dea4d1f3ad1fe55",
+    "G:\\BIL_Toolchains\\home\\.gradle\\caches\\modules-2\\files-2.1\\com.google.mlkit\\translate\\17.0.3\\d781b2f162609de238623c4b327039a052ecc5b5\\translate-17.0.3.pom": "f4bab4ff2acfb8e78375a407f9b587b01eec7eeb2a0bf094c1ea5d3c3120d8ab"
+  },
+  "binary_symbols": {
+    "classes_with_target_references": [
+      "com.google.android.gms.internal.mlkit_translate.zztz"
+    ],
+    "target_class_symbols": 11,
+    "target_member_symbols": 21,
+    "direct_okio_member_symbols": 0,
+    "internal_member_symbols": [],
+    "target_subclasses": [],
+    "reflective_target_names": [],
+    "all_aar_embedded_jars_scanned": 1,
+    "symbol_rows": 32,
+    "symbol_sha256": "ad6f957b74252fab13d8347cf913420b85cfcd954fab40add5de1ab6d83a3ecc"
+  }
+}

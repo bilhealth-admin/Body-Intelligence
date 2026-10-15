@@ -1,0 +1,359 @@
+{
+  "readAtUtc": "2026-10-15T16:44:06.423224+00:00",
+  "exactVersion": "1.0.0",
+  "versionStateFromPreviousReadback": "REJECTED",
+  "attachedBuildFromPreviousReadback": "35",
+  "mode": "public-store-metadata-get-only",
+  "storeWrites": 0,
+  "privateAppReviewDetailsRequested": false,
+  "downloads": 0,
+  "secretValuesPrinted": false,
+  "result": {
+    "ok": true,
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/appStoreVersions/7a132506-d5a8-4810-a51f-b2dc2bd636cf/appStoreVersionLocalizations",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/apps/6805349703/appInfos",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/subscriptionGroups/22343739/subscriptions",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/apps/6805349703/inAppPurchasesV2",
+        "status": 200
+      }
+    ],
+    "results": {
+      "versionLocalizations": {
+        "ok": true,
+        "data": [
+          {
+            "type": "appStoreVersionLocalizations",
+            "id": "3866ba6c-b637-4f70-9c53-d6274c37bc62",
+            "attributes": {
+              "description": "Body Intelligence Log (BIL) brings daily nutrition, body trends, activity, and habits into one clear, explainable experience.\n\nLog meals by search, barcode, voice, or photo when the related service is available. Review calories, macros, nutrients, hydration, weight trends, activity, sleep, and weekly reports based on information you record or explicitly connect.\n\nWith your permission, BIL can import supported fitness and wellness data from Apple Health and compatible fitness watches or scales. Imported readings retain their source. BIL can export weight records to Apple Health only when you explicitly enable weight export and grant Health write permission.\n\nBIL distinguishes recorded or measured data from calculated estimates and general population references. The in-app Sources & Methodology section explains relevant references, calculation methods, and limitations.\n\nExplore food catalogs, nutrition plans, 1,500 recipes, 300+ workout videos, fasting tools, community features, and optional AI Coach guidance where available.\n\nRemote AI Coach answers are generated using Google Gemini, a third-party AI service operated by Google. Before the first remote request, BIL explains what information may be sent and requires your explicit consent. Only the question and relevant selected context are processed. Raw microphone audio is not sent. You can decline, continue using local features, or withdraw consent later.\n\nMeal-photo analysis has a separate consent step before an image is selected or sent to Google Gemini. Suggested foods are never logged until you review and confirm them.\n\nCommunity, friends, and private messages are available to signed-in users. Community Guidelines, privacy controls, blocking, reporting, and server-backed moderation tools help support a safer community experience.\n\nPremium subscriptions and BIL AI Boost are optional In-App Purchases. Core logging works locally and offline. Features requiring network access clearly report when they are unavailable. Paid access is granted only after verified App Store purchases, and eligible purchases can be restored.\n\nBIL supports 25 languages and is designed to clearly identify missing information, data sources, and calculated estimates rather than presenting unavailable information as measured data.\n\nBody Intelligence Log is a wellness and fitness app, not a medical device. It does not diagnose, treat, cure, or prevent medical conditions. Calculated estimates and wellness information are not treatment prescriptions. Consult a doctor or qualified health professional before making decisions involving pregnancy, supplements, medicines, or medical conditions.\n\nTerms of Use (EULA):\nhttps://www.apple.com/legal/internet-services/itunes/dev/stdeula/\n\nCommunity Guidelines:\nhttps://www.bilhealth.com/community-guidelines",
+              "locale": "en-US",
+              "keywords": "nutrition,food,calories,macros,weight,fitness,habits,progress,wellness,workouts,hydration,sleep",
+              "marketingUrl": "https://www.bilhealth.com/",
+              "promotionalText": "Build a clearer picture of your nutrition, activity, and progress—with transparent, evidence-based insights and no medical diagnosis.",
+              "supportUrl": "https://www.bilhealth.com/support",
+              "whatsNew": null
+            },
+            "relationships": {}
+          }
+        ],
+        "included": [],
+        "paginationPresent": false
+      },
+      "appInfo": {
+        "ok": true,
+        "data": [
+          {
+            "type": "appInfos",
+            "id": "7dc45a4b-fc74-41ad-aa58-afe4c8591122",
+            "attributes": {
+              "appStoreState": "REJECTED",
+              "appStoreAgeRating": "SEVENTEEN_PLUS",
+              "brazilAgeRatingV2": "SELF_RATED_EIGHTEEN",
+              "koreaAgeRating": null,
+              "australiaAgeRating": null,
+              "franceAgeRating": null
+            },
+            "relationships": {
+              "secondaryCategory": {
+                "data": {
+                  "type": "appCategories",
+                  "id": "LIFESTYLE"
+                }
+              },
+              "ageRatingDeclaration": {
+                "data": {
+                  "type": "ageRatingDeclarations",
+                  "id": "7dc45a4b-fc74-41ad-aa58-afe4c8591122"
+                }
+              },
+              "appInfoLocalizations": {
+                "data": [
+                  {
+                    "type": "appInfoLocalizations",
+                    "id": "2ed17031-9665-4f8f-9a75-e4efd2e4e178"
+                  }
+                ]
+              },
+              "primaryCategory": {
+                "data": {
+                  "type": "appCategories",
+                  "id": "HEALTH_AND_FITNESS"
+                }
+              }
+            }
+          }
+        ],
+        "included": [
+          {
+            "type": "appInfoLocalizations",
+            "id": "2ed17031-9665-4f8f-9a75-e4efd2e4e178",
+            "attributes": {
+              "name": "Body Intelligence Log",
+              "privacyPolicyText": null,
+              "locale": "en-US",
+              "privacyPolicyUrl": "https://www.bilhealth.com/privacy",
+              "privacyChoicesUrl": "https://www.bilhealth.com/account-deletion",
+              "subtitle": "Nutrition, Fitness & Progress"
+            },
+            "relationships": {}
+          },
+          {
+            "type": "appCategories",
+            "id": "HEALTH_AND_FITNESS",
+            "attributes": {
+              "platforms": [
+                "IOS",
+                "MAC_OS",
+                "TV_OS",
+                "VISION_OS"
+              ]
+            },
+            "relationships": {
+              "parent": {
+                "data": null
+              }
+            }
+          },
+          {
+            "type": "appCategories",
+            "id": "LIFESTYLE",
+            "attributes": {
+              "platforms": [
+                "IOS",
+                "MAC_OS",
+                "TV_OS",
+                "VISION_OS"
+              ]
+            },
+            "relationships": {
+              "parent": {
+                "data": null
+              }
+            }
+          },
+          {
+            "type": "ageRatingDeclarations",
+            "id": "7dc45a4b-fc74-41ad-aa58-afe4c8591122",
+            "attributes": {
+              "messagingAndChat": true,
+              "sexualContentGraphicAndNudity": "NONE",
+              "gambling": false,
+              "horrorOrFearThemes": "NONE",
+              "parentalControls": false,
+              "advertising": true,
+              "ageRatingOverride": "SEVENTEEN_PLUS",
+              "ageRatingOverrideV2": "EIGHTEEN_PLUS",
+              "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+              "matureOrSuggestiveThemes": "NONE",
+              "healthOrWellnessTopics": true,
+              "unrestrictedWebAccess": false,
+              "violenceCartoonOrFantasy": "NONE",
+              "kidsAgeBand": null,
+              "medicalOrTreatmentInformation": "INFREQUENT",
+              "lootBox": false,
+              "alcoholTobaccoOrDrugUseOrReferences": "INFREQUENT",
+              "gamblingSimulated": "NONE",
+              "violenceRealistic": "NONE",
+              "profanityOrCrudeHumor": "NONE",
+              "socialMedia": true,
+              "contests": "NONE",
+              "ageAssurance": false,
+              "userGeneratedContent": true,
+              "gunsOrOtherWeapons": "NONE",
+              "socialMediaAgeRestricted": false,
+              "sexualContentOrNudity": "NONE"
+            },
+            "relationships": {}
+          }
+        ],
+        "paginationPresent": false
+      },
+      "subscriptions": {
+        "ok": true,
+        "data": [
+          {
+            "type": "subscriptions",
+            "id": "6806555344",
+            "attributes": {
+              "name": "BIL Premium AI Coach Annual",
+              "productId": "bil_premium_ai_coach_annual",
+              "state": "READY_TO_SUBMIT",
+              "subscriptionPeriod": "ONE_YEAR"
+            },
+            "relationships": {
+              "subscriptionLocalizations": {
+                "data": [
+                  {
+                    "type": "subscriptionLocalizations",
+                    "id": "4527d6ee-99a6-4a0d-ad4b-6ea6033f530e"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "subscriptions",
+            "id": "6806555282",
+            "attributes": {
+              "name": "BIL Premium AI Coach Monthly",
+              "productId": "bil_premium_ai_coach",
+              "state": "READY_TO_SUBMIT",
+              "subscriptionPeriod": "ONE_MONTH"
+            },
+            "relationships": {
+              "subscriptionLocalizations": {
+                "data": [
+                  {
+                    "type": "subscriptionLocalizations",
+                    "id": "7c68ba2f-dfba-46b5-9e21-576986b69d3e"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "subscriptions",
+            "id": "6806555198",
+            "attributes": {
+              "name": "BIL Premium Annual",
+              "productId": "bil_premium_annual",
+              "state": "READY_TO_SUBMIT",
+              "subscriptionPeriod": "ONE_YEAR"
+            },
+            "relationships": {
+              "subscriptionLocalizations": {
+                "data": [
+                  {
+                    "type": "subscriptionLocalizations",
+                    "id": "1c7629a9-00c7-4884-9649-3089bf54d42e"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "subscriptions",
+            "id": "6806555342",
+            "attributes": {
+              "name": "BIL Premium Monthly",
+              "productId": "bil_premium",
+              "state": "READY_TO_SUBMIT",
+              "subscriptionPeriod": "ONE_MONTH"
+            },
+            "relationships": {
+              "subscriptionLocalizations": {
+                "data": [
+                  {
+                    "type": "subscriptionLocalizations",
+                    "id": "1a3e1329-67f6-4f9c-8de1-d6cf9381414f"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "included": [
+          {
+            "type": "subscriptionLocalizations",
+            "id": "4527d6ee-99a6-4a0d-ad4b-6ea6033f530e",
+            "attributes": {
+              "name": "BIL Premium + AI Coach Annual",
+              "locale": "en-US",
+              "description": "All Premium features plus multilingual AI Coach.",
+              "state": "PREPARE_FOR_SUBMISSION"
+            },
+            "relationships": {}
+          },
+          {
+            "type": "subscriptionLocalizations",
+            "id": "7c68ba2f-dfba-46b5-9e21-576986b69d3e",
+            "attributes": {
+              "name": "BIL Premium + AI Coach Monthly",
+              "locale": "en-US",
+              "description": "All Premium features plus multilingual AI Coach.",
+              "state": "PREPARE_FOR_SUBMISSION"
+            },
+            "relationships": {}
+          },
+          {
+            "type": "subscriptionLocalizations",
+            "id": "1c7629a9-00c7-4884-9649-3089bf54d42e",
+            "attributes": {
+              "name": "BIL Premium Annual",
+              "locale": "en-US",
+              "description": "Premium nutrition, fitness, sleep and insights.",
+              "state": "PREPARE_FOR_SUBMISSION"
+            },
+            "relationships": {}
+          },
+          {
+            "type": "subscriptionLocalizations",
+            "id": "1a3e1329-67f6-4f9c-8de1-d6cf9381414f",
+            "attributes": {
+              "name": "BIL Premium Monthly",
+              "locale": "en-US",
+              "description": "Premium nutrition, fitness, sleep and insights.",
+              "state": "PREPARE_FOR_SUBMISSION"
+            },
+            "relationships": {}
+          }
+        ],
+        "paginationPresent": false
+      },
+      "inAppPurchases": {
+        "ok": true,
+        "data": [
+          {
+            "type": "inAppPurchases",
+            "id": "6806561724",
+            "attributes": {
+              "name": "BIL AI Boost 2,500 Tokens",
+              "productId": "bil_ai_boost",
+              "inAppPurchaseType": "CONSUMABLE",
+              "state": "READY_TO_SUBMIT"
+            },
+            "relationships": {
+              "inAppPurchaseLocalizations": {
+                "data": [
+                  {
+                    "type": "inAppPurchaseLocalizations",
+                    "id": "f3eff897-26cb-467b-9476-c9d56df0a5e9"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "included": [
+          {
+            "type": "inAppPurchaseLocalizations",
+            "id": "f3eff897-26cb-467b-9476-c9d56df0a5e9",
+            "attributes": {
+              "name": "BIL AI Boost — 2,500 Tokens",
+              "locale": "en-US",
+              "description": "Add 2,500 AI Coach tokens to your BIL account.",
+              "state": "PREPARE_FOR_SUBMISSION"
+            },
+            "relationships": {}
+          }
+        ],
+        "paginationPresent": false
+      }
+    }
+  }
+}

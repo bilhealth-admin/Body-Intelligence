@@ -1,0 +1,101 @@
+{
+  "scope": "Authenticated live Actions listing before integration push; not a claim about new CI results",
+  "runs": [
+    {
+      "conclusion": "cancelled",
+      "databaseId": 38749537030,
+      "headSha": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38749537030",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 38748152719,
+      "headSha": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38748152719",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38738750872,
+      "headSha": "be068460d52428c59c0b84e05b7f322f15461edf",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38738750872",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 38738008732,
+      "headSha": "b2f41184560f1f09cc5fda70ce1cfc50864a9e5e",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38738008732",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38736058081,
+      "headSha": "bb5611d58c7f3b5097a3c27fbb754019ef7799c0",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38736058081",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38734392616,
+      "headSha": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734392616",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38734179059,
+      "headSha": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734179059",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 38734174747,
+      "headSha": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734174747",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38734170433,
+      "headSha": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734170433",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38729699048,
+      "headSha": "7378554969fa5249e4aa071bea769062caa5cc1a",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38729699048",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 38729694517,
+      "headSha": "7378554969fa5249e4aa071bea769062caa5cc1a",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38729694517",
+      "workflowName": "BIL CodeQL security-extended"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38726373457,
+      "headSha": "d362c8e4c771b474595a1b3059b562519b46b758",
+      "status": "completed",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38726373457",
+      "workflowName": "BIL CodeQL security-extended"
+    }
+  ]
+}

@@ -3,3 +3,9 @@ assets/catalogs/recipes/v1/recipe-thumbnails-v4.json -text
 # Preserve the original CRLF evidence; recognize CR as its line terminator.
 test/fixtures/historical_recipe_audits/recipe_canonical_100_verified.json -text whitespace=cr-at-eol
 test/fixtures/historical_recipe_audits/existing_recipe_canonical_seeds.json -text
+# Hashed audit data retains original OS newlines and terminal padding. These
+# attributes apply only to evidence data, never application source or lint rules.
+docs/qa_next/evidence/policy-gate-20261015/**/*.json -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/qa_next/evidence/policy-gate-20261015/**/*.log -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/qa_next/evidence/policy-gate-20261015/**/*.txt -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+docs/qa_next/evidence/policy-gate-20261015/**/*.tsv -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof

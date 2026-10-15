@@ -1,0 +1,29 @@
+{
+  "scope": "Public evidence export redaction only; no app/SDK/key/account/Production change",
+  "reason": "Staged Gitleaks caught repeated Android client API configuration in aapt2 dumps before any commit/push; no assumption of server-secret privileges",
+  "original_raw_dumps_preserved_locally": true,
+  "raw_hashes_in_resource_receipts_are_unchanged": true,
+  "public_evidence": [
+    {
+      "file": "before-aapt2-resources.txt",
+      "original_raw_sha256": "2726c0d6eb2d3bd0302fc0f5d3f6edb3b90df57f4fe8ccf8c41d33ef0b996fba",
+      "public_redacted_sha256": "03efcf7c2a918279b67b77ec3eec0afb4a7b70585807fb14dfcadc7998618f5e",
+      "redacted_occurrences": 1,
+      "icon_resource_entries_changed": false
+    },
+    {
+      "file": "after-aapt2-resources-0.txt",
+      "original_raw_sha256": "307e428d69d1f6524575de6b4089cdc047e25fc68afc9df66d30c3acb936a8e7",
+      "public_redacted_sha256": "e8faa753b6d3c0105cfc4e46a0f607622e168ef6273c019265f7aa7b23fbf5f0",
+      "redacted_occurrences": 1,
+      "icon_resource_entries_changed": false
+    },
+    {
+      "file": "final-aapt2-resources-0.txt",
+      "original_raw_sha256": "307e428d69d1f6524575de6b4089cdc047e25fc68afc9df66d30c3acb936a8e7",
+      "public_redacted_sha256": "e8faa753b6d3c0105cfc4e46a0f607622e168ef6273c019265f7aa7b23fbf5f0",
+      "redacted_occurrences": 1,
+      "icon_resource_entries_changed": false
+    }
+  ]
+}

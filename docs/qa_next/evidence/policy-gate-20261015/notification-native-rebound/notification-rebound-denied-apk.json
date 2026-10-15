@@ -1,0 +1,10 @@
+{
+  "recorded_at_utc": "2026-10-15T18:48:14.405520+00:00",
+  "scope": "unsigned local debug notification SDK QA APK; not release33",
+  "apk_bytes": 258621149,
+  "apk_sha256": "30d722253cc763f6d3d7a2a4fbdcc4ba38bea914c26774189b05ccc3a0aa9b8a",
+  "patched_notification_guard_dex": [
+    "classes6.dex"
+  ],
+  "source_bindings": "notification-rebound-binding-before.json"
+}

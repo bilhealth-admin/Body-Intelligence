@@ -1,0 +1,72 @@
+[
+  {
+    "name": "profile-ar-android",
+    "sha256": "9bda7f44e161fbb4a38f81fa2f1a8030f25f1711d93509da609975464bfcf2b1",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 267161
+  },
+  {
+    "name": "settings-ar-android",
+    "sha256": "55a09e2aa5d9f901f5463291c0b213d32e032bfc9923f87c0788abe56122e0c8",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 161601
+  },
+  {
+    "name": "pearl-goal-ar-light-android",
+    "sha256": "bb72dc2800fd5f2478bf69a6c897432cc4b231c5242fcee5a4a079c36bec81d4",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 315080
+  },
+  {
+    "name": "pearl-voice-ar-light-android",
+    "sha256": "fc9ac78953809aecd702668d1e886ed3e12633e132c8d8b3cc2bd387aa3b71c2",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 560895
+  },
+  {
+    "name": "pearl-goal-ar-dark-200-android",
+    "sha256": "df32d6fbd88450388b869b4e69a498f604051984daf5a458977c0d6934321a28",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 471886
+  },
+  {
+    "name": "pearl-voice-ar-dark-200-android",
+    "sha256": "b4943ab001277bf1da0fb0ec542d117809811f5d28e2ce5bb4590140e3775a12",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 786027
+  },
+  {
+    "name": "pearl-goal-en-light-android",
+    "sha256": "e93fcf6d651d86dc79ff3d2eb88e0bd3fc593bbd366974c6f51a9683c935f595",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 344683
+  },
+  {
+    "name": "pearl-voice-en-light-android",
+    "sha256": "1996b523ea81aa832221fc9394a54d8770a9ea3ae72a0d0cf12094701768d40c",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 600003
+  },
+  {
+    "name": "pearl-goal-en-dark-200-android",
+    "sha256": "f6773e0b2bfaa1ed922ae7837c1abdde27bd20fdaf9ac096c70fdc7a84fd4583",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 474264
+  },
+  {
+    "name": "pearl-voice-en-dark-200-android",
+    "sha256": "17b505e080f9dc2cc6c61353ae78aa9a12ae93d6a92c855f7285f1550ff85785",
+    "width_pixels": 1080,
+    "height_pixels": 2337,
+    "byte_count": 759962
+  }
+]

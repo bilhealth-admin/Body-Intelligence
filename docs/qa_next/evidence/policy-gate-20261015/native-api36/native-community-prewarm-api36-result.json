@@ -1,0 +1,38 @@
+{
+  "label": "native-community-prewarm-api36",
+  "started_at_utc": "2026-10-15T17:37:53.379355+00:00",
+  "elapsed_seconds": 630.153,
+  "bootstrap_timeout_seconds": 1800.0,
+  "native_test_timeout_seconds": 1200.0,
+  "summary_grace_seconds": 60.0,
+  "first_test_after_seconds": 228.378,
+  "terminal_summary_after_seconds": 567.697,
+  "native_summary": "05:39 +13: All tests passed!",
+  "native_failure_summary_seen": false,
+  "timed_out": true,
+  "reason": "result_delivery_timeout",
+  "raw_returncode": 1,
+  "supervisor_error": null,
+  "cleanup_attempted": true,
+  "cleanup": {
+    "platform": "nt",
+    "parent_pid": 20748,
+    "parent_reaped": true,
+    "descendants_reaped": null,
+    "tree_kill_succeeded": false,
+    "actions": [
+      "taskkill_owned_tree"
+    ],
+    "errors": [],
+    "taskkill_helper_pid": 11012,
+    "taskkill_returncode": 128,
+    "taskkill_helper_reaped": true,
+    "parent_returncode": 1
+  },
+  "effective_returncode": 124,
+  "output_bytes": 29417,
+  "output_sha256": "b2152d82fd2a9aca3480dda424c5d4b5e40a153cacb833249a17fac7ee11a25d",
+  "output_complete": true,
+  "output_drain_limited": false,
+  "success_basis": "process exit 0 and no native failure summary; never inferred from a log alone"
+}

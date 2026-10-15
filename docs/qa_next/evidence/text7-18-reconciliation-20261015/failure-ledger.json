@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-10-15T13:20:52.044404+00:00",
+  "recorded_at_utc": "2026-10-15T14:20:25.261894+00:00",
   "source_at_start": "7a797819d882674b6b7ed83a546c23ff3922c312",
   "known_failures": [
     {
@@ -129,8 +129,8 @@
       "id": "F19",
       "run": 38734174747,
       "cause": "Android drive had no command timeout. Known native fixture failures finished at12:40UTC but driver did not close; job60-minute deadline canceled at13:23UTC. Native settings/crypto had already passed.",
-      "fix": "Add supported Flutter drive --timeout1200 to capture entrypoints; maintain fail-closed metadata validation and always-upload raw logs. Feature-only scope avoids rebuilding unaffected crypto/settings.",
-      "status": "Local driver with bounded timeout verified, affected CI pending."
+      "fix": "The original drive --timeout attempt did not bound the SDK path without screenshot registration. Replaced it with an OS supervisor covering bootstrap/test/summary, preserving raw exit and partial evidence. Final20/20 unit PASS; actual subsequent native run preserved FAIL and14 originals without OOM or a hang.",
+      "status": "SUPERVISOR_FIXED; this does not convert earlier native test failures to PASS."
     },
     {
       "id": "F20",
@@ -150,6 +150,16 @@
       "cause": "Visual inspection, despite passing geometry assertions, found early Android PixelCopy PNGs could retain the preceding compositor buffer: a released entry still showed welcome, while Coach first was blank and mid/end showed the real reply. Layout state is not a frame-exact screen capture.",
       "fix": "Request and paint three fresh native frames before capture, outside measured splash timing; preserve original PNGs and before/after metadata; visually verify focusedAR2x reduced scene before accepting new capture evidence.",
       "status": "PASS localAR2x reduced native3/3,6entries+reply/history,18PNGs. Visually reviewed actual diet destination and first Coach reply; screenshots now match requested scene. Prior PNGs retained, never treated as frame-exact proof."
+    },
+    {
+      "id": "F23",
+      "run": 38748152719,
+      "source": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+      "job": 116467177698,
+      "cause": "Android SDK manager failed installing the emulator: Error on ZipFile unknown archive. The emulator and app had not launched. All30 affected Flutter source cases had already passed.",
+      "fix": "No product or runner source change based on a single failed SDK download. Retry only Android native feature-splashes at the identical source. The job-rerun API returned403 because the containing run still has an active iOS job; dispatched Android-only workflow38749537030 without canceling or duplicating iOS.",
+      "status": "RETRY_COMPLETED_NOT_PASS: Android38749537030 reached10/12 business cases then failed2, driver OOM242815856 bytes and workflow60m cancellation. OriginalSDK-download failure and retry are distinct.",
+      "evidence": "android-feature-retry-final.log; native-current-ar-normal-result.json preserves later local2PASS1FAIL and14 actual PNGs; final affected reruns are reported separately."
     }
   ],
   "raw_logs_retained_locally": [
@@ -197,7 +207,249 @@
       "file": "android-crypto-final-38738750872.log",
       "bytes": 71316,
       "sha256": "2585b5ad43290364290473598202270d566fe4e2a7174603c8e28ffc7ac77534"
+    },
+    {
+      "file": "android-native-769169f2.log",
+      "bytes": 57773,
+      "sha256": "0cfe5a76dc60fbf069f0e128d90f380ff64beeb814da6db4f90051705a4e57b6"
     }
   ],
-  "full_suite_repeated": false
+  "full_suite_repeated": false,
+  "policy_gate_findings": [
+    {
+      "id": "PG01",
+      "kind": "P0 recipient boundary",
+      "cause": "Configured AI base URL/redirect could reach a provider other than the disclosed Gemini recipient.",
+      "fix": "Shared HTTPS exact-host path validator and redirect:error for Coach/Vision.",
+      "result": "10 FAIL before;68 PASS after; no paid requests or deployment.",
+      "proof": "provider-final-focused.log"
+    },
+    {
+      "id": "PG02",
+      "kind": "technical verifier",
+      "cause": "16KB verifier did not reject misaligned GNU_RELRO end.",
+      "fix": "Validate end alignment and malformed segment; retain valid absent-segment behavior.",
+      "result": "5/5 +self-test PASS; final artifact not available.",
+      "proof": "relro-after.log"
+    },
+    {
+      "id": "PG03",
+      "kind": "Android dependency compile/lint",
+      "cause": "Pinned camera/scanner OptIn, notification permission, ads appcompat and unused scanner native discovery produced genuine errors.",
+      "fix": "Full owned checksum-bound SDK overlays; unchanged shared cache and versions; mobile-exclude Windows-only scanner.",
+      "result": "10 overlay unit+40 host-JVM PASS; actual API36 notification4/4 PASS. Full lint remains separately vendor-blocked.",
+      "proof": "notification-native/receipt.json"
+    },
+    {
+      "id": "PG04",
+      "kind": "P0 Android audio disclosure",
+      "cause": "Android recognizer can use an OS-selected remote provider before a BIL-specific processing disclosure.",
+      "fix": "Consent before permission/capture; decline/manual entry; live grant invalidates on pause/background/owner/epoch/end.",
+      "result": "14 direct +bridge PASS; actual Coach2/2 and broad affected174/174 PASS, no real speech provider/device claim.",
+      "proof": "voice-disclosure-widget-and-bridge.log;coach-voice-owner-regression.log;policy-affected-flutter-final.log"
+    },
+    {
+      "id": "PG05",
+      "kind": "voice QA/owner scope",
+      "cause": "Initial fixture hung on real EventChannel; draft owner check required uninitialized Supabase and broke offline Coach test.",
+      "fix": "Keep real disclosure tests with owned recognizer fixture and separate bridge test; use existing local database/owner witness/epoch in Coach.",
+      "result": "Actual Coach2/2 PASS; old10/fixture failures and timeout retained, not hidden.",
+      "proof": "coach-voice-owner-regression.log"
+    },
+    {
+      "id": "PG06",
+      "kind": "P1 accessible UI",
+      "cause": "First disclosure draft overflowed232px at Arabic200% on320px screen; numeric editor retained plain modal layout.",
+      "fix": "Shared approved pearl panel, scrollable title/body, reachable actions, two decision buttons; retain actual save/owner logic.",
+      "result": "14 consent PASS;4 actual route journeys PASS with keyboard;4 visual semantics cases PASS after disposing fixture handle in finally.",
+      "proof": "pearl-accessibility-final.log;pearl-accessibility-corrected.log"
+    },
+    {
+      "id": "PG07",
+      "kind": "P1 native QA evidence",
+      "cause": "PNG byte arrays duplicated into driver JSON caused242MB allocation/OOM.",
+      "fix": "CRC/SHA/dimension-bound original PNG transport with compact manifest and partial preservation.",
+      "result": "17 existing capture+8 concurrency regressions PASS; API36 business12 PASS, but host serial collection exit124;72 original PNGs recovered with full SHA/CRC/dimension validation. No OOM.",
+      "proof": "native-api36/receipt.json;native-capture-concurrency-focused.log"
+    },
+    {
+      "id": "PG08",
+      "kind": "P1 native timing observations",
+      "cause": "Old positive-frame-only timing assertion and three-frame warm-up did not prove destination warmed; actual Coach negative-frame at4142.738ms follows1955.512ms observation gap.",
+      "fix": "Real positive/negative postframe observer and full separate cold visit/FrameTiming; no timer/threshold change.",
+      "result": "5 observer+3 history+8 exact frame identity regressions PASS; API36 native12 PASS. Cold24/24 observations matched actual frame identity. AR normal intermediate opacity not observed; process delivery timeout is separate.",
+      "proof": "native-api36/receipt.json;native-frame-identity-focused.log"
+    },
+    {
+      "id": "PG09",
+      "kind": "P1 Windows supervisor",
+      "cause": "taskkill TimeoutExpired/finally waits could escape and lose a timeout receipt.",
+      "fix": "Bound owned cleanup and pipe draining; always preserve original failure/deadline and uncertain descendant status.",
+      "result": "20/20 PASS; actual failed native run exited1 with complete510.261s receipt.",
+      "proof": "bounded-supervisor-python-tests-final.raw.log;native-current-ar-normal-result.json"
+    },
+    {
+      "id": "PG10",
+      "kind": "BLOCKED_VENDOR",
+      "cause": "Insights0.1.5 LoginCredentials crashes in partial AGP; Lint32.0.1 GLOBAL GradleDetector leaks KTS cookie into Groovy Context.",
+      "fix": "No proven supported fix; no suppression/baseline/filter/arbitrary upgrade; separate explicit source-only CI evidence from failed full lint.",
+      "result": "Full local lint attempted and failed;14/14 official rules listed; not a BIL runtime failure or successful lint.",
+      "proof": "lint32-global-crash-investigation.json;android-lint-global.log"
+    },
+    {
+      "id": "PG11",
+      "kind": "metadata correctness",
+      "cause": "Plans claimed300+ home videos while static inventory contains200 home+102 gym.",
+      "fix": "Display300+ workout videos across25 locales; keep compatible translation keys.",
+      "result": "13 copy +7 unchanged Golden assertions PASS, no baseline update.",
+      "proof": "copy-and-pearl-visual-focused.log"
+    },
+    {
+      "id": "PG12",
+      "kind": "P2 localization",
+      "cause": "Actual Arabic route fixture reported missing Personal plan runtime label.",
+      "fix": "Add balanced25-locale label in existing access copy, no gate/entitlement change.",
+      "result": "48/48 existing goal/localization regressions PASS, including25 locale closure cases; no entitlement change.",
+      "proof": "goal-editor-and-copy-regression-final.log"
+    },
+    {
+      "id": "PG13",
+      "kind": "snapshot completeness",
+      "cause": "First policy fingerprint selected text suffixes and omitted native Swift/Java/config and binary assets.",
+      "fix": "Version2 NUL-separated Git-visible paths, all runtime/native/assets/baselines, excluding ignored credentials/caches and generated failures.",
+      "result": "9/9 checker tests PASS including Unicode/native/asset inclusion and private/generated exclusion; v1 proof remains labeled narrower.",
+      "proof": "policy-checker-unit-final.log",
+      "final_scope_extension": "Root analysis_options/devtools/.gitattributes/.gitignore/.metadata/wrangler config now explicit input+trigger. Before new assertion:1/9 fails;after fix9/9 PASS. Every old receipt retains its original exact narrower source_inputs list. Hashed raw evidence log/JSON Git attributes retain original newlines/padding, not product/lint/test suppression."
+    },
+    {
+      "id": "PG14",
+      "kind": "notification QA fixture",
+      "cause": "First native compile exposed HttpOverrides.global is a setter, not getter; no SDK runtime case had started.",
+      "fix": "Preserve HttpOverrides.current; rerun actual owned API36 debug test.",
+      "result": "First build-only failure retained; corrected native notification4/4 PASS denied/granted, plain/tagged, with0 Dart HTTP attempts.",
+      "proof": "notification-native/receipt.json"
+    },
+    {
+      "id": "PG15",
+      "kind": "P1 host result delivery",
+      "cause": "72 sequential adb capture processes exceeded60s after12 native business cases passed.",
+      "fix": "Bounded4 capture batches preserve manifest ordering, partial results, exact validations and original errors; deadline remains60s.",
+      "result": "25/25 transport+manifest PASS; actual API33 ARnormal2/2 PASS and6PNG fully collected under60s, process exit0.72-image batch timing waits CI; old exit124 remains.",
+      "proof": "native-capture-concurrency-validation.json;native-api36/receipt.json"
+    },
+    {
+      "id": "PG16",
+      "kind": "P0 live App Privacy/rejection",
+      "cause": "Live ASC still declares tracking forUserID/DeviceID/ProductInteraction; latest build35 review observed noATT.",
+      "fix": "No blind ATT or metadata change. Four-way22-type reconciliation and conditional exact3tracking correction plan prepared for owner decision after actual release SDK/runtime proof.",
+      "result": "A084 FAIL for observed build35/currentmetadata; candidate36 IPA/runtime and official closure BLOCKED.",
+      "proof": "live-store-ui-readback-20261015.json;BIL_20261015_APP_PRIVACY_FOUR_WAY_RECONCILIATION_AR.md"
+    },
+    {
+      "id": "PG17",
+      "kind": "final analyzer and text hygiene",
+      "cause": "Full Flutter analyze found16 issues:13 infos and3 warnings in new imports, braces, non-null plugin preparation checks and a test BuildContext. Git diff check also exposed CRLF on changed numeric lines (HEAD also CRLF).",
+      "fix": "Remove redundant imports, use direct flutter_test dev dependency, add braces/mounted check, keep non-null sanitizer branch unconditional, normalize numeric file CRLF toLF with identical line content. No ignore rules or dependency upgrades.",
+      "before": "final-flutter-analyze-result.json exit1; 16issues,431.6s. Original log retained.",
+      "after": "115/115 affected Flutter PASS;8 pearl renders byte-identical; complete Flutter analyze PASS/no issues359.2s (process362.238s). Additional scanner-prep bugPG19 found afterward; final tool-source validation remains separately bound.",
+      "proof": "post-analyzer-fixes-focused-result.json;final-flutter-analyze-clean-result.json"
+    },
+    {
+      "id": "PG18",
+      "kind": "P0 reviewer role separation",
+      "cause": "Original legacy second-admin migration also grantsModerator; restoring singleownerAdmin does not revoke Moderator.",
+      "proof": "reviewer-administrator-moderator-sql-result.json:10/10 actual isolated PostgreSQL assertions; original migration bytes unchanged.",
+      "fix": "No unauthorized real-role change. Specific readback and UUID-scoped removal plan prepared for owner decision; preserve independentmoderators, purchasedrights and credits.",
+      "result": "SQL_REGRESSION PASS reproduces source overlap; liveaccounts and leastprivilege compliance BLOCKED, notPASS."
+    },
+    {
+      "id": "PG19",
+      "kind": "local native preparation environment and repeatability",
+      "cause": "A host command without pinned PUB_CACHE regenerated discovery against Ccache while owned SDK overlays were bound to Gcache. All4 upstream trees/patched hashes were identical; only source_uri differed, and strict provenance correctly failed. After pinned pub get restored G without changing lockfile, scanner-defer prep refused its own pre-existing override because discovery had reset to upstream.",
+      "fix": "Preserve strict SDK provenance; pin PUB_CACHE and enforce lock. Scanner rebind must validate owned marker, exact upstream, immutable source/assets/license bytes, links and authorized pubspec transform; no unknown overwrite or deletion.",
+      "before": "post-fix-android-plugin-overlays.json initialFAIL, restore-pinned-pub-cache.log; SDKpreparePASS after binding repair, scanner pre-existing overrideFAIL retained.",
+      "after": "37/37 fixtures PASS,23new. Actual SDK prepare and sanitizer preserve-dev PASS; repeated full release sanitizer PASS. Patched notification4/4 native API36 PASS, exact owned SDK roots/markers verified before/after, guard present classes6.dex. AGP and final analysis separately pending.",
+      "production_changed": false,
+      "native_proof": "notification-native-rebound/receipt.json"
+    },
+    {
+      "id": "PG20",
+      "kind": "CI coverage and disposable runner preparation",
+      "cause": "startup6 retained older asynchronous KVM setup; policy paths did not include exact original SQL/package inputs and preflight guard used by new jobs.",
+      "fix": "Reuse existing tested bil_prepare_android_kvm.sh, with udev settle/read-write checks; add helper path and exact6SQL+2package+source guard inputs. No broader migration replay or native duplication.",
+      "result": "actionlint all workflows and bash syntax PASS locally; hosted KVM/changed path execution awaits final CI.",
+      "proof": "Final GitHub run and workflow diff; source checks do not prove hosted KVM."
+    },
+    {
+      "id": "PG21",
+      "kind": "Local ignored host properties; not product source",
+      "cause": "AGP actual Debug3errors=InsightsLintError+2PropertyEscape;Release2PropertyEscape. sdk.dir/flutter.sdk had invalid Windows property escaping in ignored local.properties.",
+      "fix": "Only2toolchain values rewritten with escaped drive colon and slash separators. Exact other bytes unchanged; JavaProperties+Path.toRealPath prove same underlying SDK/Flutter. No versions/lock/product/Production change.",
+      "before": "post-sdk-agp-lint-result.json:exit1,1192.508s,not timeout. Original Debug/Release XML preserved.",
+      "after": "PASS properties: fresh appAnalyze/appReport4/4 executed,0PropertyEscape in both variants. Debug0errors133warnings;Release1InsightsLintError133warnings. Overall838.588s exit1 vendor failure only; full GLOBAL not rerun. Original inverse Debug/Release vendor occurrence preserved, never generalized.",
+      "proof": "pg21-local-properties-fix.json;post-sdk-lint-before-local-path-fix/summary.json"
+    },
+    {
+      "id": "PG22",
+      "kind": "Known affected Android transitive security component; exploit in BIL unproven",
+      "risk": "P1",
+      "cause": "Actual app graph resolved Tink Android1.21.0. CVE-2026-15432 affects ChunkedMacVerification timing; upstream fixed in1.22.0. Secure-storage ESP migration registers Tink indirectly; this does not prove BIL calls the affected verification primitive.",
+      "fix": "Minimum app dependency constraint1.22.0, preserving wire format and existing algorithms. No force, no new SDK purpose, no user keys/accounts/Production changed.",
+      "before": "Resolved JAR1.21.0 SHA25661d60f28640b16a92f74c5c34191432f639da4fd79ce7b50a4b7af35fbafaf7d; verifyMac bytecode calls util.Bytes.equals.",
+      "after": "Actual graph Tink1.22.0 SHA3738a5365b890f80703945b3fc8ad6253c93c5905e2e8bb8d99d4e06ffd914af matches official Maven; final Python helper+Java936/936 PASS, six isolated JVMs. Final Android native crypto/secure-cache and final CI pending; no real user migration claimed. Actual affected AndroidAPI33 AES/secure-cache2/2 PASS after both minimum constraints; final CI pending. This does not reproduce old ESP/Keystore user migration.",
+      "proof": "BIL_20261015_ANDROID_LINT_WARNINGS_AND_TINK_AR.md; official Google CVE and upstream issue75; no signed artifact created."
+    },
+    {
+      "id": "PG23",
+      "kind": "Actual release R8 removes the dynamically requested local notification drawable",
+      "risk": "P1",
+      "cause": "Dart initialization and AndroidNotificationDetails request ic_stat_bil_notification by name; it is not a native R.drawable reference. Actual AGP9.0.1 optimized release resources omitted it and resources.txt explicitly marks decimal2131230905 (0x7f0800b9) not reachable. Debug native4/4 had not covered release shrinking.",
+      "fix": "Single tools:keep entry for drawable/ic_stat_bil_notification, no wildcard/no asset/UI change. Permanent bil_android_notification_resource.init.gradle derives requested names from actual Dart declarations and verifies aapt2 post-R8 resource entries; forbids APK/AAB final packaging/sign/install/publish.",
+      "before": "notification-resource-retention/before.json + before-aapt2-resources.txt + before-shrinker-icon.txt. Original intermediate archive/raw log preserved privately; QA build-number8, not a signed Android33 artifact.",
+      "after": "PASS_POST_R8_RESOURCE_ONLY on final Tink1.22.0/OkHttp4.9.2 runtime graph. Actual AGP final run768.244s,exit0,484tasks(10executed); icon present in optimized resource entry. JAR/AAR typed collector PASS. Signed notification/FCM delivery remains untested.",
+      "qa_adapter_error": "First R8/convert/optimize completed but QA collection task failed due untyped releaseRuntimeClasspath artifact ambiguity on Flutter project secondary variants. Fixed graph-only collector by using resolved module components and explicitly selected external JAR artifact view; initial failed772.973s receipt/raw log retained. This is not a product R8 compilation failure.",
+      "proof": "BIL_20261015_ANDROID_LINT_WARNINGS_AND_TINK_AR.md; tool/release/bil_android_notification_resource.init.gradle; permanent CI resource-only step.; notification-resource-retention/final-result.json; final-android-security-resource-result.json"
+    },
+    {
+      "id": "PG24",
+      "kind": "Known affected transitive network library in ML Kit Translate",
+      "risk": "P1",
+      "cause": "Read-only OSV query of all218 actual Maven release runtime components found only OkHttp3.0.0 affected by GHSA-3cqm-mf7h-prrj/CVE2021-0341 and GHSA-4hc2-jh7r-wrc3/CVE2016-2402. Actual Google ML Kit translate17.0.3 POM requests3.0.0; BILCommunityTranslationBridge uses Translation.getClient. Component evidence is not a claim of exploited BIL traffic.",
+      "fix": "Minimum OkHttp4.9.2 constraint, smallest verified maintainer release addressing listed issues among considered4.9.2/4.12.0. No force or translation SDK upgrade. Keep actual Okio3.4.0;4.12 would unnecessarily move it3.6.0.",
+      "before": "OSV218 lookup retained; official original MLKitAAR and old graph hashed. Old direct Kelvin host/SAN regression18PASS2intendedFAIL; binary public symbol checks75PASS.",
+      "after": "PASS actual final graph4.9.2:75 linkage assertions32rows +21functional,0candidateFAIL; baseline2 intended nonASCII FAIL retained. All218 final Maven OSV lookup0matches. R8/affected Android native/final CI pending; no live TLS or exact2016 chain attack claim.",
+      "proof": "native-dependency-security/osv-before-okhttp-fix.json;tools/qa/android_okhttp_compatibility_probe.py;tools/qa/jvm/OkHttpCompatibilityProbe.java",
+      "network_app_requests": 0,
+      "production_changed": false
+    },
+    {
+      "id": "PG25",
+      "kind": "New native QA fixture serialization assumption, not product save failure",
+      "risk": "P2",
+      "cause": "Native calorie save succeeded as1875.0 via MacroGoalAllocation.toPreferences; new QA assertion wrongly demanded exact integer string1875. Partial3PNG+raw149.674s exit1 preserved. Host capture completeness also correctly rejected partial evidence.",
+      "fix": "Compare parsed persisted numeric quantity to1875; malformed/missing/different value still fails. No product calculation, storage serialization or UI changed.",
+      "after": "PASS affected native UI:1testWidgets,4calorie saves/readbacks+4speech declines,10PNG,process exit0; original failed fixture/partial3PNG retained. No product source changed.",
+      "proof": "native-pearl-final-api33/before-numeric-assertion-fix locally; public native-pearl-android before receipt copied separately."
+    },
+    {
+      "id": "PG26",
+      "kind": "QA export hygiene before commit, not a proven private server credential exposure",
+      "risk": "P2",
+      "cause": "Staged Gitleaks found3 copies of the same Android client GCP API configuration in raw aapt2 evidence dumps. No commit or push occurred.",
+      "fix": "Redact only the public dumps, preserve raw local originals and SHA256, publish exact before/public redaction mapping. No suppress/ignore, key rotation, app/runtime/Production mutation.",
+      "after": "PASS staged Gitleaks after export-only redaction:0 findings; final scan after all staging still required. No ignored finding/rule.",
+      "proof": "notification-resource-retention/public-redactions.json"
+    },
+    {
+      "id": "PG27",
+      "kind": "Two newly introduced analyzer style infos, release-gating exit1",
+      "risk": "P2",
+      "cause": "Final full analyzer313s reported unnecessary_brace_in_string_interps in deferred barcode fixture and use_null_aware_elements in package provenance. Old16 analyzer issues remain independently closed.",
+      "fix": "Equivalent interpolation and null-aware Set element; no ignore, semantics/permissions/package version/UI/Production change.",
+      "before": "final-analysis-before-two-style-fixes raw log and315.675s process receipt retained.",
+      "after": "PASS affected37/37 and clean full Flutter analyze327.6s/exit0 (process331.385s),0issues; no ignore. Later read-only CI attestation workflow has identical Dart/product inputs, proven by full source snapshot comparison."
+    }
+  ],
+  "policy_updated_at_utc": "2026-10-15T20:49:59.791086+00:00",
+  "counts_note": "F01-F23 historical categories and PG01-PG21 additive findings are not unique failed-case counts; shared variant diagnostics and overlapping tests are not summed."
 }

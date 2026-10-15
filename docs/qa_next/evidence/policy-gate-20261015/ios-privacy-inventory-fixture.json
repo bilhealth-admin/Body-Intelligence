@@ -1,0 +1,8 @@
+{
+  "scope": "Exact inline export draft tested against synthetic plist fixture only; no iOS build/device claim",
+  "positive_fixture_pass": true,
+  "missing_tracking_not_false": true,
+  "missing_lock_not_a_verified_resolution": true,
+  "invalid_tracking_type_rejected": true,
+  "draft_sha256": "7bfed6ba5a234cfaa3dc07e6a4f5902d49765892609d6380a8ccdf5400ef8e31"
+}

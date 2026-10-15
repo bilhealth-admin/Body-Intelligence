@@ -107,6 +107,13 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Prepare pinned Android policy library repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+
       - name: Analyze release source
         run: flutter analyze --no-pub
 

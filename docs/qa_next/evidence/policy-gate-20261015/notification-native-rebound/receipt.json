@@ -1,0 +1,39 @@
+{
+  "scope": "Real patched Android local notification SDK runtime on owned API36 emulator; synthetic unsigned debug build8, not final release33/push/community/account E2E",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "implementation_fingerprint": "f8dae1d4c84d3c78e48117843ff363bd5d9d59a96274cd9c7c76eb5d1ca7b5e4",
+  "business_cases": 4,
+  "pass": 4,
+  "fail": 0,
+  "apk_sha256_denied": "30d722253cc763f6d3d7a2a4fbdcc4ba38bea914c26774189b05ccc3a0aa9b8a",
+  "apk_sha256_granted": "8ec6e38319a9dd968814cfdfa8f83512d9e00c22727edf5cf2edc06a6f40979f",
+  "patched_guard_in_compiled_dex": [
+    "classes6.dex"
+  ],
+  "SDK_bindings_verified_before_and_after": true,
+  "dart_http_attempts": 0,
+  "cases": [
+    {
+      "file": "denied-plain.json",
+      "sha256": "ed1120e5a1fbb4160bbd8302b0050cb914be5e529e5e10078e0f189834f52d94",
+      "result": "PASS"
+    },
+    {
+      "file": "denied-tagged.json",
+      "sha256": "7833a1bd7760b64bc86aada2aa4a4eae3d4ad93628fa3b8ca8c5ea8d6e18b2c7",
+      "result": "PASS"
+    },
+    {
+      "file": "granted-plain.json",
+      "sha256": "2ec8ac053cf4bc17c2aea0858b5264429a99abfa1ef34a05af5b5537925f8d2f",
+      "result": "PASS"
+    },
+    {
+      "file": "granted-tagged.json",
+      "sha256": "f7fab2f238de568a967d5cf885a0849c8a36f19028fb5ad91654e576da1b5e94",
+      "result": "PASS"
+    }
+  ],
+  "signed_store_artifact": false,
+  "production_changed": false
+}

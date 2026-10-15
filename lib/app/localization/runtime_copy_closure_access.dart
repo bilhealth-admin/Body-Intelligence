@@ -8,6 +8,7 @@ abstract final class ClosureAccessRuntimeCopy {
     'This version cannot submit review decisions yet. Refresh after the review service is enabled.',
     'Could not load the moderation queue.',
     'Image unavailable',
+    'Personal plan',
   ];
   static const rows = <String, List<String>>{
     'en': sources,
@@ -17,6 +18,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'لا تستطيع هذه النسخة إرسال قرارات المراجعة بعد. حدّث القائمة بعد تفعيل خدمة المراجعة.',
       'تعذر تحميل قائمة المراجعة.',
       'الصورة غير متاحة',
+      'خطة شخصية',
     ],
     'fr': [
       'Mettre à niveau',
@@ -24,6 +26,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Cette version ne peut pas encore envoyer de décisions. Actualisez après l’activation du service de modération.',
       'Impossible de charger la file de modération.',
       'Image indisponible',
+      'Programme personnalisé',
     ],
     'es': [
       'Mejorar plan',
@@ -31,6 +34,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Esta versión aún no puede enviar decisiones. Actualiza cuando se active el servicio de moderación.',
       'No se pudo cargar la cola de moderación.',
       'Imagen no disponible',
+      'Plan personalizado',
     ],
     'tr': [
       'Yükselt',
@@ -38,6 +42,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Bu sürüm henüz inceleme kararlarını gönderemez. Hizmet etkinleştirildiğinde yenileyin.',
       'İnceleme kuyruğu yüklenemedi.',
       'Görsel kullanılamıyor',
+      'Kişisel plan',
     ],
     'de': [
       'Upgrade',
@@ -45,6 +50,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Diese Version kann noch keine Prüfentscheidungen senden. Nach Aktivierung des Prüfdienstes aktualisieren.',
       'Die Prüfwarteschlange konnte nicht geladen werden.',
       'Bild nicht verfügbar',
+      'Persönlicher Plan',
     ],
     'it': [
       'Passa al piano superiore',
@@ -52,6 +58,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Questa versione non può ancora inviare decisioni. Aggiorna dopo l’attivazione del servizio di revisione.',
       'Impossibile caricare la coda di revisione.',
       'Immagine non disponibile',
+      'Piano personale',
     ],
     'pt-BR': [
       'Melhorar plano',
@@ -59,6 +66,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Esta versão ainda não pode enviar decisões. Atualize após a ativação do serviço de revisão.',
       'Não foi possível carregar a fila de revisão.',
       'Imagem indisponível',
+      'Plano pessoal',
     ],
     'pt-PT': [
       'Melhorar plano',
@@ -66,6 +74,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Esta versão ainda não pode enviar decisões. Atualize após a ativação do serviço de revisão.',
       'Não foi possível carregar a fila de revisão.',
       'Imagem indisponível',
+      'Plano pessoal',
     ],
     'ur': [
       'اپ گریڈ',
@@ -73,6 +82,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'یہ ورژن ابھی جائزے کے فیصلے نہیں بھیج سکتا۔ سروس فعال ہونے کے بعد تازہ کریں۔',
       'جائزے کی فہرست لوڈ نہیں ہو سکی۔',
       'تصویر دستیاب نہیں',
+      'ذاتی منصوبہ',
     ],
     'fa': [
       'ارتقا',
@@ -80,6 +90,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'این نسخه هنوز نمی‌تواند تصمیم‌های بررسی را ارسال کند. پس از فعال شدن سرویس، تازه‌سازی کنید.',
       'صف بررسی بارگیری نشد.',
       'تصویر در دسترس نیست',
+      'برنامه شخصی',
     ],
     'hi': [
       'अपग्रेड करें',
@@ -87,6 +98,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'यह संस्करण अभी समीक्षा निर्णय नहीं भेज सकता। सेवा सक्रिय होने पर रीफ़्रेश करें।',
       'समीक्षा सूची लोड नहीं हो सकी।',
       'छवि उपलब्ध नहीं',
+      'व्यक्तिगत योजना',
     ],
     'id': [
       'Tingkatkan paket',
@@ -94,6 +106,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Versi ini belum dapat mengirim keputusan. Muat ulang setelah layanan peninjauan diaktifkan.',
       'Antrean peninjauan gagal dimuat.',
       'Gambar tidak tersedia',
+      'Rencana pribadi',
     ],
     'ms': [
       'Naik taraf',
@@ -101,6 +114,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Versi ini belum boleh menghantar keputusan. Muat semula selepas perkhidmatan semakan diaktifkan.',
       'Baris gilir semakan tidak dapat dimuatkan.',
       'Imej tidak tersedia',
+      'Pelan peribadi',
     ],
     'ja': [
       'アップグレード',
@@ -108,6 +122,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'このバージョンではまだ審査結果を送信できません。サービス有効化後に更新してください。',
       '審査一覧を読み込めませんでした。',
       '画像を利用できません',
+      '個人プラン',
     ],
     'ko': [
       '업그레이드',
@@ -115,6 +130,7 @@ abstract final class ClosureAccessRuntimeCopy {
       '이 버전은 아직 검토 결정을 보낼 수 없습니다. 서비스가 활성화되면 새로 고치세요.',
       '검토 목록을 불러오지 못했습니다.',
       '이미지를 사용할 수 없음',
+      '개인 플랜',
     ],
     'zh-Hans': [
       '升级',
@@ -122,6 +138,7 @@ abstract final class ClosureAccessRuntimeCopy {
       '此版本暂时无法提交审核决定。审核服务启用后请刷新。',
       '无法加载审核列表。',
       '图片不可用',
+      '个性化计划',
     ],
     'zh-Hant': [
       '升級',
@@ -129,6 +146,7 @@ abstract final class ClosureAccessRuntimeCopy {
       '此版本暫時無法提交審核決定。審核服務啟用後請重新整理。',
       '無法載入審核清單。',
       '圖片無法使用',
+      '個人化計畫',
     ],
     'ru': [
       'Улучшить план',
@@ -136,6 +154,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Эта версия пока не может отправлять решения. Обновите после включения службы проверки.',
       'Не удалось загрузить очередь проверки.',
       'Изображение недоступно',
+      'Персональный план',
     ],
     'bn': [
       'আপগ্রেড করুন',
@@ -143,6 +162,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'এই সংস্করণ এখনো পর্যালোচনার সিদ্ধান্ত পাঠাতে পারে না। সেবা চালু হলে রিফ্রেশ করুন।',
       'পর্যালোচনার তালিকা লোড করা যায়নি।',
       'ছবি উপলব্ধ নয়',
+      'ব্যক্তিগত পরিকল্পনা',
     ],
     'vi': [
       'Nâng cấp',
@@ -150,6 +170,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Phiên bản này chưa thể gửi quyết định. Làm mới sau khi dịch vụ xét duyệt được bật.',
       'Không thể tải danh sách xét duyệt.',
       'Ảnh không khả dụng',
+      'Kế hoạch cá nhân',
     ],
     'th': [
       'อัปเกรด',
@@ -157,6 +178,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'เวอร์ชันนี้ยังส่งผลการตรวจสอบไม่ได้ โปรดรีเฟรชเมื่อเปิดใช้บริการตรวจสอบแล้ว',
       'โหลดรายการตรวจสอบไม่สำเร็จ',
       'รูปภาพไม่พร้อมใช้งาน',
+      'แผนส่วนบุคคล',
     ],
     'pl': [
       'Ulepsz plan',
@@ -164,6 +186,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Ta wersja nie może jeszcze wysyłać decyzji. Odśwież po włączeniu usługi moderacji.',
       'Nie udało się wczytać kolejki moderacji.',
       'Obraz jest niedostępny',
+      'Plan osobisty',
     ],
     'nl': [
       'Upgraden',
@@ -171,6 +194,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Deze versie kan nog geen beslissingen versturen. Vernieuw nadat de beoordelingsdienst is ingeschakeld.',
       'De beoordelingslijst kon niet worden geladen.',
       'Afbeelding niet beschikbaar',
+      'Persoonlijk plan',
     ],
     'uk': [
       'Покращити план',
@@ -178,6 +202,7 @@ abstract final class ClosureAccessRuntimeCopy {
       'Ця версія ще не може надсилати рішення. Оновіть після ввімкнення служби перевірки.',
       'Не вдалося завантажити чергу перевірки.',
       'Зображення недоступне',
+      'Персональний план',
     ],
   };
   static String? resolve(String source, String tag) {

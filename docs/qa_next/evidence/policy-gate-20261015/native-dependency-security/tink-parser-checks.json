@@ -1,0 +1,15 @@
+{
+  "schema": "bil.qa.tink.graph-parser.v1",
+  "passed": 6,
+  "failed": 0,
+  "checks": [
+    "XML selects actual package runtime scope, not compile-only annotation1.8.1",
+    "actual cached AGP XML to resolvedConfiguration JSON: exact coordinate and SHA match",
+    "mismatched artifact SHA rejected",
+    "duplicate resolved coordinate rejected",
+    "artifact traversal rejected",
+    "absolute-path runtimeClasspath JSON matches cache-resolved graph"
+  ],
+  "source_sha256": "a6fc92cb4d4b10379c441e762647e5d4c30ce8a5bda98d1639b1a11bf1437026",
+  "development_failure": "Initial parser rejected duplicate compile/package annotation entries. Fixed by actual AGP package scope; no arbitrary last-version selection."
+}

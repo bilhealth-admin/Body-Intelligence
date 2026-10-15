@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -298,22 +301,53 @@ void main() {
     }
   });
 
-  test('workout inventory is two explicit video benefits', () {
+  test('workout benefit describes the approved home and gym inventory', () {
+    final registry =
+        jsonDecode(
+              File(
+                'artifacts/workout_media/workout_release_bundle_registry_v1.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    final bundles = (registry['bundles'] as List).cast<Map<String, dynamic>>();
+    final homeCount =
+        bundles.singleWhere(
+              (bundle) => bundle['bundleId'] == 'home-training',
+            )['playableCount']
+            as int;
+    final gymCount =
+        bundles.singleWhere(
+              (bundle) => bundle['bundleId'] == 'gym-six-month',
+            )['playableCount']
+            as int;
     final english = BilStoreCopy.catalogs['en']!;
     final arabic = BilStoreCopy.catalogs['ar']!;
-    expect(english['premium_benefit_workouts'], '300+ home workout videos');
+    final advertisedCount = int.parse(
+      RegExp(r'^(\d+)\+').firstMatch(english['premium_benefit_workouts']!)![1]!,
+    );
+    expect(homeCount + gymCount, registry['playableCount']);
+    expect(homeCount + gymCount, greaterThanOrEqualTo(advertisedCount));
+    expect(homeCount, lessThan(advertisedCount));
+    expect(english['premium_benefit_workouts'], '300+ workout videos');
     expect(
       english['premium_benefit_strength_plans'],
       '100+ video-guided weight-training plans',
     );
-    expect(
-      arabic['premium_benefit_workouts'],
-      'أكثر من 300 فيديو تمارين منزلية',
-    );
+    expect(arabic['premium_benefit_workouts'], 'أكثر من 300 فيديو تمارين');
     expect(
       arabic['premium_benefit_strength_plans'],
       'أكثر من 100 خطة تمارين رفع أثقال بالفيديو',
     );
+    for (final locale in RuntimeCopy.supported) {
+      final localized = BilStoreCopy.text(locale, 'premium_benefit_workouts');
+      expect(localized, contains('$advertisedCount'), reason: locale);
+      expect(
+        RuntimeCopy.resolve('300+ home workout videos', locale),
+        localized,
+        reason:
+            '$locale must preserve the legacy lookup without the home claim',
+      );
+    }
   });
 
   test('AI Boost sells the BIL coach experience in all 25 locales', () {

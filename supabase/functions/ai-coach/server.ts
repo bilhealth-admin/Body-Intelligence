@@ -1,6 +1,10 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { resolveBilLocale } from "../_shared/bcp47.ts";
 import {
+  disclosedGeminiEndpoint,
+  fetchDisclosedProvider,
+} from "../_shared/ai_provider_recipient.ts";
+import {
   MobileIntegrityFailure,
   requireMobileIntegrityGrant,
 } from "../_shared/mobile_integrity.ts";
@@ -867,9 +871,11 @@ export async function geminiCall(
   if (!key) throw new Error("provider_not_configured");
   // Prefer the already-proven Gemini endpoint used by Vision. A separately
   // configured text endpoint remains supported when Vision has no override.
-  const endpoint = env("BIL_GEMINI_VISION_ENDPOINT") ||
-    env("BIL_GEMINI_TEXT_ENDPOINT") ||
-    "https://generativelanguage.googleapis.com/v1beta";
+  const endpoint = disclosedGeminiEndpoint(
+    env("BIL_GEMINI_VISION_ENDPOINT") ||
+      env("BIL_GEMINI_TEXT_ENDPOINT") ||
+      "https://generativelanguage.googleapis.com/v1beta",
+  );
   const url = `${endpoint}/models/${encodeURIComponent(model)}:generateContent`;
   let last = "provider_failed";
   // One bounded attempt per model keeps primary + fallback below the client's
@@ -877,7 +883,7 @@ export async function geminiCall(
   for (let attempt = 1; attempt <= 1; attempt += 1) {
     let response: Response;
     try {
-      response = await fetcher(url, {
+      response = await fetchDisclosedProvider(fetcher, url, {
         method: "POST",
         signal: AbortSignal.timeout(geminiAttemptTimeoutMs),
         headers: { "content-type": "application/json", "x-goog-api-key": key },

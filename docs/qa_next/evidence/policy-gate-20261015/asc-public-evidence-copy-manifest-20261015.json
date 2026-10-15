@@ -1,0 +1,81 @@
+{
+  "copiedAtUtc": "2026-10-15T17:06:01.759225+00:00",
+  "sourceHead": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "publicEvidenceOnly": true,
+  "secretScan": {
+    "result": "PASS_NO_MATCHES",
+    "method": "PEM/JWT/bearer/token-prefix patterns plus nonempty sensitive JSON-field scan; reviewer credential fields remain booleans only",
+    "newSecretValuesPrinted": false
+  },
+  "newStoreRequests": 0,
+  "newTestsBuildsOrCI": 0,
+  "onlyMetadataRowUpdated": "ASC-M06",
+  "metadataCounts": {
+    "PASS": 17,
+    "BLOCKED": 5
+  },
+  "rawTestScope": {
+    "verifiedAtUtc": "2026-10-15T17:06:01.759225+00:00",
+    "executedBy": "root",
+    "sourceScope": "Current dirty integration source; the four copy/test input hashes are preserved in the receipt. This is not signed build36 verification.",
+    "rawLog": "docs/qa_next/evidence/policy-gate-20261015/copy-and-pearl-visual-focused.log",
+    "rawSha256": "984c8cb444452c5b8e9d775349ebe11eca2fcc4be542d5ac8bdce014c178ef07",
+    "rawWholeRunPassed": 36,
+    "scopePassed": 20,
+    "scopeBreakdown": {
+      "bil_store_copy": 13,
+      "plans_goldens": 2,
+      "apple_review_product_goldens": 5
+    },
+    "otherCasesInSameRawRun": {
+      "system_speech_disclosure": 14,
+      "policy_reviewer_navigation": 2
+    },
+    "runMode": "Normal Golden run without update, as confirmed by root execution record; log preserves actual results.",
+    "agentRanTests": false,
+    "signedBuild36Verified": false,
+    "storeStateChanged": false
+  },
+  "files": [
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/asc-live-readback-sanitized.json",
+      "sha256": "d65f3cf6c5a28d197be3343a9d9e41220d014148b81d3b777b2b8ff47358dbbc"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/asc-attached-build-app-identity-sanitized.json",
+      "sha256": "5d5e15ed32c70d1f350870ea89a13fc91778ec639e38e18d93ebe72b0a7b5a87"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/current-public-store-api-surface.json",
+      "sha256": "8311b11931d0c601cc03931ca2be7c39a222bbdefcefe95ac3dcd3473370fbc4"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/live-store-api-readback-status-20261015.json",
+      "sha256": "40140bc97300e5f86e8a8cfc6aaeecbcbfbb8a51783767a562ad1c2ca0d31f1a"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/asc-public-metadata-text-sanitized.json",
+      "sha256": "07abd227671c0868bee23ca453aaa27fed39e17343988ea5641a82694a104d35"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/asc-public-metadata-source-match-20261015.json",
+      "sha256": "a40c2abc5ea6b5795c3db47ba65ebe0e901b496695c3969ef4c1efb270ebd929"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/asc-public-metadata-source-match-20261015.md",
+      "sha256": "c08da1f6d18d14150ef62b6ca7fb1fe18d2c3bc3cdda37599ba148b18e1ba51c"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/asc-public-links-live-sanitized.json",
+      "sha256": "9d6fc7a7a510194d96d750d30ee0621994b01011aa4d6bf0048997b94e2fe30f"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/workout-count-copy-fix-receipt.json",
+      "sha256": "b5361b6aa5803f8afb4b5dda5c7b7099a2481359dec6d0a4a75ab296f717a276"
+    },
+    {
+      "file": "docs/qa_next/evidence/policy-gate-20261015/copy-and-pearl-visual-focused.log",
+      "sha256": "984c8cb444452c5b8e9d775349ebe11eca2fcc4be542d5ac8bdce014c178ef07"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "readAtUtc": "2026-10-15T16:23:17.701667+00:00",
+  "mode": "get-only-existing-asc-api-key",
+  "storeMutationsPerformed": false,
+  "newRemoteLoginSessionsCreated": false,
+  "secretValuesPrinted": false,
+  "result": {
+    "ok": true,
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/v1/appStoreVersions/7a132506-d5a8-4810-a51f-b2dc2bd636cf/build",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/v1/apps/6805349703",
+        "status": 200
+      }
+    ],
+    "attachedBuild": {
+      "id": "e695f185-2e54-4196-9153-a55653518cc2",
+      "buildNumber": "35",
+      "uploadedDate": "2026-10-04T13:41:17-07:00",
+      "processingState": "VALID",
+      "expired": false
+    },
+    "appIdentity": {
+      "id": "6805349703",
+      "bundleId": "com.bilhealth.bodyintelligencelog",
+      "sku": "BIL-IOS-2026-001",
+      "name": "Body Intelligence Log",
+      "primaryLocale": "en-US"
+    }
+  }
+}

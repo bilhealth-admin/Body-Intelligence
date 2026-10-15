@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify 16 KB packaging and ELF LOAD alignment from a final Android AAB."""
+"""Verify 16 KB packaging, ELF LOAD and GNU_RELRO from a final Android AAB."""
 
 from __future__ import annotations
 
@@ -79,6 +79,7 @@ def _require_bundle_alignment(config_output: str) -> None:
 
 
 def _load_alignments(readelf_output: str, *, library: str) -> list[int]:
+    _relro_end_addresses(readelf_output, library=library)
     alignments: list[int] = []
     for line in readelf_output.splitlines():
         tokens = line.strip().split()
@@ -93,6 +94,26 @@ def _load_alignments(readelf_output: str, *, library: str) -> list[int]:
     if not alignments:
         raise GateError(f"No ELF LOAD segments were reported for {library}.")
     return alignments
+
+
+def _relro_end_addresses(readelf_output: str, *, library: str) -> list[int]:
+    ends: list[int] = []
+    for line in readelf_output.splitlines():
+        tokens = line.strip().split()
+        if not tokens or tokens[0] != "GNU_RELRO":
+            continue
+        # llvm-readelf -lW: Type Offset VirtAddr PhysAddr FileSiz MemSiz Flg Align.
+        if len(tokens) < 8 or any(
+            re.fullmatch(r"0x[0-9a-fA-F]+", tokens[i]) is None
+            for i in (2, 5)
+        ):
+            raise GateError(f"Unreviewable GNU_RELRO range in {library}.")
+        end = int(tokens[2], 16) + int(tokens[5], 16)
+        if end % MINIMUM_ELF_LOAD_ALIGNMENT_BYTES:
+            raise GateError(f"{library} has a GNU_RELRO end not aligned to 16 KB.")
+        ends.append(end)
+    # No GNU_RELRO is trivially aligned for this check, not proof of hardening.
+    return ends
 
 
 def _write_evidence(
@@ -297,6 +318,10 @@ def main() -> int:
                     "sha256": _sha256(extracted),
                     "loadAlignmentsBytes": alignments,
                     "minimumLoadAlignmentBytes": minimum,
+                    "relroEndAddresses": _relro_end_addresses(
+                        readelf_command.stdout, library=info.filename
+                    ),
+                    "relroAlignmentStatus": "PASS",
                     "status": (
                         "PASS"
                         if minimum >= MINIMUM_ELF_LOAD_ALIGNMENT_BYTES

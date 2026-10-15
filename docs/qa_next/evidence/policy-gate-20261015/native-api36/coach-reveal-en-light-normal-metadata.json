@@ -1,0 +1,2079 @@
+{
+  "classification": "native android QA production Coach page / held synthetic model, not AI-quality E2E",
+  "platform": "android",
+  "source_head": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "source_fingerprint": "03707325ec2bb3be9b7f0bbdff807e763fe545bb15db10636fb7dbd58c560aef",
+  "scene": "en-light-normal",
+  "mode": "reveal",
+  "text_scale": 2.0,
+  "reduced_motion_fixture": false,
+  "native_reduce_motion": false,
+  "fonts": "actual platform theme and bundled BIL fonts; no Evidence override",
+  "physical_size": "1080.0x2400.0",
+  "device_pixel_ratio": 2.625,
+  "capture_windows": [
+    {
+      "name": "coach-reveal-en-light-normal-first",
+      "before": {
+        "observed_at_ms": 350,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 0.9570609403308481,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      },
+      "after": {
+        "observed_at_ms": 3250,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      }
+    },
+    {
+      "name": "coach-reveal-en-light-normal-mid",
+      "before": {
+        "observed_at_ms": 3264,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      },
+      "after": {
+        "observed_at_ms": 5058,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      }
+    },
+    {
+      "name": "coach-reveal-en-light-normal-end",
+      "before": {
+        "observed_at_ms": 5066,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      },
+      "after": {
+        "observed_at_ms": 6983,
+        "viewport_present": true,
+        "scroll_pixels": 3379.438174935246,
+        "viewport_top": 185.36190476190475,
+        "viewport_bottom": 680.5237298266587,
+        "reply_row_present": true,
+        "message_height": 3744.0,
+        "arrival_present": true,
+        "reply_opacity": 1.0,
+        "visible_graphemes": 2225,
+        "first_glyphs_visible_area": 4041.3859195638092
+      }
+    }
+  ],
+  "completed": true,
+  "held_reply_released_at_ms": 0,
+  "first_nonempty_native_frame": {
+    "observed_at_ms": 316,
+    "viewport_present": true,
+    "scroll_pixels": 3379.438174935246,
+    "viewport_top": 185.36190476190475,
+    "viewport_bottom": 680.5237298266587,
+    "reply_row_present": true,
+    "message_height": 3744.0,
+    "arrival_present": true,
+    "reply_opacity": 0.9570609403308481,
+    "visible_graphemes": 2225,
+    "first_glyphs_visible_area": 4041.3859195638092
+  },
+  "arrival_style": "complete-reply opacity/position, 320ms",
+  "capture_limit": "PNG driver IPC can outlast the entrance; frame trace records actual opacity.",
+  "entrance_intermediate_frame_observed": true,
+  "geometry_native_frames": [
+    {
+      "observed_at_ms": 193,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 0.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 0.0
+    },
+    {
+      "observed_at_ms": 316,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 0.9570609403308481,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 461,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 516,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 607,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 669,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 831,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 962,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1019,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1253,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1339,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1434,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1520,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1569,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1634,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1682,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1772,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1799,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1848,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1942,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 1980,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2034,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2154,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2221,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2264,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2315,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2380,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2463,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2496,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2589,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2634,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2718,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2781,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2849,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2881,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 2985,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3022,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3075,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3165,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3275,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3297,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3332,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3384,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3433,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3501,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3605,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3663,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3715,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3780,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3843,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3880,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3930,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 3984,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4063,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4112,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4148,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4196,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4249,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4297,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4353,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4396,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4466,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4530,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4565,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4600,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4664,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4713,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4762,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4881,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4913,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 4982,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5080,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5112,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5130,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5178,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5228,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5281,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5376,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5454,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5483,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5545,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5615,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5680,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5720,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5764,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5795,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5851,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5901,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5945,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 5996,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6068,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6106,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6147,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6196,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6267,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6350,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6419,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6481,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6592,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6659,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6759,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    },
+    {
+      "observed_at_ms": 6889,
+      "viewport_present": true,
+      "scroll_pixels": 3379.438174935246,
+      "viewport_top": 185.36190476190475,
+      "viewport_bottom": 680.5237298266587,
+      "reply_row_present": true,
+      "message_height": 3744.0,
+      "arrival_present": true,
+      "reply_opacity": 1.0,
+      "visible_graphemes": 2225,
+      "first_glyphs_visible_area": 4041.3859195638092
+    }
+  ],
+  "native_frame_timings": [
+    {
+      "build_us": 86664,
+      "raster_us": 93806,
+      "total_us": 182574,
+      "raster_finish_us": 4876899458
+    },
+    {
+      "build_us": 134441,
+      "raster_us": 89546,
+      "total_us": 233345,
+      "raster_finish_us": 4877166896
+    },
+    {
+      "build_us": 115458,
+      "raster_us": 83177,
+      "total_us": 238397,
+      "raster_finish_us": 4877355281
+    },
+    {
+      "build_us": 50723,
+      "raster_us": 127747,
+      "total_us": 193261,
+      "raster_finish_us": 4877526812
+    },
+    {
+      "build_us": 15087,
+      "raster_us": 72306,
+      "total_us": 102563,
+      "raster_finish_us": 4877619447
+    },
+    {
+      "build_us": 1222,
+      "raster_us": 104983,
+      "total_us": 125127,
+      "raster_finish_us": 4877725345
+    },
+    {
+      "build_us": 4710,
+      "raster_us": 124042,
+      "total_us": 166442,
+      "raster_finish_us": 4877849993
+    },
+    {
+      "build_us": 3959,
+      "raster_us": 96796,
+      "total_us": 208361,
+      "raster_finish_us": 4877958579
+    },
+    {
+      "build_us": 40013,
+      "raster_us": 100324,
+      "total_us": 209280,
+      "raster_finish_us": 4878059498
+    },
+    {
+      "build_us": 1117,
+      "raster_us": 137796,
+      "total_us": 187249,
+      "raster_finish_us": 4878204133
+    },
+    {
+      "build_us": 1054,
+      "raster_us": 76726,
+      "total_us": 181844,
+      "raster_finish_us": 4878282062
+    },
+    {
+      "build_us": 2611,
+      "raster_us": 43128,
+      "total_us": 55809,
+      "raster_finish_us": 4878389360
+    },
+    {
+      "build_us": 1561,
+      "raster_us": 66145,
+      "total_us": 77749,
+      "raster_finish_us": 4878494633
+    },
+    {
+      "build_us": 1318,
+      "raster_us": 71435,
+      "total_us": 79126,
+      "raster_finish_us": 4878596010
+    },
+    {
+      "build_us": 2070,
+      "raster_us": 70754,
+      "total_us": 79251,
+      "raster_finish_us": 4878679469
+    },
+    {
+      "build_us": 1785,
+      "raster_us": 63904,
+      "total_us": 94915,
+      "raster_finish_us": 4878745133
+    },
+    {
+      "build_us": 1828,
+      "raster_us": 77506,
+      "total_us": 122793,
+      "raster_finish_us": 4878823011
+    },
+    {
+      "build_us": 1218,
+      "raster_us": 55242,
+      "total_us": 111737,
+      "raster_finish_us": 4878878621
+    },
+    {
+      "build_us": 1476,
+      "raster_us": 55209,
+      "total_us": 101860,
+      "raster_finish_us": 4878935411
+    },
+    {
+      "build_us": 1852,
+      "raster_us": 66916,
+      "total_us": 126929,
+      "raster_finish_us": 4879010480
+    },
+    {
+      "build_us": 864,
+      "raster_us": 46563,
+      "total_us": 124212,
+      "raster_finish_us": 4879057763
+    },
+    {
+      "build_us": 1517,
+      "raster_us": 59198,
+      "total_us": 103952,
+      "raster_finish_us": 4879120836
+    },
+    {
+      "build_us": 1131,
+      "raster_us": 82361,
+      "total_us": 137639,
+      "raster_finish_us": 4879204523
+    },
+    {
+      "build_us": 1797,
+      "raster_us": 65719,
+      "total_us": 154316,
+      "raster_finish_us": 4879271200
+    },
+    {
+      "build_us": 2108,
+      "raster_us": 63460,
+      "total_us": 118719,
+      "raster_finish_us": 4879335603
+    },
+    {
+      "build_us": 1068,
+      "raster_us": 53331,
+      "total_us": 109906,
+      "raster_finish_us": 4879393457
+    },
+    {
+      "build_us": 1565,
+      "raster_us": 61151,
+      "total_us": 105467,
+      "raster_finish_us": 4879455684
+    },
+    {
+      "build_us": 1065,
+      "raster_us": 62427,
+      "total_us": 118211,
+      "raster_finish_us": 4879518428
+    },
+    {
+      "build_us": 1239,
+      "raster_us": 54249,
+      "total_us": 106338,
+      "raster_finish_us": 4879573222
+    },
+    {
+      "build_us": 1592,
+      "raster_us": 69763,
+      "total_us": 128003,
+      "raster_finish_us": 4879644887
+    },
+    {
+      "build_us": 1263,
+      "raster_us": 63568,
+      "total_us": 125487,
+      "raster_finish_us": 4879709038
+    },
+    {
+      "build_us": 1287,
+      "raster_us": 60207,
+      "total_us": 120656,
+      "raster_finish_us": 4879770873
+    },
+    {
+      "build_us": 2392,
+      "raster_us": 57390,
+      "total_us": 112065,
+      "raster_finish_us": 4879828949
+    },
+    {
+      "build_us": 1140,
+      "raster_us": 59796,
+      "total_us": 105952,
+      "raster_finish_us": 4879889503
+    },
+    {
+      "build_us": 1703,
+      "raster_us": 57106,
+      "total_us": 96803,
+      "raster_finish_us": 4879947020
+    },
+    {
+      "build_us": 1531,
+      "raster_us": 61567,
+      "total_us": 80365,
+      "raster_finish_us": 4880013916
+    },
+    {
+      "build_us": 1291,
+      "raster_us": 54915,
+      "total_us": 102531,
+      "raster_finish_us": 4880069415
+    },
+    {
+      "build_us": 1028,
+      "raster_us": 50203,
+      "total_us": 109301,
+      "raster_finish_us": 4880126185
+    },
+    {
+      "build_us": 643,
+      "raster_us": 48763,
+      "total_us": 81951,
+      "raster_finish_us": 4880182168
+    },
+    {
+      "build_us": 1144,
+      "raster_us": 52634,
+      "total_us": 84865,
+      "raster_finish_us": 4880235082
+    },
+    {
+      "build_us": 1204,
+      "raster_us": 49802,
+      "total_us": 122056,
+      "raster_finish_us": 4880305607
+    },
+    {
+      "build_us": 516,
+      "raster_us": 48940,
+      "total_us": 114860,
+      "raster_finish_us": 4880415077
+    },
+    {
+      "build_us": 1379,
+      "raster_us": 41250,
+      "total_us": 79327,
+      "raster_finish_us": 4880462878
+    },
+    {
+      "build_us": 614,
+      "raster_us": 50387,
+      "total_us": 97131,
+      "raster_finish_us": 4880514015
+    },
+    {
+      "build_us": 472,
+      "raster_us": 61788,
+      "total_us": 109468,
+      "raster_finish_us": 4880576352
+    },
+    {
+      "build_us": 1195,
+      "raster_us": 68665,
+      "total_us": 130666,
+      "raster_finish_us": 4880647550
+    },
+    {
+      "build_us": 1311,
+      "raster_us": 96558,
+      "total_us": 165822,
+      "raster_finish_us": 4880749373
+    },
+    {
+      "build_us": 5167,
+      "raster_us": 46928,
+      "total_us": 148558,
+      "raster_finish_us": 4880798775
+    },
+    {
+      "build_us": 1646,
+      "raster_us": 49927,
+      "total_us": 103150,
+      "raster_finish_us": 4880853367
+    },
+    {
+      "build_us": 1337,
+      "raster_us": 47181,
+      "total_us": 101576,
+      "raster_finish_us": 4880901793
+    },
+    {
+      "build_us": 1031,
+      "raster_us": 59238,
+      "total_us": 94576,
+      "raster_finish_us": 4880961460
+    },
+    {
+      "build_us": 1054,
+      "raster_us": 51932,
+      "total_us": 113834,
+      "raster_finish_us": 4881014051
+    },
+    {
+      "build_us": 1244,
+      "raster_us": 50442,
+      "total_us": 98434,
+      "raster_finish_us": 4881065318
+    },
+    {
+      "build_us": 1036,
+      "raster_us": 49064,
+      "total_us": 105709,
+      "raster_finish_us": 4881122593
+    },
+    {
+      "build_us": 1015,
+      "raster_us": 46834,
+      "total_us": 102997,
+      "raster_finish_us": 4881169881
+    },
+    {
+      "build_us": 974,
+      "raster_us": 51282,
+      "total_us": 88240,
+      "raster_finish_us": 4881221791
+    },
+    {
+      "build_us": 1873,
+      "raster_us": 49872,
+      "total_us": 88834,
+      "raster_finish_us": 4881272385
+    },
+    {
+      "build_us": 1027,
+      "raster_us": 50903,
+      "total_us": 90542,
+      "raster_finish_us": 4881324093
+    },
+    {
+      "build_us": 1059,
+      "raster_us": 43134,
+      "total_us": 89337,
+      "raster_finish_us": 4881372888
+    },
+    {
+      "build_us": 1147,
+      "raster_us": 53012,
+      "total_us": 98329,
+      "raster_finish_us": 4881431880
+    },
+    {
+      "build_us": 922,
+      "raster_us": 49430,
+      "total_us": 98108,
+      "raster_finish_us": 4881481659
+    },
+    {
+      "build_us": 1491,
+      "raster_us": 44879,
+      "total_us": 93598,
+      "raster_finish_us": 4881527149
+    },
+    {
+      "build_us": 1199,
+      "raster_us": 58113,
+      "total_us": 102004,
+      "raster_finish_us": 4881585555
+    },
+    {
+      "build_us": 958,
+      "raster_us": 49872,
+      "total_us": 103278,
+      "raster_finish_us": 4881636829
+    },
+    {
+      "build_us": 757,
+      "raster_us": 47767,
+      "total_us": 86325,
+      "raster_finish_us": 4881686542
+    },
+    {
+      "build_us": 1142,
+      "raster_us": 43573,
+      "total_us": 83380,
+      "raster_finish_us": 4881733597
+    },
+    {
+      "build_us": 1557,
+      "raster_us": 48104,
+      "total_us": 105245,
+      "raster_finish_us": 4881788796
+    },
+    {
+      "build_us": 1136,
+      "raster_us": 52772,
+      "total_us": 92458,
+      "raster_finish_us": 4881842675
+    },
+    {
+      "build_us": 1029,
+      "raster_us": 64826,
+      "total_us": 108556,
+      "raster_finish_us": 4881908773
+    },
+    {
+      "build_us": 901,
+      "raster_us": 53420,
+      "total_us": 112905,
+      "raster_finish_us": 4881963122
+    },
+    {
+      "build_us": 624,
+      "raster_us": 45420,
+      "total_us": 96932,
+      "raster_finish_us": 4882013816
+    },
+    {
+      "build_us": 638,
+      "raster_us": 52718,
+      "total_us": 68470,
+      "raster_finish_us": 4882068687
+    },
+    {
+      "build_us": 673,
+      "raster_us": 45062,
+      "total_us": 85349,
+      "raster_finish_us": 4882118900
+    },
+    {
+      "build_us": 1244,
+      "raster_us": 39817,
+      "total_us": 94485,
+      "raster_finish_us": 4882211369
+    },
+    {
+      "build_us": 1055,
+      "raster_us": 52483,
+      "total_us": 64034,
+      "raster_finish_us": 4882264251
+    },
+    {
+      "build_us": 817,
+      "raster_us": 45359,
+      "total_us": 93877,
+      "raster_finish_us": 4882310761
+    },
+    {
+      "build_us": 882,
+      "raster_us": 43200,
+      "total_us": 93101,
+      "raster_finish_us": 4882359985
+    },
+    {
+      "build_us": 660,
+      "raster_us": 50516,
+      "total_us": 104062,
+      "raster_finish_us": 4882420946
+    },
+    {
+      "build_us": 864,
+      "raster_us": 99412,
+      "total_us": 158935,
+      "raster_finish_us": 4882525819
+    },
+    {
+      "build_us": 2603,
+      "raster_us": 42120,
+      "total_us": 151516,
+      "raster_finish_us": 4882568400
+    },
+    {
+      "build_us": 1158,
+      "raster_us": 45647,
+      "total_us": 93259,
+      "raster_finish_us": 4882626810
+    },
+    {
+      "build_us": 684,
+      "raster_us": 49265,
+      "total_us": 109870,
+      "raster_finish_us": 4882676754
+    },
+    {
+      "build_us": 1006,
+      "raster_us": 43240,
+      "total_us": 87138,
+      "raster_finish_us": 4882720689
+    },
+    {
+      "build_us": 1369,
+      "raster_us": 57407,
+      "total_us": 99672,
+      "raster_finish_us": 4882783223
+    },
+    {
+      "build_us": 810,
+      "raster_us": 42944,
+      "total_us": 60161,
+      "raster_finish_us": 4882827045
+    },
+    {
+      "build_us": 886,
+      "raster_us": 50971,
+      "total_us": 94836,
+      "raster_finish_us": 4882878387
+    },
+    {
+      "build_us": 1208,
+      "raster_us": 51421,
+      "total_us": 102778,
+      "raster_finish_us": 4882936329
+    },
+    {
+      "build_us": 828,
+      "raster_us": 40191,
+      "total_us": 101789,
+      "raster_finish_us": 4882985340
+    },
+    {
+      "build_us": 1230,
+      "raster_us": 45840,
+      "total_us": 98321,
+      "raster_finish_us": 4883031872
+    },
+    {
+      "build_us": 1086,
+      "raster_us": 43423,
+      "total_us": 93903,
+      "raster_finish_us": 4883077454
+    },
+    {
+      "build_us": 1429,
+      "raster_us": 45864,
+      "total_us": 90504,
+      "raster_finish_us": 4883124055
+    },
+    {
+      "build_us": 943,
+      "raster_us": 42256,
+      "total_us": 83266,
+      "raster_finish_us": 4883166817
+    },
+    {
+      "build_us": 800,
+      "raster_us": 47777,
+      "total_us": 86263,
+      "raster_finish_us": 4883219814
+    },
+    {
+      "build_us": 1353,
+      "raster_us": 59203,
+      "total_us": 97986,
+      "raster_finish_us": 4883281537
+    },
+    {
+      "build_us": 869,
+      "raster_us": 63635,
+      "total_us": 112009,
+      "raster_finish_us": 4883345560
+    },
+    {
+      "build_us": 838,
+      "raster_us": 78068,
+      "total_us": 140720,
+      "raster_finish_us": 4883424271
+    },
+    {
+      "build_us": 1104,
+      "raster_us": 64790,
+      "total_us": 151896,
+      "raster_finish_us": 4883502113
+    },
+    {
+      "build_us": 1386,
+      "raster_us": 54687,
+      "total_us": 129525,
+      "raster_finish_us": 4883563076
+    },
+    {
+      "build_us": 937,
+      "raster_us": 74394,
+      "total_us": 137624,
+      "raster_finish_us": 4883637841
+    },
+    {
+      "build_us": 1023,
+      "raster_us": 61570,
+      "total_us": 136053,
+      "raster_finish_us": 4883702937
+    },
+    {
+      "build_us": 1293,
+      "raster_us": 83803,
+      "total_us": 155707,
+      "raster_finish_us": 4883789258
+    },
+    {
+      "build_us": 1547,
+      "raster_us": 79304,
+      "total_us": 152138,
+      "raster_finish_us": 4883869022
+    },
+    {
+      "build_us": 863,
+      "raster_us": 76858,
+      "total_us": 162881,
+      "raster_finish_us": 4883946432
+    }
+  ],
+  "synthetic_gateway_calls": 1,
+  "synthetic_gateway_questions": [
+    "hello"
+  ],
+  "synthetic_gateway_locales": [
+    "en"
+  ],
+  "dart_network_client_creations_blocked": 0,
+  "real_model_calls": 0,
+  "real_credits_spent": 0
+}
