@@ -17,6 +17,13 @@ capture_failure_evidence() {
     adb devices -l >> "$evidence/failure.txt" 2>&1 || true
     adb logcat -d -t 1500 \
       > "$evidence/failure-logcat.txt" 2>&1 || true
+    if [[ ! -f "$evidence/startup.png" ]]; then
+      adb exec-out screencap -p > "$evidence/failure-screen.png" 2>&1 || true
+    fi
+    adb shell dumpsys activity activities \
+      > "$evidence/failure-activity-state.txt" 2>&1 || true
+    adb shell dumpsys window windows \
+      > "$evidence/failure-window-state.txt" 2>&1 || true
   fi
 }
 trap capture_failure_evidence EXIT
@@ -61,12 +68,25 @@ stage='clear-app-data'
 adb shell pm clear "$app_id" >/dev/null
 stage='launch-main-activity'
 adb shell am start -n "$app_id/.MainActivity"
-stage='wait-for-app-process'
-sleep 10
-app_pid=$(adb shell pidof "$app_id" | tr -d '\r')
-test -n "$app_pid"
+stage='wait-for-app-foreground'
+app_pid=''
+foreground_window=''
+for attempt in {1..15}; do
+  app_pid=$(adb shell pidof "$app_id" | tr -d '\r' || true)
+  foreground_window=$(adb shell dumpsys window windows 2>/dev/null \
+    | grep -E 'mCurrentFocus|mFocusedApp' | tail -n 1 | tr -d '\r' || true)
+  if [[ -n "$app_pid" && "$foreground_window" == *"$app_id"* ]]; then
+    break
+  fi
+  sleep 2
+done
+if [[ -z "$app_pid" || "$foreground_window" != *"$app_id"* ]]; then
+  echo "BIL did not become the foreground Android window: $foreground_window" >&2
+  exit 1
+fi
+sleep 5
 
-stage='write-emulator-evidence'
+stage='capture-launch-evidence'
 printf '%s\n' "$actual_api_level" > "$evidence/api-level.txt"
 printf '%s\n' \
   "source_sha=${GITHUB_SHA:-unknown}" \
@@ -77,6 +97,24 @@ printf '%s\n' \
   > "$evidence/test-scope.txt"
 adb exec-out screencap -p > "$evidence/startup.png"
 sha256sum "$evidence/startup.png" > "$evidence/startup.sha256"
+adb logcat -d -t 5000 > "$evidence/startup-logcat.txt" 2>&1 || true
+adb shell dumpsys activity activities > "$evidence/activity-state.txt" 2>&1 || true
+adb shell dumpsys window windows > "$evidence/window-state.txt" 2>&1 || true
+adb shell uiautomator dump /sdcard/bil-startup-window.xml \
+  > "$evidence/uiautomator.txt" 2>&1 || true
+adb pull /sdcard/bil-startup-window.xml "$evidence/startup-window.xml" \
+  >/dev/null 2>&1 || true
+
+stage='verify-first-frame-content'
+if grep -Eqi \
+  "ANR in |Application Not Responding|isn't responding|is not responding|لا يستجيب" \
+  "$evidence/startup-logcat.txt" "$evidence/uiautomator.txt" \
+  "$evidence/startup-window.xml"; then
+  echo 'Android reported an ANR dialog or unresponsive process during startup.' >&2
+  exit 1
+fi
+python3 tool/release/verify_android_startup_frame.py \
+  "$evidence/startup.png" | tee "$evidence/startup-frame.txt"
 
 stage='check-app-crash-log'
 if adb logcat -d -t 2000 --pid="$app_pid" | grep -Eq 'FATAL EXCEPTION|Fatal signal [0-9]+'; then
