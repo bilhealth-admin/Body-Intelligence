@@ -1,0 +1,56 @@
+{
+  "started_at_utc": "2026-10-15T12:34:34.411243+00:00",
+  "finished_at_utc": "2026-10-15T12:34:37.759706+00:00",
+  "source_head": "19972310fea6284b59f3cfba5874223fac3f4607",
+  "target": "lib\\features\\nutrition\\domain\\macro_goal_editor.dart",
+  "target_sha256": "476669630444ea344ac075ca4d8d2665894dcbeba85f1da1a1f53aefe0edfda3",
+  "source_unchanged": true,
+  "generated_checks": {
+    "seed": 20261015,
+    "generated_cases": 10000,
+    "checks": 380014,
+    "result": "PASS"
+  },
+  "coverage": {
+    "hits": {
+      "measured": 81,
+      "hit": 78
+    },
+    "funcHits": {
+      "measured": 8,
+      "hit": 7
+    },
+    "branchHits": {
+      "measured": 27,
+      "hit": 24
+    }
+  },
+  "mutants": [
+    {
+      "name": "fat_energy_is_four",
+      "behaviorally_killed": true,
+      "exit_code": 255
+    },
+    {
+      "name": "allow_locked_edit",
+      "behaviorally_killed": true,
+      "exit_code": 255
+    },
+    {
+      "name": "allow_nonfinite_edit",
+      "behaviorally_killed": true,
+      "exit_code": 255
+    },
+    {
+      "name": "forget_gram_lock",
+      "behaviorally_killed": true,
+      "exit_code": 255
+    },
+    {
+      "name": "allow_too_large_calories",
+      "behaviorally_killed": true,
+      "exit_code": 255
+    }
+  ],
+  "scope": "One pure Dart macro editor, deterministic generated boundary/metamorphic cases and five explicit non-equivalent mutants; not whole-app fuzz, a full mutation score, provider intelligence or device performance"
+}

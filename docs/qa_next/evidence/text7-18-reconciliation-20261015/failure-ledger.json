@@ -47,7 +47,7 @@
       "run": 38726355481,
       "cause": "all four API parent tests rejected the valid Docker name supabase_db_Body-Intelligence using a lowercase-only selector",
       "fix": "shared explicit container selection with exact running-name validation and fail-closed ambiguity check",
-      "status": "Fixed on 73785549; API run 38729694517 signed Auth and product RPC cases passed; 28/29 overall, separate Storage DDL fixture failure"
+      "status": "PASS: all 34 API/helper cases on isolated Supabase run 38734170433, source 19972310"
     },
     {
       "id": "F08",
@@ -61,7 +61,7 @@
       "run": 38729694517,
       "cause": "Storage fixture emits unquoted hyphenated policy name; cleanup direct SQL also failed and masked original error",
       "fix": "Safe bounded policy identifiers, transactional setup, Storage API lifecycle cleanup for exact synthetic bucket, preserve primary and cleanup errors separately",
-      "status": "Real PostgreSQL before/after DDL PASS; Node helper/selector 8/8 PASS; full Storage API/Realtime rerun required"
+      "status": "PASS: Storage owner upload/read, anonymous/cross-owner deny, owner-path spoof reject, actual Realtime PostgreSQL delivery and Storage API cleanup, run 38734170433; 34/34 aggregate API/helper cases"
     },
     {
       "id": "F10",
@@ -74,7 +74,7 @@
       "id": "F11",
       "cause": "Local Windows Gradle/JDK selector failed Unable to establish loopback connection before Android test; short task-scoped Java temp directory permits selector and TCP loopback",
       "fix": "JAVA_TOOL_OPTIONS task-scoped java.io.tmpdir and jdk.net.unixdomain.tmpdir; no global Java or app setting change",
-      "status": "Small Java probe PASS; actual single-file native retry is running and not claimed passed"
+      "status": "Actual API36/WHPX native Flutter integration PASS 1/1 after short task-scoped Java temp. Final command used native chat shell to avoid intermediate Python cp1252 output failure."
     }
   ],
   "raw_logs_retained_locally": [

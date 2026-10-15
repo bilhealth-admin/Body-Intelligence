@@ -1,0 +1,113 @@
+{
+  "result": "STATIC_DEBUG_REPORT_PRESENT",
+  "scope": "Offline static debug APK only; not Dart analysis, dynamic MASVS, release AAB or store approval",
+  "package_name": "com.bilhealth.bodyintelligencelog",
+  "version_code": "33",
+  "min_sdk": "26",
+  "target_sdk": "36",
+  "permissions": [
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.BLUETOOTH",
+    "android.permission.BLUETOOTH_ADMIN",
+    "android.permission.BLUETOOTH_CONNECT",
+    "android.permission.BLUETOOTH_SCAN",
+    "android.permission.CAMERA",
+    "android.permission.FLASHLIGHT",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.INTERNET",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.RECEIVE_BOOT_COMPLETED",
+    "android.permission.RECORD_AUDIO",
+    "android.permission.USE_BIOMETRIC",
+    "android.permission.USE_FINGERPRINT",
+    "android.permission.VIBRATE",
+    "android.permission.WAKE_LOCK",
+    "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+    "android.permission.health.READ_DISTANCE",
+    "android.permission.health.READ_STEPS",
+    "com.android.vending.BILLING",
+    "com.bilhealth.bodyintelligencelog.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+    "com.google.android.c2dm.permission.RECEIVE"
+  ],
+  "manifest_findings": [
+    {
+      "rule": "vulnerable_os_version2",
+      "severity": "warning"
+    },
+    {
+      "rule": "app_is_debuggable",
+      "severity": "high"
+    },
+    {
+      "rule": "explicitly_exported",
+      "severity": "warning"
+    },
+    {
+      "rule": "exported_protected_permission_not_defined",
+      "severity": "warning"
+    },
+    {
+      "rule": "explicitly_exported",
+      "severity": "warning"
+    },
+    {
+      "rule": "exported_protected_permission_not_defined",
+      "severity": "warning"
+    },
+    {
+      "rule": "exported_protected_permission_not_defined",
+      "severity": "warning"
+    },
+    {
+      "rule": "exported_protected_permission_not_defined",
+      "severity": "warning"
+    },
+    {
+      "rule": "exported_protected_permission_not_defined",
+      "severity": "warning"
+    },
+    {
+      "rule": "exported_protected_permission_not_defined",
+      "severity": "warning"
+    }
+  ],
+  "code_findings": [],
+  "internet_enabled_in_scanner": false,
+  "source_uploaded_externally": false,
+  "scanner_image": "opensecurity/mobile-security-framework-mobsf@sha256:5113fbad0727445dda01afdccafea5e107bfa8632ead8a169492f5caa8aa1b7c",
+  "producer_run": "38726365073",
+  "producer_source": "d362c8e4c771b474595a1b3059b562519b46b758",
+  "producer_conclusion": "failure",
+  "audit_source": "19972310fea6284b59f3cfba5874223fac3f4607",
+  "apk_sha256": "93f0e343ba8243a2225e5aa271750a1272cda153cc35ec4ac3eb2ab745fcc412",
+  "qa_only_changed_paths": [
+    ".github/scripts/bil_ios36_native_integration.sh",
+    ".github/workflows/bil_codeql_security_extended.yml",
+    "docs/qa_next/BIL_TEXT7_18_RECONCILIATION_20261015_AR.md",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/android-api36-connectivity.json",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/client-cycle-local-regression.json",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/failure-ledger.json",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/flutter-analyze-final.json",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/java-short-temp-regression.json",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/semgrep-73785549.json",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/semgrep-d362c8e4.json",
+    "docs/qa_next/evidence/text7-18-reconciliation-20261015/storage-ddl-regression.json",
+    "supabase/tests/local_supabase_auth_rls_e2e_test.mjs",
+    "supabase/tests/local_supabase_product_rpc_e2e_test.mjs",
+    "supabase/tests/local_supabase_sqlite_cycle_fixture.mjs",
+    "supabase/tests/local_supabase_storage_fixture.mjs",
+    "supabase/tests/local_supabase_storage_fixture_test.mjs",
+    "supabase/tests/local_supabase_storage_realtime_e2e_test.mjs",
+    "supabase/tests/local_supabase_test_support.mjs",
+    "supabase/tests/local_supabase_test_support_test.mjs",
+    "tools/qa/bil_cloud_restore_cycle_runner.py",
+    "tools/qa/bil_mobsf_offline_static.py",
+    "tools/qa/bil_sanitize_semgrep_evidence.py",
+    "tools/qa/flutter/cloud_restore_postgres_cycle_test.dart",
+    "tools/qa/test_bil_cloud_cycle_loopback.py",
+    "tools/qa/test_bil_mobsf_offline_static.py",
+    "tools/qa/test_bil_sanitize_semgrep_evidence.py"
+  ]
+}

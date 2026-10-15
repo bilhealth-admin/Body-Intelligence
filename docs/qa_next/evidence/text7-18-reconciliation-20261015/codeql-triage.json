@@ -1,414 +1,54 @@
 {
-  "read_at_utc": "2026-10-15T10:56:16.743363+00:00",
+  "read_at_utc": "2026-10-15T12:31:51.762631+00:00",
   "ref": "refs/heads/integration/bil-qa-media-policy-20261011",
   "counts": {
-    "open": 26,
+    "open": 28,
     "fixed": 25
   },
   "alerts": [
     {
-      "number": 51,
-      "rule": "js/file-access-to-http",
+      "number": 1,
+      "rule": "actions/untrusted-checkout/medium",
       "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_subscription_version_images_upload.mjs",
-      "line": 91,
-      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
-    },
-    {
-      "number": 50,
-      "rule": "js/file-access-to-http",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_review_assets_inspect.mjs",
-      "line": 55,
-      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
-    },
-    {
-      "number": 49,
-      "rule": "js/file-access-to-http",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_product_page_screenshots_upload.mjs",
-      "line": 122,
-      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
-    },
-    {
-      "number": 48,
-      "rule": "js/remote-property-injection",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "web/drift_worker.dart.js",
-      "line": 1226,
-      "review": "generated_dart_rti_reachability_unconfirmed_keep_open"
-    },
-    {
-      "number": 47,
-      "rule": "java/android/backup-enabled",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/vendor_app_links/example/android/app/src/main/AndroidManifest.xml",
-      "line": 2,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 46,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/store_media/pull_google_play_screenshots.mjs",
-      "line": 214,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 45,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/store_media/pull_google_play_screenshots.mjs",
-      "line": 155,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 44,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/release/ios_plus8_canary/runtime.mjs",
-      "line": 54,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 43,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/prebuild/reviewer_access_preflight.mjs",
-      "line": 132,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 42,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/google_play/google_play_title_update.mjs",
-      "line": 180,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 41,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/google_play/google_play_release_surface_readonly_audit.mjs",
-      "line": 233,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 40,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/google_play/google_play_community_guidelines_link_update.mjs",
-      "line": 228,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 39,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_v1_final_audit.mjs",
-      "line": 191,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 38,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_product_page_screenshots_upload.mjs",
-      "line": 226,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 37,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_review_assets_inspect.mjs",
-      "line": 89,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 36,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_replace_product_screenshots_from_play.mjs",
-      "line": 313,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 35,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_full_catalog_audit.mjs",
-      "line": 204,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 34,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_community_guidelines_link_update.mjs",
-      "line": 154,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 33,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_commerce_final_audit.mjs",
-      "line": 114,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 32,
-      "rule": "js/http-to-file-access",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/apple_store_connect/asc_app_availability_final_audit.mjs",
-      "line": 40,
-      "review": "reviewed_intended_report_or_image_download_keep_open"
-    },
-    {
-      "number": 31,
-      "rule": "js/file-access-to-http",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/release/ios_plus8_canary/runtime.mjs",
-      "line": 119,
-      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
-    },
-    {
-      "number": 30,
-      "rule": "js/file-access-to-http",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/release/ios_plus8_canary/runtime.mjs",
-      "line": 118,
-      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
-    },
-    {
-      "number": 29,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/release/ios_plus8_canary/runtime.mjs",
-      "line": 110,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 28,
-      "rule": "js/file-access-to-http",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": "tool/release/ios_plus8_canary/service_runtime.mjs",
-      "line": 35,
-      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
-    },
-    {
-      "number": 27,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/release/ios_plus8_canary/service_runtime.mjs",
-      "line": 30,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 26,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_pubsub_readiness_audit.mjs",
-      "line": 51,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 25,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_title_update.mjs",
-      "line": 39,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 24,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_release_surface_readonly_audit.mjs",
-      "line": 64,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 23,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_region_price_conversion_audit.mjs",
-      "line": 43,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 22,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_catalog_exact_repair.mjs",
-      "line": 85,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 21,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_community_guidelines_link_update.mjs",
-      "line": 52,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 20,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_catalog_readonly_audit.mjs",
-      "line": 57,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 19,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_add_by_monthly_exact.mjs",
-      "line": 71,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 18,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/apple_store_connect/asc_subscription_version_images_upload.mjs",
-      "line": 89,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 17,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/apple_store_connect/asc_review_assets_inspect.mjs",
-      "line": 54,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 16,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/apple_store_connect/asc_product_page_screenshots_upload.mjs",
-      "line": 120,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 15,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/apple_store_connect/asc_catalog_sync.mjs",
-      "line": 333,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 14,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "cloudflare/workout-runtime/scripts/verify-recipe-thumbnails-v4.mjs",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": ".github/workflows/bil_vision_premium_20261010.yml",
       "line": 67,
-      "review": "fixed_by_scan"
+      "review": "reviewed_trusted_producer_historical_branch_keep_open"
     },
     {
-      "number": 13,
-      "rule": "js/file-access-to-http",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "cloudflare/workout-runtime/scripts/verify-recipe-thumbnails-v4.mjs",
-      "line": 37,
-      "review": "fixed_by_scan"
+      "number": 2,
+      "rule": "actions/untrusted-checkout/medium",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": ".github/workflows/bil_vision_premium_20261010.yml",
+      "line": 95,
+      "review": "reviewed_trusted_producer_historical_branch_keep_open"
     },
     {
-      "number": 12,
-      "rule": "js/remote-property-injection",
+      "number": 3,
+      "rule": "actions/untrusted-checkout/medium",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": ".github/workflows/bil_vision_premium_20261010.yml",
+      "line": 110,
+      "review": "reviewed_trusted_producer_historical_branch_keep_open"
+    },
+    {
+      "number": 4,
+      "rule": "actions/untrusted-checkout/medium",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": ".github/workflows/bil_vision_premium_20261010.yml",
+      "line": 125,
+      "review": "reviewed_trusted_producer_historical_branch_keep_open"
+    },
+    {
+      "number": 5,
+      "rule": "js/redos",
       "state": "fixed",
       "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
       "path": "web/drift_worker.dart.js",
-      "line": 1200,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 11,
-      "rule": "js/file-system-race",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_alpha_v5_release.mjs",
-      "line": 193,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 10,
-      "rule": "js/incomplete-hostname-regexp",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/release/community_links.test.mjs",
-      "line": 54,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 9,
-      "rule": "js/incomplete-url-substring-sanitization",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/google_play/google_play_community_guidelines_link_update.mjs",
-      "line": 135,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 8,
-      "rule": "js/incomplete-url-substring-sanitization",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/apple_store_connect/asc_community_guidelines_link_update.mjs",
-      "line": 86,
-      "review": "fixed_by_scan"
-    },
-    {
-      "number": 7,
-      "rule": "js/biased-cryptographic-random",
-      "state": "fixed",
-      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "tool/release/ios_plus8_canary/runtime.mjs",
-      "line": 91,
+      "line": 13335,
       "review": "fixed_by_scan"
     },
     {
@@ -421,50 +61,428 @@
       "review": "fixed_by_scan"
     },
     {
-      "number": 5,
-      "rule": "js/redos",
+      "number": 7,
+      "rule": "js/biased-cryptographic-random",
       "state": "fixed",
       "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
-      "path": "web/drift_worker.dart.js",
-      "line": 13335,
+      "path": "tool/release/ios_plus8_canary/runtime.mjs",
+      "line": 91,
       "review": "fixed_by_scan"
     },
     {
-      "number": 4,
-      "rule": "actions/untrusted-checkout/medium",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": ".github/workflows/bil_vision_premium_20261010.yml",
-      "line": 125,
-      "review": "reviewed_trusted_producer_historical_branch_keep_open"
+      "number": 8,
+      "rule": "js/incomplete-url-substring-sanitization",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/apple_store_connect/asc_community_guidelines_link_update.mjs",
+      "line": 86,
+      "review": "fixed_by_scan"
     },
     {
-      "number": 3,
-      "rule": "actions/untrusted-checkout/medium",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": ".github/workflows/bil_vision_premium_20261010.yml",
-      "line": 110,
-      "review": "reviewed_trusted_producer_historical_branch_keep_open"
+      "number": 9,
+      "rule": "js/incomplete-url-substring-sanitization",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_community_guidelines_link_update.mjs",
+      "line": 135,
+      "review": "fixed_by_scan"
     },
     {
-      "number": 2,
-      "rule": "actions/untrusted-checkout/medium",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": ".github/workflows/bil_vision_premium_20261010.yml",
-      "line": 95,
-      "review": "reviewed_trusted_producer_historical_branch_keep_open"
+      "number": 10,
+      "rule": "js/incomplete-hostname-regexp",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/release/community_links.test.mjs",
+      "line": 54,
+      "review": "fixed_by_scan"
     },
     {
-      "number": 1,
-      "rule": "actions/untrusted-checkout/medium",
-      "state": "open",
-      "analysis_commit": "699abff301947ade3730c847e3f4ced0751dcf61",
-      "path": ".github/workflows/bil_vision_premium_20261010.yml",
+      "number": 11,
+      "rule": "js/file-system-race",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_alpha_v5_release.mjs",
+      "line": 193,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 12,
+      "rule": "js/remote-property-injection",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "web/drift_worker.dart.js",
+      "line": 1200,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 13,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "cloudflare/workout-runtime/scripts/verify-recipe-thumbnails-v4.mjs",
+      "line": 37,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 14,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "cloudflare/workout-runtime/scripts/verify-recipe-thumbnails-v4.mjs",
       "line": 67,
-      "review": "reviewed_trusted_producer_historical_branch_keep_open"
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 15,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/apple_store_connect/asc_catalog_sync.mjs",
+      "line": 333,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 16,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/apple_store_connect/asc_product_page_screenshots_upload.mjs",
+      "line": 120,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 17,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/apple_store_connect/asc_review_assets_inspect.mjs",
+      "line": 54,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 18,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/apple_store_connect/asc_subscription_version_images_upload.mjs",
+      "line": 89,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 19,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_add_by_monthly_exact.mjs",
+      "line": 71,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 20,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_catalog_readonly_audit.mjs",
+      "line": 57,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 21,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_community_guidelines_link_update.mjs",
+      "line": 52,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 22,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_catalog_exact_repair.mjs",
+      "line": 85,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 23,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_region_price_conversion_audit.mjs",
+      "line": 43,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 24,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_release_surface_readonly_audit.mjs",
+      "line": 64,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 25,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_play_title_update.mjs",
+      "line": 39,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 26,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/google_play/google_pubsub_readiness_audit.mjs",
+      "line": 51,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 27,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/release/ios_plus8_canary/service_runtime.mjs",
+      "line": 30,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 28,
+      "rule": "js/file-access-to-http",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/release/ios_plus8_canary/service_runtime.mjs",
+      "line": 35,
+      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
+    },
+    {
+      "number": 29,
+      "rule": "js/file-access-to-http",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/release/ios_plus8_canary/runtime.mjs",
+      "line": 110,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 30,
+      "rule": "js/file-access-to-http",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/release/ios_plus8_canary/runtime.mjs",
+      "line": 118,
+      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
+    },
+    {
+      "number": 31,
+      "rule": "js/file-access-to-http",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/release/ios_plus8_canary/runtime.mjs",
+      "line": 119,
+      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
+    },
+    {
+      "number": 32,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_app_availability_final_audit.mjs",
+      "line": 40,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 33,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_commerce_final_audit.mjs",
+      "line": 114,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 34,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_community_guidelines_link_update.mjs",
+      "line": 154,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 35,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_full_catalog_audit.mjs",
+      "line": 204,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 36,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_replace_product_screenshots_from_play.mjs",
+      "line": 313,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 37,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_review_assets_inspect.mjs",
+      "line": 89,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 38,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_product_page_screenshots_upload.mjs",
+      "line": 226,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 39,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_v1_final_audit.mjs",
+      "line": 191,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 40,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/google_play/google_play_community_guidelines_link_update.mjs",
+      "line": 228,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 41,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/google_play/google_play_release_surface_readonly_audit.mjs",
+      "line": 233,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 42,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/google_play/google_play_title_update.mjs",
+      "line": 180,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 43,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/prebuild/reviewer_access_preflight.mjs",
+      "line": 132,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 44,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/release/ios_plus8_canary/runtime.mjs",
+      "line": 54,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 45,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/store_media/pull_google_play_screenshots.mjs",
+      "line": 155,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 46,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/store_media/pull_google_play_screenshots.mjs",
+      "line": 214,
+      "review": "reviewed_intended_report_or_image_download_keep_open"
+    },
+    {
+      "number": 47,
+      "rule": "java/android/backup-enabled",
+      "state": "fixed",
+      "analysis_commit": "aca3afbd91fce9cf146e9ecd1aa22283897c4e7c",
+      "path": "tool/vendor_app_links/example/android/app/src/main/AndroidManifest.xml",
+      "line": 2,
+      "review": "fixed_by_scan"
+    },
+    {
+      "number": 48,
+      "rule": "js/remote-property-injection",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "web/drift_worker.dart.js",
+      "line": 1226,
+      "review": "generated_dart_rti_reachability_unconfirmed_keep_open"
+    },
+    {
+      "number": 49,
+      "rule": "js/file-access-to-http",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_product_page_screenshots_upload.mjs",
+      "line": 122,
+      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
+    },
+    {
+      "number": 50,
+      "rule": "js/file-access-to-http",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_review_assets_inspect.mjs",
+      "line": 55,
+      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
+    },
+    {
+      "number": 51,
+      "rule": "js/file-access-to-http",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "tool/apple_store_connect/asc_subscription_version_images_upload.mjs",
+      "line": 91,
+      "review": "reviewed_same_origin_api_or_apple_allowlisted_upload_keep_open"
+    },
+    {
+      "number": 52,
+      "rule": "js/file-system-race",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "supabase/tests/local_supabase_sqlite_cycle_fixture.mjs",
+      "line": 31,
+      "review": "Exclusive wx creation is atomic; earlier existsSync is redundant, not the protection. Private disposable CI fixture, no manual dismissal."
+    },
+    {
+      "number": 53,
+      "rule": "js/http-to-file-access",
+      "state": "open",
+      "analysis_commit": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "path": "supabase/tests/local_supabase_sqlite_cycle_fixture.mjs",
+      "line": 31,
+      "review": "Intentional signed synthetic GoTrue session saved to exclusive 0600 fixture for standalone Flutter. Loopback only; never uploaded; exact synthetic owner/email and session file cleaned up."
     }
   ],
-  "manual_dismissals": 0
+  "manual_dismissals": false
 }

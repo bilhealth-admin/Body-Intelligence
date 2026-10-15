@@ -9,7 +9,7 @@
 - Worktree: `G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014`.
 - HEAD عند بدء المطابقة: `7a797819d882674b6b7ed83a546c23ff3922c312`؛ البعيد `53ff3c8c867f1c862eab4aceafc1318c10bb4616`.
 - المجلد الأساسي على فرع آخر وبداخله عمل غير ملتزم؛ لا تعديل فيه. صور إخفاقات Golden الموجودة في worktree محفوظة خارج commits.
-- لا تُعاد الشاملة السابقة 9,843/9,843. مصدرها `ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` وبصمتها `80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`. تغيرت لاحقًا تبعية `stack_trace` واختبارات/عقود محددة؛ تُفحص آثارها بصورة مركزة وتبقى الشاملة منسوبة إلى مصدرها.
+- لا تُعاد الشاملة السابقة 9,843/9,843. نفذت على dirty HEAD `e27a58984bff50b4bcf45044ea9893f344307e85` ثم حُفظ مصدرها المطابق في `ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67`؛ بصمتها `80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`. تغيرت لاحقًا تبعية `stack_trace` واختبارات/عقود محددة؛ تُفحص آثارها بصورة مركزة وتبقى الشاملة منسوبة إلى مصدرها.
 - تشغيل GitHub `38713591000` على `1478f4ed` كان جاريًا عند القراءة؛ Swift CodeQL انتهى، ورحلات iPhone/iPad كانت جارية. لا يُلغى أو يُكرر.
 
 ## مصفوفة المطابقة
@@ -21,18 +21,18 @@
 | R03 | HealthKit/Health Connect والعزل A→B→A — 7–10،14،16–18 | إغلاق المصدر موثق مع 157/157 للصحة/الصلاحيات؛ لم يتغير `lib` بعد SHA الشاملة | لا تعاد المجموعة المنجزة؛ HealthKit/Health Connect الفعليان وتدفقات النظام على جهاز تبقيان بوابة جهاز |
 | R04 | الصوت والنص وMeal Vision ومزود AI والموافقة — 7–10،14،16–18 | 81/81 للسياق والموافقة و132/132 لـVision/الصوت/الوحدات محفوظة؛ رفض الصوت الخام قبل الموافقة/حجز الاستخدام | لا إعادة لتلك الاختبارات؛ هذه ليست أسئلة/صور حية إلى مزود AI أو اختبار هاتف |
 | R05 | Meta/Facebook OAuth وAdMob وTracking/ATT — 7–10،14،16–18 | تقارير SDK/OAuth وقرار عدم الاستنتاج من manifest وحده موجودة | فحص مصدر الحالي؛ IPA/merged manifests وشبكة SDK الفعلية بوابات artifact/device |
-| R06 | بلاغ AI والأسباب الأربعة والبطاقة والخصوصية و`privacy` القديم — 10–18 | Flutter UI/service/admin وmigration وPGlite والصور موجودة؛ أُعيد إنتاج SQL الأصلي على PostgreSQL 17.6 ثم نجح الملف كاملًا بعد إصلاح صف حالة الاختبار | اختبار HTTP/Auth/PostgREST الفعلي أضيف ويحتاج نتيجة الخادم المعزول؛ لا يُنسب الاختبار المحلي إلى Production |
+| R06 | بلاغ AI والأسباب الأربعة والبطاقة والخصوصية و`privacy` القديم — 10–18 | Flutter UI/service/admin وmigration وSQL وAPI بلاغ AI بجلسة موقعة فعلية نجحت على Supabase معزولة؛ run38734170433 | سلوك Production وartifact المراجع غير مثبتين؛ ليس نقصًا في اختبار SQL المحلي |
 | R07 | AI Reports / Community Reports / Reviews / Grants والأدوار — 11–18 | التبويبات مستقلة؛ فصل المراجعين عن مالك الإدارة محفوظ في المصدر الأحدث | التحقق من SQL/RLS والإدارة وإلغاء السلطة؛ الحسابات الحقيقية على artifact لم تثبت |
-| R08 | الاستعادة الفعلية والتوافق 32/35 وCAS/tombstones — 7،14،16–18 | دورة SQLite A→HTTP loopback→PostgreSQL→B وتقارير SQL سابقة موجودة | لا تُسمى Supabase Auth/PostgREST/Storage كاملة؛ اختبار API المعزول لا يزال غير مكتمل |
+| R08 | الاستعادة الفعلية والتوافق 32/35 وCAS/tombstones — 7،14،16–18 | SQLite A→Supabase GoTrue/PostgREST/PostgreSQL→B وrenderer مستقلة PASS؛ 19 مغذيًا وnull/zero وCAS/tombstones وToday/goals/analytics/Coach reader | توافق32/35 على مستوى المصدر/SQL محفوظ؛ لم يثبت binary قديم على جهاز مع خادم منشور |
 | R09 | الشراء والاستعادة وBoost والفشل والتكرار والوصول — 7،9–10،14،16–18 | 97 اختبار شراء مركزًا و74 فحص PostgreSQL سابقًا، وحالات pending/refund/ownership موثقة | StoreKit/Play رسمي وحسابا المراجع على الحزمة بوابات متجر/جهاز |
 | R10 | EULA/Privacy/manage links ومصفوفة Apple/Google — 7،9–10،14 | تقارير قانونية وسياسات ورفضات تاريخية موجودة | تحقق الروابط ونطاق الإصلاح؛ لا تغيير Console/ASC ولا Appeal في هذا الاستكمال |
-| R11 | جرد كل Workflows وأمان تشغيلها وNode/runner — 16–18 | جرد 60 Workflow سابق وactionlint؛ التغير اللاحق محصور في workflow الاعتماد | مقارنة الجرد الحالي وفحص workflow المتغير؛ لا تشغيل نشر أو توقيع |
-| R12 | 47 CodeQL وReDoS وعدم تعديل المولد يدويًا — 17–18 | الاستعلام المقيد بفرع التكامل: 25 instance أصلحت و26 مفتوحة؛ ReDoS أصلح بالمسح؛ حفظ triage لكل ID | 21 تدفق ملف/شبكة مقصود، 4 checkout من منتج موثوق على فرع تاريخي، وhigh في Dart RTI لم تثبت قابليته للاستغلال؛ لا dismiss ولا ترقيع مولد |
-| R13 | أسرار وتبعيات وSBOM وأمن API والتشفير — 16–18 | أدلة OSV/Grype/Trivy/Syft/Gitleaks وعقود crypto موجودة | المفتاح العام يحتاج تحقق قيوده من المالك؛ فحوص قابلة للتنفيذ غير المغطاة تراجع منفصلة |
-| R14 | Android APIs وميزات حقيقية وLifecycle/16KB — 9–10،14،16–18 | 6/6 إقلاع سابق فقط؛ استُخرج فشل native journey: broadcast محمي قبل بدء الاختبارات، واستُبدل بأمر ConnectivityService الموثق | فحص Shell نجح؛ إعادة وظيفة Android المتأثرة على emulator لازمة لإثبات الإصلاح عمليًا |
-| R15 | iPhone/iPad كامل وSDK/permissions — 7،14،16–18 | iOS debug build وSwift CodeQL نجحا على 1478؛ native journeys جارية | انتظار النتيجة دون إلغاء؛ جهاز حقيقي/IPA موقع خارج هذا التنفيذ |
+| R11 | جرد كل Workflows وأمان تشغيلها وNode/runner — 16–18 | 60 workflow جردت وactionlint PASS؛ إصلاحات SQL/KVM/native-only ومشغلات معزولة ذات نطاق معلن | لا تشغيل signing/deployment أو workflows تغير المتاجر؛ GitHub checkouts لا تعني اعتماد إصدار |
+| R12 | 47 CodeQL وReDoS وعدم تعديل المولد يدويًا — 17–18 | 25 fixed/28 open في run38734392616؛ ReDoS fixed؛ ID52/53 خاصة بالجلسة التركيبية Exclusive0600؛ triage لكل ID | high48 generated RTI reachability لم يحسم؛ لا dismiss أو تغيير مولد يدويًا |
+| R13 | أسرار وتبعيات وSBOM وأمن API والتشفير — 16–18 | OSV/Grype/Trivy/Syft/Gitleaks السابقة محفوظة؛ MobSF فعلي offline APK33 اكتمل مع ملاحظات؛ AES native API36 PASS | المفتاح العام وrelease binary/final SDK/network يحتاجان دليلًا منفصلًا؛ لا ادعاء خلو كامل |
+| R14 | Android APIs وميزات حقيقية وLifecycle/16KB — 9–10،14،16–18 | 6/6 إقلاع سابق محفوظ؛ native crypto على API36/WHPX PASS؛ KVM/airplane setup صُححت مع أسبابها | وظيفة API33 native على19972310 جارية؛ لا Android هاتف أو AAB موقع |
+| R15 | iPhone/iPad كامل وSDK/permissions — 7،14،16–18 | debug36/Swift CodeQL نجحا على1478؛ فشل تحميل crypto بسبب TARGET_BUILD_DIR، لا اختبار assertion | مسار native-only generic bundles على iPhone/iPad جارٍ؛ لا إلغاء التشغيل القديم أو ادعاء نجاح مسبق |
 | R16 | تفاعل التطبيق والوسائط والتنقل والتوطين وإمكانية الوصول — 7،14،16–18 | اختبارات Flutter وGolden والصور السابقة محفوظة | native journeys لا تساوي رحلة دخول حقيقية؛ مراجعة gaps من الاختبارات الموجودة |
-| R17 | أداء/fault/fuzz/mutation/coverage — 16–18 | فهرس التغطية الحالي يبين PARTIAL/NOT RUN ولا يدعي نجاحًا | إتمام الفحوص المجانية الملائمة والمتاحة التي تضيف دليلًا؛ أي تعذر له سبب وخطوة إغلاق |
+| R17 | أداء/fault/fuzz/mutation/coverage — 16–18 | 10,000 generated cases و380,014 تحققًا و5/5 behavioral mutants محليًا؛ تغطية VM محصورة للملف؛ benchmark السابق محفوظ | تشغيل القياس الجديد في GitHub قادم؛ لا coverage/mutation شاملة ولا قياس أداء هاتف/Production |
 | R18 | Android33/iOS36 والحزم والتوقيع والنشر — 7،9،14،16–18 | أرقام المرشحين ومسار fail-closed موجودة؛ لا حزمة توزيع موقعة جديدة | حزم موقعة وأجهزة ومتاجر ونشر Production بوابات مستقلة؛ لا تتحول إلى PASS |
 
 الفهرس التفصيلي لأنواع الفحوص هو `BIL_MAXIMUM_TEST_COVERAGE_REGISTER_20261015.md`؛ التقارير السابقة تبقى أدلة تاريخية ولا تُنسخ نتائجها إلى SHA أحدث.
@@ -151,7 +151,7 @@ Gitleaks للـstaged diff التقط اثنتين من بصمات ملفات mi
 
 كود Flutter المثبت 3.44.6 يبين أن طلب إعدادات Xcode الخاص بـdevice يمكن أن يعيد map فارغة، بينما generic simulator build نجح. لا يثبت السجل السبب الأعمق للطلب الفارغ لغياب verbose لذلك الاستدعاء؛ لم يُخمن عيب Xcode project. مشغّل iOS الجديد يبني **كل entrypoint اختباري حقيقي** لـgeneric simulator ثم يستعمل `--use-application-binary` لتشغيل نفس bundle على iPhone وiPad. دعم `.app` مثبت في `IOSApp.fromPrebuiltApp` بالمصدر المثبت، وdriver التشفير مأخوذ من integration_test المثبتة؛ لا تغيير Flutter SDK أو app. المسار native-only على ARM لا يكرر Swift CodeQL المنجز. Syntax وactionlint للـ60 workflow PASS؛ تنفيذ Simulator الجديد ما زال مطلوبًا.
 
-على Windows أُنشئ AVD مستقل API36/WHPX ثم ثبت فعليًا أن broadcast القديم مرفوض من shell UID2000 وأن أمر ConnectivityService الجديد يعمل ويستعيد الحالة الأصلية؛ `android-api36-connectivity.json`. محاولة تشغيل حالة crypto اصطدمت قبل الاختبار بـJava loopback في Gradle. probe صغير أثبت أن مجلد temp قصيرًا لهذه العملية يحل selector/TCP؛ إعادة الاختبار الأصلي بهذا الإعداد جارية، ولا يدعى نجاحها. لم تتغير إعدادات الجهاز العامة أو SDK التطبيق. WSL يفشل بـ`HCS_E_SERVICE_NOT_AVAILABLE`؛ لا تفعيل ميزات Windows أو restart.
+على Windows أُنشئ AVD مستقل API36/WHPX ثم ثبت فعليًا أن broadcast القديم مرفوض من shell UID2000 وأن أمر ConnectivityService الجديد يعمل ويستعيد الحالة الأصلية؛ `android-api36-connectivity.json`. محاولة تشغيل حالة crypto اصطدمت قبل الاختبار بـJava loopback في Gradle. probe صغير أثبت أن مجلد temp قصيرًا لهذه العملية يحل selector/TCP؛ إعادة الاختبار الأصلي بهذا الإعداد نجحت **1/1**: AES-256-GCM وlegacy v1 byte layout على API36/WHPX فعلية. لا تثبت Keystore custody أو API33 أو هاتفًا أو build توزيع. حُفظ `android-api36-native-crypto.json`، واستعيد وضع الشبكة وأغلق المحاكي المملوك للاختبار. المحاولة الوسيطة أكملت APK ثم توقف عارض Python عن طباعة رمز Unicode؛ لم تنسب نتيجتها إلى PASS، وشغلت الحالة النهائية عبر shell الداخلي مباشرةً دون ذلك العارض. لم تتغير إعدادات الجهاز العامة أو SDK التطبيق. WSL يفشل بـ`HCS_E_SERVICE_NOT_AVAILABLE`؛ لا تفعيل ميزات Windows أو restart.
 
 ### فحص APK المعزول المطلوب في 16–18
 
@@ -162,3 +162,51 @@ Gitleaks للـstaged diff التقط اثنتين من بصمات ملفات mi
 ## آخر إجراء وخطوة تالية
 
 تُحفظ إصلاحات تجهيز Storage وKVM وتشغيل iOS وMobSF بعد فحوصها المحلية، ثم تُشغل وظائفها المعزولة المتأثرة فقط. الفشل في API لا يمنع جمع دليل دورة SQLite أو Deno المستقلة بعد نجاح migrations؛ يبقى job فاشلًا إذا فشلت أي خطوة، دون `continue-on-error` لإخفائها. لا إعادة للشاملة أو شراء أو حساب حي أو Production أو تغيير واجهات أو Golden.
+
+### حدود فحص OWASP المطلوب، والإغلاق التنفيذي لكل نقص
+
+طوبق نطاق الإثبات مع عائلات [OWASP MASVS الرسمية](https://mas.owasp.org/MASVS/) بتاريخ 15 أكتوبر 2026. هذا جرد أدلة، وليس شهادة مطابقة. عدم اكتمال حزمة توزيع أو اختبار هاتف لا يحول كودًا ناقصًا إلى «لم ننشر»؛ حالات native/API غير المكتملة أعلاه تبقى اختبارات تنفيذ مطلوبة وتتابع فعليًا.
+
+| العائلة | الإثبات المتاح | ما يلزم لإغلاق الباقي |
+|---|---|---|
+| STORAGE | مصدر `FlutterSecureCloudSecretStore` وnamespacing لكل owner، اختبارات العزل السابقة، فحص تسرب الأسرار المنقح | فحص Keychain/Keystore الفعلي وbackup/logs على حزمة نهائية؛ اختبار AES لا يثبت حفظ المفتاح في hardware |
+| CRYPTO | AES-GCM حقيقي على Android API36، fixture legacy ثابتة، تشفير/فك فعلي في دورة PostgreSQL والـRPC | نتيجة iOS الأصلية من الوظيفة الحالية؛ استعادة/تدوير مفتاح على جهاز مع حزمة موقعة تبقى بوابة مستقلة |
+| AUTH | GoTrue signup/JWT/refresh وRLS وowner spoof ورفض JWT تالف؛ سحب دور moderator/device مع جلسة موقعة قائمة | حسابا المراجع الحقيقيان على artifact؛ OAuth ومزود الهوية ليسا ممثلين بـsignup التركيبي |
+| NETWORK | فحص مدخلات URL للـrunner ومنع redirect؛ RPC عبر loopback مع هوية حقيقية | اعتراض TLS وشبكة SDK/AI على حزمة هاتف؛ loopback HTTP المعزول ليس إثبات TLS Production |
+| PLATFORM | بناء plugins وCodeQL Java/Swift، أوامر النظام على API36؛ Native UI قيد الاختبار | إشعارات/روابط/أذونات Health الأصلية على النظام، وTalkBack/VoiceOver فعلي؛ صور Widget وحدها لا تغلقها |
+| CODE | التحليل الكامل PASS، الشاملة السابقة محفوظة، source/dependency scanners؛ التنبيهات المتبقية معلنة | high RTI reachability لم يحسم؛ لا dismiss أو ترقيع مولد. MobSF static debug لا يغني عن فحص release binary |
+| RESILIENCE | fail-closed release configuration وعزل jobs؛ اختبار retry/CAS/tombstone | Play Integrity/App Attest والتوقيع/anti-tamper على حزم توزيع مع بيئاتها؛ لا نتيجة dynamic pentest مدعاة |
+| PRIVACY | اختبارات الموافقات المنفصلة ورفض الصوت الخام وبيانات البلاغ المحددة وعزل الحسابات؛ لا بيانات حية في الأدلة | تطابق الإفصاح مع IPA/AAB النهائي وسلوك SDK الفعلي؛ المفتاح العام يحتاج تحقق قيود مالك Google Cloud |
+
+الاختبارات الموجودة للأداء والـbenchmark جزء من الشاملة السابقة؛ لا تسمى قياس سرعة Production أو أداء جهاز. لا توجد حتى الآن حملة fuzz/mutation أو نسبة coverage كاملة؛ لا يتحول count assertions أو تعدد الملفات إلى هذه المقاييس. توثيق هذا النقص صريح، وليس blocker بسبب غياب إذن نشر: يحتاج نطاق corpus/targets وقياس مستقل، مع أولوية إغلاق إخفاقات API/native المثبتة الحالية دون إعادة المنجز. لم تربط خدمة خارجية جديدة أو حساب أداة مدفوعة.
+
+### التشغيل المحدود بعد تحقق الإصلاحات محليًا
+
+حُفظت التغييرات في `19972310fea6284b59f3cfba5874223fac3f4607` ودُفعت fast-forward. الأوامر الفعلية:
+
+```text
+gh workflow run bil_codeql_security_extended.yml --ref integration/bil-qa-media-policy-20261011 -f supabase_only=true
+gh workflow run bil_codeql_security_extended.yml --ref integration/bil-qa-media-policy-20261011 -f android_native_only=true -f ios_native_only=true
+gh workflow run bil_codeql_security_extended.yml --ref integration/bil-qa-media-policy-20261011 -f mobsf_only=true -f android_artifact_run=38726365073
+gh workflow run bil_codeql_security_extended.yml --ref integration/bil-qa-media-policy-20261011 -f source_audit_only=true
+```
+
+التشغيلات: [Supabase 38734170433](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734170433)، [Native 38734174747](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734174747)، [MobSF 38734179059](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734179059)، [فحص مشغلات المصدر 38734392616](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38734392616). بدء تشغيلها ليس PASS. Source audit يعاد لأن مشغلات Python/JS/Actions جديدة أضيفت، ولا يعيد الشاملة أو بناء Java/Swift المنجز.
+
+## النتائج المكتملة على 19972310
+
+- **Supabase 38734170433 — SUCCESS**: كل migrations المتسلسلة مع preflight فصل الأدوار؛ SQL **9/9**؛ Node API/helper **34/34، صفر fail/skip**؛ دورة Flutter SQLite A→GoTrue/PostgREST/PostgreSQL→B **1/1**؛ PostgreSQL/PGlite **74/74**؛ Deno Edge Functions **358/358**. اختبارات Deno تستخدم حدود مزودين مزيفة معلنة، ولا تمثل شراء متجر أو طلب AI حي؛ SQL/RLS وAuth وStorage وRealtime أعلاه استعملت stack معزولة فعلية. PostgreSQL الصورة الفعلية `17.11.0.004` عبر CLI `2.121.0`، وليست نسخة PG17.6 المحلية السابقة.
+- دورة SQLite تضمنت قواعد A/B وrenderer مستقلة، وتشفيرًا حقيقيًا، و19 مغذيًا، وحصة/علاقات/هويات، ومجهولًا مقابل صفر، وأقفالًا وأهدافًا ذات مصدر، وفقد رد بعد commit، وإعادة محاولة وصفحات وتعارض CAS وحلًا صريحًا وحذفًا. `cycle-proof.json` يثبت مراحل partial/conflict ثم completed الصحيحة؛ لا حذف partial من التقرير. مصدر AES داخل Flutter VM هنا .NET loopback، وتطابق Android native اختُبر منفصلًا أعلاه.
+- فُتحت صور Flutter الثلاث المستعادة من server وفُحصت بصريًا: Today والأهداف وتحليلات التغذية؛ الإجمالي **246** والهدف **1000** والمتبقي **754** في Today والتحليلات. هذه بيانات تركيبية للفحص، ليست اقتراحًا صحيًا أو أرقامًا مأخوذة من صور المالك. الصور بجانب `cycle-proof.json` في دليل evidence. سياق أهداف AI Coach اختُبر عبر قارئ التطبيق، وليس استنتاجًا من JSON أو محادثة مزود حي. حالة أول وجبة بقيت منجزة ولم تُغير حقوق الشراء.
+- **MobSF 38734179059 — التقرير اكتمل**: تحقق APK SHA-256 `93f0e343ba8243a2225e5aa271750a1272cda153cc35ec4ac3eb2ab745fcc412`، package BIL وbuild33 وmin26/target36. التقرير يضم **10 ملاحظات manifest**؛ منها `app_is_debuggable` المتوقع في هذا debug، وتحذيرات exported/permission وminSDK. يلزم فحص المكوّن/الحماية في release النهائي قبل نسبتها إلى عيب قابل للاستغلال. `code_findings` فارغة؛ لا تُسمى إثبات خلو كود Flutter أو إثبات نجاح decompilation لكل class لعدم حفظ تعدادها في هذا الملخص. لا تسرب source أو APK إلى SaaS، والحاوية كانت `--network none`. نجاح بناء APK في producer مثبت؛ فشل native اللاحق فيه بقي مسجلًا ولم يتحول إلى نجاح.
+- **Source audit 38734392616 — SUCCESS في الوظائف الأربع**: Semgrep فحص **5,141 مسارًا، 15 finding، صفر أخطاء**. الزيادتان audit على urllib داخل MobSF؛ العنوان loopback ثابت داخل حاوية بلا شبكة. النتائج الحالية **FINDINGS_REVIEW**. CodeQL الحالي **25 fixed/28 open**؛ الزيادتان IDs52/53 في fixture الجلسة الخاصة. ID52 يحذر من exists/write، لكن الحماية الفعلية `flag: wx` تنشئ الملف حصريًا ذريًا و`mode: 0600`، فلا يعتمد الأمان على exists؛ وID53 كتابة مقصودة لجلسة GoTrue تركيبية إلى الملف الخاص ليقرأها Flutter، ثم حذفها. لا artifact للجلسة، ولا dismiss يدوي. الـhigh48 يبقى غير محسوم وفق فقرة الوصول أعلاه.
+
+دليل النتائج والأوقات وSHA في `ci-19972310-results.json`. هذه الأعداد مجموعات مختلفة؛ لا تجمع على أنها عدد حالات فريدة عالميًا.
+
+### قياس إضافي محصور للأهداف — لا إعادة للشاملة
+
+أضيف مشغّل QA مستقل لـ`macro_goal_editor.dart` غير المعدل: seed **20261015**، **10,000 حالة مولّدة** و**380,014 تحققًا** للطاقة 4/4/9، حدود النسب، التحويل غرام↔نسبة، قفل الغرام/النسبة وثبات serialization ورفض المدخلات غير المحدودة. سماحية المقارنة المطلقة `1e-7` أصغر كثيرًا من دقة العرض ولا تخفي فرقًا غذائيًا.
+
+نجحت محليًا، وكشفت **5/5 تعديلات سلوكية خاطئة مقصودة** على نسخ مؤقتة: معامل دهون خاطئ، السماح بتحرير مقفل، السماح بقيمة غير finite، فقد قفل الغرام، وتجاوز سقف تحقق السعرات. لم يُمس المصدر الحقيقي؛ hash قبل/بعد مطابق. محاولات الـmutants المتوقعة ليست إخفاقات المنتج؛ لا يحتسب compile error كقتل mutant. صُحح أولًا تشخيص العارض لنص Dart `Bad state` ثم نجح القياس النهائي.
+
+تغطية VM للملف المستهدف فقط: أسطر **78/81**، دوال **7/8**، فروع **24/27**. ليست نسبة تغطية للتطبيق ولا mutation score شاملًا. يستخدم coverage المثبتة في package map دون إضافة SDK/package؛ لا تسرب VM service URI في التقرير. `macro-generated-local.json` يحفظ زمن التشغيل والهدف والبصمة والنطاق. أُضيف إلى مسار source audit لكي ينفذ في GitHub أيضًا؛ لا إعادة Native/Supabase ناجحة لأجل هذا المشغّل.

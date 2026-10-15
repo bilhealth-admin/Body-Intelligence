@@ -1,0 +1,89 @@
+{
+  "recorded_at_utc": "2026-10-15T12:36:32.494582+00:00",
+  "runs": [
+    {
+      "run": 38734170433,
+      "scope": "Supabase/SQL/API/SQLite/PGlite/Edge",
+      "source_head": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at_utc": "2026-10-15T12:22:44Z",
+      "updated_at_utc": "2026-10-15T12:28:39Z",
+      "executed_jobs": [
+        {
+          "name": "Local Supabase migrations, SQL, Auth and RLS",
+          "conclusion": "success",
+          "started_at_utc": "2026-10-15T12:22:49Z",
+          "completed_at_utc": "2026-10-15T12:28:38Z"
+        }
+      ]
+    },
+    {
+      "run": 38734179059,
+      "scope": "Offline MobSF debug APK33",
+      "source_head": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at_utc": "2026-10-15T12:22:48Z",
+      "updated_at_utc": "2026-10-15T12:27:01Z",
+      "executed_jobs": [
+        {
+          "name": "Offline MobSF static debug APK audit",
+          "conclusion": "success",
+          "started_at_utc": "2026-10-15T12:22:52Z",
+          "completed_at_utc": "2026-10-15T12:27:01Z"
+        }
+      ]
+    },
+    {
+      "run": 38734392616,
+      "scope": "Semgrep and Actions/JS/Python CodeQL",
+      "source_head": "19972310fea6284b59f3cfba5874223fac3f4607",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at_utc": "2026-10-15T12:24:28Z",
+      "updated_at_utc": "2026-10-15T12:28:36Z",
+      "executed_jobs": [
+        {
+          "name": "Isolated Semgrep source audit",
+          "conclusion": "success",
+          "started_at_utc": "2026-10-15T12:24:33Z",
+          "completed_at_utc": "2026-10-15T12:28:35Z"
+        },
+        {
+          "name": "CodeQL (python)",
+          "conclusion": "success",
+          "started_at_utc": "2026-10-15T12:24:32Z",
+          "completed_at_utc": "2026-10-15T12:26:30Z"
+        },
+        {
+          "name": "CodeQL (javascript-typescript)",
+          "conclusion": "success",
+          "started_at_utc": "2026-10-15T12:24:33Z",
+          "completed_at_utc": "2026-10-15T12:27:40Z"
+        },
+        {
+          "name": "CodeQL (actions)",
+          "conclusion": "success",
+          "started_at_utc": "2026-10-15T12:24:33Z",
+          "completed_at_utc": "2026-10-15T12:26:29Z"
+        }
+      ]
+    }
+  ],
+  "scope_counts": {
+    "sql_suites_on_native_supabase_postgres": 9,
+    "api_and_fixture_cases": 34,
+    "real_sqlite_to_supabase_to_independent_sqlite": 1,
+    "pglite_assertions": 74,
+    "deno_edge_tests": 358
+  },
+  "do_not_sum_as_unique_global_tests": true,
+  "production_writes": false,
+  "real_user_accounts_used": false,
+  "supabase_log": {
+    "retained_locally": "build\\qa\\text7-18-reconciliation-20261015\\logs\\supabase-final-38734170433.log",
+    "bytes": 318769,
+    "sha256": "f2d911da44d0d74e0ae764d3ff264dcb1c4f60ced3d59461eab5a295a19fceb6"
+  }
+}

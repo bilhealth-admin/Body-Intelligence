@@ -1,0 +1,106 @@
+{
+  "scanner_version": "1.181.0",
+  "result": "FINDINGS_REVIEW",
+  "findings_count": 15,
+  "findings": [
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/prebuild/audit_repository.py",
+      "line": 16,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/prebuild/store_policy_source_guard.py",
+      "line": 14,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/prebuild/test_native_config.py",
+      "line": 6,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
+      "path": "tool/recipe_catalog/localize_reviewed_recipes_five.py",
+      "line": 492,
+      "severity": "WARNING"
+    },
+    {
+      "rule": "javascript.lang.security.audit.unknown-value-with-script-tag.unknown-value-with-script-tag",
+      "path": "tool/release/community_links.test.mjs",
+      "line": 63,
+      "severity": "WARNING"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/release/configure_deferred_admob.py",
+      "line": 18,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/release/test_configure_deferred_admob.py",
+      "line": 10,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/release/test_validate_admob_production_configuration.py",
+      "line": 10,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/release/validate_admob_production_configuration.py",
+      "line": 16,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/release/verify_android_optional_device_features.py",
+      "line": 10,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/release/verify_android_startup_frame.py",
+      "line": 11,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.use-defused-xml.use-defused-xml",
+      "path": "tool/release/verify_android_target_sdk.py",
+      "line": 10,
+      "severity": "ERROR"
+    },
+    {
+      "rule": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
+      "path": "tools/qa/bil_cloud_restore_cycle_runner.py",
+      "line": 117,
+      "severity": "WARNING"
+    },
+    {
+      "rule": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
+      "path": "tools/qa/bil_mobsf_offline_static.py",
+      "line": 52,
+      "severity": "WARNING"
+    },
+    {
+      "rule": "python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
+      "path": "tools/qa/bil_mobsf_offline_static.py",
+      "line": 62,
+      "severity": "WARNING"
+    }
+  ],
+  "errors_count": 0,
+  "errors": [],
+  "scanned_paths_count": 5141,
+  "scope": "Semgrep CE supported source languages; not a Dart, device or release-artifact scan",
+  "source_uploaded": false,
+  "metrics_enabled": false,
+  "raw_report_sha256": "7bbf9b47a8d4263f8e48a476c856d096331547179723c072f6b195852cfbc563",
+  "source_head": "19972310fea6284b59f3cfba5874223fac3f4607",
+  "recorded_at_utc": "2026-10-15T12:28:31.391293+00:00"
+}

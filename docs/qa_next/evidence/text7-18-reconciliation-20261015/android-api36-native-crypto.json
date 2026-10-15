@@ -1,0 +1,35 @@
+{
+  "recorded_at_utc": "2026-10-15T12:25:48.101610+00:00",
+  "result": "PASS",
+  "tests": 1,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "source_head": "19972310fea6284b59f3cfba5874223fac3f4607",
+  "target": "integration_test/system_crypto_bridge_integration_test.dart",
+  "scope": "Actual Flutter integration_test on local Android API36 x86_64/WHPX emulator; native AES-256-GCM bridge and fixed legacy byte layout. Not Keystore custody, API33, physical device, purchase, cloud Auth or release AAB.",
+  "avd": "bil-qa-connectivity-api36-20261015",
+  "serial": "emulator-5580",
+  "api": "36",
+  "android_release": "16",
+  "system_fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+  "java_temp_scope": "Task process only; short java.io.tmpdir and jdk.net.unixdomain.tmpdir",
+  "gradle_build_seconds": 79.3,
+  "installation_seconds": 3.9,
+  "test_reported_seconds": 3,
+  "source_inputs": [
+    {
+      "path": "integration_test/system_crypto_bridge_integration_test.dart",
+      "sha256": "17e56c87ee3c199e30e9948f42e0befa66ff3677ac5080b2ab1dc308160052ac"
+    },
+    {
+      "path": "lib/features/cloud_platform/services/aes_gcm_cloud_payload_cipher.dart",
+      "sha256": "ec779aee0a25b10e19e2260c90ebd32f27562ae65f297e43c2ebf82b5b18c744"
+    }
+  ],
+  "apk_sha256": "a7b64436778ba8f411e69e1f01b84ebf4b8c774082b336b677230efa91fcdbfe",
+  "apk_scope": "Standalone debug integration-test entrypoint; not shipping build33 artifact",
+  "log_sha256": "82dc1391b4bb907bbc3e264a4861011c88e495651b3dd398566e0bd4bcbad406",
+  "airplane_mode_restored": true,
+  "owned_emulator_shutdown_requested": true
+}
