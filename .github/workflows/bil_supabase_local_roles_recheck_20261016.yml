@@ -1,0 +1,46 @@
+name: BIL disposable Supabase current reviewer-roles QA recheck
+
+# QA-only: re-run the existing disposable local migration/Auth/RLS suite
+# after updating its OLD fixture assertions to reflect current migrations.
+# This does NOT modify any migration, live SQL, backend, signed artifacts,
+# Apple TestFlight, Play, production account or store build.
+on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_supabase_local_roles_recheck_20261016.yml
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch-local-db-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PRIOR_SHA: 'aa2d1136b2af6fb0bdd61c0fdf550755e33fb3de'
+    steps:
+      - name: Require exactly the reviewed two QA-only workflow edits
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/integration/bil-qa-media-policy-20261011'
+          CHANGES="$(gh api "repos/$GITHUB_REPOSITORY/compare/$PRIOR_SHA...$GITHUB_SHA" --jq '.files | map(.filename) | sort | join("\n")')"
+          EXPECTED="$(printf '%s\n' \
+            '.github/workflows/bil_codeql_security_extended.yml' \
+            '.github/workflows/bil_supabase_local_roles_recheck_20261016.yml')"
+          test "$CHANGES" = "$EXPECTED" || { echo 'Unexpected source change; refusing recheck.' >&2; exit 1; }
+      - name: Re-run disposable LOCAL Supabase contract with current reviewer/admin separation
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run bil_codeql_security_extended.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$GITHUB_REF_NAME" \
+            --field supabase_only=true
+          echo 'LOCAL_DB_RECHECK=DISPATCHED; NOT_A_TEST_PASS' >> "$GITHUB_STEP_SUMMARY"

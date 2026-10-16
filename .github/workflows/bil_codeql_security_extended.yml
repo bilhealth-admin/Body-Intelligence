@@ -505,11 +505,16 @@ jobs:
             from auth.users
             where pg_catalog.lower(email) = 'play-review@bilhealth.com';
 
-            if not exists (
+            -- The October 15 migration deliberately REMOVES the legacy
+            -- store reviewer moderator bootstrap. This must stay absent.
+            if exists (
               select 1 from public.bil_community_moderators
               where user_id = v_reviewer_id
+            ) or exists (
+              select 1 from private.bil_ai_coach_admins
+              where user_id = v_reviewer_id and active
             ) then
-              raise exception 'local_moderator_fixture_reviewer_enrollment_missing';
+              raise exception 'local_store_reviewer_privilege_separation_failed';
             end if;
 
             if not exists (
@@ -527,12 +532,18 @@ jobs:
               raise exception 'local_moderator_fixture_entitlements_incomplete';
             end if;
 
+            -- The operational owner and their approved secondary account
+            -- are the only two active admins; no store/test reviewer is one.
             if (select pg_catalog.count(*)
                 from private.bil_ai_coach_admins
-                where active) <> 1
+                where active) <> 2
+              or not exists (
+                select 1 from private.bil_ai_coach_admins
+                where user_id = v_reviewer_account_id and active
+              )
               or exists (
                 select 1 from private.bil_ai_coach_admins
-                where user_id in (v_reviewer_account_id, v_second_reviewer_id)
+                where user_id in (v_reviewer_id, v_second_reviewer_id)
                   and active
               )
               or not exists (
