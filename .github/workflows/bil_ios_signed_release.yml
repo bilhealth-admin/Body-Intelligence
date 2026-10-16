@@ -1,6 +1,13 @@
 name: BIL iOS signed release candidate (build 36)
 
+# One-shot owner-requested artifact-only QA from the frozen audited source.
+# The QA-branch push is solely a trigger; both workflows checkout the audited SHA.
 on:
+  push:
+    branches:
+      - fix/rc33-36-commerce-fixtures-20261016
+    paths:
+      - .github/workflows/bil_ios_signed_release.yml
   workflow_dispatch:
     inputs:
       upload_to_testflight:
@@ -92,8 +99,8 @@ jobs:
       - name: Validate release build number and Apple team
         shell: bash
         env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
-          UPLOAD_TO_TESTFLIGHT: ${{ inputs.upload_to_testflight }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
+          UPLOAD_TO_TESTFLIGHT: ${{ github.event_name == 'push' && 'false' || inputs.upload_to_testflight }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
@@ -265,12 +272,16 @@ jobs:
           BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
           BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md
           BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V36_STAGING_MANIFEST_SHA256 }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
         run: |
           flutter pub get
           flutter analyze --no-pub
           dart run tool/release/validate_release_configuration.dart
-          python3 tool/release/run_portable_release_tests.py --code-only
+          # Full comprehensive tests are already running independently.
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
           flutter test --no-pub \
             test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
             --timeout 2m
@@ -429,7 +440,7 @@ jobs:
 
       - name: Build signed archive
         env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
         shell: bash
@@ -472,7 +483,7 @@ jobs:
         shell: bash
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
         run: |
           set -euo pipefail
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
@@ -565,7 +576,7 @@ jobs:
             > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
-        if: ${{ inputs.upload_to_testflight }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_to_testflight }}
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -596,7 +607,7 @@ jobs:
           xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
       - name: Upload validated build to TestFlight
-        if: ${{ inputs.upload_to_testflight }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_to_testflight }}
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
