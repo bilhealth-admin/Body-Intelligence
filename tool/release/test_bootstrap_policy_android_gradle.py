@@ -30,6 +30,13 @@ class BootstrapTest(unittest.TestCase):
             self.assertEqual(local.count("flutter.sdk="), 1)
             self.assertIn(f"sdk.dir={sdk.as_posix()}", local)
 
+    def test_policy_requests_both_final_merged_manifests(self):
+        workflow = (Path(__file__).resolve().parents[2] /
+                    ".github/workflows/bil_apple_google_policy_gate.yml").read_text(encoding="utf-8")
+        self.assertIn(":app:processDebugManifest :app:processReleaseManifest", workflow)
+        self.assertNotIn(":app:processDebugMainManifest", workflow)
+        self.assertIn("--require-merged", workflow)
+
     def test_missing_cached_wrapper_fails_closed(self):
         with tempfile.TemporaryDirectory() as root:
             root = Path(root)

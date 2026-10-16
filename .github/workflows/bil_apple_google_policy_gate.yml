@@ -282,7 +282,7 @@ jobs:
           ./gradlew --no-daemon --console=plain --max-workers=2 \
             --init-script ../tool/release/bil_android_runtime_dependencies.init.gradle \
             --init-script ../tool/release/bil_android_notification_resource.init.gradle \
-            :app:processDebugMainManifest :app:processReleaseMainManifest \
+            :app:processDebugManifest :app:processReleaseManifest \
             :app:bilPolicyRuntimeDependencies :app:bilPolicyNotificationResource \
             2>&1 | tee "../$POLICY_OUT/android-merged-manifests.log"
 

@@ -7,3 +7,9 @@
 - لم يُشغّل Android Gradle فعليًا محليًا ضمن هذا الإصلاح؛ نجاح مسار GitHub المعدل ينتظر تشغيل البوابة على الكوميت الجديد.
 - الشاملة الأصلية https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38826857261 بقيت تعمل على مصدرها الأصلي، والتحليل فيها نجح. لم تُلغَ ولم تُكرر، ولا تُنسب نتيجتها إلى تغيير workflow اللاحق.
 - لا تعديل على التطبيق أو Goldens أو Production أو المتاجر.
+
+## Follow-up: run 38827943546
+
+Wrapper bootstrap and Gradle tasks succeeded. Final gate failed only `merged-debug-available`; release merged permissions passed. MainManifest tasks do not guarantee the final merged_manifests output consumed by the guard. Request processDebugManifest and processReleaseManifest explicitly. The mandatory two-variant guard remains unchanged.
+
+Local validation: three focused tests PASS, including both final tasks and retained --require-merged; actionlint and whitespace PASS. Actual amended Android execution awaits GitHub; no claim of CI success. Full run 38826857261 remains untouched. No app, baseline or Production changes.
