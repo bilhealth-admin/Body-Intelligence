@@ -1,6 +1,13 @@
 name: BIL Android signed release candidate (build 33)
 
+# Owner-requested original-branch candidate build. Source is the separately
+# verified frozen audited SHA, not the evolving workflow-only commit.
 on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_android_release_candidate.yml
   workflow_dispatch:
     inputs:
       build_number:
@@ -65,7 +72,7 @@ jobs:
       - name: Validate release build number
         shell: bash
         env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
         run: |
           set -euo pipefail
           [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
@@ -150,11 +157,16 @@ jobs:
           BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
           BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md
           BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_ANDROID_V33_STAGING_MANIFEST_SHA256 }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
         run: dart run tool/release/validate_release_configuration.dart
 
-      - name: Run portable release tests
-        run: python3 tool/release/run_portable_release_tests.py --code-only
+      - name: Verify focused payment and subscription regressions only
+        # The broader owner suite is running independently; no repeat of 9k tests.
+        run: |
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
 
       - name: Run explicit system-crypto source gate
         run: >-
@@ -208,7 +220,7 @@ jobs:
       - name: Build signed Android App Bundle
         id: android_aab_build
         env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
           PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
           BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
         run: >-
@@ -301,7 +313,7 @@ jobs:
         if: ${{ always() && steps.android_aab_build.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-android-16k-evidence-${{ github.sha }}
+          name: bil-android-16k-evidence-${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -319,7 +331,7 @@ jobs:
       - name: Capture release evidence
         shell: bash
         env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
           EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
         run: |
           set -euo pipefail
@@ -391,7 +403,7 @@ jobs:
       - name: Upload signed release candidate
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-android-signed-aab-${{ github.sha }}
+          name: bil-android-signed-aab-${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |

@@ -1,6 +1,13 @@
 name: BIL iOS signed release candidate (build 36)
 
+# Owner-requested original-branch candidate build. Source is the separately
+# verified frozen audited SHA, not the evolving workflow-only commit.
 on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_ios_signed_release.yml
   workflow_dispatch:
     inputs:
       upload_to_testflight:
@@ -92,8 +99,8 @@ jobs:
       - name: Validate release build number and Apple team
         shell: bash
         env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
-          UPLOAD_TO_TESTFLIGHT: ${{ inputs.upload_to_testflight }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
+          UPLOAD_TO_TESTFLIGHT: ${{ github.event_name == 'push' && 'true' || inputs.upload_to_testflight }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
@@ -136,7 +143,7 @@ jobs:
           test -n "${CERTIFICATE_PASSWORD:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD'; exit 1; }
           test -n "${PROVISIONING_PROFILE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_PROVISIONING_PROFILE_BASE64'; exit 1; }
           test -n "${APPLE_TEAM_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID'; exit 1; }
-          if [[ "${{ inputs.upload_to_testflight }}" == 'true' ]]; then
+          if [[ "${{ github.event_name == 'push' && 'true' || inputs.upload_to_testflight }}" == 'true' ]]; then
             test -n "${ASC_KEY_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_KEY_ID'; exit 1; }
             test -n "${ASC_ISSUER_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_ISSUER_ID'; exit 1; }
             test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
@@ -265,12 +272,16 @@ jobs:
           BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
           BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md
           BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V36_STAGING_MANIFEST_SHA256 }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
         run: |
           flutter pub get
           flutter analyze --no-pub
           dart run tool/release/validate_release_configuration.dart
-          python3 tool/release/run_portable_release_tests.py --code-only
+          # The owner comprehensive suite already runs independently.
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
           flutter test --no-pub \
             test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
             --timeout 2m
@@ -352,10 +363,11 @@ jobs:
           printf '%s\n' \
             'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347' \
             > ios/Flutter/ReleaseAdMob.xcconfig
-          grep -Fqx '<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
+          grep -Fqx $'\t<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
           grep -Fqx $'\t<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
           grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
-          grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
+          # GeneratedPluginRegistrant.m is checked after flutter build ipa,
+          # where Flutter/Xcode must actually regenerate it.
 
       - name: Configure manual App Store distribution signing
         shell: bash
@@ -429,7 +441,7 @@ jobs:
 
       - name: Build signed archive
         env:
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
         shell: bash
@@ -472,7 +484,7 @@ jobs:
         shell: bash
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
         run: |
           set -euo pipefail
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
@@ -565,7 +577,7 @@ jobs:
             > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
-        if: ${{ inputs.upload_to_testflight }}
+        if: ${{ github.event_name == 'push' || inputs.upload_to_testflight }}
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -596,7 +608,7 @@ jobs:
           xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
       - name: Upload validated build to TestFlight
-        if: ${{ inputs.upload_to_testflight }}
+        if: ${{ github.event_name == 'push' || inputs.upload_to_testflight }}
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
