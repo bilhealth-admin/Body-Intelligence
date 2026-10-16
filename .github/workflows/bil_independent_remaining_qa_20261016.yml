@@ -1,0 +1,104 @@
+name: BIL independent remaining QA — native + local cloud (no release changes)
+
+# Owner requested completion of missing tests without touching the signed
+# Android 33 / iOS 36 candidates, their workflows, stores, or Production.
+# This file ONLY dispatches EXISTING read-only native / isolated local-cloud
+# test jobs. It never checks out application source, builds signed binaries,
+# modifies repository variables, or changes production services.
+on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_independent_remaining_qa_20261016.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-independent-remaining-qa-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch-isolated-qa:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      actions: write
+      contents: read
+    env:
+      AUDITED_RELEASE_SHA: 'a6f0a9a15188aabca0dcb739269ab17079ed4504'
+      ORIGINAL_PARENT_SHA: 'eadef997ca5c9e0b085d48c686870658f7caef4e'
+      QA_WORKFLOW_PATH: '.github/workflows/bil_independent_remaining_qa_20261016.yml'
+      ANDROID_SIGNED_RUN_ID: '38844200159'
+      IOS_SIGNED_RUN_ID: '38844200115'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Refuse any release-source or candidate-workflow changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          # On the first owner-requested push, require precisely one changed
+          # file: THIS QA-only dispatcher. Never write to signed builds.
+          if [[ "${GITHUB_EVENT_NAME}" == 'push' ]]; then
+            CHANGED="$(gh api "repos/$GITHUB_REPOSITORY/compare/${ORIGINAL_PARENT_SHA}...${GITHUB_SHA}" --jq '.files | map(.filename) | join("\n")')"
+            test "$CHANGED" = "$QA_WORKFLOW_PATH" || {
+              echo 'QA dispatch source changed beyond the approved workflow; refusing.' >&2
+              exit 1
+            }
+          fi
+          for RUN_ID in "$ANDROID_SIGNED_RUN_ID" "$IOS_SIGNED_RUN_ID"; do
+            RESPONSE="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '[.head_sha,.head_branch] | join("|")')"
+            test "$RESPONSE" = "$ORIGINAL_PARENT_SHA|integration/bil-qa-media-policy-20261011" || {
+              echo 'Signed run identity changed; refusing to touch or substitute candidate.' >&2
+              exit 1
+            }
+          done
+          echo 'SIGNED_CANDIDATES_UNTOUCHED=YES' >> "$GITHUB_STEP_SUMMARY"
+          echo "SOURCE_SHA=$AUDITED_RELEASE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "QA_REF=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Launch Android API 33 native integration (no signing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run bil_codeql_security_extended.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$GITHUB_REF_NAME" \
+            --field android_native_only=true \
+            --field native_target=all
+          echo 'ANDROID_NATIVE_ALL=DISPATCH_ACCEPTED_NOT_A_TEST_PASS' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Launch iPhone and iPad native simulator integration (no signing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run bil_codeql_security_extended.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$GITHUB_REF_NAME" \
+            --field ios_native_only=true \
+            --field native_target=all
+          echo 'IOS_IPHONE_IPAD_ALL=DISPATCH_ACCEPTED_NOT_A_TEST_PASS' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Launch disposable local Supabase migrations, Auth, RLS and SQLite restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run bil_codeql_security_extended.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$GITHUB_REF_NAME" \
+            --field supabase_only=true
+          echo 'LOCAL_SUPABASE_E2E=DISPATCH_ACCEPTED_NOT_A_TEST_PASS' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve the evidence boundary for this dispatch only
+        if: always()
+        run: |
+          {
+            echo '### Isolated QA dispatch, not certification'
+            echo 'These three workflows run from the unchanged application/CI snapshot plus this QA-only file.'
+            echo 'NO_SIGNED_RELEASE_BUILD, NO_TESTFLIGHT_UPLOAD, NO_PLAY_UPLOAD, NO_PRODUCTION_MUTATIONS.'
+            echo 'Every new job must be read and classified separately: PASS, FAIL, SKIPPED, or BLOCKED.'
+            echo 'Physical devices, real store transactions, Apple/Google Console acceptance, and real SDK traffic are not tested here.'
+          } >> "$GITHUB_STEP_SUMMARY"
