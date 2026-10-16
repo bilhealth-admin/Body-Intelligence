@@ -75,6 +75,8 @@ CAPTURE_GUARDED = {
 # These files retain their full layout, navigation and health-data assertions.
 # Only their optional PNG output uses process-environment flags, not Dart defines.
 ENV_CAPTURE_GUARDED = {
+    "test/features/intelligence_center/ai_coach_report_confirmation_capture_test.dart": "BIL_CAPTURE_COACH_RELEASE",
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart": "BIL_CAPTURE_COACH_RELEASE",
     "test/dashboard_polish/dashboard_current_preview_test.dart": "BIL_CAPTURE_DASHBOARD_POLISH",
     "test/dashboard_polish/dashboard_polish_layout_review_test.dart": "BIL_CAPTURE_DASHBOARD_POLISH",
     "test/dashboard_polish/icon_label_layout_review_test.dart": "BIL_CAPTURE_ICON_POLISH",

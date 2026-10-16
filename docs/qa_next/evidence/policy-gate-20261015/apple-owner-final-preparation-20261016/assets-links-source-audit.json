@@ -1,0 +1,2483 @@
+{
+  "checkedAtUtc": "2026-10-16T01:16:56.099Z",
+  "reads": {
+    "screenshotSets": {
+      "data": [
+        {
+          "type": "appScreenshotSets",
+          "id": "4a9bbef2-a708-4c15-8da4-f795119ced68",
+          "attributes": {
+            "screenshotDisplayType": "APP_IPHONE_67"
+          },
+          "relationships": {
+            "appScreenshots": {
+              "meta": {
+                "paging": {
+                  "total": 8,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "appScreenshots",
+                  "id": "a7fdbac5-8806-45f2-a46e-18ab36891092"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "824195d5-2125-4800-9f11-16aa25970cc0"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "5ef92684-44d8-4f34-9597-fdb892b5cb1d"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "fca80b74-20e5-448d-a8a2-1fc046ffc904"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "9c2ec46d-dd46-417a-bd85-783bc3745d14"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "2ba428dd-672f-4358-8846-8ff1f7d9b43a"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "d9a0e2e2-2b8d-4bbb-ba9b-5ec79c805dc0"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "3b57dd01-8a35-48d5-a281-252fe52bc826"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/appScreenshotSets/4a9bbef2-a708-4c15-8da4-f795119ced68/relationships/appScreenshots",
+                "related": "https://api.appstoreconnect.apple.com/v1/appScreenshotSets/4a9bbef2-a708-4c15-8da4-f795119ced68/appScreenshots"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshotSets/4a9bbef2-a708-4c15-8da4-f795119ced68"
+          }
+        },
+        {
+          "type": "appScreenshotSets",
+          "id": "6bd5a51a-d06f-46d3-a5f5-487412a9c968",
+          "attributes": {
+            "screenshotDisplayType": "APP_IPAD_PRO_3GEN_129"
+          },
+          "relationships": {
+            "appScreenshots": {
+              "meta": {
+                "paging": {
+                  "total": 8,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "appScreenshots",
+                  "id": "2d7f6dec-7e01-4070-b59d-37598bfa5b46"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "f0c1f57e-2332-4722-9825-e732bf7337c6"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "c98d9b36-e61d-4580-8db4-4f35b6a4e7e4"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "9ebc9ef8-d4b1-4cbf-b3f8-20e033b57dce"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "9b7b1883-9aa8-4469-a827-60ddbc722497"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "7992228a-495c-4d50-afe1-0aea48448f68"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "8d36733e-a628-42af-ad21-bb0a1aea1e63"
+                },
+                {
+                  "type": "appScreenshots",
+                  "id": "5d823441-1fb5-4087-90ff-f31925c54395"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/appScreenshotSets/6bd5a51a-d06f-46d3-a5f5-487412a9c968/relationships/appScreenshots",
+                "related": "https://api.appstoreconnect.apple.com/v1/appScreenshotSets/6bd5a51a-d06f-46d3-a5f5-487412a9c968/appScreenshots"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshotSets/6bd5a51a-d06f-46d3-a5f5-487412a9c968"
+          }
+        }
+      ],
+      "included": [
+        {
+          "type": "appScreenshots",
+          "id": "a7fdbac5-8806-45f2-a46e-18ab36891092",
+          "attributes": {
+            "fileSize": 1354904,
+            "fileName": "01_dashboard.png",
+            "sourceFileChecksum": "5e0ff22fb81c1ff9620f5adc0fc4b33e",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/t13t1Gz29Ft3KfXTJsNGiQ/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource221/v4/90/01/66/900166b4-4bfb-940e-3491-fd084fb2a26a/01_dashboard.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/a7fdbac5-8806-45f2-a46e-18ab36891092"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "824195d5-2125-4800-9f11-16aa25970cc0",
+          "attributes": {
+            "fileSize": 1277434,
+            "fileName": "02_ai_coach.png",
+            "sourceFileChecksum": "34b0c1627d0cfc019f472d9fce62404c",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/gqeR9cEcijMS7zpjeGpYBg/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource211/v4/64/b8/f0/64b8f06f-69a9-663c-836e-0f32e6bfd90f/02_ai_coach.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/824195d5-2125-4800-9f11-16aa25970cc0"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "5ef92684-44d8-4f34-9597-fdb892b5cb1d",
+          "attributes": {
+            "fileSize": 1127374,
+            "fileName": "03_daily_log.png",
+            "sourceFileChecksum": "94d794d586dbcf611b8dafe492e74e17",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/fa7SaYzjh1OOC0NpDMIWiA/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource221/v4/e1/a7/f6/e1a7f656-a4fd-dddb-c63a-d8a4a2ef3135/03_daily_log.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/5ef92684-44d8-4f34-9597-fdb892b5cb1d"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "fca80b74-20e5-448d-a8a2-1fc046ffc904",
+          "attributes": {
+            "fileSize": 1739402,
+            "fileName": "04_food_search.png",
+            "sourceFileChecksum": "7dbc8ba0ba2908be35b8e40598770a4b",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/3BsiSHLU_wwW9ZYitvIVJA/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource211/v4/1e/fc/50/1efc503b-ba77-348e-9663-5420a34db1cb/04_food_search.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/fca80b74-20e5-448d-a8a2-1fc046ffc904"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "9c2ec46d-dd46-417a-bd85-783bc3745d14",
+          "attributes": {
+            "fileSize": 1411548,
+            "fileName": "05_progress.png",
+            "sourceFileChecksum": "e6ff0aa599014a3a0d898dc5717140f7",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/pMvpGUWE7R38t2wGwJ3VJA/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource211/v4/4c/46/70/4c4670c2-0bee-8deb-9b2b-0fd16ecd76a5/05_progress.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/9c2ec46d-dd46-417a-bd85-783bc3745d14"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "2ba428dd-672f-4358-8846-8ff1f7d9b43a",
+          "attributes": {
+            "fileSize": 1201961,
+            "fileName": "06_nutrition_goals.png",
+            "sourceFileChecksum": "6ae27781a9cc4c6735ce8ef583c4b4f7",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/_SVflDIV_2351iAk_CZ73g/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource221/v4/07/d0/18/07d01862-9ea2-34ae-b676-4fa4516dae14/06_nutrition_goals.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/2ba428dd-672f-4358-8846-8ff1f7d9b43a"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "d9a0e2e2-2b8d-4bbb-ba9b-5ec79c805dc0",
+          "attributes": {
+            "fileSize": 1549963,
+            "fileName": "07_workouts.png",
+            "sourceFileChecksum": "95fef53a516ebd9d445bb0889c7fa8d3",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/3pSmYd-UqtntftY-VDef8A/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource211/v4/90/3f/eb/903feb9d-0faa-b739-c498-6c33254a3d1a/07_workouts.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/d9a0e2e2-2b8d-4bbb-ba9b-5ec79c805dc0"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "3b57dd01-8a35-48d5-a281-252fe52bc826",
+          "attributes": {
+            "fileSize": 1753872,
+            "fileName": "08_recipes.png",
+            "sourceFileChecksum": "af62bf1c0f9d618bf242870ec9f436cd",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/YgUsd7nvmxc-pCYmylBJVQ/{w}x{h}bb.{f}",
+              "width": 1290,
+              "height": 2796
+            },
+            "assetToken": "PurpleSource211/v4/b0/85/b0/b085b0d8-c092-44bc-fc3b-9ac874f42758/08_recipes.png",
+            "assetType": "SortedD74ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/3b57dd01-8a35-48d5-a281-252fe52bc826"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "2d7f6dec-7e01-4070-b59d-37598bfa5b46",
+          "attributes": {
+            "fileSize": 1523436,
+            "fileName": "01_dashboard.png",
+            "sourceFileChecksum": "9cabafd6511ae843cda7b3ee7c7d2f0e",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/7k2OE_RudlYGrJg3KpXFkQ/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource211/v4/68/60/53/68605348-5787-254f-163a-087d1721c14b/01_dashboard.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/2d7f6dec-7e01-4070-b59d-37598bfa5b46"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "f0c1f57e-2332-4722-9825-e732bf7337c6",
+          "attributes": {
+            "fileSize": 1018145,
+            "fileName": "02_ai_coach.png",
+            "sourceFileChecksum": "3649cf54ff4b350ae7d73d3f6864a61f",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/bV6EfN8Gkvm8GN-GMZOqWA/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource211/v4/ed/1a/c4/ed1ac477-c687-1d15-5cad-be40e2723e77/02_ai_coach.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/f0c1f57e-2332-4722-9825-e732bf7337c6"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "c98d9b36-e61d-4580-8db4-4f35b6a4e7e4",
+          "attributes": {
+            "fileSize": 933940,
+            "fileName": "03_daily_log.png",
+            "sourceFileChecksum": "759c1a8af18921c7b4c2147273ce8e1d",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/-fpyOkWoKF8l_NWD68gUIA/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource211/v4/bb/99/71/bb99715b-9b44-3e66-de45-be3fb4276669/03_daily_log.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/c98d9b36-e61d-4580-8db4-4f35b6a4e7e4"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "9ebc9ef8-d4b1-4cbf-b3f8-20e033b57dce",
+          "attributes": {
+            "fileSize": 1571713,
+            "fileName": "04_food_search.png",
+            "sourceFileChecksum": "aa758f511a6401e9b02137c13dc4c127",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/wn1jVM4rbjj3ThwXE1lK7g/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource211/v4/b4/3b/ba/b43bbadb-4fe3-6bf4-a571-9b68f9c6bd04/04_food_search.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/9ebc9ef8-d4b1-4cbf-b3f8-20e033b57dce"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "9b7b1883-9aa8-4469-a827-60ddbc722497",
+          "attributes": {
+            "fileSize": 1478603,
+            "fileName": "05_progress.png",
+            "sourceFileChecksum": "471af7248f0babdb3b926f2c0537ddac",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/mn0gYY09RB69Q-QCZJ_N7A/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource211/v4/b4/f4/96/b4f49675-60f0-ac9a-19ed-e3c175d836b2/05_progress.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/9b7b1883-9aa8-4469-a827-60ddbc722497"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "7992228a-495c-4d50-afe1-0aea48448f68",
+          "attributes": {
+            "fileSize": 1022918,
+            "fileName": "06_nutrition_goals.png",
+            "sourceFileChecksum": "76ba826cd19e576612bd986a234f2811",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/OpMVc_I03DOL1Z88hpC7Fg/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource221/v4/85/78/ee/8578ee1d-bdcb-075a-c046-2f3e3bc47e68/06_nutrition_goals.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/7992228a-495c-4d50-afe1-0aea48448f68"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "8d36733e-a628-42af-ad21-bb0a1aea1e63",
+          "attributes": {
+            "fileSize": 2204010,
+            "fileName": "07_workouts.png",
+            "sourceFileChecksum": "f616fb1c174a97e6856af2703aad5feb",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/RaGP_iB4lIa8ziK9OjzEcA/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource221/v4/ab/1e/32/ab1e329e-b247-06a5-914a-98ecc53693b3/07_workouts.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/8d36733e-a628-42af-ad21-bb0a1aea1e63"
+          }
+        },
+        {
+          "type": "appScreenshots",
+          "id": "5d823441-1fb5-4087-90ff-f31925c54395",
+          "attributes": {
+            "fileSize": 2434690,
+            "fileName": "08_recipes.png",
+            "sourceFileChecksum": "92cdb541b8c2edfb3045953cdc3595b1",
+            "imageAsset": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/m0DLKMp-xuZqYWVDY7u3PA/{w}x{h}bb.{f}",
+              "width": 2064,
+              "height": 2752
+            },
+            "assetToken": "PurpleSource211/v4/6b/b4/98/6bb498fa-e622-3a76-46f5-aa689b2bc139/08_recipes.png",
+            "assetType": "SortedJ320ScreenShot",
+            "uploadOperations": [],
+            "assetDeliveryState": {
+              "errors": [],
+              "warnings": null,
+              "state": "COMPLETE"
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/appScreenshots/5d823441-1fb5-4087-90ff-f31925c54395"
+          }
+        }
+      ],
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations/3866ba6c-b637-4f70-9c53-d6274c37bc62/appScreenshotSets?include=appScreenshots"
+      },
+      "meta": {
+        "paging": {
+          "total": 2,
+          "limit": 50
+        }
+      }
+    },
+    "builds": {
+      "data": [
+        {
+          "type": "builds",
+          "id": "e695f185-2e54-4196-9153-a55653518cc2",
+          "attributes": {
+            "version": "35",
+            "uploadedDate": "2026-10-04T13:41:17-07:00",
+            "expirationDate": "2027-01-02T12:41:17-08:00",
+            "expired": false,
+            "minOsVersion": "15.0",
+            "lsMinimumSystemVersion": null,
+            "computedMinMacOsVersion": "12.0",
+            "computedMinVisionOsVersion": "1.0",
+            "iconAssetToken": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/3b/9d/d3/3b9dd308-626a-d783-75b2-a04d5b3f1af2/AppIcon-0-0-2x_U007epad-0-9-0-85-220.png/{w}x{h}bb.{f}",
+              "width": 167,
+              "height": 167
+            },
+            "processingState": "VALID",
+            "buildAudienceType": "APP_STORE_ELIGIBLE",
+            "usesNonExemptEncryption": false
+          },
+          "relationships": {
+            "preReleaseVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/preReleaseVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/preReleaseVersion"
+              }
+            },
+            "individualTesters": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/individualTesters",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/individualTesters"
+              }
+            },
+            "betaGroups": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/betaGroups"
+              }
+            },
+            "betaBuildLocalizations": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/betaBuildLocalizations",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/betaBuildLocalizations"
+              }
+            },
+            "appEncryptionDeclaration": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/appEncryptionDeclaration",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/appEncryptionDeclaration"
+              }
+            },
+            "betaAppReviewSubmission": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/betaAppReviewSubmission",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/betaAppReviewSubmission"
+              }
+            },
+            "app": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/app",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/app"
+              }
+            },
+            "buildBetaDetail": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/buildBetaDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/buildBetaDetail"
+              }
+            },
+            "appStoreVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/appStoreVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/appStoreVersion"
+              }
+            },
+            "icons": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/icons",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/icons"
+              }
+            },
+            "perfPowerMetrics": {
+              "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/perfPowerMetrics"
+              }
+            },
+            "diagnosticSignatures": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/relationships/diagnosticSignatures",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2/diagnosticSignatures"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/builds/e695f185-2e54-4196-9153-a55653518cc2"
+          }
+        },
+        {
+          "type": "builds",
+          "id": "70caf120-eaf4-420b-984f-6f0bb20afcfc",
+          "attributes": {
+            "version": "34",
+            "uploadedDate": "2026-10-02T17:42:05-07:00",
+            "expirationDate": "2026-12-31T16:42:05-08:00",
+            "expired": false,
+            "minOsVersion": "15.0",
+            "lsMinimumSystemVersion": null,
+            "computedMinMacOsVersion": "12.0",
+            "computedMinVisionOsVersion": "1.0",
+            "iconAssetToken": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/59/c2/1e/59c21eac-7eea-5b4a-e91e-07e029bc8978/AppIcon-0-0-2x_U007epad-0-9-0-85-220.png/{w}x{h}bb.{f}",
+              "width": 167,
+              "height": 167
+            },
+            "processingState": "VALID",
+            "buildAudienceType": "APP_STORE_ELIGIBLE",
+            "usesNonExemptEncryption": false
+          },
+          "relationships": {
+            "preReleaseVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/preReleaseVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/preReleaseVersion"
+              }
+            },
+            "individualTesters": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/individualTesters",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/individualTesters"
+              }
+            },
+            "betaGroups": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/betaGroups"
+              }
+            },
+            "betaBuildLocalizations": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/betaBuildLocalizations",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/betaBuildLocalizations"
+              }
+            },
+            "appEncryptionDeclaration": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/appEncryptionDeclaration",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/appEncryptionDeclaration"
+              }
+            },
+            "betaAppReviewSubmission": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/betaAppReviewSubmission",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/betaAppReviewSubmission"
+              }
+            },
+            "app": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/app",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/app"
+              }
+            },
+            "buildBetaDetail": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/buildBetaDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/buildBetaDetail"
+              }
+            },
+            "appStoreVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/appStoreVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/appStoreVersion"
+              }
+            },
+            "icons": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/icons",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/icons"
+              }
+            },
+            "perfPowerMetrics": {
+              "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/perfPowerMetrics"
+              }
+            },
+            "diagnosticSignatures": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/relationships/diagnosticSignatures",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc/diagnosticSignatures"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/builds/70caf120-eaf4-420b-984f-6f0bb20afcfc"
+          }
+        },
+        {
+          "type": "builds",
+          "id": "ed704d42-8387-4e77-b383-5dd766cdcf93",
+          "attributes": {
+            "version": "33",
+            "uploadedDate": "2026-10-02T03:16:02-07:00",
+            "expirationDate": "2026-12-31T02:16:02-08:00",
+            "expired": false,
+            "minOsVersion": "15.0",
+            "lsMinimumSystemVersion": null,
+            "computedMinMacOsVersion": "12.0",
+            "computedMinVisionOsVersion": "1.0",
+            "iconAssetToken": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/e0/8f/db/e08fdb68-e8c6-7bb5-07db-64ae92f06365/AppIcon-0-0-2x_U007epad-0-9-0-85-220.png/{w}x{h}bb.{f}",
+              "width": 167,
+              "height": 167
+            },
+            "processingState": "VALID",
+            "buildAudienceType": "APP_STORE_ELIGIBLE",
+            "usesNonExemptEncryption": false
+          },
+          "relationships": {
+            "preReleaseVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/preReleaseVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/preReleaseVersion"
+              }
+            },
+            "individualTesters": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/individualTesters",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/individualTesters"
+              }
+            },
+            "betaGroups": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/betaGroups"
+              }
+            },
+            "betaBuildLocalizations": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/betaBuildLocalizations",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/betaBuildLocalizations"
+              }
+            },
+            "appEncryptionDeclaration": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/appEncryptionDeclaration",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/appEncryptionDeclaration"
+              }
+            },
+            "betaAppReviewSubmission": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/betaAppReviewSubmission",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/betaAppReviewSubmission"
+              }
+            },
+            "app": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/app",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/app"
+              }
+            },
+            "buildBetaDetail": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/buildBetaDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/buildBetaDetail"
+              }
+            },
+            "appStoreVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/appStoreVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/appStoreVersion"
+              }
+            },
+            "icons": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/icons",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/icons"
+              }
+            },
+            "perfPowerMetrics": {
+              "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/perfPowerMetrics"
+              }
+            },
+            "diagnosticSignatures": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/relationships/diagnosticSignatures",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93/diagnosticSignatures"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/builds/ed704d42-8387-4e77-b383-5dd766cdcf93"
+          }
+        },
+        {
+          "type": "builds",
+          "id": "e55992bb-b09e-4b75-95c6-f65c166c9b1e",
+          "attributes": {
+            "version": "32",
+            "uploadedDate": "2026-09-28T07:41:52-07:00",
+            "expirationDate": "2026-12-27T06:41:52-08:00",
+            "expired": false,
+            "minOsVersion": "15.0",
+            "lsMinimumSystemVersion": null,
+            "computedMinMacOsVersion": "12.0",
+            "computedMinVisionOsVersion": "1.0",
+            "iconAssetToken": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/cd/12/60/cd126059-d76f-6b32-2c5a-08205d9a5f0a/AppIcon-0-0-2x_U007epad-0-9-0-85-220.png/{w}x{h}bb.{f}",
+              "width": 167,
+              "height": 167
+            },
+            "processingState": "VALID",
+            "buildAudienceType": "APP_STORE_ELIGIBLE",
+            "usesNonExemptEncryption": false
+          },
+          "relationships": {
+            "preReleaseVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/preReleaseVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/preReleaseVersion"
+              }
+            },
+            "individualTesters": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/individualTesters",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/individualTesters"
+              }
+            },
+            "betaGroups": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/betaGroups"
+              }
+            },
+            "betaBuildLocalizations": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/betaBuildLocalizations",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/betaBuildLocalizations"
+              }
+            },
+            "appEncryptionDeclaration": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/appEncryptionDeclaration",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/appEncryptionDeclaration"
+              }
+            },
+            "betaAppReviewSubmission": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/betaAppReviewSubmission",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/betaAppReviewSubmission"
+              }
+            },
+            "app": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/app",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/app"
+              }
+            },
+            "buildBetaDetail": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/buildBetaDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/buildBetaDetail"
+              }
+            },
+            "appStoreVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/appStoreVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/appStoreVersion"
+              }
+            },
+            "icons": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/icons",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/icons"
+              }
+            },
+            "perfPowerMetrics": {
+              "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/perfPowerMetrics"
+              }
+            },
+            "diagnosticSignatures": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/relationships/diagnosticSignatures",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e/diagnosticSignatures"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/builds/e55992bb-b09e-4b75-95c6-f65c166c9b1e"
+          }
+        },
+        {
+          "type": "builds",
+          "id": "58c95945-f72b-4c58-9756-c6f06dd43e4c",
+          "attributes": {
+            "version": "31",
+            "uploadedDate": "2026-09-27T22:21:13-07:00",
+            "expirationDate": "2026-12-26T21:21:13-08:00",
+            "expired": false,
+            "minOsVersion": "15.0",
+            "lsMinimumSystemVersion": null,
+            "computedMinMacOsVersion": "12.0",
+            "computedMinVisionOsVersion": "1.0",
+            "iconAssetToken": {
+              "templateUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/04/b2/c2/04b2c2fd-3c7b-34ed-67b5-439b11f1c21e/AppIcon-0-0-2x_U007epad-0-9-0-85-220.png/{w}x{h}bb.{f}",
+              "width": 167,
+              "height": 167
+            },
+            "processingState": "VALID",
+            "buildAudienceType": "APP_STORE_ELIGIBLE",
+            "usesNonExemptEncryption": false
+          },
+          "relationships": {
+            "preReleaseVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/preReleaseVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/preReleaseVersion"
+              }
+            },
+            "individualTesters": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/individualTesters",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/individualTesters"
+              }
+            },
+            "betaGroups": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/betaGroups"
+              }
+            },
+            "betaBuildLocalizations": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/betaBuildLocalizations",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/betaBuildLocalizations"
+              }
+            },
+            "appEncryptionDeclaration": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/appEncryptionDeclaration",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/appEncryptionDeclaration"
+              }
+            },
+            "betaAppReviewSubmission": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/betaAppReviewSubmission",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/betaAppReviewSubmission"
+              }
+            },
+            "app": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/app",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/app"
+              }
+            },
+            "buildBetaDetail": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/buildBetaDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/buildBetaDetail"
+              }
+            },
+            "appStoreVersion": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/appStoreVersion",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/appStoreVersion"
+              }
+            },
+            "icons": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/icons",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/icons"
+              }
+            },
+            "perfPowerMetrics": {
+              "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/perfPowerMetrics"
+              }
+            },
+            "diagnosticSignatures": {
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/relationships/diagnosticSignatures",
+                "related": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c/diagnosticSignatures"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/builds/58c95945-f72b-4c58-9756-c6f06dd43e4c"
+          }
+        }
+      ],
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/builds?filter%5Bapp%5D=6805349703&sort=-uploadedDate&limit=5",
+        "next": "https://api.appstoreconnect.apple.com/v1/builds?filter%5Bapp%5D=6805349703&sort=-uploadedDate&cursor=BQ&limit=5"
+      },
+      "meta": {
+        "paging": {
+          "total": 31,
+          "nextCursor": "BQ",
+          "limit": 5
+        }
+      }
+    },
+    "submission": {
+      "data": [
+        {
+          "type": "reviewSubmissions",
+          "id": "d92bf043-3499-4e1f-95e9-f050ed0f66c5",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-10-04T20:56:12.74Z",
+            "state": "UNRESOLVED_ISSUES"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDZ8ODkwMzIxMDU2"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/d92bf043-3499-4e1f-95e9-f050ed0f66c5/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/d92bf043-3499-4e1f-95e9-f050ed0f66c5/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/d92bf043-3499-4e1f-95e9-f050ed0f66c5"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "411564b4-9a26-45f6-9152-8ec10e7e87ee",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-28T15:03:47.914Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDZ8ODkwMzIxMDU2"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/411564b4-9a26-45f6-9152-8ec10e7e87ee/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/411564b4-9a26-45f6-9152-8ec10e7e87ee/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/411564b4-9a26-45f6-9152-8ec10e7e87ee"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "c1f51f38-ffd5-47a7-9113-aba2513c3a6d",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-28T05:32:33.041Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDZ8ODkwMzIxMDU2"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/c1f51f38-ffd5-47a7-9113-aba2513c3a6d/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/c1f51f38-ffd5-47a7-9113-aba2513c3a6d/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/c1f51f38-ffd5-47a7-9113-aba2513c3a6d"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "6d592c0c-8a1c-4ce0-b2aa-13870d75f00f",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-25T22:34:28.329Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDZ8ODkwMzIxMDU2"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/6d592c0c-8a1c-4ce0-b2aa-13870d75f00f/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/6d592c0c-8a1c-4ce0-b2aa-13870d75f00f/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/6d592c0c-8a1c-4ce0-b2aa-13870d75f00f"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "8881e255-e04e-4f19-9428-9a271ba752a5",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-25T13:37:55.162Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDZ8ODkwMzIxMDU2"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/8881e255-e04e-4f19-9428-9a271ba752a5/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/8881e255-e04e-4f19-9428-9a271ba752a5/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/8881e255-e04e-4f19-9428-9a271ba752a5"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "6aa9182b-c5ae-470c-8d6e-263b043d66dd",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-22T06:11:34.65Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDZ8ODkwMzIxMDU2"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/6aa9182b-c5ae-470c-8d6e-263b043d66dd/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/6aa9182b-c5ae-470c-8d6e-263b043d66dd/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/6aa9182b-c5ae-470c-8d6e-263b043d66dd"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "b725e36e-c0e4-4786-b0b9-68822810432d",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-17T22:46:15.268Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDZ8ODkwMzIxMDU2"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/b725e36e-c0e4-4786-b0b9-68822810432d/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/b725e36e-c0e4-4786-b0b9-68822810432d/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/b725e36e-c0e4-4786-b0b9-68822810432d"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "c24a2e5d-cc56-4197-9bd2-ae37ef853b6a",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-10T15:42:43.419Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDZ8ODkwMzIxMDU2"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/c24a2e5d-cc56-4197-9bd2-ae37ef853b6a/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/c24a2e5d-cc56-4197-9bd2-ae37ef853b6a/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/c24a2e5d-cc56-4197-9bd2-ae37ef853b6a"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "69e2012e-8582-42f6-841b-505cd68252a4",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-09T15:56:04.453Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDZ8ODkwMzIxMDU2"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/69e2012e-8582-42f6-841b-505cd68252a4/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/69e2012e-8582-42f6-841b-505cd68252a4/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/69e2012e-8582-42f6-841b-505cd68252a4"
+          }
+        },
+        {
+          "type": "reviewSubmissions",
+          "id": "4f597d93-ba75-4754-99f5-cf3d16fbbe5c",
+          "attributes": {
+            "platform": "IOS",
+            "submittedDate": "2026-09-09T04:17:03.644Z",
+            "state": "COMPLETE"
+          },
+          "relationships": {
+            "items": {
+              "meta": {
+                "paging": {
+                  "total": 7,
+                  "limit": 10
+                }
+              },
+              "data": [
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+                },
+                {
+                  "type": "reviewSubmissionItems",
+                  "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDZ8ODkwMzIxMDU2"
+                }
+              ],
+              "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/4f597d93-ba75-4754-99f5-cf3d16fbbe5c/relationships/items",
+                "related": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/4f597d93-ba75-4754-99f5-cf3d16fbbe5c/items"
+              }
+            }
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissions/4f597d93-ba75-4754-99f5-cf3d16fbbe5c"
+          }
+        }
+      ],
+      "included": [
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "READY_FOR_REVIEW"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "READY_FOR_REVIEW"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "READY_FOR_REVIEW"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "READY_FOR_REVIEW"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "READY_FOR_REVIEW"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "READY_FOR_REVIEW"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REJECTED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ZDkyYmYwNDMtMzQ5OS00ZTFmLTk1ZTktZjA1MGVkMGY2NmM1fDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NDExNTY0YjQtOWEyNi00NWY2LTkxNTItOGVjMTBlN2U4N2VlfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzFmNTFmMzgtZmZkNS00N2E3LTkxMTMtYWJhMjUxM2MzYTZkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmQ1OTJjMGMtOGExYy00Y2UwLWIyYWEtMTM4NzBkNzVmMDBmfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/ODg4MWUyNTUtZTA0ZS00ZjE5LTk0MjgtOWEyNzFiYTc1MmE1fDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NmFhOTE4MmItYzVhZS00NzBjLThkNmUtMjYzYjA0M2Q2NmRkfDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YjcyNWUzNmUtYzBlNC00Nzg2LWIwYjktNjg4MjI4MTA0MzJkfDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/YzI0YTJlNWQtY2M1Ni00MTk3LTliZDItYWUzN2VmODUzYjZhfDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NjllMjAxMmUtODU4Mi00MmY2LTg0MWItNTA1Y2Q2ODI1MmE0fDZ8ODkwMzIxMDU2"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE3fGMxZDdjMDNhLTMxYjctNDZhNi05OTdlLTQ2MTQ1ODBjYzhkNw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE5fGYzNzg3YmY3LWJjNDQtNDNhYS1iOGYxLWM2NDM5NzgxYTNkMQ"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fGVjMDU1YzhkLWE1ZGEtNGVlYS1iNGY5LTJlNDg1MjcyNzI1Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDIyMTdkYmJkLWFhMjQtNGFhYS05NWY4LTAxMDFjZTk5NmJjMw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDA1ZWM1MWZlLTI4YjYtNDM1OS1iMjQ4LTUyNWNjMWZlYzcyZg"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDE4fDUwNzdkNDQ4LTdmODgtNGNlOC1iOWFiLTExOWIzMTE5NmI0Mw"
+          }
+        },
+        {
+          "type": "reviewSubmissionItems",
+          "id": "NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDZ8ODkwMzIxMDU2",
+          "attributes": {
+            "state": "REMOVED"
+          },
+          "links": {
+            "self": "https://api.appstoreconnect.apple.com/v1/reviewSubmissionItems/NGY1OTdkOTMtYmE3NS00NzU0LTk5ZjUtY2YzZDE2ZmJiZTVjfDZ8ODkwMzIxMDU2"
+          }
+        }
+      ],
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/apps/6805349703/reviewSubmissions?include=items&limit=10",
+        "next": "https://api.appstoreconnect.apple.com/v1/apps/6805349703/reviewSubmissions?include=items&cursor=Cg&limit=10"
+      },
+      "meta": {
+        "paging": {
+          "total": 11,
+          "nextCursor": "Cg",
+          "limit": 10
+        }
+      }
+    },
+    "eula": {
+      "data": null,
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/apps/6805349703/endUserLicenseAgreement"
+      }
+    },
+    "availability": {
+      "data": {
+        "type": "appAvailabilities",
+        "id": "6805349703",
+        "attributes": {
+          "availableInNewTerritories": true
+        },
+        "relationships": {
+          "territoryAvailabilities": {
+            "links": {
+              "self": "https://api.appstoreconnect.apple.com/v2/appAvailabilities/6805349703/relationships/territoryAvailabilities",
+              "related": "https://api.appstoreconnect.apple.com/v2/appAvailabilities/6805349703/territoryAvailabilities"
+            }
+          }
+        },
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v2/appAvailabilities/6805349703"
+        }
+      },
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/apps/6805349703/appAvailabilityV2"
+      }
+    }
+  },
+  "links": [
+    {
+      "url": "https://www.bilhealth.com/privacy",
+      "status": 200,
+      "finalUrl": "https://www.bilhealth.com/privacy",
+      "bytes": 7846,
+      "sha256": "56a32cf27de55b0e2b2dd0b5226e6d7b6f87ede15b1714f1797bf531986cf1ee"
+    },
+    {
+      "url": "https://www.bilhealth.com/terms",
+      "status": 200,
+      "finalUrl": "https://www.bilhealth.com/terms",
+      "bytes": 7842,
+      "sha256": "5870fc8c8e68441faa165d691ad758fc6db4cd104b92f867323fd57b27471f39"
+    },
+    {
+      "url": "https://www.bilhealth.com/support",
+      "status": 200,
+      "finalUrl": "https://www.bilhealth.com/support",
+      "bytes": 7846,
+      "sha256": "42892c9fd5dc520f12b54a3cc194eda8e6a2957c3e5c9dbb9a3fac626cf4bf71"
+    },
+    {
+      "url": "https://www.bilhealth.com/account-deletion",
+      "status": 200,
+      "finalUrl": "https://www.bilhealth.com/account-deletion",
+      "bytes": 7864,
+      "sha256": "323cfa8d4048805c271b8248640d93be143543b070112f9f01d4d453c06ab36f"
+    },
+    {
+      "url": "https://www.bilhealth.com/community-guidelines",
+      "status": 200,
+      "finalUrl": "https://www.bilhealth.com/community-guidelines",
+      "bytes": 7872,
+      "sha256": "533b1247cd7b962c3e28c31a292005b3c7083790e81a3618a3ea532aec4a2980"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "lib/features/commerce/presentation/bil_store_copy.dart",
+      "currentSha256": "c4a96400202e4ef669b947fbfd6678de15bef1b6196fcea6a36a82ae051e69e6",
+      "previousSha256": "c4a96400202e4ef669b947fbfd6678de15bef1b6196fcea6a36a82ae051e69e6",
+      "unchanged": true
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach.dart",
+      "currentSha256": "f97c74da982b1f317be290190269b5e62ea47029f9626f1720369f98fc310fdc",
+      "previousSha256": "f97c74da982b1f317be290190269b5e62ea47029f9626f1720369f98fc310fdc",
+      "unchanged": true
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_extended.dart",
+      "currentSha256": "653a686a463ef9ac41de2fd42c133b8fc63f133e454ff65d7a8d1e244417e6ee",
+      "previousSha256": "653a686a463ef9ac41de2fd42c133b8fc63f133e454ff65d7a8d1e244417e6ee",
+      "unchanged": true
+    },
+    {
+      "path": "test/features/commerce/bil_store_copy_test.dart",
+      "currentSha256": "8499a09d82647c3458089a500608f6cdc060ea7f32821a370bbb9d5ea785a91f",
+      "previousSha256": "8499a09d82647c3458089a500608f6cdc060ea7f32821a370bbb9d5ea785a91f",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/commerce/domain/store_catalog_configuration.dart",
+      "currentSha256": "34a1b04c6dee409ae1770a5f78b00bc93b8a44a7745b6c293911bed174c1a8b6",
+      "previousSha256": "34a1b04c6dee409ae1770a5f78b00bc93b8a44a7745b6c293911bed174c1a8b6",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/commerce/domain/paid_plan_catalog.dart",
+      "currentSha256": "535a9186f9e5502ab204de33f408af9f228c3a295a3464fddf8d83d4808db4e4",
+      "previousSha256": "535a9186f9e5502ab204de33f408af9f228c3a295a3464fddf8d83d4808db4e4",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/commerce/domain/free_plan.dart",
+      "currentSha256": "9d2d9af7d310ff6119170216e40a49d85926f362ccce2ac17c3e78dcdd893f56",
+      "previousSha256": "9d2d9af7d310ff6119170216e40a49d85926f362ccce2ac17c3e78dcdd893f56",
+      "unchanged": true
+    },
+    {
+      "path": "lib/app/localization/bil_locale_rollout_manifest.dart",
+      "currentSha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433",
+      "previousSha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433",
+      "unchanged": true
+    },
+    {
+      "path": "artifacts/workout_media/workout_release_bundle_registry_v1.json",
+      "currentSha256": "90bd7cd4ce7d9c1a2652720b79b67e0ede885da1cf979d86632a3f8f3c345a3f",
+      "previousSha256": "90bd7cd4ce7d9c1a2652720b79b67e0ede885da1cf979d86632a3f8f3c345a3f",
+      "unchanged": true
+    },
+    {
+      "path": "assets/catalogs/recipes/v1/recipe-index.json",
+      "currentSha256": "6c9f4773f6221f5468c28e02d3897271009e6e36c3f0d9dd6bdca2fe66628638",
+      "previousSha256": "6c9f4773f6221f5468c28e02d3897271009e6e36c3f0d9dd6bdca2fe66628638",
+      "unchanged": true
+    },
+    {
+      "path": "assets/catalogs/recipes/v1/release-manifest.json",
+      "currentSha256": "a966bbedf7ada7dcf16d483c1d9c2fe94a810dffff504eb9944ed9b56bd86b53",
+      "previousSha256": "a966bbedf7ada7dcf16d483c1d9c2fe94a810dffff504eb9944ed9b56bd86b53",
+      "unchanged": true
+    },
+    {
+      "path": "ios/Runner/BILSpeechBridge.swift",
+      "currentSha256": "13746972cbe09a074486bbd3c32873451a7ba0563d737b9e467bd8d077918656",
+      "previousSha256": "13746972cbe09a074486bbd3c32873451a7ba0563d737b9e467bd8d077918656",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/remote_ai_consent_coordinator.dart",
+      "currentSha256": "80fc59d26f7f4739c97686b9ea85658c79c72d0597b9e5eab0b5570167d6ccbb",
+      "previousSha256": "80fc59d26f7f4739c97686b9ea85658c79c72d0597b9e5eab0b5570167d6ccbb",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart",
+      "currentSha256": "44320fc810156c9b4c727b574c9f3879dcd0b0200ec7c47621415ee9590d4202",
+      "previousSha256": "44320fc810156c9b4c727b574c9f3879dcd0b0200ec7c47621415ee9590d4202",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/daily_log/daily_log_capture_actions.dart",
+      "currentSha256": "745b3feb3589b0eb32450cfafa9e31113c74d193a3153a3182a3cdc1b03d52d9",
+      "previousSha256": "745b3feb3589b0eb32450cfafa9e31113c74d193a3153a3182a3cdc1b03d52d9",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/daily_log/food_log_actions.dart",
+      "currentSha256": "0ac51bf1da30af333f21ba75a8e849a890f62ec3827b3c3d9f48d028d13108f8",
+      "previousSha256": "0ac51bf1da30af333f21ba75a8e849a890f62ec3827b3c3d9f48d028d13108f8",
+      "unchanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_vision_flow.dart",
+      "currentSha256": "ba1b337bab05dfc0559c00a89d304497db96a98c11b517bdc9383768147cad4f",
+      "previousSha256": "ba1b337bab05dfc0559c00a89d304497db96a98c11b517bdc9383768147cad4f",
+      "unchanged": true
+    }
+  ]
+}

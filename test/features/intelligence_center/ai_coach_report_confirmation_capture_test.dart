@@ -158,27 +158,32 @@ void main() {
       );
       expect(tester.takeException(), isNull);
 
-      final boundary =
-          boundaryKey.currentContext!.findRenderObject()!
-              as RenderRepaintBoundary;
-      await tester.runAsync(() async {
-        final image = await boundary.toImage(pixelRatio: 1);
-        try {
-          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-          final directory = Directory(
-            'build/stage1-closure/ai-coach-safety-report-captures',
-          );
-          await directory.create(recursive: true);
-          await File(
-            '${directory.path}/report-sheet-$language-light.png',
-          ).writeAsBytes(bytes!.buffer.asUint8List());
-        } finally {
-          image.dispose();
-        }
-      });
-      await tester.ensureVisible(
-        find.byKey(const Key('ai-coach-confirm-report')),
-      );
+      if (Platform.environment['BIL_CAPTURE_COACH_RELEASE'] != '0') {
+        final boundary =
+            boundaryKey.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        await tester.runAsync(() async {
+          final image = await boundary.toImage(pixelRatio: 1);
+          try {
+            final bytes = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            final directory = Directory(
+              'build/stage1-closure/ai-coach-safety-report-captures',
+            );
+            await directory.create(recursive: true);
+            await File(
+              '${directory.path}/report-sheet-$language-light.png',
+            ).writeAsBytes(bytes!.buffer.asUint8List());
+          } finally {
+            image.dispose();
+          }
+        });
+        await tester.ensureVisible(
+          find.byKey(const Key('ai-coach-confirm-report')),
+        );
+      }
+
       await tester.tap(find.byKey(const Key('ai-coach-confirm-report')));
       await tester.pumpAndSettle();
       expect(submitted, hasLength(1));

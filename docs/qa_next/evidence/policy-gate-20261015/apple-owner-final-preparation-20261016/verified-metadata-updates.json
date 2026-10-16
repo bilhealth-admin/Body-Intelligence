@@ -1,0 +1,68 @@
+{
+  "checkedAtUtc": "2026-10-16T01:15:17.220Z",
+  "appId": "6805349703",
+  "versionId": "7a132506-d5a8-4810-a51f-b2dc2bd636cf",
+  "mutations": [
+    {
+      "resource": "/v1/subscriptions/6806555342",
+      "fields": [
+        "reviewNote"
+      ],
+      "before": {
+        "reviewNote": "722e1001a70a93acdca9dd8eaf33bb83cbd210e1c9ed2cbac04210b85447d960"
+      },
+      "after": {
+        "reviewNote": "BIL Premium monthly: ad-free Premium nutrition, fitness, sleep, device and trend features. Community, friends and private messaging are free for signed-in users and do not require this subscription. Remote AI Coach quota is provided by the separate Premium AI Coach tier or eligible AI token entitlement."
+      },
+      "exactReadback": true,
+      "untouchedFieldsPreserved": true
+    },
+    {
+      "resource": "/v1/subscriptions/6806555198",
+      "fields": [
+        "reviewNote"
+      ],
+      "before": {
+        "reviewNote": "dca4d260f74d2455c7cffcd3592ec92566b0d376f4f383d727ac5bcfd29f9c40"
+      },
+      "after": {
+        "reviewNote": "BIL Premium annual: ad-free Premium nutrition, fitness, sleep, device and trend features. Community, friends and private messaging are free for signed-in users and do not require this subscription. Remote AI Coach quota is provided by the separate Premium AI Coach tier or eligible AI token entitlement."
+      },
+      "exactReadback": true,
+      "untouchedFieldsPreserved": true
+    },
+    {
+      "resource": "/v1/appStoreVersionLocalizations/3866ba6c-b637-4f70-9c53-d6274c37bc62",
+      "fields": [
+        "description"
+      ],
+      "before": {
+        "description": "c9ccd886ef66be58d4b439ce3d479948780184b094f4225af0dc78ebdb26517b"
+      },
+      "after": {
+        "description": "Body Intelligence Log (BIL) brings daily nutrition, body trends, activity, and habits into one clear, explainable experience.\n\nLog meals by search, barcode, voice, or photo when the related service is available. Review calories, macros, nutrients, hydration, weight trends, activity, sleep, and weekly reports based on information you record or explicitly connect.\n\nWith your permission, BIL can import supported fitness and wellness data from Apple Health and compatible fitness watches or scales. Imported readings retain their source. BIL can export weight records to Apple Health only when you explicitly enable weight export and grant Health write permission.\n\nBIL distinguishes recorded or measured data from calculated estimates and general population references. The in-app Sources & Methodology section explains relevant references, calculation methods, and limitations.\n\nExplore food catalogs, nutrition plans, 1,500 recipes, 300+ workout videos, fasting tools, community features, and optional AI Coach guidance where available.\n\nRemote AI Coach answers are generated using Google Gemini, a third-party AI service operated by Google. Before the first remote request, BIL explains what information may be sent and requires your explicit consent. Only the question and relevant selected context are processed. Raw microphone audio is not sent. You can decline, continue using local features, or withdraw consent later.\n\nMeal-photo analysis has a separate consent step before an image is selected or sent to Google Gemini. Suggested foods are never logged until you review and confirm them.\n\nCommunity, friends, and private messages are available to signed-in users. Community Guidelines, privacy controls, blocking, reporting, and server-backed moderation tools help support a safer community experience.\n\nPremium subscriptions and BIL AI Boost are optional In-App Purchases. Core logging works locally and offline. Features requiring network access clearly report when they are unavailable. In-App Purchases are activated after App Store verification, and eligible purchases can be restored.\n\nBIL supports 25 languages and is designed to clearly identify missing information, data sources, and calculated estimates rather than presenting unavailable information as measured data.\n\nBody Intelligence Log is a wellness and fitness app, not a medical device. It does not diagnose, treat, cure, or prevent medical conditions. Calculated estimates and wellness information are not treatment prescriptions. Consult a doctor or qualified health professional before making decisions involving pregnancy, supplements, medicines, or medical conditions.\n\nTerms of Use (EULA):\nhttps://www.apple.com/legal/internet-services/itunes/dev/stdeula/\n\nCommunity Guidelines:\nhttps://www.bilhealth.com/community-guidelines\n\nPrivacy Policy:\nhttps://www.bilhealth.com/privacy\n\nApp Terms:\nhttps://www.bilhealth.com/terms"
+      },
+      "exactReadback": true,
+      "untouchedFieldsPreserved": true
+    },
+    {
+      "resource": "/v1/appStoreReviewDetails/ce559d08-1073-4d88-9887-7f31d1951533",
+      "fields": [
+        "notes"
+      ],
+      "before": {
+        "notes": "a87599cce47012dc81ff2b97cfcc55bc53febf6bd7db757eef84b089c67a88d5"
+      },
+      "after": {
+        "notes": "BUILD 36 CANDIDATE — PREPARATION, NOT SUBMITTED\nAndroid 33 and iOS 36 candidate builds have been authorized. The first signed build jobs stopped in test selection before creating a distribution artifact; that tooling issue is being corrected. No replacement binary has been validated or attached by this preparation, and the previous iOS 35 privacy rejection is not claimed resolved.\nNo purchase is required for review.\n\nSCREENSHOTS — GUIDELINE 2.3.10\nThe screenshot sets remain in this draft. Their correspondence to the corrected replacement must be verified before submission.\n\nREVIEW ACCESS\nPlease use the private demo credentials provided in App Review Information. The reviewer account is email-confirmed and has server-managed Premium and AI Coach access. No in-app purchase or subscription is required.\nLaunch steps:\n1. Choose English.\n2. Complete the age step.\n3. Tap Sign in > Store reviewer access.\n4. Enter the supplied review credentials.\nCore local logging features can also be evaluated without signing in.\n\nTHIRD-PARTY AI PRIVACY — GUIDELINES 5.1.1(i) AND 5.1.2(i)\nAI Coach: After signing in, open More > AI Coach settings and enable Remote AI consent. Alternatively, submit a question in AI Coach to display the consent prompt. Before sending any remote AI request, BIL:\n- identifies Google Gemini as a third-party AI service operated by Google;\n- explains that the user’s question and only the selected relevant context categories may be sent;\n- states that raw microphone audio is not sent; and\n- requires the user to select Allow & Continue.\nSelect Don’t Allow to verify that consent is not recorded and no request is sent to Google Gemini. Local and manual features remain available. Consent can be withdrawn later under More > AI Coach settings.\n\nMeal-photo analysis: Open Food Log > Analyze meal photo. Before image selection or upload, BIL separately:\n- identifies Google Gemini as a third-party AI service operated by Google;\n- explains that the selected image, locale, and minimum request metadata are sent to suggest visible foods; and\n- requires the user to select Allow & Continue.\nSelect Don’t Allow to return without selecting or sending an image. No image is uploaded and no food is logged until the user grants consent, reviews the suggested results, and confirms them. Consent can be withdrawn under More > Sharing & Privacy.\n\nHEALTH INFORMATION\nReferences, methodology, and limitations are available under:\nMore > Settings > Health preferences > Health sources & methodology\nBIL is a wellness application and does not diagnose, treat, cure, or prevent medical conditions.\n\nHEALTHKIT\nHealth data read permissions are optional and requested separately for each supported data type. Weight export is separate, user-initiated, and requires Health write permission.\n\nACCOUNT DELETION\nIn-app path: More > Help > Delete Account\nPrivacy Policy: https://www.bilhealth.com/privacy\nAccount Deletion: https://www.bilhealth.com/account-deletion\nSupport: https://www.bilhealth.com/support\n\nPURCHASES AND ROLES\nCommunity, friends and private messaging are free for signed-in users. Premium and Premium AI Coach have monthly and annual options. Premium AI Coach includes the Premium tier plus its AI allowance. BIL AI Boost is a consumable purchase of 2,500 AI tokens, not a recurring subscription or an administrator role. Restore Purchases is for eligible store entitlements; purchase and restore must be evaluated with an appropriate sandbox account. The feature-review account is separate from administrative access.\n\nREVIEW PREPARATION STATUS\nThe candidate must still be verified for actual reviewer login, full access, consent, screenshots, signed SDK/privacy behavior and sandbox purchases before submission. Source and automated test results are not evidence of a completed device review journey. HealthKit, Apple Watch and fitness-device features require supported hardware and explicit permissions. Declining optional health access must leave manual features usable."
+      },
+      "exactReadback": true,
+      "untouchedFieldsPreserved": true
+    }
+  ],
+  "credentialsChanged": false,
+  "privacyDeclarationsChanged": false,
+  "pricesTrialAvailabilityChanged": false,
+  "buildAttached": false,
+  "submissionSent": false
+}

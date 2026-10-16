@@ -826,6 +826,7 @@ void registerCoachRevealViewportCases() {
           size: const Size(390, 844),
         );
         Future<void> savePreview(String filename) async {
+          if (Platform.environment['BIL_CAPTURE_COACH_RELEASE'] == '0') return;
           final boundary = tester.renderObject<RenderRepaintBoundary>(
             find.byKey(const ValueKey('coach-screen-capture-root')),
           );

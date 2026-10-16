@@ -1,0 +1,16 @@
+{
+  "observedAtUtc": "2026-10-16T01:17:33.161914+00:00",
+  "source": "Authenticated App Store Connect visible App Privacy UI",
+  "appId": "6805349703",
+  "url": "https://appstoreconnect.apple.com/apps/6805349703/distribution/privacy",
+  "publishedLabel": "Published 2 days ago",
+  "collectedDataTypes": 22,
+  "tracking": [
+    "User ID",
+    "Device ID",
+    "Product Interaction"
+  ],
+  "edited": false,
+  "status": "P0_OPEN_PENDING_SIGNED_RUNTIME_ALIGNMENT",
+  "reason": "No validated IPA36 or ATT/tracking runtime proof. NSPrivacyTracking=false and non-personalized advertising do not prove no tracking."
+}

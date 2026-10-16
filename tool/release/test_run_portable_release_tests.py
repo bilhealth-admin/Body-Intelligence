@@ -51,6 +51,18 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
         self.assertEqual(set(all_tests) - set(scheduled), runner.EXCLUDED_TESTS)
         self.assertNotIn(runner.PERFORMANCE_BUDGET_TEST, remaining)
 
+    def test_coach_behavior_files_remain_scheduled_with_only_png_disabled(self):
+        policy = runner.load_code_only_policy()
+        _, ordinary = policy.discover()
+        for path in (
+            "test/features/intelligence_center/ai_coach_report_confirmation_capture_test.dart",
+            "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+        ):
+            self.assertIn(path, ordinary)
+            self.assertNotIn(path, policy.NOT_RUN)
+            self.assertNotIn(path, policy.MIXED_NAMES)
+            self.assertEqual(policy.ENV_CAPTURE_GUARDED[path], "BIL_CAPTURE_COACH_RELEASE")
+
     def test_partition_preserves_the_remaining_order(self):
         self.assertEqual(
             runner.partition_tests(self.portable),
@@ -171,6 +183,8 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
             "test/dashboard_polish/dashboard_current_preview_test.dart",
             "test/dashboard_polish/dashboard_polish_layout_review_test.dart",
             "test/dashboard_polish/icon_label_layout_review_test.dart",
+            "test/features/intelligence_center/ai_coach_report_confirmation_capture_test.dart",
+            "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
         }
         self.assertEqual(set(policy.ENV_CAPTURE_GUARDED), expected)
         for name in expected:
