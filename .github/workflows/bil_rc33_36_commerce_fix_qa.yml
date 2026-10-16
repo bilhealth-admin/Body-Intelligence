@@ -1,0 +1,59 @@
+name: BIL RC33/36 isolated commerce fixture QA
+
+on:
+  push:
+    branches:
+      - fix/rc33-36-commerce-fixtures-20261016
+    paths:
+      - tool/release/run_portable_release_tests.py
+      - .github/workflows/bil_rc33_36_commerce_fix_qa.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-rc-commerce-fixture-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused-then-portable:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/fix/rc33-36-commerce-fixtures-20261016'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Check out exact isolated source; no credentials retained
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Record exact source identity
+        run: |
+          git rev-parse HEAD
+          test "$(git branch --show-current)" = fix/rc33-36-commerce-fixtures-20261016
+      - name: Install same Flutter toolchain as signed builds
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies without upgrading
+        run: flutter pub get
+      - name: Check Python runner and reviewed code-only inventory
+        run: |
+          python3 -m py_compile tool/release/run_portable_release_tests.py
+          python3 tool/release/run_portable_release_tests.py --code-only --list-only
+      - name: Focused 11 purchase/subscription fixture cases — enable payments only here
+        run: |
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
+      - name: Broader code-only portable release suite (only after focused PASS)
+        run: python3 tool/release/run_portable_release_tests.py --code-only
+      - name: Record verification boundary
+        if: always()
+        run: |
+          {
+            echo '### RC33/36 isolated commerce fixture QA'
+            echo 'No release branch movement, signing, artifact promotion, store upload, production mutation, or native device purchase.'
+            echo 'Only a passing workflow on this SHA is evidence of completed checks.'
+            echo "Source SHA: $GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
