@@ -80,29 +80,26 @@ void main() {
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
 
-  test(
-    'signed build workflows stay blocked by incomplete release manifests',
-    () {
-      final androidWorkflow = _read(workflows.first);
-      final iosWorkflow = _read(workflows.last);
-      final androidManifest = _read(
-        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
-      );
-      final iosManifest = _read(
-        'docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
-      );
+  test('signed build workflows require complete frozen candidate records', () {
+    final androidWorkflow = _read(workflows.first);
+    final iosWorkflow = _read(workflows.last);
+    final androidManifest = _read(
+      'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+    );
+    final iosManifest = _read(
+      'docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+    );
 
-      expect(androidManifest, contains('STAGING_MANIFEST_COMPLETE: NO'));
-      expect(androidManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: NO'));
-      expect(iosManifest, contains('STAGING_MANIFEST_COMPLETE: NO'));
-      expect(iosManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: NO'));
-      for (final workflow in <String>[androidWorkflow, iosWorkflow]) {
-        expect(workflow, contains('grep -Fqx'));
-        expect(workflow, contains('STAGING_MANIFEST_COMPLETE: YES'));
-        expect(workflow, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
-      }
-    },
-  );
+    expect(androidManifest, contains('STAGING_MANIFEST_COMPLETE: YES'));
+    expect(androidManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+    expect(iosManifest, contains('STAGING_MANIFEST_COMPLETE: YES'));
+    expect(iosManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+    for (final workflow in <String>[androidWorkflow, iosWorkflow]) {
+      expect(workflow, contains('grep -Fqx'));
+      expect(workflow, contains('STAGING_MANIFEST_COMPLETE: YES'));
+      expect(workflow, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+    }
+  });
 
   test('Android validator consumes the current frozen-source manifest', () {
     final source = _read(workflows.first);

@@ -45,8 +45,8 @@ void main() {
         ),
       );
       expect(manifest, contains('RELEASE_BUILD_NUMBER: 33'));
-      expect(manifest, contains('STAGING_MANIFEST_COMPLETE: NO'));
-      expect(manifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: NO'));
+      expect(manifest, contains('STAGING_MANIFEST_COMPLETE: YES'));
+      expect(manifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
     },
   );
 

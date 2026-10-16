@@ -298,3 +298,7 @@ gh workflow run bil_codeql_security_extended.yml --ref integration/bil-qa-media-
 قراءة المتجر الحية أصبحت مثبتة: Apple ما زال REJECTED على build35، وسبب 5.1.2(i) هو إعلان tracking لـUser ID وDevice ID وProduct Interaction دون طلب ATT. App Privacy الحالية ما زالت تحمل العلامات الثلاث. عناصر Submission سبعة، منها ستة غير التطبيق؛ المنتجات القابلة للشراء خمسة. Google Policy Status ما زال App suspended، وقُرئ أصل Enforcement Process ورسالتا المتجر عبر Gmail. لم يُحسم سجل Appeal السابق أو App Access وData Safety الحالية. تُحفظ القراءة في [الدليل الحي](evidence/policy-gate-20261015/live-store-ui-readback-20261015.json).
 
 تثبت إعدادات الإصدار ADS_ENABLED=true، بخلاف QA بلا إعلانات؛ لذلك لا يُحسم tracking من NPA أو NSPrivacyTracking=false. [المطابقة الرباعية](BIL_20261015_APP_PRIVACY_FOUR_WAY_RECONCILIATION_AR.md) تحدد الدليل والقرار المطلوبين قبل تغيير ASC أو إضافة ATT. لم تتغير Production أو الأسعار أو Trial أو الأدوار الحية، ولم يُرسل Appeal أو رد Apple أو توقيع أو رفع متجر. نتائج التحليل وGitHub النهائية وقرار الجاهزية الأحدث تُجمع في التقرير الموحد مع بصمة مصدرها الفعلية.
+
+## 2026-10-16 — signed candidate construction authorized
+
+Owner approved Android 33 AAB, iOS 36 IPA and TestFlight upload after successful full suite (9889/0 failures), analysis and current policy evidence. See BIL_20261016_FINAL_SIGNED_CANDIDATE_BUILD_AR.md. Source freeze approval is for candidate construction only; historical enforcement cases and device/Sandbox/Console evidence remain open. No store submission or Production distribution approval.

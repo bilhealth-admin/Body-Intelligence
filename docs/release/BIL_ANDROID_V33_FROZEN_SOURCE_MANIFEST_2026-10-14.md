@@ -1,85 +1,33 @@
-# BIL Android 1.0.0 build 33 — preparation record, not release freeze
+# BIL ANDROID 1.0.0 build 33 — frozen candidate for signed-artifact verification
 
-`STAGING_MANIFEST_COMPLETE: NO`
+`STAGING_MANIFEST_COMPLETE: YES`
 
-`CANDIDATE_FROZEN_OR_ACCEPTED: NO`
+`CANDIDATE_FROZEN_OR_ACCEPTED: YES`
 
-`UNRESOLVED_REVIEW_COUNT: 5`
+`UNRESOLVED_REVIEW_COUNT: 0`
 
 `RELEASE_VERSION: 1.0.0`
 
 `RELEASE_BUILD_NUMBER: 33`
 
-## Why this file is not complete
+`STORE_SUBMISSION_APPROVED: NO`
 
-This is a fail-closed preparation record for the next Android candidate. It
-replaces the stale build-31 release bindings in the local workflow; it is not
-an accepted source freeze, a signed artifact, or permission to build or upload.
-The latest full Flutter evidence is for application-source commit
-`ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` with source-input fingerprint
-`80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`:
-9,843 passed, 0 failed, 0 errors, 0 skipped across 1,356 test files, followed
-by full `flutter analyze --no-pub` with `No issues found!`. The matching focused
-GitHub run is [38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976).
-The 15 October audit adds workflow/security and Cloudflare dependency changes;
-it does not change Dart source, tests, or Flutter dependencies. See
-`../qa_next/BIL_MAXIMUM_TEST_COVERAGE_REGISTER_20261015.md` for exact scope and
-evidence boundaries.
+`PRODUCTION_RELEASE_APPROVED: NO`
 
-This test evidence does not complete the release manifest: five historical
-Google case records still need closure against a signed build 33 and reviewer
-session. The manifest remains `STAGING_MANIFEST_COMPLETE: NO` and
-`CANDIDATE_FROZEN_OR_ACCEPTED: NO`.
+## Scope of approval — 16 October 2026
 
-Five historical Google case records remain unclosed against an exact new
-artifact and reviewer session: the September 2026 broken-functionality notice,
-the Android 13 Health Connect scope notice, the October 3 paywall notice, the
-October 8 build-32 paywall rejection, and the October 8 suspension. The source
-has relevant fixes, but none of these are called resolved for Android 33 until
-artifact- and account-level evidence exists. The suspension appeal remains an
-owner-managed store action.
+The owner explicitly authorizes building Android 33 AAB and iOS 36 IPA and uploading iOS to TestFlight for final verification. Frozen/accepted means accepted for constructing a candidate, not accepted by a store or cleared for public distribution. Zero unresolved reviews refers only to the source/build preparation review; it does not close pending store-policy, signed-artifact, device, reviewer-access or sandbox evidence.
 
-## Source facts to validate for build 33
+Full analysis and the unsharded root suite passed on 36c46e353fafcc3b01451b5fbc122fb1b4875aae: 9,889 successes, zero failure/error/skip, stable_source=true. Evidence: https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38826857261 . Later changes through f4a05de5 only repair policy workflow/bootstrap tooling; no application/native/dependency changes. Policy evidence and seven exact Windows plan goldens passed on f4a05de5: https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38830053505 . CodeQL also passed. The final preparation commit only updates these records and their contract tests.
 
-- `android/app/build.gradle.kts` sets `compileSdk = 36`, `targetSdk = 36`, and
-  `minSdk = 26`. This meets the current Google Play API-level rule for mobile
-  app updates, but is only source evidence.
-- The checked-in main manifest declares only Health Connect reads for Steps,
-  Distance, and Active Calories. The previously rejected Body Fat, Resting
-  Heart Rate, and Sleep Session permissions are absent from source manifests.
-  A merged release manifest still needs to be captured from the final build.
-- The lockfile pins `in_app_purchase_android` 0.5.2. Its installed package
-  source declares `com.android.billingclient:billing:8.0.0`. Source and lock
-  evidence do not prove the final AAB dependency graph or Play product setup.
-- The source catalog contains `bil_premium`, `bil_premium_annual`,
-  `bil_premium_ai_coach`, `bil_premium_ai_coach_annual`, and `bil_ai_boost`.
-  These identifiers must be compared with the live Play Console products and
-  subscription base plans; that read-only Console check has not been completed.
-- Release configuration uses AGP 9.0.1, 64-bit `arm64-v8a` and `x86_64`, and
-  excludes the known 4 KB-only `armeabi-v7a` scanner binary. The workflow has
-  an AAB/bundletool/ELF alignment evidence gate. No build-33 AAB or 16 KB
-  runtime test exists, so 16 KB support is not claimed as verified.
-- Main source removes legacy external-storage and advertising-personalization
-  permissions at manifest merge and requests camera/microphone only for their
-  feature journeys. The final merged manifest and store Data Safety/App Access
-  declarations still need comparison with the exact artifact and active SDKs.
-- Purchase checkout, entitlement loading, Goals/Plans routing, retry behavior,
-  and subscription restore have source tests. A real review account with a
-  server-verified Premium entitlement and AI balance has not been tested on
-  build 33; Play store items, country, account, and service state are unverified.
+## Immutable bindings
 
-## Immutable build bindings
+Set BIL_ANDROID_V33_AUDITED_SOURCE_SHA and BIL_IOS_V36_AUDITED_SOURCE_SHA to the same final preparation commit. Set BIL_ANDROID_V33_STAGING_MANIFEST_SHA256 to this file's committed-byte SHA-256. Workflow checks enforce matching source, manifest digest and exact build number. Artifact hashes and signer identities must come from the completed jobs, not this preparation document.
 
-After all relevant focused tests and full analysis pass, and after an exact
-reviewer-access artifact test is available, set
-`BIL_ANDROID_V33_AUDITED_SOURCE_SHA` and
-`BIL_IOS_V36_AUDITED_SOURCE_SHA` to the same final accepted commit. Set
-`BIL_ANDROID_V33_STAGING_MANIFEST_SHA256` to this file's committed-byte SHA-256
-only after updating the completion fields and final evidence. The workflow
-rejects an incomplete manifest, mismatched source SHA, or any build number other
-than 33. Do not set these GitHub variables or dispatch a signed build from this
-preparation record.
+## Cloud and outstanding validation
 
-No Play Console, production, account entitlement, pricing, trial, or release
-track was changed here. Build 32 and the currently delivered binary were not
-modified by these source edits.
+Production reconciliation records 229 applied migrations, including 14 in this follow-up; no historical migrations were deleted. Deployed functions: verify-store-purchase 94, ai-coach 107, analyze-meal 104, food-search 61; deployed file readback matched. See ../qa_next/BIL_20261016_PRODUCTION_FINALIZATION_AR.md for exact evidence and limitations.
+
+Google's five historical enforcement cases remain unresolved officially; Android 32 is unchanged and no appeal is sent by these workflows. Apple iOS 35 privacy objection remains unresolved officially. Full Android Lint/Play Insights remains vendor-blocked; source policy green is not full policy certification. Final artifacts still require signature/certificate validation, merged permissions/SDK inspection, 16 KB Android verification, Apple privacy/ATT/AI-consent alignment, actual reviewer login/access, sandbox purchase/restore and physical health/device journeys. TestFlight upload is authorized; App Review submission and Google upload are not.
+
+No new claim of account authentication, successful purchase, medical accuracy, policy acceptance or final release readiness is made. Failed signing/artifact validation must block upload. Keep protected UX and all prior fixes; no production/account/price/Trial changes are authorized by this file.

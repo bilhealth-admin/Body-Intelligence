@@ -1,8 +1,8 @@
-# BIL iOS 1.0.0 build 36 — preparation record, not release freeze
+# BIL IOS 1.0.0 build 36 — frozen candidate for signed-artifact verification
 
-`STAGING_MANIFEST_COMPLETE: NO`
+`STAGING_MANIFEST_COMPLETE: YES`
 
-`CANDIDATE_FROZEN_OR_ACCEPTED: NO`
+`CANDIDATE_FROZEN_OR_ACCEPTED: YES`
 
 `UNRESOLVED_REVIEW_COUNT: 0`
 
@@ -10,38 +10,24 @@
 
 `RELEASE_BUILD_NUMBER: 36`
 
-## Release state
+`STORE_SUBMISSION_APPROVED: NO`
 
-This local record aligns the signed-release workflow with the requested iOS
-build 36 and Android build 33 pair. It is not a frozen source approval, signed
-IPA, TestFlight upload, or App Store submission. No iOS artifact, TestFlight
-reviewer session, current App Store Connect status, or device run was performed
-for this preparation record. Google Play findings are tracked separately in the
-Android 33 manifest and are not reclassified as Apple review findings.
+`PRODUCTION_RELEASE_APPROVED: NO`
 
-The latest full Flutter evidence is for application-source commit
-`ef4b9f19f491426ba8663ba1a9d76f9af6fe0c67` with source-input fingerprint
-`80087ad7b2ef76192e9f22c5be0af34edc53dfc2139eb1b63ad81eaf7416614e`:
-9,843 passed, 0 failed, 0 errors, 0 skipped across 1,356 test files, followed
-by full `flutter analyze --no-pub` with `No issues found!`. The matching focused
-GitHub run is [38653187976](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38653187976).
-The 15 October audit adds workflow/security and Cloudflare dependency changes;
-it does not change Dart source, tests, or Flutter dependencies. See
-`../qa_next/BIL_MAXIMUM_TEST_COVERAGE_REGISTER_20261015.md` for exact scope and
-evidence boundaries.
+## Scope of approval — 16 October 2026
 
-This result does not complete the release manifest: there is still no iOS 36
-signed IPA, TestFlight upload, or current App Store Connect/device validation.
-The manifest remains `STAGING_MANIFEST_COMPLETE: NO` and
-`CANDIDATE_FROZEN_OR_ACCEPTED: NO`.
+The owner explicitly authorizes building Android 33 AAB and iOS 36 IPA and uploading iOS to TestFlight for final verification. Frozen/accepted means accepted for constructing a candidate, not accepted by a store or cleared for public distribution. Zero unresolved reviews refers only to the source/build preparation review; it does not close pending store-policy, signed-artifact, device, reviewer-access or sandbox evidence.
 
-## Immutable build bindings
+Full analysis and the unsharded root suite passed on 36c46e353fafcc3b01451b5fbc122fb1b4875aae: 9,889 successes, zero failure/error/skip, stable_source=true. Evidence: https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38826857261 . Later changes through f4a05de5 only repair policy workflow/bootstrap tooling; no application/native/dependency changes. Policy evidence and seven exact Windows plan goldens passed on f4a05de5: https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/38830053505 . CodeQL also passed. The final preparation commit only updates these records and their contract tests.
 
-After the source is clean and the exact iOS review artifact is validated, set
-`BIL_IOS_V36_AUDITED_SOURCE_SHA` and
-`BIL_ANDROID_V33_AUDITED_SOURCE_SHA` to the same final accepted commit. Set
-`BIL_IOS_V36_STAGING_MANIFEST_SHA256` to this file's committed-byte SHA-256
-only after updating the completion fields and final evidence. The signed iOS
-workflow rejects an incomplete manifest, mismatched source SHA, or any build
-number other than 36. Do not set these GitHub variables, build a signed IPA, or
-upload to TestFlight from this preparation record.
+## Immutable bindings
+
+Set BIL_ANDROID_V33_AUDITED_SOURCE_SHA and BIL_IOS_V36_AUDITED_SOURCE_SHA to the same final preparation commit. Set BIL_IOS_V36_STAGING_MANIFEST_SHA256 to this file's committed-byte SHA-256. Workflow checks enforce matching source, manifest digest and exact build number. Artifact hashes and signer identities must come from the completed jobs, not this preparation document.
+
+## Cloud and outstanding validation
+
+Production reconciliation records 229 applied migrations, including 14 in this follow-up; no historical migrations were deleted. Deployed functions: verify-store-purchase 94, ai-coach 107, analyze-meal 104, food-search 61; deployed file readback matched. See ../qa_next/BIL_20261016_PRODUCTION_FINALIZATION_AR.md for exact evidence and limitations.
+
+Google's five historical enforcement cases remain unresolved officially; Android 32 is unchanged and no appeal is sent by these workflows. Apple iOS 35 privacy objection remains unresolved officially. Full Android Lint/Play Insights remains vendor-blocked; source policy green is not full policy certification. Final artifacts still require signature/certificate validation, merged permissions/SDK inspection, 16 KB Android verification, Apple privacy/ATT/AI-consent alignment, actual reviewer login/access, sandbox purchase/restore and physical health/device journeys. TestFlight upload is authorized; App Review submission and Google upload are not.
+
+No new claim of account authentication, successful purchase, medical accuracy, policy acceptance or final release readiness is made. Failed signing/artifact validation must block upload. Keep protected UX and all prior fixes; no production/account/price/Trial changes are authorized by this file.

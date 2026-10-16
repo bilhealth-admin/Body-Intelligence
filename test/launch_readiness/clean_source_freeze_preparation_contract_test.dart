@@ -126,16 +126,18 @@ void main() {
         validator,
         isNot(contains('BIL_PLUS8_STAGING_MANIFEST_2026-09-05.md')),
       );
-      expect(metadata.unresolvedReviewCount, 5);
+      expect(metadata.unresolvedReviewCount, 0);
+      expect(manifestSource, contains('STORE_SUBMISSION_APPROVED: NO'));
+      expect(manifestSource, contains('PRODUCTION_RELEASE_APPROVED: NO'));
       expect(metadata.releaseVersion, '1.0.0');
       expect(metadata.releaseBuildNumber, 33);
       expect(
         metadata.stagingManifestComplete,
-        isFalse,
+        isTrue,
         reason:
-            'This Android 33 manifest is a preparation record, not an accepted freeze.',
+            'The owner approved a source freeze for signed candidate verification.',
       );
-      expect(metadata.candidateFrozenOrAccepted, isFalse);
+      expect(metadata.candidateFrozenOrAccepted, isTrue);
       expect(manifestSource, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
       expect(
         manifestSource,
