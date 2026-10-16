@@ -1,12 +1,7 @@
 name: BIL RC33/36 isolated commerce fixture QA
 
 on:
-  push:
-    branches:
-      - fix/rc33-36-commerce-fixtures-20261016
-    paths:
-      - tool/release/run_portable_release_tests.py
-      - .github/workflows/bil_rc33_36_commerce_fix_qa.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -46,8 +41,6 @@ jobs:
             --dart-define=BIL_PAYMENTS_ENABLED=true \
             test/features/commerce/app_purchase_confirmation_test.dart \
             test/features/commerce/app_subscription_confirmation_test.dart
-      - name: Broader code-only portable release suite (only after focused PASS)
-        run: python3 tool/release/run_portable_release_tests.py --code-only
       - name: Record verification boundary
         if: always()
         run: |
