@@ -59,6 +59,16 @@ EXCLUDED_TESTS = frozenset(
     }
 )
 
+# Purchase/subscription widget fixtures require the opt-in compile-time payment
+# gate. Keep that gate scoped to these two isolated tests: the regular code-only
+# suite must continue proving the default (disabled) configuration.
+COMMERCE_FIXTURE_TESTS = frozenset(
+    {
+        "test/features/commerce/app_purchase_confirmation_test.dart",
+        "test/features/commerce/app_subscription_confirmation_test.dart",
+    }
+)
+
 PERFORMANCE_BUDGET_TEST = "test/performance_budget_test.dart"
 WINDOWS_COMMAND_LINE_LIMIT = 6_000
 PORTABLE_COMMAND_LINE_LIMIT = 120_000
@@ -169,12 +179,30 @@ def main(argv: list[str] | None = None) -> int:
             print(f"PORTABLE_RELEASE_NAME_FILTER={path}: {pattern}; other cases NOT RUN", flush=True)
     performance_tests, remaining_tests = partition_tests(portable)
     remaining_tests = [path for path in remaining_tests if path not in mixed_names]
+    commerce_fixture_tests: list[str] = []
+    if policy is not None:
+        missing_fixtures = sorted(COMMERCE_FIXTURE_TESTS.difference(remaining_tests))
+        if missing_fixtures:
+            raise SystemExit(
+                "Commerce fixture isolation drifted; missing test files: "
+                + ", ".join(missing_fixtures)
+            )
+        commerce_fixture_tests = [
+            path for path in remaining_tests if path in COMMERCE_FIXTURE_TESTS
+        ]
+        remaining_tests = [
+            path for path in remaining_tests if path not in COMMERCE_FIXTURE_TESTS
+        ]
     print(f"PORTABLE_RELEASE_ALL_TEST_FILES={len(all_tests)}", flush=True)
     excluded_count = len(all_tests) - len(portable) if policy is not None else len(EXCLUDED_TESTS)
     print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={excluded_count}", flush=True)
     if policy is not None:
         print(f"PORTABLE_RELEASE_MIXED_NAME_FILTERED_FILES={len(mixed_names)}", flush=True)
     print(f"PORTABLE_RELEASE_SCHEDULED_TEST_FILES={len(portable)}", flush=True)
+    print(
+        f"PORTABLE_RELEASE_COMMERCE_FIXTURE_TEST_FILES={len(commerce_fixture_tests)}",
+        flush=True,
+    )
     print(
         f"PORTABLE_RELEASE_PERFORMANCE_SCHEDULED_TEST_FILES={len(performance_tests)}",
         flush=True,
@@ -204,15 +232,34 @@ def main(argv: list[str] | None = None) -> int:
         cwd=REPOSITORY_ROOT,
         check=False,
     )
-    if performance.returncode != 0 or (not remaining_tests and not mixed_names):
+    if performance.returncode != 0 or (not remaining_tests and not mixed_names and not commerce_fixture_tests):
         print(
             f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(performance_tests)}",
             flush=True,
         )
         return performance.returncode
 
-    print("PORTABLE_RELEASE_PHASE=remaining_portable", flush=True)
     executed_test_files = len(performance_tests)
+    if commerce_fixture_tests:
+        print("PORTABLE_RELEASE_PHASE=commerce_fixture", flush=True)
+        fixture_result = subprocess.run(
+            [
+                *command,
+                "--dart-define=BIL_PAYMENTS_ENABLED=true",
+                *commerce_fixture_tests,
+            ],
+            cwd=REPOSITORY_ROOT,
+            check=False,
+        )
+        executed_test_files += len(commerce_fixture_tests)
+        if fixture_result.returncode != 0:
+            print(
+                f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}",
+                flush=True,
+            )
+            return fixture_result.returncode
+
+    print("PORTABLE_RELEASE_PHASE=remaining_portable", flush=True)
     batches = partition_test_batches(command, remaining_tests)
     print(f"PORTABLE_RELEASE_REMAINING_BATCHES={len(batches)}", flush=True)
     for batch in batches:
