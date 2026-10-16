@@ -1,0 +1,46 @@
+name: BIL read-only reviewer login and entitlement preflight
+
+# Owner-requested independent verification of the existing reviewer account.
+# The called workflow uses Apple's configured review credentials in memory,
+# performs only an ordinary auth session and owner-scoped reads, then logs out.
+# No production entitlement grants, account mutation, signing, store upload,
+# console metadata changes, or candidate build modifications.
+on:
+  push:
+    branches:
+      - integration/bil-qa-media-policy-20261011
+    paths:
+      - .github/workflows/bil_reviewer_preflight_readonly_20261016.yml
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch-existing-read-only-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ALLOWED_PARENT: '7b139a88cf989731679bfebb33103d8ac5d4c042'
+      ALLOWED_PATH: '.github/workflows/bil_reviewer_preflight_readonly_20261016.yml'
+    steps:
+      - name: Verify the only code change is this independent QA dispatcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/integration/bil-qa-media-policy-20261011'
+          CHANGED="$(gh api "repos/$GITHUB_REPOSITORY/compare/$ALLOWED_PARENT...$GITHUB_SHA" --jq '.files | map(.filename) | join("\n")')"
+          test "$CHANGED" = "$ALLOWED_PATH" || { echo 'Unexpected additional release or app file change' >&2; exit 1; }
+
+      - name: Dispatch existing review-account login preflight with no mutating inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run bil_reviewer_access_preflight.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$GITHUB_REF_NAME"
+          echo 'REVIEWER_READONLY_PREFLIGHT=DISPATCH_ACCEPTED_NOT_A_TEST_PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No google_reviewer_owner_id or owner_confirmation was supplied; the privileged job remains skipped.' >> "$GITHUB_STEP_SUMMARY"
