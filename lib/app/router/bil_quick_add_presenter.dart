@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../shared/widgets/bil_modal_bottom_sheet.dart';
 import '../theme/premium_motion_tokens.dart';
 import 'bil_quick_add_sheet.dart';
+import 'bil_quick_add_photo_flow.dart';
 
 /// Exact internal destinations only. These are return destinations, not the
 /// shell's navigation indices, and must never accept a URL or a path prefix.
@@ -153,9 +154,10 @@ Future<void> showBilQuickAdd(
       );
       break;
     case 'photo':
-      // Photo analysis uses the standalone Food Log surface and returns to
-      // the validated originating destination.
-      context.push('/quick-add/meal-camera?from=$origin');
+      // Do not mount a placeholder Food Log/camera route behind a picker.
+      // Choose camera/gallery directly over the CURRENT tab. Only a confirmed
+      // image enters the existing Food Log analysis/review journey.
+      await openBilQuickAddMealPhoto(context, encodedReturnPath: origin);
       break;
     case 'exercise':
       context.push('/wellness/workouts');

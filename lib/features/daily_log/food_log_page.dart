@@ -96,6 +96,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   List<Food>? searchResults;
   bool searchLoading = false;
   bool mealImageBusy = false;
+  // Blocks duplicate capture attempts without hiding Food Log before selection.
+  bool mealPhotoRequestInFlight = false;
   bool barcodeBusy = false;
   bool voiceBusy = false;
   bool quickAddBusy = false;

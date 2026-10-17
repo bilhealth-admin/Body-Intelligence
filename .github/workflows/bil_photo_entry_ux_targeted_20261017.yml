@@ -1,0 +1,79 @@
+name: BIL Photo Entry UX — isolated targeted QA
+on:
+  push:
+    branches:
+      - fix/bil-photo-entry-ux-20261017
+      - fix/bil-photo-entry-ux-ready-20261017
+    paths:
+      - 'lib/app/router/bil_quick_add_presenter.dart'
+      - 'lib/app/router/bil_quick_add_photo_flow.dart'
+      - 'lib/features/daily_log/food_log_actions.dart'
+      - 'lib/features/daily_log/food_log_page.dart'
+      - 'lib/features/commerce/presentation/optional_access_offer.dart'
+      - 'test/app/router/bil_quick_add_presenter_test.dart'
+      - 'test/features/daily_log/quick_add_meal_camera_contract_test.dart'
+      - '.github/workflows/bil_photo_entry_ux_targeted_20261017.yml'
+permissions:
+  contents: read
+concurrency:
+  group: bil-photo-entry-ux-20261017
+  cancel-in-progress: true
+jobs:
+  photo-ux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve locked dependencies
+        run: flutter pub get
+      - name: Format touched sources in disposable runner only
+        run: |
+          dart format \
+            lib/app/router/bil_quick_add_presenter.dart \
+            lib/app/router/bil_quick_add_photo_flow.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/commerce/presentation/optional_access_offer.dart \
+            test/app/router/bil_quick_add_presenter_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart
+          git diff --check
+      - name: Analyze touched files
+        run: |
+          flutter analyze --no-pub \
+            lib/app/router/bil_quick_add_presenter.dart \
+            lib/app/router/bil_quick_add_photo_flow.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/commerce/presentation/optional_access_offer.dart \
+            test/app/router/bil_quick_add_presenter_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart
+      - name: Run Quick Add and meal vision focused regressions
+        run: |
+          flutter test --no-pub --concurrency=1 --reporter expanded --timeout 3m \
+            test/app/router/bil_quick_add_presenter_test.dart \
+            test/app/router/quick_add_premium_capture_actions_contract_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart \
+            test/features/daily_log/meal_photo_initial_action_test.dart \
+            test/features/daily_log/food_log_page_reference_test.dart \
+            test/features/daily_log/quick_add_barcode_integration_test.dart \
+            test/features/nutrition/meal_vision_flutter_capture_test.dart \
+            test/features/nutrition/meal_image_unified_review_contract_test.dart
+      - name: Report formatter diff for source backport
+        if: always()
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- \
+            lib/app/router/bil_quick_add_presenter.dart \
+            lib/app/router/bil_quick_add_photo_flow.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/commerce/presentation/optional_access_offer.dart \
+            test/app/router/bil_quick_add_presenter_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart | head -c 60000 || true
