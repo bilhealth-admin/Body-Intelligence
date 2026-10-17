@@ -38,3 +38,8 @@
 
 ### Corrected coach CI path
 - The expanded Coach test matrix succeeded in 135 tests but included a **nonexistent test path** `coach_navigation_receipt_test.dart`; the actual tracked file is `ai_coach_navigation_receipt_test.dart`. This is strictly a CI path correction, not an exemption or removal. Rerun the entire Coach matrix at the latest tree.
+
+### Store 403 classification correction (code + isolated test)
+- Store RPC security *unchanged*: missing/incorrect reconciliation secret still throws `reconciliation_forbidden` and cannot call database. Only HTTP classification is corrected from retryable 503 to intentional **403 Forbidden**; legacy signed purchase and boost paths retain their verified receipt protocol.
+- `store_reconciliation_http_denial_test.ts` exercises absent secret, wrong/equal secret lengths and a foreign HTTP method with synthetic requests and injected dummy environment; requires no genuine account, receipt, admin secret or transaction.
+- Only backend source changed; Production function version is **not deployed**. Test status must be obtained from Actions before handoff.

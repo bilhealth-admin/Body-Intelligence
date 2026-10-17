@@ -177,3 +177,24 @@ jobs:
         env:
           BIL_ALLOW_PUBLIC_WORKOUT_HEAD: "1"
         run: python3 tool/release/check_public_workout_cdn_samples.py
+
+  store_reconciliation_contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282
+        with:
+          deno-version: v2.9.7
+      - name: No store credentials, no production secrets, no live backend writes
+        run: |
+          test -z "${SUPABASE_SERVICE_ROLE_KEY:-}"
+          test -z "${BIL_RECONCILIATION_SECRET:-}"
+          test -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}"
+          cd supabase/functions
+          deno test --allow-env --allow-read --allow-net --frozen --lock=deno.lock \
+            verify-store-purchase/store_reconciliation_http_denial_test.ts \
+            verify-store-purchase/store_credentials_test.ts \
+            verify-store-purchase/store_environment_test.ts
