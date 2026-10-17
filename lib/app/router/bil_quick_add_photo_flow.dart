@@ -73,7 +73,8 @@ Future<void> openBilQuickAddMealPhoto(
     final available = await container.read(aiBoostVisionAccessProvider.future);
     if (!context.mounted) return;
     if (!available) {
-      final insufficient = container.read(aiVisionCreditStateProvider).asData?.value ==
+      final insufficient =
+          container.read(aiVisionCreditStateProvider).asData?.value ==
           AiVisionCreditState.insufficient;
       await showOptionalAccessOfferFromContainer(
         context,
@@ -91,14 +92,15 @@ Future<void> openBilQuickAddMealPhoto(
       final permissions = const BilRuntimePermissionPolicy();
       final current = await permissions.status(BilRuntimeCapability.camera);
       if (!context.mounted) return;
-      final allowed = current == BilRuntimePermissionState.granted ||
+      final allowed =
+          current == BilRuntimePermissionState.granted ||
           await permissions.request(BilRuntimeCapability.camera) ==
               BilRuntimePermissionState.granted;
       if (!allowed || !context.mounted) {
         if (context.mounted) {
-          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-            SnackBar(content: Text(copy.text('camera_failed'))),
-          );
+          ScaffoldMessenger.maybeOf(
+            context,
+          )?.showSnackBar(SnackBar(content: Text(copy.text('camera_failed'))));
         }
         return;
       }
@@ -140,8 +142,8 @@ Future<void> openBilQuickAddMealPhoto(
     );
   } on Object {
     if (!context.mounted) return;
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(content: Text(copy.text('camera_failed'))),
-    );
+    ScaffoldMessenger.maybeOf(
+      context,
+    )?.showSnackBar(SnackBar(content: Text(copy.text('camera_failed'))));
   }
 }
