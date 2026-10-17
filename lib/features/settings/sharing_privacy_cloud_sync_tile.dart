@@ -116,11 +116,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
           .runOnce();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            cloudManualSyncOutcomeText(context, result),
-          ),
-        ),
+        SnackBar(content: Text(cloudManualSyncOutcomeText(context, result))),
       );
       ref.invalidate(cloudRuntimePreparationProvider);
     } on Object {

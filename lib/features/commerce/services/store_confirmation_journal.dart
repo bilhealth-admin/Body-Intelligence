@@ -16,8 +16,9 @@ final class StoreConfirmationJournal {
   }) : _session = processSession ?? _defaultProcessSession,
        _now = clock ?? DateTime.now;
 
-  static final String _defaultProcessSession =
-      DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+  static final String _defaultProcessSession = DateTime.now()
+      .microsecondsSinceEpoch
+      .toRadixString(36);
   final PreferencesRepository preferences;
   final bool Function() isCurrent;
   final String _session;

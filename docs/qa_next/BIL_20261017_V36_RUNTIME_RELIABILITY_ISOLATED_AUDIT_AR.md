@@ -30,3 +30,8 @@
 ### Android checker / video public read-only QA
 - كشف سجل Android 33 موقع الخطأ: أداة verify_android_16k_alignment.py دخلت مسار فشل التحقق الأصلي ثم انهارت بسبب استخدام sys.stderr دون import sys. تم إصلاح **المبلّغ عن الفشل فقط** دون تعديل حدود ELF أو إسقاط gate؛ اختبارات Python جديدة تثبت صدور FAIL JSON/stdout/stderr عند غياب AAB أو bundletool وعدم ظهور PASS زائف. **توافق AAB الفعلي مع 16 KB لا يزال غير مثبت** ويتطلب إعادة البناء/فحص .so في خطوة منفصلة.
 - أضفنا اختبارات فيديو محلية بمحاكيات HTTP لحدود checksum وHEAD/CDN؛ وتجربة عامة قراءة فقط موجودة أصلًا في المشروع لطلب HEAD + 32 بايت (دون token أو تنزيل فيديو كامل) للتحقق من CDN الحقيقي. نتيجتها ستُسجل منفصلة ولا تعتبر اختبار تشغيل على جهاز حقيقي.
+
+### Expanded isolated acceptance matrix
+- Coach independent regression suite now exercises lifecycle, RTL/25 languages, response messages, Arabic transcript, navigation, offline, and duplicate-action behavior. No real AI provider requests or user personal records.
+- Public workouts sample diagnostic reads only HEAD metadata from 20 declared preview groups at a concurrency cap of three; no video is downloaded, no credentials supplied, and no production mutations. It tests availability, bytes, range support and strong ETag; 20/302 is only a representative sample, not native playback certification.
+- Financial logs correlation: in 16 October store traffic, the 503 cluster includes `reconciliation_forbidden` (intentional security rejection currently incorrectly mapped to 503); ownership conflicts correspond to 400. Do **not** treat all purchase 503 as vendor outage; revise error classification only with old-client compatibility proof.

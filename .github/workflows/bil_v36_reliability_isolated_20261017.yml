@@ -21,9 +21,9 @@ jobs:
           flutter-version: 3.44.6
           cache: true
       - run: flutter pub get
-      - name: Format targeted sources in isolated runner, report any delta
+      - name: Strict Dart source formatting (no CI rewrite)
         run: |
-          dart format \
+          dart format --output=none --set-exit-if-changed \
             lib/features/community/data/community_feed_cache.dart \
             lib/features/settings/cloud_sync_status_presentation.dart \
             lib/features/settings/sharing_privacy_cloud_sync_tile.dart \
@@ -142,3 +142,38 @@ jobs:
           flutter test --no-pub --timeout 90s --reporter expanded \
             --dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true \
             test/features/wellness/wellness_video_stream_live_test.dart
+  coach_quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Coach lifecycle, 25 locales, Arabic voice, routes and retry matrix
+        run: |
+          flutter test --no-pub --concurrency=2 --timeout 8m --reporter expanded \
+            test/features/intelligence_center/coach_page_lifecycle_regression_test.dart \
+            test/features/intelligence_center/coach_greeting_completion_test.dart \
+            test/features/intelligence_center/coach_conversation_rename_ui_test.dart \
+            test/features/intelligence_center/coach_message_presentation_view_test.dart \
+            test/features/intelligence_center/coach_voice_transcript_normalizer_test.dart \
+            test/features/intelligence_center/coach_offline_behavior_benchmark_test.dart \
+            test/features/intelligence_center/coach_25_locale_matrix_test.dart \
+            test/features/intelligence_center/coach_navigation_receipt_test.dart \
+            test/features/intelligence_center/coach_answer_with_action_regression_test.dart
+  video_samples_read_only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Validate up to 20 public preview HEAD responses without credentials
+        env:
+          BIL_ALLOW_PUBLIC_WORKOUT_HEAD: "1"
+        run: python3 tool/release/check_public_workout_cdn_samples.py

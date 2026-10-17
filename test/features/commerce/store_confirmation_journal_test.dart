@@ -93,37 +93,43 @@ void main() {
       expect(jsonDecode((await prefs.get(journal.key(e)))!)['state'], 'shown');
     },
   );
-  test('competing process recoveries cannot duplicate the celebration', () async {
-    final e = event();
-    await journal.enqueue(e, userInitiated: true);
-    await journal.reserve(e);
-    final resumed = StoreConfirmationJournal(
-      prefs,
-      () => true,
-      clock: () => now,
-      processSession: 'resumed-process',
-    );
-    final other = StoreConfirmationJournal(
-      prefs,
-      () => true,
-      clock: () => now,
-      processSession: 'other-process',
-    );
-    final attempts = await Future.wait([
-      resumed.enqueue(e, userInitiated: false),
-      other.enqueue(e, userInitiated: false),
-    ]);
-    expect(attempts.where((approved) => approved), hasLength(1));
-    expect(await resumed.enqueue(e, userInitiated: false), isTrue);
-    expect(await resumed.reserve(e), isTrue);
-    expect(await other.enqueue(e, userInitiated: false), isFalse);
-    expect(
-      await other.enqueue(event(environment: 'production'), userInitiated: true),
-      isFalse,
-    );
-    expect(await resumed.cancel(e), isTrue);
-    expect(await resumed.enqueue(e, userInitiated: false), isFalse);
-  });
+  test(
+    'competing process recoveries cannot duplicate the celebration',
+    () async {
+      final e = event();
+      await journal.enqueue(e, userInitiated: true);
+      await journal.reserve(e);
+      final resumed = StoreConfirmationJournal(
+        prefs,
+        () => true,
+        clock: () => now,
+        processSession: 'resumed-process',
+      );
+      final other = StoreConfirmationJournal(
+        prefs,
+        () => true,
+        clock: () => now,
+        processSession: 'other-process',
+      );
+      final attempts = await Future.wait([
+        resumed.enqueue(e, userInitiated: false),
+        other.enqueue(e, userInitiated: false),
+      ]);
+      expect(attempts.where((approved) => approved), hasLength(1));
+      expect(await resumed.enqueue(e, userInitiated: false), isTrue);
+      expect(await resumed.reserve(e), isTrue);
+      expect(await other.enqueue(e, userInitiated: false), isFalse);
+      expect(
+        await other.enqueue(
+          event(environment: 'production'),
+          userInitiated: true,
+        ),
+        isFalse,
+      );
+      expect(await resumed.cancel(e), isTrue);
+      expect(await resumed.enqueue(e, userInitiated: false), isFalse);
+    },
+  );
   test(
     'historical, refunded and other environments cannot acquire a celebration',
     () async {

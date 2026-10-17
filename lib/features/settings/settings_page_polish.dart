@@ -62,11 +62,7 @@ class _CloudSyncRow extends ConsumerWidget {
           .runOnce();
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            cloudManualSyncOutcomeText(context, result),
-          ),
-        ),
+        SnackBar(content: Text(cloudManualSyncOutcomeText(context, result))),
       );
     } on Object {
       if (!context.mounted) return;
