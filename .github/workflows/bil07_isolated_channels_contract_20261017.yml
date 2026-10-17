@@ -1,0 +1,44 @@
+name: BIL07 isolated channel backend contracts
+on:
+  push:
+    branches:
+      - qa/bil07-channel-backend-isolated-20261017
+permissions:
+  contents: read
+jobs:
+  pglite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282
+        with:
+          deno-version: v2.9.7
+      - name: PGlite synthetic-auth negative and positive tests
+        run: |
+          set -euo pipefail
+          test -z "${SUPABASE_SERVICE_ROLE_KEY:-}"
+          test -z "${DATABASE_URL:-}"
+          deno test --allow-read --allow-env --no-lock \
+            supabase/tests/bil07_community_channels_isolated_pglite_test.ts
+          git diff --exit-code
+  flutter:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Verify existing community owner and chat contracts
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout 8m --reporter expanded \
+            test/features/community/community_chat_auth_session_test.dart \
+            test/features/community/community_policy_acceptance_ui_test.dart \
+            test/features/community/community_owner_refresh_transport_test.dart
