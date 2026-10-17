@@ -1,0 +1,46 @@
+name: BIL Admin gift revoked — targeted verified-Free contract
+on:
+  push:
+    branches:
+      - fix/bil-admin-revoke-verified-free-20261017
+    paths:
+      - lib/features/commerce/repositories/server_entitlement_repository.dart
+      - test/features/commerce/admin_revocation_verified_free_regression_test.dart
+      - .github/workflows/bil_admin_revoke_verified_free_targeted.yml
+permissions:
+  contents: read
+concurrency:
+  group: bil-revoke-verified-free-targeted
+  cancel-in-progress: true
+jobs:
+  flutter-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - name: Checkout only the isolated Flutter fix branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Pinned Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Install locked project dependencies
+        run: flutter pub get
+      - name: Format only the two edited files in the disposable CI workspace
+        run: |
+          dart format lib/features/commerce/repositories/server_entitlement_repository.dart test/features/commerce/admin_revocation_verified_free_regression_test.dart
+          git diff --check
+      - name: Analyze touched repository and regression source
+        run: |
+          flutter analyze --no-pub lib/features/commerce/repositories/server_entitlement_repository.dart test/features/commerce/admin_revocation_verified_free_regression_test.dart
+      - name: Run focused revoke, reviewer, owner-epoch and gate regressions
+        run: |
+          flutter test --no-pub --concurrency=1 --reporter expanded --timeout 3m             test/features/commerce/admin_revocation_verified_free_regression_test.dart             test/features/commerce/reviewer_subscription_mirror_fallback_test.dart             test/features/commerce/admin_subscription_access_test.dart             test/features/commerce/server_entitlement_owner_epoch_test.dart             test/features/commerce/premium_route_unverified_retry_test.dart
+      - name: Output formatted delta for patch reconciliation
+        if: always()
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- lib/features/commerce/repositories/server_entitlement_repository.dart test/features/commerce/admin_revocation_verified_free_regression_test.dart | head -c 35000 || true
