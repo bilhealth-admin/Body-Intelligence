@@ -121,8 +121,7 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
         error is ChannelFailure &&
         error.kind == ChannelFailureKind.policyRequired;
     final rateLimited =
-        error is ChannelFailure &&
-        error.kind == ChannelFailureKind.rateLimited;
+        error is ChannelFailure && error.kind == ChannelFailureKind.rateLimited;
     return _notice(
       policy
           ? CommunityChannelsCopyKey.policyRequired
