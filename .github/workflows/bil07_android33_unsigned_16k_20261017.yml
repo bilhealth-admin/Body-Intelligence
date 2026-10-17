@@ -1,0 +1,61 @@
+name: BIL07 Android33 unsigned native 16KB isolated gate
+on:
+  push:
+    branches:
+      - qa/bil07-android33-unsigned-16k-20261017
+permissions:
+  contents: read
+jobs:
+  unsigned_16k:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Prove no signing or store upload configuration is loaded
+        run: |
+          set -euo pipefail
+          test ! -f android/key.properties
+          test -z "\${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}"
+          test -z "\${APP_STORE_CONNECT_PRIVATE_KEY:-}"
+          test -z "\${SUPABASE_SERVICE_ROLE_KEY:-}"
+          flutter --version
+      - name: Fetch locked Flutter packages
+        run: flutter pub get
+      - name: Build QA release AAB unsigned with Android versionCode 33
+        run: |
+          flutter build appbundle --release --no-pub \
+            --build-number=33 --target-platform android-arm64,android-x64
+          test -s build/app/outputs/bundle/release/app-release.aab
+      - name: Verify official Bundletool digest and all ELF LOAD/RELRO + 16 KB metadata
+        run: |
+          set -euo pipefail
+          BUNDLETOOL_VERSION=1.18.3
+          BUNDLETOOL_SHA256=a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-\${BUNDLETOOL_VERSION}.jar"
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$BUNDLETOOL_JAR" \
+            "https://github.com/google/bundletool/releases/download/\${BUNDLETOOL_VERSION}/bundletool-all-\${BUNDLETOOL_VERSION}.jar"
+          echo "$BUNDLETOOL_SHA256  $BUNDLETOOL_JAR" | sha256sum --check
+          python3 tool/release/verify_android_16k_alignment.py \
+            --aab build/app/outputs/bundle/release/app-release.aab \
+            --bundletool "$BUNDLETOOL_JAR" \
+            --bundletool-version "$BUNDLETOOL_VERSION" \
+            --readelf readelf \
+            --evidence-dir "$RUNNER_TEMP/bil07-unsigned-android33-16k"
+      - name: Publish text-only native evidence, never the build or keys
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil07-unsigned-android33-16k-report
+          path: \${{ runner.temp }}/bil07-unsigned-android33-16k/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Check source remains unchanged
+        if: always()
+        run: git diff --check && git diff --exit-code
