@@ -91,7 +91,7 @@ void main() {
     final c = cases[i];
     final caseIndex = i;
     test(c.name, () async {
-      final owner = '65000000-0000-4000-8000-00000000000' + (caseIndex + 1).toString();
+      final owner = '65000000-0000-4000-8000-00000000000${caseIndex + 1}';
       final now = DateTime.now().toUtc();
       final seen = <String>[];
       final saved = <String, String>{};
@@ -116,11 +116,15 @@ void main() {
         final path = request.url.path;
         seen.add(path);
         if (path == '/rest/v1/bil_ai_closed_test_grants') {
-          if (c.closedTestFailure) throw http.ClientException('synthetic closed-test outage');
+          if (c.closedTestFailure) {
+            throw http.ClientException('synthetic closed-test outage');
+          }
           return http.Response('[]', 200, headers: {'content-type': 'application/json'});
         }
         if (path == '/rest/v1/bil_subscriptions') {
-          if (c.mirrorFailure) throw http.ClientException('synthetic mirror outage');
+          if (c.mirrorFailure) {
+            throw http.ClientException('synthetic mirror outage');
+          }
           final rows = c.paidStore
               ? [
                   {
@@ -155,7 +159,7 @@ void main() {
               : null;
           return http.Response(jsonEncode(gift), 200, headers: {'content-type': 'application/json'});
         }
-        throw StateError('Unexpected URL: ' + request.url.toString());
+        throw StateError('Unexpected URL: ${request.url}');
       });
       try {
         await Supabase.initialize(
@@ -234,7 +238,7 @@ void main() {
             : null;
         return http.Response(jsonEncode(gift), 200, headers: {'content-type': 'application/json'});
       }
-      throw StateError('Unexpected URL: ' + request.url.toString());
+      throw StateError('Unexpected URL: ${request.url}');
     });
     try {
       await Supabase.initialize(
