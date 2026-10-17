@@ -26,6 +26,8 @@ void main() {
         ),
       ),
     );
+    // MaterialApp's localization delegate resolves asynchronously.
+    await tester.pumpAndSettle();
     final plus = find.byKey(const Key('daily-meal-empty-add-food'));
     expect(plus, findsOneWidget);
     expect(tester.widget<IconButton>(plus).onPressed, isNotNull);

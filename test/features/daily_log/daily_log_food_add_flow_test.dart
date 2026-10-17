@@ -184,8 +184,7 @@ void main() {
         await tester.pumpAndSettle();
       }
       await tester.enterText(find.byType(SearchBar).last, 'Plain Greek');
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await _waitForInlineFoodResult(tester, 'Plain Greek yogurt');
       expect(find.text('Plain Greek yogurt'), findsOneWidget);
       await tester.tap(find.text('Plain Greek yogurt'));
       await tester.pump();
@@ -247,6 +246,7 @@ void main() {
       );
       expect(reopenedSearchBars, isNotEmpty);
       expect(reopenedSearchBars.last.controller?.text, 'Plain Greek');
+      await _waitForInlineFoodResult(tester, 'Plain Greek yogurt');
       expect(find.text('Plain Greek yogurt'), findsOneWidget);
       await tester.tap(find.text('Plain Greek yogurt'));
       await tester.pump();
@@ -325,4 +325,24 @@ void main() {
       expect(await database.select(database.mealItems).get(), isEmpty);
     },
   );
+}
+
+ 
+/// The progressive authority reads SQLite on an actual executor. In widget
+/// tests, a single fake-async one-second pump does not guarantee real IO ran.
+/// Wait for the REAL result (never fake the food), with a strict bounded retry.
+Future<void> _waitForInlineFoodResult(
+  WidgetTester tester,
+  String displayName,
+) async {
+  for (var attempt = 0;
+      attempt < 100 && find.text(displayName).evaluate().isEmpty;
+      attempt++) {
+    await tester.pump(const Duration(milliseconds: 50));
+    if (attempt % 5 == 0) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+    }
+  }
 }
