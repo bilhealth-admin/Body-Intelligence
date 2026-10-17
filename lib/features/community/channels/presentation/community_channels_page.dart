@@ -253,16 +253,18 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
     CommunityChannelsController controller,
     CommunityChannelMessage message,
   ) async {
-    final safety = widget.repository;
+    final safetySource = widget.repository;
     final owner = controller.ownerId;
     final channel = controller.channelId;
-    if (safety is! CommunityChannelSafetyRepository ||
+    if (safetySource is! CommunityChannelSafetyRepository ||
         owner == null ||
         channel == null ||
         message.authorId == owner ||
         !_current(controller)) {
       return;
     }
+    final CommunityChannelSafetyRepository safety =
+        safetySource as CommunityChannelSafetyRepository;
     final action = await showDialog<String>(
       context: context,
       builder: (dialogContext) => BilPearlAlertDialog(

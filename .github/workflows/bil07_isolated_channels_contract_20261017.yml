@@ -48,6 +48,9 @@ jobs:
             test/features/community/community_channels_safety_action_test.dart
           git diff --check
           git diff --stat
+          echo BIL07_FORMAT_PATCH_START
+          git --no-pager diff --unified=2 -- lib/features/community/channels/domain/community_channels_repository.dart lib/features/community/channels/data/supabase_community_channels_repository.dart lib/features/community/channels/presentation/community_channel_message_tile.dart lib/features/community/channels/presentation/community_channels_copy.dart lib/features/community/channels/presentation/community_channels_page.dart lib/features/community/channels/presentation/community_channel_transcript.dart test/features/community/community_channels_safety_action_test.dart
+          echo BIL07_FORMAT_PATCH_END
       - name: Analyze channel safety UI and transport
         run: |
           flutter analyze --no-pub \
