@@ -4,7 +4,6 @@ import '../../shared/widgets/first_use_target_guide.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -525,12 +524,22 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         const SizedBox(height: 14),
 
         Text(
-          _t(context, 'Most popular'),
+          query.isEmpty
+              ? _t(context, 'Most popular')
+              : _foodTourText(
+                  context,
+                  en: 'Search results',
+                  ar: 'نتائج البحث',
+                  fr: 'Résultats de recherche',
+                  es: 'Resultados de búsqueda',
+                  tr: 'Arama sonuçları',
+                ),
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
         ),
-        if (filtered.isEmpty) _buildEmptyState(context),
+        // An in-flight query must never flash a false "no foods" page.
+        if (!searchLoading && filtered.isEmpty) _buildEmptyState(context),
         if (filtered.isNotEmpty)
           for (final food in filtered)
             _buildFoodTile(
@@ -539,14 +548,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               localeTag: query.isEmpty ? interfaceLocale : resultLocale,
               guide: food.id == filtered.first.id ? chooseGuide : null,
             ),
-        if (filtered.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Text(
-              _t(context, 'No foods found'),
-              textAlign: TextAlign.center,
-            ),
-          ),
       ],
     );
   }
@@ -591,24 +592,27 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         mounted &&
         generation == _searchGeneration &&
         identical(ref.read(foodRuntimeSearchAuthorityProvider), authority);
-    _progressiveSearch = authority
-        .searchProgressively(query, limit: 30)
-        .listen(
-          (result) {
-            if (!current()) return;
-            setState(() {
-              searchResults = result;
-              searchLoading = false;
-            });
-          },
-          onError: (Object error, StackTrace stack) {
-            if (!current()) return;
-            setState(() {
-              searchResults ??= const <Food>[];
-              searchLoading = false;
-            });
-          },
-        );
+    _searchDebounce = Timer(const Duration(milliseconds: 160), () {
+      if (!current()) return;
+      _progressiveSearch = authority
+          .searchProgressively(query, limit: 30)
+          .listen(
+            (result) {
+              if (!current()) return;
+              setState(() {
+                searchResults = result;
+                searchLoading = false;
+              });
+            },
+            onError: (Object error, StackTrace stack) {
+              if (!current()) return;
+              setState(() {
+                searchResults ??= const <Food>[];
+                searchLoading = false;
+              });
+            },
+          );
+    });
   }
 
   Widget _buildActions(BuildContext context) {

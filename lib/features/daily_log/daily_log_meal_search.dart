@@ -175,7 +175,6 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     return uniqueResults.map(
       (food) => _mealSearchFoodTile(
         food: food,
-        controller: controller,
         languageCode: resultLocale,
         current: current,
       ),
@@ -184,7 +183,6 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
 
   Widget _mealSearchFoodTile({
     required Food food,
-    required TextEditingController controller,
     required String languageCode,
     bool Function()? current,
   }) {
@@ -274,7 +272,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           customBorder: const CircleBorder(),
           onTap: () {
             if (current?.call() ?? true) {
-              _selectFood(food, controller, displayName);
+              _selectFood(food);
             }
           },
           child: SizedBox.square(
@@ -301,7 +299,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       child: InkWell(
         onTap: () {
           if (current?.call() ?? true) {
-            _selectFood(food, controller, displayName);
+            _selectFood(food);
           }
         },
         child: Padding(
@@ -345,7 +343,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     );
   }
 
-  void _selectFood(Food food, TextEditingController controller, String displayName) {
+  void _selectFood(Food food) {
     mealSearchDebounce?.cancel();
     _updateState(() {
       selectedFood = food;

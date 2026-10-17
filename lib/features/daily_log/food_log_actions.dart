@@ -79,7 +79,7 @@ extension _FoodLogActions on _FoodLogPageState {
                     skipKey: const Key('food-log-save-guide-skip'),
                   )
                 : null;
-            return AlertDialog(
+            return BilPearlAlertDialog(
               title: Text(_t(dialogContext, 'Choose a serving')),
               content: SingleChildScrollView(
                 child: Column(

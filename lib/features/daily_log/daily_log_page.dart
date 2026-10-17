@@ -3,7 +3,6 @@ import '../commerce/presentation/optional_access_offer.dart';
 import '../dashboard/widgets/first_food_days_guide.dart';
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
