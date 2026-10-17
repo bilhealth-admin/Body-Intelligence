@@ -51,34 +51,18 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     };
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(permissionTitle),
-          content: Text(
-            tr(
-              'This permission is off. Enable it in system settings to use this feature; typing remains available.',
-              'هذا الإذن متوقف. فعّله في إعدادات النظام لاستخدام هذه الميزة؛ وتبقى الكتابة متاحة.',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(tr('Not now', 'ليس الآن')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(tr('Open system settings', 'فتح إعدادات النظام')),
-            ),
-          ],
+      final open = await showBilPearlPermissionDecision(
+        context,
+        title: permissionTitle,
+        description: tr(
+          'This permission is off. Enable it in system settings to use this feature; typing remains available.',
+          'هذا الإذن متوقف. فعّله في إعدادات النظام لاستخدام هذه الميزة؛ وتبقى الكتابة متاحة.',
         ),
+        cancelLabel: tr('Not now', 'ليس الآن'),
+        confirmLabel: tr('Open system settings', 'فتح إعدادات النظام'),
       );
       if (!currentRequest()) return false;
-      if (open == true) await policy.openSettings();
+      if (open) await policy.openSettings();
       return false;
     }
     if (!currentRequest()) return false;

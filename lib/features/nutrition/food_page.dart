@@ -40,6 +40,8 @@ import 'presentation/meal_image_guide_page.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
 import '../../shared/widgets/actionable_error_state.dart';
 import '../../shared/widgets/bil_modal_bottom_sheet.dart';
+import '../../shared/widgets/bil_permission_recovery_dialog.dart';
+import '../../shared/widgets/bil_pearl_alert_dialog.dart';
 
 part 'presentation/food_catalog_overview.dart';
 part 'presentation/food_catalog_tile.dart';
