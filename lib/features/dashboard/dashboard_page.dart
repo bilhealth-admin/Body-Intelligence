@@ -13,6 +13,7 @@ import '../profile/providers/user_profile_provider.dart';
 import '../profile/providers/profile_auth_identity_provider.dart';
 import '../profile/services/profile_photo_service.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
+import '../../shared/widgets/bil_permission_recovery_dialog.dart';
 import '../../shared/widgets/bil_media_review_sheet.dart';
 import 'widgets/dashboard_composition.dart';
 import 'widgets/dashboard_grid.dart';
@@ -168,39 +169,24 @@ class DashboardPage extends ConsumerWidget {
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final openSettings = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(context.strings.text('Camera access is off')),
-          content: Text(
-            context.strings.text(
-              'Enable camera access in system settings to take a profile photo. You can still choose a photo with the system picker.',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(
-                MaterialLocalizations.of(dialogContext).closeButtonLabel,
-              ),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(context.strings.text('Open system settings')),
-            ),
-          ],
+      // First permission is always the native iOS/Android system request.
+      // Only previously blocked permissions show this optional pearl
+      // recovery; never jump straight to Settings without user approval.
+      final openSettings = await showBilPearlPermissionDecision(
+        context,
+        title: context.strings.text('Camera access is off'),
+        description: context.strings.text(
+          'Enable camera access in system settings to take a profile photo. You can still choose a photo with the system picker.',
         ),
+        cancelLabel: context.strings.text('Not now'),
+        confirmLabel: context.strings.text('Open system settings'),
       );
-      if (openSettings == true) await policy.openSettings();
+      if (openSettings && context.mounted) await policy.openSettings();
       return false;
     }
 
-    return await policy.request(BilRuntimeCapability.camera) ==
-        BilRuntimePermissionState.granted;
+    final result = await policy.request(BilRuntimeCapability.camera);
+    return context.mounted && result == BilRuntimePermissionState.granted;
   }
 
   @override

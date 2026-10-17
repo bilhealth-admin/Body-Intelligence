@@ -7,6 +7,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/runtime_copy_check_in.dart';
 import '../../../app/localization/runtime_copy_voice_status.dart';
 import '../../../app/services/runtime_permission_policy.dart';
+import '../../../shared/widgets/bil_permission_recovery_dialog.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_voice_session.dart';
@@ -341,30 +342,16 @@ final class WeightVoiceInputService {
     if (!context.mounted) return false;
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(context.strings.text('Voice input unavailable')),
-          content: Text(
-            context.strings.text(weightVoiceSettingsRecoverySource(capability)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(context.strings.text('Not now')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(context.strings.text('Open system settings')),
-            ),
-          ],
+      final open = await showBilPearlPermissionDecision(
+        context,
+        title: context.strings.text('Voice input unavailable'),
+        description: context.strings.text(
+          weightVoiceSettingsRecoverySource(capability),
         ),
+        cancelLabel: context.strings.text('Not now'),
+        confirmLabel: context.strings.text('Open system settings'),
       );
-      if (open == true) await policy.openSettings();
+      if (open && context.mounted) await policy.openSettings();
       return false;
     }
 

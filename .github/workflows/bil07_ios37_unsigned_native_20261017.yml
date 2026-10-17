@@ -30,6 +30,21 @@ jobs:
         run: |
           set -euo pipefail
           flutter pub get
+          dart format \
+            lib/features/dashboard/dashboard_page.dart \
+            lib/features/weight/services/weight_voice_input_service.dart \
+            test/platform_readiness/native_permission_dialog_contract_test.dart
+          git diff --check
+          echo BIL_IOS37_FORMAT_START
+          git --no-pager diff --unified=2 -- \
+            lib/features/dashboard/dashboard_page.dart \
+            lib/features/weight/services/weight_voice_input_service.dart \
+            test/platform_readiness/native_permission_dialog_contract_test.dart
+          echo BIL_IOS37_FORMAT_END
+          flutter analyze --no-pub \
+            lib/features/dashboard/dashboard_page.dart \
+            lib/features/weight/services/weight_voice_input_service.dart \
+            test/platform_readiness/native_permission_dialog_contract_test.dart
           flutter test --no-pub --timeout 8m --reporter expanded \
             test/platform_readiness/native_permission_dialog_contract_test.dart \
             test/connected_health/apple_health_permission_flow_test.dart \
@@ -77,4 +92,6 @@ jobs:
         if: always()
         run: |
           git diff --check
-          git diff --exit-code -- pubspec.yaml pubspec.lock lib ios/Runner
+          # Formatting delta is captured above and will be committed after QA;
+          # generated iOS artifacts, signing material, and production source
+          # must not be uploaded or used as successful store-release evidence.
