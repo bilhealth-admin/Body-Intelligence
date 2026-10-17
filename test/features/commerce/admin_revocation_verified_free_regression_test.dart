@@ -89,8 +89,9 @@ void main() {
 
   for (var i = 0; i < cases.length; i++) {
     final c = cases[i];
+    final caseIndex = i;
     test(c.name, () async {
-      final owner = '65000000-0000-4000-8000-00000000000' + (i + 1).toString();
+      final owner = '65000000-0000-4000-8000-00000000000' + (caseIndex + 1).toString();
       final now = DateTime.now().toUtc();
       final seen = <String>[];
       final saved = <String, String>{};
