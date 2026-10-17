@@ -35,10 +35,11 @@ void main() {
       '/advertising-privacy',
       '/health-information-sources',
       '/help',
-      '/admin/ai-coach',
     ]) {
       expect(source, contains(route), reason: route);
     }
+    expect(source, isNot(contains("'/admin/ai-coach'")));
+    expect(source, isNot(contains('settings-ai-coach-admin-entry')));
     expect(source, contains('class _MorePremiumIcon'));
     expect(source, isNot(contains('const Color(0xFF0869E8)')));
     expect(source, contains('minTileHeight: protectedEntry ? 60 : 54'));
