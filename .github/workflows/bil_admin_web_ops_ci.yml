@@ -1,0 +1,22 @@
+name: BIL Secure Admin Web Ops QA
+on:
+  push:
+    branches: [feat/bil-secure-admin-ops-20261018]
+    paths:
+      - 'tool/admin_web/ops_v1/**'
+      - '.github/workflows/bil_admin_web_ops_ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  admin-web-ops-unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - run: node --version
+      - run: node --check tool/admin_web/ops_v1/ops_server.mjs
+      - run: node --check tool/admin_web/ops_v1/policy.mjs
+      - run: node --test tool/admin_web/ops_v1/ops_server.test.mjs
