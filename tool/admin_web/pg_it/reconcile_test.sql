@@ -11,7 +11,10 @@ BEGIN
   'public.bil_admin_web_reconcile_subscription_command(uuid,text)','EXECUTE')
  THEN RAISE EXCEPTION 'RECEIPT_EXECUTABLE_BY_UNAUTHORIZED_ROLE'; END IF;
 
- SELECT grant_id INTO v_grant FROM outcome;
+ SELECT (result->>'grant_id')::uuid INTO v_grant
+   FROM bil_admin_private.subscription_commands
+  WHERE actor_id='11111111-1111-4111-8111-111111111111'
+    AND idempotency_key='grant-first-test-0001';
  v:=public.bil_admin_web_reconcile_subscription_command(
    '11111111-1111-4111-8111-111111111111','grant-first-test-0001');
  IF v->>'found'!='true' OR v->>'operation'!='grant'
