@@ -1,0 +1,30 @@
+name: BIL07 rate-limit exact Dart formatter diagnostic
+on:
+  push:
+    branches:
+      - qa/bil07-rate-format-diagnostic-20261017
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+      - name: Print exact source-only formatting patch without committing
+        run: |
+          dart format \
+          lib/features/community/channels/domain/community_channel_models.dart \
+          lib/features/community/channels/data/supabase_community_channels_repository.dart \
+          lib/features/community/channels/presentation/community_channels_copy.dart \
+          lib/features/community/channels/presentation/community_channel_composer.dart \
+          lib/features/community/channels/presentation/community_channel_transcript.dart \
+          test/features/community/community_channels_safety_action_test.dart
+          echo BIL07_RATE_FORMAT_START
+          git --no-pager diff --unified=2 -- lib/features/community/channels/domain/community_channel_models.dart lib/features/community/channels/data/supabase_community_channels_repository.dart lib/features/community/channels/presentation/community_channels_copy.dart lib/features/community/channels/presentation/community_channel_composer.dart lib/features/community/channels/presentation/community_channel_transcript.dart test/features/community/community_channels_safety_action_test.dart
+          echo BIL07_RATE_FORMAT_END
