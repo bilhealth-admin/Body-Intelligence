@@ -35,10 +35,16 @@ void main() {
     );
   }
 
-  testWidgets('user can open the safety menu on another member message', (tester) async {
+  testWidgets('user can open the safety menu on another member message', (
+    tester,
+  ) async {
     CommunityChannelMessage? selected;
     await tester.pumpWidget(surface(visitor, (message) => selected = message));
-    final action = find.byKey(const ValueKey('bil07-message-safety-35000000-0000-4000-8000-000000000100'));
+    final action = find.byKey(
+      const ValueKey(
+        'bil07-message-safety-35000000-0000-4000-8000-000000000100',
+      ),
+    );
     expect(action, findsOneWidget);
     expect(find.text('Fixture reportable text'), findsOneWidget);
     await tester.tap(action);
@@ -47,7 +53,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('author cannot report or block their own channel message', (tester) async {
+  testWidgets('author cannot report or block their own channel message', (
+    tester,
+  ) async {
     var actions = 0;
     await tester.pumpWidget(surface(author, (_) => actions++));
     expect(find.byIcon(Icons.more_horiz_rounded), findsNothing);

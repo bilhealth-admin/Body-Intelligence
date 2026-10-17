@@ -154,8 +154,10 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.reportHate: 'Hate or harmful content',
     CommunityChannelsCopyKey.reportOther: 'Other safety concern',
     CommunityChannelsCopyKey.reportSubmitted: 'Report submitted for review.',
-    CommunityChannelsCopyKey.blockConfirmed: 'Member blocked. Refreshing this conversation.',
-    CommunityChannelsCopyKey.safetyUnavailable: 'Could not confirm the safety action. Try again.',
+    CommunityChannelsCopyKey.blockConfirmed:
+        'Member blocked. Refreshing this conversation.',
+    CommunityChannelsCopyKey.safetyUnavailable:
+        'Could not confirm the safety action. Try again.',
     CommunityChannelsCopyKey.cancel: 'Not now',
     CommunityChannelsCopyKey.confirm: 'Confirm',
   };
@@ -231,8 +233,10 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.reportHate: 'محتوى يحض على الكراهية أو الضرر',
     CommunityChannelsCopyKey.reportOther: 'مشكلة سلامة أخرى',
     CommunityChannelsCopyKey.reportSubmitted: 'تم إرسال البلاغ للمراجعة.',
-    CommunityChannelsCopyKey.blockConfirmed: 'تم حظر العضو. جارٍ تحديث المحادثة.',
-    CommunityChannelsCopyKey.safetyUnavailable: 'تعذر تأكيد إجراء السلامة. حاول مجددًا.',
+    CommunityChannelsCopyKey.blockConfirmed:
+        'تم حظر العضو. جارٍ تحديث المحادثة.',
+    CommunityChannelsCopyKey.safetyUnavailable:
+        'تعذر تأكيد إجراء السلامة. حاول مجددًا.',
     CommunityChannelsCopyKey.cancel: 'ليس الآن',
     CommunityChannelsCopyKey.confirm: 'تأكيد',
   };

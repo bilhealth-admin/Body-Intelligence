@@ -43,7 +43,6 @@ abstract interface class CommunityChannelsRepository {
   );
 }
 
- 
 /// Optional channel safety contract; older injected repository doubles need
 /// not implement it. The real transport strictly scopes these operations to
 /// the authenticated, current owner and never sends a report automatically.

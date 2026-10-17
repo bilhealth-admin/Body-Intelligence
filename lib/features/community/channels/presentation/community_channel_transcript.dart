@@ -197,7 +197,8 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
                 ownerId: controller.ownerId!,
                 viewportMarker: marker(message.id),
                 onSafety: widget.repository is CommunityChannelSafetyRepository
-                    ? (message) => unawaited(_messageSafety(controller, message))
+                    ? (message) =>
+                          unawaited(_messageSafety(controller, message))
                     : null,
               );
             },

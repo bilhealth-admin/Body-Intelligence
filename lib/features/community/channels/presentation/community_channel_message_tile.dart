@@ -83,7 +83,11 @@ class CommunityChannelMessageTile extends StatelessWidget {
                       CommunityChannelsCopyKey.messageSafety,
                     ),
                     onPressed: () => onSafety!(message),
-                    icon: Icon(Icons.more_horiz_rounded, size: 19, color: muted),
+                    icon: Icon(
+                      Icons.more_horiz_rounded,
+                      size: 19,
+                      color: muted,
+                    ),
                   ),
                 if (mine)
                   Icon(

@@ -259,7 +259,12 @@ final class SupabaseCommunityChannelsRepository
   }) => _run(scope, () async {
     CommunityChannelCodec.requireUuid(channelId);
     CommunityChannelCodec.requireUuid(messageId);
-    if (!const {'spam', 'harassment', 'hate_speech', 'other'}.contains(reason)) {
+    if (!const {
+      'spam',
+      'harassment',
+      'hate_speech',
+      'other',
+    }.contains(reason)) {
       throw ArgumentError.value(reason, 'reason');
     }
     final response = await _client.rpc(

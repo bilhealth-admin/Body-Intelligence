@@ -17,3 +17,8 @@ This backend proposal is still NOT READY for production until a user-visible cha
 
 ## Client report and block controls — proposal
 The channel's message bubble now exposes a safety button only on messages authored by another member. The pearl confirmation flows offer a deliberate report category (spam, harassment, hate, other), or confirm a block using the existing community block-member authority. Reporter/owner validation is repeated after every awaited sheet and before/after network dispatch; no report is sent by just opening the dialog. The repository implements an optional safety interface so older injected test fakes remain valid. All such flows require staging QA and moderator reporting/retention review before any production activation.
+
+## QA update — source-level proof
+- Initial isolated migration, report/moderator extension, and new mobile report/block menu passed **both** PGlite and Flutter focused tests on `00d1cd0b5fd499adf4b6fbe39429670cae5b65e1` (Actions run `39065891567`).
+- Applied the exact seven Dart formatter deltas from that run into Git source and changed CI to enforce zero-diff source formatting. A subsequent run on the formatted HEAD is required before declaring this worktree final.
+- This is staging evidence only. No approved channel seeds, no production data writes, and no published moderation web UI.

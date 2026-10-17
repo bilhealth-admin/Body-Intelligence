@@ -311,9 +311,11 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
           reason: reason,
         );
         if (!mounted || !_current(controller)) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_copy(CommunityChannelsCopyKey.reportSubmitted)),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_copy(CommunityChannelsCopyKey.reportSubmitted)),
+          ),
+        );
       } else if (action == 'block') {
         final confirmed = await showDialog<bool>(
           context: context,
@@ -338,15 +340,19 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
         if (!mounted || !_current(controller)) return;
         await _refresh(controller);
         if (!mounted || !_current(controller)) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_copy(CommunityChannelsCopyKey.blockConfirmed)),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_copy(CommunityChannelsCopyKey.blockConfirmed)),
+          ),
+        );
       }
     } on Object {
       if (!mounted || !_current(controller)) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(_copy(CommunityChannelsCopyKey.safetyUnavailable)),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_copy(CommunityChannelsCopyKey.safetyUnavailable)),
+        ),
+      );
     }
   }
 
