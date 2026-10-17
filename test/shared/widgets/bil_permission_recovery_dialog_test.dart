@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_permission_recovery_dialog.dart';
 
 void main() {
-  testWidgets('permission explainer uses pearl dialog with cancellation', (tester) async {
+  testWidgets('pearl permission recovery can be cancelled', (tester) async {
     bool? allowed;
     await tester.pumpWidget(
       MaterialApp(
@@ -27,7 +27,10 @@ void main() {
     );
     await tester.tap(find.text('Check permission'));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('bil-permission-pearl-dialog')), findsOneWidget);
+    expect(
+      find.byKey(const Key('bil-permission-pearl-dialog')),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('bil-permission-cancel')));
     await tester.pumpAndSettle();
     expect(allowed, isFalse);
