@@ -59,3 +59,15 @@ jobs:
           PGPASSWORD: test-only-ephemeral
         run: |
           psql -h 127.0.0.1 -p 5432 -U postgres -d bil_finance_synthetic -v ON_ERROR_STOP=1 -f tool/admin_web/pg_it/finance_test.sql
+      - name: Install receipt reconciliation in ephemeral database
+        shell: bash
+        env:
+          PGPASSWORD: test-only-ephemeral
+        run: |
+          psql -h 127.0.0.1 -p 5432 -U postgres -d bil_finance_synthetic -v ON_ERROR_STOP=1 -f tool/admin_web/pg_it/reconcile.sql
+      - name: Check interrupted-request receipt recovery and unauthorized access
+        shell: bash
+        env:
+          PGPASSWORD: test-only-ephemeral
+        run: |
+          psql -h 127.0.0.1 -p 5432 -U postgres -d bil_finance_synthetic -v ON_ERROR_STOP=1 -f tool/admin_web/pg_it/reconcile_test.sql
