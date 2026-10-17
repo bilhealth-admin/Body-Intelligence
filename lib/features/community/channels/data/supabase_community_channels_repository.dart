@@ -12,7 +12,7 @@ import 'community_channel_codec.dart';
 /// The app's existing CommunityOwnerHttpClient must remain installed on this
 /// Supabase client. It enforces the visit fence after SDK token resolution.
 final class SupabaseCommunityChannelsRepository
-    implements CommunityChannelsRepository {
+    implements CommunityChannelsRepository, CommunityChannelSafetyRepository {
   SupabaseCommunityChannelsRepository(this.community);
 
   final CommunityRepository community;
@@ -249,6 +249,51 @@ final class SupabaseCommunityChannelsRepository
     if (!isForeground()) throw const ChannelVisitCancelled();
     return CommunityChannelCodec.presence(payload, scope.ownerId, channelId);
   }, isActive: isForeground);
+
+  @override
+  Future<void> reportMessage(
+    ChannelRequestScope scope, {
+    required String channelId,
+    required String messageId,
+    required String reason,
+  }) => _run(scope, () async {
+    CommunityChannelCodec.requireUuid(channelId);
+    CommunityChannelCodec.requireUuid(messageId);
+    if (!const {'spam', 'harassment', 'hate_speech', 'other'}.contains(reason)) {
+      throw ArgumentError.value(reason, 'reason');
+    }
+    final response = await _client.rpc(
+      'bil07_channel_report_v1',
+      params: {
+        'p_channel_id': channelId,
+        'p_message_id': messageId,
+        'p_reason': reason,
+      },
+    );
+    scope.check();
+    final payload = CommunityChannelCodec.envelope(
+      response,
+      ownerId: scope.ownerId,
+      channelId: channelId,
+    );
+    if (payload['report_id'] is! String ||
+        !const {'open', 'closed'}.contains(payload['status']) ||
+        payload['idempotent_replay'] is! bool) {
+      throw const FormatException('Invalid channel report confirmation');
+    }
+    CommunityChannelCodec.requireUuid(payload['report_id'] as String);
+  });
+
+  @override
+  Future<void> blockMember(ChannelRequestScope scope, String memberId) =>
+      _run(scope, () async {
+        CommunityChannelCodec.requireUuid(memberId);
+        if (memberId == scope.ownerId) {
+          throw ArgumentError.value(memberId, 'memberId');
+        }
+        await community.blockMember(memberId);
+        scope.check();
+      });
 
   @override
   Stream<CommunityChannelChange> watchChanges(

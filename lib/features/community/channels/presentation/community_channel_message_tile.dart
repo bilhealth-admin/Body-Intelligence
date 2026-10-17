@@ -10,12 +10,14 @@ class CommunityChannelMessageTile extends StatelessWidget {
     required this.message,
     required this.ownerId,
     required this.viewportMarker,
+    this.onSafety,
     super.key,
   });
 
   final CommunityChannelMessage message;
   final String ownerId;
   final Key viewportMarker;
+  final ValueChanged<CommunityChannelMessage>? onSafety;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +75,16 @@ class CommunityChannelMessageTile extends StatelessWidget {
                     context,
                   ).textTheme.labelSmall?.copyWith(color: muted),
                 ),
+                if (!mine && onSafety != null)
+                  IconButton(
+                    key: ValueKey('bil07-message-safety-${message.id}'),
+                    tooltip: CommunityChannelsCopy.text(
+                      context,
+                      CommunityChannelsCopyKey.messageSafety,
+                    ),
+                    onPressed: () => onSafety!(message),
+                    icon: Icon(Icons.more_horiz_rounded, size: 19, color: muted),
+                  ),
                 if (mine)
                   Icon(
                     Icons.done_rounded,
