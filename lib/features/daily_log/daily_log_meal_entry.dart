@@ -15,49 +15,49 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
         child: Column(
           children: [
             if (selectedFood == null) ...[
-              SearchAnchor(
-                searchController: foodSearch,
-                viewBuilder: (suggestions) => ListView(
-                  padding: EdgeInsets.zero,
-                  children: suggestions.toList(growable: false),
+              SearchBar(
+                key: const Key('daily-meal-food-search-bar'),
+                enabled: !mealSaving,
+                controller: foodSearch,
+                focusNode: mealSearchFocus,
+                onChanged: _onMealSearchTextChanged,
+                leading: Icon(
+                  Icons.search_rounded,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                viewHintText: _mealCopy('searchDetail'),
-                builder: (context, controller) => SearchBar(
-                  key: const Key('daily-meal-food-search-bar'),
-                  enabled: !mealSaving,
-                  controller: controller,
-                  leading: Icon(
-                    Icons.search_rounded,
-                    color: Theme.of(context).colorScheme.primary,
+                elevation: const WidgetStatePropertyAll(0),
+                backgroundColor: WidgetStatePropertyAll(
+                  Theme.of(context).colorScheme.surfaceContainerLow,
+                ),
+                side: WidgetStatePropertyAll(
+                  BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: .18),
                   ),
-                  elevation: const WidgetStatePropertyAll(0),
-                  backgroundColor: WidgetStatePropertyAll(
-                    Theme.of(context).colorScheme.surfaceContainerLow,
+                ),
+                shape: WidgetStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(22),
                   ),
-                  side: WidgetStatePropertyAll(
-                    BorderSide(
-                      color: Theme.of(
+                ),
+                hintText: _mealCopy('searchFoods'),
+                trailing: [
+                  if (foodSearch.text.isNotEmpty)
+                    IconButton(
+                      key: const Key('daily-meal-clear-search'),
+                      tooltip: MaterialLocalizations.of(
                         context,
-                      ).colorScheme.primary.withValues(alpha: .18),
+                      ).deleteButtonTooltip,
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () {
+                        foodSearch.clear();
+                        _onMealSearchTextChanged('');
+                      },
                     ),
-                  ),
-                  shape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                  ),
-                  hintText: _mealCopy('searchFoods'),
-                  onTap: mealSaving ? null : controller.openView,
-                ),
-                suggestionsBuilder: (context, controller) {
-                  final locale = _mealLocale;
-                  final query = controller.text.trim();
-                  if (query.isEmpty) {
-                    return const <Widget>[];
-                  }
-                  return _mealQuerySuggestions(controller, query, locale);
-                },
+                ],
               ),
+              _buildInlineMealSearchResults(),
             ],
             if (selectedFood != null)
               Padding(

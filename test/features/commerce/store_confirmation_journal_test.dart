@@ -11,6 +11,7 @@ void main() {
   late PreferencesRepository prefs;
   late StoreConfirmationJournal journal;
   var visit = 0;
+  var now = DateTime.utc(2026, 10, 17, 18);
   StoreBenefitDelivery event({
     String key = 'a',
     String environment = 'sandbox',
@@ -30,12 +31,18 @@ void main() {
   );
   setUp(() async {
     visit = 0;
+    now = DateTime.utc(2026, 10, 17, 18);
     db = AppDatabase.forTesting(
       NativeDatabase.memory(),
       localOwnerId: 'fixture-A',
     );
     prefs = PreferencesRepository(db);
-    journal = StoreConfirmationJournal(prefs, () => visit == 0);
+    journal = StoreConfirmationJournal(
+      prefs,
+      () => visit == 0,
+      clock: () => now,
+      processSession: 'first-process',
+    );
     await db.customSelect('SELECT 1').get();
   });
   tearDown(() => db.close());
@@ -59,20 +66,68 @@ void main() {
     },
   );
   test(
-    'restart can resume a waiting recent event after fresh verification, but not a reserved crash',
+    'waiting resumes; unpainted reserved event recovers once after process restart',
     () async {
       final e = event();
       expect(await journal.enqueue(e, userInitiated: true), isTrue);
-      final restarted = StoreConfirmationJournal(prefs, () => true);
+      final sameProcess = StoreConfirmationJournal(
+        prefs,
+        () => true,
+        clock: () => now,
+        processSession: 'first-process',
+      );
+      expect(await sameProcess.enqueue(e, userInitiated: false), isTrue);
+      expect(await sameProcess.reserve(e), isTrue);
+      expect(await sameProcess.enqueue(e, userInitiated: false), isFalse);
+
+      final restarted = StoreConfirmationJournal(
+        prefs,
+        () => true,
+        clock: () => now,
+        processSession: 'second-process',
+      );
       expect(await restarted.enqueue(e, userInitiated: false), isTrue);
       expect(await restarted.reserve(e), isTrue);
+      expect(await restarted.painted(e), isTrue);
+      expect(await restarted.enqueue(e, userInitiated: false), isFalse);
+      expect(jsonDecode((await prefs.get(journal.key(e)))!)['state'], 'shown');
+    },
+  );
+  test(
+    'competing process recoveries cannot duplicate the celebration',
+    () async {
+      final e = event();
+      await journal.enqueue(e, userInitiated: true);
+      await journal.reserve(e);
+      final resumed = StoreConfirmationJournal(
+        prefs,
+        () => true,
+        clock: () => now,
+        processSession: 'resumed-process',
+      );
+      final other = StoreConfirmationJournal(
+        prefs,
+        () => true,
+        clock: () => now,
+        processSession: 'other-process',
+      );
+      final attempts = await Future.wait([
+        resumed.enqueue(e, userInitiated: false),
+        other.enqueue(e, userInitiated: false),
+      ]);
+      expect(attempts.where((approved) => approved), hasLength(1));
+      expect(await resumed.enqueue(e, userInitiated: false), isTrue);
+      expect(await resumed.reserve(e), isTrue);
+      expect(await other.enqueue(e, userInitiated: false), isFalse);
       expect(
-        await StoreConfirmationJournal(
-          prefs,
-          () => true,
-        ).enqueue(e, userInitiated: false),
+        await other.enqueue(
+          event(environment: 'production'),
+          userInitiated: true,
+        ),
         isFalse,
       );
+      expect(await resumed.cancel(e), isTrue);
+      expect(await resumed.enqueue(e, userInitiated: false), isFalse);
     },
   );
   test(

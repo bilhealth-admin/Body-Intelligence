@@ -9,6 +9,7 @@ import json
 import pathlib
 import re
 import shutil
+import sys
 import subprocess
 import tempfile
 import zipfile

@@ -162,13 +162,11 @@ void main() {
       }
 
       final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
-      final searchController =
-          tester.widget<SearchBar>(searchEntry).controller! as SearchController;
-      expect(
-        searchController.isOpen,
-        isFalse,
-        reason: '$mealType waits for the user on initial and updated routes',
-      );
+      final searchController = tester
+          .widget<SearchBar>(searchEntry)
+          .controller!;
+      expect(searchController.text, isEmpty);
+      expect(find.byType(SearchAnchor), findsNothing);
       expect(authority.queries, isEmpty);
 
       final title = tester.widget<Text>(
@@ -181,8 +179,7 @@ void main() {
       expect(find.byKey(const Key('daily-meal-food-search-bar')), findsOne);
 
       await tester.tap(searchEntry);
-      await tester.pumpAndSettle();
-      expect(searchController.isOpen, isTrue);
+      await tester.pump();
 
       final searchBar = find.byType(SearchBar).last;
       const sequence = <String>['a', 'ap', 'app', 'appl', 'apple'];

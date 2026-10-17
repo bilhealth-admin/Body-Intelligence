@@ -1,0 +1,139 @@
+name: BIL food and permission targeted QA
+on:
+  push:
+    branches:
+      - fix/bil-meal-permissions-search-admin-ready-20261017
+permissions:
+  contents: read
+# A newer source snapshot supersedes an obsolete CI attempt, while all jobs
+# for the SAME snapshot remain independent, visible and required.
+concurrency:
+  group: bil-food-permissions-20261017-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Install locked dependencies
+        run: flutter pub get
+      - name: Enforce Dart formatting of committed sources (no CI rewrites)
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            lib/features/daily_log/daily_log_page.dart \
+            lib/features/daily_log/daily_log_meal_entry.dart \
+            lib/features/daily_log/daily_log_meal_search.dart \
+            lib/features/daily_log/daily_log_navigation_actions.dart \
+            lib/features/daily_log/daily_log_mutation_actions.dart \
+            lib/features/daily_log/daily_log_capture_actions.dart \
+            lib/features/daily_log/presentation/daily_log_meal_detail_items.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/nutrition/food_page.dart \
+            lib/features/nutrition/presentation/food_page_actions.dart \
+            lib/features/nutrition/services/meal_voice_input_service.dart \
+            lib/features/nutrition/presentation/food_barcode_scanner_page.dart \
+            lib/features/nutrition/presentation/meal_vision_consent_gate.dart \
+            lib/features/intelligence_center/presentation/intelligence_center_page.dart \
+            lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart \
+            lib/features/settings/settings_page.dart \
+            lib/app/router/app_router.dart \
+            lib/shared/widgets/bil_permission_recovery_dialog.dart \
+            test/features/daily_log/diary_search_race_test.dart \
+            test/features/daily_log/diary_search_detail_25_locale_test.dart \
+            test/features/daily_log/meal_search_prefix_matrix_test.dart \
+            test/features/daily_log/daily_log_food_add_flow_test.dart \
+            test/features/daily_log/meal_detail_add_button_regression_test.dart \
+            test/shared/widgets/bil_permission_recovery_dialog_test.dart \
+            test/app/router/mobile_admin_removal_contract_test.dart \
+            test/features/daily_log/meal_photo_initial_action_test.dart
+          git diff --check
+      - name: Analyze touched Dart sources and tests
+        run: |
+          flutter analyze --no-pub \
+            lib/features/daily_log/daily_log_page.dart \
+            lib/features/daily_log/daily_log_meal_entry.dart \
+            lib/features/daily_log/daily_log_meal_search.dart \
+            lib/features/daily_log/daily_log_navigation_actions.dart \
+            lib/features/daily_log/daily_log_mutation_actions.dart \
+            lib/features/daily_log/daily_log_capture_actions.dart \
+            lib/features/daily_log/presentation/daily_log_meal_detail_items.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/features/daily_log/food_log_actions.dart \
+            lib/features/nutrition/food_page.dart \
+            lib/features/nutrition/presentation/food_page_actions.dart \
+            lib/features/nutrition/services/meal_voice_input_service.dart \
+            lib/features/nutrition/presentation/food_barcode_scanner_page.dart \
+            lib/features/nutrition/presentation/meal_vision_consent_gate.dart \
+            lib/features/intelligence_center/presentation/intelligence_center_page.dart \
+            lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart \
+            lib/features/settings/settings_page.dart \
+            lib/app/router/app_router.dart \
+            lib/shared/widgets/bil_permission_recovery_dialog.dart \
+            test/features/daily_log/diary_search_race_test.dart \
+            test/features/daily_log/diary_search_detail_25_locale_test.dart \
+            test/features/daily_log/meal_search_prefix_matrix_test.dart \
+            test/features/daily_log/daily_log_food_add_flow_test.dart \
+            test/features/daily_log/meal_detail_add_button_regression_test.dart \
+            test/shared/widgets/bil_permission_recovery_dialog_test.dart \
+            test/app/router/mobile_admin_removal_contract_test.dart \
+            test/features/daily_log/meal_photo_initial_action_test.dart
+      - name: Report formatter delta
+        if: always()
+        run: |
+          git diff --check
+          git diff --stat
+  functional:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Install locked dependencies
+        run: flutter pub get
+      - name: Test real meal flow, native permission policy and photo regressions
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout 8m --reporter expanded \
+            test/features/daily_log/diary_search_race_test.dart \
+            test/features/daily_log/daily_log_food_add_flow_test.dart \
+            test/features/daily_log/meal_detail_add_button_regression_test.dart \
+            test/shared/widgets/bil_permission_recovery_dialog_test.dart \
+            test/app/router/mobile_admin_removal_contract_test.dart \
+            test/features/daily_log/quick_add_meal_camera_contract_test.dart \
+            test/features/daily_log/meal_photo_initial_action_test.dart \
+            test/features/daily_log/food_log_page_reference_test.dart \
+            test/features/nutrition/food_search_ui_state_test.dart \
+            test/features/nutrition/epic4_food_experience_closure_contract_test.dart \
+            test/features/nutrition/voice_shared_purpose_behavior_test.dart \
+            test/features/nutrition/meal_voice_25_locale_copy_test.dart \
+            test/features/intelligence_center/coach_speech_policy_test.dart
+  multilingual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Install locked dependencies
+        run: flutter pub get
+      - name: Test 25-locale meal search and all meal prefixes
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout 8m --reporter expanded \
+            test/features/daily_log/diary_search_detail_25_locale_test.dart \
+            test/features/daily_log/meal_search_prefix_matrix_test.dart
