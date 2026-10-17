@@ -119,7 +119,7 @@ void main() {
           if (c.closedTestFailure) {
             throw http.ClientException('synthetic closed-test outage');
           }
-          return http.Response('[]', 200, headers: {'content-type': 'application/json'});
+          return http.Response('[]', 200, headers: {'content-type': 'application/json'}, request: request);
         }
         if (path == '/rest/v1/bil_subscriptions') {
           if (c.mirrorFailure) {
@@ -138,14 +138,14 @@ void main() {
                   },
                 ]
               : <Map<String, Object?>>[];
-          return http.Response(jsonEncode(rows), 200, headers: {'content-type': 'application/json'});
+          return http.Response(jsonEncode(rows), 200, headers: {'content-type': 'application/json'}, request: request);
         }
         if (path == '/rest/v1/rpc/bil_get_my_admin_subscription') {
           if (c.grantFailure) {
             return http.Response(
               jsonEncode({'code': 'PGRST500', 'message': 'synthetic read failure'}),
               503,
-              headers: {'content-type': 'application/json'},
+              headers: {'content-type': 'application/json'}, request: request,
             );
           }
           final gift = c.grantActive
@@ -157,7 +157,7 @@ void main() {
                   'access_until': now.add(const Duration(minutes: 5)).toIso8601String(),
                 }
               : null;
-          return http.Response(jsonEncode(gift), 200, headers: {'content-type': 'application/json'});
+          return http.Response(jsonEncode(gift), 200, headers: {'content-type': 'application/json'}, request: request);
         }
         throw StateError('Unexpected URL: ${request.url}');
       });
@@ -226,7 +226,7 @@ void main() {
       final path = request.url.path;
       if (path == '/rest/v1/bil_ai_closed_test_grants' ||
           path == '/rest/v1/bil_subscriptions') {
-        return http.Response('[]', 200, headers: {'content-type': 'application/json'});
+        return http.Response('[]', 200, headers: {'content-type': 'application/json'}, request: request);
       }
       if (path == '/rest/v1/rpc/bil_get_my_admin_subscription') {
         final gift = giftActive
@@ -238,7 +238,7 @@ void main() {
                 'access_until': now.add(const Duration(minutes: 5)).toIso8601String(),
               }
             : null;
-        return http.Response(jsonEncode(gift), 200, headers: {'content-type': 'application/json'});
+        return http.Response(jsonEncode(gift), 200, headers: {'content-type': 'application/json'}, request: request);
       }
       throw StateError('Unexpected URL: ${request.url}');
     });
