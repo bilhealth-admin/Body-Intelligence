@@ -30,7 +30,7 @@ async function setup(db:PGlite) {
   await db.exec(
     "create table auth.users(id uuid primary key);"+
     "create table public.bil_public_profiles(user_id uuid primary key references auth.users(id),display_name text not null);"+
-    "create table public.bil_blocks(blocker_id uuid not null references auth.users(id),blocked_id uuid not null references auth.users(id),primary key(blocker_id,blocked_id));"+
+    "create table public.bil_blocks(blocker_id uuid not null references auth.users(id),blocked_id uuid not null references auth.users(id),primary key(blocker_id,blocked_id));create table public.bil_community_moderators(user_id uuid primary key references auth.users(id));"+
     "create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;"+
     "create function public.bil_can_use_community() returns boolean language sql stable as $$ select auth.uid() is not null $$;"+
     "create function private.bil_assert_current_community_policy() returns text language plpgsql stable security definer set search_path='' as $$ begin if coalesce(pg_catalog.current_setting('bil07.accepted',true),'')<>'yes' then raise exception 'community_policy_acceptance_required' using errcode='42501'; end if; return 'test-policy'; end $$;"+
@@ -38,6 +38,8 @@ async function setup(db:PGlite) {
   );
   await db.exec(await Deno.readTextFile(new URL(
     "../migrations/20261017210000_bil07_community_channels_isolated.sql",import.meta.url)));
+  await db.exec(await Deno.readTextFile(new URL(
+    "../migrations/20261017211000_bil07_channel_reporting_isolated.sql",import.meta.url)));
   await db.query("insert into auth.users(id) values ($1),($2),($3)",[A,B,C]);
   await db.query(
     "insert into public.bil_public_profiles(user_id,display_name) values ($1,'A'),($2,'B'),($3,'C')",[A,B,C]);
@@ -129,5 +131,58 @@ Deno.test("isolated BIL07 deny consent, explicit ban and unauthenticated access"
     await denied(()=>db.query("select * from private.bil07_channel_presence_v1"),"42501");
     await db.exec("reset role");await actor(db,null);await db.exec("set role anon");
     await denied(()=>db.query("select public.bil07_channel_capabilities_v1()"),"42501");
+  }finally{await db.close();}
+});
+
+Deno.test("BIL07 report is owner-scoped, reviewer-gated, idempotent and hides approved content",async()=>{
+  const db=new PGlite();
+  try{
+    await setup(db);await rooms(db);
+    await db.query("insert into public.bil_community_moderators(user_id) values ($1)",[C]);
+    await db.exec("set role authenticated");await actor(db,A);
+    const sent=await rpc(db,"select public.bil07_channel_send_v1($1,$2,$3) result",
+      [PUBLIC,KEY,"Reported harmful fixture"]);
+    const msg=sent.message as Record<string,unknown>;
+    await denied(()=>db.query(
+      "select public.bil07_channel_report_v1($1,$2,$3)",
+      [PUBLIC,msg.id,"Self report"]),"42501");
+    await actor(db,B);
+    await denied(()=>db.query(
+      "select public.bil07_channel_review_queue_v1(50)"),"42501");
+    const first=await rpc(db,"select public.bil07_channel_report_v1($1,$2,$3) result",
+      [PUBLIC,msg.id,"Harassment and abusive message"]);
+    assert(first.owner_id===B && first.idempotent_replay===false
+      && first.status==="open","report not stored with owner");
+    const retry=await rpc(db,"select public.bil07_channel_report_v1($1,$2,$3) result",
+      [PUBLIC,msg.id,"Harassment and abusive message"]);
+    assert(retry.idempotent_replay===true && retry.report_id===first.report_id,
+      "duplicate report not idempotent");
+    await denied(()=>db.query("select public.bil07_channel_report_v1($1,$2,$3)",
+      [PUBLIC,msg.id,"Swapped reason"]),"22023");
+    await denied(()=>db.query("select * from private.bil07_channel_reports_v1"),"42501");
+    await actor(db,C);
+    const review=await rpc(db,"select public.bil07_channel_review_queue_v1(50) result");
+    const queue=review.reports as Record<string,unknown>[];
+    assert(queue.length===1 && queue[0].message_id===msg.id,
+      "moderator cannot see actual reported message");
+    const decision=await rpc(db,"select public.bil07_channel_decide_report_v1($1,true) result",
+      [first.report_id]);
+    assert(decision.decision_remove===true && decision.idempotent_replay===false,
+      "moderation decision not authoritative");
+    const idem=await rpc(db,"select public.bil07_channel_decide_report_v1($1,true) result",
+      [first.report_id]);
+    assert(idem.idempotent_replay===true,"moderation retry duplicated decision");
+    await denied(()=>db.query(
+      "select public.bil07_channel_decide_report_v1($1,false)",
+      [first.report_id]),"22023");
+    const emptyQueue=await rpc(db,"select public.bil07_channel_review_queue_v1(50) result");
+    assert((emptyQueue.reports as unknown[]).length===0,"review queue not cleared");
+    await actor(db,B);
+    const page=await rpc(db,"select public.bil07_channel_messages_v1($1,null,null,50) result",
+      [PUBLIC]);
+    assert((page.messages as unknown[]).length===0,
+      "removed content still appears in mobile channel");
+    await denied(()=>db.query("select public.bil07_channel_report_v1($1,$2,$3)",
+      [PUBLIC,msg.id,"Too late after removal"]),"42501");
   }finally{await db.close();}
 });
