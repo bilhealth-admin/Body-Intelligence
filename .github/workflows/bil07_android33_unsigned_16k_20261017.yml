@@ -27,6 +27,17 @@ jobs:
           flutter --version
       - name: Fetch locked Flutter packages
         run: flutter pub get
+      - name: Preserve runtime plugins; remove native dev-only test registrants
+        run: |
+          set -euo pipefail
+          # This is the same fail-closed sanitizer as BIL's reviewed Android
+          # signing workflow. It preserves production plugins but prevents
+          # integration_test from compiling in a release-only Java registrant.
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+          REGISTRANT=android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+          test -s "$REGISTRANT"
+          ! grep -q 'new dev.flutter.plugins.integration_test.IntegrationTestPlugin' "$REGISTRANT"
+          git diff --exit-code -- pubspec.yaml pubspec.lock android/app/build.gradle.kts
       - name: Build QA release AAB unsigned with Android versionCode 33
         run: |
           flutter build appbundle --release --no-pub \
