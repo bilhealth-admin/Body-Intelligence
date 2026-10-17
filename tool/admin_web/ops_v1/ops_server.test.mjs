@@ -115,3 +115,12 @@ test('origin is exact, not wildcard or HTTP',async()=>{
   const [status]=await read(await handleOps(request({operation:'status'}),deps));
   assert.equal(status,403);
 });
+
+test('pending moderation uses pending posts and never substitutes reward requests',async()=>{
+ const calls=[], [status,v]=await read(await handleOps(
+   request({operation:'moderation.posts.pending',limit:20}),dependencies({userSpy:calls})));
+ assert.equal(status,200);
+ assert.equal(v.operation,'moderation.posts.pending');
+ assert.ok(calls.some(x=>x.name==='bil_list_pending_community_posts'&&x.args.p_limit===20));
+ assert.ok(!calls.some(x=>x.name==='bil_community_reward_review_queue_v2'));
+});

@@ -1,0 +1,16 @@
+{
+  "name": "bil-secure-admin-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild site/app.mjs --bundle --minify --format=esm --target=es2022 --outfile=site/app.bundle.js",
+    "check": "node --check site/app.mjs && node --test tests/site.test.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.112.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}

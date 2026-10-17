@@ -27,7 +27,7 @@ const WRITE = new Set([
   'coach.reset.all','coach.reset.user','notifications.send',
   'moderation.posts.review','moderation.reports.decide','moderation.safety.decide',
 ]);
-const VERSION = '2026-10-18-web-ops-v1';
+const VERSION = '2026-10-18-web-ops-v2';
 
 function json(obj, code=200, origin=null) {
   const headers = {...REPLY_HEADERS};
@@ -158,7 +158,7 @@ async function perform(op,req,userId,user,service) {
   switch(op){
   case 'moderators.list': return rpc(service,'bil_list_community_moderators_for_admin',{p_actor_id:userId});
   case 'members.list': return rpc(service,'bil_list_suspended_community_members_for_admin',{p_actor_id:userId});
-  case 'moderation.posts.pending': return rpc(user,'bil_community_reward_review_queue_v2',{p_limit:req.limit});
+  case 'moderation.posts.pending': return rpc(user,'bil_list_pending_community_posts',{p_limit:req.limit});
   case 'moderation.posts.snapshots': return rpc(user,'bil_community_review_snapshots_v2',{p_post_ids:req.post_ids});
   case 'moderation.reports.open': return rpc(user,'bil_list_open_community_reports');
   case 'moderation.reports.content': return rpc(user,'bil_community_report_content_v1',{p_report_id:req.report_id,p_source:req.source});

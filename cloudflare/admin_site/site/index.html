@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#eef4f0">
+  <meta name="description" content="BIL Secure Administration — owner-only management console">
+  <title>BIL Secure Administration</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.bundle.js"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-symbol">B<span>·</span></div><div><strong>BIL</strong><small>SECURE ADMINISTRATION</small></div></div>
+    <div class="sidebar-kicker" data-i18n="portal">بوابة الإدارة</div>
+    <nav id="navigation" aria-label="Administration sections">
+      <button type="button" class="nav-item selected" data-page="overview"><span class="nav-icon">◈</span><span data-i18n="overview">نظرة عامة</span></button>
+      <button type="button" class="nav-item" data-page="finance"><span class="nav-icon">◇</span><span data-i18n="finance">الاشتراكات والمنح</span></button>
+      <button type="button" class="nav-item" data-page="coach"><span class="nav-icon">✧</span><span data-i18n="coach">إدارة المدرب الذكي</span></button>
+      <button type="button" class="nav-item" data-page="notifications"><span class="nav-icon">◉</span><span data-i18n="notifications">الإشعارات</span></button>
+      <button type="button" class="nav-item" data-page="moderation"><span class="nav-icon">⌘</span><span data-i18n="moderation">المراجعة والبلاغات</span></button>
+      <button type="button" class="nav-item" data-page="moderators"><span class="nav-icon">♧</span><span data-i18n="moderators">المشرفون</span></button>
+      <button type="button" class="nav-item" data-page="members"><span class="nav-icon">♙</span><span data-i18n="members">وصول الأعضاء</span></button>
+      <button type="button" class="nav-item" data-page="audit"><span class="nav-icon">≋</span><span data-i18n="audit">سجل التدقيق</span></button>
+      <button type="button" class="nav-item" data-page="security"><span class="nav-icon">⬡</span><span data-i18n="security">الأمن والاتصال</span></button>
+    </nav>
+    <div class="sidebar-bottom"><div class="status-dot"></div><span data-i18n="protected">بوابة محمية بصلاحيات الخادم</span></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <button class="mobile-menu" id="mobile-menu" type="button" aria-label="Open menu">☰</button>
+      <div class="breadcrumb"><span>BIL</span><span class="slash">/</span><span id="breadcrumb" data-i18n="overview">نظرة عامة</span></div>
+      <div class="topbar-actions">
+        <span class="top-status" id="top-status" data-i18n="offline">غير متصل</span>
+        <button type="button" class="small-button" id="language" aria-label="Change language">EN</button>
+        <button type="button" class="small-button" id="logout" hidden data-i18n="logout">خروج</button>
+      </div>
+    </header>
+    <div class="content">
+      <div class="hero">
+        <div><p class="eyebrow">BODY INTELLIGENCE LOG · MANAGEMENT</p><h1 id="page-title" data-i18n="overview">نظرة عامة</h1><p id="page-subtitle" data-i18n="intro">إدارة BIL بأذونات واضحة وسجل عمليات قابل للتدقيق.</p></div>
+        <div class="hero-right"><div class="hero-mark">B</div></div>
+      </div>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+      <section id="auth-view" class="auth-area">
+        <div class="glass auth-card">
+          <div class="auth-lock">⬡</div>
+          <h2 data-i18n="secureLogin">تسجيل دخول الإدارة</h2><p class="muted" data-i18n="secureLoginDesc">التحقق عبر بريدك الإلكتروني ثم رمز المصادقة الثنائية. الوصول للمالك المخوّل فقط.</p>
+          <form id="email-form" class="stack">
+            <label data-i18n="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="email" required placeholder="you@example.com" dir="ltr">
+            <button class="primary" type="submit" data-i18n="sendCode">إرسال رمز الدخول</button>
+          </form>
+          <form id="otp-form" class="stack" hidden>
+            <label data-i18n="emailCode">الرمز الذي وصل إلى بريدك</label><input id="email-code" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required dir="ltr">
+            <button class="primary" type="submit" data-i18n="verifyEmail">تأكيد البريد</button>
+            <button class="secondary" type="button" id="back-email" data-i18n="changeEmail">تغيير البريد</button>
+          </form>
+          <div id="mfa-area" hidden>
+            <form id="mfa-form" class="stack"><label data-i18n="totp">رمز المصادقة الثنائية</label><input id="mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required dir="ltr"><button class="primary" data-i18n="verifyMfa">تحقق وأدخل</button></form>
+          </div>
+          <div id="enroll-area" hidden><p class="muted" data-i18n="enrollHelp">أضف هذا الحساب إلى تطبيق المصادقة ثم أكد رمز الأمان.</p><img id="enroll-qr" class="qr" alt="Authenticator enrollment QR"><form id="enroll-form" class="stack"><label data-i18n="totp">رمز المصادقة الثنائية</label><input id="enroll-code" inputmode="numeric" maxlength="8" required dir="ltr"><button type="submit" class="primary" data-i18n="verifyMfa">تحقق وأدخل</button></form></div>
+          <p class="micro" data-i18n="noPasswords">لا تُعرض مفاتيح الخادم أو كلمات المرور داخل هذا الموقع.</p>
+        </div>
+      </section>
+      <section id="admin-view" hidden>
+        <div id="overview-page" class="page active">
+          <div class="metric-grid"><article class="metric glass"><div class="metric-label" data-i18n="grants">المنح الإدارية</div><div id="metric-grants" class="metric-value">—</div><div class="metric-footer" data-i18n="sourceFinance">مصدرها دفتر المنح الفعلي</div></article><article class="metric glass"><div class="metric-label" data-i18n="moderators">المشرفون</div><div id="metric-mods" class="metric-value">—</div><div class="metric-footer" data-i18n="authorizedCount">بعد التحقق من الصلاحيات</div></article><article class="metric glass"><div class="metric-label" data-i18n="reports">البلاغات المفتوحة</div><div id="metric-reports" class="metric-value">—</div><div class="metric-footer" data-i18n="sourceReports">قائمة المراجعة الفعلية</div></article><article class="metric glass"><div class="metric-label" data-i18n="suspended">الأعضاء الموقوفون</div><div id="metric-members" class="metric-value">—</div><div class="metric-footer" data-i18n="sourceMembers">وفق سجل الوصول الفعلي</div></article></div>
+          <div class="grid-two"><article class="glass section-card"><h2 data-i18n="connection">حالة الاتصال</h2><div id="status-cards" class="status-list"></div><button type="button" id="refresh-status" class="secondary" data-i18n="refresh">تحديث</button></article><article class="glass section-card"><h2 data-i18n="principles">ضوابط التشغيل</h2><p class="muted" data-i18n="principlesText">تظهر البيانات الحقيقية فقط بعد اعتماد جلسة المالك. الوظائف غير المختبرة تبقى مقفلة، ولا تُستخدم مفاتيح إدارة البيانات في المتصفح.</p><div class="read-only" id="ops-lock" data-i18n="opsLock">تغييرات الإدارة الأخرى مقفلة إلى حين اكتمال التحقق</div></article></div>
+        </div>
+        <div id="finance-page" class="page">
+          <div class="section-head"><h2 data-i18n="grants">المنح الإدارية</h2><button id="refresh-finance" class="secondary" data-i18n="refresh">تحديث</button></div>
+          <div class="grid-two"><article class="glass section-card"><h3 data-i18n="newGrant">منح اشتراك جديد</h3><p class="muted" data-i18n="grantWarning">المنحة الإدارية مستقلة عن مشتريات المتجر وأرصدة Boost. لا تستخدم حسابات حقيقية لأغراض الاختبار.</p><form id="grant-form" class="stack">
+              <label data-i18n="recipientEmail">بريد المستفيد</label><input name="email" type="email" dir="ltr" required>
+              <label data-i18n="plan">الباقة</label><select name="plan"><option value="premium">Premium</option><option value="premium_ai_coach">Premium + AI Coach</option></select>
+              <label data-i18n="duration">المدة</label><select name="days"><option value="30">30 days</option><option value="90">90 days</option><option value="365">365 days</option></select>
+              <label data-i18n="reason">سبب المنحة</label><textarea name="reason" rows="2" required minlength="10" maxlength="160"></textarea>
+              <label data-i18n="confirmEmail">تأكيد البريد (أعد كتابته)</label><input name="confirm_email" dir="ltr" type="email" required>
+              <label class="check"><input type="checkbox" name="external_grant" required><span data-i18n="grantAck">أؤكد أن هذه منحة إدارية وليست شراءً من المتجر.</span></label>
+              <button type="submit" class="primary" id="grant-submit" data-i18n="submitGrant">مراجعة المنحة وإرسالها</button>
+            </form></article>
+            <article class="glass section-card"><h3 data-i18n="existingGrants">المنح القائمة</h3><div id="finance-list" class="table-wrap empty-state" data-i18n="loadData">اضغط تحديث لجلب السجل الحقيقي</div><div class="pagination"><button id="finance-prev" class="secondary" disabled data-i18n="prev">السابق</button><span id="finance-page-index">1</span><button id="finance-next" class="secondary" disabled data-i18n="next">التالي</button></div></article></div>
+          <article class="glass section-card"><h3 data-i18n="lastCommand">آخر أمر مالي غير محسوم</h3><div id="pending-operation" class="muted" data-i18n="noPending">لا يوجد أمر معلّق في هذه الجلسة.</div><button type="button" id="reconcile" class="secondary" disabled data-i18n="reconcile">تحقق من الإيصال</button></article>
+        </div>
+        <div id="coach-page" class="page"><div class="grid-two"><article class="glass section-card"><h2 data-i18n="individualReset">إعادة ضبط حساب واحد</h2><form id="coach-individual-form" class="stack" data-ops-form><label data-i18n="recipientEmail">بريد المستفيد</label><input name="email" type="email" required dir="ltr"><label data-i18n="reason">السبب</label><textarea name="reason" minlength="2" maxlength="160" required></textarea><label data-i18n="message">رسالة الإشعار</label><textarea name="message" required maxlength="180"></textarea><label data-i18n="confirmEmail">تأكيد البريد</label><input name="confirm_email" type="email" dir="ltr" required><button type="submit" class="primary ops-write" disabled data-i18n="execute">تنفيذ</button></form></article><article class="glass section-card"><h2 data-i18n="globalReset">إعادة ضبط جميع الحسابات</h2><p class="warning" data-i18n="globalWarning">عملية واسعة التأثير. لا يمكن استخدامها للاختبارات على المستخدمين الحقيقيين.</p><form id="coach-global-form" class="stack" data-ops-form><label data-i18n="message">رسالة الإشعار</label><textarea name="message" maxlength="180" required></textarea><label data-i18n="confirmPhrase">أدخل عبارة التأكيد الإنجليزية</label><input name="confirm_phrase" placeholder="RESET ALL AI COACH ACCOUNTS" dir="ltr" required><button type="submit" class="danger ops-write" disabled data-i18n="execute">تنفيذ</button></form></article></div></div>
+        <div id="notifications-page" class="page"><article class="glass section-card"><h2 data-i18n="composeNotification">إعداد إشعار BIL</h2><p class="warning" data-i18n="notificationWarning">إشعارات التعويض والهدية قد تؤثر في التوكنات؛ لا تُرسل دون تفويض واختبار.</p><form id="notification-form" class="stack" data-ops-form><label data-i18n="kind">النوع</label><select name="kind"><option value="custom">Custom</option><option value="gift">Gift</option><option value="compensation">Compensation</option></select><label data-i18n="audience">المستفيدون</label><select name="audience"><option value="email">حساب محدد</option><option value="all">جميع الحسابات</option></select><label data-i18n="recipientEmail">بريد المستفيد (لإشعار فردي)</label><input name="email" type="email" dir="ltr"><label data-i18n="message">الرسالة</label><textarea name="message" rows="3" maxlength="180" required></textarea><label data-i18n="confirmTarget">تأكيد المستفيد (أو SEND TO ALL)</label><input name="confirm_target" dir="ltr" required><label class="check"><input type="checkbox" name="acknowledge_token_grant"><span data-i18n="tokenAcknowledgment">أفهم أن تعويضًا أو هدية قد يضيف توكنات.</span></label><button type="submit" class="primary ops-write" disabled data-i18n="send">إرسال</button></form></article></div>
+        <div id="moderation-page" class="page"><div class="tab-bar"><button class="tab selected" data-queue="posts" type="button" data-i18n="posts">المنشورات</button><button class="tab" data-queue="reports" type="button" data-i18n="reports">البلاغات</button><button class="tab" data-queue="safety" type="button" data-i18n="safety">سلامة المدرب</button></div><div class="glass section-card"><div class="section-head"><h2 id="queue-title" data-i18n="posts">المنشورات</h2><button id="refresh-queue" class="secondary" data-i18n="refresh">تحديث</button></div><div id="queue-content" class="empty-state" data-i18n="loadData">اضغط تحديث لجلب السجل الحقيقي</div></div></div>
+        <div id="moderators-page" class="page"><div class="grid-two"><article class="glass section-card"><div class="section-head"><h2 data-i18n="moderators">المشرفون</h2><button id="refresh-mods" class="secondary" data-i18n="refresh">تحديث</button></div><div id="moderator-content" class="empty-state" data-i18n="loadData">اضغط تحديث لجلب السجل الحقيقي</div></article><article class="glass section-card"><h3 data-i18n="addModerator">إضافة مشرف</h3><form id="moderator-form" class="stack" data-ops-form><label data-i18n="recipientEmail">البريد الإلكتروني</label><input name="email" type="email" dir="ltr" required><label data-i18n="confirmEmail">تأكيد البريد</label><input name="confirm_email" type="email" dir="ltr" required><button class="primary ops-write" disabled data-i18n="addModerator">إضافة مشرف</button></form></article></div></div>
+        <div id="members-page" class="page"><div class="grid-two"><article class="glass section-card"><div class="section-head"><h2 data-i18n="suspended">الأعضاء الموقوفون</h2><button id="refresh-members" class="secondary" data-i18n="refresh">تحديث</button></div><div id="member-content" class="empty-state" data-i18n="loadData">اضغط تحديث لجلب السجل الحقيقي</div></article><article class="glass section-card"><h3 data-i18n="suspendMember">تعليق وصول عضو</h3><form id="member-form" class="stack" data-ops-form><label data-i18n="recipientEmail">بريد الحساب</label><input name="email" type="email" dir="ltr" required><label data-i18n="reason">السبب</label><textarea name="reason" minlength="2" maxlength="160" required></textarea><label data-i18n="confirmEmail">تأكيد البريد</label><input name="confirm_email" type="email" dir="ltr" required><button class="danger ops-write" disabled data-i18n="suspendMember">تعليق وصول عضو</button></form></article></div></div>
+        <div id="audit-page" class="page"><article class="glass section-card"><div class="section-head"><h2 data-i18n="financialAudit">سجل العمليات المالية</h2><button id="refresh-audit" class="secondary" data-i18n="refresh">تحديث</button></div><div id="audit-content" class="empty-state" data-i18n="loadData">اضغط تحديث لجلب السجل الحقيقي</div></article></div>
+        <div id="security-page" class="page"><div class="grid-two"><article class="glass section-card"><h2 data-i18n="identity">حالة الهوية</h2><div id="identity-content" class="status-list"></div></article><article class="glass section-card"><h2 data-i18n="securityBoundaries">حدود الأمان</h2><p class="muted" data-i18n="securityText">كل طلب يمرّ من بوابة Supabase ويُراجع الخادم صلاحياته. مفاتيح الخدمة والإدارة المالية لا تُخزن في المتصفح. عمليات الكتابة غير المختبرة تبقى معطّلة.</p><p class="micro" data-i18n="noRealUsers">لا تُنفذ تجارب على مستخدمين حقيقيين أو أرصدتهم.</p></article></div></div>
+      </section>
+    </div>
+  </main>
+</div>
+<div id="mfa-modal" class="modal-backdrop" hidden><div class="glass modal" role="dialog" aria-modal="true" aria-labelledby="mfa-modal-title"><h2 id="mfa-modal-title" data-i18n="stepUp">تأكيد المصادقة الثنائية قبل تنفيذ العملية</h2><p class="muted" data-i18n="stepUpDesc">أدخل الرمز الجديد من تطبيق المصادقة. لن ننفذ العملية دون التحقق من صلاحياتك.</p><label data-i18n="totp">رمز المصادقة الثنائية</label><input id="step-up-code" inputmode="numeric" maxlength="8" dir="ltr"><div class="modal-actions"><button class="secondary" id="cancel-stepup" data-i18n="cancel">إلغاء</button><button class="primary" id="confirm-stepup" data-i18n="confirm">تأكيد</button></div></div></div>
+</body>
+</html>

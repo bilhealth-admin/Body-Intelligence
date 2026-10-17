@@ -1,0 +1,89 @@
+name: BIL Secure Admin Website — Isolated Cloudflare
+on:
+  push:
+    branches:
+      - feat/bil-secure-admin-ops-20261018
+    paths:
+      - 'cloudflare/admin_site/**'
+      - '.github/workflows/bil_secure_admin_cloudflare.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-secure-admin-cloudflare
+  cancel-in-progress: false
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Dependencies and static checks
+        working-directory: cloudflare/admin_site
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm run check
+          npm run build
+          test -s site/app.bundle.js
+          test -s site/index.html
+          if grep -Eiq 'sb_secret_|SUPABASE_SERVICE_ROLE_KEY' site/config.mjs; then
+            echo 'Refusing to publish privileged secrets.' >&2
+            exit 1
+          fi
+      - name: Verify independent Cloudflare API token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo 'BLOCKED: existing CLOUDFLARE_API_TOKEN GitHub secret not configured.' >&2
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json,os,urllib.request
+          req=urllib.request.Request('https://api.cloudflare.com/client/v4/accounts',headers={
+            'Authorization':'Bearer '+os.environ['CLOUDFLARE_API_TOKEN'],
+            'Content-Type':'application/json'})
+          with urllib.request.urlopen(req,timeout=20) as response:
+            data=json.load(response)
+          accounts=data.get('result') or []
+          if not data.get('success') or len(accounts)!=1:
+            raise SystemExit('Expected exactly one Cloudflare account scoped to this token.')
+          with open(os.environ['GITHUB_ENV'],'a') as file:
+            file.write('CLOUDFLARE_ACCOUNT_ID='+accounts[0]['id']+'\n')
+          print('CLOUDFLARE_ACCOUNT=RESOLVED')
+          PY
+      - name: Deploy separate admin asset Worker
+        working-directory: cloudflare/admin_site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.125.0 deploy --config wrangler.jsonc --keep-vars 2>&1 | tee /tmp/bil-secure-admin-deploy.log
+          grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' /tmp/bil-secure-admin-deploy.log | tail -1 > /tmp/bil-admin-origin.txt || true
+          if [ ! -s /tmp/bil-admin-origin.txt ]; then
+            echo 'BLOCKED: Worker deployed but no workers.dev URL in the deployment log.'
+            exit 1
+          fi
+          cat /tmp/bil-admin-origin.txt
+      - name: Verify HTTPS public website, never a placeholder
+        run: |
+          set -euo pipefail
+          url="$(cat /tmp/bil-admin-origin.txt)"
+          test -n "$url"
+          curl --fail --show-error --silent --max-time 25 "$url" -o /tmp/bil-admin-home.html
+          grep -q 'BIL Secure Administration' /tmp/bil-admin-home.html
+          if grep -qi 'Replit Agent is building' /tmp/bil-admin-home.html; then
+            echo 'PLACEHOLDER_NOT_ACCEPTED' >&2
+            exit 1
+          fi
+          echo "PUBLIC_ADMIN_WEB=DEPLOYED"
+          echo "ADMIN_WEB_URL=$url" >> "$GITHUB_STEP_SUMMARY"
