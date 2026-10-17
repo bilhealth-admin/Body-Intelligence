@@ -18,8 +18,10 @@ function isolatedRequest(
 }
 
 Deno.test("reconciliation rejection stays forbidden, not retryable 503", async () => {
-  for (
-    const item of [
+  const cases: Array<{
+    headers: Record<string, string>;
+    secret: string;
+  }> = [
       { headers: {}, secret: "" },
       { headers: {}, secret: "fixture-nonproduction-secret" },
       {
@@ -30,8 +32,8 @@ Deno.test("reconciliation rejection stays forbidden, not retryable 503", async (
         headers: { "x-bil-reconciliation-secret": "x".repeat(28) },
         secret: "fixture-nonproduction-secret",
       },
-    ]
-  ) {
+    ];
+  for (const item of cases) {
     const response = await handler(
       isolatedRequest(item.headers),
       {
