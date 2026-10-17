@@ -274,6 +274,15 @@ void main() {
       final foodRow = find.byKey(
         Key('daily-food-row-${loggedItems.single.id}'),
       );
+      // Drift's table-watched stream re-reads joined meal/food rows on real
+      // SQLite IO, not the fake widget clock. Do not mistake the DB commit
+      // for an immediately painted row. Assert that the actual row appears.
+      await _waitForSavedMealRow(tester, foodRow);
+      expect(
+        find.byKey(const Key('daily-log-focused-meal-page')),
+        findsOneWidget,
+        reason: 'Saving returns to the same meal instead of another route.',
+      );
       expect(
         find.descendant(
           of: find.byKey(const Key('daily-log-focused-meal-page')),
@@ -342,6 +351,17 @@ Future<void> _waitForInlineFoodResult(
   for (var attempt = 0;
       attempt < 100 && find.text(displayName).evaluate().isEmpty;
       attempt++) {
+    await tester.pump(const Duration(milliseconds: 50));
+    if (attempt % 5 == 0) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+    }
+  }
+}
+
+Future<void> _waitForSavedMealRow(WidgetTester tester, Finder row) async {
+  for (var attempt = 0; attempt < 100 && row.evaluate().isEmpty; attempt++) {
     await tester.pump(const Duration(milliseconds: 50));
     if (attempt % 5 == 0) {
       await tester.runAsync(
