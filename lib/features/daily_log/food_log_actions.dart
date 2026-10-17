@@ -301,8 +301,24 @@ extension _FoodLogActions on _FoodLogPageState {
     bool directCamera = false,
     XFile? initialImage,
   }) async {
-    if (mealImageBusy) return;
-    _updateState(() => mealImageBusy = true);
+    if (mealPhotoRequestInFlight) return;
+    mealPhotoRequestInFlight = true;
+    try {
+      await _analyzeMealImageWithSource(
+        directCamera: directCamera,
+        initialImage: initialImage,
+      );
+    } finally {
+      mealPhotoRequestInFlight = false;
+    }
+  }
+
+  Future<void> _analyzeMealImageWithSource({
+    required bool directCamera,
+    XFile? initialImage,
+  }) async {
+    // Leave the existing Log Food form mounted while checking access,
+    // presenting camera/gallery and confirming a selected image.
     final visionCopy = MealVisionUiCopy.ofLocale(
       Localizations.localeOf(context),
     );
@@ -449,6 +465,9 @@ extension _FoodLogActions on _FoodLogPageState {
         }
       }
       if (image == null || !mounted) return;
+      // The analysis indicator belongs to AI work AFTER image selection, not
+      // to the photo source chooser or the camera/gallery permission flow.
+      _updateState(() => mealImageBusy = true);
       final analysis = await service.analyze(image);
       if (!mounted) return;
       if (analysis.candidates.isEmpty) {
