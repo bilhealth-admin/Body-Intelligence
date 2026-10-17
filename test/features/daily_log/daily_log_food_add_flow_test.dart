@@ -277,12 +277,25 @@ void main() {
       // Drift's table-watched stream re-reads joined meal/food rows on real
       // SQLite IO, not the fake widget clock. Do not mistake the DB commit
       // for an immediately painted row. Assert that the actual row appears.
-      await _waitForSavedMealRow(tester, foodRow);
+      final focusedMeal = find.byKey(const Key('daily-log-focused-meal-page'));
       expect(
-        find.byKey(const Key('daily-log-focused-meal-page')),
+        focusedMeal,
         findsOneWidget,
         reason: 'Saving returns to the same meal instead of another route.',
       );
+      // The meal summary is tall. The saved-food card may be lazily built
+      // below the viewport, particularly now that search stays inline.
+      // Scroll to the real card, then wait for its authoritative row.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('daily-meal-detail-items')),
+        230,
+        scrollable: find.descendant(
+          of: focusedMeal,
+          matching: find.byType(Scrollable),
+        ).first,
+      );
+      await tester.pump();
+      await _waitForSavedMealRow(tester, foodRow);
       expect(
         find.descendant(
           of: find.byKey(const Key('daily-log-focused-meal-page')),

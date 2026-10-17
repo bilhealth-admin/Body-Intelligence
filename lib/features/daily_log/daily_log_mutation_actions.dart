@@ -122,6 +122,12 @@ extension _DailyLogMutationActions on _DailyLogPageState {
       if (mounted) {
         _updateState(() {
           if (selectedFood?.id == food.id) selectedFood = null;
+          // A successful save completes this query. Clear inline suggestions
+          // so they never obscure the saved meal list or jump the keyboard.
+          mealSearchDebounce?.cancel();
+          foodSearch.clear();
+          mealLiveQuery = '';
+          mealResultStream = null;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || !scrollController.hasClients) return;
