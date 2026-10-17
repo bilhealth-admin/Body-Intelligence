@@ -1,0 +1,31 @@
+name: BIL format-only extraction (disposable)
+on:
+  push:
+    branches:
+      - fix/bil-format-report-20261017
+permissions:
+  contents: read
+jobs:
+  formatter-diff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Format original source without committing
+        run: |
+          dart format \
+          lib/features/daily_log/daily_log_page.dart \
+          lib/features/daily_log/daily_log_meal_entry.dart \
+          test/features/daily_log/diary_search_detail_25_locale_test.dart \
+          test/features/daily_log/meal_search_prefix_matrix_test.dart \
+          test/features/daily_log/daily_log_food_add_flow_test.dart \
+          test/features/daily_log/meal_detail_add_button_regression_test.dart
+          echo 'BIL_FORMAT_DIFF_BEGIN'
+          git --no-pager diff --unified=2 -- lib/features/daily_log/daily_log_page.dart lib/features/daily_log/daily_log_meal_entry.dart test/features/daily_log/diary_search_detail_25_locale_test.dart test/features/daily_log/meal_search_prefix_matrix_test.dart test/features/daily_log/daily_log_food_add_flow_test.dart test/features/daily_log/meal_detail_add_button_regression_test.dart
+          echo 'BIL_FORMAT_DIFF_END'
