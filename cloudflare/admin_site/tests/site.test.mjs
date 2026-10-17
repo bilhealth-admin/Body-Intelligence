@@ -66,3 +66,21 @@ test('only publishable key is embedded in client configuration',()=>{
 test('no live user data or fabricated grant rows embedded',()=>{
   assert.doesNotMatch(source,/\bmockUsers\b|\bdemoGrants\b|\bfakeSuccess\b/);
 });
+
+test('pending financial receipts survive a same-owner tab refresh only',()=>{
+  assert.match(source,/sessionStorage\.setItem\(PENDING_STORAGE_KEY/);
+  assert.match(source,/sessionStorage\.getItem\(PENDING_STORAGE_KEY/);
+  assert.match(source,/stored\?\.owner_id===state\.user\?\.id/);
+  assert.match(source,/restorePending\(\)/);
+});
+test('reconciliation cannot claim success for an unmatched receipt',()=>{
+  assert.match(source,/d\.receipt\?\.matched===true/);
+  assert.match(source,/d\.receipt\?\.matched===false/);
+  assert.match(source,/d\.operation===p\.operation/);
+});
+test('sign-out in another tab clears cached privileged records',()=>{
+  assert.match(source,/onAuthStateChange/);
+  assert.match(source,/event==='SIGNED_OUT'/);
+  assert.match(source,/function clearPrivateView/);
+  assert.match(source,/state\.auditRows=\[\]/);
+});
