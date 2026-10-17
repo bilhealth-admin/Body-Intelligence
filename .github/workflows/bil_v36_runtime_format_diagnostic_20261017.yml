@@ -1,0 +1,31 @@
+name: BIL v36 Dart format exact-patch evidence (diagnostic)
+on:
+  push:
+    branches:
+      - fix/bil-v36-runtime-format-report-20261017
+permissions:
+  contents: read
+jobs:
+  formatter-diff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+      - name: Print byte-exact Dart formatter patch without committing
+        run: |
+          dart format \
+          lib/features/settings/sharing_privacy_cloud_sync_tile.dart \
+          lib/features/settings/settings_page_polish.dart \
+          lib/features/commerce/services/store_confirmation_journal.dart \
+          test/features/community/community_feed_cache_test.dart \
+          test/features/commerce/store_confirmation_journal_test.dart \
+          test/features/cloud_platform/cloud_manual_sync_outcome_copy_test.dart \
+          test/features/intelligence_center/ai_coach_failure_surface_regression_test.dart
+          echo 'BIL_V36_FORMAT_START'
+          git --no-pager diff --unified=2 -- lib/features/settings/sharing_privacy_cloud_sync_tile.dart lib/features/settings/settings_page_polish.dart lib/features/commerce/services/store_confirmation_journal.dart test/features/community/community_feed_cache_test.dart test/features/commerce/store_confirmation_journal_test.dart test/features/cloud_platform/cloud_manual_sync_outcome_copy_test.dart test/features/intelligence_center/ai_coach_failure_surface_regression_test.dart
+          echo 'BIL_V36_FORMAT_END'
