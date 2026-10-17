@@ -239,7 +239,7 @@ void main() {
       expect(find.byKey(const Key('daily-log-water-shortcut')), findsNothing);
 
       // The platform back gesture must behave like the visible Back button:
-      // reopen SearchAnchor with the exact query and its results intact.
+      // restore the inline results with the exact query and no overlay route.
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       final reopenedSearchBars = tester.widgetList<SearchBar>(

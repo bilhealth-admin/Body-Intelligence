@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_meal_voice.dart';
 import '../../../app/services/runtime_permission_policy.dart';
+import '../../../shared/widgets/bil_permission_recovery_dialog.dart';
+import '../../../shared/widgets/bil_pearl_alert_dialog.dart';
 import 'bil_speech_to_text.dart';
 import 'meal_voice_candidate.dart';
 import 'meal_voice_session.dart';
@@ -128,28 +130,14 @@ class MealVoiceInputService {
     );
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(copy.unavailable),
-          content: Text(copy.settingsRecovery(capability)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(copy.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(copy.openSettings),
-            ),
-          ],
-        ),
+      final open = await showBilPearlPermissionDecision(
+        context,
+        title: copy.unavailable,
+        description: copy.settingsRecovery(capability),
+        cancelLabel: copy.cancel,
+        confirmLabel: copy.openSettings,
       );
-      if (open == true) await policy.openSettings();
+      if (open && context.mounted) await policy.openSettings();
       return false;
     }
 
@@ -169,24 +157,14 @@ class MealVoiceInputService {
       return await _ensureMicrophonePermission(context);
     }
 
-    final continueRequest = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog.adaptive(
-        title: Text(copy.permissionTitle(capability)),
-        content: Text(copy.permissionRationale(capability)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(copy.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(copy.continueLabel),
-          ),
-        ],
-      ),
+    final continueRequest = await showBilPearlPermissionDecision(
+      context,
+      title: copy.permissionTitle(capability),
+      description: copy.permissionRationale(capability),
+      cancelLabel: copy.cancel,
+      confirmLabel: copy.continueLabel,
     );
-    if (continueRequest != true) return false;
+    if (!continueRequest || !context.mounted) return false;
     final granted =
         await policy.request(capability) == BilRuntimePermissionState.granted;
     if (!granted || capability != BilRuntimeCapability.microphone) {
@@ -273,7 +251,7 @@ class MealVoiceInputService {
     );
     return showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => BilPearlAlertDialog(
         title: Text(copy.unavailable),
         content: Text(copy.failure(failure)),
         actions: [

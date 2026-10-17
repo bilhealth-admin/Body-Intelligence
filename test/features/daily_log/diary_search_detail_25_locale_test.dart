@@ -183,16 +183,11 @@ void main() {
       expect(tester.takeException(), isNull, reason: '$tag search');
 
       final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
-      final searchController =
-          tester.widget<SearchBar>(searchEntry).controller! as SearchController;
-      expect(
-        searchController.isOpen,
-        isFalse,
-        reason: '$tag user opens search',
-      );
+      final searchController = tester.widget<SearchBar>(searchEntry).controller!;
+      expect(searchController.text, isEmpty);
+      expect(find.byType(SearchAnchor), findsNothing);
       await tester.tap(searchEntry);
-      await tester.pumpAndSettle();
-      expect(searchController.isOpen, isTrue);
+      await tester.pump();
 
       const query = 'chicken';
       final resultLocale = FoodPresentationLocalizer.resultLocaleForQuery(

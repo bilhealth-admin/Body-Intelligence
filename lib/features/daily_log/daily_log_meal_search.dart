@@ -1,58 +1,90 @@
 part of 'daily_log_page.dart';
 
 extension _DailyLogMealSearchPresentation on _DailyLogPageState {
-  Future<Iterable<Widget>> _mealQuerySuggestions(
-    SearchController controller,
-    String query,
-    String locale,
-  ) async {
-    final effectiveQuery = query.trim();
-    if (effectiveQuery.isEmpty) return const <Widget>[];
+  void _onMealSearchTextChanged(String raw) {
+    if (!mounted) return;
+    final query = raw.trim();
+    mealSearchDebounce?.cancel();
+    _updateState(() {
+      mealLiveQuery = query;
+      mealResultStream = null;
+    });
+    if (query.isEmpty) return;
+    // Debounce network work, never the editing field or visible meal page.
+    mealSearchDebounce = Timer(const Duration(milliseconds: 160), () {
+      if (!mounted || selectedFood != null || foodSearch.text.trim() != query) {
+        return;
+      }
+      final authority = ref.read(foodRuntimeSearchAuthorityProvider);
+      _updateState(() {
+        mealResultStream = authority.searchProgressively(query, limit: 20);
+      });
+    });
+  }
+
+  Widget _buildInlineMealSearchResults() {
+    final query = foodSearch.text.trim();
+    if (query.isEmpty) return const SizedBox.shrink();
+    final stream = query == mealLiveQuery ? mealResultStream : null;
+    if (stream == null) {
+      return const Padding(
+        padding: EdgeInsets.all(12),
+        child: LinearProgressIndicator(key: Key('daily-meal-search-loading')),
+      );
+    }
     final authority = ref.read(foodRuntimeSearchAuthorityProvider);
     bool current() =>
         mounted &&
-        controller.text.trim() == effectiveQuery &&
+        selectedFood == null &&
+        foodSearch.text.trim() == query &&
         identical(authority, ref.read(foodRuntimeSearchAuthorityProvider));
-    return <Widget>[
-      StreamBuilder<List<Food>>(
-        key: ValueKey((authority, effectiveQuery)),
-        stream: authority.searchProgressively(effectiveQuery, limit: 20),
-        builder: (context, snapshot) {
-          if (!current()) return const SizedBox.shrink();
-          if (!snapshot.hasData) {
-            return const Padding(
-              padding: EdgeInsets.all(20),
-              child: LinearProgressIndicator(),
-            );
-          }
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ..._mealSuggestionTiles(
-                controller,
-                effectiveQuery,
-                locale,
-                snapshot.data!,
-                current: current,
-              ),
-              if (snapshot.connectionState != ConnectionState.done)
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(
-                    Localizations.localeOf(context).languageCode == 'ar'
-                        ? 'نتائج الجهاز أولًا؛ يجري البحث عن نتائج إضافية.'
-                        : 'On-device results first; checking for more matches.',
-                  ),
-                ),
-            ],
+    return StreamBuilder<List<Food>>(
+      key: ValueKey((authority, query)),
+      stream: stream,
+      builder: (context, snapshot) {
+        if (!current()) return const SizedBox.shrink();
+        if (snapshot.hasError) {
+          return ListTile(
+            key: const Key('daily-meal-search-retry'),
+            leading: const Icon(Icons.refresh_rounded),
+            title: Text(_mealCopy('noResult')),
+            onTap: () => _onMealSearchTextChanged(query),
           );
-        },
-      ),
-    ];
+        }
+        if (!snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.all(12),
+            child: LinearProgressIndicator(),
+          );
+        }
+        return Column(
+          key: const Key('daily-meal-inline-results'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ..._mealSuggestionTiles(
+              foodSearch,
+              query,
+              _mealLocale,
+              snapshot.data!,
+              current: current,
+            ),
+            if (snapshot.connectionState != ConnectionState.done)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'نتائج الجهاز أولًا؛ يجري البحث عن نتائج إضافية.'
+                      : 'On-device results first; checking for more matches.',
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   Iterable<Widget> _mealSuggestionTiles(
-    SearchController controller,
+    TextEditingController controller,
     String effectiveQuery,
     String locale,
     List<Food> results, {
@@ -76,7 +108,10 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             title: Text('${_mealCopy('didYouMean')} $correction?'),
             onTap: () {
               controller.text = correction;
-              controller.openView();
+              controller.selection = TextSelection.collapsed(
+                offset: correction.length,
+              );
+              _onMealSearchTextChanged(correction);
             },
           ),
         ListTile(
@@ -93,7 +128,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             child: Icon(Icons.arrow_forward_ios_rounded, size: 16),
           ),
           onTap: () {
-            controller.closeView(effectiveQuery);
+            FocusScope.of(context).unfocus();
             context.push('/foods');
           },
         ),
@@ -131,7 +166,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             child: Icon(Icons.arrow_forward_ios_rounded, size: 16),
           ),
           onTap: () {
-            controller.closeView(effectiveQuery);
+            FocusScope.of(context).unfocus();
             context.push('/foods');
           },
         ),
@@ -149,7 +184,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
 
   Widget _mealSearchFoodTile({
     required Food food,
-    required SearchController controller,
+    required TextEditingController controller,
     required String languageCode,
     bool Function()? current,
   }) {
@@ -310,8 +345,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     );
   }
 
-  void _selectFood(Food food, SearchController controller, String displayName) {
-    final returnQuery = controller.text.trim();
+  void _selectFood(Food food, TextEditingController controller, String displayName) {
+    mealSearchDebounce?.cancel();
     _updateState(() {
       selectedFood = food;
       final sourceGrams = dailyLogAmountInGrams(
@@ -324,10 +359,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
         amount == amount.roundToDouble() ? 0 : 1,
       );
     });
-    // Keep the user's query authoritative so both the visible Back button and
-    // the platform back gesture can reopen the same result set. The selected
-    // food name is only a fallback for non-text entry points.
-    controller.closeView(returnQuery.isEmpty ? displayName : returnQuery);
+    // Keep the typed query when returning from details, without a search route.
+    FocusScope.of(context).unfocus();
     WidgetsBinding.instance.addPostFrameCallback((_) => _focusMealEntry());
   }
 

@@ -9,6 +9,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../shared/widgets/bil_pearl_alert_dialog.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/services/recoverable_image_picker.dart';
 import 'barcode_runtime_copy.dart';
@@ -327,7 +328,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
     final input = TextEditingController();
     final value = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlAlertDialog(
         title: Text(
           nutritionText(
             dialogContext,
