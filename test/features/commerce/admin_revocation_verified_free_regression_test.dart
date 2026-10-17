@@ -184,8 +184,10 @@ void main() {
           },
         }));
         final result = await const ServerEntitlementRepository().current();
-        expect(result.plan, c.expectedPlan);
-        expect(result.authority, c.expectedAuthority);
+        expect(result.plan, c.expectedPlan,
+          reason: 'fixture paths: $seen; plan: ${result.plan}; authority: ${result.authority}');
+        expect(result.authority, c.expectedAuthority,
+          reason: 'fixture paths: $seen; plan: ${result.plan}; authority: ${result.authority}');
         expect(seen, contains('/rest/v1/bil_subscriptions'));
         expect(seen, contains('/rest/v1/bil_ai_closed_test_grants'));
         expect(seen, contains('/rest/v1/rpc/bil_get_my_admin_subscription'));
