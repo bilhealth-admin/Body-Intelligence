@@ -33,5 +33,14 @@ void main() {
     expect(flow, contains('retryableErrorMessageIds.add(errorMessage.id);'));
     expect(message, contains("Key('ai-coach-retry')"));
     expect(message, isNot(contains("Key('ai-coach-retry-progress')")));
+    expect(
+      flow,
+      contains('Your question remains in this chat; review any earlier actions'),
+    );
+    expect(
+      flow,
+      isNot(contains('Your data was not changed; try again.')),
+      reason: 'A late exception cannot prove no native action already committed.',
+    );
   });
 }

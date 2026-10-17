@@ -118,12 +118,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _privacyText(
-              context,
-              result.completed
-                  ? 'Encrypted cloud sync completed.'
-                  : 'Cloud sync could not run. Check consent and internet.',
-            ),
+            cloudManualSyncOutcomeText(context, result),
           ),
         ),
       );
@@ -199,14 +194,15 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _privacyText(
-              context,
-              !granted
-                  ? 'Cloud sync preference updated.'
-                  : syncResult?.completed == true
-                  ? 'Encrypted cloud sync completed.'
-                  : 'Cloud sync could not run. Check consent and internet.',
-            ),
+            !granted
+                ? _privacyText(context, 'Cloud sync preference updated.')
+                : cloudManualSyncOutcomeText(
+                    context,
+                    syncResult ??
+                        const CloudManualSyncResult(
+                          disposition: CloudManualSyncDisposition.unavailable,
+                        ),
+                  ),
           ),
         ),
       );

@@ -499,8 +499,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           role: IntelligenceMessageRole.bil,
           kind: IntelligenceMessageKind.safety,
           text: tr(
-            'AI Coach could not prepare your context. Your data was not changed; try again.',
-            'تعذر تجهيز سياق AI Coach الآن. لم تتغير بياناتك؛ أعد المحاولة.',
+            'AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.',
+            'لم يتمكّن AI Coach من إكمال الرد. بقي سؤالك في المحادثة؛ راجع أي إجراءات سابقة قبل إعادة المحاولة.',
           ),
           createdAt: DateTime.now(),
           evidence: const ['local-coach-runtime'],

@@ -1,0 +1,80 @@
+name: BIL v36 runtime reliability isolated verification
+on:
+  push:
+    branches:
+      - qa/bil-v36-reliability-coach-isolated-20261017
+permissions:
+  contents: read
+concurrency:
+  group: bil-v36-reliability-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  analysis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Format targeted sources in isolated runner, report any delta
+        run: |
+          dart format \
+            lib/features/community/data/community_feed_cache.dart \
+            lib/features/settings/cloud_sync_status_presentation.dart \
+            lib/features/settings/sharing_privacy_cloud_sync_tile.dart \
+            lib/features/settings/settings_page_polish.dart \
+            lib/features/commerce/services/store_confirmation_journal.dart \
+            lib/features/intelligence_center/presentation/intelligence_query_flow.dart \
+            test/features/community/community_feed_cache_test.dart \
+            test/features/commerce/store_confirmation_journal_test.dart \
+            test/features/cloud_platform/cloud_manual_sync_outcome_copy_test.dart \
+            test/features/intelligence_center/ai_coach_failure_surface_regression_test.dart
+          git diff --check
+          git diff --stat
+      - name: Analyze modified sources and tests
+        run: |
+          flutter analyze --no-pub \
+            lib/features/community/data/community_feed_cache.dart \
+            lib/features/settings/cloud_sync_status_presentation.dart \
+            lib/features/settings/sharing_privacy_cloud_sync_tile.dart \
+            lib/features/settings/settings_page_polish.dart \
+            lib/features/commerce/services/store_confirmation_journal.dart \
+            lib/features/intelligence_center/presentation/intelligence_query_flow.dart \
+            test/features/community/community_feed_cache_test.dart \
+            test/features/commerce/store_confirmation_journal_test.dart \
+            test/features/cloud_platform/cloud_manual_sync_outcome_copy_test.dart \
+            test/features/intelligence_center/ai_coach_failure_surface_regression_test.dart
+      - name: Preserve formatter changes for reconciliation
+        if: always()
+        run: |
+          git diff --check
+          git diff --stat
+  functional:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Verify feed privacy, financial confirmation, sync and Coach
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout 8m --reporter expanded \
+            test/features/community/community_feed_cache_test.dart \
+            test/features/community/community_cached_feed_refresh_test.dart \
+            test/features/commerce/store_confirmation_journal_test.dart \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/cloud_platform/cloud_manual_sync_result_test.dart \
+            test/features/cloud_platform/cloud_manual_sync_surface_contract_test.dart \
+            test/features/cloud_platform/cloud_manual_sync_outcome_copy_test.dart \
+            test/features/intelligence_center/ai_coach_failure_surface_regression_test.dart \
+            test/features/intelligence_center/coach_question_scoped_payload_test.dart

@@ -64,11 +64,7 @@ class _CloudSyncRow extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            context.strings.text(
-              result.completed
-                  ? 'Encrypted cloud sync completed.'
-                  : 'Cloud sync could not run. Check Premium, consent, and internet.',
-            ),
+            cloudManualSyncOutcomeText(context, result),
           ),
         ),
       );
