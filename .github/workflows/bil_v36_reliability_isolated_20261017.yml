@@ -72,9 +72,28 @@ jobs:
             test/features/community/community_feed_cache_test.dart \
             test/features/community/community_cached_feed_refresh_test.dart \
             test/features/commerce/store_confirmation_journal_test.dart \
-            test/features/commerce/app_purchase_confirmation_test.dart \
             test/features/cloud_platform/cloud_manual_sync_result_test.dart \
             test/features/cloud_platform/cloud_manual_sync_surface_contract_test.dart \
             test/features/cloud_platform/cloud_manual_sync_outcome_copy_test.dart \
             test/features/intelligence_center/ai_coach_failure_surface_regression_test.dart \
             test/features/intelligence_center/coach_question_scoped_payload_test.dart
+  store_widgets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Test purchase UX against mock native store and blocked HTTP
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout 8m --reporter expanded \
+            --dart-define=BIL_USE_SUPABASE=true \
+            --dart-define=SUPABASE_URL=https://purchase-fixture.invalid \
+            --dart-define=SUPABASE_ANON_KEY=fixture \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart

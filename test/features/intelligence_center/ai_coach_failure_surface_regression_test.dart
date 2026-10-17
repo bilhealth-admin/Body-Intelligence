@@ -39,8 +39,8 @@ void main() {
     );
     expect(
       flow,
-      isNot(contains('Your data was not changed; try again.')),
-      reason: 'A late exception cannot prove no native action already committed.',
+      isNot(contains('AI Coach could not prepare your context. Your data was not changed; try again.')),
+      reason: 'The generic exception must not claim that no prior action committed.',
     );
   });
 }

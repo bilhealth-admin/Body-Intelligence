@@ -21,3 +21,8 @@
 - منع أي شراء أو خدمة فعلية في CI؛ كل الأمثلة تابعة لاختبارات محلية SQLite/Flutter.
 - بعد نجاح QA المركز، يبقى Full Flutter 9800+/Goldens، Play 16KB/native/SDK وiOS device وعمليات شراء Sandbox والتكامل الخادمي قبل تأكيد نسخ 37/33.
 - لا يوجد امتياز لتغيير إنتاج أو نشر متاجر في هذا العمل؛ قرار النشر يحتاج خطوة مستقلة صريحة.
+
+### First isolated CI feedback (before acceptance)
+- Analysis passed; the first combined functional run exposed three purchase widget tests missing the required commerce fixture flags. The tests were not removed: a separate store_widgets job now uses a fake .invalid URL, mock store and blocked HTTP, without production requests or credentials.
+- AI Coach source assertion was narrowed to the obsolete full phrase, preserving valid guarantees in other branches.
+- Format output changed seven files in disposable CI; source formatting must be committed and a strict zero-diff format gate verified before final handoff.
