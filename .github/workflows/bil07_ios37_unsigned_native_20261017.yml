@@ -1,0 +1,80 @@
+name: BIL07 iOS37 simulator and unsigned device compile gate
+on:
+  push:
+    branches:
+      - qa/bil07-ios37-unsigned-native-20261017
+permissions:
+  contents: read
+jobs:
+  ios37_unsigned:
+    runs-on: macos-26
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Enforce no signing, App Store or production secrets
+        run: |
+          set -euo pipefail
+          test -z "${APP_STORE_CONNECT_PRIVATE_KEY_BASE64:-}"
+          test -z "${APPLE_PRIVATE_KEY:-}"
+          test -z "${SUPABASE_SERVICE_ROLE_KEY:-}"
+          test -z "${BIL_RECONCILIATION_SECRET:-}"
+          flutter --version
+          xcodebuild -version
+      - name: Resolve locked dependencies and native privacy contracts
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter test --no-pub --timeout 8m --reporter expanded \
+            test/platform_readiness/native_permission_dialog_contract_test.dart \
+            test/connected_health/apple_health_permission_flow_test.dart \
+            test/features/notifications/apple_notification_permission_timing_test.dart \
+            test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart \
+            test/launch_readiness/flutter_release_plugin_sanitizer_test.dart
+          plutil -lint ios/Runner/Info.plist
+          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
+          plutil -lint ios/Runner/Runner.entitlements
+          plutil -lint ios/Runner/RunnerDebug.entitlements
+      - name: Keep development native plugins for simulator QA
+        run: |
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+      - name: Compile iOS37 unsigned simulator app
+        run: |
+          flutter build ios --simulator --debug --no-codesign --no-pub \
+            --build-number=37 \
+            --dart-define=BIL_ENVIRONMENT=qa \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
+            --dart-define=BIL_PAYMENTS_ENABLED=false \
+            --dart-define=BIL_ADS_ENABLED=false
+          test -d build/ios/iphonesimulator/Runner.app
+      - name: Remove dev-only iOS registrants before production-shaped compile
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
+          git diff --check
+      - name: Compile iOS37 unsigned release app — NOT a TestFlight upload
+        run: |
+          flutter build ios --release --no-codesign --no-pub \
+            --build-number=37 \
+            --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            --dart-define=BIL_ADS_ENABLED=false \
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+          test -d build/ios/iphoneos/Runner.app
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' \
+            build/ios/iphoneos/Runner.app/Info.plist | grep -qx '37'
+          printf '%s\n' \
+            'BIL_IOS37_UNSIGNED_SIMULATOR_BUILD=PASS' \
+            'BIL_IOS37_UNSIGNED_DEVICE_BUILD=PASS' \
+            'BIL_IOS37_NOT_SIGNED_NOT_SUBMITTED=PASS'
+      - name: Preserve only harmless source/build status
+        if: always()
+        run: |
+          git diff --check
+          git diff --exit-code -- pubspec.yaml pubspec.lock lib ios/Runner
