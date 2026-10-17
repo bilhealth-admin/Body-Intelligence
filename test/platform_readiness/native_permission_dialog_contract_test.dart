@@ -35,8 +35,16 @@ void main() {
     ];
     for (final path in files) {
       final source = File(path).readAsStringSync();
-      expect(source, contains('TargetPlatform.iOS'),
-          reason: '$path must preserve iOS native microphone/speech admission');
+      if (path.contains('intelligence_conversation_voice.dart')) {
+        // The Coach delegates platform branching to the independently tested
+        // capability sequence, rather than spelling out TargetPlatform.iOS
+        // within this UI part file.
+        expect(source, contains('coachRuntimePermissionSequence('));
+        expect(source, contains('platform: defaultTargetPlatform'));
+      } else {
+        expect(source, contains('TargetPlatform.iOS'),
+            reason: '$path must preserve iOS native microphone/speech admission');
+      }
       expect(source, contains('showBilPearlPermissionDecision('),
           reason: '$path must offer optional recovery for permanently denied access');
       expect(source, contains('BilRuntimeCapability.microphone'));
