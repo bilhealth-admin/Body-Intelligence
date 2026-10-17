@@ -26,3 +26,7 @@
 - Analysis passed; the first combined functional run exposed three purchase widget tests missing the required commerce fixture flags. The tests were not removed: a separate store_widgets job now uses a fake .invalid URL, mock store and blocked HTTP, without production requests or credentials.
 - AI Coach source assertion was narrowed to the obsolete full phrase, preserving valid guarantees in other branches.
 - Format output changed seven files in disposable CI; source formatting must be committed and a strict zero-diff format gate verified before final handoff.
+
+### Android checker / video public read-only QA
+- كشف سجل Android 33 موقع الخطأ: أداة verify_android_16k_alignment.py دخلت مسار فشل التحقق الأصلي ثم انهارت بسبب استخدام sys.stderr دون import sys. تم إصلاح **المبلّغ عن الفشل فقط** دون تعديل حدود ELF أو إسقاط gate؛ اختبارات Python جديدة تثبت صدور FAIL JSON/stdout/stderr عند غياب AAB أو bundletool وعدم ظهور PASS زائف. **توافق AAB الفعلي مع 16 KB لا يزال غير مثبت** ويتطلب إعادة البناء/فحص .so في خطوة منفصلة.
+- أضفنا اختبارات فيديو محلية بمحاكيات HTTP لحدود checksum وHEAD/CDN؛ وتجربة عامة قراءة فقط موجودة أصلًا في المشروع لطلب HEAD + 32 بايت (دون token أو تنزيل فيديو كامل) للتحقق من CDN الحقيقي. نتيجتها ستُسجل منفصلة ولا تعتبر اختبار تشغيل على جهاز حقيقي.

@@ -97,3 +97,48 @@ jobs:
             --dart-define=SUPABASE_ANON_KEY=fixture \
             --dart-define=BIL_PAYMENTS_ENABLED=true \
             test/features/commerce/app_purchase_confirmation_test.dart
+  android_gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Validate checker cannot obscure an underlying 16 KB failure
+        run: |
+          python3 -m unittest tool/release/test_verify_android_16k_failure_contract.py -v
+  media_contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Validate SHA-256 cache and mocked native video stream gates
+        run: |
+          flutter test --no-pub --concurrency=1 --timeout 8m --reporter expanded \
+            test/features/wellness/wellness_video_stream_test.dart \
+            test/features/wellness/wellness_media_cache_test.dart \
+            test/features/wellness/workout_video_explicit_media_test.dart
+  media_live_public:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Read-only CDN smoke HEAD plus 32-byte range without credentials
+        run: |
+          flutter test --no-pub --timeout 90s --reporter expanded \
+            --dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true \
+            test/features/wellness/wellness_video_stream_live_test.dart
