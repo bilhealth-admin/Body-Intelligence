@@ -31,6 +31,7 @@ jobs:
             lib/features/daily_log/daily_log_meal_entry.dart \
             lib/features/daily_log/daily_log_meal_search.dart \
             lib/features/daily_log/daily_log_navigation_actions.dart \
+            lib/features/daily_log/daily_log_mutation_actions.dart \
             lib/features/daily_log/daily_log_capture_actions.dart \
             lib/features/daily_log/presentation/daily_log_meal_detail_items.dart \
             lib/features/daily_log/food_log_page.dart \
@@ -61,6 +62,7 @@ jobs:
             lib/features/daily_log/daily_log_meal_entry.dart \
             lib/features/daily_log/daily_log_meal_search.dart \
             lib/features/daily_log/daily_log_navigation_actions.dart \
+            lib/features/daily_log/daily_log_mutation_actions.dart \
             lib/features/daily_log/daily_log_capture_actions.dart \
             lib/features/daily_log/presentation/daily_log_meal_detail_items.dart \
             lib/features/daily_log/food_log_page.dart \

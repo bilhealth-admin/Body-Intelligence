@@ -114,6 +114,11 @@ extension _DailyLogMutationActions on _DailyLogPageState {
             items: [(foodId: food.id, quantity: quantityGrams)],
           );
       ref.invalidate(selectedDailyLedgerProvider);
+      // A successful atomic write may finish before a table-watched join
+      // publishes its next UI snapshot. Explicitly refresh the authoritative
+      // meal list so the saved food becomes visible in this same meal.
+      // Never refresh or show a success state before the repository commits.
+      ref.invalidate(dailyMealsProvider);
       if (mounted) {
         _updateState(() {
           if (selectedFood?.id == food.id) selectedFood = null;
