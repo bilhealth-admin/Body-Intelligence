@@ -147,11 +147,13 @@ class CommunityFeedCache {
           Map<String, dynamic>.from(row as Map),
         );
         if (!_deleted.contains(post.id) && visibleIds.contains(post.id)) {
+          // The private bucket requires a real signed capability token.
+          // Constructing /object/sign/<path> without that token creates a
+          // guaranteed-broken image request (and leaks an object path into
+          // device/network logs). Keep the authorized cached text and media
+          // metadata; a fresh server hydration attaches signed URLs later.
           byId[post.id] = post.withMedia([
-            for (final media in post.mediaItems)
-              media.withUrl(
-                '${AppEnvironment.supabaseUrl}/storage/v1/object/sign/community-post-images/${media.objectPath}',
-              ),
+            for (final media in post.mediaItems) media.withUrl(null),
           ]);
         }
       }

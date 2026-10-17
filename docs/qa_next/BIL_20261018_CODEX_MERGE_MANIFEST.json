@@ -1,0 +1,34 @@
+{
+  "schema": "bil-codex-handoff-v1",
+  "created_at": "2026-10-18",
+  "base": "ceb3570cc46c387f25e7e9821bb4aa4120b53d71",
+  "bundled_base": "faaaada9b4bbfba520f322185fdf15c3530a1909",
+  "overlays": {
+    "mobile_channels": "9be8504de574b355dd7fcf41d3f7128020035cd4",
+    "verified_free_revocation": "becd992acef17f46fc06cf5859816ba5310e6146",
+    "more_admin_contracts": "c6c394d6e7b72255f74c917e2e5154bffafb913e"
+  },
+  "not_bundled": {
+    "staging_database": "qa/bil07-real-postgres-postgrest-isolated-20261017@9be8504de574b355dd7fcf41d3f7128020035cd4",
+    "production_deployment": false
+  },
+  "tested_source_gates": {
+    "mobile": "39048263465",
+    "reliability": "39064523912",
+    "channels": "39069254309",
+    "postgres": "39069953601",
+    "free_admin": "39034708852"
+  },
+  "known_blockers": {
+    "golden": "39070955984",
+    "android_16kb": "39070988786",
+    "ios_permission": "39071275952"
+  },
+  "expected_versions": {
+    "ios_build": 37,
+    "android_version_code": 33
+  },
+  "full_suite_green": false,
+  "production_cloud_validated": false,
+  "signed_release_approved": false
+}

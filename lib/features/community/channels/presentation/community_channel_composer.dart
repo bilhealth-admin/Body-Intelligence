@@ -120,9 +120,13 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
     final policy =
         error is ChannelFailure &&
         error.kind == ChannelFailureKind.policyRequired;
+    final rateLimited =
+        error is ChannelFailure && error.kind == ChannelFailureKind.rateLimited;
     return _notice(
       policy
           ? CommunityChannelsCopyKey.policyRequired
+          : rateLimited
+          ? CommunityChannelsCopyKey.sendRateLimited
           : CommunityChannelsCopyKey.sendFailed,
       action: policy && widget.onReviewPolicy != null
           ? TextButton(

@@ -33,5 +33,21 @@ void main() {
     expect(flow, contains('retryableErrorMessageIds.add(errorMessage.id);'));
     expect(message, contains("Key('ai-coach-retry')"));
     expect(message, isNot(contains("Key('ai-coach-retry-progress')")));
+    expect(
+      flow,
+      contains(
+        'Your question remains in this chat; review any earlier actions',
+      ),
+    );
+    expect(
+      flow,
+      isNot(
+        contains(
+          'AI Coach could not prepare your context. Your data was not changed; try again.',
+        ),
+      ),
+      reason:
+          'The generic exception must not claim that no prior action committed.',
+    );
   });
 }

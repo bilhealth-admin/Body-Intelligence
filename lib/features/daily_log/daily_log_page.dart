@@ -3,7 +3,6 @@ import '../commerce/presentation/optional_access_offer.dart';
 import '../dashboard/widgets/first_food_days_guide.dart';
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +27,9 @@ import '../../app/services/store_review_prompt_service.dart';
 import '../../shared/widgets/actionable_error_state.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
 import '../../shared/widgets/premium_surface.dart';
+import '../../shared/widgets/bil_permission_recovery_dialog.dart';
+import '../../shared/widgets/bil_pearl_alert_dialog.dart';
+import '../../shared/widgets/bil_modal_bottom_sheet.dart';
 import '../foods/providers/food_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
@@ -97,7 +99,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final exerciseNotes = TextEditingController();
   DateTime? exerciseNotesDraftDate;
   final quantity = TextEditingController(text: '100');
-  final foodSearch = SearchController();
+  // The meal's food search stays in the current page, never a second route.
+  final foodSearch = TextEditingController();
+  final mealSearchFocus = FocusNode();
+  Timer? mealSearchDebounce;
+  String mealLiveQuery = '';
+  Stream<List<Food>>? mealResultStream;
   static const FoodSearchAssistance _searchAssistance = FoodSearchAssistance();
   final scrollController = ScrollController();
   final mealEntryKey = GlobalKey();
@@ -164,6 +171,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     notes.dispose();
     exerciseNotes.dispose();
     quantity.dispose();
+    mealSearchDebounce?.cancel();
+    mealSearchFocus.dispose();
     foodSearch.dispose();
     scrollController.dispose();
     super.dispose();
@@ -436,6 +445,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           const SizedBox(height: 12),
                           DailyMealDetailItems(
                             meal: focusedMeal,
+                            onAddFood: mutationBusy
+                                ? null
+                                : _openFoodSearchAfterBuild,
                             onEdit: _editMealItem,
                             onActions: _showItemActions,
                             showFoodTimestamps: showFoodTimestamps,

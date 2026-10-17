@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/runtime_copy.dart';
 import '../../../shared/widgets/bil_premium_trust_surface.dart';
+import '../../../shared/widgets/bil_pearl_alert_dialog.dart';
 
 const mealVisionConsentPurpose = 'meal_vision_ai';
 const mealVisionConsentPolicyVersion = '1';
@@ -38,8 +39,8 @@ Future<bool> ensureMealVisionConsent(BuildContext context) async {
   final granted = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => AlertDialog.adaptive(
-      contentPadding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
+    builder: (dialogContext) => BilPearlAlertDialog(
+      title: Text(mealVisionConsentText(dialogContext, 'Meal photo analysis')),
       content: SingleChildScrollView(
         child: BilPremiumTrustSurface(
           icon: Icons.image_search_rounded,

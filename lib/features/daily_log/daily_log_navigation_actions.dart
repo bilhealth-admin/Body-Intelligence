@@ -99,16 +99,21 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     });
   }
 
-  void _openFoodSearchAfterBuild([int attempt = 0]) {
+  void _openFoodSearchAfterBuild() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (foodSearch.isAttached) {
-        foodSearch.openView();
-        return;
+      if (!mounted || selectedFood != null || !mealSearchActive) return;
+      _onMealSearchTextChanged(foodSearch.text);
+      mealSearchFocus.requestFocus();
+      final entry = mealEntryKey.currentContext;
+      if (entry != null) {
+        Scrollable.ensureVisible(
+          entry,
+          alignment: 0,
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 180),
+        );
       }
-      // SearchAnchor is inserted by the same state change that exposes the
-      // meal-entry surface. On slower devices it may attach one frame later.
-      if (attempt < 3) _openFoodSearchAfterBuild(attempt + 1);
     });
   }
 

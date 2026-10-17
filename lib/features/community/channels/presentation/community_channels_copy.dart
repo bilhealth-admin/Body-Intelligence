@@ -34,6 +34,7 @@ enum CommunityChannelsCopyKey {
   retrySend,
   sending,
   sendFailed,
+  sendRateLimited,
   retryOriginal,
   originalAttempt,
   textLimit,
@@ -48,6 +49,19 @@ enum CommunityChannelsCopyKey {
   unread,
   loading,
   member,
+  messageSafety,
+  reportMessage,
+  blockMember,
+  reportCategory,
+  reportSpam,
+  reportHarassment,
+  reportHate,
+  reportOther,
+  reportSubmitted,
+  blockConfirmed,
+  safetyUnavailable,
+  cancel,
+  confirm,
 }
 
 abstract final class CommunityChannelsCopy {
@@ -111,6 +125,8 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.sending: 'Sending…',
     CommunityChannelsCopyKey.sendFailed:
         'The message could not be confirmed. Your text is kept.',
+    CommunityChannelsCopyKey.sendRateLimited:
+        'Please wait a minute before sending again. Your message is saved for retry.',
     CommunityChannelsCopyKey.retryOriginal:
         'Retry sends the original message. Any newer draft stays separate.',
     CommunityChannelsCopyKey.originalAttempt: 'Original message',
@@ -132,6 +148,21 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.unread: 'Unread',
     CommunityChannelsCopyKey.loading: 'Loading channels…',
     CommunityChannelsCopyKey.member: 'Community member',
+    CommunityChannelsCopyKey.messageSafety: 'Message safety options',
+    CommunityChannelsCopyKey.reportMessage: 'Report this message',
+    CommunityChannelsCopyKey.blockMember: 'Block this member',
+    CommunityChannelsCopyKey.reportCategory: 'Why are you reporting?',
+    CommunityChannelsCopyKey.reportSpam: 'Spam or advertising',
+    CommunityChannelsCopyKey.reportHarassment: 'Harassment or bullying',
+    CommunityChannelsCopyKey.reportHate: 'Hate or harmful content',
+    CommunityChannelsCopyKey.reportOther: 'Other safety concern',
+    CommunityChannelsCopyKey.reportSubmitted: 'Report submitted for review.',
+    CommunityChannelsCopyKey.blockConfirmed:
+        'Member blocked. Refreshing this conversation.',
+    CommunityChannelsCopyKey.safetyUnavailable:
+        'Could not confirm the safety action. Try again.',
+    CommunityChannelsCopyKey.cancel: 'Not now',
+    CommunityChannelsCopyKey.confirm: 'Confirm',
   };
 
   static const arabic = <CommunityChannelsCopyKey, String>{
@@ -176,6 +207,8 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.sending: 'جارٍ الإرسال…',
     CommunityChannelsCopyKey.sendFailed:
         'تعذر تأكيد إرسال الرسالة. احتفظنا بالنص.',
+    CommunityChannelsCopyKey.sendRateLimited:
+        'يرجى الانتظار دقيقة قبل الإرسال مجددًا. احتفظنا برسالتك لإعادة المحاولة.',
     CommunityChannelsCopyKey.retryOriginal:
         'تعيد المحاولة إرسال الرسالة الأصلية. تبقى مسودتك الأحدث منفصلة.',
     CommunityChannelsCopyKey.originalAttempt: 'الرسالة الأصلية',
@@ -196,5 +229,20 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.unread: 'غير مقروءة',
     CommunityChannelsCopyKey.loading: 'جارٍ تحميل القنوات…',
     CommunityChannelsCopyKey.member: 'عضو في المجتمع',
+    CommunityChannelsCopyKey.messageSafety: 'خيارات سلامة الرسالة',
+    CommunityChannelsCopyKey.reportMessage: 'الإبلاغ عن هذه الرسالة',
+    CommunityChannelsCopyKey.blockMember: 'حظر هذا العضو',
+    CommunityChannelsCopyKey.reportCategory: 'ما سبب الإبلاغ؟',
+    CommunityChannelsCopyKey.reportSpam: 'رسائل مزعجة أو إعلانات',
+    CommunityChannelsCopyKey.reportHarassment: 'مضايقة أو تنمر',
+    CommunityChannelsCopyKey.reportHate: 'محتوى يحض على الكراهية أو الضرر',
+    CommunityChannelsCopyKey.reportOther: 'مشكلة سلامة أخرى',
+    CommunityChannelsCopyKey.reportSubmitted: 'تم إرسال البلاغ للمراجعة.',
+    CommunityChannelsCopyKey.blockConfirmed:
+        'تم حظر العضو. جارٍ تحديث المحادثة.',
+    CommunityChannelsCopyKey.safetyUnavailable:
+        'تعذر تأكيد إجراء السلامة. حاول مجددًا.',
+    CommunityChannelsCopyKey.cancel: 'ليس الآن',
+    CommunityChannelsCopyKey.confirm: 'تأكيد',
   };
 }

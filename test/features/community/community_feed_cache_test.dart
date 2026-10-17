@@ -81,6 +81,32 @@ void main() {
       );
     },
   );
+  test(
+    'a private image is never given a fabricated unsigned storage URL',
+    () async {
+      await cache.save('A', 'for_you|ar', [post('p-with-image')]);
+      final rows = await cache.readAuthorized('A', 'for_you|ar', [
+        'p-with-image',
+      ]);
+      expect(rows, hasLength(1));
+      expect(rows.single.mediaItems, hasLength(1));
+      expect(
+        rows.single.mediaItems.single.objectPath,
+        contains('p-with-image'),
+      );
+      expect(rows.single.mediaItems.single.url, isNull);
+      expect(rows.single.hasImage, isTrue);
+      final disk =
+          await (await root
+                  .list()
+                  .where((f) => f.path.endsWith('.json'))
+                  .cast<File>()
+                  .first)
+              .readAsString();
+      expect(disk, isNot(contains('/storage/v1/object/sign/')));
+      expect(disk, isNot(contains('DO-NOT-PERSIST')));
+    },
+  );
   test('corrupt feed metadata fails closed', () async {
     await cache.save('A', 'ar', [post('p')]);
     final file = (await root.list().cast<File>().toList()).single;

@@ -79,7 +79,7 @@ extension _FoodLogActions on _FoodLogPageState {
                     skipKey: const Key('food-log-save-guide-skip'),
                   )
                 : null;
-            return AlertDialog(
+            return BilPearlAlertDialog(
               title: Text(_t(dialogContext, 'Choose a serving')),
               content: SingleChildScrollView(
                 child: Column(
@@ -196,6 +196,7 @@ extension _FoodLogActions on _FoodLogPageState {
       if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) {
         return false;
       }
+      if (!await _ensureCameraPermission() || !mounted) return false;
       final barcode = await Navigator.of(context).push<String>(
         MaterialPageRoute<String>(
           builder: (_) => const FoodBarcodeScannerPage(),
@@ -265,44 +266,44 @@ extension _FoodLogActions on _FoodLogPageState {
     if (!mounted) return false;
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(context.strings.text('Camera access is off')),
-          content: Text(
-            context.strings.text(
-              'BIL only uses the camera after you choose barcode or meal-photo capture. Enable camera access in system settings, or continue with manual entry.',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(context.strings.text('Not now')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(context.strings.text('Open system settings')),
-            ),
-          ],
+      final open = await showBilPearlPermissionDecision(
+        context,
+        title: context.strings.text('Camera access is off'),
+        description: context.strings.text(
+          'BIL only uses the camera after you choose barcode or meal-photo capture. Enable camera access in system settings, or continue with manual entry.',
         ),
+        cancelLabel: context.strings.text('Not now'),
+        confirmLabel: context.strings.text('Open system settings'),
       );
-      if (open == true) await policy.openSettings();
+      if (open && mounted) await policy.openSettings();
       return false;
     }
-    return await policy.request(BilRuntimeCapability.camera) ==
-        BilRuntimePermissionState.granted;
+    final result = await policy.request(BilRuntimeCapability.camera);
+    return mounted && result == BilRuntimePermissionState.granted;
   }
 
   Future<void> _analyzeMealImage({
     bool directCamera = false,
     XFile? initialImage,
   }) async {
-    if (mealImageBusy) return;
-    _updateState(() => mealImageBusy = true);
+    if (mealPhotoRequestInFlight) return;
+    mealPhotoRequestInFlight = true;
+    try {
+      await _analyzeMealImageWithSource(
+        directCamera: directCamera,
+        initialImage: initialImage,
+      );
+    } finally {
+      mealPhotoRequestInFlight = false;
+    }
+  }
+
+  Future<void> _analyzeMealImageWithSource({
+    required bool directCamera,
+    XFile? initialImage,
+  }) async {
+    // Leave the existing Log Food form mounted while checking access,
+    // presenting camera/gallery and confirming a selected image.
     final visionCopy = MealVisionUiCopy.ofLocale(
       Localizations.localeOf(context),
     );
@@ -335,7 +336,7 @@ extension _FoodLogActions on _FoodLogPageState {
       try {
         await showDialog<void>(
           context: context,
-          builder: (dialogContext) => AlertDialog.adaptive(
+          builder: (dialogContext) => BilPearlAlertDialog(
             title: Text(visionCopy.text('unavailable')),
             content: Text(
               const MealImageAnalysisException(
@@ -449,6 +450,9 @@ extension _FoodLogActions on _FoodLogPageState {
         }
       }
       if (image == null || !mounted) return;
+      // The analysis indicator belongs to AI work AFTER image selection, not
+      // to the photo source chooser or the camera/gallery permission flow.
+      _updateState(() => mealImageBusy = true);
       final analysis = await service.analyze(image);
       if (!mounted) return;
       if (analysis.candidates.isEmpty) {

@@ -8,36 +8,20 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     if (!mounted) return false;
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(context.strings.text('Camera access is off')),
-          content: Text(
-            context.strings.text(
-              'BIL only uses the camera after you choose barcode or meal-photo capture. Enable camera access in system settings, or continue with manual entry.',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(context.strings.text('Not now')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(context.strings.text('Open system settings')),
-            ),
-          ],
+      final open = await showBilPearlPermissionDecision(
+        context,
+        title: context.strings.text('Camera access is off'),
+        description: context.strings.text(
+          'BIL only uses the camera after you choose barcode or meal-photo capture. Enable camera access in system settings, or continue with manual entry.',
         ),
+        cancelLabel: context.strings.text('Not now'),
+        confirmLabel: context.strings.text('Open system settings'),
       );
-      if (open == true) await policy.openSettings();
+      if (open && mounted) await policy.openSettings();
       return false;
     }
-    return await policy.request(BilRuntimeCapability.camera) ==
-        BilRuntimePermissionState.granted;
+    final result = await policy.request(BilRuntimeCapability.camera);
+    return mounted && result == BilRuntimePermissionState.granted;
   }
 
   Future<void> _resolveBarcode(String rawBarcode) async {
@@ -52,7 +36,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     if (outcome.invalid) {
       await showDialog<void>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => BilPearlAlertDialog(
           title: Text(barcodeCopy.invalidTitle),
           content: Text(barcodeCopy.invalidBody),
           actions: [
@@ -82,7 +66,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     if (outcome.product != null) {
       final submitReview = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => BilPearlAlertDialog(
           title: Text(
             productKindLabel(
               outcome.product!.kind,
@@ -125,7 +109,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
 
     final submitReview = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => BilPearlAlertDialog(
         title: Text(
           context.strings.text(
             outcome.degraded
@@ -185,10 +169,12 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     }
 
     foodSearch.text = result.foodQuery;
-    _updateState(() => selectedFood = null);
-    // Use the same progressive picker as typing. Recognition is not consent
-    // to select the first network result or to save a guessed food identity.
-    foodSearch.openView();
+    _updateState(() {
+      selectedFood = null;
+      mealSearchActive = true;
+    });
+    // Spoken food queries enter the very same inline search as typing.
+    _openFoodSearchAfterBuild();
   }
 
   Future<void> _analyzeMealImage({
@@ -215,7 +201,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       if (!service.configured) {
         await showDialog<void>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => BilPearlAlertDialog(
             title: Text(visionCopy.text('unavailable')),
             content: Text(
               const MealImageAnalysisException(
@@ -256,7 +242,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
             ),
           );
         } else {
-          final imageSource = await showModalBottomSheet<ImageSource>(
+          final imageSource = await showBilModalBottomSheet<ImageSource>(
             context: context,
             showDragHandle: true,
             builder: (sheetContext) => SafeArea(

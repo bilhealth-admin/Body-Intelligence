@@ -146,13 +146,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
-    final controller =
-        tester.widget<SearchBar>(searchEntry).controller! as SearchController;
-    expect(controller.isOpen, isFalse);
+    final controller = tester.widget<SearchBar>(searchEntry).controller!;
+    expect(controller.text, isEmpty);
+    expect(find.byType(SearchAnchor), findsNothing);
+    expect(find.byKey(const Key('daily-meal-empty-add-food')), findsOneWidget);
     expect(authority.pending, isEmpty);
     await tester.tap(searchEntry);
-    await tester.pumpAndSettle();
-    expect(controller.isOpen, isTrue);
+    await tester.pump();
 
     final searchBar = find.byType(SearchBar).last;
     await tester.enterText(searchBar, 'a');
