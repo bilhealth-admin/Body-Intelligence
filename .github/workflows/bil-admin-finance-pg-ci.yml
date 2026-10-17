@@ -1,0 +1,61 @@
+name: BIL Admin — isolated PostgreSQL finance contract
+on:
+  push:
+    branches:
+      - admin-web-readonly-direct-20261017
+    paths:
+      - 'tool/admin_web/pg_it/**'
+      - '.github/workflows/bil-admin-finance-pg-ci.yml'
+permissions:
+  contents: read
+concurrency:
+  group: admin-web-pg-finance-only
+  cancel-in-progress: true
+jobs:
+  finance-postgres:
+    name: PostgreSQL 17 — fake users and finance contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-ephemeral
+          POSTGRES_DB: bil_finance_synthetic
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bil_finance_synthetic"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout isolated admin-only branch
+        uses: actions/checkout@v4
+      - name: Verify PostgreSQL client
+        shell: bash
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+          psql --version
+      - name: Bootstrap synthetic users and production grant implementation
+        shell: bash
+        env:
+          PGPASSWORD: test-only-ephemeral
+        run: |
+          psql -h 127.0.0.1 -p 5432 -U postgres -d bil_finance_synthetic -v ON_ERROR_STOP=1 -f tool/admin_web/pg_it/bootstrap.sql
+      - name: Install unactivated finance wrapper only in ephemeral DB
+        shell: bash
+        env:
+          PGPASSWORD: test-only-ephemeral
+        run: |
+          psql -h 127.0.0.1 -p 5432 -U postgres -d bil_finance_synthetic -v ON_ERROR_STOP=1 -f tool/admin_web/pg_it/stepup.sql
+      - name: Verify rollback/ACL/MFA/idempotency/grant/revoke
+        shell: bash
+        env:
+          PGPASSWORD: test-only-ephemeral
+        run: |
+          psql -h 127.0.0.1 -p 5432 -U postgres -d bil_finance_synthetic -v ON_ERROR_STOP=1 -f tool/admin_web/pg_it/finance_test.sql
