@@ -2,6 +2,7 @@
 """Local-only real PostgreSQL+PostgREST HTTP/JWT integration test."""
 from __future__ import annotations
 import base64
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import hmac
 import json
@@ -95,6 +96,37 @@ def main():
     check(os.getenv("BIL07_FIXTURE_HTTP_ONLY") == "1", "Fixture opt-in missing")
     wait_server()
     denied("bil07_channel_capabilities_v1", {})
+    # The public endpoint must not permit direct SELECT on message storage.
+    private_req = urllib.request.Request(
+        BASE + "/bil07_channel_messages_v1?select=id",
+        method="GET",
+        headers={"Authorization": "Bearer " + jwt(A)},
+    )
+    try:
+        with urllib.request.urlopen(private_req, timeout=10) as response:
+            table_status = response.status
+    except urllib.error.HTTPError as err:
+        table_status = err.code
+    check(table_status in (401, 403, 404),
+          "Direct private message table was exposed through REST")
+    # Signed claims require a valid MAC; editing the identity cannot rebind
+    # someone else's channel visit.
+    fake = jwt(A).split(".")
+    fake[2] = ("B" if fake[2][0] == "A" else "A") + fake[2][1:]
+    tampered = urllib.request.Request(
+        BASE + "/rpc/bil07_channel_capabilities_v1",
+        method="POST",
+        headers={"Authorization": "Bearer " + ".".join(fake),
+                 "Content-Type": "application/json"},
+        data=b"{}",
+    )
+    try:
+        with urllib.request.urlopen(tampered, timeout=10) as response:
+            tampered_status = response.status
+    except urllib.error.HTTPError as err:
+        tampered_status = err.code
+    check(tampered_status == 401,
+          "A forged member JWT was accepted at the PostgREST boundary")
     cap = allowed("bil07_channel_capabilities_v1", {}, A)
     check(cap["contract_version"] == 1 and cap["max_text_code_points"] == 2000,
           "mobile capability v1 mismatch")
@@ -170,6 +202,29 @@ def main():
         "p_after_sequence": None, "p_limit": 50}, B)
     check(len(hidden["messages"]) == 0,
           "removed content leaked to another user")
+    # Two HTTP requests racing with the same owner/UUID must commit once.
+    concurrent_key = "35000000-0000-4000-8000-000000000777"
+    concurrent_body = {
+        "p_channel_id": PUBLIC,
+        "p_client_message_id": concurrent_key,
+        "p_text": "Fixture racing duplicate request",
+    }
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(
+            lambda _: request("bil07_channel_send_v1", concurrent_body, owner=B),
+            range(2),
+        ))
+    check(all(status == 200 for status, _ in outcomes),
+          "Two legitimate concurrently retried sends failed")
+    check(
+        outcomes[0][1]["message"]["id"] == outcomes[1][1]["message"]["id"]
+        and sorted(str(item[1]["idempotent_replay"]) for item in outcomes)
+        == ["False", "True"],
+        "Concurrent duplicate send changed the stored message identity",
+    )
+    print("BIL07_REAL_POSTGRES_CONCURRENT_IDEMPOTENCY=PASS")
+    print("BIL07_REAL_POSTGRES_DIRECT_TABLE_ACL_AND_JWT_MAC=PASS")
+
     # These are real HTTP writes but solely to the disposable fixture. Twenty
     # messages are the sender's total minute budget (including first send).
     for index in range(19):

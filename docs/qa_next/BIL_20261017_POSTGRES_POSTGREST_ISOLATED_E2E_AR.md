@@ -13,3 +13,6 @@ One sender can initiate at most 20 distinct channel messages in a rolling 60-sec
 - PostgREST integration baseline `8d22378a1e985428684334c9035c4c3e286317e5` passed [39068469341](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/39068469341).
 - Extended per-owner rate limiter `b2237aefcfb4e1619025c2670884929780346c7a` passed PGlite, actual PostgreSQL/PostgREST HTTP and Flutter [39068794875](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/39068794875).
 - Exact Dart formatter changes from [39069003326](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/39069003326) are applied to the tracked source; CI now strictly rejects unformatted inputs rather than modifying working copy only. Re-run required for final byte-identical source proof.
+
+### Additional real-HTTP adversarial coverage
+Added direct PostgREST table-query denial using an authenticated fixture JWT; a tampered signed token must return 401. Two concurrent HTTP POSTs with the same sender and client message UUID must result in exactly one created message, the second being a confirmed idempotent replay. These tests prove server-side security and race handling in the disposable database, without disclosing real user data or accessing Production. Latest focused CI must pass on the changed HEAD before acceptance.
