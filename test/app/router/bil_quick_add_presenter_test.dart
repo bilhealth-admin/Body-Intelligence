@@ -153,31 +153,45 @@ void main() {
     );
   }
 
-  testWidgets('Quick Add photo shows source chooser without leaving the current tab',
-      (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    final router = _router(initial: '/community', origin: '/community');
-    addTearDown(router.dispose);
-    await tester.pumpWidget(_app(router));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('open-quick-add')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quick-add-primary-3')));
-    await tester.pumpAndSettle();
-    expect(find.byType(BilQuickAddSheet), findsNothing);
-    expect(find.byKey(const Key('quick-add-meal-photo-source-sheet')), findsOneWidget);
-    expect(find.byKey(const Key('quick-add-meal-photo-camera')), findsOneWidget);
-    expect(find.byKey(const Key('quick-add-meal-photo-gallery')), findsOneWidget);
-    expect(router.routeInformationProvider.value.uri.path, '/community');
-    expect(find.byKey(const Key('route')), findsOneWidget);
-    await tester.tapAt(const Offset(10, 40));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('quick-add-meal-photo-source-sheet')), findsNothing);
-    expect(router.routeInformationProvider.value.uri.path, '/community');
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'Quick Add photo shows source chooser without leaving the current tab',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final router = _router(initial: '/community', origin: '/community');
+      addTearDown(router.dispose);
+      await tester.pumpWidget(_app(router));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('open-quick-add')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quick-add-primary-3')));
+      await tester.pumpAndSettle();
+      expect(find.byType(BilQuickAddSheet), findsNothing);
+      expect(
+        find.byKey(const Key('quick-add-meal-photo-source-sheet')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('quick-add-meal-photo-camera')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('quick-add-meal-photo-gallery')),
+        findsOneWidget,
+      );
+      expect(router.routeInformationProvider.value.uri.path, '/community');
+      expect(find.byKey(const Key('route')), findsOneWidget);
+      await tester.tapAt(const Offset(10, 40));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('quick-add-meal-photo-source-sheet')),
+        findsNothing,
+      );
+      expect(router.routeInformationProvider.value.uri.path, '/community');
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   for (final origin in [
     '/intelligence-center',
