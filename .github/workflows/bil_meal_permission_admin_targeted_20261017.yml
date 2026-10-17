@@ -5,6 +5,11 @@ on:
       - fix/bil-meal-permissions-search-admin-ready-20261017
 permissions:
   contents: read
+# A newer source snapshot supersedes an obsolete CI attempt, while all jobs
+# for the SAME snapshot remain independent, visible and required.
+concurrency:
+  group: bil-food-permissions-20261017-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   lint:
     runs-on: ubuntu-24.04

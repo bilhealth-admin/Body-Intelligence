@@ -45,6 +45,10 @@ void main() {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       var databaseClosed = false;
       addTearDown(() async {
+        // Always retire widget subscriptions before closing the SQLite
+        // executor, including when a preceding assertion has failed.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
         if (!databaseClosed) await database.close();
       });
       final foods = FoodRepository(database);
