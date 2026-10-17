@@ -77,7 +77,6 @@ void main() {
             if (AppEnvironment.communityConfigured) 'Community',
             'Privacy & notifications',
             'Help',
-            'Administration',
           ];
           for (final title in sectionTitles) {
             final localizedTitle = copy(title);
@@ -138,6 +137,14 @@ void main() {
             }
             expect(tester.takeException(), isNull);
           }
+
+          // Admin-only web functionality must never be reachable through More,
+          // including for a mock account with admin access granted.
+          expect(
+            find.byKey(const Key('settings-ai-coach-admin-entry')),
+            findsNothing,
+          );
+          expect(find.text(copy('Administration')), findsNothing);
 
           await tester.pumpWidget(const SizedBox.shrink());
           await tester.pumpAndSettle();
