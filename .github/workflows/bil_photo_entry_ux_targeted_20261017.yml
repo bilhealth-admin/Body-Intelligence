@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - fix/bil-photo-entry-ux-20261017
+      - fix/bil-photo-entry-ux-ready-20261017
     paths:
       - 'lib/app/router/bil_quick_add_presenter.dart'
       - 'lib/app/router/bil_quick_add_photo_flow.dart'
