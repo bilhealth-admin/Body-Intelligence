@@ -32,7 +32,10 @@ void main() {
     await tester.pumpAndSettle();
     final plus = find.byKey(const Key('daily-meal-empty-add-food'));
     expect(plus, findsOneWidget);
-    expect(tester.widget<IconButton>(plus).onPressed, isNotNull);
+    final button = tester.widget<IconButton>(plus);
+    expect(button.onPressed, isNotNull);
+    expect(button.constraints?.minWidth, greaterThanOrEqualTo(48));
+    expect(button.constraints?.minHeight, greaterThanOrEqualTo(48));
     await tester.tap(plus);
     await tester.pump();
     expect(called, 1);

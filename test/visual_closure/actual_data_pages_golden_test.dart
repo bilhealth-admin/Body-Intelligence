@@ -533,7 +533,21 @@ void main() {
         await tester.pumpAndSettle();
         await tester.enterText(searchBar, 'Plain Greek');
         await tester.pump();
-        await tester.pump(const Duration(milliseconds: 1500));
+        // Real SQLite-backed progressive results are asynchronous beyond
+        // the fake widget clock. Wait for the *actual* matching item,
+        // bounded, without fabricating a search result or bypassing the check.
+        for (
+          var attempt = 0;
+          attempt < 120 && find.text('Plain Greek yogurt').evaluate().isEmpty;
+          attempt++
+        ) {
+          await tester.pump(const Duration(milliseconds: 50));
+          if (attempt % 5 == 0) {
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 20)),
+            );
+          }
+        }
         expect(find.text('Plain Greek yogurt'), findsOneWidget);
       },
     );

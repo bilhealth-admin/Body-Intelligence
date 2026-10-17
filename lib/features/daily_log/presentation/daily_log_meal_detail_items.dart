@@ -57,11 +57,20 @@ class DailyMealDetailItems extends StatelessWidget {
               ],
             ),
             if (items.isEmpty) ...[
-              const SizedBox(height: 14),
+              // Preserve the previously approved compact empty-meal layout.
+              // The 48x48 transparent hit target makes the original + fully
+              // interactive without adding a filled badge or pushing its
+              // guidance out of the viewport on smaller phones.
+              const SizedBox(height: 4),
               Center(
-                child: IconButton.filledTonal(
+                child: IconButton(
                   key: const Key('daily-meal-empty-add-food'),
                   tooltip: context.strings.text('Add food'),
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  padding: EdgeInsets.zero,
                   onPressed: onAddFood,
                   icon: Icon(
                     Icons.add_circle_outline_rounded,
@@ -70,7 +79,6 @@ class DailyMealDetailItems extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
               Text(
                 _mealListText(context, 'emptyMeal'),
                 textAlign: TextAlign.center,
