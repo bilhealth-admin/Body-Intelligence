@@ -35,3 +35,6 @@
 - Coach independent regression suite now exercises lifecycle, RTL/25 languages, response messages, Arabic transcript, navigation, offline, and duplicate-action behavior. No real AI provider requests or user personal records.
 - Public workouts sample diagnostic reads only HEAD metadata from 20 declared preview groups at a concurrency cap of three; no video is downloaded, no credentials supplied, and no production mutations. It tests availability, bytes, range support and strong ETag; 20/302 is only a representative sample, not native playback certification.
 - Financial logs correlation: in 16 October store traffic, the 503 cluster includes `reconciliation_forbidden` (intentional security rejection currently incorrectly mapped to 503); ownership conflicts correspond to 400. Do **not** treat all purchase 503 as vendor outage; revise error classification only with old-client compatibility proof.
+
+### Corrected coach CI path
+- The expanded Coach test matrix succeeded in 135 tests but included a **nonexistent test path** `coach_navigation_receipt_test.dart`; the actual tracked file is `ai_coach_navigation_receipt_test.dart`. This is strictly a CI path correction, not an exemption or removal. Rerun the entire Coach matrix at the latest tree.

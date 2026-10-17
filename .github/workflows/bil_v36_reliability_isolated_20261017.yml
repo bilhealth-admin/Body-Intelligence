@@ -164,7 +164,7 @@ jobs:
             test/features/intelligence_center/coach_voice_transcript_normalizer_test.dart \
             test/features/intelligence_center/coach_offline_behavior_benchmark_test.dart \
             test/features/intelligence_center/coach_25_locale_matrix_test.dart \
-            test/features/intelligence_center/coach_navigation_receipt_test.dart \
+            test/features/intelligence_center/ai_coach_navigation_receipt_test.dart \
             test/features/intelligence_center/coach_answer_with_action_regression_test.dart
   video_samples_read_only:
     runs-on: ubuntu-24.04
