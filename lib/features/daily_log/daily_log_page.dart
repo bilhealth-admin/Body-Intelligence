@@ -445,7 +445,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           const SizedBox(height: 12),
                           DailyMealDetailItems(
                             meal: focusedMeal,
-                            onAddFood: mutationBusy ? null : _openFoodSearchAfterBuild,
+                            onAddFood: mutationBusy
+                                ? null
+                                : _openFoodSearchAfterBuild,
                             onEdit: _editMealItem,
                             onActions: _showItemActions,
                             showFoodTimestamps: showFoodTimestamps,

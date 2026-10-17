@@ -5,7 +5,9 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_meals_list.dart';
 
 void main() {
-  testWidgets('empty Foods in this meal plus invokes the add-food callback', (tester) async {
+  testWidgets('empty Foods in this meal plus invokes the add-food callback', (
+    tester,
+  ) async {
     var called = 0;
     await tester.pumpWidget(
       MaterialApp(

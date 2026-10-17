@@ -162,7 +162,9 @@ void main() {
       }
 
       final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
-      final searchController = tester.widget<SearchBar>(searchEntry).controller!;
+      final searchController = tester
+          .widget<SearchBar>(searchEntry)
+          .controller!;
       expect(searchController.text, isEmpty);
       expect(find.byType(SearchAnchor), findsNothing);
       expect(authority.queries, isEmpty);

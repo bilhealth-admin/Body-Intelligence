@@ -289,10 +289,9 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('daily-meal-detail-items')),
         230,
-        scrollable: find.descendant(
-          of: focusedMeal,
-          matching: find.byType(Scrollable),
-        ).first,
+        scrollable: find
+            .descendant(of: focusedMeal, matching: find.byType(Scrollable))
+            .first,
       );
       await tester.pump();
       await _waitForSavedMealRow(tester, foodRow);
@@ -353,7 +352,6 @@ void main() {
   );
 }
 
- 
 /// The progressive authority reads SQLite on an actual executor. In widget
 /// tests, a single fake-async one-second pump does not guarantee real IO ran.
 /// Wait for the REAL result (never fake the food), with a strict bounded retry.
@@ -361,9 +359,11 @@ Future<void> _waitForInlineFoodResult(
   WidgetTester tester,
   String displayName,
 ) async {
-  for (var attempt = 0;
-      attempt < 100 && find.text(displayName).evaluate().isEmpty;
-      attempt++) {
+  for (
+    var attempt = 0;
+    attempt < 100 && find.text(displayName).evaluate().isEmpty;
+    attempt++
+  ) {
     await tester.pump(const Duration(milliseconds: 50));
     if (attempt % 5 == 0) {
       await tester.runAsync(

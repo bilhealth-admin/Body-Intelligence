@@ -31,18 +31,24 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                 ),
                 side: WidgetStatePropertyAll(
                   BorderSide(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: .18),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: .18),
                   ),
                 ),
                 shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(22),
+                  ),
                 ),
                 hintText: _mealCopy('searchFoods'),
                 trailing: [
                   if (foodSearch.text.isNotEmpty)
                     IconButton(
                       key: const Key('daily-meal-clear-search'),
-                      tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).deleteButtonTooltip,
                       icon: const Icon(Icons.close_rounded),
                       onPressed: () {
                         foodSearch.clear();

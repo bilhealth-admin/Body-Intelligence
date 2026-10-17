@@ -183,7 +183,9 @@ void main() {
       expect(tester.takeException(), isNull, reason: '$tag search');
 
       final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
-      final searchController = tester.widget<SearchBar>(searchEntry).controller!;
+      final searchController = tester
+          .widget<SearchBar>(searchEntry)
+          .controller!;
       expect(searchController.text, isEmpty);
       expect(find.byType(SearchAnchor), findsNothing);
       await tester.tap(searchEntry);

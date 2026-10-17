@@ -24,9 +24,9 @@ jobs:
           cache: true
       - name: Install locked dependencies
         run: flutter pub get
-      - name: Format touched Dart in disposable CI runner
+      - name: Enforce Dart formatting of committed sources (no CI rewrites)
         run: |
-          dart format \
+          dart format --output=none --set-exit-if-changed \
             lib/features/daily_log/daily_log_page.dart \
             lib/features/daily_log/daily_log_meal_entry.dart \
             lib/features/daily_log/daily_log_meal_search.dart \
