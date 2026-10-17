@@ -111,7 +111,13 @@ final class ServerEntitlementRepository {
         // unavailable or corrupt.
       }
     }
-    final store = await _storeCurrent();
+    // A verified empty store/closed-test read is only a negative paid-source
+    // witness. Do not treat it as Free until the independent admin RPC also
+    // succeeds and explicitly returns no active grant.
+    var verifiedNoStorePaidSource = false;
+    final store = await _storeCurrent(
+      onVerifiedNoStorePaidSource: () => verifiedNoStorePaidSource = true,
+    );
     CommunityOwnerOperation.checkCurrent();
     if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
     try {
@@ -120,12 +126,14 @@ final class ServerEntitlementRepository {
           .timeout(const Duration(seconds: 10));
       CommunityOwnerOperation.checkCurrent();
       if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
-      final resolved = composeAdminSubscriptionAccess(
-        store: store,
-        grant: grant,
-        ownerId: ownerId,
-        now: DateTime.now().toUtc(),
-      );
+      final resolved = grant == null && verifiedNoStorePaidSource
+          ? _verifiedFree(verifiedAt: DateTime.now().toUtc())
+          : composeAdminSubscriptionAccess(
+              store: store,
+              grant: grant,
+              ownerId: ownerId,
+              now: DateTime.now().toUtc(),
+            );
       _adminSessionCache.remember(
         ownerId: ownerId,
         state: resolved,
@@ -181,7 +189,9 @@ final class ServerEntitlementRepository {
     }
   }
 
-  Future<SubscriptionState> _storeCurrent() async {
+  Future<SubscriptionState> _storeCurrent({
+    void Function()? onVerifiedNoStorePaidSource,
+  }) async {
     CommunityOwnerOperation.checkCurrent();
     if (!AppEnvironment.supabaseRuntimeReady) {
       return FreePlan.createState();
@@ -233,10 +243,19 @@ final class ServerEntitlementRepository {
           .limit(1)
           .timeout(const Duration(seconds: 10));
       if (rows.isEmpty) {
-        // An empty response can be produced while a just-verified purchase is
-        // still replicating through Supabase. Do not erase the short-lived
-        // verified continuity cache on that transient read.
-        return await _transientFallback(user.id, now);
+        // An empty store mirror can briefly follow a successful purchase.
+        // Preserve an existing, still-valid paid continuity lease. Only a
+        // successful closed-test read AND a successful admin RPC with a null
+        // grant can later establish verified Free. A failed read stays
+        // unverified, so the premium gate never mistakes network failure for
+        // a real revocation.
+        final previous = await _transientFallback(user.id, now);
+        if (!closedTestReadFailed &&
+            previous.authority == EntitlementAuthority.localDefault &&
+            previous.plan == CommercePlan.free) {
+          onVerifiedNoStorePaidSource?.call();
+        }
+        return previous;
       }
       final row = rows.first;
       final providerValue = row['provider']?.toString().trim().toLowerCase();
