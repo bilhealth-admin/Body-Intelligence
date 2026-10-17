@@ -79,11 +79,40 @@ jobs:
           set -euo pipefail
           url="$(cat /tmp/bil-admin-origin.txt)"
           test -n "$url"
-          curl --fail --show-error --silent --max-time 25 "$url" -o /tmp/bil-admin-home.html
+          for attempt in $(seq 1 12); do
+            if curl --fail --show-error --silent --max-time 20 "$url" -o /tmp/bil-admin-home.html \
+               && grep -q 'BIL Secure Administration' /tmp/bil-admin-home.html; then
+              break
+            fi
+            echo "Waiting for Cloudflare deployment propagation: $attempt/12"
+            sleep 5
+          done
+          test -s /tmp/bil-admin-home.html
           grep -q 'BIL Secure Administration' /tmp/bil-admin-home.html
-          if grep -qi 'Replit Agent is building' /tmp/bil-admin-home.html; then
-            echo 'PLACEHOLDER_NOT_ACCEPTED' >&2
-            exit 1
-          fi
+          ! grep -qi 'Replit Agent is building' /tmp/bil-admin-home.html
+          export ADMIN_WEB_ORIGIN="$url"
+          node --input-type=module <<'JS'
+          const origin=process.env.ADMIN_WEB_ORIGIN;
+          const api='https://tgmanzhqulksykhslrzb.supabase.co/functions/v1';
+          for(const slug of ['bil-admin-web-v1','bil-admin-web-ops-v1']){
+            const endpoint=api+'/'+slug;
+            const preflight=await fetch(endpoint,{method:'OPTIONS',headers:{
+              Origin:origin,'Access-Control-Request-Method':'POST',
+              'Access-Control-Request-Headers':'authorization, apikey, content-type'}});
+            if(preflight.status!==204||preflight.headers.get('access-control-allow-origin')!==origin){
+              throw new Error('PRODUCTION_CORS_PREFLIGHT_FAILED:'+slug+':'+preflight.status);
+            }
+            const unauthorized=await fetch(endpoint,{method:'POST',headers:{
+              Origin:origin,'content-type':'application/json'},body:JSON.stringify({operation:'status'})});
+            if(unauthorized.status!==401){
+              throw new Error('UNAUTHENTICATED_ACCESS_GATE_FAILED:'+slug+':'+unauthorized.status);
+            }
+            const wrongOrigin=await fetch(endpoint,{method:'OPTIONS',headers:{Origin:'https://not-bil.invalid'}});
+            if(wrongOrigin.status!==403||wrongOrigin.headers.get('access-control-allow-origin')){
+              throw new Error('FORBIDDEN_ORIGIN_GATE_FAILED:'+slug+':'+wrongOrigin.status);
+            }
+            console.log('LIVE_EDGE_UNAUTHENTICATED_GATE=PASS '+slug);
+          }
+          JS
           echo "PUBLIC_ADMIN_WEB=DEPLOYED"
           echo "ADMIN_WEB_URL=$url" >> "$GITHUB_STEP_SUMMARY"
