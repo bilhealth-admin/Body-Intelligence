@@ -170,6 +170,30 @@ def main():
         "p_after_sequence": None, "p_limit": 50}, B)
     check(len(hidden["messages"]) == 0,
           "removed content leaked to another user")
+    # These are real HTTP writes but solely to the disposable fixture. Twenty
+    # messages are the sender's total minute budget (including first send).
+    for index in range(19):
+        request_key = "35000000-0000-4000-8000-" + format(1280 + index, "012x")
+        allowed("bil07_channel_send_v1", {
+            "p_channel_id": PUBLIC,
+            "p_client_message_id": request_key,
+            "p_text": "Synthetic sender throttle fixture",
+        }, A)
+    rate_status, _ = request("bil07_channel_send_v1", {
+        "p_channel_id": PUBLIC,
+        "p_client_message_id": "35000000-0000-4000-8000-000000000999",
+        "p_text": "Synthetic flood must be rejected",
+    }, owner=A)
+    check(rate_status == 403, "21st unique send evaded owner rate cap")
+    committed_retry = allowed("bil07_channel_send_v1", payload, A)
+    check(committed_retry["idempotent_replay"] is True,
+          "owner rate cap incorrectly blocks committed idempotent retry")
+    allowed("bil07_channel_send_v1", {
+        "p_channel_id": PUBLIC,
+        "p_client_message_id": "35000000-0000-4000-8000-000000000901",
+        "p_text": "Another owner's independent allowance",
+    }, C)
+    print("BIL07_REAL_POSTGRES_OWNER_RATE_LIMIT=PASS")
     print("BIL07_REAL_POSTGRES_POSTGREST_RLS=PASS")
     print("BIL07_REAL_POSTGRES_POSTGREST_REPORT_MODERATION=PASS")
     print("BIL07_REAL_POSTGRES_POSTGREST_OWNER_IDEMPOTENCY=PASS")

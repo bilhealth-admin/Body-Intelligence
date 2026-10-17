@@ -66,10 +66,14 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
         controller.sendError is ChannelFailure &&
         (controller.sendError! as ChannelFailure).kind ==
             ChannelFailureKind.policyRequired;
+    final rateLimitedError =
+        controller.sendError is ChannelFailure &&
+        (controller.sendError! as ChannelFailure).kind ==
+            ChannelFailureKind.rateLimited;
     final status = <Widget>[
       if (controller.pendingSend != null) _pendingAttempt(),
       if (controller.sendError != null &&
-          (controller.pendingSend == null || policyError))
+          (controller.pendingSend == null || policyError || rateLimitedError))
         _sendError(),
       if (controller.connectionState ==
           CommunityChannelConnectionState.disconnected)

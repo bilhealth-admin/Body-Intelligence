@@ -5,6 +5,7 @@ enum ChannelFailureKind {
   denied,
   policyRequired,
   invalidText,
+  rateLimited,
   conflict,
   transport,
 }

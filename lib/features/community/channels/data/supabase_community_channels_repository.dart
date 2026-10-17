@@ -77,6 +77,9 @@ final class SupabaseCommunityChannelsRepository
     if (error.message.contains('idempotency_payload_mismatch')) {
       return const ChannelFailure(ChannelFailureKind.conflict);
     }
+    if (error.message.contains('channel_send_rate_limited')) {
+      return const ChannelFailure(ChannelFailureKind.rateLimited);
+    }
     if (error.code == '42501') {
       return const ChannelFailure(ChannelFailureKind.denied);
     }

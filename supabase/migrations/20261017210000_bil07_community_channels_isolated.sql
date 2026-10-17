@@ -81,6 +81,10 @@ create table private.bil07_channel_presence_v1 (
 create index bil07_channel_messages_browse_idx
   on public.bil07_channel_messages_v1(channel_id,sequence desc)
   where hidden_at is null;
+-- Exact sliding-window rate checks count hidden rows too: removal never
+-- refunds the ability to flood another room.
+create index bil07_channel_messages_author_rate_idx
+  on public.bil07_channel_messages_v1(author_id,created_at desc);
 create index bil07_channel_read_owner_idx
   on private.bil07_channel_read_receipts_v1(owner_id,channel_id);
 create index bil07_channel_presence_active_idx
@@ -311,6 +315,8 @@ declare
   v_created public.bil07_channel_messages_v1%rowtype;
   v_name text;
   v_replay boolean := false;
+  v_sent_minute integer;
+  v_sent_day integer;
 begin
   if p_channel_id is null or p_client_message_id is null or p_text is null
     or pg_catalog.char_length(p_text) not between 1 and 2000
@@ -338,6 +344,22 @@ begin
     v_created:=v_existing;
     v_replay:=true;
   else
+    -- A per-owner advisory transaction lock serializes rate budgets across
+    -- all rooms. Replaying the same committed UUID bypasses the budget
+    -- without ever writing or sending a second notification.
+    perform pg_catalog.pg_advisory_xact_lock(
+      pg_catalog.hashtextextended('bil07_send_rate:'||v_owner::text,0));
+    select pg_catalog.count(*)::integer into v_sent_minute
+      from public.bil07_channel_messages_v1
+      where author_id=v_owner and created_at>
+        pg_catalog.clock_timestamp()-interval '60 seconds';
+    select pg_catalog.count(*)::integer into v_sent_day
+      from public.bil07_channel_messages_v1
+      where author_id=v_owner and created_at>
+        pg_catalog.clock_timestamp()-interval '24 hours';
+    if v_sent_minute>=20 or v_sent_day>=300 then
+      raise exception 'channel_send_rate_limited' using errcode='42501';
+    end if;
     if v_channel.latest_sequence>=9007199254740990 then
       raise exception 'channel_sequence_exhausted' using errcode='55000';
     end if;

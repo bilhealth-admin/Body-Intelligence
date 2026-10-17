@@ -62,6 +62,19 @@ void main() {
     expect(actions, 0);
   });
 
+  test('a flood rejection retains actionable copy in Arabic and English', () {
+    expect(
+      CommunityChannelsCopy.forLocale(
+        const Locale('en'), CommunityChannelsCopyKey.sendRateLimited,
+      ), contains('wait a minute'),
+    );
+    expect(
+      CommunityChannelsCopy.forLocale(
+        const Locale('ar'), CommunityChannelsCopyKey.sendRateLimited,
+      ), contains('الانتظار دقيقة'),
+    );
+  });
+
   test('safety menu has Arabic and English labels without raw RPC code', () {
     expect(
       CommunityChannelsCopy.forLocale(

@@ -34,6 +34,7 @@ enum CommunityChannelsCopyKey {
   retrySend,
   sending,
   sendFailed,
+  sendRateLimited,
   retryOriginal,
   originalAttempt,
   textLimit,
@@ -124,6 +125,8 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.sending: 'Sending…',
     CommunityChannelsCopyKey.sendFailed:
         'The message could not be confirmed. Your text is kept.',
+    CommunityChannelsCopyKey.sendRateLimited:
+        'Please wait a minute before sending again. Your message is saved for retry.',
     CommunityChannelsCopyKey.retryOriginal:
         'Retry sends the original message. Any newer draft stays separate.',
     CommunityChannelsCopyKey.originalAttempt: 'Original message',
@@ -204,6 +207,8 @@ abstract final class CommunityChannelsCopy {
     CommunityChannelsCopyKey.sending: 'جارٍ الإرسال…',
     CommunityChannelsCopyKey.sendFailed:
         'تعذر تأكيد إرسال الرسالة. احتفظنا بالنص.',
+    CommunityChannelsCopyKey.sendRateLimited:
+        'يرجى الانتظار دقيقة قبل الإرسال مجددًا. احتفظنا برسالتك لإعادة المحاولة.',
     CommunityChannelsCopyKey.retryOriginal:
         'تعيد المحاولة إرسال الرسالة الأصلية. تبقى مسودتك الأحدث منفصلة.',
     CommunityChannelsCopyKey.originalAttempt: 'الرسالة الأصلية',

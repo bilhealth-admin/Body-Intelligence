@@ -186,3 +186,29 @@ Deno.test("BIL07 report is owner-scoped, reviewer-gated, idempotent and hides ap
       [PUBLIC,msg.id,"Too late after removal"]),"42501");
   }finally{await db.close();}
 });
+
+Deno.test("per-owner channel flood budget rejects the 21st new send but never duplicates replay",async()=>{
+  const db=new PGlite();
+  try {
+    await setup(db);await rooms(db);
+    await db.exec("set role authenticated");await actor(db,A);
+    const content="rate-safe fixture";
+    const firstId="35000000-0000-4000-8000-000000000500";
+    for (let i=0;i<20;i++){
+      const id="35000000-0000-4000-8000-"+(1280+i).toString(16).padStart(12,"0");
+      await rpc(db,"select public.bil07_channel_send_v1($1,$2,$3) result",[PUBLIC,id,content]);
+    }
+    await denied(
+      ()=>db.query("select public.bil07_channel_send_v1($1,$2,$3)",
+        [PUBLIC,"35000000-0000-4000-8000-000000000999","blocked flood"]),
+      "42501",
+    );
+    const replay=await rpc(db,"select public.bil07_channel_send_v1($1,$2,$3) result",
+      [PUBLIC,firstId,content]);
+    assert(replay.idempotent_replay===true,"rate limiter mistakenly rejected a committed retry");
+    await actor(db,B);
+    const other=await rpc(db,"select public.bil07_channel_send_v1($1,$2,$3) result",
+      [PUBLIC,"35000000-0000-4000-8000-000000000901","owner independent"]);
+    assert(other.idempotent_replay===false,"one user's limit restricted a different owner");
+  }finally{await db.close();}
+});
