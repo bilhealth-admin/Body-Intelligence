@@ -1,7 +1,6 @@
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +39,8 @@ import 'presentation/meal_image_guide_page.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
 import '../../shared/widgets/actionable_error_state.dart';
 import '../../shared/widgets/bil_modal_bottom_sheet.dart';
+import '../../shared/widgets/bil_permission_recovery_dialog.dart';
+import '../../shared/widgets/bil_pearl_alert_dialog.dart';
 
 part 'presentation/food_catalog_overview.dart';
 part 'presentation/food_catalog_tile.dart';

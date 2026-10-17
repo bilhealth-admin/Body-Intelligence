@@ -19,6 +19,7 @@ import '../../shared/widgets/bil_mobile_list.dart';
 import '../../shared/widgets/bil_native_settings_icon.dart';
 import '../../shared/widgets/bil_account_avatar.dart';
 import '../../shared/widgets/bil_media_review_sheet.dart';
+import '../../shared/widgets/bil_permission_recovery_dialog.dart';
 import '../nutrition/domain/dietary_preferences.dart';
 import '../nutrition_plans/domain/nutrition_pathway_catalog.dart';
 import '../onboarding/domain/adult_eligibility.dart';

@@ -8,7 +8,6 @@ import '../environment/app_environment.dart';
 import '../../features/analytics/analytics_page.dart';
 import '../../features/analytics/nutrition_analytics_page.dart';
 import '../../features/ads/advertising_privacy_page.dart';
-import '../../features/admin/presentation/ai_coach_admin_page.dart';
 import '../../features/analytics/weekly_report_page.dart';
 import '../../features/settings/language_settings_page.dart';
 import '../../features/auth/login_page.dart';
@@ -509,10 +508,6 @@ class AppRouter {
             initialDatasets: datasets,
           );
         },
-      ),
-      GoRoute(
-        path: '/admin/ai-coach',
-        builder: (_, _) => const AiCoachAdminPage(),
       ),
       ShellRoute(
         // Startup is a full-screen gate. Entering the product must replace it
