@@ -21,9 +21,9 @@ jobs:
         run: |
           set -euo pipefail
           test ! -f android/key.properties
-          test -z "\${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}"
-          test -z "\${APP_STORE_CONNECT_PRIVATE_KEY:-}"
-          test -z "\${SUPABASE_SERVICE_ROLE_KEY:-}"
+          test -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}"
+          test -z "${APP_STORE_CONNECT_PRIVATE_KEY:-}"
+          test -z "${SUPABASE_SERVICE_ROLE_KEY:-}"
           flutter --version
       - name: Fetch locked Flutter packages
         run: flutter pub get
@@ -37,10 +37,10 @@ jobs:
           set -euo pipefail
           BUNDLETOOL_VERSION=1.18.3
           BUNDLETOOL_SHA256=a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
-          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-\${BUNDLETOOL_VERSION}.jar"
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-${BUNDLETOOL_VERSION}.jar"
           curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
             --output "$BUNDLETOOL_JAR" \
-            "https://github.com/google/bundletool/releases/download/\${BUNDLETOOL_VERSION}/bundletool-all-\${BUNDLETOOL_VERSION}.jar"
+            "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
           echo "$BUNDLETOOL_SHA256  $BUNDLETOOL_JAR" | sha256sum --check
           python3 tool/release/verify_android_16k_alignment.py \
             --aab build/app/outputs/bundle/release/app-release.aab \
@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: bil07-unsigned-android33-16k-report
-          path: \${{ runner.temp }}/bil07-unsigned-android33-16k/
+          path: ${{ runner.temp }}/bil07-unsigned-android33-16k/
           if-no-files-found: ignore
           retention-days: 14
       - name: Check source remains unchanged
