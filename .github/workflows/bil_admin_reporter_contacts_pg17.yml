@@ -1,0 +1,44 @@
+name: BIL Admin Reporter Contacts PG17 Security
+on:
+  push:
+    branches:
+      - feat/bil-secure-admin-ops-20261018
+    paths:
+      - 'supabase/migrations/20261018025500_bil_admin_reporter_contacts_v1.sql'
+      - 'tool/admin_web/report_contacts_pg/**'
+      - '.github/workflows/bil_admin_reporter_contacts_pg17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pg-security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bil_admin_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bil_admin_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: bil_admin_test
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: SQL fixture and synthetic identities
+        run: psql -v ON_ERROR_STOP=1 -f tool/admin_web/report_contacts_pg/fixture.sql
+      - name: Additive privacy-scoped DDL
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261018025500_bil_admin_reporter_contacts_v1.sql
+      - name: RPC permission and visibility tests
+        run: psql -v ON_ERROR_STOP=1 -f tool/admin_web/report_contacts_pg/contract_test.sql
