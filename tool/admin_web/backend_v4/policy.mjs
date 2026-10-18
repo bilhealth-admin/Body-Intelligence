@@ -176,9 +176,23 @@ export function safeAuditPage(data) {
           (row.matched && (!uuid.test(row.grant_id || ''))) ||
           (!row.matched && row.grant_id !== null))
         throw new WebAdminError('invalid_server_response',503);
+      const optional = (value,maxLength=200) => {
+        if(value === null || value === undefined) return null;
+        if(typeof value !== 'string' || value.length > maxLength)
+          throw new WebAdminError('invalid_server_response',503);
+        return value;
+      };
+      const plan=row.plan_id??null;
+      if(plan!==null && !PLAN_IDS.includes(plan))
+        throw new WebAdminError('invalid_server_response',503);
       return {id:row.id, actor_id:row.actor_id, operation:row.operation,
         created_at:row.created_at, matched:row.matched, changed:row.changed,
-        grant_id:row.grant_id};
+        grant_id:row.grant_id,
+        recipient_email:optional(row.recipient_email,254),
+        actor_email:optional(row.actor_email,254),
+        plan_id:plan,
+        grant_expires_at:optional(row.grant_expires_at,50),
+        grant_reason:optional(row.grant_reason,180)};
     }),
   };
 }
