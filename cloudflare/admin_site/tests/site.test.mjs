@@ -84,3 +84,51 @@ test('sign-out in another tab clears cached privileged records',()=>{
   assert.match(source,/function clearPrivateView/);
   assert.match(source,/state\.auditRows=\[\]/);
 });
+
+test('human-readable reporter cases and safe compensation drafts',()=>{
+  assert.match(source,/function renderRecords\(/);
+  assert.match(source,/function reporterPanel\(/);
+  assert.match(source,/reporter_email/);
+  assert.match(source,/reporter_user_id/);
+  assert.match(source,/function prepareCompensation\(/);
+  assert.match(source,/\.value='compensation'/);
+  assert.match(source,/\.value=''/);
+  assert.match(source,/function recordField\(/);
+  assert.doesNotMatch(source,/JSON\.stringify\(allowed,null,2\)/);
+});
+test('translated grant status and audit outcomes are first-class labels',()=>{
+  assert.match(source,/function localizedState\(/);
+  assert.match(source,/elem\('span',localizedState\(value\),'pill'\)/);
+  assert.match(source,/operationGrant/);
+  assert.match(source,/operationRevoke/);
+  assert.match(source,/resultChanged/);
+  assert.match(source,/shortId\(row\.grant_id\)/);
+});
+test('notifications explain custom, gift and compensation, with all-account confirmation',()=>{
+  assert.match(source,/notificationWarning/);
+  assert.match(source,/notificationKindHelpCustom/);
+  assert.match(source,/notificationKindHelpGift/);
+  assert.match(source,/notificationKindHelpCompensation/);
+  assert.match(source,/notificationAudienceAll/);
+  assert.match(source,/updateNotificationHelp/);
+  assert.match(source,/acknowledge_token_grant/);
+});
+test('global AI coach reset and member scope explain real effects and server lock',()=>{
+  assert.match(source,/individualResetHelp/);
+  assert.match(source,/globalWarning/);
+  assert.match(source,/whyLocked/);
+  assert.match(source,/membersHelp/);
+  assert.match(index,/data-i18n="whyLocked"/);
+  assert.match(index,/data-i18n="membersHelp"/);
+});
+test('mobile tables collapse into accessible labeled rows without document overflow',()=>{
+  const css=readFileSync(new URL('../site/styles.css',import.meta.url),'utf8');
+  assert.match(css,/overflow-x:clip/);
+  assert.match(css,/white-space:nowrap/);
+  assert.match(css,/grid-template-columns:minmax/);
+  assert.match(css,/\[data-label\]/);
+  assert.match(source,/td\.dataset\.label/);
+  assert.match(source,/container\.classList\.remove\('empty-state'\)/);
+  assert.match(source,/function makeTable\(/);
+  assert.match(source,/function badge\(/);
+});
