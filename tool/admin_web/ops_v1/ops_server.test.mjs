@@ -195,3 +195,68 @@ test('AAL1 never loads reporter identity even if user is on allowlist',async()=>
     request({operation:'moderation.safety.open'},{jwt:token('aal1')}),dependencies()));
   assert.equal(status,403);
 });
+
+test('enabled owner-only operational actions map to exact service RPCs',async()=>{
+  const cases=[
+    {operation:'moderators.remove',user_id:uid,confirm_user_id:uid,expected:'bil_remove_community_moderator'},
+    {operation:'members.suspend',email:'user@example.invalid',confirm_email:'user@example.invalid',reason:'Repeated rule violation',expected:'bil_suspend_community_member_by_email'},
+    {operation:'members.reinstate',user_id:uid,confirm_user_id:uid,expected:'bil_reinstate_community_member'},
+    {operation:'coach.reset.all',confirm_phrase:'RESET ALL AI COACH ACCOUNTS',message:'Your AI Coach allowance was restored.',expected:'bil_global_reset_ai_coach'},
+    {operation:'notifications.send',kind:'custom',audience:'all',confirm_target:'SEND TO ALL',message:'Service maintenance notice',expected:'bil_enqueue_admin_notification'},
+    {operation:'notifications.send',kind:'gift',audience:'all',confirm_target:'SEND TO ALL',message:'A small gift from BIL',acknowledge_token_grant:true,expected:'bil_enqueue_admin_notification_with_message'}
+  ];
+  for(const [i,{expected,...body}] of cases.entries()){
+    const calls=[];
+    const [status,response]=await read(await handleOps(request({
+      ...body,idempotency_key:'test-command-uuid-'+String(i).padStart(4,'0')
+    }),dependencies({write:true,serviceSpy:calls})));
+    assert.equal(status,200,body.operation+': '+JSON.stringify(response));
+    assert.equal(response.state,'executed');
+    assert.ok(calls.some(x=>x.name===expected),body.operation+' did not invoke protected '+expected);
+    assert.ok(calls.every(x=>x.args.p_actor_id===uid),body.operation+' actor mismatch');
+  }
+});
+test('authorized individual AI Coach reset resolves email through service then calls reset with resolved target',async()=>{
+  const calls=[],deps=dependencies({write:true});
+  deps.makeServiceClient=()=>({rpc:async(name,args)=>{
+    calls.push({name,args});
+    return {error:null,data:name==='bil_resolve_ai_coach_reset_target'?uid:{reset_id:uid,duplicate:false}};
+  }});
+  const [status,r]=await read(await handleOps(request({
+    operation:'coach.reset.user',email:'user@example.invalid',confirm_email:'user@example.invalid',
+    message:'Your allowance was restored.',reason:'Verified user support request',
+    idempotency_key:'test-unique-individual-reset-0001'
+  }),deps));
+  assert.equal(status,200);
+  assert.deepEqual(calls.map(x=>x.name),['bil_resolve_ai_coach_reset_target','bil_individual_reset_ai_coach']);
+  assert.equal(calls[1].args.p_target_id,uid);
+});
+test('sensitive account changes reject mismatched confirmation before any service mutation',async()=>{
+ const calls=[];const [status,res]=await read(await handleOps(request({
+  operation:'members.suspend',email:'first@example.invalid',confirm_email:'second@example.invalid',
+  reason:'Repeated harassment',idempotency_key:'test-mismatched-target-email-0123'
+ }),dependencies({write:true,serviceSpy:calls})));
+ assert.equal(status,400);assert.equal(res.error,'explicit_confirmation_required');assert.equal(calls.length,0);
+});
+test('high-impact writes require fresh TOTP and cannot proceed with stale codes',async()=>{
+ const ops=[
+   {operation:'coach.reset.all',confirm_phrase:'RESET ALL AI COACH ACCOUNTS',message:'Example'},
+   {operation:'notifications.send',kind:'gift',audience:'all',confirm_target:'SEND TO ALL',message:'Example',acknowledge_token_grant:true},
+   {operation:'members.reinstate',user_id:uid,confirm_user_id:uid},
+ ];
+ for(const [i,payload] of ops.entries()){
+  const calls=[];
+  const [status,result]=await read(await handleOps(request({
+   ...payload,idempotency_key:'test-stale-mfa-'+String(i).padStart(10,'0')
+  },{jwt:token('aal2',[{method:'totp',timestamp:now-400}])}),dependencies({write:true,serviceSpy:calls})));
+  assert.equal(status,403);assert.equal(result.error,'fresh_mfa_required');
+  assert.equal(calls.length,0);
+ }
+});
+test('an unauthorized account cannot call any enabled production-like service mutation',async()=>{
+  const calls=[];const [status,response]=await read(await handleOps(request({
+    operation:'moderators.add',email:'user@example.invalid',confirm_email:'user@example.invalid',
+    idempotency_key:'test-admin-unauthorized-0001'
+  }),dependencies({allow:false,write:true,serviceSpy:calls})));
+  assert.equal(status,404);assert.equal(response.error,'not_found');assert.equal(calls.length,0);
+});
