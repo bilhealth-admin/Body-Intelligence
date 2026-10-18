@@ -1,5 +1,6 @@
 name: BIL offline receipt diagnostic
 on:
+  workflow_dispatch:
   push:
     branches: [qa/coach-community-next-20261005]
     paths: [.github/workflows/bil_activity_retry_diagnostic.yml]
@@ -7,7 +8,7 @@ permissions:
   contents: read
 jobs:
   diagnose:
-    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/qa/coach-community-next-20261005' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'))
     runs-on: ubuntu-24.04
     timeout-minutes: 7
     steps:

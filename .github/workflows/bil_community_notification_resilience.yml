@@ -1,6 +1,7 @@
 name: BIL Community notification resilience
 
 on:
+  workflow_dispatch:
   push:
     branches: [work/community-reference-parity-20261003]
     paths:

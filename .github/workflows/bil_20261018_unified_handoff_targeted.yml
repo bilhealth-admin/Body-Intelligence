@@ -1,5 +1,6 @@
 name: BIL single-commit Codex handoff targeted QA
 on:
+  workflow_dispatch:
   push:
     branches:
       - handoff/bil-20261018-unified-codex-reconciliation

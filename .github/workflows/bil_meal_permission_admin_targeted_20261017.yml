@@ -1,5 +1,6 @@
 name: BIL food and permission targeted QA
 on:
+  workflow_dispatch:
   push:
     branches:
       - fix/bil-meal-permissions-search-admin-ready-20261017

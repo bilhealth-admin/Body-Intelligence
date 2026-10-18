@@ -1,5 +1,6 @@
 name: BIL Photo Entry UX — isolated targeted QA
 on:
+  workflow_dispatch:
   push:
     branches:
       - fix/bil-photo-entry-ux-20261017

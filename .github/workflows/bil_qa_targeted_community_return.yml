@@ -1,6 +1,7 @@
 name: BIL QA targeted community return
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - qa/bil-quality-ux-integration-20261009
@@ -20,7 +21,7 @@ concurrency:
 
 jobs:
   community-return-only:
-    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/bil-quality-ux-integration-20261009'
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/qa/bil-quality-ux-integration-20261009' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'))
     runs-on: windows-latest
     timeout-minutes: 25
     steps:

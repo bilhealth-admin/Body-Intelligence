@@ -1,5 +1,6 @@
 name: BIL Admin gift revoked — targeted verified-Free contract
 on:
+  workflow_dispatch:
   push:
     branches:
       - fix/bil-admin-revoke-verified-free-20261017

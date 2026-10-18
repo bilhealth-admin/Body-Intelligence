@@ -1,5 +1,6 @@
 name: BIL v36 runtime reliability isolated verification
 on:
+  workflow_dispatch:
   push:
     branches:
       - qa/bil-v36-reliability-coach-isolated-20261017
