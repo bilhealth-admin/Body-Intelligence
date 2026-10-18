@@ -203,7 +203,7 @@ test('enabled owner-only operational actions map to exact service RPCs',async()=
     {operation:'members.reinstate',user_id:uid,confirm_user_id:uid,expected:'bil_reinstate_community_member'},
     {operation:'coach.reset.all',confirm_phrase:'RESET ALL AI COACH ACCOUNTS',message:'Your AI Coach allowance was restored.',expected:'bil_global_reset_ai_coach'},
     {operation:'notifications.send',kind:'custom',audience:'all',confirm_target:'SEND TO ALL',message:'Service maintenance notice',expected:'bil_enqueue_admin_notification'},
-    {operation:'notifications.send',kind:'gift',audience:'all',confirm_target:'SEND TO ALL',message:'A small gift from BIL',acknowledge_token_grant:true,expected:'bil_enqueue_admin_notification_with_message'}
+    {operation:'notifications.send',kind:'gift',audience:'all',confirm_target:'SEND TO ALL',message:'A small gift from BIL',acknowledge_token_grant:true,confirm_mass_grant:'GRANT 2500 AI TOKENS TO ALL USERS',expected:'bil_enqueue_admin_notification_with_message'}
   ];
   for(const [i,{expected,...body}] of cases.entries()){
     const calls=[];
@@ -241,7 +241,7 @@ test('sensitive account changes reject mismatched confirmation before any servic
 test('high-impact writes require fresh TOTP and cannot proceed with stale codes',async()=>{
  const ops=[
    {operation:'coach.reset.all',confirm_phrase:'RESET ALL AI COACH ACCOUNTS',message:'Example'},
-   {operation:'notifications.send',kind:'gift',audience:'all',confirm_target:'SEND TO ALL',message:'Example',acknowledge_token_grant:true},
+   {operation:'notifications.send',kind:'gift',audience:'all',confirm_target:'SEND TO ALL',message:'Example',acknowledge_token_grant:true,confirm_mass_grant:'GRANT 2500 AI TOKENS TO ALL USERS'},
    {operation:'members.reinstate',user_id:uid,confirm_user_id:uid},
  ];
  for(const [i,payload] of ops.entries()){
@@ -259,4 +259,27 @@ test('an unauthorized account cannot call any enabled production-like service mu
     idempotency_key:'test-admin-unauthorized-0001'
   }),dependencies({allow:false,write:true,serviceSpy:calls})));
   assert.equal(status,404);assert.equal(response.error,'not_found');assert.equal(calls.length,0);
+});
+
+test('all-user gift and compensation require explicit typed financial consequence',async()=>{
+ for(const kind of ['gift','compensation']){
+  const calls=[];
+  const [status,out]=await read(await handleOps(request({
+   operation:'notifications.send',kind,audience:'all',confirm_target:'SEND TO ALL',
+   message:'Important account notice',acknowledge_token_grant:true,
+   idempotency_key:'test-mass-confirmation-missing-0001'
+  }),dependencies({write:true,serviceSpy:calls})));
+  assert.equal(status,400);assert.equal(out.error,'mass_grant_confirmation_required');
+  assert.equal(calls.length,0);
+ }
+});
+test('a custom broadcast never needs gift or token authorization',async()=>{
+ const calls=[];
+ const [status,out]=await read(await handleOps(request({
+  operation:'notifications.send',kind:'custom',audience:'all',
+  confirm_target:'SEND TO ALL',message:'Scheduled service maintenance notice',
+  idempotency_key:'test-safe-custom-notification-0001'
+ }),dependencies({write:true,serviceSpy:calls})));
+ assert.equal(status,200);assert.equal(out.state,'executed');
+ assert.ok(calls.some(x=>x.name==='bil_enqueue_admin_notification'));
 });

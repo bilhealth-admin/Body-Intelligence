@@ -27,7 +27,7 @@ const WRITE = new Set([
   'coach.reset.all','coach.reset.user','notifications.send',
   'moderation.posts.review','moderation.reports.decide','moderation.safety.decide',
 ]);
-const VERSION = '2026-10-18-web-ops-v4';
+const VERSION = '2026-10-18-web-ops-v5';
 
 function json(obj, code=200, origin=null) {
   const headers = {...REPLY_HEADERS};
@@ -119,6 +119,9 @@ function validate(op, body) {
     expect(body.confirm_target, target??'SEND TO ALL');
     if(body.kind!=='custom' && body.acknowledge_token_grant!==true)
       fail('token_grant_acknowledgment_required');
+    if(body.audience==='all' && body.kind!=='custom' &&
+       body.confirm_mass_grant!=='GRANT 2500 AI TOKENS TO ALL USERS')
+      fail('mass_grant_confirmation_required');
     return {key,kind:body.kind,audience:body.audience,email:target,message:limitedText(body.message)};
   }
   if(op==='moderation.posts.review'){
