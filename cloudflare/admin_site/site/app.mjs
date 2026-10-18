@@ -233,11 +233,19 @@ Object.assign(ar,{
   grantAlreadyRevoked:'هذه المنحة ملغاة بالفعل؛ لا تحتاج سحبًا آخر.',
   grantAlreadyExpired:'انتهت هذه المنحة؛ لا توجد منحة نشطة لسحبها.',
   grantNotActive:'لا يمكن سحب هذه المنحة لأنها غير نشطة.',
+  financialCooldown:'توجد مهلة حماية مدتها دقيقتان بعد آخر عملية مالية. انتظر انتهاءها ثم أعد المحاولة برمز مصادقة جديد.',
+  freshCodeRequired:'تحتاج هذه العملية رمز مصادقة جديدًا غير مستخدم. لم يُؤكد أي تغيير؛ تحقق من الإيصال قبل إعادة الطلب.',
+  existingGrantConflict:'للحساب منحة نشطة بالفعل. راجع المنحة القائمة قبل إنشاء منحة أخرى.',
+  commandConflict:'بيانات الطلب لا تطابق إيصال العملية. راجع الإيصال والمستفيد قبل إعادة التنفيذ.',
 });
 Object.assign(en,{
   grantAlreadyRevoked:'This grant is already revoked; no further revocation is needed.',
   grantAlreadyExpired:'This grant has expired; there is no active grant to revoke.',
   grantNotActive:'This grant cannot be revoked because it is not active.',
+  financialCooldown:'A two-minute protection period follows the last financial command. Wait for it to finish, then retry with a fresh authenticator code.',
+  freshCodeRequired:'This command needs a fresh, unused authenticator code. No change was confirmed; reconcile its receipt before retrying.',
+  existingGrantConflict:'This account already has an active grant. Review the existing grant before creating another.',
+  commandConflict:'The request does not match the command receipt. Review the receipt and recipient before retrying.',
 });
 const dict={ar,en};
 const state={language:'ar',page:'overview',queue:'posts',email:'',factor:null,finance:null,ops:null,user:null,financeRows:[],auditRows:[],mods:[],members:[],queueRows:[],review:null,earnPolicy:null,financeOffset:0,hasMore:false,pendingCommand:null,authenticated:false,modalResolve:null,loading:false};
@@ -501,13 +509,17 @@ function updateNotificationHelp(){
 function token(){return crypto.randomUUID()}
 function explainBackendError(code,scope){
   const reason=String(code??'');
+  if(reason==='financial_cooldown_active')return tr('financialCooldown');
+  if(reason==='fresh_step_up_already_used'||reason==='fresh_mfa_required')return tr('freshCodeRequired');
+  if(reason==='existing_grant_conflict')return tr('existingGrantConflict');
+  if(reason==='idempotency_conflict'||reason==='reconciliation_mismatch')return tr('commandConflict');
   if(reason==='review_context_configuration_error'||reason==='review_service_read_unavailable'||reason==='invalid_backend_result')
     return tr('reviewDataPermission');
   if(reason==='not_authorized'||reason==='not_found'||reason==='administrator_required')
     return tr('scopedAuthorizationFailure');
   if(reason==='authentication_required'||reason==='invalid_session'||reason==='mfa_required')
     return tr('sessionExpired');
-  if(reason==='admin_ops_writes_locked'||reason==='moderation_writes_locked')
+  if(reason==='financial_writes_locked'||reason==='admin_ops_writes_locked'||reason==='moderation_writes_locked')
     return tr('protectedWriteLocked');
   if(reason==='stale_content'||reason==='content_changed'||reason==='post_not_reviewable')
     return tr('reviewChanged');
