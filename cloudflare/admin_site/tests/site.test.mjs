@@ -14,12 +14,16 @@ test('all nine admin modules are present',()=>{
   for(const name of ['overview','finance','coach','notifications','moderation','moderators','members','audit','security'])
     assert.match(index,new RegExp(`id="${name}-page"`));
 });
-test('moderation workflows use versioned server snapshots and audit confirmations',()=>{
-  assert.match(source,/moderation.posts.snapshots/);
-  assert.match(source,/moderation.posts.review/);
-  assert.match(source,/moderation.reports.content/);
-  assert.match(source,/moderation.reports.decide/);
-  assert.match(source,/moderation.safety.decide/);
+test('moderation review reads exact snapshots and separates approval from Earn',()=>{
+  for(const op of ['posts.queue','posts.detail','posts.review','earn.queue','earn.policy','earn.request','earn.decide','reports.content','reports.decide','safety.decide']){
+    assert.ok(source.includes(op),'Missing documented operation '+op);
+  }
+  assert.match(source,/api\('review',\{operation:'posts.detail'/);
+  assert.match(source,/expected_revision/);
+  assert.match(source,/media_complete!==true/);
+  assert.match(source,/acknowledge_full_content/);
+  assert.match(source,/showReviewDecision\(/);
+  assert.match(source,/moderation_writes_enabled/);
 });
 test('owner login uses Supabase OTP, real TOTP challenge, server state',()=>{
   assert.match(source,/auth\.signInWithOtp\(/);
@@ -85,24 +89,27 @@ test('sign-out in another tab clears cached privileged records',()=>{
   assert.match(source,/state\.auditRows=\[\]/);
 });
 
-test('human-readable reporter cases and safe compensation drafts',()=>{
+test('owner-only reporter fields render without raw JSON and prepare a draft only',()=>{
   assert.match(source,/function renderRecords\(/);
-  assert.match(source,/function reporterPanel\(/);
+  assert.match(source,/function renderReporterContact\(/);
   assert.match(source,/reporter_email/);
   assert.match(source,/reporter_user_id/);
   assert.match(source,/function prepareCompensation\(/);
-  assert.match(source,/\.value='compensation'/);
-  assert.match(source,/\.value=''/);
-  assert.match(source,/function recordField\(/);
+  assert.match(source,/namedItem\('kind'\)\.value='compensation'/);
+  assert.match(source,/namedItem\('email'\)\.value=/);
+  assert.match(source,/function displayField\(|function reportField\(|function recordField\(|function renderRecords\(/);
   assert.doesNotMatch(source,/JSON\.stringify\(allowed,null,2\)/);
 });
-test('translated grant status and audit outcomes are first-class labels',()=>{
-  assert.match(source,/function localizedState\(/);
-  assert.match(source,/elem\('span',localizedState\(value\),'pill'\)/);
+test('grant statuses and financial audit have localized labels and safe identifiers',()=>{
+  assert.match(source,/function statusLabel\(/);
+  assert.match(source,/function badge\(/);
+  assert.match(source,/elem\('span',statusLabel\(value\),'pill'\)/);
+  assert.match(source,/setAttribute\('data-status',code\)/);
   assert.match(source,/operationGrant/);
   assert.match(source,/operationRevoke/);
   assert.match(source,/resultChanged/);
-  assert.match(source,/shortId\(row\.grant_id\)/);
+  assert.match(source,/function identifier\(/);
+  assert.match(source,/identifier\(row\.grant_id\)/);
 });
 test('notifications explain custom, gift and compensation, with all-account confirmation',()=>{
   assert.match(source,/notificationWarning/);
@@ -121,24 +128,26 @@ test('global AI coach reset and member scope explain real effects and server loc
   assert.match(index,/data-i18n="whyLocked"/);
   assert.match(index,/data-i18n="membersHelp"/);
 });
-test('mobile tables collapse into accessible labeled rows without document overflow',()=>{
+test('mobile tables collapse into labeled cards and maintain bounded width',()=>{
   const css=readFileSync(new URL('../site/styles.css',import.meta.url),'utf8');
   assert.match(css,/overflow-x:clip/);
   assert.match(css,/white-space:nowrap/);
   assert.match(css,/grid-template-columns:minmax/);
-  assert.match(css,/\[data-label\]/);
+  assert.match(css,/content:attr\(data-label\)/);
+  assert.match(css,/\.data-table td\{display:grid/);
   assert.match(source,/td\.dataset\.label/);
   assert.match(source,/container\.classList\.remove\('empty-state'\)/);
   assert.match(source,/function makeTable\(/);
   assert.match(source,/function badge\(/);
 });
-
-test('private image previews use exact Supabase CSP origin and safe labels',()=>{
- const headers=readFileSync(new URL('../site/_headers',import.meta.url),'utf8');
- assert.match(headers,/img-src 'self' data: https:\/\/tgmanzhqulksykhslrzb\.supabase\.co;/);
- assert.match(source,/function validReviewImage\(/);
- assert.match(source,/function reviewPictureGallery\(/);
- assert.match(source,/img\.addEventListener\('error'/);
+test('private post images fail closed on errors under exact-origin CSP',()=>{
+  const headers=readFileSync(new URL('../site/_headers',import.meta.url),'utf8');
+  assert.match(headers,/img-src 'self' data: https:\/\/tgmanzhqulksykhslrzb\.supabase\.co;/);
+  assert.match(source,/function validReviewImage\(/);
+  assert.match(source,/function reviewPictureGallery\(/);
+  assert.match(source,/picture\.addEventListener\('error'/);
+  assert.match(source,/row\.media_complete=false/);
+  assert.match(source,/media-broken/);
 });
 test('human moderation receipts disclose exact Earn policy but never preclaim push delivery',()=>{
  assert.match(source,/posts\.detail/);
