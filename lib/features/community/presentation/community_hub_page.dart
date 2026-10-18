@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show SynchronousFuture;
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'community_attention_scope.dart';
@@ -85,6 +87,7 @@ part 'community_post_card.dart';
 part 'community_post_owner_scope.dart';
 part 'community_poll_panel.dart';
 part 'community_feed_pagination.dart';
+part 'community_feed_mode_continuity.dart';
 part 'community_post_composer_page.dart';
 part 'community_compose_entry_page.dart';
 part 'community_post_composer_owner_scope.dart';
@@ -517,7 +520,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     var refreshProfile = false;
     FocusManager.instance.primaryFocus?.unfocus();
     try {
-      final destination = await showModalBottomSheet<String>(
+      final destination = await showBilPearlBottomSheet<String>(
         context: context,
         isScrollControlled: true,
         useSafeArea: true,

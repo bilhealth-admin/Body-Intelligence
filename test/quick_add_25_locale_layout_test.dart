@@ -4,7 +4,6 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/router/bil_quick_add_locale_copy.dart';
 import 'package:body_intelligence_log/app/router/bil_quick_add_sheet.dart';
-import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -205,11 +204,9 @@ void main() {
               );
               expect(
                 firstIcon.color,
-                BilSemanticIcons.spec(BilSemanticIconKind.foodLog).onAccent(
-                  themeMode == ThemeMode.dark
-                      ? Brightness.dark
-                      : Brightness.light,
-                ),
+                Theme.of(
+                  tester.element(find.byKey(const Key('quick-add-primary-0'))),
+                ).colorScheme.onSurfaceVariant,
               );
               expect(tester.takeException(), isNull);
               semantics.dispose();

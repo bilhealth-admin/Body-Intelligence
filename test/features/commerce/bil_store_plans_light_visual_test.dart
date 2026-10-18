@@ -10,6 +10,52 @@ import '../../visual_closure/visual_evidence_font.dart';
 void main() {
   setUpAll(loadVisualEvidenceFont);
 
+  testWidgets('purchase button feedback stays with its own arrow', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        theme: visualEvidenceTheme(ThemeData(), fontFamily: 'RobotoEvidence'),
+        home: BilStorePlansPage(
+          catalog: _PlansVisualCatalog(),
+          productIds: const {'premium.monthly', 'premium.annual'},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final cta = find.byKey(const ValueKey('store-purchase-cta'));
+    final localBubble = find.byKey(const Key('bil-glass-press-bubble'));
+    final sdkBubble = find.byKey(const Key('bil-sdk-arrow-glass-bubble'));
+    final buttonGesture = await tester.startGesture(tester.getCenter(cta));
+    await tester.pump();
+    expect(localBubble, findsNothing);
+    expect(sdkBubble, findsNothing);
+    await buttonGesture.cancel();
+    await tester.pumpAndSettle();
+
+    final ctaArrow = find.descendant(of: cta, matching: find.byType(Icon));
+    expect(ctaArrow, findsOneWidget);
+    final arrowGesture = await tester.startGesture(tester.getCenter(ctaArrow));
+    await tester.pump();
+    expect(localBubble, findsOneWidget);
+    expect(tester.getCenter(localBubble), tester.getCenter(ctaArrow));
+    expect(sdkBubble, findsNothing);
+    await arrowGesture.cancel();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   for (final locale in const [Locale('en'), Locale('ar')]) {
     testWidgets(
       'Plans light reference ${locale.languageCode} 390x844 at 160%',

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/ai_coach_safety_report.dart';
@@ -29,7 +30,7 @@ class AiCoachSafetyReportQueueSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         if (reviewUnavailable)
-          Card(
+          BilPearlMaterialCard(
             key: const Key('ai-coach-report-review-unavailable'),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -84,7 +85,7 @@ class _AiCoachSafetyReportCard extends StatelessWidget {
         ? null
         : '${MaterialLocalizations.of(context).formatMediumDate(reviewedAt)} · '
               '${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(reviewedAt))}';
-    return Card(
+    return BilPearlMaterialCard(
       key: Key('ai-coach-safety-report-${report.id}'),
       child: Padding(
         padding: const EdgeInsets.all(16),

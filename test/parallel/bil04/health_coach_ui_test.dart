@@ -151,7 +151,7 @@ void main() {
           final original = await fixture.healthSnapshot();
           await _sendHealthPrompt(tester, 'preview plan high-protein');
           await _waitHealthReads(tester, fixture, 1);
-          expect(find.byType(AlertDialog), findsNothing);
+          expect(find.bySubtype<AlertDialog>(), findsNothing);
           final read = (await fixture.healthReads()).single;
           expect(read['tool_id'], 'preview_plan');
           expect(read['mutationsPerformed'], 0);
@@ -341,7 +341,7 @@ void main() {
           fixture.daily.requestedDays.clear();
           await _sendHealthPrompt(tester, 'show sleep history 2 days');
           await _waitHealthReads(tester, fixture, 1);
-          expect(find.byType(AlertDialog), findsNothing);
+          expect(find.bySubtype<AlertDialog>(), findsNothing);
           final read = (await fixture.healthReads()).single;
           final result = read['result'] as Map;
           expect(read['tool_id'], 'read_health_history');
@@ -434,7 +434,7 @@ void main() {
         final original = await fixture.healthSnapshot();
         await _sendHealthPrompt(tester, 'I slept 7 or 8 hours yesterday');
         await tester.pumpAndSettle();
-        expect(find.byType(AlertDialog), findsNothing);
+        expect(find.bySubtype<AlertDialog>(), findsNothing);
         expect(
           (await fixture.messages()).any(
             (message) => message['text'].toString().contains(
@@ -669,7 +669,7 @@ void _healthCoachAccessibilityCases() {
           await _sendHealthPrompt(tester, 'نمت 7 ساعات أمس');
           await _expectHealthDialog(tester);
           expect(
-            Directionality.of(tester.element(find.byType(AlertDialog))),
+            Directionality.of(tester.element(find.bySubtype<AlertDialog>())),
             TextDirection.rtl,
           );
           expect(find.textContaining('نوم مسجلة يدويًا'), findsOneWidget);
@@ -709,7 +709,7 @@ void _healthCoachAccessibilityCases() {
           await _sendHealthPrompt(tester, 'سجل تمرين مشي 20 دقيقة أمس');
           await _expectHealthDialog(tester);
           expect(
-            Directionality.of(tester.element(find.byType(AlertDialog))),
+            Directionality.of(tester.element(find.bySubtype<AlertDialog>())),
             TextDirection.rtl,
           );
           expect(find.textContaining('مشي سريع'), findsOneWidget);
@@ -723,7 +723,7 @@ void _healthCoachAccessibilityCases() {
           expect(cancel.hitTestable(), findsOneWidget);
           await tester.tap(cancel);
           await tester.pumpAndSettle();
-          expect(find.byType(AlertDialog), findsNothing);
+          expect(find.bySubtype<AlertDialog>(), findsNothing);
           expect(await fixture.healthSnapshot(), original);
           expect(await fixture.receipts(), isEmpty);
           expect(fixture.gateway.calls, 0);

@@ -28,6 +28,7 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_community_ex
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_reference.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_reference_delta.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_coach_quick_prompts.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_apple_ai_privacy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_sleep_schedule.dart';
@@ -157,6 +158,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...CommunitySocialRuntimeCopy.sources,
     ...CommunityReferenceRuntimeCopy.sources,
     ...ReferenceDeltaRuntimeCopy.sources,
+    ...CoachQuickPromptRuntimeCopy.sources,
     ...NextWorkspaceRuntimeCopy.sources,
     ...CoachControlsRuntimeCopy.sources,
     ...CommunityCreationRuntimeCopy.sources,

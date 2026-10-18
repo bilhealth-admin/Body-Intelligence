@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -24,7 +25,7 @@ Future<bool> showProductReviewSubmissionDialog(
       Supabase.instance.client.auth.currentUser == null) {
     final signIn = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(t('Sign-in required', 'يلزم تسجيل الدخول')),
         content: Text(
           t(
@@ -183,7 +184,7 @@ class _ProductReviewSubmissionDialogState
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => BilPearlMaterialAlertDialog(
     title: Text(_t('Submit product for review', 'إرسال منتج للمراجعة')),
     content: SizedBox(
       width: 480,

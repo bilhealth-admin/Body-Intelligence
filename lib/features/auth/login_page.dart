@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -92,7 +93,7 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
-                  child: Card(
+                  child: BilPearlMaterialCard(
                     color: const Color(0xE80A1827),
                     elevation: 18,
                     shape: RoundedRectangleBorder(

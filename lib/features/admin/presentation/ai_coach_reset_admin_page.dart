@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -122,7 +123,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachResetAdminPage> {
         padding: const EdgeInsets.all(16),
         children: [
           if (widget.global)
-            Card(
+            BilPearlMaterialCard(
               child: Padding(
                 padding: const EdgeInsets.all(18),
                 child: Form(
@@ -187,7 +188,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachResetAdminPage> {
             ),
           const SizedBox(height: 16),
           if (!widget.global)
-            Card(
+            BilPearlMaterialCard(
               child: Padding(
                 padding: const EdgeInsets.all(18),
                 child: Form(
@@ -328,7 +329,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachResetAdminPage> {
     final message = _individualMessageController.text.trim();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         key: const Key('admin-ai-coach-individual-reset-confirmation'),
         title: Text(
           _copy(
@@ -456,7 +457,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachResetAdminPage> {
     final message = _globalMessageController.text.trim();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         key: const Key('admin-ai-coach-reset-confirmation'),
         title: Text(
           _copy(

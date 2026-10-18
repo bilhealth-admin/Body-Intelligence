@@ -42,3 +42,17 @@ abstract interface class CommunityChannelsRepository {
     String? channelId,
   );
 }
+
+/// Optional channel safety contract; older injected repository doubles need
+/// not implement it. The real transport strictly scopes these operations to
+/// the authenticated, current owner and never sends a report automatically.
+abstract interface class CommunityChannelSafetyRepository {
+  Future<void> reportMessage(
+    ChannelRequestScope scope, {
+    required String channelId,
+    required String messageId,
+    required String reason,
+  });
+
+  Future<void> blockMember(ChannelRequestScope scope, String memberId);
+}

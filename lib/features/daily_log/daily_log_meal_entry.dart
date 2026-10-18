@@ -14,8 +14,9 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
         key: mealEntryKey,
         child: Column(
           children: [
-            if (selectedFood == null) ...[
-              SearchAnchor(
+            Offstage(
+              offstage: selectedFood != null,
+              child: SearchAnchor(
                 searchController: foodSearch,
                 viewBuilder: (suggestions) => ListView(
                   padding: EdgeInsets.zero,
@@ -47,7 +48,7 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                     ),
                   ),
                   hintText: _mealCopy('searchFoods'),
-                  onTap: mealSaving ? null : controller.openView,
+                  onTap: mealSaving ? null : _openFoodSearchView,
                 ),
                 suggestionsBuilder: (context, controller) {
                   final locale = _mealLocale;
@@ -58,7 +59,7 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                   return _mealQuerySuggestions(controller, query, locale);
                 },
               ),
-            ],
+            ),
             if (selectedFood != null)
               Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 6),

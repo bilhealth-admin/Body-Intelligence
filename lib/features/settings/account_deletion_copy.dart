@@ -1,7 +1,8 @@
 part of 'account_deletion_page.dart';
 
 class _AccountDeletionCopy {
-  const _AccountDeletionCopy(this.values);
+  const _AccountDeletionCopy(this.values, this.platform);
+  final TargetPlatform platform;
   final Map<String, String> values;
   String get title => values['title']!;
   String get heading => values['heading']!;
@@ -12,8 +13,21 @@ class _AccountDeletionCopy {
   String get confirmationRequired => values['confirmationRequired']!;
   String get requestReceived => values['requestReceived']!;
   String get requestReceivedBody => values['requestReceivedBody']!;
-  String get deletionCompletedBody => values['deletionCompletedBody']!;
-  String get billingNotice => values['billingNotice']!;
+  String get deletionCompletedBody =>
+      _storeText(values['deletionCompletedBody']!);
+  String get billingNotice => _storeText(values['billingNotice']!);
+  String _storeText(String text) {
+    final apple =
+        platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
+    if (!apple && platform != TargetPlatform.android) return text;
+    return text
+        .replaceAll(
+          RegExp(r'App[ -]Store-?.*?Google[ -]Play'),
+          apple ? 'App Store' : 'Google Play',
+        )
+        .replaceAll(RegExp(r'Apple.*?Google'), apple ? 'Apple' : 'Google');
+  }
+
   String get appleAccessTitle => values['appleAccessTitle']!;
   String get appleAccessBody => values['appleAccessBody']!;
   String get appleAccessLearnMore => values['appleAccessLearnMore']!;
@@ -31,9 +45,10 @@ class _AccountDeletionCopy {
   };
 
   static _AccountDeletionCopy of(BuildContext context) {
+    final platform = Theme.of(context).platform;
     final code = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
     final authored = _catalog[code];
-    if (authored != null) return _AccountDeletionCopy(authored);
+    if (authored != null) return _AccountDeletionCopy(authored, platform);
     final english = _catalog['en']!;
     return _AccountDeletionCopy({
       for (final entry in english.entries)
@@ -43,7 +58,7 @@ class _AccountDeletionCopy {
             (throw StateError(
               'Missing account-deletion copy for $code: ${entry.value}',
             )),
-    });
+    }, platform);
   }
 
   static const _statusCatalog = <String, Map<String, String>>{

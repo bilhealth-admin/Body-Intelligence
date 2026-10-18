@@ -99,7 +99,7 @@ extension _DailyLogPageActions on _DailyLogPageState {
     final source = destination.subtract(const Duration(days: 1));
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(_tr('Copy yesterday’s meals?', 'نسخ وجبات اليوم السابق؟')),
         content: Text(
           _arabic
@@ -147,7 +147,7 @@ extension _DailyLogPageActions on _DailyLogPageState {
     if (!await _ensureDiaryOpen() || !mounted) return;
     final count = await showDialog<int>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(_tr('Copy to multiple days', 'نسخ إلى عدة أيام')),
         content: Text(
           _tr(

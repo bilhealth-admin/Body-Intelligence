@@ -55,6 +55,34 @@ void main() {
   });
 
   testWidgets(
+    'discovery metadata explains why licensed videos are absent and offers packs',
+    (tester) async {
+      await tester.pumpWidget(
+        _TestApp(
+          child: BilWorkoutRoutinesPage(
+            loader: (_) async => [_discoveryWorkoutWithoutMedia],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('workout-video-pack-not-installed')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('workout-verified-packs-action')),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.play_arrow_rounded), findsNothing);
+      final action = tester.widget<FilledButton>(
+        find.byKey(const ValueKey('workout-verified-packs-action')),
+      );
+      expect(action.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
     'verified routine supports details, truthful video state, logging, and saving',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(430, 1050));
@@ -811,6 +839,24 @@ final _verifiedWorkout = WellnessContentItem(
   attribution: 'Reviewed original routine',
   reviewedAt: DateTime.utc(2026, 8, 1),
   safetyReviewed: true,
+);
+
+final _discoveryWorkoutWithoutMedia = WellnessContentItem(
+  id: 'strength-discovery-01',
+  type: WellnessContentType.workouts,
+  locale: 'en',
+  title: 'Foundation strength preview',
+  description: 'A catalog preview without installed routine media.',
+  publisher: 'BIL Health',
+  sourceUrl: Uri.parse('https://bilhealth.com/workouts/strength-discovery-01'),
+  licenseName: 'BIL reviewed discovery metadata',
+  verified: true,
+  durationMinutes: 25,
+  difficulty: 'Beginner',
+  category: 'Strength',
+  minimumAccess: WellnessContentAccess.pro,
+  releaseBundleId: 'home-training',
+  releaseKey: 'home-training:strength-discovery-01',
 );
 
 final _secondVerifiedWorkout = WellnessContentItem(

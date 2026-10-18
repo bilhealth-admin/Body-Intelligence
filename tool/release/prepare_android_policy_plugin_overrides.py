@@ -29,6 +29,7 @@ LENS = "android/src/main/kotlin/dev/steenbakker/mobile_scanner/MobileScannerCame
 ADS = "android/build.gradle"
 NOTIFICATIONS = "android/src/main/java/com/dexterous/flutterlocalnotifications/FlutterLocalNotificationsPlugin.java"
 RECEIVER = "android/src/main/java/com/dexterous/flutterlocalnotifications/ScheduledNotificationReceiver.java"
+JNI_CMAKE = "src/CMakeLists.txt"
 SPECS = {
     "camera_android_camerax": ("0.7.4+3", {
         CAMERA: "bb8e155f855aa3689c26de50d055056c138511461f83a6f6a63c9c764397fbc9",
@@ -43,6 +44,9 @@ SPECS = {
     "flutter_local_notifications": ("22.2.0", {
         NOTIFICATIONS: "bb687e972464ac40db192115aa9a2c085b292ffde29f6a64e8123209629ac7c8",
         RECEIVER: "e2037fb296aa0900a1eef65111a78b2331b3c65cddb276b3c54f78c152e3814c",
+    }),
+    "jni": ("1.0.0", {
+        JNI_CMAKE: "0241a96defe71682561f674d5a8273a82ad45da99a4e0881c3d1dae1f19d722a",
     }),
 }
 
@@ -157,6 +161,16 @@ def patch(relative: str, data: bytes) -> bytes:
         Log.w(TAG, "Notification not posted: POST_NOTIFICATIONS permission is not granted.");
       }"""
         text = _once(text, old, new, RECEIVER)
+    elif relative == JNI_CMAKE:
+        text = _once(
+            text,
+            'target_link_options(jni PRIVATE "-Wl,-z,max-page-size=16384")',
+            'target_link_options(jni PRIVATE\n'
+            '    "-Wl,-z,max-page-size=16384"\n'
+            '    "-Wl,-z,common-page-size=16384"\n'
+            ')',
+            JNI_CMAKE,
+        )
     else:
         raise OverlayError(f"Unknown source patch: {relative}")
     return text.encode("utf-8")

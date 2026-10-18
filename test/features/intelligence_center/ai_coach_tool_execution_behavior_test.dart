@@ -656,7 +656,7 @@ void main() {
         // A missing persisted row fails native preparation before a dialog.
         confirmation: false,
       );
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.bySubtype<AlertDialog>(), findsNothing);
       final failure = find.textContaining('The action was not completed.');
       await _pumpUntil(tester, () => failure.evaluate().isNotEmpty);
       expect(failure, findsOneWidget);
@@ -802,7 +802,10 @@ void main() {
       expectedReceipt: 'Logged 250 ml of water.',
     );
     expect(await WaterRepository(database).totalForDay(DateTime.now()), 250);
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Undo').last);
+    final waterUndo = find.widgetWithText(OutlinedButton, 'Undo').last;
+    await tester.ensureVisible(waterUndo);
+    await tester.pumpAndSettle();
+    await tester.tap(waterUndo);
     await _pumpUntil(
       tester,
       () => find.text('The previous action was undone.').evaluate().isNotEmpty,
@@ -937,7 +940,10 @@ Future<void> _submitNextTool(
     await _pumpUntil(tester, () => receipt.evaluate().isNotEmpty);
     expect(receipt, findsOneWidget);
   } else {
-    await _pumpUntil(tester, () => find.byType(AlertDialog).evaluate().isEmpty);
+    await _pumpUntil(
+      tester,
+      () => find.bySubtype<AlertDialog>().evaluate().isEmpty,
+    );
   }
 }
 

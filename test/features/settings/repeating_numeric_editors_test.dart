@@ -120,7 +120,7 @@ void main() {
           if (fitness) {
             expect(
               find.descendant(
-                of: find.byType(AlertDialog),
+                of: find.bySubtype<AlertDialog>(),
                 matching: find.text('3'),
               ),
               findsOneWidget,
@@ -145,7 +145,7 @@ void main() {
           if (fitness) {
             await tester.tapAt(const Offset(4, 4));
             await tester.pumpAndSettle();
-            expect(find.byType(AlertDialog), findsNothing);
+            expect(find.bySubtype<AlertDialog>(), findsNothing);
           }
           await tester.pumpWidget(const SizedBox.shrink());
           await tester.pump();

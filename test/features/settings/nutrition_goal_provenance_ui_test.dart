@@ -323,7 +323,7 @@ void main() {
               await settle(tester);
               await tester.tap(book);
               await tester.pumpAndSettle();
-              expect(find.byType(AlertDialog), findsOneWidget);
+              expect(find.bySubtype<AlertDialog>(), findsOneWidget);
               expect(
                 find.textContaining(language == 'ar' ? 'الماكروز' : 'Macros:'),
                 findsWidgets,

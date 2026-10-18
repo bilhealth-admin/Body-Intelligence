@@ -85,7 +85,7 @@ extension _WorkoutLibrarySelection on _WorkoutLibraryPageState {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (context, setDialogState) => BilPearlMaterialAlertDialog(
           title: Text(tr('Review selected workouts', 'راجع التمارين المحددة')),
           content: SizedBox(
             width: 420,
@@ -198,7 +198,7 @@ extension _WorkoutLibrarySelection on _WorkoutLibraryPageState {
       selected = workout;
       minutes = initialMinutes.clamp(5, 120);
     });
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,

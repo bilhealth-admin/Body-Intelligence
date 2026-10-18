@@ -196,6 +196,12 @@ class PluginOverlayTest(unittest.TestCase):
         self.assertEqual(camera.count(b"@androidx.annotation.OptIn("), 4)
         ads = overlay.patch(overlay.ADS, (self.sources["google_mobile_ads"] / overlay.ADS).read_bytes())
         self.assertEqual(ads.count(b"implementation 'androidx.appcompat:appcompat:1.7.1'"), 1)
+        jni_cmake = overlay.patch(
+            overlay.JNI_CMAKE,
+            (self.sources["jni"] / overlay.JNI_CMAKE).read_bytes(),
+        )
+        self.assertIn(b'"-Wl,-z,max-page-size=16384"', jni_cmake)
+        self.assertIn(b'"-Wl,-z,common-page-size=16384"', jni_cmake)
 
     def test_actual_notification_bodies_on_host_jvm_preserve_delivery_cleanup_and_reschedule(self):
         plugin = overlay.patch(overlay.NOTIFICATIONS,

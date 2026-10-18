@@ -76,7 +76,7 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
     final visit = _captureProfileVisit();
     final profile = _profile;
     if (visit == null || profile == null) return;
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       useSafeArea: true,
       showDragHandle: true,
@@ -102,7 +102,7 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
           moderationReason = await showDialog<String>(
             context: context,
             builder: (dialogContext) => visit.guard(
-              SimpleDialog(
+              BilPearlMaterialSimpleDialog(
                 title: Text(
                   action == 'moderate_hide'
                       ? communityText(context, 'Hide post', 'إخفاء المنشور')
@@ -134,7 +134,7 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (dialogContext) => visit.guard(
-              AlertDialog(
+              BilPearlMaterialAlertDialog(
                 title: Text(
                   action == 'delete'
                       ? communityText(context, 'Delete post?', 'حذف المشاركة؟')
@@ -253,7 +253,7 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
     if (visit == null || creator == null) return;
     final balance = _goldBalance;
     final quests = _quests;
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       useSafeArea: true,
       showDragHandle: true,

@@ -1,0 +1,10 @@
+{
+  "path": "build\\cloud-functions-all-final.log",
+  "sha256": "f4b7c47a48cc34d8ba2be1db3e0a7b9261f80dda574bab0d04517e60d2a2c29e",
+  "bytes": 61771,
+  "tail": [
+    "",
+    "ok | 380 passed | 0 failed (10s)",
+    ""
+  ]
+}

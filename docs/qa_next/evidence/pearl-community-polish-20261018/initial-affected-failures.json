@@ -1,0 +1,250 @@
+[
+  {
+    "log": "build/pearl-affected/batch-01.log",
+    "failure": "00:05 +5 -1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/architecture_source_file_size_guard_test.dart: hand-maintained Dart sources stay below the architecture ceiling [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-01.log",
+    "failure": "00:15 +26 -2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/auth_visual_redesign_contract_test.dart: language control is iPhone-like, icon-free and alphabetically governed [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-01.log",
+    "failure": "00:28 +62 -3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/daily_log_edit_quantity_route_contract_test.dart: edit quantity dialog pops its own dialog route [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-01.log",
+    "failure": "00:47 +122 -4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/intelligence_center_composer_contract_test.dart: session greeting and day-one decision remain visible [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-02.log",
+    "failure": "00:34 +132 -1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/ai_coach_server_contract_test.dart: AI Coach text route is server metered and confirmation gated [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "00:31 +70 -1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/qa_next/coach_calorie_only_flow_test.dart: calorie text commits, restores and undoes native rows: Log 1905 calories for lunch on 2026-10-01 yesterday [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "00:32 +70 -2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/qa_next/coach_calorie_only_flow_test.dart: calorie text commits, restores and undoes native rows: سجل ١٩٠٥ سعرة للغداء بتاريخ ٢٠٢٦-١٠-٠١ امس [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "00:33 +70 -3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/qa_next/coach_calorie_only_flow_test.dart: cancelled calorie-only review creates no row or receipt [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "00:35 +71 -4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/qa_next/coach_calorie_only_flow_test.dart: permission revoked during calorie review blocks persistence [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "01:39 +209 -5: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/qa_next/nutrition_window_accessibility_test.dart: actual manual-barcode Arabic 320 keyboard 2x has reachable cancel and never writes [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "01:41 +210 -6: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/qa_next/nutrition_window_accessibility_test.dart: actual custom-food Arabic 320 keyboard 2x has reachable cancel and never writes [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:12 +308 -7: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: Arabic sleep review has RTL and an accessible tappable Continue label [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:12 +309 -8: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: Arabic exercise review uses trusted Arabic name and accessible cancel [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:13 +310 -9: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: 320px health review at text scale 2 has no overflow and keeps Continue accessible [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:14 +312 -10: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: fasting save stays verified while UI reports denied device notifications [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:14 +312 -11: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: closing route cancels a hung fasting device deadline after durable save [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:15 +312 -12: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: failed postcommit readback recovers exact receipt and Undo after reopening Coach [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:15 +312 -13: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: approved health commit finishing after route close recovers one receipt and Undo [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:15 +320 -14: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_sleep requires fresh confirmation in writeAllowed [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:16 +325 -15: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_exercise requires fresh confirmation in writeAllowed [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:17 +335 -16: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: cancelling model sleep and exercise proposals changes no health data [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:17 +335 -17: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_sleep saved in the real page can Undo after route recreation [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:18 +335 -18: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_exercise saved in the real page can Undo after route recreation [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:19 +336 -19: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: model clinical flag leaves checkbox unchecked until user reviews plan [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:19 +336 -20: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: checking clinical review cannot adopt a draft edited during the dialog [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:20 +337 -21: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_sleep rejects permission revoked during dialog, restored=false [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:20 +340 -22: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_sleep rejects delivered owner A B A during dialog [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:21 +340 -23: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_exercise rejects permission revoked during dialog, restored=true [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:21 +340 -24: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: log_exercise rejects delivered owner A B A during dialog [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:22 +340 -25: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: activate_plan rejects permission revoked during dialog, restored=true [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:22 +340 -26: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: activate_plan rejects delivered owner A B A during dialog [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-03.log",
+    "failure": "02:23 +345 -27: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil04/health_coach_ui_test.dart: silent database write failure cannot show successful sleep save [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-04.log",
+    "failure": "00:36 +88 -1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/cloud_platform/cloud_restore_scope_controls_test.dart: en light 320px 2x explicit consent controls remain reachable [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-04.log",
+    "failure": "00:37 +88 -2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/cloud_platform/cloud_restore_scope_controls_test.dart: en dark 320px 2x explicit consent controls remain reachable [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-04.log",
+    "failure": "00:37 +88 -3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/cloud_platform/cloud_restore_scope_controls_test.dart: ar light 320px 2x explicit consent controls remain reachable [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-04.log",
+    "failure": "00:38 +88 -4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/cloud_platform/cloud_restore_scope_controls_test.dart: ar dark 320px 2x explicit consent controls remain reachable [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-04.log",
+    "failure": "00:41 +91 -5: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/cloud_platform/cloud_sync_consent_notice_contract_test.dart: dashboard requests a recorded cloud retention choice [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-04.log",
+    "failure": "00:56 +126 -6: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/cloud_platform/cloud_restore_v2_engine_test.dart: conflict editor real taps cancel without writes [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-04.log",
+    "failure": "01:09 +143 -7: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/cloud_platform/cloud_restore_v2_engine_test.dart: conflict editor real taps accept cloud preserving local preimage [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "00:00 +3 -1: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_feed_redesign_regression_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "00:12 +3 -2: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_filter_stability_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "00:25 +10 -3: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_notification_content_route_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "00:40 +10 -4: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_policy_acceptance_ui_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "00:56 +10 -5: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_polish_visual_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "01:08 +15 -6: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_post_image_support_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "01:19 +15 -7: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_post_moderation_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "01:33 +23 -8: loading G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_profile_auth_session_test.dart [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "01:57 +52 -9: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_reference_navigation_test.dart: one Home tab row retains all four authoritative feed modes [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "01:59 +52 -10: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_reference_navigation_test.dart: mode picker works from Circles and pagination uses the selected server cursor [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-05.log",
+    "failure": "02:37 +125 -11: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/community/community_session_switch_test.dart: real Supabase auth events rebuild the feed across local logout and account switch [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:18 +208 -1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: en real food journey: cancel, edit 80g, commit once, celebrate, streak [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:20 +209 -2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: en real food journey: cancel, edit 80g, commit once, celebrate, streak reduced motion [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:21 +214 -3: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: ar Food Log 320.0 px 2x text and keyboard can confirm quantity [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:22 +214 -4: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: ar Food Log 390.0 px 2x text and keyboard can confirm quantity [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:23 +218 -5: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: ar Food Log 430.0 px 2x text and keyboard can confirm quantity [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:24 +219 -6: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: en Food Log 320.0 px 2x text and keyboard can confirm quantity [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:25 +221 -7: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: en Food Log 390.0 px 2x text and keyboard can confirm quantity [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-06.log",
+    "failure": "01:26 +221 -8: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/first_use_reference_journey_test.dart: en Food Log 430.0 px 2x text and keyboard can confirm quantity [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-07.log",
+    "failure": "00:34 +60 -1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart: full long reply arrives softly at stable geometry AR=false light 320 2x [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-07.log",
+    "failure": "00:34 +61 -2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart: full long reply arrives softly at stable geometry AR=true light 320 2x [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-09.log",
+    "failure": "00:34 +69 -1: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/wellness/recipe_deep_link_entitlement_loading_test.dart: CommercePlan.premium recipe deep link waits for authoritative access without Plans [E]"
+  },
+  {
+    "log": "build/pearl-affected/batch-09.log",
+    "failure": "01:04 +155 -2: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/dashboard/architecture/dashboard_epic_closure_contract_test.dart: DashboardGrid remains below the shared architecture ceiling [E]"
+  }
+]

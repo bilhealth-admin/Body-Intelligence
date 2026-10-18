@@ -215,13 +215,13 @@ Future<void> openDelete(WidgetTester tester, {String id = 'current'}) async {
   for (var i = 0; i < 10; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
-  expect(find.byType(AlertDialog), findsNothing);
+  expect(find.bySubtype<AlertDialog>(), findsNothing);
   expect(find.text('Choose the conversation to delete'), findsOneWidget);
   expect(find.text('New conversation'), findsNothing);
   await tester.tap(find.byKey(Key('ai-coach-conversation-$id')));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
-  expect(find.byType(AlertDialog), findsOneWidget);
+  expect(find.bySubtype<AlertDialog>(), findsOneWidget);
 }
 
 CoachContextSnapshot nutritionContext() {
@@ -381,7 +381,7 @@ void main() {
       await tester.ensureVisible(find.text('Clear conversation'));
       await tester.tap(find.text('Clear conversation'));
       await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.bySubtype<AlertDialog>(), findsNothing);
       expect(
         find.byKey(const Key('ai-coach-conversation-current')),
         findsOneWidget,

@@ -8,12 +8,9 @@ void main() {
       'lib/app/router/bil_quick_add_sheet.dart',
     ).readAsStringSync();
 
-    expect(source, contains('BilSemanticIconKind.voice => const <Color>['));
-    expect(source, contains('Color(0xFF243B8F)'));
-    expect(source, contains('Color(0xFF6D4AE8)'));
-    expect(source, contains('BilSemanticIconKind.mealPhoto => const <Color>['));
-    expect(source, contains('Color(0xFF075A8C)'));
-    expect(source, contains('Color(0xFF0A84FF)'));
+    expect(source, contains('baseTheme.colorScheme.onSurfaceVariant'));
+    expect(source, contains('gradient: BilPearlFinish.panel('));
+    expect(source, isNot(contains('premiumGradient')));
     expect(source, contains("Key('quick-add-primary-\$index')"));
     expect(source, contains("Key('quick-add-primary-badge-\$index')"));
     expect(source, contains("Key('quick-add-primary-icon-\$index')"));

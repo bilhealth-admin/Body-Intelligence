@@ -1,7 +1,7 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../services/admin_operation_error.dart';
@@ -46,7 +46,7 @@ class _CommunityMemberAccessAdminPanelState
   @override
   Widget build(BuildContext context) {
     final suspended = ref.watch(communitySuspendedMemberListProvider);
-    return Card(
+    return BilPearlMaterialCard(
       key: const Key('admin-community-member-access-panel'),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -84,20 +84,6 @@ class _CommunityMemberAccessAdminPanelState
               ),
             ),
             const SizedBox(height: 12),
-            OutlinedButton.icon(
-              key: const Key('admin-community-open-moderation'),
-              onPressed: () => context.push('/community/moderation'),
-              icon: const Icon(Icons.fact_check_outlined),
-              label: Text(
-                _copy(
-                  'Open approval queue',
-                  ar: 'فتح قائمة الموافقات',
-                  fr: 'Ouvrir la file de validation',
-                  es: 'Abrir cola de aprobaciones',
-                  tr: 'Onay kuyruğunu aç',
-                ),
-              ),
-            ),
             const Divider(height: 32),
             Form(
               key: _formKey,
@@ -275,7 +261,7 @@ class _CommunityMemberAccessAdminPanelState
     final email = _emailController.text.trim().toLowerCase();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         key: const Key('admin-community-suspend-confirmation'),
         title: Text(
           _copy(
@@ -357,7 +343,7 @@ class _CommunityMemberAccessAdminPanelState
   Future<void> _confirmAndReinstate(CommunitySuspendedMemberEntry entry) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         key: const Key('admin-community-reinstate-confirmation'),
         title: Text(
           _copy(

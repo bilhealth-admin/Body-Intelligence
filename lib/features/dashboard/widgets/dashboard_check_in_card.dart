@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -49,7 +50,7 @@ class _DashboardCheckInCardState extends State<DashboardCheckInCard> {
   @override
   Widget build(BuildContext context) {
     final system = widget.system;
-    return Card(
+    return BilPearlMaterialCard(
       key: const ValueKey('dashboard-daily-check-in'),
       child: Padding(
         padding: const EdgeInsets.all(16),

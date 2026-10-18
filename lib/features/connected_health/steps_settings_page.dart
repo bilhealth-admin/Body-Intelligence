@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -149,7 +150,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) => PopScope(
             canPop: !dialogSaving,
-            child: AlertDialog(
+            child: BilPearlMaterialAlertDialog(
               title: Text(t('Daily step goal')),
               content: Column(
                 mainAxisSize: MainAxisSize.min,

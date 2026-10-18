@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -147,7 +148,7 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
   }
 
   void _information() {
-    showModalBottomSheet<void>(
+    showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -204,9 +205,7 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
                 size: 16,
               ),
               label: Text(
-                !busy &&
-                        !_translated &&
-                        defaultTargetPlatform == TargetPlatform.android
+                !busy && !_translated
                     ? googleTranslationAction(context)
                     : translationCopy(
                         context,
@@ -233,6 +232,11 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
               ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
+          ),
+        if (_allowed && !_translated)
+          Text(
+            cloudTranslationDisclosure(context),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         if (_translated) ...[
           Row(

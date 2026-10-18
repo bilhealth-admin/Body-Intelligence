@@ -197,7 +197,7 @@ extension _FastingTimerActions on _FastingTimerPageState {
     final controller = TextEditingController(text: '$targetHours');
     final selected = await showDialog<int>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(tr('Custom fasting window', 'نافذة صيام مخصصة')),
         content: TextField(
           controller: controller,

@@ -1,5 +1,115 @@
 part of 'ai_coach_settings_page.dart';
 
+class _CoachActionPermissionCard extends ConsumerWidget {
+  const _CoachActionPermissionCard({required this.t});
+
+  final _Copy t;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(coachActionPermissionModeProvider);
+    return _PremiumCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(
+            icon: Icons.admin_panel_settings_outlined,
+            title: t(
+              'Coach action permissions',
+              'صلاحيات إجراءات المدرب',
+              'Autorisations des actions du Coach',
+              'Permisos de acciones del Coach',
+              'Koç eylem izinleri',
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            t(
+              'Choose how the Coach handles changes. Sensitive and destructive actions always require confirmation. This preference applies for the current app session.',
+              'اختر طريقة تعامل المدرب مع التغييرات. تتطلب الإجراءات الحساسة أو الحذف تأكيدًا دائمًا. يسري هذا الاختيار خلال جلسة التطبيق الحالية.',
+              'Choisissez comment le Coach traite les modifications. Les actions sensibles ou destructrices nécessitent toujours une confirmation. Ce choix s’applique à la session actuelle.',
+              'Elige cómo gestiona el Coach los cambios. Las acciones sensibles o destructivas siempre requieren confirmación. Esta preferencia se aplica a la sesión actual.',
+              'Koçun değişiklikleri nasıl ele alacağını seçin. Hassas ve silici işlemler her zaman onay gerektirir. Bu tercih geçerli uygulama oturumu için geçerlidir.',
+            ),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          RadioGroup<CoachActionPermissionMode>(
+            groupValue: selected,
+            onChanged: (next) {
+              if (next != null) {
+                ref.read(coachActionPermissionModeProvider.notifier).state =
+                    next;
+              }
+            },
+            child: Column(
+              children: [
+                for (final mode in CoachActionPermissionMode.values)
+                  RadioListTile<CoachActionPermissionMode>(
+                    key: Key('ai-coach-permission-${mode.name}'),
+                    value: mode,
+                    controlAffinity: ListTileControlAffinity.trailing,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(switch (mode) {
+                      CoachActionPermissionMode.readOnly => t(
+                        'Read only',
+                        'قراءة فقط',
+                        'Lecture seule',
+                        'Solo lectura',
+                        'Yalnızca okuma',
+                      ),
+                      CoachActionPermissionMode.askBeforeWrite => t(
+                        'Ask before write',
+                        'اسأل قبل الحفظ',
+                        'Demander avant modification',
+                        'Preguntar antes de guardar',
+                        'Yazmadan önce sor',
+                      ),
+                      CoachActionPermissionMode.writeAllowed => t(
+                        'Write allowed',
+                        'السماح بالتغييرات القابلة للتراجع',
+                        'Modifications réversibles autorisées',
+                        'Permitir cambios reversibles',
+                        'Geri alınabilir değişikliklere izin ver',
+                      ),
+                    }),
+                    subtitle: Text(switch (mode) {
+                      CoachActionPermissionMode.readOnly => t(
+                        'The Coach can review your selected BIL context but will not save changes.',
+                        'يمكن للمدرب مراجعة سياق BIL الذي اخترته، لكنه لن يحفظ تغييرات.',
+                        'Le Coach peut consulter le contexte BIL choisi sans enregistrer de modifications.',
+                        'El Coach puede revisar el contexto BIL elegido, pero no guardará cambios.',
+                        'Koç seçtiğiniz BIL bağlamını inceleyebilir, ancak değişiklikleri kaydetmez.',
+                      ),
+                      CoachActionPermissionMode.askBeforeWrite => t(
+                        'The Coach asks before saving reversible changes.',
+                        'يطلب المدرب تأكيدك قبل حفظ التغييرات القابلة للتراجع.',
+                        'Le Coach demande votre accord avant d’enregistrer une modification réversible.',
+                        'El Coach pide confirmación antes de guardar cambios reversibles.',
+                        'Koç, geri alınabilir değişiklikleri kaydetmeden önce onayınızı ister.',
+                      ),
+                      CoachActionPermissionMode.writeAllowed => t(
+                        'The Coach may save reversible changes without an extra prompt. Sensitive or destructive actions still require confirmation.',
+                        'يمكن للمدرب حفظ التغييرات القابلة للتراجع دون سؤال إضافي. وتظل الإجراءات الحساسة أو الحذف بحاجة إلى تأكيد.',
+                        'Le Coach peut enregistrer des changements réversibles sans demander à nouveau. Les actions sensibles ou destructrices exigent toujours une confirmation.',
+                        'El Coach puede guardar cambios reversibles sin otra pregunta. Las acciones sensibles o destructivas siguen requiriendo confirmación.',
+                        'Koç geri alınabilir değişiklikleri ek bir soru sormadan kaydedebilir. Hassas ve silici işlemler yine de onay gerektirir.',
+                      ),
+                    }),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ContextFocusCard extends StatelessWidget {
   const _ContextFocusCard({
     required this.focuses,

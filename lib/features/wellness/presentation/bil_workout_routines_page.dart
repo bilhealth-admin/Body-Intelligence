@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -470,7 +471,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   Future<void> _showCustomRoutineBuilder(
     List<WellnessContentItem> items,
   ) async {
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

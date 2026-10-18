@@ -81,7 +81,7 @@ class _QuestCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final title = _questTitle(context, quest.titleCopyKey);
     final subtitle = _questSubtitle(context, quest.subtitleCopyKey);
-    return Card(
+    return BilPearlMaterialCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

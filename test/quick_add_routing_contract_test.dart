@@ -47,7 +47,12 @@ void main() {
       expect(foodLog, contains('if (mounted && !completed) _close(context);'));
       // Photo Quick Add opens the meal-vision camera directly. It must never
       // route through the AI Coach conversation.
-      expect(shell, contains("'/quick-add/meal-camera?from=\$origin'"));
+      expect(
+        shell,
+        contains(
+          'await openBilQuickAddMealPhoto(context, encodedReturnPath: origin)',
+        ),
+      );
       expect(shell, isNot(contains('vision=capture&from=\$origin')));
       expect(diary, contains("case 'photo':"));
 

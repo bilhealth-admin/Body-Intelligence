@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -196,7 +197,7 @@ class _PlanCard extends StatelessWidget {
       selected: selected,
       enabled: selectable,
       label: '${plan.title}, ${plan.priceLabel} ${plan.billingPeriodLabel}',
-      child: Card(
+      child: BilPearlMaterialCard(
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: selectable ? onTap : null,

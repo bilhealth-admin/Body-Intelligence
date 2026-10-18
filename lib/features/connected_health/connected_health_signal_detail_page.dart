@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -116,7 +117,7 @@ class _MissingSignalCard extends StatelessWidget {
   final VoidCallback onConnect;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: const Key('connected-signal-not-connected'),
     child: Padding(
       padding: const EdgeInsets.all(20),
@@ -164,7 +165,7 @@ class _MeasuredSignalCard extends StatelessWidget {
     final value = signal.value == signal.value.roundToDouble()
         ? signal.value.round().toString()
         : signal.value.toStringAsFixed(1);
-    return Card(
+    return BilPearlMaterialCard(
       key: const Key('connected-signal-measured'),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -220,7 +221,7 @@ class _SignalHistoryCard extends StatelessWidget {
   final DateTime asOf;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: const Key('connected-signal-history'),
     child: Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),

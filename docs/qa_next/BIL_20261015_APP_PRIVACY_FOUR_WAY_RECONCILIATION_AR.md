@@ -1,18 +1,20 @@
 # BIL — مطابقة App Privacy الرباعية وخطة القرار المشروط
 
+**تصحيح بعد مكالمة Apple — 16 أكتوبر 2026:** تغييران مباشران أُجريا في إجابات App Privacy اعتمادًا جزئيًا على تصريحات Privacy Manifest داخل حزمة iOS المجمعة، منها Google Sign-In وGoogle Mobile Ads. هذا يثبت مصدرًا من حزمة iOS فقط، ولا يثبت وحده أن إجابات ASC دقيقة عبر كل المنصات. توضح Apple أن إجابات App Privacy على مستوى التطبيق وتشمل ممارسات التطبيق وشركائه عبر المنصات؛ لذا فالتعديلات الحية **غير معتمدة وغير محسومة** حتى يُنجز ربط السلوك الفعلي لمنصتي iOS وAndroid وشركائهما بكل إجابة. لا يُدّعى أن Apple قبلتها، ولا تجرى تعديلات حية إضافية قبل إتمام المطابقة.
+
 تاريخ التوثيق: 15 أكتوبر 2026. HEAD المصدر: `769169f2dd00f7e3dbcbce763285d2b81c2e9d60`، الفرع `integration/bil-qa-media-policy-20261011`، مع تعديلات محلية محفوظة. وقت تجميع هذا الملحق: `2026-10-15T17:51:21.394820+00:00`.
 
 ## القرار المباشر
 
 **إضافة16 أكتوبر — حزمة Simulator فعلية:** جرد `82fc546e` في [الدليل المدمج](evidence/policy-gate-20261015/ci-regressions-20261016/compiled-ios-82fc/proof.json) يثبت31 Manifest ذات19 بصمة محتوى و7 سجلات Framework، واتحاد22 نوع بيانات. GMA الفعلي **13.11.0** وUMP **3.1.0**؛ فحص vendor13.7.0 في الجدول التاريخي أدناه لا يمثل إصدار هذه الحزمة. مصدر تصريح **Other Usage Data** أصبح مثبتًا: Google Sign-In يعلنه linked=true وtracking=false ولغرض Analytics، مطابقًا لصف ASC؛ أُغلق غموض مصدر التصريح لهذه الحزمة، لا سلوك الجمع الفعلي. لا يلزم إضافة صف عشوائي إلى Runner.
 
-بقيت فروق تحتاج إثبات السلوك: GMA يعلن Device ID tracking=true؛ وASC يعلن tracking لـUser ID وProduct Interaction خلاف التصريحات المدمجة المقابلة. GMA يعلن DeveloperAdvertising لستة أنواع غير ظاهرة بهذا الغرض في ASC، وGoogle Sign-In يعلن Analytics لـUser ID غير ظاهر في صف ASC. لا تسمح هذه الفروق بمسح إجابات المتجر تلقائيًا. NSPrivacyTracking العام false في29 ملفًا و**null** في GMA وUMP؛ Crash Data linked في قراءة ASC يبقى **null**. قفل CocoaPods المدون يحتوي Flutter/simple_barcode_scanner فقط، ولا يثبت قفل جميع حزم SwiftPM.
+بقيت فروق تحتاج إثبات السلوك: GMA يعلن Device ID tracking=true؛ أما User ID وProduct Interaction فقد صُححت إجابتاهما الحيتان في App Store Connect في16 أكتوبر استنادًا إلى تصريحاتهما المدمجة ومسارات المصدر. GMA يعلن DeveloperAdvertising لستة أنواع غير ظاهرة بهذا الغرض في ASC، وGoogle Sign-In يعلن Analytics لـUser ID، وقد أضيف هذا الغرض إلى صف User ID الحي. لا تسمح هذه الفروق بمسح إجابات المتجر تلقائيًا. NSPrivacyTracking العام false في29 ملفًا و**null** في GMA وUMP؛ Crash Data linked في قراءة ASC يبقى **null**. قفل CocoaPods المدون يحتوي Flutter/simple_barcode_scanner فقط، ولا يثبت قفل جميع حزم SwiftPM.
 
 هذا البناء `BIL_ADS_ENABLED=false`، واختباره الحقيقي نجح في AES ثم فشل في Keychain بـ`-34018`؛ لم يصل إلى iPad أو بقية المسارات. لا يثبت توقيع المتجر أو SDK signatures أو شبكة إصدار الإعلانات الفعلي. تبقى A084 وقرار التتبع وتصحيح ASC **BLOCKED/P0** للمرشح36، مع بقاء رفض35 التاريخي **FAIL/P0**. جرد الخصوصية الفعلي متاح الآن، وأي وصف أقدم هنا بأن جميع تصريحات الحزمة غير متاحة تجاوزته هذه الإضافة المحددة.
 
-**قراءة App Privacy ورسالة الرفض أصبحتا READ_VERIFIED، وليستا READ_BLOCKED. ما زال تصحيح الإجابات وإغلاق مطابقتها مع IPA وسلوك التشغيل BLOCKED/P0.** لا أوصي بإلغاء علامات tracking الثلاث اعتمادًا على NPA أو على نجاح QA بلا إعلانات. لا أوصي بإضافة ATT لمجرد مطابقة إعلان غير محقق. يلزم أولًا إثبات سلوك الإصدار الفعلي ثم تنفيذ القرار الموافق له بموافقة المالك.
+**قراءة App Privacy ورسالة الرفض READ_VERIFIED. تحديث 16 أكتوبر: نُشرت إجابتان؛ User ID أصبح App Functionality + Analytics, linked=true, tracking=false؛ وProduct Interaction بقيت أغراضه وربطه كما هي وأصبح tracking=false. Device ID ما زال linked=true وtracking=true؛ لذلك يبقى اعتراض 5.1.2(i) مفتوحًا P0 حتى يُحسم مسار ATT/الإعلانات على الحزمة النهائية.** لا نعتبر NPA أو نجاح QA بلا إعلانات إثباتًا لعدم التتبع. الدليل الحي بعد التعديل: [App Privacy revision](evidence/policy-gate-20261015/apple-full-store-update-20261016/app-privacy-revision-20261016.json).
 
-الدليل الحي الذي قرأه الوكيل الرئيسي من DOM الفعلي وموصل Gmail الرسمي هو [live-store-ui-readback-20261015.json](evidence/policy-gate-20261015/live-store-ui-readback-20261015.json). لم ينفذ مؤلف هذا الملحق UI أو شبكة أو اختبارات أو بناء أو تعديل متجر جديدًا. لم تتغير حسابات أو أسعار أو Trial أو أدوار أو بيانات Production.
+الدليل الحي التاريخي الذي قرأه الوكيل الرئيسي من DOM الفعلي وموصل Gmail الرسمي هو [live-store-ui-readback-20261015.json](evidence/policy-gate-20261015/live-store-ui-readback-20261015.json). حصل تعديل App Privacy حي واحد لاحق موثق في16 أكتوبر؛ لا يغير ذلك build 35 أو يثبت candidate 36. لم تتغير حسابات أو أسعار أو Trial أو أدوار أو بيانات Production.
 
 التصنيف المعروف في [A084 داخل policy-requirements.json](evidence/policy-gate-20261015/policy-requirements.json) هو **FAIL/P0 للحزمة المرفوضة build 35 والبيانات الحالية في ASC**؛ سببه مثبت، وليس تعذر قراءة أو نقص دليل افتراضيًا. **مطابقة candidate 36 مع IPA/runtime تبقى BLOCKED/P0** ولا تسمى FAIL مثبتًا على حزمة لم تختبر، ولا PASS بسبب نجاح QA.
 
@@ -22,7 +24,7 @@
 |---|---|
 | حالة Apple | iOS 1.0.0، REJECTED، مرتبطة بـ build 35. المراجعة بتاريخ 14 أكتوبر 2026 على iPad Air 11-inch (M3). لا تعني هذه الواقعة اختبار build 36. |
 | سبب الرفض الأخير | Guideline 5.1.2(i): ASC يعلن tracking لـ User ID وDevice ID وProduct Interaction، بينما النسخة المقدمة لم تطلب ATT. هذا هو السبب المقروء، وليس استنتاجًا من Manifest. |
-| App Privacy الحالي | 22 نوعًا مجموعًا، منها الأنواع الثلاثة نفسها معلنة للتتبع. نص النشر النسبي «2 days ago» لا يعين وقت نشر UTC دقيقًا. |
+| App Privacy الحالي | 22 نوعًا مجموعًا؛ بعد تعديل 16 أكتوبر، User ID وProduct Interaction بلا tracking، وDevice ID وحده معلن للتتبع. |
 | تفصيل linked/purposes في ASC | القراءة الحية الإضافية تثبت الأغراض المعروضة لكل الأنواع الـ22. ظهر linked-identity bullet لـ21 نوعًا؛ Crash Data محفوظة null لأن bullet لم يظهر ولم يفتح radio. لا نستبدل null بـfalse أو نستنتج القيم من Runner. |
 | عناصر Submission | **7 = تطبيق واحد + مجموعة اشتراك واحدة +4 اشتراكات +Boost واحد؛ أي 6 عناصر غير التطبيق.** مجموعة الاشتراك ليست منتج IAP سادسًا. |
 | حالة العناصر الأخرى | Ready for Review، وليست approved. حالة API للمنتجات READY_TO_SUBMIT تخص كيانًا مختلفًا ولا تغني عن حالة Submission. |
@@ -60,17 +62,17 @@
 | 1 | Search History | طلب بحث USDA الموثق بعد فقد المطابقة المحلية، مع جلسة مصادق عليها؛ لا سجل بحث إعلاني مقصود. جرد I1. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 2 | Other User Content | محتوى المجتمع وسياق المحادثة المدخل من المستخدم عند اختيار الوظيفة؛ I1 وI2. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 3 | Emails or Text Messages | رسائل المجتمع الخاصة؛ لا تعني قراءة صندوق بريد الهاتف. I1 وI2. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
-| 4 | User ID | هوية Auth وربط ملكية السجلات والاستحقاق والطلبات؛ UUID فحص أهلية الإعلان لا يمرر إلى AdRequest في gateway المفحوص. I1 وI3. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking **نعم** | **P0:** ASC tracking نعم؛ Runner app-owned لا. لا يجوز حسم tracking من صف Runner أو SDK وحده. |
+| 4 | User ID | هوية Auth وربط ملكية السجلات والاستحقاق والطلبات؛ UUID فحص أهلية الإعلان لا يمرر إلى AdRequest في gateway المفحوص. I1 وI3. | Google Sign-In في الجرد المركب: linked نعم؛ Analytics؛ tracking لا. | Runner: collected نعم؛ linked نعم؛ tracking لا. | **بعد تحديث 16 أكتوبر:** collected/linked؛ App Functionality + Analytics؛ tracking لا | **مفتوح على candidate 36:** لا IPA/runtime موقع يثبت كل مسارات SDK. التعديل الحي مدعوم بمسار المصدر والجرد المركب الحالي. |
 | 5 | Name | ملف المستخدم وبيانات دخول اختيارية وملف المجتمع؛ I1. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 6 | Other Data Types | العمر/تاريخ الميلاد والجنس وحقول الملف للحسابات المطلوبة، مع مزامنة اختيارية؛ I1. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 7 | Health | الوزن والقياسات والصحة المتصلة بحسب الأذونات، ومزامنة/سياق AI بحسب الاختيار؛ I1. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 8 | Photos or Videos | صور مختارة للملف والمجتمع وVision؛ لا تستخدم للتوجيه الإعلاني؛ I1 وI3. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 9 | Customer Support | طلبات الدعم المرتبطة بالحساب ومحتواها وسياق تقني محدود؛ I1. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 10 | Purchase History | معرّفات المعاملة والتحقق والاستحقاق؛ معالجة بطاقة الدفع عند المتجر، لا يجمعها BIL؛ I1. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
-| 11 | Device ID | معرّفات التشغيل/التسجيل/الأمان app-owned وفق الجرد، مع احتمال معرّفات SDK مستقلة؛ I1 وI3. | GMA 13.7.0: linked نعم، tracking نعم؛ إعلان طرف ثالث/إعلان المطور/Analytics. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking **نعم** | **P0:** إعلان SDK tracking نعم يفرض تحققًا خاصًا. NPA وSameAppKey=false لا يحسمان إزالته. |
+| 11 | Device ID | معرّفات التشغيل/التسجيل/الأمان app-owned وفق الجرد، مع احتمال معرّفات SDK مستقلة؛ I1 وI3. | GMA 13.11.0 في الجرد المركب: tracking نعم؛ إعلان طرف ثالث/إعلان المطور/Analytics. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking **نعم** | **P0:** تصريح SDK وإجابة ASC الحية tracking=true. NPA وSameAppKey=false لا يحسمان ذلك؛ يلزم IPA/runtime/ATT. |
 | 12 | Phone Number | مسار تسجيل/تواصل يطلب الرقم عند توفره؛ ليس شرطًا لكل دخول؛ I1. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 13 | Fitness | النشاط والتدريب والصحة المتصلة المختارة؛ لا تصبح مدخلًا للإعلان؛ I1 وI3. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
-| 14 | Product Interaction | استعمال الوظائف وسجل طلبات AI الضروري للاستخدام/الحدود، وتفاعلات إعلان SDK عند تشغيله؛ I1 وI3. | GMA 13.7.0: linked نعم، tracking لا؛ إعلان طرف ثالث/إعلان المطور/Analytics. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking **نعم** | **P0:** ASC tracking نعم؛ Runner app-owned لا. لا يجوز حسم tracking من صف Runner أو SDK وحده. |
+| 14 | Product Interaction | استعمال الوظائف وسجل طلبات AI الضروري للاستخدام/الحدود، وتفاعلات إعلان SDK عند تشغيله؛ I1 وI3. | GMA 13.11.0 في الجرد المركب: linked نعم، tracking لا؛ يشمل Analytics وإعلانات المطور والطرف الثالث. | Runner: collected نعم؛ linked نعم؛ tracking لا. | **بعد تحديث 16 أكتوبر:** collected/linked؛ الأغراض السابقة باقية؛ tracking لا | **مفتوح على candidate 36:** لا IPA/runtime موقع يثبت كل مسارات SDK. |
 | 15 | Performance Data | زمن طلبات AI المرتبط بالحساب، وأداء SDK مستقل؛ I1. | GMA 13.7.0: linked لا، tracking لا؛ إعلان طرف ثالث/إعلان المطور/Analytics. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 16 | Email Address | Auth والملف والدعم وOAuth عند توفير البريد بالإذن؛ لا يمرر إلى طلب الإعلان؛ I1 وI3. | لا صف مقابل في جدول GMA 13.7.0 المفحوص؛ لا ينفي ذلك معالجة App/Auth/AI أو SDK آخر في الحزمة. | Runner: collected نعم؛ linked نعم؛ tracking لا. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
 | 17 | Crash Data | crash reporter الخاص بالتطبيق محلي وفق الجرد؛ SDK الإعلان يعلن تشخيص الأعطال بصورة مستقلة؛ I1 وI4. | GMA 13.7.0: linked لا، tracking لا؛ Analytics. | لا صف app-owned مستقل في Runner الحالي؛ لا يعني عدم وجود جمع SDK/خادم. | collected نعم؛ tracking لا | مطابقة IPA وruntime/GMA الفعلي قبل اعتماد الإجابة. |
@@ -98,10 +100,10 @@
 | 10 | Customer Support | App Functionality | ظهر (true) | لم يظهر (false في دليل DOM) |
 | 11 | Other User Content | App Functionality؛ Product Personalization | ظهر (true) | لم يظهر (false في دليل DOM) |
 | 12 | Search History | App Functionality | ظهر (true) | لم يظهر (false في دليل DOM) |
-| 13 | User ID | App Functionality؛ Product Personalization؛ Third-Party Advertising | ظهر (true) | ظهر (true) |
+| 13 | User ID | بعد تحديث 16 أكتوبر: App Functionality؛ Analytics | ظهر (true) | أزيل (false) |
 | 14 | Device ID | App Functionality؛ Analytics؛ Third-Party Advertising | ظهر (true) | ظهر (true) |
 | 15 | Purchase History | App Functionality | ظهر (true) | لم يظهر (false في دليل DOM) |
-| 16 | Product Interaction | App Functionality؛ Analytics؛ Product Personalization؛ Third-Party Advertising | ظهر (true) | ظهر (true) |
+| 16 | Product Interaction | App Functionality؛ Analytics؛ Product Personalization؛ Third-Party Advertising | ظهر (true) | بعد تحديث 16 أكتوبر: أزيل (false) |
 | 17 | Advertising Data | Analytics؛ Third-Party Advertising | ظهر (true) | لم يظهر (false في دليل DOM) |
 | 18 | Other Usage Data | Analytics | ظهر (true) | لم يظهر (false في دليل DOM) |
 | 19 | Crash Data | App Functionality؛ Analytics | **null — لم يظهر bullet؛ لم يفتح radio** | لم يظهر (false في دليل DOM) |
@@ -138,12 +140,12 @@
 
 | البند | الحالة |
 |---|---|
-| قراءة App Privacy الحالي والأغراض والربط المعروض | **PASS_READ_VERIFIED**: 22 نوعًا بأغراضها و3 tracking؛ linked-bullet لـ21 نوعًا، وCrash Data=null دون حسم radio. |
+| قراءة App Privacy الحالي والأغراض والربط المعروض | **PASS_READ_VERIFIED**: 22 نوعًا؛ تعديل 16 أكتوبر أبقى User ID وProduct Interaction مرتبطين بالهوية لكنه أزال tracking عنهما، وأبقى Device ID tracking. Crash Data linked لم يُحسم في القراءة السابقة. |
 | قراءة سبب رفض 35 الأخير وعدد عناصر Submission | **PASS_READ_VERIFIED**؛ 7 إجمالًا و6 غير التطبيق. |
 | حالة build 35 وASC الحالية — A084 | **FAIL/P0 مثبت** بسبب tracking المعلن دون ATT؛ مطابقة candidate 36 تبقى **BLOCKED/P0** بصورة مستقلة. |
 | وجود NPA وSameAppKey=false وحدود المصدر | **PASS_SOURCE_SCOPE** فقط، وليست شهادة runtime. |
 | مطابقة App/SDK/Manifest/ASC للإصدار36 | **BLOCKED/P0**؛ IPA/graph/runtime الصحيح غير مثبت هنا. |
-| تصحيح tracking في ASC | **BLOCKED/P0** حتى دليل النوع وقرار المالك؛ لم يتغير المتجر. |
+| تصحيح tracking في ASC | **PARTIAL / OPEN P0**: صُحح User ID وProduct Interaction؛ Device ID ما زال tracking، ومطابقته مع IPA 36/runtime لم تثبت. |
 | Other Usage Data | **BLOCKED/P1_CLASSIFICATION** حتى ربط المنتج الفعلي والغرض/التصنيف. |
 | إغلاق رفض Apple رسميًا | **BLOCKED**؛ لم يحدث إرسال أو قبول جديد. |
 

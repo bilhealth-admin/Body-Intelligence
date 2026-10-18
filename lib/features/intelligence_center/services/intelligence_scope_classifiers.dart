@@ -1,10 +1,37 @@
 part of 'intelligence_center_engine.dart';
 
-// Pure scope classifiers extracted unchanged from the engine coordinator.
+// Pure scope classifiers used by the Coach engine.
 bool _has(String value, List<String> markers) => markers.any(value.contains);
-bool isTransliteratedArabicGreeting(String value) =>
-    _has(value, const ['kefak', 'keefak', 'kifak', 'kefek', 'keefek']);
-bool _isGreeting(String v) => _has(v, const [
+bool isTransliteratedArabicGreeting(String value) => _containsWholePhrase(
+  value,
+  const ['kefak', 'keefak', 'kifak', 'kefek', 'keefek'],
+);
+
+List<String> _greetingTokens(String value) => value
+    .toLowerCase()
+    .split(RegExp(r'''[\s.,!?;:…،؛؟(){}\[\]"'“”‘’—–-]+'''))
+    .where((token) => token.isNotEmpty)
+    .toList(growable: false);
+
+bool _containsWholePhrase(String value, List<String> phrases) {
+  final tokens = _greetingTokens(value);
+  for (final phrase in phrases) {
+    final phraseTokens = _greetingTokens(phrase);
+    for (var start = 0; start <= tokens.length - phraseTokens.length; start++) {
+      var matches = true;
+      for (var offset = 0; offset < phraseTokens.length; offset++) {
+        if (tokens[start + offset] != phraseTokens[offset]) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) return true;
+    }
+  }
+  return false;
+}
+
+bool _isGreeting(String v) => _containsWholePhrase(v, const [
   'مرحبا',
   'مرحبًا',
   'أهلا',

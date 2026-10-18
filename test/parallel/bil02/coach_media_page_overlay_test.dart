@@ -269,7 +269,7 @@ Finder get _matchUse {
   final premium = find.byKey(const Key('premium-vision-use-food'));
   if (premium.evaluate().isNotEmpty) return premium;
   return find.descendant(
-    of: find.byType(AlertDialog),
+    of: find.bySubtype<AlertDialog>(),
     matching: find.byType(FilledButton),
   );
 }
@@ -651,7 +651,7 @@ void main() {
         await _drain(tester);
         pending.complete(fixture.entries);
         await _drain(tester);
-        expect(find.byType(AlertDialog), findsNothing);
+        expect(find.bySubtype<AlertDialog>(), findsNothing);
         expect(find.byType(CoachFoodReviewCard), findsNothing);
         if (exit) {
           expect(
@@ -675,7 +675,7 @@ void main() {
         tester,
         find.textContaining('No verified local match was found.'),
       );
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.bySubtype<AlertDialog>(), findsNothing);
       await _expectNoMeal(tester, fixture);
       await _unmount(tester);
     },

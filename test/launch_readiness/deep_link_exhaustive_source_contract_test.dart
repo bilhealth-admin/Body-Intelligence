@@ -37,6 +37,9 @@ void main() {
 
   test('every router path is runtime-linked or explicitly classified', () {
     const explicitlyUnlinked = <String, String>{
+      '/quick-add/meal-camera':
+          'Legacy direct capture route remains registered; Quick Add now opens '
+          'the source chooser over the current tab before capture.',
       '/context':
           'LifeContextPage is declared in the production router but has no '
           'current runtime literal entry point; keep it explicitly tracked.',

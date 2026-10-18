@@ -13,7 +13,7 @@ void main() {
         '.github/workflows/bil_android_release_candidate.yml',
       );
       final manifest = _read(
-        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
       );
 
       expect(gradle, contains('compileSdk = 36'));
@@ -26,11 +26,11 @@ void main() {
       expect(workflow, contains('(( BUILD_NUMBER == 33 ))'));
       expect(workflow, isNot(contains('(( BUILD_NUMBER == 29 ))')));
       expect(workflow, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_IOS_V36_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_IOS_V37_AUDITED_SOURCE_SHA'));
       expect(workflow, contains('BIL_ANDROID_V33_STAGING_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md'),
+        contains('BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));

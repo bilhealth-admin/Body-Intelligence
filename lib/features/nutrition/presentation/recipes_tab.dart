@@ -58,7 +58,7 @@ class _RecipesTab extends ConsumerWidget {
             ),
           ),
         for (final savedRecipe in saved.value ?? const [])
-          Card(
+          BilPearlMaterialCard(
             child: ListTile(
               leading: const BilSemanticIconBadge(
                 kind: BilSemanticIconKind.recipes,
@@ -123,7 +123,7 @@ class _RecipesTab extends ConsumerWidget {
       final repository = ref.read(trustedRecipeRepositoryProvider);
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => BilPearlMaterialAlertDialog(
           title: Text(_recipeListCopy(dialogContext, 'deleteTitle')),
           content: Text(_recipeListCopy(dialogContext, 'deleteBody')),
           actions: [

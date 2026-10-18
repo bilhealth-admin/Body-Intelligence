@@ -326,6 +326,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                           _ProfileRelationshipAction(
                             profile: profile,
                             busy: relationshipBusy,
+                            showAcceptedStatus: profile.friendCount == null,
                             onRequestFriend: () {
                               if (visit.isCurrent()) onRequestFriend();
                             },
@@ -457,11 +458,13 @@ class _ProfileRelationshipAction extends StatelessWidget {
   const _ProfileRelationshipAction({
     required this.profile,
     required this.busy,
+    this.showAcceptedStatus = true,
     required this.onRequestFriend,
   });
 
   final CommunityProfileOverview profile;
   final bool busy;
+  final bool showAcceptedStatus;
   final VoidCallback onRequestFriend;
 
   @override
@@ -488,10 +491,11 @@ class _ProfileRelationshipAction extends StatelessWidget {
       icon: const Icon(Icons.mark_email_unread_outlined),
       label: Text(communityText(context, 'Review request', 'مراجعة الطلب')),
     ),
-    CommunityRelationshipStatus.accepted => Chip(
+    CommunityRelationshipStatus.accepted when showAcceptedStatus => Chip(
       avatar: const Icon(Icons.people_rounded),
       label: Text(communityText(context, 'Friends', 'الأصدقاء')),
     ),
+    CommunityRelationshipStatus.accepted => const SizedBox.shrink(),
     _ => const SizedBox.shrink(),
   };
 }

@@ -45,6 +45,10 @@ void main() {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       var databaseClosed = false;
       addTearDown(() async {
+        // Always retire widget subscriptions before closing the SQLite
+        // executor, including when a preceding assertion has failed.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
         if (!databaseClosed) await database.close();
       });
       final foods = FoodRepository(database);
@@ -184,8 +188,7 @@ void main() {
         await tester.pumpAndSettle();
       }
       await tester.enterText(find.byType(SearchBar).last, 'Plain Greek');
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await _waitForFoodResult(tester, 'Plain Greek yogurt');
       expect(find.text('Plain Greek yogurt'), findsOneWidget);
       await tester.tap(find.text('Plain Greek yogurt'));
       await tester.pump();
@@ -239,7 +242,7 @@ void main() {
       expect(find.byKey(const Key('daily-log-water-shortcut')), findsNothing);
 
       // The platform back gesture must behave like the visible Back button:
-      // reopen SearchAnchor with the exact query and its results intact.
+      // reopen the same separate search with the exact query and results.
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       final reopenedSearchBars = tester.widgetList<SearchBar>(
@@ -247,6 +250,7 @@ void main() {
       );
       expect(reopenedSearchBars, isNotEmpty);
       expect(reopenedSearchBars.last.controller?.text, 'Plain Greek');
+      await _waitForFoodResult(tester, 'Plain Greek yogurt');
       expect(find.text('Plain Greek yogurt'), findsOneWidget);
       await tester.tap(find.text('Plain Greek yogurt'));
       await tester.pump();
@@ -270,6 +274,27 @@ void main() {
       final foodRow = find.byKey(
         Key('daily-food-row-${loggedItems.single.id}'),
       );
+      // Drift's table-watched stream re-reads joined meal/food rows on real
+      // SQLite IO, not the fake widget clock. Do not mistake the DB commit
+      // for an immediately painted row. Assert that the actual row appears.
+      final focusedMeal = find.byKey(const Key('daily-log-focused-meal-page'));
+      expect(
+        focusedMeal,
+        findsOneWidget,
+        reason: 'Saving returns to the same meal instead of another route.',
+      );
+      // The meal summary is tall. The saved-food card may be lazily built
+      // below the viewport, on smaller viewports.
+      // Scroll to the real card, then wait for its authoritative row.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('daily-meal-detail-items')),
+        230,
+        scrollable: find
+            .descendant(of: focusedMeal, matching: find.byType(Scrollable))
+            .first,
+      );
+      await tester.pump();
+      await _waitForSavedMealRow(tester, foodRow);
       expect(
         find.descendant(
           of: find.byKey(const Key('daily-log-focused-meal-page')),
@@ -325,4 +350,33 @@ void main() {
       expect(await database.select(database.mealItems).get(), isEmpty);
     },
   );
+}
+
+/// The progressive authority reads SQLite on an actual executor. In widget
+/// tests, a single fake-async one-second pump does not guarantee real IO ran.
+/// Wait for the REAL result (never fake the food), with a strict bounded retry.
+Future<void> _waitForFoodResult(WidgetTester tester, String displayName) async {
+  for (
+    var attempt = 0;
+    attempt < 100 && find.text(displayName).evaluate().isEmpty;
+    attempt++
+  ) {
+    await tester.pump(const Duration(milliseconds: 50));
+    if (attempt % 5 == 0) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+    }
+  }
+}
+
+Future<void> _waitForSavedMealRow(WidgetTester tester, Finder row) async {
+  for (var attempt = 0; attempt < 100 && row.evaluate().isEmpty; attempt++) {
+    await tester.pump(const Duration(milliseconds: 50));
+    if (attempt % 5 == 0) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+    }
+  }
 }

@@ -39,7 +39,7 @@ void main() {
           h,
         ) async {
           await _openEntry(tester, prompt);
-          expect(find.byType(AlertDialog), findsOneWidget);
+          expect(find.bySubtype<AlertDialog>(), findsOneWidget);
           expect(await h.database.select(h.database.mealItems).get(), isEmpty);
           expect(await h.receipts(), isEmpty);
           await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
@@ -118,7 +118,7 @@ void main() {
       h,
     ) async {
       await _openEntry(tester, 'Log 1905 calories for lunch on 2026-10-01');
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.bySubtype<AlertDialog>(), findsOneWidget);
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
       await tester.pumpAndSettle();
       expect(await h.database.select(h.database.mealItems).get(), isEmpty);
@@ -136,7 +136,7 @@ void main() {
     await _withCoach(tester, CoachActionPermissionMode.readOnly, (h) async {
       await _openEntry(tester, 'Log 1905 calories for lunch on 2026-10-01');
       await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.bySubtype<AlertDialog>(), findsNothing);
       expect(await h.database.select(h.database.mealItems).get(), isEmpty);
       expect(await h.receipts(), isEmpty);
       expect(find.text(_receiptText), findsNothing);
@@ -152,7 +152,7 @@ void main() {
       h,
     ) async {
       await _openEntry(tester, 'Log 1905 calories for lunch on 2026-10-01');
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.bySubtype<AlertDialog>(), findsOneWidget);
       h.container.read(coachActionPermissionModeProvider.notifier).state =
           CoachActionPermissionMode.readOnly;
       await tester.pump();

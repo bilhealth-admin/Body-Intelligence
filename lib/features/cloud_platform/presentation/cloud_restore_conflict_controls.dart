@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import '../providers/cloud_restore_conflict_provider.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +76,7 @@ class _ConflictControlsState
         if (!mounted) return;
         final keep = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => BilPearlMaterialAlertDialog(
             scrollable: true,
             title: Text(tr('Choose the saved version', 'اختر النسخة المحفوظة')),
             content: Column(

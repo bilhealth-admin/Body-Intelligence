@@ -142,7 +142,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
               : Future<bool>.value(false),
         );
       } else {
-        final source = await showModalBottomSheet<_ProfilePhotoSource>(
+        final source = await showBilPearlBottomSheet<_ProfilePhotoSource>(
           context: context,
           useSafeArea: true,
           showDragHandle: true,
@@ -252,34 +252,22 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final openSettings = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(tr('Camera access is off', 'الوصول إلى الكاميرا متوقف')),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(
-                MaterialLocalizations.of(dialogContext).closeButtonLabel,
-              ),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(tr('Open system settings', 'فتح إعدادات النظام')),
-            ),
-          ],
+      final openSettings = await showBilPearlPermissionDecision(
+        context,
+        title: tr('Camera access is off', 'الوصول إلى الكاميرا متوقف'),
+        description: tr(
+          'Enable camera access in system settings to take a profile photo. You can choose a photo instead.',
+          'يمكنك تفعيل الكاميرا من إعدادات النظام لالتقاط صورة الملف الشخصي، أو اختيار صورة جاهزة.',
         ),
+        cancelLabel: tr('Not now', 'ليس الآن'),
+        confirmLabel: tr('Open system settings', 'فتح إعدادات النظام'),
       );
-      if (openSettings == true) await policy.openSettings();
+      if (openSettings && mounted) await policy.openSettings();
       return false;
     }
 
-    return await policy.request(BilRuntimeCapability.camera) ==
-        BilRuntimePermissionState.granted;
+    final result = await policy.request(BilRuntimeCapability.camera);
+    return mounted && result == BilRuntimePermissionState.granted;
   }
 
   Future<String?> edit(
@@ -288,7 +276,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     bool number = false,
   }) async {
     final controller = TextEditingController(text: value);
-    final result = await showModalBottomSheet<String>(
+    final result = await showBilPearlBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -332,7 +320,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
   }
 
   Future<T?> choose<T>(String title, Map<T, String> options) =>
-      showModalBottomSheet<T>(
+      showBilPearlBottomSheet<T>(
         context: context,
         useSafeArea: true,
         showDragHandle: true,
@@ -359,7 +347,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
       );
 
   Future<void> showHealthGoalDetails(GoalTimelineEstimate estimate) =>
-      showModalBottomSheet<void>(
+      showBilPearlBottomSheet<void>(
         context: context,
         useSafeArea: true,
         showDragHandle: true,

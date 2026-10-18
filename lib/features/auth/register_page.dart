@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
       languageSelector: const AuthLanguageSelector(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        child: Card(
+        child: BilPearlMaterialCard(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 18, 24, 26),
             child: Form(

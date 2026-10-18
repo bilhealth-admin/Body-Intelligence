@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -170,7 +171,7 @@ class _RecipeDiaryConfirmationPageState
               ),
             ),
             if (valid)
-              Card(
+              BilPearlMaterialCard(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(

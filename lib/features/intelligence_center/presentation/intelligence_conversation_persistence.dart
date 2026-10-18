@@ -453,7 +453,7 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
     if (!mounted || !conversationReady || foodImageFlowOpening) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         scrollable: true,
         title: Text(tr('Clear conversation', 'مسح المحادثة')),
         content: Column(

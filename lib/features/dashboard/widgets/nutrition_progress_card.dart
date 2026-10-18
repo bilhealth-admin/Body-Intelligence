@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class NutritionProgressCard extends StatelessWidget {
     return Semantics(
       label:
           '$label: ${consumed.round()} $unit ${context.strings.text('consumed')}, ${target.round()} $unit ${context.strings.text('target')}, $summary',
-      child: Card(
+      child: BilPearlMaterialCard(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

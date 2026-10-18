@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'community_attention_scope.dart';
 import 'dart:async';
@@ -109,7 +110,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
     final privacy = bilCommunityContactPrivacy(localeTag);
     // The native system picker grants one-contact access only.
     // No permission was requested. BIL cannot read or retain the address book.
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

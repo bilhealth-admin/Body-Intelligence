@@ -38,51 +38,56 @@ class _CommunityCreatorPanel extends StatelessWidget {
     _ => key,
   };
 
-  Future<void> _openBadges(BuildContext context) => showModalBottomSheet<void>(
-    context: context,
-    useSafeArea: true,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (sheetContext) => visit.guard(
-      SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              communityText(sheetContext, 'Community badges', 'شارات المجتمع'),
-              style: Theme.of(
-                sheetContext,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 12),
-            for (final badge in creator.badges)
-              ListTile(
-                key: Key('community-creator-badge-${badge.badgeKey}'),
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
-                  child: Icon(
-                    badge.earned
-                        ? Icons.verified_rounded
-                        : Icons.lock_outline_rounded,
+  Future<void> _openBadges(BuildContext context) =>
+      showBilPearlBottomSheet<void>(
+        context: context,
+        useSafeArea: true,
+        showDragHandle: true,
+        isScrollControlled: true,
+        builder: (sheetContext) => visit.guard(
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  communityText(
+                    sheetContext,
+                    'Community badges',
+                    'شارات المجتمع',
                   ),
+                  style: Theme.of(
+                    sheetContext,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                 ),
-                title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
-                trailing: Text(
-                  badge.earned
-                      ? communityText(sheetContext, 'Earned', 'مكتسبة')
-                      : communityText(sheetContext, 'Locked', 'مقفلة'),
-                ),
-              ),
-          ],
+                const SizedBox(height: 12),
+                for (final badge in creator.badges)
+                  ListTile(
+                    key: Key('community-creator-badge-${badge.badgeKey}'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      child: Icon(
+                        badge.earned
+                            ? Icons.verified_rounded
+                            : Icons.lock_outline_rounded,
+                      ),
+                    ),
+                    title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
+                    trailing: Text(
+                      badge.earned
+                          ? communityText(sheetContext, 'Earned', 'مكتسبة')
+                          : communityText(sheetContext, 'Locked', 'مقفلة'),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 
   Future<void> _openCreatorCenter(BuildContext context) =>
-      showModalBottomSheet<void>(
+      showBilPearlBottomSheet<void>(
         context: context,
         useSafeArea: true,
         showDragHandle: true,
@@ -195,7 +200,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => visit.guard(
-        AlertDialog(
+        BilPearlMaterialAlertDialog(
           icon: BilGlassPressFeedback(child: Icon(icon)),
           title: Text(title),
           content: Text(body),
@@ -231,7 +236,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
               .replaceAll('{level}', nextLevel.toString())
               .replaceAll('{target}', nextXp.toString());
 
-    return Card(
+    return BilPearlMaterialCard(
       key: const Key('community-creator-panel'),
       margin: EdgeInsets.zero,
       child: Padding(
@@ -647,25 +652,38 @@ class _CommunityProfileReviewTile extends StatelessWidget {
   final CommunityProfileReview review;
 
   @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 10),
-    child: ListTile(
-      leading: const CircleAvatar(child: Icon(Icons.rate_review_outlined)),
-      title: Text(review.canonicalName),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (review.brand?.trim().isNotEmpty == true) Text(review.brand!),
-          if (review.reviewNote?.trim().isNotEmpty == true) ...[
-            const SizedBox(height: 4),
-            Text(review.reviewNote!),
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return BilPearlMaterialCard(
+      color: colors.surfaceContainerLow,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: colors.surfaceContainerHighest,
+          foregroundColor: colors.onSurfaceVariant,
+          child: const Icon(Icons.rate_review_outlined),
+        ),
+        title: Text(review.canonicalName),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (review.brand?.trim().isNotEmpty == true) Text(review.brand!),
+            if (review.reviewNote?.trim().isNotEmpty == true) ...[
+              const SizedBox(height: 4),
+              Text(review.reviewNote!),
+            ],
           ],
-        ],
+        ),
+        trailing: Text(
+          review.productKind,
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
       ),
-      trailing: Text(
-        review.productKind,
-        style: Theme.of(context).textTheme.labelSmall,
-      ),
-    ),
-  );
+    );
+  }
 }

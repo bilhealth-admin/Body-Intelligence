@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
@@ -11,7 +12,7 @@ Future<void> showAppleHealthPermissionReview(
 }) async {
   final openSettings = await showDialog<bool>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
+    builder: (dialogContext) => BilPearlMaterialAlertDialog(
       key: const Key('apple-health-permission-review'),
       title: const Text('Apple Health'),
       content: SingleChildScrollView(

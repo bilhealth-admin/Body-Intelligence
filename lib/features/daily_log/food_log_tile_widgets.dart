@@ -19,7 +19,7 @@ extension _FoodLogTileWidgets on _FoodLogPageState {
     );
     return KeyedSubtree(
       key: _foodTargets.putIfAbsent(food.id, GlobalKey.new),
-      child: Card(
+      child: BilPearlMaterialCard(
         key: Key('food-log-food-${food.id}'),
         margin: const EdgeInsets.only(bottom: 8),
         elevation: 0,

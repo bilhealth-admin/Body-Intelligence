@@ -576,7 +576,7 @@ void main() {
         );
         for (
           var i = 0;
-          i < 50 && find.byType(AlertDialog).evaluate().isEmpty;
+          i < 50 && find.bySubtype<AlertDialog>().evaluate().isEmpty;
           i++
         ) {
           await tester.runAsync(
@@ -584,7 +584,7 @@ void main() {
           );
           await tester.pump();
         }
-        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.bySubtype<AlertDialog>(), findsOneWidget);
         expect(find.textContaining('1000 kcal'), findsOneWidget);
         expect(find.textContaining('2000 kcal'), findsOneWidget);
         await tester.tap(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -16,12 +17,26 @@ Future<void> showOptionalAccessOffer(
   WidgetRef ref, {
   required bool verifiedDenied,
   String focus = 'subscription',
+}) => showOptionalAccessOfferFromContainer(
+  context,
+  ProviderScope.containerOf(context, listen: false),
+  verifiedDenied: verifiedDenied,
+  focus: focus,
+);
+
+/// Allows non-Consumer entrypoints (e.g. Quick Add photo source) to reuse
+/// the same explicit access choices without bypassing purchase authority.
+Future<void> showOptionalAccessOfferFromContainer(
+  BuildContext context,
+  ProviderContainer container, {
+  required bool verifiedDenied,
+  String focus = 'subscription',
 }) async {
   if (!context.mounted) return;
-  final owner = ref.read(verifiedEntitlementOwnerIdProvider);
+  final owner = container.read(verifiedEntitlementOwnerIdProvider);
   final choice = await showDialog<String>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
+    builder: (dialogContext) => BilPearlMaterialAlertDialog(
       title: Text(
         context.strings.text(
           verifiedDenied
@@ -54,13 +69,13 @@ Future<void> showOptionalAccessOffer(
     ),
   );
   if (!context.mounted ||
-      ref.read(verifiedEntitlementOwnerIdProvider) != owner) {
+      container.read(verifiedEntitlementOwnerIdProvider) != owner) {
     return;
   }
   if (choice == 'retry') {
-    ref.invalidate(verifiedSubscriptionStateProvider);
-    ref.invalidate(aiVisionCreditStateProvider);
-    ref.invalidate(aiBoostVisionAccessProvider);
+    container.invalidate(verifiedSubscriptionStateProvider);
+    container.invalidate(aiVisionCreditStateProvider);
+    container.invalidate(aiBoostVisionAccessProvider);
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
         content: Text(

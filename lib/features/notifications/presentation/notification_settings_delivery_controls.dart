@@ -16,7 +16,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
   List<Widget> _dailyDeliveryControls(
     NotificationDeliveryPreferences delivery,
   ) => [
-    Card(
+    BilPearlMaterialCard(
       child: SwitchListTile.adaptive(
         key: const Key('all-daily-reminders'),
         value: _allDailyEnabled,
@@ -44,7 +44,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
     ),
     const SizedBox(height: 16),
 
-    Card(
+    BilPearlMaterialCard(
       child: Column(
         children: [
           SwitchListTile(
@@ -86,7 +86,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
   List<Widget> _communityDeliveryControls(
     NotificationDeliveryPreferences delivery,
   ) => [
-    Card(
+    BilPearlMaterialCard(
       key: const Key('community-notification-settings'),
       child: Column(
         children: [

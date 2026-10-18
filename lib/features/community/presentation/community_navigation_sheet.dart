@@ -15,8 +15,6 @@ class _CommunityNavigationSheet extends StatefulWidget {
 }
 
 class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
-  late final Future<bool> _moderator = widget.repository.isCommunityModerator();
-
   @override
   Widget build(BuildContext context) => SafeArea(
     top: false,
@@ -24,141 +22,125 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * .78,
       ),
-      child: FutureBuilder<bool>(
-        future: _moderator,
-        builder: (context, snapshot) => ListView(
-          key: const Key('community-navigation-sheet'),
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 16),
-              child: Text(
-                communityText(context, 'Community actions', 'إجراءات المجتمع'),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+      child: ListView(
+        key: const Key('community-navigation-sheet'),
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 16),
+            child: Text(
+              communityText(context, 'Community actions', 'إجراءات المجتمع'),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-            _CommunityFeedModeControl(selectedMode: widget.selectedFeedMode),
-            _item(
-              'account',
-              Icons.account_circle_outlined,
-              'Community profile',
-              'ملف المجتمع',
-              subtitle: communityText(context, 'My posts', 'منشوراتي'),
+          ),
+          _CommunityFeedModeControl(selectedMode: widget.selectedFeedMode),
+          _item(
+            'account',
+            Icons.account_circle_outlined,
+            'Community profile',
+            'ملف المجتمع',
+            subtitle: communityText(context, 'My posts', 'منشوراتي'),
+          ),
+          _item(
+            '/community/messages',
+            Icons.chat_bubble_outline_rounded,
+            'Messages',
+            'الرسائل',
+            key: 'community-nav-messages',
+          ),
+          _item(
+            '/community/channels',
+            Icons.forum_outlined,
+            CommunityChannelsCopy.text(
+              context,
+              CommunityChannelsCopyKey.channels,
             ),
-            _item(
-              '/community/messages',
-              Icons.chat_bubble_outline_rounded,
-              'Messages',
-              'الرسائل',
-              key: 'community-nav-messages',
+            CommunityChannelsCopy.text(
+              context,
+              CommunityChannelsCopyKey.channels,
             ),
-            _item(
-              '/community/channels',
-              Icons.forum_outlined,
-              CommunityChannelsCopy.text(
-                context,
-                CommunityChannelsCopyKey.channels,
-              ),
-              CommunityChannelsCopy.text(
-                context,
-                CommunityChannelsCopyKey.channels,
-              ),
-              key: 'community-nav-channels',
+            key: 'community-nav-channels',
+          ),
+          _item(
+            '/community/connections',
+            Icons.people_outline_rounded,
+            'Friends and requests',
+            'الأصدقاء والطلبات',
+            key: 'community-nav-friends',
+          ),
+          _item(
+            '/community/code',
+            Icons.qr_code_2_rounded,
+            'My BIL Code',
+            'رمز BIL الخاص بي',
+            key: 'community-my-bil-code',
+          ),
+          _item(
+            '/community/people',
+            Icons.person_search_outlined,
+            'Find people',
+            'البحث عن أصدقاء',
+          ),
+          _item(
+            '/community/drafts',
+            Icons.drafts_outlined,
+            'Drafts',
+            'المسودات',
+            key: 'community-drafts',
+            subtitle: communityText(
+              context,
+              'Private unfinished posts',
+              'منشورات غير مكتملة وخاصة',
             ),
-            _item(
-              '/community/connections',
-              Icons.people_outline_rounded,
-              'Friends and requests',
-              'الأصدقاء والطلبات',
-              key: 'community-nav-friends',
-            ),
-            _item(
-              '/community/code',
-              Icons.qr_code_2_rounded,
-              'My BIL Code',
-              'رمز BIL الخاص بي',
-              key: 'community-my-bil-code',
-            ),
-            _item(
-              '/community/people',
-              Icons.person_search_outlined,
-              'Find people',
-              'البحث عن أصدقاء',
-            ),
-            _item(
-              '/community/drafts',
-              Icons.drafts_outlined,
-              'Drafts',
-              'المسودات',
-              key: 'community-drafts',
-              subtitle: communityText(
-                context,
-                'Private unfinished posts',
-                'منشورات غير مكتملة وخاصة',
-              ),
-            ),
-            _item(
-              'saved',
-              Icons.bookmark_border_rounded,
-              'Saved posts',
-              'المنشورات المحفوظة',
-              key: 'community-saved-posts',
-            ),
-            _item(
-              '/community/notifications',
-              Icons.notifications_none_rounded,
-              'Community updates',
-              'تحديثات المجتمع',
-            ),
-            _item(
-              '/community/rewards',
-              Icons.workspace_premium_outlined,
-              'BIL Rewards',
-              'مكافآت BIL',
-            ),
-            const Divider(indent: 20, endIndent: 20, height: 20),
-            _item(
-              'foods',
-              Icons.fact_check_outlined,
-              'Verified food',
-              'غذاء موثّق',
-            ),
-            _item(
-              'topics',
-              Icons.grid_view_rounded,
-              CommunityTaxonomySheet.browseLabel(context),
-              CommunityTaxonomySheet.browseLabel(context),
-              key: 'community-browse-topics',
-            ),
-            _item(
-              'circles',
-              Icons.groups_2_outlined,
-              'Circles',
-              'الدوائر',
-              key: 'community-browse-circles',
-            ),
-            _item(
-              '/community/safety',
-              Icons.shield_outlined,
-              'Safety and policy',
-              'الأمان والسياسة',
-            ),
-            _item(
-              '/community/food-review',
-              Icons.fact_check_outlined,
-              'Review foods',
-              'مراجعة الأغذية',
-            ),
-            if (snapshot.data == true)
-              _item(
-                '/community/moderation',
-                Icons.admin_panel_settings_outlined,
-                'Community moderation',
-                'مراجعة المجتمع',
-              ),
-          ],
-        ),
+          ),
+          _item(
+            'saved',
+            Icons.bookmark_border_rounded,
+            'Saved posts',
+            'المنشورات المحفوظة',
+            key: 'community-saved-posts',
+          ),
+          _item(
+            '/community/notifications',
+            Icons.notifications_none_rounded,
+            'Community updates',
+            'تحديثات المجتمع',
+          ),
+          _item(
+            '/community/rewards',
+            Icons.workspace_premium_outlined,
+            'BIL Rewards',
+            'مكافآت BIL',
+          ),
+          const Divider(indent: 20, endIndent: 20, height: 20),
+          _item(
+            'foods',
+            Icons.fact_check_outlined,
+            'Verified food',
+            'غذاء موثّق',
+          ),
+          _item(
+            'topics',
+            Icons.grid_view_rounded,
+            CommunityTaxonomySheet.browseLabel(context),
+            CommunityTaxonomySheet.browseLabel(context),
+            key: 'community-browse-topics',
+          ),
+          _item(
+            'circles',
+            Icons.groups_2_outlined,
+            'Circles',
+            'الدوائر',
+            key: 'community-browse-circles',
+          ),
+          _item(
+            '/community/safety',
+            Icons.shield_outlined,
+            'Safety and policy',
+            'الأمان والسياسة',
+          ),
+        ],
       ),
     ),
   );
@@ -170,7 +152,7 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
     String arabic, {
     String? key,
     String? subtitle,
-  }) => Card(
+  }) => BilPearlMaterialCard(
     margin: const EdgeInsets.only(bottom: 8),
     child: ListTile(
       key: Key(key ?? 'community-nav-$value'),

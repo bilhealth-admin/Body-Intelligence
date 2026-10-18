@@ -72,7 +72,7 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
     );
     double? result;
     try {
-      result = await showModalBottomSheet<double>(
+      result = await showBilPearlBottomSheet<double>(
         context: context,
         isScrollControlled: true,
         useSafeArea: true,

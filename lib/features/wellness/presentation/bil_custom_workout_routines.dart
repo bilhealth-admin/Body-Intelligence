@@ -228,7 +228,7 @@ class _CustomRoutineCard extends StatelessWidget {
           sum +
           (item.durationMinutes ?? ((item.durationSeconds ?? 0) / 60).ceil()),
     );
-    return Card(
+    return BilPearlMaterialCard(
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(18),

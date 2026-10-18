@@ -51,34 +51,18 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     };
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(permissionTitle),
-          content: Text(
-            tr(
-              'This permission is off. Enable it in system settings to use this feature; typing remains available.',
-              'هذا الإذن متوقف. فعّله في إعدادات النظام لاستخدام هذه الميزة؛ وتبقى الكتابة متاحة.',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(tr('Not now', 'ليس الآن')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(tr('Open system settings', 'فتح إعدادات النظام')),
-            ),
-          ],
+      final open = await showBilPearlPermissionDecision(
+        context,
+        title: permissionTitle,
+        description: tr(
+          'This permission is off. Enable it in system settings to use this feature; typing remains available.',
+          'هذا الإذن متوقف. فعّله في إعدادات النظام لاستخدام هذه الميزة؛ وتبقى الكتابة متاحة.',
         ),
+        cancelLabel: tr('Not now', 'ليس الآن'),
+        confirmLabel: tr('Open system settings', 'فتح إعدادات النظام'),
       );
       if (!currentRequest()) return false;
-      if (open == true) await policy.openSettings();
+      if (open) await policy.openSettings();
       return false;
     }
     if (!currentRequest()) return false;
@@ -453,6 +437,16 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     required void Function(String) writeTranscript,
     required bool Function() hasUserEdited,
   }) async {
+    if (!mounted) return false;
+    final speechPlatform = defaultTargetPlatform;
+    final speechInterfaceLocaleTag = Localizations.localeOf(
+      context,
+    ).toLanguageTag();
+    final speechDeviceLocaleTag = WidgetsBinding
+        .instance
+        .platformDispatcher
+        .locale
+        .toLanguageTag();
     try {
       final available = await speech.initialize(
         onError: (error) {
@@ -474,9 +468,8 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           !_canCaptureVoice) {
         return false;
       }
-      // Speech language is deliberately independent from the BIL interface.
-      // Supplying the UI locale here makes Android lock recognition to that
-      // language before its language-switch model gets a chance to run.
+      // iOS can use a supported interface locale; Android keeps multilingual
+      // detection and receives the supported-language allow-list below.
       final speechLocaleAllowList = await _coachSpeechLocaleAllowList();
       if (!await _voiceRequestAllowed(request, generation) ||
           !_canCaptureVoice) {
@@ -519,7 +512,12 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           );
         },
         listenOptions: SpeechListenOptions(
-          localeId: null,
+          localeId: coachIosSpeechLocaleId(
+            platform: speechPlatform,
+            interfaceLocaleTag: speechInterfaceLocaleTag,
+            deviceLocaleTag: speechDeviceLocaleTag,
+            supportedLocaleIds: speechLocaleAllowList,
+          ),
           listenFor: const Duration(seconds: 45),
           // Give Android's recognizer time to open its audio route and let a
           // user begin speaking. Two seconds was short enough to produce an
@@ -530,7 +528,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           cancelOnError: true,
           // Android 14+ detects and switches the recognition model to the
           // language being spoken, independently from the BIL interface.
-          autoDetectLanguage: true,
+          autoDetectLanguage: defaultTargetPlatform != TargetPlatform.iOS,
           // Restrict Android's language switcher to the BIL release languages
           // that the platform actually exposes. This is a speech allow-list,
           // not the interface locale, and it is empty only when the platform

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../nutrition/domain/unified_food.dart';

@@ -28,7 +28,10 @@ void main() {
           find.descendant(of: flat, matching: find.byType(Icon)),
         );
         expect(glyph.icon, spec.iconFor(platform));
-        expect(glyph.color, spec.accent(brightness));
+        expect(
+          glyph.color,
+          Theme.of(tester.element(flat)).colorScheme.onSurfaceVariant,
+        );
         expect(
           find.descendant(of: flat, matching: find.byType(DecoratedBox)),
           findsNothing,
@@ -69,7 +72,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Legacy semantic badge remains unchanged for protected pages', (
+  testWidgets('Semantic icons on every page now use the same flat treatment', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -86,10 +89,7 @@ void main() {
       of: find.byKey(const Key('quality-legacy-badge')),
       matching: find.byType(DecoratedBox),
     );
-    final decorated = tester.widget<DecoratedBox>(decorations.first);
-    final decoration = decorated.decoration;
-    expect(decoration, isA<BoxDecoration>());
-    expect((decoration as BoxDecoration).gradient, isNotNull);
+    expect(decorations, findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

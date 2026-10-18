@@ -61,7 +61,7 @@ class _CommunityFeedTopicSuggestions extends StatelessWidget {
                   final topic = visible[index];
                   return SizedBox(
                     width: cardWidth,
-                    child: Card(
+                    child: BilPearlMaterialCard(
                       margin: EdgeInsets.zero,
                       child: InkWell(
                         key: Key('community-feed-topic-${topic.slug}'),

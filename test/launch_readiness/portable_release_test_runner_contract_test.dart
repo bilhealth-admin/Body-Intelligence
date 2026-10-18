@@ -95,19 +95,36 @@ void main() {
     expect(source, contains('PORTABLE_RELEASE_REMAINING_SCHEDULED_TEST_FILES'));
   });
 
-  test('both signed workflows use the same portable release runner', () {
-    for (final path in [androidWorkflowPath, iosWorkflowPath]) {
-      final workflow = File(path).readAsStringSync();
-      expect(
-        workflow,
-        contains('python3 tool/release/run_portable_release_tests.py'),
-        reason: path,
-      );
-      expect(
-        workflow,
-        isNot(contains('flutter test --no-pub --timeout 30s')),
-        reason: '$path must not reintroduce the non-portable full suite.',
-      );
-    }
-  });
+  test(
+    'signed workflows keep focused checks and avoid repeating the owner suite',
+    () {
+      for (final path in [androidWorkflowPath, iosWorkflowPath]) {
+        final workflow = File(path).readAsStringSync();
+        expect(
+          workflow,
+          contains(
+            'test/features/commerce/app_purchase_confirmation_test.dart',
+          ),
+          reason: path,
+        );
+        expect(
+          workflow,
+          contains(
+            'test/features/commerce/app_subscription_confirmation_test.dart',
+          ),
+          reason: path,
+        );
+        expect(
+          workflow,
+          isNot(contains('tool/release/run_portable_release_tests.py')),
+          reason: '$path must not repeat the comprehensive owner suite.',
+        );
+        expect(
+          workflow,
+          isNot(contains('flutter test --no-pub --timeout 30s')),
+          reason: '$path must not reintroduce the non-portable full suite.',
+        );
+      }
+    },
+  );
 }

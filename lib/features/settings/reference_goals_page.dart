@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'fitness_goal_progress_card.dart';
 import 'package:flutter/material.dart';
@@ -153,7 +154,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
     final controller = TextEditingController(text: initial.toStringAsFixed(1));
     double? result;
     try {
-      result = await showModalBottomSheet<double>(
+      result = await showBilPearlBottomSheet<double>(
         context: context,
         useSafeArea: true,
         isScrollControlled: true,
@@ -232,7 +233,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
     var date = DateTime.tryParse(startingDate ?? '') ?? DateTime.now();
     ({double weight, DateTime date})? result;
     try {
-      result = await showModalBottomSheet<({double weight, DateTime date})>(
+      result = await showBilPearlBottomSheet<({double weight, DateTime date})>(
         context: context,
         useSafeArea: true,
         isScrollControlled: true,
@@ -408,7 +409,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
     }
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(c('Are You Sure?')),
         content: Text(
           c(
@@ -480,7 +481,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
                   children: [
-                    Card(
+                    BilPearlMaterialCard(
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
@@ -610,7 +611,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                     ),
                     const SizedBox(height: 16),
                     _Section(c('Nutrition Goals')),
-                    Card(
+                    BilPearlMaterialCard(
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
@@ -658,7 +659,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                     ),
                     const SizedBox(height: 16),
                     _Section(c('Fitness Goals')),
-                    Card(
+                    BilPearlMaterialCard(
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [

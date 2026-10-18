@@ -107,7 +107,7 @@ class _DashboardNutrientGoalCards extends StatelessWidget {
               label:
                   '${label(id)}. $summary. ${context.strings.text('Edit goal')}',
               child: ExcludeSemantics(
-                child: Card(
+                child: BilPearlMaterialCard(
                   child: InkWell(
                     onTap: () => context.push('/settings/nutrition-goals'),
                     borderRadius: BorderRadius.circular(12),

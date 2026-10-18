@@ -160,11 +160,11 @@ def sign_simulator(args, *, run=subprocess.run, host=sys.platform):
         info_path = checked_path(app / "Info.plist", app)
         info_bytes = info_path.read_bytes()
         info = plistlib.loads(info_bytes)
-        if (info.get("CFBundleIdentifier") != BUNDLE_ID or info.get("CFBundleVersion") != "36"
+        if (info.get("CFBundleIdentifier") != BUNDLE_ID or info.get("CFBundleVersion") != "37"
                 or info.get("DTPlatformName") != "iphonesimulator"
                 or info.get("CFBundleSupportedPlatforms") != ["iPhoneSimulator"]
                 or info.get("CFBundleExecutable") != "Runner"):
-            raise ValueError("Bundle identity, build 36 and Simulator platform must match")
+            raise ValueError("Bundle identity, build 37 and Simulator platform must match")
         binary = checked_path(app / "Runner", app)
         receipt["binary_sha256_before"] = digest(binary.read_bytes())
         platform_result = command(["xcrun", "vtool", "-show-build", str(binary)], public_readback=True)

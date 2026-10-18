@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 // language comes from local detection, never the author's country/profile.
 String translationCopy(BuildContext context, int index) {
   final language = Localizations.localeOf(context).languageCode;
+  if (index == 5) return 'Google Translate';
+  if (index == 7) return cloudTranslationDisclosure(context);
   if (language == 'zh' &&
       Localizations.localeOf(context).scriptCode == 'Hant') {
     return const [
@@ -304,4 +306,54 @@ const _googleActions = {
   'pl': 'Przetłumacz z Google',
   'nl': 'Vertalen met Google',
   'uk': 'Перекласти з Google',
+};
+
+// Shown before the explicit action, including on iOS: no device model download.
+String cloudTranslationDisclosure(BuildContext context) =>
+    _cloudDisclosure[Localizations.localeOf(context).languageCode] ??
+    _cloudDisclosure['en']!;
+const _cloudDisclosure = {
+  'en':
+      'Tapping translate sends only this text to BIL and Google Cloud Translation. Check the original for accuracy.',
+  'ar':
+      'عند الضغط على الترجمة يُرسل هذا النص فقط إلى BIL وترجمة Google السحابية. راجع الأصل للتأكد من الدقة.',
+  'fr':
+      'Traduire envoie uniquement ce texte à BIL et Google Cloud Translation. Vérifiez le texte original.',
+  'es':
+      'Al traducir, solo se envía este texto a BIL y Google Cloud Translation. Compruebe el original.',
+  'tr':
+      'Çevir düğmesi yalnızca bu metni BIL ve Google Cloud Translation’a gönderir. Asıl metni kontrol edin.',
+  'de':
+      'Beim Übersetzen wird nur dieser Text an BIL und Google Cloud Translation gesendet. Prüfen Sie das Original.',
+  'it':
+      'Traduci invia solo questo testo a BIL e Google Cloud Translation. Controlla il testo originale.',
+  'pt':
+      'Ao traduzir, apenas este texto é enviado ao BIL e ao Google Cloud Translation. Confira o original.',
+  'ur':
+      'ترجمہ دبانے پر صرف یہ متن BIL اور Google Cloud Translation کو بھیجا جاتا ہے۔ اصل متن چیک کریں۔',
+  'fa':
+      'با زدن ترجمه، فقط این متن به BIL و Google Cloud Translation فرستاده می‌شود. متن اصلی را بررسی کنید.',
+  'hi':
+      'अनुवाद दबाने पर केवल यह पाठ BIL और Google Cloud Translation को भेजा जाता है। मूल पाठ जाँचें।',
+  'id':
+      'Mengetuk terjemahkan hanya mengirim teks ini ke BIL dan Google Cloud Translation. Periksa teks asli.',
+  'ms':
+      'Menekan terjemah menghantar teks ini sahaja kepada BIL dan Google Cloud Translation. Semak teks asal.',
+  'ja': '翻訳を押すと、このテキストのみがBILとGoogle Cloud Translationに送信されます。原文を確認してください。',
+  'ko': '번역을 누르면 이 텍스트만 BIL 및 Google Cloud Translation으로 전송됩니다. 원문을 확인하세요.',
+  'zh': '点击翻译仅将此文本发送给 BIL 和 Google Cloud Translation。请核对原文。',
+  'ru':
+      'При переводе только этот текст отправляется в BIL и Google Cloud Translation. Проверьте оригинал.',
+  'bn':
+      'অনুবাদ চাপলে শুধু এই লেখাটি BIL ও Google Cloud Translation-এ পাঠানো হয়। মূল লেখা যাচাই করুন।',
+  'vi':
+      'Nhấn dịch chỉ gửi văn bản này đến BIL và Google Cloud Translation. Hãy kiểm tra bản gốc.',
+  'th':
+      'เมื่อกดแปล ระบบส่งเฉพาะข้อความนี้ไปยัง BIL และ Google Cloud Translation โปรดตรวจสอบต้นฉบับ',
+  'pl':
+      'Tłumaczenie wysyła tylko ten tekst do BIL i Google Cloud Translation. Sprawdź oryginał.',
+  'nl':
+      'Bij vertalen wordt alleen deze tekst naar BIL en Google Cloud Translation gestuurd. Controleer het origineel.',
+  'uk':
+      'Під час перекладу лише цей текст надсилається до BIL і Google Cloud Translation. Перевірте оригінал.',
 };

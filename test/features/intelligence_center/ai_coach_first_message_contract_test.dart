@@ -28,6 +28,7 @@ void main() {
     expect(flow, contains('if (addUserMessage) {'));
     expect(flow, contains('addUserMessage: false'));
     expect(flow, contains('repeatedServiceNotice'));
+    expect(flow, contains('!addUserMessage &&'));
     expect(
       page,
       allOf(

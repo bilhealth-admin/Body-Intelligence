@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,7 +51,7 @@ class _AdminNotificationControlsState
     final locale = Localizations.localeOf(context);
     final presets = AdminNotificationPresetCatalog.ready(locale);
     final customPreset = AdminNotificationPresetCatalog.blankCustom(locale);
-    return Card(
+    return BilPearlMaterialCard(
       key: const Key('admin-notification-controls'),
       clipBehavior: Clip.antiAlias,
       child: Padding(
@@ -124,7 +125,7 @@ class _AdminNotificationControlsState
 
   Future<void> _compose(AdminNotificationPreset preset) async {
     if (_sending) return;
-    final request = await showModalBottomSheet<_AdminNotificationRequest>(
+    final request = await showBilPearlBottomSheet<_AdminNotificationRequest>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -149,7 +150,7 @@ class _AdminNotificationControlsState
         : request.email!;
     return showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         key: const Key('admin-notification-confirmation'),
         icon: const Icon(Icons.mark_email_read_rounded),
         title: Text(

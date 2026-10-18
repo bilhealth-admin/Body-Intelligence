@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:io';
@@ -244,7 +245,7 @@ class _PremiumVisionReviewDialogState
     setState(() => _adding = true);
     final name = await showDialog<String>(
       context: context,
-      builder: (dialog) => AlertDialog(
+      builder: (dialog) => BilPearlMaterialAlertDialog(
         title: Text(_word(context, 'Add missing food', 'أضف طعامًا مفقودًا')),
         content: TextField(
           controller: _newFood,

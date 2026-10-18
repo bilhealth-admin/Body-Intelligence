@@ -98,7 +98,7 @@ class _FoodAnalysisTabState extends State<_FoodAnalysisTab> {
         ),
         const SizedBox(height: 12),
         if (analysis.contributors.isEmpty)
-          Card(
+          BilPearlMaterialCard(
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Text(_t(context, 'No evidenced values are available.')),
@@ -106,7 +106,7 @@ class _FoodAnalysisTabState extends State<_FoodAnalysisTab> {
           )
         else
           for (final contributor in analysis.contributors)
-            Card(
+            BilPearlMaterialCard(
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -142,7 +142,7 @@ class _FoodAnalysisTabState extends State<_FoodAnalysisTab> {
               ),
             ),
         const SizedBox(height: 12),
-        Card(
+        BilPearlMaterialCard(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Text(

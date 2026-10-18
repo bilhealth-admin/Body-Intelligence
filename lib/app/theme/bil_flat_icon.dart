@@ -1,13 +1,8 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
 import 'bil_semantic_icons.dart';
 
-/// Flat icons for BIL surfaces outside the protected Home and Log Food pages.
-///
-/// Keeps a stable layout box and uses synchronous Cupertino/Material fallbacks.
-/// No colored badge, gradient, shader, elevation, shadow, network or animation.
-/// Protected screens keep their existing BilSemanticIconBadge presentation.
+/// Flat semantic symbols shared with More and all functional entry points.
 class BilFlatIcon extends StatelessWidget {
   const BilFlatIcon({
     super.key,
@@ -31,25 +26,13 @@ class BilFlatIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final spec = BilSemanticIcons.spec(kind);
-    final glyph = switch (theme.platform) {
-      TargetPlatform.iOS || TargetPlatform.macOS => appleIcon ?? spec.appleIcon,
-      _ => materialIcon ?? spec.icon,
-    };
-    final visual = SizedBox.square(
-      dimension: size,
-      child: Center(
-        child: ExcludeSemantics(
-          child: BilGlassPressFeedback(
-            child: Icon(
-              glyph,
-              size: iconSize,
-              color: color ?? spec.accent(theme.brightness),
-            ),
-          ),
-        ),
-      ),
+    final visual = BilSemanticIconBadge(
+      kind: kind,
+      size: size,
+      iconSize: iconSize,
+      iconOverride: materialIcon,
+      appleIconOverride: appleIcon,
+      colorOverride: color,
     );
     final label = semanticLabel?.trim();
     if (label == null || label.isEmpty) return visual;

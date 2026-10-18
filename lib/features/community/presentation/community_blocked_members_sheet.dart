@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -75,7 +76,7 @@ class _CommunityBlockedMembersSheetState
     try {
       final yes = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => BilPearlMaterialAlertDialog(
           title: Text(
             communityText(
               context,
@@ -198,7 +199,7 @@ class _CommunityBlockedMembersSheetState
                     shrinkWrap: true,
                     children: [
                       for (final member in snapshot.requireData)
-                        Card(
+                        BilPearlMaterialCard(
                           child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Column(

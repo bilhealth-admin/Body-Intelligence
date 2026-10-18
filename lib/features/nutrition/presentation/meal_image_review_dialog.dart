@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show Bidi;
 
@@ -63,7 +64,7 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => StatefulBuilder(
-      builder: (context, setState) => AlertDialog(
+      builder: (context, setState) => BilPearlMaterialAlertDialog(
         title: Text(copy.matchTitle),
         content: SizedBox(
           width: 440,
@@ -160,7 +161,7 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
     builder: (dialogContext) => _MealImageReviewControllerOwner(
       controllers: [...amounts, ...units],
       child: StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (context, setDialogState) => BilPearlMaterialAlertDialog(
           title: Text(copy.review),
           content: SizedBox(
             width: 480,
@@ -277,7 +278,7 @@ class _CandidateReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final low = candidate.confidence < 0.55;
-    return Card(
+    return BilPearlMaterialCard(
       color: low ? Theme.of(context).colorScheme.errorContainer : null,
       child: Padding(
         padding: const EdgeInsets.all(12),

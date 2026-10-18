@@ -4,6 +4,7 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
@@ -29,6 +30,8 @@ void main() {
         addTearDown(() async {
           await tester.pumpWidget(const SizedBox.shrink());
           await tester.pumpAndSettle();
+          await tester.pump(Duration.zero);
+          await tester.pump(Duration.zero);
         });
         final repository = _DeferredPresetRepository(database, failSave);
         await repository.set('dashboard.preset', 'calorie');
@@ -114,12 +117,99 @@ void main() {
       });
     }
   }
+
+  testWidgets(
+    'Restore defaults keeps indicators and Done stable while saving',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final repository = _DeferredPresetRepository(database, false)
+        ..holdRemoval = true;
+      await repository.set('dashboard.preset', 'calorie');
+      addTearDown(() async {
+        if (!repository.restoreRelease.isCompleted) {
+          repository.restoreRelease.complete();
+        }
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+        await database.close();
+        await tester.pump(const Duration(milliseconds: 1));
+      });
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            preferencesRepositoryProvider.overrideWithValue(repository),
+            dashboardSelectedPresetProvider.overrideWith(
+              (_) => Stream.value('calorie'),
+            ),
+            dashboardNutrientGoalCardsProvider.overrideWith(
+              (_) => Stream.value(const <String>{}),
+            ),
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => DateTime.utc(2026, 10, 4),
+            ),
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(FreePlan.createState()),
+            ),
+            for (final section in DashboardSectionIds.all)
+              dashboardSectionVisibleProvider(
+                section,
+              ).overrideWith((_) => Stream.value(true)),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: DashboardPreferencesPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final restore = find.text('Restore default view');
+      await tester.scrollUntilVisible(
+        restore,
+        280,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(restore);
+      await tester.pump();
+
+      final done = tester.widget<FilledButton>(
+        find.byKey(const Key('dashboard-preferences-done')),
+      );
+      expect(done.onPressed, isNotNull);
+      final section = find.byKey(
+        const Key('dashboard-section-${DashboardSectionIds.quickLog}'),
+      );
+      expect(MediaQuery.disableAnimationsOf(tester.element(section)), isTrue);
+      for (final id in DashboardSectionIds.all) {
+        expect(
+          tester
+              .widget<SwitchListTile>(find.byKey(Key('dashboard-section-$id')))
+              .value,
+          DashboardSectionIds.defaultVisible(id),
+        );
+      }
+
+      repository.restoreRelease.complete();
+      await tester.pumpAndSettle();
+      expect(MediaQuery.disableAnimationsOf(tester.element(section)), isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 class _DeferredPresetRepository extends PreferencesRepository {
   _DeferredPresetRepository(super.database, this.failSave);
   final bool failSave;
   final release = Completer<void>();
+  final restoreRelease = Completer<void>();
+  bool holdRemoval = false;
   int presetSubscriptions = 0;
 
   @override
@@ -133,5 +223,14 @@ class _DeferredPresetRepository extends PreferencesRepository {
     await release.future;
     if (failSave) throw StateError('save failed');
     await super.setMany(values);
+  }
+
+  @override
+  Future<void> removeMany(Iterable<String> keys) async {
+    if (holdRemoval) {
+      await restoreRelease.future;
+      if (failSave) throw StateError('restore save failed');
+    }
+    await super.removeMany(keys);
   }
 }

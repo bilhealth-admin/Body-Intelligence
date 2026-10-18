@@ -10,7 +10,7 @@ class BilNativeSettingsIcon extends StatefulWidget {
   const BilNativeSettingsIcon({
     required this.kind,
     this.symbol,
-    this.flat = false,
+    this.flat = true,
     super.key,
   });
   final BilSemanticIconKind kind;
@@ -30,56 +30,16 @@ class _BilNativeSettingsIconState extends State<BilNativeSettingsIcon> {
     final symbol =
         widget.symbol ?? BilNativeSettingsIcon.symbolFor(widget.kind);
     final platform = Theme.of(context).platform;
-    final base = switch (symbol) {
-      BilSettingsSymbol.location => const Color(0xFFFF9500),
-      BilSettingsSymbol.health ||
-      BilSettingsSymbol.notifications => const Color(0xFFFF3B30),
-      BilSettingsSymbol.nutrition ||
-      BilSettingsSymbol.exercise ||
-      BilSettingsSymbol.privacy => const Color(0xFF34A853),
-      BilSettingsSymbol.goals ||
-      BilSettingsSymbol.height ||
-      BilSettingsSymbol.measure => const Color(0xFFAF52DE),
-      BilSettingsSymbol.profile ||
-      BilSettingsSymbol.camera ||
-      BilSettingsSymbol.preferences ||
-      BilSettingsSymbol.appearance => const Color(0xFF8E8E93),
-      _ => const Color(0xFF007AFF),
-    };
-    if (widget.flat) {
-      return ExcludeSemantics(
-        child: SizedBox(
-          width: 29,
-          height: 29,
-          child: Center(
-            child: BilNativeSymbolGlyph(
-              symbol: symbol,
-              fallback: _fallback(symbol, platform),
-              size: 22,
-              color: base,
-            ),
-          ),
-        ),
-      );
-    }
     return ExcludeSemantics(
-      child: Container(
-        width: 29,
-        height: 29,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(7),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color.lerp(base, Colors.white, .2)!, base],
+      child: SizedBox.square(
+        dimension: 29,
+        child: Center(
+          child: BilNativeSymbolGlyph(
+            symbol: symbol,
+            fallback: _fallback(symbol, platform),
+            size: 22,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-        ),
-        alignment: Alignment.center,
-        child: BilNativeSymbolGlyph(
-          symbol: symbol,
-          fallback: _fallback(symbol, platform),
-          size: 22,
-          color: Colors.white,
         ),
       ),
     );

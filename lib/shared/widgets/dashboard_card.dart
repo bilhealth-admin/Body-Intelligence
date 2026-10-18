@@ -1,3 +1,4 @@
+import 'bil_pearl_material.dart';
 import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,7 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return BilPearlMaterialCard(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(

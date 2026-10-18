@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class DashboardProfileRequiredCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (hero != null) ...[hero!, const SizedBox(height: 16)],
-        Card(
+        BilPearlMaterialCard(
           margin: EdgeInsets.zero,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -109,7 +110,7 @@ class _EmptyMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
     width: 150,
-    child: Card(
+    child: BilPearlMaterialCard(
       margin: EdgeInsets.zero,
       elevation: 0,
       shape: RoundedRectangleBorder(

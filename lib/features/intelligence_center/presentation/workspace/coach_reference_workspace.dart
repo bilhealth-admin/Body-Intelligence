@@ -23,6 +23,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     required this.now,
     required this.onChat,
     required this.onRoute,
+    required this.onQuickAdd,
     required this.onPhoto,
     required this.onVoice,
     super.key,
@@ -31,6 +32,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
   final DateTime now;
   final VoidCallback onChat;
   final ValueChanged<String> onRoute;
+  final VoidCallback onQuickAdd;
   final VoidCallback onPhoto;
   final VoidCallback onVoice;
   static const _blue = Color(0xFF1677FF);
@@ -128,6 +130,22 @@ class CoachReferenceWorkspace extends ConsumerWidget {
             children: [
               Row(
                 children: [
+                  IconButton(
+                    key: const Key('coach-workspace-back-to-chat'),
+                    tooltip: t(
+                      'Back to Coach conversation',
+                      'العودة إلى محادثة المدرب',
+                    ),
+                    onPressed: onChat,
+                    icon: BilGlassPressFeedback(
+                      child: Icon(
+                        ar
+                            ? Icons.chevron_right_rounded
+                            : Icons.chevron_left_rounded,
+                        color: muted,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,7 +363,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                             t('Quick Add', 'إضافة سريعة'),
                             t('In seconds', 'خلال ثوانٍ'),
                             const Color(0xFF31C5DD),
-                            () => onRoute('/daily-log'),
+                            onQuickAdd,
                           ),
                           (
                             Icons.qr_code_scanner_rounded,

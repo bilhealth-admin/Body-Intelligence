@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,7 @@ class HelpCenterPage extends StatelessWidget {
   void _show(BuildContext context, String title, String body) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(title),
         content: Text(body),
         actions: [

@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
+import 'coach_thinking_status.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -9,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -24,6 +25,7 @@ import '../app_commands/coach_verified_message_projection.dart';
 import 'coach_message_plain_copy.dart';
 import 'coach_message_presentation_view.dart';
 import 'ai_coach_report_confirmation_sheet.dart';
+import '../services/coach_ios_speech_locale.dart';
 import 'workspace/coach_food_receipt_content.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
@@ -33,6 +35,7 @@ import '../../../app/environment/app_environment.dart';
 import '../../../app/services/app_settings_provider.dart';
 import '../../../app/services/app_settings_service.dart';
 import '../../../app/services/runtime_permission_policy.dart';
+import '../../../shared/widgets/bil_permission_recovery_dialog.dart';
 import '../../../app/services/recoverable_image_picker.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_meal_voice.dart';
@@ -64,6 +67,7 @@ import '../media_bridge/coach_media_bridge_copy.dart';
 import '../media_bridge/coach_voice_transcript_bridge.dart';
 import '../domain/coach_action_permission.dart';
 import '../domain/coach_action_admission.dart';
+import 'coach_action_permission_provider.dart';
 import '../domain/bil_navigation_registry.dart';
 import '../domain/bil_action_receipt.dart';
 import '../domain/coach_context_snapshot.dart';
@@ -130,12 +134,15 @@ import 'workspace/coach_food_review_card.dart';
 import 'workspace/coach_food_receipt_card.dart';
 import 'coach_anchored_history.dart';
 
+export 'coach_action_permission_provider.dart';
+
 part 'intelligence_center_page_message.dart';
 part 'intelligence_center_widgets.dart';
 part 'intelligence_coach_menu.dart';
 part 'intelligence_reference_workspace_flow.dart';
 part 'intelligence_coach_reference_header.dart';
 part 'intelligence_center_message_widgets.dart';
+part 'intelligence_feedback_reaction.dart';
 part 'intelligence_center_voice_widgets.dart';
 part 'intelligence_conversation_persistence.dart';
 part 'intelligence_conversation_history.dart';
@@ -165,7 +172,11 @@ part '../app_commands/coach_message_read_flow.dart';
 part '../app_commands/coach_health_recovery.dart';
 
 TextStyle? _coachConversationBodyStyle(BuildContext context, {Color? color}) =>
-    Theme.of(context).textTheme.bodySmall?.copyWith(color: color, height: 1.4);
+    Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: color,
+      fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) + 1,
+      height: 1.45,
+    );
 
 TextStyle? _coachConversationActionStyle(BuildContext context, {Color? color}) {
   final bodyStyle = _coachConversationBodyStyle(context, color: color);
@@ -192,11 +203,6 @@ final intelligenceConversationClockProvider = Provider<DateTime Function()>(
 final intelligenceCenterModelGatewayProvider = Provider<LocalModelGateway>(
   (ref) => createLocalModelGateway(),
 );
-
-final coachActionPermissionModeProvider =
-    StateProvider<CoachActionPermissionMode>(
-      (ref) => CoachActionPermissionMode.askBeforeWrite,
-    );
 
 class IntelligenceCenterPage extends ConsumerStatefulWidget {
   const IntelligenceCenterPage({

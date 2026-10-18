@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -56,7 +57,7 @@ class DashboardMealsTimeline extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: PremiumDesignTokens.spaceXs),
       child: Column(

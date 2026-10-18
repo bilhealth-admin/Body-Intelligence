@@ -40,7 +40,19 @@ class _DailyWaterPageState extends ConsumerState<DailyWaterPage> {
     super.dispose();
   }
 
-  void leave() => context.go(widget.returnPath ?? '/daily-log');
+  void leave() {
+    final router = GoRouter.maybeOf(context);
+    final navigator = Navigator.maybeOf(context);
+    if (router?.canPop() ?? navigator?.canPop() ?? false) {
+      if (router != null) {
+        router.pop();
+      } else {
+        navigator!.pop();
+      }
+    } else {
+      router?.go(widget.returnPath ?? '/daily-log');
+    }
+  }
 
   void message(String value) {
     if (!mounted) return;
@@ -107,8 +119,10 @@ class _DailyWaterPageState extends ConsumerState<DailyWaterPage> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final routerCanPop = GoRouter.maybeOf(context)?.canPop() ?? false;
+    final navigatorCanPop = Navigator.maybeOf(context)?.canPop() ?? false;
     return PopScope(
-      canPop: false,
+      canPop: !saving && (routerCanPop || navigatorCanPop),
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && !saving) leave();
       },

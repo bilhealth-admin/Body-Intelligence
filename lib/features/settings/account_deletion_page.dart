@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -182,7 +183,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
       _confirmation.clear();
       await showDialog<void>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => BilPearlMaterialAlertDialog(
           title: Text(copy.requestReceived),
           content: Column(
             mainAxisSize: MainAxisSize.min,

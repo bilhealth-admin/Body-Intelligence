@@ -1927,7 +1927,7 @@ void main() {
         interact: (tester) async {
           await tester.tap(find.text(dialog.$2));
           await tester.pumpAndSettle();
-          expect(find.byType(AlertDialog), findsOneWidget);
+          expect(find.bySubtype<AlertDialog>(), findsOneWidget);
           expect(find.text(dialog.$3), findsOneWidget);
         },
       );

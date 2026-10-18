@@ -22,7 +22,7 @@ class _ReviewReasonDialogState extends State<_ReviewReasonDialog> {
   @override
   Widget build(BuildContext context) {
     final valid = controller.text.trim().isNotEmpty;
-    return AlertDialog(
+    return BilPearlMaterialAlertDialog(
       title: Text(
         communityText(context, 'Reason for this decision', 'سبب هذا القرار'),
       ),
@@ -99,7 +99,7 @@ class _RewardReviewCard extends StatelessWidget {
   final bool busy;
   final VoidCallback onRequest, onApprove, onReject;
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: Key('community-reward-review-${review.snapshot.post.id}'),
     child: Padding(
       padding: const EdgeInsets.all(16),

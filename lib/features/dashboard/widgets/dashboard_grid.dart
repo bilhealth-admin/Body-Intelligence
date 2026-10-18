@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +65,6 @@ class DashboardGrid extends ConsumerWidget {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
     String localized(String value) {
-      // Some evidence engines already return reviewed Arabic nutrient labels.
       // Feeding those labels back into the English-key runtime translator
       // produces a false "missing translation" warning and can expose the
       // fallback path. Preserve already-localized Arabic copy as-is.

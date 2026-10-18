@@ -160,7 +160,7 @@ Future<void> _submitGramCorrection(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 350));
   await tester.tap(action);
   await tester.pumpAndSettle();
-  expect(find.byType(AlertDialog), findsOneWidget);
+  expect(find.bySubtype<AlertDialog>(), findsOneWidget);
   await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
   await tester.pumpAndSettle();
 }

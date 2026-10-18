@@ -174,7 +174,7 @@ extension _CoachFoodConversationFlow on _IntelligenceCenterPageState {
       if (owner != reviewOwner) revokeReview();
     }, onError: (Object _, StackTrace _) => revokeReview());
     try {
-      await showModalBottomSheet<void>(
+      await showBilPearlBottomSheet<void>(
         context: context,
         isScrollControlled: true,
         showDragHandle: true,

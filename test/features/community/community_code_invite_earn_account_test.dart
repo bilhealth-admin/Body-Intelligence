@@ -8,6 +8,7 @@ import 'package:body_intelligence_log/features/community/domain/community_reward
 import 'package:body_intelligence_log/features/community/presentation/community_ai_reward_notice.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_bil_code_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_gold_balance_action.dart';
+import 'package:body_intelligence_log/features/community/presentation/bil_gold_coin.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_invite_landing_page.dart';
 import 'package:body_intelligence_log/features/community/services/community_owner_http_client.dart';
 import 'package:flutter/material.dart';
@@ -367,7 +368,20 @@ void main() {
       addTearDown(router.dispose);
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
-      expect(find.text('Earn'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('ai-coach-earn-post')),
+          matching: find.byType(BilGoldCoin),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('ai-coach-earn-post')),
+          matching: find.text('Earn'),
+        ),
+        findsNothing,
+      );
       await tester.tap(find.byKey(const Key('ai-coach-earn-post')));
       await tester.pumpAndSettle();
       expect(
@@ -919,10 +933,34 @@ void main() {
           await tester.pumpAndSettle();
           final earn = find.byKey(const Key('ai-coach-earn-post'));
           expect(earn.hitTestable(), findsOneWidget);
-          final text = find.descendant(of: earn, matching: find.byType(Text));
-          expect(text, findsOneWidget);
+          final coin = find.descendant(
+            of: earn,
+            matching: find.byType(BilGoldCoin),
+          );
+          expect(coin, findsOneWidget);
+          expect(
+            find.descendant(of: earn, matching: find.byType(Text)),
+            findsNothing,
+          );
           expect(tester.getSize(earn).height, greaterThanOrEqualTo(48));
           expect(tester.takeException(), isNull);
+          await tester.pumpWidget(
+            app(
+              Scaffold(
+                body: CommunityGoldBalanceAction(
+                  compact: true,
+                  showEarn: false,
+                  repository: repository,
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(earn, findsNothing);
+          expect(
+            find.byKey(const Key('ai-coach-bil-gold')).hitTestable(),
+            findsOneWidget,
+          );
           await tester.pumpWidget(
             app(CommunityBilCodePage(repository: repository)),
           );

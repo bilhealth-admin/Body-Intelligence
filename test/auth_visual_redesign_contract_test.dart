@@ -91,7 +91,7 @@ void main() {
       ]) {
         expect(localeNames, contains(locale), reason: locale);
       }
-      expect(selector, contains('showModalBottomSheet<void>'));
+      expect(selector, contains('showBilPearlBottomSheet<void>'));
       expect(selector, contains('Color(0xFFF2F2F7)'));
       expect(selector, contains('Color(0xFF8E8E93)'));
       expect(selector, isNot(contains('Icons.language_rounded')));

@@ -738,24 +738,27 @@ void main() {
     expect(usageWidgets, contains("Key('ai-coach-current-period')"));
   });
 
-  test('admin route is gated and gift link opens ordinary AI Coach', () {
-    final router = [
-      File('lib/app/router/app_router.dart').readAsStringSync(),
-      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
-    ].join('\n');
-    final settings = File(
-      'lib/features/settings/settings_page.dart',
-    ).readAsStringSync();
-    final links = File(
-      'lib/features/notifications/domain/community_deep_link.dart',
-    ).readAsStringSync();
-    expect(router, contains("path: '/admin/ai-coach'"));
-    expect(router, contains('builder: (_, _) => const AiCoachAdminPage()'));
-    expect(settings, contains('if (adminAccess.asData?.value == true)'));
-    expect(settings, contains("'/admin/ai-coach'"));
-    expect(settings, contains("copy('BIL Administration')"));
-    expect(links, contains("'settings/ai-coach': '/intelligence-center'"));
-  });
+  test(
+    'mobile admin route is absent and gift link opens ordinary AI Coach',
+    () {
+      final router = [
+        File('lib/app/router/app_router.dart').readAsStringSync(),
+        File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+      ].join('\n');
+      final settings = File(
+        'lib/features/settings/settings_page.dart',
+      ).readAsStringSync();
+      final links = File(
+        'lib/features/notifications/domain/community_deep_link.dart',
+      ).readAsStringSync();
+      expect(router, isNot(contains("path: '/admin/ai-coach'")));
+      expect(router, isNot(contains('AiCoachAdminPage()')));
+      expect(settings, isNot(contains('aiCoachAdminAccessProvider')));
+      expect(settings, isNot(contains("'/admin/ai-coach'")));
+      expect(settings, isNot(contains("copy('BIL Administration')")));
+      expect(links, contains("'settings/ai-coach': '/intelligence-center'"));
+    },
+  );
 }
 
 Future<void> _pumpAdmin(

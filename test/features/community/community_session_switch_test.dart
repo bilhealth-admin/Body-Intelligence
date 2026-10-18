@@ -17,6 +17,7 @@ void main() {
     (tester) async {
       var owner = '11111111-1111-4111-8111-111111111111';
       var feedLoads = 0;
+      var exploreReferenceReads = 0;
       var logoutStatus = 200;
       final logoutScopes = <String?>[];
       final client = (await tester.runAsync(() async {
@@ -52,6 +53,9 @@ void main() {
             } else if (request.url.path.endsWith(
               '/rpc/bil_community_feed_refs_v1',
             )) {
+              if ((jsonDecode(request.body) as Map)['p_mode'] == 'explore') {
+                exploreReferenceReads++;
+              }
               body = [
                 {
                   'post_id': '33333333-3333-4333-8333-333333333333',
@@ -118,13 +122,16 @@ void main() {
       await _settleFeed(tester, 'Visible for $owner');
       expect(find.text('Sign in'), findsNothing);
       expect(find.text('Visible for $owner'), findsOneWidget);
-      expect(feedLoads, 1);
+      expect(feedLoads, greaterThanOrEqualTo(1));
+      final initialExploreReads = exploreReferenceReads;
+      expect(initialExploreReads, greaterThan(0));
       await tester.runAsync(() => client.auth.refreshSession());
       await tester.pumpAndSettle();
       expect(
-        feedLoads,
-        1,
-        reason: 'Refreshing the same account must not reload the feed',
+        exploreReferenceReads,
+        initialExploreReads,
+        reason:
+            'Refreshing the same account must not reload the selected feed; Following may warm independently',
       );
 
       await tester.runAsync(() => signOutSettingsSession(client.auth, owner));
@@ -144,7 +151,8 @@ void main() {
       await _settleFeed(tester, 'Visible for $owner');
       expect(find.text('Visible for $owner'), findsOneWidget);
       expect(find.text('Visible for $previousOwner'), findsNothing);
-      expect(feedLoads, 2);
+      expect(feedLoads, greaterThanOrEqualTo(2));
+      expect(exploreReferenceReads, greaterThan(initialExploreReads));
       logoutStatus = 503;
       await tester.runAsync(() => signOutSettingsSession(client.auth, owner));
       await tester.pumpAndSettle();
@@ -165,10 +173,7 @@ Future<void> _settleFeed(WidgetTester tester, String body) async {
   // that request's loading surface as well as the header before revealing an
   // off-screen lazy post. Allow the real isolate and the welcome timer to run.
   final ready = find.byKey(const Key('community-create-post'));
-  final coldLoading = find.descendant(
-    of: find.byKey(const Key('community-public-feed')),
-    matching: find.byType(CircularProgressIndicator),
-  );
+  final coldLoading = find.byKey(const Key('community-feed-cold-placeholder'));
   await tester.pump();
   for (
     var i = 0;

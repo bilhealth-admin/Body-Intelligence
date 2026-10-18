@@ -1,0 +1,130 @@
+[
+  {
+    "number": 1,
+    "title": "محادثة المدرب",
+    "old": "01-reference.png",
+    "new": "01-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_ai_coach_conversation_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_ai_coach_conversation_phone_testImage.png"
+  },
+  {
+    "number": 2,
+    "title": "بطاقة الموافقات",
+    "old": "02-reference.png",
+    "new": "02-modified.png",
+    "old_source": "test\\features\\onboarding\\failures\\permissions_light_160_masterImage.png",
+    "new_source": "test\\features\\onboarding\\failures\\permissions_light_160_testImage.png"
+  },
+  {
+    "number": 3,
+    "title": "موافقة الصحة المتصلة",
+    "old": "03-reference.png",
+    "new": "03-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_connected_health_permission_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_connected_health_permission_phone_testImage.png"
+  },
+  {
+    "number": 4,
+    "title": "سجل الخطوات",
+    "old": "04-reference.png",
+    "new": "04-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_progress_steps_month_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_progress_steps_month_phone_testImage.png"
+  },
+  {
+    "number": 5,
+    "title": "بطاقات الوصفات",
+    "old": "05-reference.png",
+    "new": "05-modified.png",
+    "old_source": "test\\features\\wellness\\failures\\recipe_library_polish_phone_masterImage.png",
+    "new_source": "test\\features\\wellness\\failures\\recipe_library_polish_phone_testImage.png"
+  },
+  {
+    "number": 6,
+    "title": "التقرير الأسبوعي",
+    "old": "06-reference.png",
+    "new": "06-modified.png",
+    "old_source": "test\\failures\\epic8_weekly_report_exercise_anchor_masterImage.png",
+    "new_source": "test\\failures\\epic8_weekly_report_exercise_anchor_testImage.png"
+  },
+  {
+    "number": 7,
+    "title": "صفحة الطعام",
+    "old": "07-reference.png",
+    "new": "07-modified.png",
+    "old_source": "test\\failures\\epic15_iphone_69_en_025_food_search_masterImage.png",
+    "new_source": "test\\failures\\epic15_iphone_69_en_025_food_search_testImage.png"
+  },
+  {
+    "number": 8,
+    "title": "سجل الطعام بالعربية",
+    "old": "08-reference.png",
+    "new": "08-modified.png",
+    "old_source": "test\\failures\\epic15_iphone_69_ar_02_daily_log_masterImage.png",
+    "new_source": "test\\failures\\epic15_iphone_69_ar_02_daily_log_testImage.png"
+  },
+  {
+    "number": 9,
+    "title": "إضافة طعام مخصص",
+    "old": "09-reference.png",
+    "new": "09-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_custom_food_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_custom_food_phone_testImage.png"
+  },
+  {
+    "number": 10,
+    "title": "بطاقة دخول المجتمع",
+    "old": "10-reference.png",
+    "new": "10-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_community_signed_out_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_community_signed_out_phone_testImage.png"
+  },
+  {
+    "number": 11,
+    "title": "خصوصية الإعلانات",
+    "old": "11-reference.png",
+    "new": "11-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_advertising_privacy_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_advertising_privacy_phone_testImage.png"
+  },
+  {
+    "number": 12,
+    "title": "إدخال الوجبة",
+    "old": "12-reference.png",
+    "new": "12-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_daily_log_meal_entry_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_daily_log_meal_entry_phone_testImage.png"
+  },
+  {
+    "number": 13,
+    "title": "تخصيص اليوم — الأيقونات المحايدة",
+    "old": "13-reference.png",
+    "new": "13-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_dashboard_preferences_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_dashboard_preferences_phone_testImage.png"
+  },
+  {
+    "number": 14,
+    "title": "Quick Add — إلغاء الخلفيات الملونة",
+    "old": "14-reference.png",
+    "new": "14-modified.png",
+    "old_source": "test\\visual_closure\\failures\\quick_add_en_light_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\goldens\\quick_add_en_light_phone.png"
+  },
+  {
+    "number": 15,
+    "title": "المشاركة والخصوصية — توحيد الأيقونات",
+    "old": "15-reference.png",
+    "new": "15-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_sharing_privacy_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_sharing_privacy_phone_testImage.png"
+  },
+  {
+    "number": 16,
+    "title": "الملف الشخصي — توحيد الأيقونات",
+    "old": "16-reference.png",
+    "new": "16-modified.png",
+    "old_source": "test\\visual_closure\\failures\\visual_closure_profile_phone_masterImage.png",
+    "new_source": "test\\visual_closure\\failures\\visual_closure_profile_phone_testImage.png"
+  }
+]

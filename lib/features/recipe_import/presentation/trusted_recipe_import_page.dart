@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -209,7 +210,7 @@ class _TrustedRecipeImportPageState
           title: Text(recipe.steps[index]),
         ),
       const SizedBox(height: 12),
-      Card(
+      BilPearlMaterialCard(
         child: ListTile(
           leading: const Icon(Icons.info_outline),
           title: Text(
@@ -386,7 +387,7 @@ class _TrustedRecipeImportPageState
     }
     await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => BilPearlMaterialAlertDialog(
         title: Text(_text('Source')),
         content: SingleChildScrollView(
           child: SelectableText(

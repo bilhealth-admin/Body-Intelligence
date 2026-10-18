@@ -240,6 +240,57 @@ void registerCoachRequestCases() {
     expect(tester.takeException(), isNull);
     await _unmount(tester);
   });
+  testWidgets('each new question receives its own service failure reply', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final gateway = _HeldGateway();
+    await _mount(tester, database: database, gateway: gateway);
+    const failure = LocalModelResult(
+      status: CoachServiceStatus.temporarilyUnavailable,
+    );
+    List<IntelligenceMessage> assistantMessages() {
+      final dynamic state = tester.state(find.byType(IntelligenceCenterPage));
+      return List<IntelligenceMessage>.from(state.messages as List)
+          .where((message) => message.role == IntelligenceMessageRole.bil)
+          .toList(growable: false);
+    }
+
+    final initialAssistantCount = assistantMessages().length;
+
+    await _send(tester, gateway, question: 'Analyze my weight this week');
+    gateway.replies[0].complete(failure);
+    await tester.pumpAndSettle();
+    final afterFirst = assistantMessages();
+    expect(afterFirst, hasLength(initialAssistantCount + 1));
+    final firstFailure = afterFirst.last;
+
+    await tester.enterText(
+      find.byKey(const Key('ai-coach-question-field')),
+      'How tall am I?',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('ai-coach-send-button')));
+    for (var i = 0; i < 100 && gateway.calls < 2; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(gateway.calls, 2);
+    gateway.replies[1].complete(failure);
+    await tester.pumpAndSettle();
+
+    final afterSecond = assistantMessages();
+    expect(afterSecond, hasLength(initialAssistantCount + 2));
+    final secondFailure = afterSecond.last;
+    expect(secondFailure.text, firstFailure.text);
+    final history = tester.widget<CoachAnchoredHistory>(
+      find.byType(CoachAnchoredHistory),
+    );
+    expect(history.rowIds, containsAll([firstFailure.id, secondFailure.id]));
+    expect(find.byKey(const Key('ai-coach-retry')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await _unmount(tester);
+  });
   for (final failure in ['service', 'exception', 'timeout']) {
     testWidgets('one first-message failure surface: $failure', (tester) async {
       final database = AppDatabase.forTesting(NativeDatabase.memory());

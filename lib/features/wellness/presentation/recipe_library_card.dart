@@ -32,7 +32,7 @@ class _RecipeCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Semantics(
       container: true,
-      child: Card(
+      child: BilPearlMaterialCard(
         margin: EdgeInsets.zero,
         elevation: 0,
         color: scheme.surfaceContainerLow,

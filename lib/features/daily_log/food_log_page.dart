@@ -1,10 +1,10 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import '../../shared/widgets/first_use_target_guide.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +35,8 @@ import '../nutrition/services/food_presentation_localizer.dart';
 import '../nutrition/services/meal_image_analysis_service.dart';
 import '../nutrition/services/meal_voice_input_service.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
+import '../../shared/widgets/bil_permission_recovery_dialog.dart';
+import '../../shared/widgets/bil_pearl_alert_dialog.dart';
 import '../../shared/widgets/bil_media_review_sheet.dart';
 import 'domain/food_log_meal_selector.dart';
 import 'presentation/quick_macro_entry_dialog.dart';
@@ -96,6 +98,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   List<Food>? searchResults;
   bool searchLoading = false;
   bool mealImageBusy = false;
+  // Blocks duplicate capture attempts without hiding Food Log before selection.
+  bool mealPhotoRequestInFlight = false;
   bool barcodeBusy = false;
   bool voiceBusy = false;
   bool quickAddBusy = false;
@@ -521,12 +525,22 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         const SizedBox(height: 14),
 
         Text(
-          _t(context, 'Most popular'),
+          query.isEmpty
+              ? _t(context, 'Most popular')
+              : _foodTourText(
+                  context,
+                  en: 'Search results',
+                  ar: 'نتائج البحث',
+                  fr: 'Résultats de recherche',
+                  es: 'Resultados de búsqueda',
+                  tr: 'Arama sonuçları',
+                ),
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
         ),
-        if (filtered.isEmpty) _buildEmptyState(context),
+        // An in-flight query must never flash a false "no foods" page.
+        if (!searchLoading && filtered.isEmpty) _buildEmptyState(context),
         if (filtered.isNotEmpty)
           for (final food in filtered)
             _buildFoodTile(
@@ -535,14 +549,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               localeTag: query.isEmpty ? interfaceLocale : resultLocale,
               guide: food.id == filtered.first.id ? chooseGuide : null,
             ),
-        if (filtered.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Text(
-              _t(context, 'No foods found'),
-              textAlign: TextAlign.center,
-            ),
-          ),
       ],
     );
   }
@@ -587,24 +593,27 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         mounted &&
         generation == _searchGeneration &&
         identical(ref.read(foodRuntimeSearchAuthorityProvider), authority);
-    _progressiveSearch = authority
-        .searchProgressively(query, limit: 30)
-        .listen(
-          (result) {
-            if (!current()) return;
-            setState(() {
-              searchResults = result;
-              searchLoading = false;
-            });
-          },
-          onError: (Object error, StackTrace stack) {
-            if (!current()) return;
-            setState(() {
-              searchResults ??= const <Food>[];
-              searchLoading = false;
-            });
-          },
-        );
+    _searchDebounce = Timer(const Duration(milliseconds: 160), () {
+      if (!current()) return;
+      _progressiveSearch = authority
+          .searchProgressively(query, limit: 30)
+          .listen(
+            (result) {
+              if (!current()) return;
+              setState(() {
+                searchResults = result;
+                searchLoading = false;
+              });
+            },
+            onError: (Object error, StackTrace stack) {
+              if (!current()) return;
+              setState(() {
+                searchResults ??= const <Food>[];
+                searchLoading = false;
+              });
+            },
+          );
+    });
   }
 
   Widget _buildActions(BuildContext context) {

@@ -173,17 +173,12 @@ class _CommunityCommentTile extends StatelessWidget {
                 TextButton.icon(
                   key: Key('community-comment-like-${comment.id}'),
                   onPressed: busy ? null : onLike,
-                  icon: busy
-                      ? const SizedBox.square(
-                          dimension: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          comment.liked
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          size: 18,
-                        ),
+                  icon: Icon(
+                    comment.liked
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    size: 18,
+                  ),
                   label: Text('${comment.likeCount}'),
                 ),
               ],

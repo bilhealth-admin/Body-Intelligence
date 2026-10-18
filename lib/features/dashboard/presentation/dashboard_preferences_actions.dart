@@ -216,6 +216,7 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
   Future<void> _restoreDefaults(BuildContext context, WidgetRef ref) async {
     if (_saving) return;
     _updateState(() {
+      _restoringDefaults = true;
       _pendingPresetId = '__default__';
       for (final section in DashboardSectionIds.all) {
         _pendingSectionValues[section] = DashboardSectionIds.defaultVisible(
@@ -240,6 +241,7 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
         _pendingSectionValues.clear();
       });
     }
+    if (mounted) _updateState(() => _restoringDefaults = false);
   }
 
   void _showSaveFailure(BuildContext context) {
@@ -300,7 +302,7 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
       ),
     };
     if (!context.mounted) return;
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       isDismissible: false,
@@ -417,7 +419,7 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
   }
 
   Future<void> _showLockedNutrientPreview(BuildContext context) async {
-    final upgrade = await showModalBottomSheet<bool>(
+    final upgrade = await showBilPearlBottomSheet<bool>(
       context: context,
       useSafeArea: true,
       showDragHandle: true,

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -485,7 +486,7 @@ class OnboardingStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Card(
+    return BilPearlMaterialCard(
       elevation: 0,
       color: scheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(

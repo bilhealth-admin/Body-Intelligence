@@ -1,6 +1,7 @@
 enum PlanPageOrigin {
   profile('profile', '/profile-settings'),
-  dashboard('dashboard', '/dashboard');
+  dashboard('dashboard', '/dashboard'),
+  coach('coach', '/intelligence-center');
 
   const PlanPageOrigin(this.queryValue, this.returnLocation);
 
@@ -12,6 +13,7 @@ enum PlanPageOrigin {
   static PlanPageOrigin fromQuery(String? value) => switch (value) {
     'profile' => PlanPageOrigin.profile,
     'dashboard' => PlanPageOrigin.dashboard,
+    'coach' => PlanPageOrigin.coach,
     _ => PlanPageOrigin.dashboard,
   };
 }

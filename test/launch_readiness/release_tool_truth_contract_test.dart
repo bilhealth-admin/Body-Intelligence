@@ -152,9 +152,10 @@ void main() {
           ),
         };
     for (final entry in expectedByPlatform.entries) {
+      final buildStep = _signedBuildStep(entry.key, entry.value.source);
       final defines = RegExp(
         r'--dart-define=([^\s\\]+)',
-      ).allMatches(entry.value.source).map((match) => match.group(1)!).toList();
+      ).allMatches(buildStep).map((match) => match.group(1)!).toList();
       expect(defines, hasLength(entry.value.defines.length), reason: entry.key);
       expect(defines, unorderedEquals(entry.value.defines), reason: entry.key);
       expect(
@@ -269,4 +270,14 @@ void main() {
       }
     },
   );
+}
+
+String _signedBuildStep(String platform, String source) {
+  final marker = platform == 'iOS'
+      ? '      - name: Build signed archive'
+      : '      - name: Build signed Android App Bundle';
+  final start = source.indexOf(marker);
+  expect(start, greaterThanOrEqualTo(0), reason: '$platform signed build step');
+  final nextStep = source.indexOf('\n      - name:', start + marker.length);
+  return source.substring(start, nextStep < 0 ? source.length : nextStep);
 }

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -56,7 +57,7 @@ class _AccountDataConflictPageState extends State<AccountDataConflictPage> {
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 520),
-              child: Card(
+              child: BilPearlMaterialCard(
                 child: Padding(
                   padding: const EdgeInsets.all(28),
                   child: Column(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -325,7 +326,7 @@ class _ContentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrl = item.imageUrl;
     final videoUrl = item.videoMedia?.url;
-    return Card(
+    return BilPearlMaterialCard(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onOpen,

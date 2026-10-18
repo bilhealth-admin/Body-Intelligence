@@ -21,7 +21,6 @@ void main() {
         '/community/rewards',
         '/community/compose',
         '/community/connections',
-        '/community/food-review',
         '/community/profile/:userId',
         '/community/chat/:userId',
         '/community/messages',
@@ -47,7 +46,6 @@ void main() {
       expect(root, contains('showWelcome: true'));
       expect(root, contains('entryWelcomeHandled: true'));
       for (final path in [
-        '/community/moderation',
         '/community/invite/:token',
         '/community/safety',
         '/community/profile',
@@ -59,10 +57,8 @@ void main() {
           reason: 'recovery/policy/moderation: $path',
         );
       }
-      final moderator = blocks.singleWhere(
-        (b) => b.contains("path: '/community/moderation',"),
-      );
-      expect(moderator, isNot(contains('PremiumRouteGlassGate(')));
+      expect(source, isNot(contains("path: '/community/moderation'")));
+      expect(source, isNot(contains("path: '/community/food-review'")));
     },
   );
 

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -161,7 +162,7 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
         context: context,
         builder: (dialogContext) => ListenableBuilder(
           listenable: ticket.visit,
-          builder: (_, _) => AlertDialog(
+          builder: (_, _) => BilPearlMaterialAlertDialog(
             title: Text(
               communityText(
                 dialogContext,
@@ -655,7 +656,7 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
               return Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
-                  child: Card(
+                  child: BilPearlMaterialCard(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Column(

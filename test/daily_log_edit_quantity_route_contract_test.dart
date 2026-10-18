@@ -13,7 +13,7 @@ void main() {
       contains(
         'showDialog<double>(\n'
         '      context: context,\n'
-        '      builder: (dialogContext) => AlertDialog(',
+        '      builder: (dialogContext) => BilPearlMaterialAlertDialog(',
       ),
     );
 

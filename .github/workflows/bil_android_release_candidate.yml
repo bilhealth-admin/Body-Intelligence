@@ -1,13 +1,9 @@
 name: BIL Android signed release candidate (build 33)
 
+# Explicit manual release only: ordinary source pushes never sign or upload.
 # Owner-requested original-branch candidate build. Source is the separately
 # verified frozen audited SHA, not the evolving workflow-only commit.
 on:
-  push:
-    branches:
-      - integration/bil-qa-media-policy-20261011
-    paths:
-      - .github/workflows/bil_android_release_candidate.yml
   workflow_dispatch:
     inputs:
       build_number:
@@ -28,16 +24,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - name: Require exact audited 33/36 source bindings
+      - name: Require exact audited Android 33 / iOS 37 source bindings
         shell: bash
         env:
           ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
-          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
+          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
         run: |
           set -euo pipefail
           [[ "$ANDROID_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_ANDROID_V33_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
-          [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V36_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
-          test "$ANDROID_AUDITED_SOURCE" = "$IOS_AUDITED_SOURCE" || { echo 'Android 33 and iOS 36 must use the same audited source SHA.' >&2; exit 1; }
+          [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V37_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
+          test "$ANDROID_AUDITED_SOURCE" = "$IOS_AUDITED_SOURCE" || { echo 'Android 33 and iOS 37 must use the same audited source SHA.' >&2; exit 1; }
 
       - name: Checkout accepted source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -51,7 +47,7 @@ jobs:
           EXPECTED_MANIFEST_SHA: ${{ vars.BIL_ANDROID_V33_STAGING_MANIFEST_SHA256 }}
         run: |
           set -euo pipefail
-          MANIFEST='docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md'
+          MANIFEST='docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md'
           grep -Fqx '`STAGING_MANIFEST_COMPLETE: YES`' "$MANIFEST" || {
             echo 'Android 33 source freeze is incomplete; signed build is blocked.' >&2
             exit 1
@@ -60,7 +56,7 @@ jobs:
             echo 'Android 33 candidate is not accepted; signed build is blocked.' >&2
             exit 1
           }
-          ACTUAL="$(sha256sum docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md | awk '{print $1}')"
+          ACTUAL="$(sha256sum docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md | awk '{print $1}')"
           test "$EXPECTED_MANIFEST_SHA" = "$ACTUAL" || { echo 'BIL_ANDROID_V33_STAGING_MANIFEST_SHA256 does not match the frozen manifest.' >&2; exit 1; }
 
       - name: Install Flutter stable
@@ -72,7 +68,7 @@ jobs:
       - name: Validate release build number
         shell: bash
         env:
-          BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
           set -euo pipefail
           [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
@@ -154,10 +150,10 @@ jobs:
           BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
           BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
           BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md
           BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_ANDROID_V33_STAGING_MANIFEST_SHA256 }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: dart run tool/release/validate_release_configuration.dart
 
       - name: Verify focused payment and subscription regressions only
@@ -220,7 +216,7 @@ jobs:
       - name: Build signed Android App Bundle
         id: android_aab_build
         env:
-          BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
           PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
           BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
         run: >-
@@ -331,7 +327,7 @@ jobs:
       - name: Capture release evidence
         shell: bash
         env:
-          BUILD_NUMBER: ${{ github.event_name == 'push' && '33' || inputs.build_number }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
           EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
         run: |
           set -euo pipefail

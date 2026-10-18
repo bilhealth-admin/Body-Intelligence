@@ -19,7 +19,7 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
   Future<bool> _confirmAction(IntelligenceAction action) async {
     final accepted = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         scrollable: true,
         icon: BilGlassPressFeedback(
           child: Icon(
@@ -75,7 +75,7 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
       return await showDialog<bool>(
             context: context,
             barrierDismissible: false,
-            builder: (dialogContext) => AlertDialog(
+            builder: (dialogContext) => BilPearlMaterialAlertDialog(
               scrollable: true,
               icon: BilGlassPressFeedback(
                 child: Icon(

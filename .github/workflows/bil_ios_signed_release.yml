@@ -1,13 +1,9 @@
-name: BIL iOS signed release candidate (build 36)
+name: BIL iOS signed release candidate (build 37)
 
+# Explicit manual release only: ordinary source pushes never sign or upload.
 # Owner-requested original-branch candidate build. Source is the separately
 # verified frozen audited SHA, not the evolving workflow-only commit.
 on:
-  push:
-    branches:
-      - integration/bil-qa-media-policy-20261011
-    paths:
-      - .github/workflows/bil_ios_signed_release.yml
   workflow_dispatch:
     inputs:
       upload_to_testflight:
@@ -16,7 +12,7 @@ on:
         default: false
         type: boolean
       build_number:
-        description: Exact App Store build number for this candidate; must be 36
+        description: Exact App Store build number for this candidate; must be 37
         required: true
         type: string
       run_native_crypto_checks:
@@ -33,40 +29,40 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 75
     steps:
-      - name: Require exact audited 33/36 source bindings
+      - name: Require exact audited Android 33 / iOS 37 source bindings
         shell: bash
         env:
-          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
+          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
           ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
         run: |
           set -euo pipefail
-          [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V36_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
+          [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V37_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
           [[ "$ANDROID_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_ANDROID_V33_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
-          test "$IOS_AUDITED_SOURCE" = "$ANDROID_AUDITED_SOURCE" || { echo 'iOS 36 and Android 33 must use the same audited source SHA.' >&2; exit 1; }
+          test "$IOS_AUDITED_SOURCE" = "$ANDROID_AUDITED_SOURCE" || { echo 'iOS 37 and Android 33 must use the same audited source SHA.' >&2; exit 1; }
 
       - name: Checkout accepted source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           persist-credentials: false
-          ref: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
+          ref: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
 
       - name: Verify frozen iOS manifest digest binding
         shell: bash
         env:
-          EXPECTED_MANIFEST_SHA: ${{ vars.BIL_IOS_V36_STAGING_MANIFEST_SHA256 }}
+          EXPECTED_MANIFEST_SHA: ${{ vars.BIL_IOS_V37_STAGING_MANIFEST_SHA256 }}
         run: |
           set -euo pipefail
-          MANIFEST='docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md'
+          MANIFEST='docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md'
           grep -Fqx '`STAGING_MANIFEST_COMPLETE: YES`' "$MANIFEST" || {
-            echo 'iOS 36 source freeze is incomplete; signed build is blocked.' >&2
+            echo 'iOS 37 source freeze is incomplete; signed build is blocked.' >&2
             exit 1
           }
           grep -Fqx '`CANDIDATE_FROZEN_OR_ACCEPTED: YES`' "$MANIFEST" || {
-            echo 'iOS 36 candidate is not accepted; signed build is blocked.' >&2
+            echo 'iOS 37 candidate is not accepted; signed build is blocked.' >&2
             exit 1
           }
-          ACTUAL="$(shasum -a 256 docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md | awk '{print $1}')"
-          test "$EXPECTED_MANIFEST_SHA" = "$ACTUAL" || { echo 'BIL_IOS_V36_STAGING_MANIFEST_SHA256 does not match the frozen manifest.' >&2; exit 1; }
+          ACTUAL="$(shasum -a 256 docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md | awk '{print $1}')"
+          test "$EXPECTED_MANIFEST_SHA" = "$ACTUAL" || { echo 'BIL_IOS_V37_STAGING_MANIFEST_SHA256 does not match the frozen manifest.' >&2; exit 1; }
 
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
@@ -83,7 +79,7 @@ jobs:
         if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
+          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -99,8 +95,8 @@ jobs:
       - name: Validate release build number and Apple team
         shell: bash
         env:
-          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
-          UPLOAD_TO_TESTFLIGHT: ${{ github.event_name == 'push' && 'true' || inputs.upload_to_testflight }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+          UPLOAD_TO_TESTFLIGHT: ${{ inputs.upload_to_testflight }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
@@ -108,8 +104,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 36 )) || {
-            echo 'build_number must be exactly 36 for the iOS release candidate; build 35 and earlier must never be selected.' >&2
+          (( BUILD_NUMBER == 37 )) || {
+            echo 'build_number must be exactly 37 for the iOS release candidate; build 36 and earlier must never be selected.' >&2
             exit 1
           }
           [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
@@ -143,7 +139,7 @@ jobs:
           test -n "${CERTIFICATE_PASSWORD:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD'; exit 1; }
           test -n "${PROVISIONING_PROFILE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_PROVISIONING_PROFILE_BASE64'; exit 1; }
           test -n "${APPLE_TEAM_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID'; exit 1; }
-          if [[ "${{ github.event_name == 'push' && 'true' || inputs.upload_to_testflight }}" == 'true' ]]; then
+          if [[ "${{ inputs.upload_to_testflight }}" == 'true' ]]; then
             test -n "${ASC_KEY_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_KEY_ID'; exit 1; }
             test -n "${ASC_ISSUER_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_ISSUER_ID'; exit 1; }
             test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
@@ -267,12 +263,12 @@ jobs:
           BIL_PUSH_PROVIDER_READY: true
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
+          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
           BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V36_STAGING_MANIFEST_SHA256 }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V37_STAGING_MANIFEST_SHA256 }}
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
           flutter pub get
           flutter analyze --no-pub
@@ -441,7 +437,7 @@ jobs:
 
       - name: Build signed archive
         env:
-          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
         shell: bash
@@ -484,7 +480,7 @@ jobs:
         shell: bash
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          BUILD_NUMBER: ${{ github.event_name == 'push' && '36' || inputs.build_number }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
           set -euo pipefail
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
@@ -577,7 +573,7 @@ jobs:
             > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
-        if: ${{ github.event_name == 'push' || inputs.upload_to_testflight }}
+        if: ${{ inputs.upload_to_testflight }}
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -608,7 +604,7 @@ jobs:
           xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
       - name: Upload validated build to TestFlight
-        if: ${{ github.event_name == 'push' || inputs.upload_to_testflight }}
+        if: ${{ inputs.upload_to_testflight }}
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -622,7 +618,7 @@ jobs:
       - name: Upload signed IPA and validation evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}
+          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |

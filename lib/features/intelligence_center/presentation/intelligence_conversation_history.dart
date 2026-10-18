@@ -288,7 +288,7 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
       await _archiveCurrentConversation(history);
     }
     if (!mounted) return;
-    final selection = await showModalBottomSheet<String>(
+    final selection = await showBilPearlBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
       useSafeArea: true,
@@ -336,7 +336,6 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Text('${entry['createdAt'] ?? ''}'),
                   selected: entry['id'] == activeConversationId,
                   trailing: deleteMode
                       ? Icon(

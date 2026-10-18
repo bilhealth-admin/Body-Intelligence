@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -136,7 +137,7 @@ class _NoticeCard extends StatelessWidget {
   final VoidCallback? onAction;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
     child: Padding(
       padding: const EdgeInsets.all(14),

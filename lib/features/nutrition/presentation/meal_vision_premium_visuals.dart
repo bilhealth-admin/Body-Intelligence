@@ -43,7 +43,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
         key: const Key('premium-vision-photo'),
         onTap: () => showDialog<void>(
           context: context,
-          builder: (zoomContext) => Dialog(
+          builder: (zoomContext) => BilPearlMaterialDialog(
             child: Stack(
               children: [
                 InteractiveViewer(

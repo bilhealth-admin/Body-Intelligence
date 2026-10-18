@@ -97,12 +97,12 @@ void main() {
             await tester.tap(nutrition);
             await tester.pumpAndSettle();
             expect(backend.writes, isEmpty);
-            expect(find.byType(AlertDialog), findsOneWidget);
+            expect(find.bySubtype<AlertDialog>(), findsOneWidget);
             expect(find.textContaining('AI Coach'), findsOneWidget);
             expect(tester.takeException(), isNull);
             await captureClosureSurface(
               tester,
-              find.byType(AlertDialog),
+              find.bySubtype<AlertDialog>(),
               'restore-consent-$language-${brightness.name}-320-2x',
             );
             final cancel = find.byKey(

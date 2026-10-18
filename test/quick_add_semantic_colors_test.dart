@@ -63,75 +63,79 @@ void main() {
 
   for (final brightness in Brightness.values) {
     for (final locale in const <Locale>[Locale('en'), Locale('ar')]) {
-      testWidgets('seven Quick Add actions keep distinct accessible colors '
-          '${brightness.name} ${locale.languageCode}', (tester) async {
-        final semantics = tester.ensureSemantics();
-        await pumpSheet(tester, brightness: brightness, locale: locale);
-        final expected = actionKinds
-            .map((kind) => BilSemanticIcons.spec(kind).accent(brightness))
-            .toList(growable: false);
-        final actual = <Color>[];
-        for (var index = 0; index < 7; index++) {
-          final primary = index < 4;
-          final actionIndex = primary ? index : index - 4;
-          final action = find.byKey(
-            Key(
-              'quick-add-${primary ? 'primary' : 'secondary'}-'
-              '$actionIndex',
-            ),
-          );
-          final icon = tester.widget<Icon>(
-            find.byKey(
+      testWidgets(
+        'seven Quick Add actions keep neutral flat icons and accessible contrast '
+        '${brightness.name} ${locale.languageCode}',
+        (tester) async {
+          final semantics = tester.ensureSemantics();
+          await pumpSheet(tester, brightness: brightness, locale: locale);
+          final ink = Theme.of(
+            tester.element(find.byKey(const Key('quick-add-half-sheet'))),
+          ).colorScheme.onSurfaceVariant;
+          final actual = <Color>[];
+          for (var index = 0; index < 7; index++) {
+            final primary = index < 4;
+            final actionIndex = primary ? index : index - 4;
+            final action = find.byKey(
               Key(
-                'quick-add-${primary ? 'primary' : 'secondary'}-icon-'
+                'quick-add-${primary ? 'primary' : 'secondary'}-'
                 '$actionIndex',
               ),
-            ),
-          );
-          final representedAccent = primary
-              ? (tester
-                            .widget<Container>(
-                              find.byKey(
-                                Key('quick-add-primary-badge-$actionIndex'),
-                              ),
-                            )
-                            .decoration!
-                        as BoxDecoration)
-                    .color!
-              : icon.color!;
-          actual.add(representedAccent);
-          expect(representedAccent, expected[index]);
-          if (primary) {
-            final spec = BilSemanticIcons.spec(actionKinds[index]);
-            expect(icon.color, spec.onAccent(brightness));
+            );
+            final icon = tester.widget<Icon>(
+              find.byKey(
+                Key(
+                  'quick-add-${primary ? 'primary' : 'secondary'}-icon-'
+                  '$actionIndex',
+                ),
+              ),
+            );
+            actual.add(icon.color!);
+            expect(icon.color, ink);
+            final iconContainer = find
+                .ancestor(
+                  of: find.byKey(
+                    Key(
+                      'quick-add-${primary ? 'primary' : 'secondary'}-icon-$actionIndex',
+                    ),
+                  ),
+                  matching: find.byWidgetPredicate(
+                    (widget) => widget is Container || widget is SizedBox,
+                  ),
+                )
+                .first;
+            final anchor = tester.widget(iconContainer);
+            if (anchor is Container) {
+              expect(anchor.decoration, isNull);
+            }
             expect(
-              _contrastRatio(representedAccent, icon.color!),
+              tester.getSize(iconContainer),
+              Size.square(primary ? 32 : 36),
+            );
+            expect(tester.getSize(action).height, greaterThanOrEqualTo(48));
+            final node = tester.getSemantics(action);
+            expect(
+              node.getSemanticsData().hasAction(SemanticsAction.tap),
+              isTrue,
+            );
+            expect(node.label.trim(), isNotEmpty);
+          }
+          expect(actual.toSet(), hasLength(1));
+
+          final surface = Theme.of(
+            tester.element(find.byKey(const Key('quick-add-half-sheet'))),
+          ).colorScheme.surface;
+          for (final color in actual) {
+            expect(
+              _contrastRatio(color, surface),
               greaterThanOrEqualTo(3),
+              reason: '$color must retain graphical contrast on $surface',
             );
           }
-          expect(tester.getSize(action).height, greaterThanOrEqualTo(48));
-          final node = tester.getSemantics(action);
-          expect(
-            node.getSemanticsData().hasAction(SemanticsAction.tap),
-            isTrue,
-          );
-          expect(node.label.trim(), isNotEmpty);
-        }
-        expect(actual.toSet(), hasLength(7));
-
-        final surface = Theme.of(
-          tester.element(find.byKey(const Key('quick-add-half-sheet'))),
-        ).colorScheme.surface;
-        for (final color in actual) {
-          expect(
-            _contrastRatio(color, surface),
-            greaterThanOrEqualTo(3),
-            reason: '$color must retain graphical contrast on $surface',
-          );
-        }
-        expect(tester.takeException(), isNull);
-        semantics.dispose();
-      });
+          expect(tester.takeException(), isNull);
+          semantics.dispose();
+        },
+      );
     }
   }
 
@@ -205,22 +209,21 @@ void main() {
     expect(barcode.icon, CupertinoIcons.barcode_viewfinder);
     expect(searchOrCreate.icon, Icons.manage_search_rounded);
 
-    final badgeColors = <Color>[];
+    final ink = Theme.of(
+      tester.element(find.byKey(const Key('quick-add-half-sheet'))),
+    ).colorScheme.onSurfaceVariant;
     for (var index = 0; index < 4; index++) {
       final badge = tester.widget<Container>(
         find.byKey(Key('quick-add-primary-badge-$index')),
       );
-      final decoration = badge.decoration! as BoxDecoration;
-      badgeColors.add(decoration.color!);
-      expect(decoration.shape, BoxShape.circle);
+      expect(badge.decoration, isNull);
       expect(
         tester
             .widget<Icon>(find.byKey(Key('quick-add-primary-icon-$index')))
             .color,
-        Colors.white,
+        ink,
       );
     }
-    expect(badgeColors.toSet(), hasLength(4));
   });
 
   for (final platform in const [TargetPlatform.android, TargetPlatform.iOS]) {

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -210,7 +211,7 @@ class _AppPurchaseCoordinatorState extends ConsumerState<AppPurchaseCoordinator>
       route = DialogRoute<void>(
         context: context,
         barrierDismissible: true,
-        builder: (_) => Dialog(
+        builder: (_) => BilPearlMaterialDialog(
           backgroundColor: Colors.transparent,
           elevation: 0,
           insetPadding: const EdgeInsets.all(16),

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +54,7 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
             children: [
               if (days.isNotEmpty)
-                Card(
+                BilPearlMaterialCard(
                   key: const Key('steps-current-measured'),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
@@ -135,7 +136,7 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
               ),
               const SizedBox(height: 8),
               if (days.isEmpty)
-                Card(
+                BilPearlMaterialCard(
                   key: const Key('steps-history-empty'),
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -161,7 +162,7 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
                   ),
                 )
               else
-                Card(
+                BilPearlMaterialCard(
                   child: Column(
                     children: [
                       for (var index = 0; index < days.length; index++) ...[

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -347,7 +348,7 @@ final class WeightVoiceInputService {
       }
       final open = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
+        builder: (dialogContext) => BilPearlMaterialAlertDialog(
           title: Text(context.strings.text('Voice input unavailable')),
           content: Text(
             context.strings.text(weightVoiceSettingsRecoverySource(capability)),
@@ -384,7 +385,7 @@ final class WeightVoiceInputService {
 
     final proceed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog.adaptive(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           context.strings.text(
             capability == BilRuntimeCapability.speechRecognition

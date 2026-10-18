@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class DashboardPage extends ConsumerWidget {
   ) async {
     final hasPhoto =
         currentPhoto != null || currentPhotoUrl?.trim().isNotEmpty == true;
-    final action = await showModalBottomSheet<String>(
+    final action = await showBilPearlBottomSheet<String>(
       context: context,
       useSafeArea: true,
       showDragHandle: true,
@@ -174,7 +175,7 @@ class DashboardPage extends ConsumerWidget {
       }
       final openSettings = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
+        builder: (dialogContext) => BilPearlMaterialAlertDialog(
           title: Text(context.strings.text('Camera access is off')),
           content: Text(
             context.strings.text(
@@ -372,7 +373,7 @@ class _WindowsCameraCaptureState extends State<_WindowsCameraCapture> {
   @override
   Widget build(BuildContext context) {
     final active = controller;
-    return AlertDialog(
+    return BilPearlMaterialAlertDialog(
       title: Text(_dashboardText(widget.locale, 'takeProfilePhoto')),
       content: SizedBox(
         width: 520,

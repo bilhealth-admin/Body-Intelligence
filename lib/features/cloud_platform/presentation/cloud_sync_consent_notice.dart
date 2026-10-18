@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -60,7 +61,7 @@ class _CloudSyncConsentNoticeState
 
   Future<void> _presentChoice() async {
     if (!mounted || _saving) return;
-    final enable = await showModalBottomSheet<bool>(
+    final enable = await showBilPearlBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       isDismissible: false,

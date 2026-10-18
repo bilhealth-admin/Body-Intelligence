@@ -190,7 +190,7 @@ void main() {
         picker.result.complete(leave ? XFile('late-result.jpg') : null);
         await tester.pumpAndSettle();
         expect(analyses, 0);
-        expect(find.byType(AlertDialog), findsNothing);
+        expect(find.bySubtype<AlertDialog>(), findsNothing);
         if (!leave) {
           await tester.tap(cameraButton);
           await tester.pumpAndSettle();

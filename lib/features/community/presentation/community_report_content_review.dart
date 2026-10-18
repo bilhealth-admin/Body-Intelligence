@@ -127,7 +127,7 @@ class _CommentReportCard extends StatelessWidget {
   final bool busy;
   final VoidCallback onReview;
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: Key('community-comment-report-${report.id}'),
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -213,7 +213,7 @@ class _ReportedContentDialogState extends State<_ReportedContentDialog> {
   @override
   Widget build(BuildContext context) {
     final review = widget.review, post = widget.review.post;
-    return AlertDialog(
+    return BilPearlMaterialAlertDialog(
       key: const Key('community-report-content-review'),
       title: Text(
         communityText(

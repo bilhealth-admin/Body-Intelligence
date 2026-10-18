@@ -14,6 +14,7 @@ class _CommunityPostCard extends StatefulWidget {
     this.commentPreview,
     this.authorMembershipTier,
     this.onSavedChanged,
+    this.onMutation,
     this.showModerationStatus = false,
   });
 
@@ -29,6 +30,7 @@ class _CommunityPostCard extends StatefulWidget {
   final CommunityComment? commentPreview;
   final String? authorMembershipTier;
   final ValueChanged<bool>? onSavedChanged;
+  final VoidCallback? onMutation;
   final bool showModerationStatus;
 
   @override
@@ -84,7 +86,10 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
         liked: !_stats.liked,
       );
       scope.check();
-      if (mounted && scope.isCurrent) setState(() => _stats = stats);
+      if (mounted && scope.isCurrent) {
+        setState(() => _stats = stats);
+        widget.onMutation?.call();
+      }
     } on CommunityOwnerOperationCancelled {
       rethrow;
     } catch (_) {
@@ -117,6 +122,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
       if (mounted && scope.isCurrent) {
         setState(() => _saved = result.saved);
         widget.onSavedChanged?.call(result.saved);
+        widget.onMutation?.call();
       }
     } on CommunityOwnerOperationCancelled {
       rethrow;
@@ -197,6 +203,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
       );
       if (!mounted || !scope.isCurrent) return;
       scope.check();
+      widget.onMutation?.call();
       try {
         final refreshed = await widget.repository.loadPostStats([
           widget.post.id,
@@ -483,16 +490,11 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                 onPressed: _socialActionsAvailable && !_liking
                     ? _toggleLike
                     : null,
-                icon: _liking
-                    ? const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        _stats.liked
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                      ),
+                icon: Icon(
+                  _stats.liked
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                ),
                 label: Text(
                   '${_stats.likeCount}',
                   semanticsLabel:
@@ -537,16 +539,11 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                         'إزالة من المحفوظات',
                       )
                     : communityText(context, 'Save post', 'حفظ المنشور'),
-                icon: _saving
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        _saved
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_border_rounded,
-                      ),
+                icon: Icon(
+                  _saved
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_border_rounded,
+                ),
               ),
               Builder(
                 builder: (shareContext) => IconButton(

@@ -107,6 +107,7 @@ Future<GoRouter> _mount(
   Stream<String?>? owners,
   CoachNativeOwnerWitness? messageOwnerWitness,
   Future<CoachContextSnapshot> Function()? contextLoader,
+  Future<CoachContextSnapshot> Function()? briefLoader,
   bool waitForBrief = false,
 }) async {
   final messenger = tester.binding.defaultBinaryMessenger;
@@ -202,6 +203,8 @@ Future<GoRouter> _mount(
               ? CoachContextSnapshot.empty()
               : await contextLoader(),
         ),
+        if (briefLoader != null)
+          coachHealthBriefProvider.overrideWith((ref) => briefLoader()),
         intelligenceHealthContextProvider.overrideWith(
           (ref) async => const IntelligenceHealthContext(
             primaryMessage: '',
@@ -257,19 +260,7 @@ Future<GoRouter> _mount(
           ),
           child: RepaintBoundary(
             key: const ValueKey('coach-screen-capture-root'),
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: NotificationListener<ScrollStartNotification>(
-                onNotification: (notification) {
-                  if (notification.dragDetails != null) {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  }
-                  return false;
-                },
-                child: child!,
-              ),
-            ),
+            child: child!,
           ),
         ),
       ),
@@ -333,6 +324,69 @@ void main() {
   registerCoachVoiceCases();
   registerCoachRequestCases();
   registerCoachScrollCases();
+  testWidgets('Coach welcome brief stays anchored during a data refresh', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    final refresh = Completer<CoachContextSnapshot>();
+    var loads = 0;
+    Future<CoachContextSnapshot> loadBrief() {
+      loads++;
+      return loads == 1
+          ? Future.value(CoachContextSnapshot.empty())
+          : refresh.future;
+    }
+
+    try {
+      await _mount(
+        tester,
+        database: database,
+        gateway: _HeldGateway(),
+        briefLoader: loadBrief,
+        waitForBrief: true,
+      );
+      const rowKey = ValueKey('coach-session-brief');
+      final row = find.byKey(rowKey);
+      final title = find.text('Let’s make the first decision');
+      expect(row, findsOneWidget);
+      expect(title, findsOneWidget);
+      final initialRow = tester.getRect(row);
+      final initialTitle = tester.getRect(title);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(IntelligenceCenterPage)),
+      );
+
+      container.invalidate(coachHealthBriefProvider);
+      await tester.pump();
+
+      expect(container.read(coachHealthBriefProvider).isRefreshing, isTrue);
+      expect(row, findsOneWidget);
+      expect(title, findsOneWidget);
+      expect(tester.getRect(row), initialRow);
+      expect(tester.getRect(title), initialTitle);
+
+      refresh.complete(
+        CoachContextSnapshot(
+          generatedAt: DateTime(2026, 9, 9, 10),
+          profile: const {'profileSaved': true},
+          weights: const [],
+          nutritionDays: const [],
+          waterHistory: const [],
+          computedHealth: const {},
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(rowKey), findsOneWidget);
+      expect(find.text('I’m ready for today'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    } finally {
+      if (!refresh.isCompleted) {
+        refresh.complete(CoachContextSnapshot.empty());
+      }
+      await _unmount(tester);
+      await tester.runAsync(database.close);
+    }
+  });
   testWidgets(
     'successful reply must preserve coach state and unsent draft through valid credit refresh',
     (tester) async {
@@ -429,17 +483,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(scroll.offset, closeTo(0, .5));
       await tester.tap(find.byKey(const Key('ai-coach-question-field')));
+      final composer = tester.widget<EditableText>(
+        find.descendant(
+          of: find.byKey(const Key('ai-coach-question-field')),
+          matching: find.byType(EditableText),
+        ),
+      );
       tester.view.viewInsets = const FakeViewPadding(bottom: 310);
       await tester.pumpAndSettle();
+      expect(composer.focusNode.hasFocus, isTrue);
       expect(
         tester
             .getBottomRight(find.byKey(const Key('ai-coach-question-field')))
             .dy,
         lessThanOrEqualTo(534),
       );
-      await tester.drag(
-        find.byType(SelectableText).hitTestable().first,
+      final historyViewport = tester.getRect(find.byType(CoachAnchoredHistory));
+      await tester.dragFrom(
+        Offset(historyViewport.left + 2, historyViewport.center.dy),
         const Offset(0, 170),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        composer.focusNode.hasFocus,
+        isFalse,
+        reason:
+            'Dragging the message history should dismiss the keyboard itself.',
       );
       tester.view.viewInsets = const FakeViewPadding();
       await tester.pumpAndSettle();
@@ -611,11 +680,12 @@ void registerCoachRevealViewportCases() {
           final replyStyle = tester.widget<CoachMessageText>(row).style;
           final starterStyle = Theme.of(
             tester.element(row),
-          ).textTheme.bodySmall;
+          ).textTheme.bodyMedium;
           expect(
             replyStyle?.fontSize,
-            starterStyle?.fontSize,
-            reason: 'Coach replies match the smaller starter guidance style.',
+            (starterStyle?.fontSize ?? 14) + 1,
+            reason:
+                'Coach replies use the slightly enlarged conversation body size.',
           );
           expect(
             replyStyle?.fontFamily,
@@ -625,8 +695,7 @@ void registerCoachRevealViewportCases() {
           expect(
             replyStyle?.fontWeight,
             starterStyle?.fontWeight,
-            reason:
-                'Coach replies use the same font weight as starter guidance.',
+            reason: 'Coach replies retain the shared body font weight.',
           );
           final messageTextKey =
               tester.widget<CoachMessageText>(row).key! as ValueKey<String>;

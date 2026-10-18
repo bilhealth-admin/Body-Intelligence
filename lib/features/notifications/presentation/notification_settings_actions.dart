@@ -389,7 +389,7 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
   Future<void> _addReminder() async {
     final reminders = _reminders;
     if (reminders == null) return;
-    final kind = await showModalBottomSheet<DailyReminderKind>(
+    final kind = await showBilPearlBottomSheet<DailyReminderKind>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(

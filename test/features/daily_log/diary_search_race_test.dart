@@ -39,6 +39,21 @@ final class _RaceFoodSearchAuthority extends FoodRuntimeSearchAuthority {
       : pending.putIfAbsent(query, Completer<List<Food>>.new).future;
 }
 
+final class _MealSearchNavigationObserver extends NavigatorObserver {
+  final pushed = <Route<dynamic>>[];
+  final popped = <Route<dynamic>>[];
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    pushed.add(route);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    popped.add(route);
+  }
+}
+
 void main() {
   testWidgets('rapid whole-word input cannot leave stale food suggestions', (
     tester,
@@ -73,6 +88,7 @@ void main() {
     final egg = foods.singleWhere((food) => food.id == eggId);
     final apple = foods.singleWhere((food) => food.id == appleId);
     final authority = _RaceFoodSearchAuthority(repository);
+    final navigation = _MealSearchNavigationObserver();
     addTearDown(() async {
       for (final pending in authority.pending.values) {
         if (!pending.isCompleted) pending.complete(const []);
@@ -126,7 +142,8 @@ void main() {
             const AsyncData(MeasurementSystem.metric),
           ),
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
+          navigatorObservers: [navigation],
           locale: Locale('en'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: [
@@ -150,9 +167,20 @@ void main() {
         tester.widget<SearchBar>(searchEntry).controller! as SearchController;
     expect(controller.isOpen, isFalse);
     expect(authority.pending, isEmpty);
-    await tester.tap(searchEntry);
+    final plus = find.byKey(const Key('daily-meal-empty-add-food'));
+    await tester.ensureVisible(plus);
+    // Two presses before the next frame must schedule one result page.
+    await tester.tap(plus);
+    await tester.tap(plus);
     await tester.pumpAndSettle();
     expect(controller.isOpen, isTrue);
+    expect(
+      navigation.pushed.length,
+      2,
+      reason: 'One diary page plus one separate search, never duplicates',
+    );
+    final searchRoute = navigation.pushed.last;
+    final routeCount = navigation.pushed.length;
 
     final searchBar = find.byType(SearchBar).last;
     await tester.enterText(searchBar, 'a');
@@ -170,6 +198,18 @@ void main() {
 
     expect(find.text('Apple'), findsOneWidget);
     expect(find.text('Eggs, Grade A, Large'), findsNothing);
+    expect(
+      navigation.pushed.length,
+      routeCount,
+      reason: 'Typing and late results must not push another search page',
+    );
+    expect(
+      navigation.popped,
+      isEmpty,
+      reason: 'The result page must not close and reopen while typing',
+    );
+    expect(searchRoute.isCurrent, isTrue);
+    expect(controller.isOpen, isTrue);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());

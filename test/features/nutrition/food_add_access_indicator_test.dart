@@ -137,7 +137,7 @@ void main() {
         );
         await tester.tap(custom);
         await tester.pumpAndSettle();
-        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.bySubtype<AlertDialog>(), findsOneWidget);
         final cancel = find.text('إلغاء').last;
         await tester.ensureVisible(cancel);
         await tester.pumpAndSettle();

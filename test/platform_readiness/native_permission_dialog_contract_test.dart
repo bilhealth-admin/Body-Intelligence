@@ -16,11 +16,23 @@ void main() {
 
     for (final path in files) {
       final source = File(path).readAsStringSync();
-      expect(
-        source,
-        contains('defaultTargetPlatform == TargetPlatform.iOS'),
-        reason: '$path must branch to the native iOS permission flow',
-      );
+      if (source.contains('defaultTargetPlatform == TargetPlatform.iOS')) {
+        expect(source, contains('policy.request('));
+      } else {
+        // Unified native request flow: the optional recovery card is reached
+        // only when the OS will not present a new permission prompt.
+        expect(source, contains('BilRuntimePermissionState.permanentlyDenied'));
+        final recovery = source.indexOf(
+          'await showBilPearlPermissionDecision(',
+        );
+        final nativeRequest = source.indexOf('await policy.request(');
+        expect(recovery, greaterThanOrEqualTo(0));
+        expect(nativeRequest, greaterThan(recovery));
+        expect(
+          source.substring(recovery, nativeRequest),
+          contains('return false;'),
+        );
+      }
       expect(
         source,
         contains('await policy.openSettings();'),

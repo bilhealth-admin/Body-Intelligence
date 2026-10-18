@@ -14,7 +14,7 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
             key: const Key('premium-vision-final-photo'),
             onTap: () => showDialog<void>(
               context: context,
-              builder: (zoomContext) => Dialog(
+              builder: (zoomContext) => BilPearlMaterialDialog(
                 // A real FileImage has no dimensions until its first frame
                 // decodes. Keep the modal and close button hittable even while
                 // the original photo is pending or fails to load.

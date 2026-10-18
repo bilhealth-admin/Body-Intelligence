@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
     final progress = target <= 0
         ? 0.0
         : (widget.consumedMl / target).clamp(0.0, 1.0);
-    return Card(
+    return BilPearlMaterialCard(
       child: Padding(
         padding: EdgeInsets.all(PremiumDesignTokens.spaceMd),
         child: Column(
@@ -217,7 +218,7 @@ class _CustomWaterDialogState extends State<_CustomWaterDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => BilPearlMaterialAlertDialog(
     title: Text(context.strings.text('Custom water amount')),
     content: TextField(
       controller: controller,

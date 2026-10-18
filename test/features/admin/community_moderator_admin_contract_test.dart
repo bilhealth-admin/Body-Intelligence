@@ -75,15 +75,9 @@ void main() {
     expect(edge, contains('operation === "moderator_list"'));
     expect(edge, contains('operation === "moderator_add"'));
     expect(edge, contains('operation === "moderator_remove"'));
-    // Assert the actual route boundary, not the position of its explanation.
-    // A presentation-only wrapper must not turn a moderator role into a purchase.
-    final moderationRoute = RegExp(
-      r"GoRoute\(\s*path: '/community/moderation',([\s\S]*?)\n      \),",
-    ).firstMatch(router)?.group(1);
-    expect(moderationRoute, isNotNull);
-    expect(moderationRoute, contains('CommunityPostModerationPage()'));
-    expect(moderationRoute, contains('CommunitySurface('));
-    expect(moderationRoute, isNot(contains('PremiumRouteGlassGate')));
+    // Server moderation APIs stay intact, while mobile routes are removed.
+    expect(router, isNot(contains("path: '/community/moderation'")));
+    expect(router, isNot(contains('CommunityPostModerationPage()')));
   });
 
   test('review accounts stay outside the single owner administrator role', () {

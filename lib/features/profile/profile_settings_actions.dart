@@ -142,7 +142,7 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
     if (dirty) {
       final discard = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => BilPearlMaterialAlertDialog(
           title: Text(t('Discard changes?', 'تجاهل التغييرات؟')),
           content: Text(
             t('You have unsaved changes.', 'لديك تغييرات لم تُحفظ.'),

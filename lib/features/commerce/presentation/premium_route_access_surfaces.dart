@@ -24,7 +24,7 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
       child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Card(
+          child: BilPearlMaterialCard(
             key: const ValueKey('premium-route-access-unavailable'),
             elevation: 0,
             color: scheme.surfaceContainerLow,

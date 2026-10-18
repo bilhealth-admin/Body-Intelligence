@@ -44,6 +44,186 @@ const _remoteNotificationDeliveryUnavailable =
 // Reviewed exceptions where the generic translator preserved an English UI
 // label even though the locale has a clearer native equivalent.
 const _reviewedOverrides = <(String, String), String>{
+  ("de", "Preparing your reply…"): "Deine Antwort wird vorbereitet…",
+  ("de", "Working on your question…"): "Deine Frage wird bearbeitet…",
+  ("de", "Thanks for waiting…"): "Danke fürs Warten…",
+  ("de", "Copy message"): "Nachricht kopieren",
+  ("de", "Loading posts"): "Beiträge werden geladen",
+  (
+    "de",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach konnte die Antwort nicht abschließen. Deine Frage bleibt in diesem Chat; prüfe frühere Aktionen, bevor du es erneut versuchst.",
+  ("it", "Preparing your reply…"): "Preparazione della risposta…",
+  ("it", "Working on your question…"): "Sto elaborando la tua domanda…",
+  ("it", "Thanks for waiting…"): "Grazie per l’attesa…",
+  ("it", "Copy message"): "Copia messaggio",
+  ("it", "Loading posts"): "Caricamento dei post",
+  (
+    "it",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach non ha potuto completare la risposta. La tua domanda rimane in questa chat; controlla le azioni precedenti prima di riprovare.",
+  ("pt-BR", "Preparing your reply…"): "Preparando sua resposta…",
+  ("pt-BR", "Working on your question…"): "Analisando sua pergunta…",
+  ("pt-BR", "Thanks for waiting…"): "Obrigado por aguardar…",
+  ("pt-BR", "Copy message"): "Copiar mensagem",
+  ("pt-BR", "Loading posts"): "Carregando publicações",
+  (
+    "pt-BR",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "O AI Coach não conseguiu concluir a resposta. Sua pergunta permanece nesta conversa; revise as ações anteriores antes de tentar novamente.",
+  ("pt-PT", "Preparing your reply…"): "A preparar a sua resposta…",
+  ("pt-PT", "Working on your question…"): "A analisar a sua pergunta…",
+  ("pt-PT", "Thanks for waiting…"): "Obrigado por aguardar…",
+  ("pt-PT", "Copy message"): "Copiar mensagem",
+  ("pt-PT", "Loading posts"): "A carregar publicações",
+  (
+    "pt-PT",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "O AI Coach não conseguiu concluir a resposta. A sua pergunta permanece nesta conversa; reveja as ações anteriores antes de tentar novamente.",
+  ("ur", "Preparing your reply…"): "آپ کا جواب تیار کیا جا رہا ہے…",
+  ("ur", "Working on your question…"): "آپ کے سوال پر کام جاری ہے…",
+  ("ur", "Thanks for waiting…"): "انتظار کرنے کا شکریہ…",
+  ("ur", "Copy message"): "پیغام کاپی کریں",
+  ("ur", "Loading posts"): "پوسٹس لوڈ ہو رہی ہیں",
+  (
+    "ur",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach جواب مکمل نہیں کر سکا۔ آپ کا سوال اس چیٹ میں موجود ہے؛ دوبارہ کوشش سے پہلے پچھلے اقدامات کا جائزہ لیں۔",
+  ("fa", "Preparing your reply…"): "در حال آماده‌سازی پاسخ شما…",
+  ("fa", "Working on your question…"): "در حال بررسی پرسش شما…",
+  ("fa", "Thanks for waiting…"): "از صبر شما سپاسگزاریم…",
+  ("fa", "Copy message"): "کپی پیام",
+  ("fa", "Loading posts"): "در حال بارگیری پست‌ها",
+  (
+    "fa",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach نتوانست پاسخ را کامل کند. پرسش شما در این گفتگو باقی می‌ماند؛ پیش از تلاش دوباره، اقدامات قبلی را بررسی کنید.",
+  ("hi", "Preparing your reply…"): "आपका जवाब तैयार हो रहा है…",
+  ("hi", "Working on your question…"): "आपके सवाल पर काम जारी है…",
+  ("hi", "Thanks for waiting…"): "इंतज़ार करने के लिए धन्यवाद…",
+  ("hi", "Copy message"): "संदेश कॉपी करें",
+  ("hi", "Loading posts"): "पोस्ट लोड हो रही हैं",
+  (
+    "hi",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach जवाब पूरा नहीं कर सका। आपका सवाल इस चैट में मौजूद है; दोबारा कोशिश करने से पहले पिछली कार्रवाइयाँ जाँचें।",
+  ("id", "Preparing your reply…"): "Menyiapkan jawaban Anda…",
+  ("id", "Working on your question…"): "Memproses pertanyaan Anda…",
+  ("id", "Thanks for waiting…"): "Terima kasih sudah menunggu…",
+  ("id", "Copy message"): "Salin pesan",
+  ("id", "Loading posts"): "Memuat postingan",
+  (
+    "id",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach tidak dapat menyelesaikan jawaban. Pertanyaan Anda tetap ada di obrolan ini; tinjau tindakan sebelumnya sebelum mencoba lagi.",
+  ("ms", "Preparing your reply…"): "Menyediakan jawapan anda…",
+  ("ms", "Working on your question…"): "Sedang meneliti soalan anda…",
+  ("ms", "Thanks for waiting…"): "Terima kasih kerana menunggu…",
+  ("ms", "Copy message"): "Salin mesej",
+  ("ms", "Loading posts"): "Memuatkan siaran",
+  (
+    "ms",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach tidak dapat melengkapkan jawapan. Soalan anda kekal dalam sembang ini; semak tindakan terdahulu sebelum mencuba lagi.",
+  ("ja", "Preparing your reply…"): "回答を準備しています…",
+  ("ja", "Working on your question…"): "ご質問を処理しています…",
+  ("ja", "Thanks for waiting…"): "お待ちいただきありがとうございます…",
+  ("ja", "Copy message"): "メッセージをコピー",
+  ("ja", "Loading posts"): "投稿を読み込み中",
+  (
+    "ja",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coachは回答を完了できませんでした。ご質問はこのチャットに残っています。再試行する前に、以前の操作を確認してください。",
+  ("ko", "Preparing your reply…"): "답변을 준비하고 있어요…",
+  ("ko", "Working on your question…"): "질문을 처리하고 있어요…",
+  ("ko", "Thanks for waiting…"): "기다려 주셔서 감사합니다…",
+  ("ko", "Copy message"): "메시지 복사",
+  ("ko", "Loading posts"): "게시물 불러오는 중",
+  (
+    "ko",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach가 답변을 완료하지 못했습니다. 질문은 이 채팅에 남아 있습니다. 다시 시도하기 전에 이전 작업을 확인하세요.",
+  ("zh-Hans", "Preparing your reply…"): "正在准备回复…",
+  ("zh-Hans", "Working on your question…"): "正在处理你的问题…",
+  ("zh-Hans", "Thanks for waiting…"): "感谢等待…",
+  ("zh-Hans", "Copy message"): "复制消息",
+  ("zh-Hans", "Loading posts"): "正在加载帖子",
+  (
+    "zh-Hans",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach 未能完成回复。你的问题仍保留在此聊天中；重试前请检查之前的操作。",
+  ("zh-Hant", "Preparing your reply…"): "正在準備回覆…",
+  ("zh-Hant", "Working on your question…"): "正在處理你的問題…",
+  ("zh-Hant", "Thanks for waiting…"): "感謝等候…",
+  ("zh-Hant", "Copy message"): "複製訊息",
+  ("zh-Hant", "Loading posts"): "正在載入貼文",
+  (
+    "zh-Hant",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach 未能完成回覆。你的問題仍保留在此聊天中；重試前請檢查先前的操作。",
+  ("ru", "Preparing your reply…"): "Готовлю ответ…",
+  ("ru", "Working on your question…"): "Работаю над вашим вопросом…",
+  ("ru", "Thanks for waiting…"): "Спасибо за ожидание…",
+  ("ru", "Copy message"): "Копировать сообщение",
+  ("ru", "Loading posts"): "Загрузка публикаций",
+  (
+    "ru",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach не смог завершить ответ. Ваш вопрос остаётся в этом чате; проверьте предыдущие действия перед повторной попыткой.",
+  ("bn", "Preparing your reply…"): "আপনার উত্তর প্রস্তুত হচ্ছে…",
+  ("bn", "Working on your question…"): "আপনার প্রশ্ন নিয়ে কাজ চলছে…",
+  ("bn", "Thanks for waiting…"): "অপেক্ষা করার জন্য ধন্যবাদ…",
+  ("bn", "Copy message"): "বার্তা কপি করুন",
+  ("bn", "Loading posts"): "পোস্ট লোড হচ্ছে",
+  (
+    "bn",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach উত্তর সম্পূর্ণ করতে পারেনি। আপনার প্রশ্ন এই চ্যাটে রয়েছে; আবার চেষ্টা করার আগে আগের কাজগুলো পর্যালোচনা করুন।",
+  ("vi", "Preparing your reply…"): "Đang chuẩn bị câu trả lời…",
+  ("vi", "Working on your question…"): "Đang xử lý câu hỏi của bạn…",
+  ("vi", "Thanks for waiting…"): "Cảm ơn bạn đã chờ…",
+  ("vi", "Copy message"): "Sao chép tin nhắn",
+  ("vi", "Loading posts"): "Đang tải bài viết",
+  (
+    "vi",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach không thể hoàn tất câu trả lời. Câu hỏi của bạn vẫn còn trong cuộc trò chuyện này; hãy kiểm tra các thao tác trước đó trước khi thử lại.",
+  ("th", "Preparing your reply…"): "กำลังเตรียมคำตอบ…",
+  ("th", "Working on your question…"): "กำลังประมวลผลคำถามของคุณ…",
+  ("th", "Thanks for waiting…"): "ขอบคุณที่รอ…",
+  ("th", "Copy message"): "คัดลอกข้อความ",
+  ("th", "Loading posts"): "กำลังโหลดโพสต์",
+  (
+    "th",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach ไม่สามารถตอบให้เสร็จได้ คำถามของคุณยังอยู่ในแชตนี้ โปรดตรวจสอบการดำเนินการก่อนหน้าก่อนลองอีกครั้ง",
+  ("pl", "Preparing your reply…"): "Przygotowuję odpowiedź…",
+  ("pl", "Working on your question…"): "Pracuję nad Twoim pytaniem…",
+  ("pl", "Thanks for waiting…"): "Dziękuję za cierpliwość…",
+  ("pl", "Copy message"): "Kopiuj wiadomość",
+  ("pl", "Loading posts"): "Ładowanie postów",
+  (
+    "pl",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach nie mógł dokończyć odpowiedzi. Twoje pytanie pozostaje na tym czacie; sprawdź wcześniejsze działania przed ponowną próbą.",
+  ("nl", "Preparing your reply…"): "Je antwoord wordt voorbereid…",
+  ("nl", "Working on your question…"): "Je vraag wordt verwerkt…",
+  ("nl", "Thanks for waiting…"): "Bedankt voor het wachten…",
+  ("nl", "Copy message"): "Bericht kopiëren",
+  ("nl", "Loading posts"): "Berichten laden",
+  (
+    "nl",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach kon het antwoord niet afronden. Je vraag blijft in deze chat staan; controleer eerdere acties voordat je het opnieuw probeert.",
+  ("uk", "Preparing your reply…"): "Готую відповідь…",
+  ("uk", "Working on your question…"): "Працюю над вашим запитанням…",
+  ("uk", "Thanks for waiting…"): "Дякуємо за очікування…",
+  ("uk", "Copy message"): "Копіювати повідомлення",
+  ("uk", "Loading posts"): "Завантаження дописів",
+  (
+    "uk",
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+  ): "AI Coach не зміг завершити відповідь. Ваше запитання залишається в цьому чаті; перевірте попередні дії перед повторною спробою.",
   ('th', 'All cuisines'): 'อาหารทุกประเภท',
   ('vi', 'Low carb'): 'Ít carbohydrate',
   ('uk', 'Custom'): 'Користувацький',
@@ -337,7 +517,25 @@ const _privacyReviewedOverrides = <(String, String), String>{
   ): 'Служба розпізнавання мовлення на вашому пристрої або платформі може обробляти звук мікрофона за власними умовами. Надсилаючи запит Coach, BIL передає Gemini лише розпізнаний текст, а не необроблений звук мікрофона.',
 };
 
+// Manual translations must preserve the same product tokens as the provider
+// path; reviewed overrides are applied after automatic token restoration.
+void _validateBrandOverrides() {
+  for (final entry in {
+    ..._reviewedOverrides,
+    ..._privacyReviewedOverrides,
+  }.entries) {
+    for (final brand in ['BIL', 'AI Coach', 'Gemini']) {
+      if (entry.key.$2.contains(brand) && !entry.value.contains(brand)) {
+        throw StateError(
+          'Override loses $brand: ${entry.key.$1}:${entry.key.$2}',
+        );
+      }
+    }
+  }
+}
+
 Future<void> main(List<String> args) async {
+  _validateBrandOverrides();
   if (args.contains('--check-sources')) {
     final sources = <String>{
       ...await _runtimeCopyBaseKeys(),

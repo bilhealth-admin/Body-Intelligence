@@ -1,0 +1,82 @@
+[
+  {
+    "path": "build\\cloud-reconcile-six-focused-verified.log",
+    "sha256": "f35af3401a346081f8ad3dda1a8f4b9af9b6b5ecdad169ecde6bd71265d8f121",
+    "bytes": 4964,
+    "tail": [
+      "00:05 +22: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deep_link_exhaustive_source_contract_test.dart: emitted community push links are accepted by both parsers",
+      "00:05 +23: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deep_link_exhaustive_source_contract_test.dart: malformed parameters and open redirects fail closed",
+      "00:05 +24: All tests passed!"
+    ]
+  },
+  {
+    "path": "build\\cloud-reconciled-ux-focused.log",
+    "sha256": "05fd3ad02bba3d09a87da7dd0d889d8471b9f46c16d42de27ff0dfa408391124",
+    "bytes": 5079,
+    "tail": [
+      "00:10 +23: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/more_section_headings_test.dart: android/en More headings are text-only while action icons remain",
+      "00:10 +24: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/settings/more_section_headings_test.dart: android/ar More headings are text-only while action icons remain",
+      "00:11 +25: All tests passed!"
+    ]
+  },
+  {
+    "path": "build\\cloud-coach-commerce-lifecycle-defined.log",
+    "sha256": "2ead25862e1f06b26d55d5a619b0f3baec690e91f9c9f146feb6bafec62180c2",
+    "bytes": 63597,
+    "tail": [
+      "AUDIT_HISTORY overlappingSheets=1",
+      "00:29 +95: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/features/intelligence_center/coach_page_lifecycle_regression_test.dart: (tearDownAll)",
+      "00:30 +95: All tests passed!"
+    ]
+  },
+  {
+    "path": "build\\cloud-channels-all-focused.log",
+    "sha256": "0e8b3c4eda11c18bb0b2ae8b927328b4771397db4702183b54f4b70636953cf5",
+    "bytes": 13094,
+    "tail": [
+      "00:07 +64: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil07/community_channels_widget_test.dart: Arabic channel at 2x text keeps RTL labels and accessible controls",
+      "00:07 +65: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/parallel/bil07/community_channels_widget_test.dart: role copy covers every EN/AR key and leaves other locales as fallback",
+      "00:07 +66: All tests passed!"
+    ]
+  },
+  {
+    "path": "build\\cloud-final-targeted-verified.log",
+    "sha256": "e179898ab09125d962ab28765e4b871e81e6d1e95b0740a79a0afae780cf121d",
+    "bytes": 12440,
+    "tail": [
+      "00:20 +61: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deep_link_exhaustive_source_contract_test.dart: emitted community push links are accepted by both parsers",
+      "00:20 +62: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/launch_readiness/deep_link_exhaustive_source_contract_test.dart: malformed parameters and open redirects fail closed",
+      "00:20 +63: All tests passed!"
+    ]
+  },
+  {
+    "path": "build\\cloud-functions-all-focused.log",
+    "sha256": "0c70c0b9d3241ad4388079a7dd66121f831e79ec2e2440d662d34b8c68ab88de",
+    "bytes": 61387,
+    "tail": [
+      "",
+      "ok | 379 passed | 0 failed (8s)",
+      ""
+    ]
+  },
+  {
+    "path": "build\\cloud-channel-merged-sql-final.log",
+    "sha256": "b7cd251d11efbee732a6db43d6df8992becac40bd73e80f6f60b2f2375fc648a",
+    "bytes": 905,
+    "tail": [
+      "",
+      "ok | 6 passed | 0 failed (4s)",
+      ""
+    ]
+  },
+  {
+    "path": "build\\cloud-final-golden.log",
+    "sha256": "03a4317da9b113d07987236947f89fdb39b5457cfbaa37efd1a5b6f2941e5ee9",
+    "bytes": 64462,
+    "tail": [
+      "01:27 +359: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/visual_closure/actual_production_pages_golden_test.dart: notification settings production page capture",
+      "01:27 +360: G:/BIL_Project/worktrees/bil-ios36-audit-snapshot-20261014/test/visual_closure/actual_production_pages_golden_test.dart: (tearDownAll)",
+      "01:27 +360: All tests passed!"
+    ]
+  }
+]

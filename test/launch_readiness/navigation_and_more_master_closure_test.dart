@@ -85,11 +85,11 @@ void main() {
       '/settings/sharing-privacy',
       '/health-information-sources',
       '/help',
-      '/admin/ai-coach',
     ]) {
       expect(source, contains(route), reason: route);
     }
-    expect(source, contains('aiCoachAdminAccessProvider'));
+    expect(source, isNot(contains('aiCoachAdminAccessProvider')));
+    expect(source, isNot(contains("'/admin/ai-coach'")));
     expect(source, contains('cloudManualSyncStatusProvider'));
     expect(
       RegExp(r"copy\('Apps & Devices'\)").allMatches(source).length,

@@ -23,7 +23,7 @@ class SimulatorSigningFixtures(unittest.TestCase):
         self.workspace = Path(self.temp.name).resolve()
         self.app = self.workspace / "build/ios/iphonesimulator/Runner.app"
         self.app.mkdir(parents=True)
-        self.info = {"CFBundleIdentifier": SIGN.BUNDLE_ID, "CFBundleVersion": "36",
+        self.info = {"CFBundleIdentifier": SIGN.BUNDLE_ID, "CFBundleVersion": "37",
                      "CFBundleExecutable": "Runner", "DTPlatformName": "iphonesimulator",
                      "CFBundleSupportedPlatforms": ["iPhoneSimulator"]}
         self.write_info()
@@ -250,7 +250,7 @@ class SwiftPackageInventoryFixtures(unittest.TestCase):
         self.app.mkdir(parents=True)
         self.output = self.workspace / "build/qa/inventory.json"
         self.output.parent.mkdir(parents=True)
-        script = SCRIPT.with_name("bil_ios36_native_integration.sh").read_text(encoding="utf-8")
+        script = SCRIPT.with_name("bil_ios37_native_integration.sh").read_text(encoding="utf-8")
         self.inventory = script.split("<<'BIL_PRIVACY_PY'\n", 1)[1].split("\nBIL_PRIVACY_PY", 1)[0]
 
     def write_lock(self, path, document):

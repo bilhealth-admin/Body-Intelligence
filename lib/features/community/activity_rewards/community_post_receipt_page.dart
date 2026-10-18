@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
@@ -330,7 +331,7 @@ class _ReceiptPollPreview extends StatelessWidget {
   final CommunityPoll poll;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: Key('community-receipt-poll-$postId'),
     child: Padding(
       padding: const EdgeInsets.all(14),

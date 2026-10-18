@@ -32,7 +32,7 @@ void main() {
       await tester.tap(find.byKey(const Key('admin-tab-community')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('admin-action-moderators')), findsOneWidget);
-      expect(find.byKey(const Key('admin-action-approvals')), findsOneWidget);
+      expect(find.byKey(const Key('admin-action-approvals')), findsNothing);
       expect(find.byType(TextFormField), findsNothing);
       await _freeTab(tester);
       await tester.tap(find.byKey(const Key('admin-action-ai')));

@@ -541,7 +541,7 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
     final count = selected.length;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           communityText(
             dialogContext,

@@ -1,0 +1,330 @@
+[
+  {
+    "path": ".github/workflows/bil07_isolated_channels_contract_20261017.yml",
+    "state": "incoming_only"
+  },
+  {
+    "path": ".github/workflows/bil07_real_postgres_postgrest_e2e_20261017.yml",
+    "state": "incoming_only"
+  },
+  {
+    "path": ".github/workflows/bil_20261018_unified_handoff_targeted.yml",
+    "state": "incoming_only"
+  },
+  {
+    "path": ".github/workflows/bil_admin_revoke_verified_free_targeted.yml",
+    "state": "incoming_only"
+  },
+  {
+    "path": ".github/workflows/bil_meal_permission_admin_targeted_20261017.yml",
+    "state": "identical"
+  },
+  {
+    "path": ".github/workflows/bil_photo_entry_ux_targeted_20261017.yml",
+    "state": "identical"
+  },
+  {
+    "path": ".github/workflows/bil_v36_reliability_isolated_20261017.yml",
+    "state": "incoming_only"
+  },
+  {
+    "path": "docs/qa_next/BIL_20261017_ADMIN_GRANT_REVOKE_TO_VERIFIED_FREE_HANDOFF_AR.md",
+    "state": "identical"
+  },
+  {
+    "path": "docs/qa_next/BIL_20261017_BIL07_CHANNELS_ISOLATED_PROPOSAL_AR.md",
+    "state": "incoming_only"
+  },
+  {
+    "path": "docs/qa_next/BIL_20261017_FOOD_SEARCH_PERMISSION_ADMIN_CODEX_HANDOFF_AR.md",
+    "state": "identical"
+  },
+  {
+    "path": "docs/qa_next/BIL_20261017_LOGFOOD_QUICKADD_CAMERA_CODEX_MERGE_AR.md",
+    "state": "identical"
+  },
+  {
+    "path": "docs/qa_next/BIL_20261017_POSTGRES_POSTGREST_ISOLATED_E2E_AR.md",
+    "state": "incoming_only"
+  },
+  {
+    "path": "docs/qa_next/BIL_20261017_V36_RUNTIME_RELIABILITY_ISOLATED_AUDIT_AR.md",
+    "state": "incoming_only"
+  },
+  {
+    "path": "docs/qa_next/BIL_20261018_CODEX_UNIFIED_ALL_FIXES_ADMIN_WEB_CLOUD_COACH_HANDOFF_AR.md",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/app/router/app_router.dart",
+    "state": "clean_3way"
+  },
+  {
+    "path": "lib/app/router/bil_quick_add_photo_flow.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/app/router/bil_quick_add_presenter.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/commerce/presentation/optional_access_offer.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/commerce/repositories/server_entitlement_repository.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/commerce/services/store_confirmation_journal.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/data/supabase_community_channels_repository.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/domain/community_channel_models.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/domain/community_channels_repository.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/presentation/community_channel_composer.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/presentation/community_channel_message_tile.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/presentation/community_channel_transcript.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/presentation/community_channels_copy.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/channels/presentation/community_channels_page.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/community/data/community_feed_cache.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/daily_log/daily_log_capture_actions.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/daily_log/daily_log_meal_entry.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "lib/features/daily_log/daily_log_meal_search.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "lib/features/daily_log/daily_log_mutation_actions.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "lib/features/daily_log/daily_log_navigation_actions.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "lib/features/daily_log/daily_log_page.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "lib/features/daily_log/food_log_actions.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/daily_log/food_log_page.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/daily_log/presentation/daily_log_meal_detail_items.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+    "state": "clean_3way"
+  },
+  {
+    "path": "lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart",
+    "state": "clean_3way"
+  },
+  {
+    "path": "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+    "state": "clean_3way"
+  },
+  {
+    "path": "lib/features/nutrition/food_page.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/nutrition/presentation/food_barcode_scanner_page.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/nutrition/presentation/food_page_actions.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/nutrition/presentation/meal_vision_consent_gate.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/nutrition/services/meal_voice_input_service.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/profile/premium_profile_actions.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/profile/premium_profile_page.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/settings/cloud_sync_status_presentation.dart",
+    "state": "clean_3way"
+  },
+  {
+    "path": "lib/features/settings/settings_page.dart",
+    "state": "identical"
+  },
+  {
+    "path": "lib/features/settings/settings_page_polish.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/features/settings/sharing_privacy_cloud_sync_tile.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "lib/shared/widgets/bil_permission_recovery_dialog.dart",
+    "state": "identical"
+  },
+  {
+    "path": "supabase/functions/verify-store-purchase/store_backend.ts",
+    "state": "incoming_only"
+  },
+  {
+    "path": "supabase/functions/verify-store-purchase/store_reconciliation_http_denial_test.ts",
+    "state": "incoming_only"
+  },
+  {
+    "path": "supabase/migrations/20261017210000_bil07_community_channels_isolated.sql",
+    "state": "incoming_only"
+  },
+  {
+    "path": "supabase/migrations/20261017211000_bil07_channel_reporting_isolated.sql",
+    "state": "incoming_only"
+  },
+  {
+    "path": "supabase/tests/bil07_community_channels_isolated_pglite_test.ts",
+    "state": "incoming_only"
+  },
+  {
+    "path": "supabase/tests/bil07_real_postgrest_http_e2e.py",
+    "state": "incoming_only"
+  },
+  {
+    "path": "supabase/tests/fixtures/bil07_real_postgres_auth.sql",
+    "state": "incoming_only"
+  },
+  {
+    "path": "supabase/tests/fixtures/bil07_real_postgres_seed.sql",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/app/router/bil_quick_add_presenter_test.dart",
+    "state": "identical"
+  },
+  {
+    "path": "test/app/router/mobile_admin_removal_contract_test.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "test/features/cloud_platform/cloud_manual_sync_outcome_copy_test.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/features/commerce/admin_revocation_verified_free_regression_test.dart",
+    "state": "identical"
+  },
+  {
+    "path": "test/features/commerce/store_confirmation_journal_test.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/features/community/community_channels_safety_action_test.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/features/community/community_feed_cache_test.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/features/daily_log/daily_log_food_add_flow_test.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "test/features/daily_log/diary_search_detail_25_locale_test.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/features/daily_log/diary_search_race_test.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "test/features/daily_log/meal_detail_add_button_regression_test.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "test/features/daily_log/meal_photo_initial_action_test.dart",
+    "state": "identical"
+  },
+  {
+    "path": "test/features/daily_log/meal_search_prefix_matrix_test.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/features/daily_log/quick_add_meal_camera_contract_test.dart",
+    "state": "identical"
+  },
+  {
+    "path": "test/features/intelligence_center/ai_coach_failure_surface_regression_test.dart",
+    "state": "incoming_only"
+  },
+  {
+    "path": "test/features/settings/more_premium_polish_contract_test.dart",
+    "state": "conflict"
+  },
+  {
+    "path": "test/features/settings/more_section_headings_test.dart",
+    "state": "clean_3way"
+  },
+  {
+    "path": "test/shared/widgets/bil_permission_recovery_dialog_test.dart",
+    "state": "identical"
+  },
+  {
+    "path": "tool/release/check_public_workout_cdn_samples.py",
+    "state": "incoming_only"
+  },
+  {
+    "path": "tool/release/test_verify_android_16k_failure_contract.py",
+    "state": "incoming_only"
+  },
+  {
+    "path": "tool/release/verify_android_16k_alignment.py",
+    "state": "clean_3way"
+  }
+]

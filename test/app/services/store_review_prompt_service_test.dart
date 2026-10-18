@@ -206,7 +206,7 @@ void main() {
     expect(serviceSource, contains('_review.requestReview()'));
     expect(serviceSource, isNot(contains('openStoreListing')));
     expect(serviceSource, isNot(contains('showDialog')));
-    expect(serviceSource, isNot(contains('showModalBottomSheet')));
+    expect(serviceSource, isNot(contains('showBilPearlBottomSheet')));
     expect(appSource, isNot(contains('Do you like BIL')));
     expect(appSource, isNot(contains('Would you rate BIL 5 stars')));
     expect(

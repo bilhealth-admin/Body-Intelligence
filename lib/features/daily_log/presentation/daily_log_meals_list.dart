@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -311,7 +312,7 @@ class _DiaryMealCard extends StatelessWidget {
         ),
       ],
     );
-    return Card(
+    return BilPearlMaterialCard(
       margin: EdgeInsets.zero,
       elevation: 0,
       color: scheme.surface,

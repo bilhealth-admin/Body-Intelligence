@@ -5,7 +5,7 @@ extension _DashboardPreferencesSignOut on _DashboardPreferencesPageState {
     BuildContext context,
     String ownerId,
     bool sessionReady,
-  ) => Card(
+  ) => BilPearlMaterialCard(
     clipBehavior: Clip.antiAlias,
     child: ListTile(
       key: const Key('dashboard-preferences-sign-out'),

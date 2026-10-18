@@ -116,7 +116,7 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
     if (action != 'delete' || _deleting) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(communityText(context, 'Delete post?', 'حذف المشاركة؟')),
         content: Text(
           communityText(

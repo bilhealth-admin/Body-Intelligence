@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
@@ -67,7 +68,7 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
     );
     final entered = await showDialog<double>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(dailyCheckInText(context, 'Enter weight')),
         content: TextField(
           controller: controller,

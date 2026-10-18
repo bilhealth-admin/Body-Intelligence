@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -219,7 +220,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
           icon: const Icon(Icons.person_off_outlined),
           onPressed: _repository == null
               ? null
-              : () => showModalBottomSheet<void>(
+              : () => showBilPearlBottomSheet<void>(
                   context: context,
                   isScrollControlled: true,
                   useSafeArea: true,
@@ -275,7 +276,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 20),
-                  Card(
+                  BilPearlMaterialCard(
                     child: Column(
                       children: [
                         ListTile(
@@ -415,7 +416,7 @@ class _SafetyTile extends StatelessWidget {
   final String body;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     child: ListTile(
       leading: BilSemanticIconBadge(kind: kind),
       title: Text(title),

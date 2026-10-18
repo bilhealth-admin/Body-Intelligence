@@ -60,7 +60,13 @@ void main() {
     // The atomic bridge submits only the recognized, reviewed text snapshot.
     expect(page, contains('textOverride: submission.text'));
     expect(page, contains('inputChannel: CoachInputChannel.voice'));
-    expect(page, contains('autoDetectLanguage: true'));
+    expect(
+      page,
+      contains(
+        'autoDetectLanguage: defaultTargetPlatform != TargetPlatform.iOS',
+      ),
+    );
+    expect(page, contains('localeId: coachIosSpeechLocaleId('));
     expect(page, isNot(contains('_startCloudVoiceCapture')));
     expect(page, isNot(contains('cloudVoice.start')));
     expect(page, isNot(contains('base64Audio')));

@@ -34,7 +34,7 @@ void main() {
     );
     expect(
       CommunityDeepLink.routeFor(Uri.parse('bil://community/moderation')),
-      '/community/moderation',
+      isNull,
     );
     expect(
       CommunityDeepLink.routeFor(
@@ -191,7 +191,6 @@ void main() {
       'community/messages/': '/community/messages',
       'community/rewards/': '/community/rewards',
       'community/messages/new/': '/community/messages/new',
-      'community/moderation/': '/community/moderation',
       'community/safety/': '/community/safety',
       'settings/': '/settings',
       'settings/notifications/': '/notification-settings',

@@ -67,7 +67,7 @@ extension _ProgressPageSeries on _ProgressPageState {
           ],
         ),
         const SizedBox(height: 16),
-        Card(
+        BilPearlMaterialCard(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
           child: Column(

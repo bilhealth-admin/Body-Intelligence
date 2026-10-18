@@ -9,9 +9,12 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
     }
     final scheme = Theme.of(context).colorScheme;
     final coachContext = ref.watch(coachHealthBriefProvider);
-    // Do not retain a previous owner's/category's brief while its current
-    // bounded provider is rebuilding or access has been withdrawn.
-    final snapshot = coachContext.isLoading ? null : coachContext.asData?.value;
+    // Keep the opening transcript stable for same-dependency data refreshes.
+    // Dependency reloads (including owner or context-permission changes) use
+    // the loading fallback instead of retaining the previous snapshot.
+    final snapshot =
+        coachContext.asData?.value ??
+        (coachContext.isRefreshing ? coachContext.value : null);
     final dailyBrief = snapshot == null
         ? null
         : const CoachDailyBriefEngine().build(
@@ -163,7 +166,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  _buildCoachPermissionMenu(),
+                                  _buildCoachQuickPromptMenu(),
                                   Expanded(
                                     child: listening
                                         ? _ListeningComposerLabel(
@@ -196,6 +199,9 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                             textInputAction:
                                                 TextInputAction.send,
                                             onTap: _scrollToLatest,
+                                            onTapOutside: (_) => FocusScope.of(
+                                              context,
+                                            ).unfocus(),
                                             onSubmitted: (_) => ask(),
                                             scrollPadding:
                                                 const EdgeInsets.symmetric(

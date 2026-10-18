@@ -83,7 +83,7 @@ void main() {
         await tester.pumpAndSettle();
         await captureClosureSurface(
           tester,
-          find.byType(AlertDialog),
+          find.bySubtype<AlertDialog>(),
           'barcode-review-$locale-320-keyboard-2x',
         );
         await tester.tap(use);

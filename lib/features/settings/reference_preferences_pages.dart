@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_pearl_alert_dialog.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
@@ -371,7 +372,7 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
       final controller = TextEditingController();
       final key = await showDialog<String>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => BilPearlMaterialAlertDialog(
           title: Text(_diaryText(context, 'Create access key')),
           content: TextField(
             controller: controller,

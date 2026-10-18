@@ -7,29 +7,35 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
   ),
   GoRoute(
     path: '/wellness/sleep',
-    builder: (_, _) => const PremiumRouteGlassGate(
-      feature: PremiumGateFeature.sleep,
-      child: BilFeatureEntrySplashGate(
-        kind: BilFeatureEntryKind.sleep,
-        child: SleepTrackerPage(),
+    pageBuilder: (_, _) => const NoTransitionPage(
+      child: PremiumRouteGlassGate(
+        feature: PremiumGateFeature.sleep,
+        child: BilFeatureEntrySplashGate(
+          kind: BilFeatureEntryKind.sleep,
+          child: SleepTrackerPage(),
+        ),
       ),
     ),
   ),
   GoRoute(
     path: '/wellness/workouts',
-    builder: (_, state) => BilFeatureEntrySplashGate(
-      kind: BilFeatureEntryKind.videos,
-      child: BilWorkoutRoutinesPage(
-        initialItemId: state.uri.queryParameters['item'],
+    pageBuilder: (_, state) => NoTransitionPage(
+      child: BilFeatureEntrySplashGate(
+        kind: BilFeatureEntryKind.videos,
+        child: BilWorkoutRoutinesPage(
+          initialItemId: state.uri.queryParameters['item'],
+        ),
       ),
     ),
   ),
   GoRoute(
     path: '/wellness/workouts/routines',
-    builder: (_, state) => BilFeatureEntrySplashGate(
-      kind: BilFeatureEntryKind.videos,
-      child: BilWorkoutRoutinesPage(
-        initialItemId: state.uri.queryParameters['item'],
+    pageBuilder: (_, state) => NoTransitionPage(
+      child: BilFeatureEntrySplashGate(
+        kind: BilFeatureEntryKind.videos,
+        child: BilWorkoutRoutinesPage(
+          initialItemId: state.uri.queryParameters['item'],
+        ),
       ),
     ),
   ),

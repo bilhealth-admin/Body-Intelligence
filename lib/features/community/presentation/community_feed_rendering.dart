@@ -47,7 +47,12 @@ extension _CommunityFeedRendering on _FeedTabState {
                     key: PageStorageKey(
                       'community-feed-scroll-${visit.ownerId}-${widget.preview.visit.epoch}-${widget.preview.locale}-${_selectedFeedMode.wireValue}',
                     ),
-                    physics: const AlwaysScrollableScrollPhysics(),
+                    // Keep the post surface pinned during pull-to-refresh.
+                    // The refresh indicator still receives overscroll while
+                    // ClampingScrollPhysics avoids iOS bounce moving the feed.
+                    physics: const ClampingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
                     slivers: [
                       SliverToBoxAdapter(
                         child: CommunityPolicyNotice(
@@ -114,9 +119,8 @@ extension _CommunityFeedRendering on _FeedTabState {
                         )
                       else if (loading && !matched)
                         const SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: 96,
-                            child: Center(child: CircularProgressIndicator()),
+                          child: _CommunityFeedSkeleton(
+                            key: Key('community-feed-cold-placeholder'),
                           ),
                         )
                       else if (posts.isEmpty)
@@ -163,6 +167,11 @@ extension _CommunityFeedRendering on _FeedTabState {
                                       _membershipTierByAuthor[post.authorId],
                                   actionsEnabled:
                                       !_openingComposer && !_managingPost,
+                                  onMutation: () {
+                                    _modeReadEpoch++;
+                                    _modePages.clear();
+                                    _modePrefetch.clear();
+                                  },
                                   onAction: (value) => _managePost(post, value),
                                 ),
                               );

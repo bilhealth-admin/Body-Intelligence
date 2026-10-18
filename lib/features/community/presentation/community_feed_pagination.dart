@@ -54,53 +54,63 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     try {
       late CommunityFeedModeBatch page;
       await visit.run(() async {
-        page = await repository
-            .loadCommunityFeedCachedFirst(
-              mode: mode,
-              locale: locale,
-              current: () =>
-                  mounted && visit.isCurrent() && generation == _feedGeneration,
-              onRefresh: (updated) {
-                if (!mounted ||
-                    !visit.isCurrent() ||
-                    generation != _feedGeneration) {
-                  return;
-                }
-                setState(() {
-                  _cacheRefreshing = false;
-                  _cacheRefreshFailed = false;
-                  _feed = Future.value(_tagPosts(updated.posts, mode));
-                  _hasMore = updated.hasMore;
-                  _feedCursorPriority = updated.nextPriority;
-                  _feedCursorCreatedAt = updated.nextBefore;
-                  _feedCursorPostId = updated.nextBeforeId;
-                });
-                unawaited(
-                  presentationZone.run(
-                    () => _loadFeedExtras(visit, generation, updated.posts),
-                  ),
-                );
-              },
-              onRefreshing: () {
-                if (mounted &&
-                    visit.isCurrent() &&
-                    generation == _feedGeneration) {
-                  setState(() => _cacheRefreshing = true);
-                }
-              },
-              onRefreshError: (_) {
-                if (mounted &&
-                    visit.isCurrent() &&
-                    generation == _feedGeneration) {
-                  setState(() {
-                    _cacheRefreshing = false;
-                    _cacheRefreshFailed = true;
-                  });
-                }
-              },
-              limit: _FeedTabState._pageSize,
-            )
-            .timeout(const Duration(seconds: 15));
+        final prefetched = (this as _FeedTabState)._modePrefetch.remove(mode);
+        page = prefetched != null
+            ? await prefetched
+            : await repository
+                  .loadCommunityFeedCachedFirst(
+                    mode: mode,
+                    locale: locale,
+                    current: () =>
+                        mounted &&
+                        visit.isCurrent() &&
+                        generation == _feedGeneration,
+                    onRefresh: (updated) {
+                      if (!mounted ||
+                          !visit.isCurrent() ||
+                          generation != _feedGeneration) {
+                        return;
+                      }
+                      setState(() {
+                        _cacheRefreshing = false;
+                        _cacheRefreshFailed = false;
+                        (this as _FeedTabState)._rememberModePage(
+                          mode,
+                          updated,
+                        );
+                        _feed = Future.value(_tagPosts(updated.posts, mode));
+                        _hasMore = updated.hasMore;
+                        _feedCursorPriority = updated.nextPriority;
+                        _feedCursorCreatedAt = updated.nextBefore;
+                        _feedCursorPostId = updated.nextBeforeId;
+                      });
+                      unawaited(
+                        presentationZone.run(
+                          () =>
+                              _loadFeedExtras(visit, generation, updated.posts),
+                        ),
+                      );
+                    },
+                    onRefreshing: () {
+                      if (mounted &&
+                          visit.isCurrent() &&
+                          generation == _feedGeneration) {
+                        setState(() => _cacheRefreshing = true);
+                      }
+                    },
+                    onRefreshError: (_) {
+                      if (mounted &&
+                          visit.isCurrent() &&
+                          generation == _feedGeneration) {
+                        setState(() {
+                          _cacheRefreshing = false;
+                          _cacheRefreshFailed = true;
+                        });
+                      }
+                    },
+                    limit: _FeedTabState._pageSize,
+                  )
+                  .timeout(const Duration(seconds: 15));
         visit.check();
         visit.check();
         if (generation != _feedGeneration) return;
@@ -119,6 +129,10 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         _feedCursorPostId = page.nextBeforeId;
       });
       visit.check();
+      if (generation == _feedGeneration) {
+        (this as _FeedTabState)._rememberModePage(mode, page);
+        (this as _FeedTabState)._warmOtherMode(visit, mode);
+      }
       return _tagPosts(page.posts, mode);
     } on CommunityOwnerOperationCancelled {
       return const <CommunityPost>[];
@@ -221,6 +235,17 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           ...page.posts.where((post) => known.add(post.id)),
         ];
         setState(() {
+          (this as _FeedTabState)._rememberModePage(
+            mode,
+            CommunityFeedModeBatch(
+              posts: combined,
+              references: page.references,
+              hasMore: page.hasMore,
+              nextPriority: page.nextPriority,
+              nextBefore: page.nextBefore,
+              nextBeforeId: page.nextBeforeId,
+            ),
+          );
           _feed = Future.value(_tagPosts(combined, mode));
           _hasMore = page.hasMore;
           _feedCursorPriority = page.nextPriority;
@@ -285,7 +310,12 @@ extension _CommunityFeedScrollRestore on _FeedTabState {
           !_scroll.hasClients) {
         return;
       }
-      _scroll.jumpTo(target.clamp(0, _scroll.position.maxScrollExtent));
+      final bounded = target
+          .clamp(0, _scroll.position.maxScrollExtent)
+          .toDouble();
+      if ((_scroll.offset - bounded).abs() > .5) {
+        _scroll.jumpTo(bounded);
+      }
     });
   }
 }

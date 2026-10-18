@@ -7,7 +7,7 @@ extension on _ConnectedHealthPageState {
         : !kIsWeb && defaultTargetPlatform == TargetPlatform.android
         ? 'Health Connect'
         : connectedHealthText(context, 'Health source', 'مصدر صحي');
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(

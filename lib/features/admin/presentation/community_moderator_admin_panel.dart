@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,7 +44,7 @@ class _CommunityModeratorAdminPanelState
   @override
   Widget build(BuildContext context) {
     final moderators = ref.watch(communityModeratorAdminListProvider);
-    return Card(
+    return BilPearlMaterialCard(
       key: const Key('admin-community-moderators-panel'),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -267,7 +268,7 @@ class _CommunityModeratorAdminPanelState
   Future<void> _remove(CommunityModeratorAdminEntry entry) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         key: const Key('admin-community-moderator-remove-confirmation'),
         title: Text(
           _copy(

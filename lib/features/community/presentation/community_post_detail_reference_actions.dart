@@ -9,7 +9,7 @@ extension _CommunityPostDetailReferenceActions
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => _detailOwnerScope.guard(
-          AlertDialog(
+          BilPearlMaterialAlertDialog(
             title: Text(
               action == 'delete'
                   ? communityText(context, 'Delete post?', 'حذف المنشور؟')

@@ -17,8 +17,9 @@ class _CoachHero extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final compact =
         MediaQuery.textScalerOf(context).scale(1) > 1.3 ||
-        MediaQuery.sizeOf(context).width < 380;
-    final controls = Row(
+        MediaQuery.sizeOf(context).width < 520;
+    final buttonSize = compact ? 40.0 : 44.0;
+    final compactActions = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CoachHeaderAction(
@@ -29,6 +30,7 @@ class _CoachHero extends StatelessWidget {
             'ابحث في محادثاتك',
           ),
           onPressed: interactionEnabled ? onHistory : null,
+          size: buttonSize,
         ),
         _CoachHeaderAction(
           icon: Icons.history_rounded,
@@ -38,16 +40,25 @@ class _CoachHero extends StatelessWidget {
             'سجل المحادثات',
           ),
           onPressed: interactionEnabled ? onHistory : null,
+          size: buttonSize,
         ),
         _CoachHeaderAction(
           icon: Icons.more_horiz_rounded,
           label: intelligenceText(context, 'Coach controls', 'أدوات المدرب'),
           onPressed: interactionEnabled ? onMenu : null,
+          size: buttonSize,
         ),
       ],
     );
+    final backSize = 48.0;
+    final portraitSize = compact ? 40.0 : 44.0;
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        compact ? 6 : 12,
+        compact ? 3 : 6,
+        compact ? 6 : 12,
+        compact ? 3 : 6,
+      ),
       decoration: BilPearlFinish.panel(
         context,
         radius: BorderRadius.zero,
@@ -60,14 +71,14 @@ class _CoachHero extends StatelessWidget {
           Row(
             children: [
               SizedBox.square(
-                dimension: 48,
+                dimension: backSize,
                 child: IconButton(
                   onPressed: onBack,
                   tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints.tightFor(
-                    width: 48,
-                    height: 48,
+                  constraints: BoxConstraints.tightFor(
+                    width: backSize,
+                    height: backSize,
                   ),
                   icon: BilGlassPressFeedback(
                     child: Icon(
@@ -81,68 +92,56 @@ class _CoachHero extends StatelessWidget {
                 ),
               ),
               _CoachHeroPortrait(
-                size: 48,
+                size: portraitSize,
                 onTap: interactionEnabled ? onHistory : null,
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: 6),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      intelligenceText(context, 'AI Coach', 'المدرب الذكي'),
-                      style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    if (!compact)
-                      Text(
-                        intelligenceText(
-                          context,
-                          'Your health partner, always with you',
-                          'شريك صحتك، معك دائمًا',
-                        ),
-                        style: TextStyle(
-                          fontSize: 9,
-                          color: scheme.onSurfaceVariant,
-                          height: 1.4,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              if (!compact) controls,
-            ],
-          ),
-          if (compact) ...[
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    intelligenceText(
-                      context,
-                      'Your health partner, always with you',
-                      'شريك صحتك، معك دائمًا',
-                    ),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: scheme.onSurfaceVariant,
-                      height: 1.4,
-                    ),
+                child: Text(
+                  intelligenceText(context, 'AI Coach', 'المدرب الذكي'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(width: 8),
-                controls,
-              ],
+              ),
+              const SizedBox(width: 4),
+              const CommunityGoldBalanceAction(
+                compact: true,
+                showBalance: false,
+                showEarn: true,
+              ),
+              compactActions,
+            ],
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: backSize + portraitSize + 6,
+              end: 8,
             ),
-          ],
-          const Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: CommunityGoldBalanceAction(compact: true),
+            child: Transform.translate(
+              offset: const Offset(0, -4),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  intelligenceText(
+                    context,
+                    'Your health partner, always with you',
+                    'شريك صحتك، معك دائمًا',
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: scheme.onSurfaceVariant,
+                    height: 1.15,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -155,20 +154,23 @@ class _CoachHeaderAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
+    this.size = 48,
   });
   final IconData icon;
   final String label;
   final VoidCallback? onPressed;
+  final double size;
   @override
   Widget build(BuildContext context) => SizedBox.square(
-    dimension: 48,
-    child: IconButton(
-      tooltip: label,
-      onPressed: onPressed,
-      padding: const EdgeInsets.all(5),
-      constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-      icon: BilGlassPressFeedback(
-        child: Icon(
+    dimension: size,
+    child: BilGlassPressFeedback(
+      always: true,
+      child: IconButton(
+        tooltip: label,
+        onPressed: onPressed,
+        padding: const EdgeInsets.all(5),
+        constraints: BoxConstraints.tightFor(width: size, height: size),
+        icon: Icon(
           icon,
           size: 19,
           color: Theme.of(context).colorScheme.onSurfaceVariant,

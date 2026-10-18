@@ -15,7 +15,7 @@ void main() {
     ).readAsStringSync();
 
     expect(dashboard, contains('CloudSyncConsentNotice'));
-    expect(notice, contains('showModalBottomSheet<bool>'));
+    expect(notice, contains('showBilPearlBottomSheet<bool>'));
     expect(notice, isNot(contains('showDialog<bool>')));
     expect(notice, contains('isDismissible: false'));
     expect(notice, contains('enableDrag: false'));

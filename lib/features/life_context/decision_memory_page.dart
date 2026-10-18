@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:convert';
 
@@ -33,7 +34,7 @@ class DecisionMemoryPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
+          BilPearlMaterialCard(
             color: Theme.of(context).colorScheme.primaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(18),
@@ -75,7 +76,7 @@ class DecisionMemoryPage extends ConsumerWidget {
             loading: () => const LinearProgressIndicator(),
             error: (_, _) => Text(t('Could not load Coach memories.')),
             data: (rows) => rows.isEmpty
-                ? Card(
+                ? BilPearlMaterialCard(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
@@ -88,7 +89,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                 : Column(
                     children: rows
                         .map(
-                          (row) => Card(
+                          (row) => BilPearlMaterialCard(
                             child: ListTile(
                               leading: BilGlassPressFeedback(
                                 child: Icon(_memoryKindIcon(row['kind'])),
@@ -142,7 +143,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                 Text(t('Could not load decision memories. Try again.')),
             data: (rows) {
               if (rows.isEmpty) {
-                return Card(
+                return BilPearlMaterialCard(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Text(
@@ -169,7 +170,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                         (jsonDecode(row.evidenceJson) as List<dynamic>)
                             .map((item) => item.toString())
                             .toList();
-                    return Card(
+                    return BilPearlMaterialCard(
                       child: ExpansionTile(
                         title: Text(t(row.title)),
                         subtitle: Text('${row.dayKey} · ${t(row.response)}'),
@@ -261,7 +262,7 @@ class DecisionMemoryPage extends ConsumerWidget {
     if (id.isEmpty || expectedUpdatedAt.isEmpty || text.isEmpty) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(context.strings.text('Forget this memory?')),
         content: Text(
           '${context.strings.text('Only the memory you selected will be deleted.')}\n\n$text',
@@ -310,7 +311,7 @@ class DecisionMemoryPage extends ConsumerWidget {
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(context.strings.text('Forget memories?')),
         content: Text(
           context.strings.text(

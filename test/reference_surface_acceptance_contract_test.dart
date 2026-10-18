@@ -128,7 +128,12 @@ void main() {
         );
         expect(shell, contains('await showBilQuickAdd('));
         expect(shell, contains('originPath: paths[index]'));
-        expect(quickAdd, contains("'/quick-add/meal-camera?from=\$origin'"));
+        expect(
+          quickAdd,
+          contains(
+            'await openBilQuickAddMealPhoto(context, encodedReturnPath: origin)',
+          ),
+        );
         expect(shell, isNot(contains('vision=capture&from=\$origin')));
         expect(quickAdd, isNot(contains('vision=capture&from=\$origin')));
         expect(diary, contains("case 'barcode':"));

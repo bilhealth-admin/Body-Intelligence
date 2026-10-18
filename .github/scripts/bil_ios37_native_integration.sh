@@ -4,7 +4,7 @@ set -euo pipefail
 # The device-specific Flutter build-settings query failed on the previous
 # Intel runner. Build each real test entrypoint for the generic simulator,
 # then drive that exact bundle on both devices without another Xcode build.
-OUT=artifacts/qa/text18/ios36-simulators
+OUT=artifacts/qa/text18/ios37-simulators
 mkdir -p "$OUT"
 BOUND=.github/scripts/bil_native_bounded_command.py
 SOURCE_HEAD="$(git rev-parse HEAD)"
@@ -86,11 +86,11 @@ print(runtime['identifier'], iphone['identifier'], ipad['identifier'])
 PY
 )
 stage create-iphone 120 "$OUT/create-iphone.log" xcrun simctl create \
-  "BIL-iPhone36-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME"
+  "BIL-iPhone37-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME"
 IPHONE_UDID="$(tr -d '\r\n' < "$OUT/create-iphone.log")"
 [[ "$IPHONE_UDID" =~ ^[0-9A-Fa-f-]{36}$ ]]
 stage create-ipad 120 "$OUT/create-ipad.log" xcrun simctl create \
-  "BIL-iPad36-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME"
+  "BIL-iPad37-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME"
 IPAD_UDID="$(tr -d '\r\n' < "$OUT/create-ipad.log")"
 [[ "$IPAD_UDID" =~ ^[0-9A-Fa-f-]{36}$ ]]
 
@@ -103,7 +103,7 @@ DEFINES=(
   --dart-define=BIL_PAYMENTS_ENABLED=false
   --dart-define=BIL_ADS_ENABLED=false
   --dart-define=BIL_QA_IOS_SIMULATOR=true
-  --dart-define=BIL_QA_DEVICE_NAME=github-ios36-native-simulator
+  --dart-define=BIL_QA_DEVICE_NAME=github-ios37-native-simulator
   --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD"
   --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE"
 )
@@ -127,9 +127,9 @@ for KIND in "${KINDS[@]}"; do
   esac
   stage "$KIND-generic-build" 1800 "$OUT/$KIND-generic-build.log" \
     flutter --verbose build ios --simulator --debug --no-codesign --no-pub \
-    --build-number 36 --target "$TARGET" "${DEFINES[@]}"
+    --build-number 37 --target "$TARGET" "${DEFINES[@]}"
   APP="$GITHUB_WORKSPACE/build/ios/iphonesimulator/Runner.app"
-  test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '36'
+  test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '37'
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
   # Local pseudo-identity '-' only: no certificate, provisioning or store signing.
   # The real Keychain integration test below still decides native correctness.

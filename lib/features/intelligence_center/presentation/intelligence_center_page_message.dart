@@ -176,9 +176,7 @@ extension on _IntelligenceCenterPageState {
               ref.watch(measurementSystemProvider).value ??
               MeasurementSystem.metric,
         ),
-        onCopy: message.role == IntelligenceMessageRole.bil
-            ? () => unawaited(_copyCoachMessage(message))
-            : null,
+        onCopy: () => unawaited(_copyCoachMessage(message)),
         onShare: message.role == IntelligenceMessageRole.bil
             ? (anchor) => unawaited(_shareCoachMessage(message, anchor))
             : null,

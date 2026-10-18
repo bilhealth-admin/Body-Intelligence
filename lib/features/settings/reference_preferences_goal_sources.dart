@@ -83,7 +83,7 @@ class _NutritionGoalBook extends StatelessWidget {
               context.mounted &&
               identical(visit, ref.read(nutritionGoalOwnerVisitProvider)) &&
               identical(repository, ref.read(preferencesRepositoryProvider));
-          return AlertDialog(
+          return BilPearlMaterialAlertDialog(
             title: Text(context.strings.text('Health sources & methodology')),
             content: SizedBox(
               width: 600,
@@ -286,7 +286,7 @@ Future<bool> _restoreGoalSuggestion(
   final ar = Localizations.localeOf(context).languageCode == 'ar';
   final confirmed = await showDialog<bool>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
+    builder: (dialogContext) => BilPearlMaterialAlertDialog(
       title: Text(ar ? 'استعادة المقترح' : 'Restore suggestion'),
       content: Text(
         group

@@ -100,7 +100,7 @@ void main() {
         accessOffer,
         contains("push('/plans?focus=\${Uri.encodeQueryComponent(focus)}')"),
       );
-      expect(captureActions, contains('showModalBottomSheet<ImageSource>'));
+      expect(captureActions, contains('showBilModalBottomSheet<ImageSource>'));
       expect(captureActions, contains('ImageSource.camera'));
       expect(captureActions, contains('ImageSource.gallery'));
       expect(captureActions, contains('source: imageSource'));

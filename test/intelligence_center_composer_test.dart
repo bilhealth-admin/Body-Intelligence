@@ -20,6 +20,7 @@ import 'package:body_intelligence_log/features/profile/providers/user_profile_pr
 import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -105,6 +106,22 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(430, 932));
     addTearDown(() => tester.binding.setSurfaceSize(null));
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
     final db = await database(tester);
     await tester.pumpWidget(_app(db));
     await tester.pumpAndSettle();
@@ -119,6 +136,12 @@ void main() {
 
     expect(find.text('hello'), findsOneWidget);
     expect(find.textContaining('I am ready').hitTestable(), findsOneWidget);
+    final copySent = find.byTooltip('Copy message');
+    expect(copySent, findsOneWidget);
+    await tester.ensureVisible(copySent);
+    await tester.tap(copySent);
+    await tester.pump();
+    expect(copied, 'hello');
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
@@ -565,7 +588,7 @@ void main() {
 
     expect(find.byType(TabBar), findsNothing);
     expect(find.byType(TabBarView), findsNothing);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.bySubtype<AlertDialog>(), findsNothing);
     expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
     expect(find.byKey(const Key('ai-coach-voice-button')), findsOneWidget);
     expect(tester.takeException(), isNull);

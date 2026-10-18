@@ -45,7 +45,7 @@ void main() {
       tester,
       () async =>
           await repository.get('goal.calories') == '2000.0' &&
-          find.byType(AlertDialog).evaluate().isEmpty &&
+          find.bySubtype<AlertDialog>().evaluate().isEmpty &&
           find.text('2000').evaluate().isNotEmpty,
     );
     expect(await repository.get('goal.calories'), '2000.0');
@@ -72,7 +72,7 @@ void main() {
       tester,
       () async =>
           await repository.get('goal.calories') == null &&
-          find.byType(AlertDialog).evaluate().isEmpty,
+          find.bySubtype<AlertDialog>().evaluate().isEmpty,
     );
     expect(await repository.get('goal.calories'), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
@@ -98,7 +98,7 @@ void main() {
       () async => find.text('Could not save changes.').evaluate().isNotEmpty,
     );
 
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.bySubtype<AlertDialog>(), findsOneWidget);
     expect(find.text('Could not save changes.'), findsOneWidget);
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller?.text,
@@ -131,7 +131,7 @@ void main() {
       () async => find.text('Could not save changes.').evaluate().isNotEmpty,
     );
 
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.bySubtype<AlertDialog>(), findsOneWidget);
     expect(find.text('Could not save changes.'), findsOneWidget);
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller?.text,

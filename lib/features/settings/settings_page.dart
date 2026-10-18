@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../community/presentation/community_attention_scope.dart';
 import 'dart:async';
@@ -12,7 +13,6 @@ import '../../app/theme/bil_semantic_icons.dart';
 import '../../app/theme/bil_flat_icon.dart';
 import '../../core/units/measurement_units.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
-import '../admin/services/ai_coach_admin_service.dart';
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/domain/subscription_state.dart';
@@ -47,7 +47,6 @@ class SettingsPage extends ConsumerWidget {
     final photoUrl = ref.watch(profileAvatarStateProvider).url;
     final subscription = ref.watch(verifiedSubscriptionAccessProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
-    final adminAccess = ref.watch(aiCoachAdminAccessProvider);
     final name = displayName?.trim().isNotEmpty == true
         ? displayName!.trim()
         : copy('BIL member');
@@ -83,7 +82,7 @@ class SettingsPage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 96),
           children: [
-            Card(
+            BilPearlMaterialCard(
               clipBehavior: Clip.antiAlias,
               child: _ProfileSummary(
                 name: name,
@@ -244,18 +243,8 @@ class SettingsPage extends ConsumerWidget {
                 _CloudSyncRow(label: copy('Sync now'), status: cloudSyncStatus),
               ],
             ),
-            if (adminAccess.asData?.value == true)
-              _MoreSection(
-                title: copy('Administration'),
-                children: [
-                  _MoreRow(
-                    copy('BIL Administration'),
-                    '/admin/ai-coach',
-                    key: const Key('settings-ai-coach-admin-entry'),
-                    showDivider: false,
-                  ),
-                ],
-              ),
+            // Administrative operations are web-only and never exposed
+            // as hidden client routes or More actions.
           ],
         ),
       ),
@@ -548,10 +537,7 @@ class _MoreRow extends StatelessWidget {
 
   bool get _isDanger => route == '/help/delete-account';
 
-  BilSemanticIconKind get _fallbackKind => switch (Uri.parse(route).path) {
-    '/admin/ai-coach' => BilSemanticIconKind.moderation,
-    _ => BilSemanticIconKind.preferences,
-  };
+  BilSemanticIconKind get _fallbackKind => BilSemanticIconKind.preferences;
 
   @override
   Widget build(BuildContext context) {

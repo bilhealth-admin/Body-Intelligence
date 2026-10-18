@@ -99,16 +99,29 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     });
   }
 
+  void _openFoodSearchView() {
+    if (!mounted ||
+        mealSaving ||
+        selectedFood != null ||
+        !mealSearchActive ||
+        !foodSearch.isAttached ||
+        foodSearch.isOpen) {
+      return;
+    }
+    foodSearch.openView();
+  }
+
   void _openFoodSearchAfterBuild([int attempt = 0]) {
+    if (mealSearchOpenScheduled) return;
+    mealSearchOpenScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      mealSearchOpenScheduled = false;
+      if (!mounted || selectedFood != null || !mealSearchActive) return;
       if (foodSearch.isAttached) {
-        foodSearch.openView();
-        return;
+        _openFoodSearchView();
+      } else if (attempt < 3) {
+        _openFoodSearchAfterBuild(attempt + 1);
       }
-      // SearchAnchor is inserted by the same state change that exposes the
-      // meal-entry surface. On slower devices it may attach one frame later.
-      if (attempt < 3) _openFoodSearchAfterBuild(attempt + 1);
     });
   }
 
@@ -191,7 +204,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
   }
 
   Future<void> _showDiaryCopyOptions() async {
-    final selection = await showModalBottomSheet<String>(
+    final selection = await showBilPearlBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(

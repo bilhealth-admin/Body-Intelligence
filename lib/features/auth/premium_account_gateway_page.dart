@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:ui';
@@ -86,7 +87,7 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         backgroundColor: Theme.of(dialogContext).colorScheme.surface,
         title: Text(
           authEntryText(context, AuthEntryCopyKey.restorePreviousDataQuestion),

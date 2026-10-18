@@ -8,7 +8,6 @@ import '../environment/app_environment.dart';
 import '../../features/analytics/analytics_page.dart';
 import '../../features/analytics/nutrition_analytics_page.dart';
 import '../../features/ads/advertising_privacy_page.dart';
-import '../../features/admin/presentation/ai_coach_admin_page.dart';
 import '../../features/analytics/weekly_report_page.dart';
 import '../../features/settings/language_settings_page.dart';
 import '../../features/auth/login_page.dart';
@@ -52,14 +51,12 @@ import '../../features/community/presentation/community_surface.dart';
 import '../../features/community/presentation/community_bil_code_page.dart';
 import '../../features/community/presentation/community_people_page.dart';
 import '../../features/community/presentation/community_connections_page.dart';
-import '../../features/community/presentation/community_food_review_page.dart';
 import '../../features/community/presentation/community_profile_page.dart';
 import '../../features/community/presentation/community_safety_page.dart';
 import '../../features/community/presentation/community_messages_page.dart';
 import '../../features/community/presentation/community_notifications_page.dart';
 import '../../features/community/presentation/community_invite_landing_page.dart';
 import '../../features/community/presentation/community_rewards_page.dart';
-import '../../features/community/presentation/community_post_moderation_page.dart';
 import '../../features/life_context/life_context_page.dart';
 import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
@@ -296,9 +293,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/nutrition-plans',
-        builder: (_, _) => const BilFeatureEntrySplashGate(
-          kind: BilFeatureEntryKind.diet,
-          child: NutritionPathwaysPage(),
+        pageBuilder: (_, _) => const NoTransitionPage(
+          child: BilFeatureEntrySplashGate(
+            kind: BilFeatureEntryKind.diet,
+            child: NutritionPathwaysPage(),
+          ),
         ),
       ),
       GoRoute(
@@ -510,10 +509,6 @@ class AppRouter {
           );
         },
       ),
-      GoRoute(
-        path: '/admin/ai-coach',
-        builder: (_, _) => const AiCoachAdminPage(),
-      ),
       ShellRoute(
         // Startup is a full-screen gate. Entering the product must replace it
         // atomically; a platform page transition would expose the blue splash
@@ -591,12 +586,14 @@ class AppRouter {
           ),
           GoRoute(
             path: '/intelligence-center',
-            builder: (_, state) => PremiumRouteGlassGate(
-              feature: PremiumGateFeature.aiCoach,
-              child: IntelligenceCenterPage(
-                startWithVisionCapture:
-                    state.uri.queryParameters['vision'] == 'capture',
-                initialBarcode: state.uri.queryParameters['barcode'],
+            pageBuilder: (_, state) => NoTransitionPage(
+              child: PremiumRouteGlassGate(
+                feature: PremiumGateFeature.aiCoach,
+                child: IntelligenceCenterPage(
+                  startWithVisionCapture:
+                      state.uri.queryParameters['vision'] == 'capture',
+                  initialBarcode: state.uri.queryParameters['barcode'],
+                ),
               ),
             ),
           ),
@@ -618,7 +615,11 @@ class AppRouter {
             path: '/analytics',
             builder: (_, _) => const AnalyticsPage(showDashboardBack: true),
           ),
-          GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
+          GoRoute(
+            path: '/settings',
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: SettingsPage()),
+          ),
         ],
       ),
       GoRoute(

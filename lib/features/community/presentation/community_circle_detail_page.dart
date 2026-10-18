@@ -127,7 +127,7 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
     try {
       await visit.run(() async {
         visit.check();
-        await showModalBottomSheet<void>(
+        await showBilPearlBottomSheet<void>(
           context: context,
           isScrollControlled: true,
           showDragHandle: true,

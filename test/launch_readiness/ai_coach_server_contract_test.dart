@@ -22,13 +22,25 @@ void main() {
     expect(source, contains('BIL_GEMINI_COST_RATES_JSON'));
     expect(source, contains('attempt <= 1'));
     expect(source, contains('geminiAttemptTimeoutMs = 10_000'));
-    expect(source, contains('AbortSignal.timeout(geminiAttemptTimeoutMs)'));
+    expect(
+      source,
+      matches(
+        RegExp(
+          r'AbortSignal\.timeout\(\s*Math\.max\(1, Math\.min\(geminiAttemptTimeoutMs, attemptTimeoutMs\)\),?\s*\)',
+        ),
+      ),
+    );
     expect(source, contains('maxOutputTokens'));
     expect(source, contains('responseMimeType: "application/json"'));
     expect(source, contains('responseSchema: coachResponseSchema('));
     expect(source, contains('citationCatalogVersion,\n            )'));
     expect(source, contains('function coachResponseSchema('));
-    expect(source, contains('extractModelText(parts)'));
+    expect(source, contains('extractModelText('));
+    expect(
+      source,
+      contains('content?.parts as Array<Record<string, unknown>> | undefined'),
+    );
+    expect(source, contains('parseModelJson('));
     expect(source, contains('system,\n      4096,'));
     expect(source, contains('const providerContext = context'));
     expect(source, contains('requires_confirmation: true'));
@@ -74,8 +86,13 @@ void main() {
     final bridge = File(
       'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILSpeechBridge.kt',
     ).readAsStringSync();
-    expect(page, contains('autoDetectLanguage: true'));
-    expect(page, contains('localeId: null'));
+    expect(
+      page,
+      contains(
+        'autoDetectLanguage: defaultTargetPlatform != TargetPlatform.iOS',
+      ),
+    );
+    expect(page, contains('localeId: coachIosSpeechLocaleId('));
     expect(page, isNot(contains('previousUserMessage')));
     // Native capture now requires the owned media request and a guarded
     // draft writer; old one-argument source text was no longer the contract.

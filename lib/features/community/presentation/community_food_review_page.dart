@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -33,7 +34,7 @@ class _CommunityFoodReviewPageState extends State<CommunityFoodReviewPage> {
   Future<void> _review(Map<String, dynamic> item, String verdict) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => BilPearlMaterialAlertDialog(
         title: Text(communityText(context, 'Confirm review', 'تأكيد المراجعة')),
         content: Text(
           _arabic
@@ -131,7 +132,7 @@ class _CommunityFoodReviewPageState extends State<CommunityFoodReviewPage> {
               if (item['observed_confidence'] case final String value)
                 '${communityText(context, 'confidence', 'ثقة')}: $value',
             ];
-            return Card(
+            return BilPearlMaterialCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(

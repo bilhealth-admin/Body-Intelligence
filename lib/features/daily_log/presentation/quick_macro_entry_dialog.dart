@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
@@ -172,7 +173,7 @@ class _QuickMacroEntryDialogState extends State<_QuickMacroEntryDialog> {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: !saving,
-      child: Dialog(
+      child: BilPearlMaterialDialog(
         key: const Key('quick-macro-dialog'),
         insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
         clipBehavior: Clip.antiAlias,

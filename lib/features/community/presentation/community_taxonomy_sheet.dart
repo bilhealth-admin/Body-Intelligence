@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -71,7 +72,7 @@ class CommunityTaxonomySheet extends StatelessWidget {
   static Future<void> show(
     BuildContext context, {
     required ValueChanged<String> onSelectTag,
-  }) => showModalBottomSheet<void>(
+  }) => showBilPearlBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
@@ -190,7 +191,7 @@ class CommunityTaxonomySheet extends StatelessWidget {
             ],
             const SizedBox(height: 16),
             for (final category in categories)
-              Card(
+              BilPearlMaterialCard(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: BilSemanticIconBadge(

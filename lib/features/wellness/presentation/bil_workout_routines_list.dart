@@ -452,7 +452,7 @@ class _WorkoutRoutineCard extends StatelessWidget {
     final theme = Theme.of(context);
     return SizedBox(
       height: 352,
-      child: Card(
+      child: BilPearlMaterialCard(
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
         child: InkWell(

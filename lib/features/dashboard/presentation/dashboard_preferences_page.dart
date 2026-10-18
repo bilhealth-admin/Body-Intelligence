@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,7 @@ part 'dashboard_preferences_actions.dart';
 part 'dashboard_preferences_catalog.dart';
 part 'dashboard_preferences_polish.dart';
 part 'dashboard_preferences_body.dart';
+part 'dashboard_preferences_body_done_action.dart';
 part 'dashboard_preferences_sign_out.dart';
 
 @visibleForTesting
@@ -36,6 +38,7 @@ class DashboardPreferencesPage extends ConsumerStatefulWidget {
 class _DashboardPreferencesPageState
     extends ConsumerState<DashboardPreferencesPage> {
   bool _saving = false;
+  bool _restoringDefaults = false;
   bool _signingOut = false;
   String? _savingSection;
   // A single switch save must not dim every control or flash a page-wide

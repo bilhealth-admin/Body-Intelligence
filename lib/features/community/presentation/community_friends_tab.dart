@@ -132,7 +132,7 @@ class _FriendsTabState extends State<_FriendsTab>
                         profile?['display_name'] as String? ??
                         communityText(context, 'BIL member', 'عضو BIL');
                     final accepted = row['status'] == 'accepted';
-                    return Card(
+                    return BilPearlMaterialCard(
                       child: ListTile(
                         leading: BilAccountAvatar(
                           radius: 20,

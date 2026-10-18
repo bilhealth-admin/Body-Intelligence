@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ import 'dietary_system_labels.dart';
 import 'domain/goal_timeline_estimator.dart';
 import 'goal_timeline_card.dart';
 import 'plan_navigation_contract.dart';
+import 'plan_pathway_context_card.dart';
 import 'providers/user_profile_provider.dart';
 import 'profile_locale_copy.dart';
 
@@ -43,6 +45,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
   bool initialized = false;
   bool saving = false;
   bool leaving = false;
+  bool _approvedPop = false;
   DietaryPattern selectedPattern = DietaryPattern.omnivore;
   String selectedApproach = 'balanced';
   DietaryPreferences? initialDietaryPreferences;
@@ -69,7 +72,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
       if (hasUnsavedChanges) {
         final discard = await showDialog<bool>(
           context: context,
-          builder: (dialogContext) => AlertDialog(
+          builder: (dialogContext) => BilPearlMaterialAlertDialog(
             title: Text(context.strings.text('Discard changes?')),
             content: Text(context.strings.text('You have unsaved changes.')),
             actions: [
@@ -86,10 +89,21 @@ class _PlanPageState extends ConsumerState<PlanPage> {
         );
         if (discard != true || !mounted) return;
       }
-      context.go(widget.origin.returnLocation);
+      await _returnToOrigin();
     } finally {
       leaving = false;
     }
+  }
+
+  Future<void> _returnToOrigin() async {
+    if (!mounted) return;
+    if (!context.canPop()) {
+      context.go(widget.origin.returnLocation);
+      return;
+    }
+    if (!_approvedPop) setState(() => _approvedPop = true);
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) context.pop();
   }
 
   @override
@@ -121,7 +135,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
       }
     }
     return PopScope(
-      canPop: false,
+      canPop: _approvedPop || !saving && !hasUnsavedChanges && context.canPop(),
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) leave();
       },
@@ -316,7 +330,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                       ),
                     ),
                   );
-                  context.go(widget.origin.returnLocation);
+                  await _returnToOrigin();
                 }
               } on ArgumentError {
                 if (context.mounted) {
@@ -447,7 +461,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                 GoalTimelineCard(estimate: goalTimeline),
                 if (pathway != null) ...[
                   BilMobileSectionHeader(t('Selected pathway')),
-                  _PathwayContextCard(pathway: pathway),
+                  PlanPathwayContextCard(pathway: pathway),
                 ],
                 BilMobileSectionHeader(t('Default goal')),
                 ColoredBox(
@@ -625,71 +639,5 @@ class _PlanPageState extends ConsumerState<PlanPage> {
         ),
       _ => value,
     };
-  }
-}
-
-class _PathwayContextCard extends StatelessWidget {
-  const _PathwayContextCard({required this.pathway});
-
-  final NutritionPathway pathway;
-
-  @override
-  Widget build(BuildContext context) {
-    final reviewRequired =
-        pathway.safety == NutritionPathwaySafety.clinicianReview;
-    return ColoredBox(
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.route_rounded),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    profileLocaleText(
-                      context,
-                      pathway.enTitle,
-                      pathway.arTitle,
-                    ),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              profileLocaleText(
-                context,
-                pathway.enSubtitle,
-                pathway.arSubtitle,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              reviewRequired
-                  ? profileLocaleText(
-                      context,
-                      'Review draft only. Clinician review is required before activation.',
-                      'مسودة للمراجعة فقط. يلزم مختص قبل التفعيل.',
-                    )
-                  : profileLocaleText(
-                      context,
-                      'Selecting a pathway does not change your targets. No values apply until you save the plan.',
-                      'اختيار المسار لا يغيّر أهدافك. لا تُطبق أي قيم حتى تضغط حفظ الخطة.',
-                    ),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: reviewRequired
-                    ? const Color(0xFF9A6700)
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

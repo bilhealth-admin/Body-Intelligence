@@ -126,7 +126,7 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
     try {
       await visit.run(() async {
         visit.check();
-        await showModalBottomSheet<void>(
+        await showBilPearlBottomSheet<void>(
           context: context,
           isScrollControlled: true,
           showDragHandle: true,
@@ -309,7 +309,7 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
     try {
       await visit.run(() async {
         visit.check();
-        final leave = await showModalBottomSheet<bool>(
+        final leave = await showBilPearlBottomSheet<bool>(
           context: context,
           showDragHandle: true,
           builder: (sheetContext) => visit.guard(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../app/localization/app_localizations.dart';
@@ -76,7 +77,7 @@ class _CoachConversationRenameDialogState
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => BilPearlMaterialAlertDialog(
     scrollable: true,
     title: Text(
       coachRenameCopy(context, 'Rename conversation', 'إعادة تسمية المحادثة'),

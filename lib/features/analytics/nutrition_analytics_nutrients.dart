@@ -75,7 +75,7 @@ class _PremiumNutrientDashboard extends StatelessWidget {
               minimum: true,
             ),
           ];
-    return Card(
+    return BilPearlMaterialCard(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       child: Padding(
         padding: const EdgeInsets.all(16),

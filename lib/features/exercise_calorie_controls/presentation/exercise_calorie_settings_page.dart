@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,7 +120,7 @@ class _ExerciseCaloriePreferencesBodyState
         children: [
           Text(copy.intro, style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 20),
-          Card(
+          BilPearlMaterialCard(
             child: Column(
               children: [
                 SwitchListTile.adaptive(

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +22,7 @@ class FoodNameHealthSyncCard extends ConsumerWidget {
         final status =
             snapshot.data ??
             FoodNameHealthSyncPolicy.evaluate(requested: false);
-        return Card(
+        return BilPearlMaterialCard(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

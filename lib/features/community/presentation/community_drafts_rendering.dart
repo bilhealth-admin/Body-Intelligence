@@ -72,7 +72,7 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
         final title = (draft == null ? summary.title : draft.title)?.trim();
         final body = (draft?.body ?? summary.body).trim();
         final metadata = _metadata(summary, draft);
-        return Card(
+        return BilPearlMaterialCard(
           key: Key('community-draft-${summary.draftId}'),
           margin: const EdgeInsets.symmetric(vertical: 6),
           clipBehavior: Clip.antiAlias,

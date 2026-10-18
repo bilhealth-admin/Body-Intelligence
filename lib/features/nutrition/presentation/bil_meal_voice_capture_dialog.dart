@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -82,7 +83,7 @@ class BilMealVoiceCaptureDialog extends StatelessWidget {
         locale,
       ),
     };
-    return Dialog(
+    return BilPearlMaterialDialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
       constraints: const BoxConstraints(maxWidth: 560),

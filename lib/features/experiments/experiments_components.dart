@@ -65,7 +65,7 @@ class _ActiveExperimentCard extends StatelessWidget {
     final total = experiment.endsAt.difference(experiment.startedAt).inDays + 1;
     final elapsed = DateTime.now().difference(experiment.startedAt).inDays + 1;
     final progress = (elapsed / total).clamp(0.0, 1.0);
-    return Card(
+    return BilPearlMaterialCard(
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -147,7 +147,7 @@ class _CompletedExperimentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.strings.text;
-    return Card(
+    return BilPearlMaterialCard(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         contentPadding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
@@ -181,7 +181,7 @@ class _PresetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.strings.text;
     final scheme = Theme.of(context).colorScheme;
-    return Card(
+    return BilPearlMaterialCard(
       margin: const EdgeInsets.only(bottom: 11),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),

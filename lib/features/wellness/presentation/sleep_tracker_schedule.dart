@@ -17,14 +17,14 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
             '$windowHours h $windowMinutes min',
             '$windowHours س $windowMinutes د',
           );
-    return Card(
+    return BilPearlMaterialCard(
       key: const Key('sleep-schedule-card'),
       child: Column(
         children: [
           SwitchListTile.adaptive(
             key: const Key('sleep-schedule-toggle'),
             horizontalTitleGap: 12,
-            secondary: const BilSemanticIconBadge(
+            secondary: const _SleepSemanticGlyph(
               kind: BilSemanticIconKind.notifications,
             ),
             title: Text(
@@ -39,9 +39,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
           ListTile(
             enabled: !scheduleLoading && !scheduleSaving,
             horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.sleep,
-            ),
+            leading: const _SleepSemanticGlyph(kind: BilSemanticIconKind.sleep),
             title: Text(scheduleLabels.$1),
             trailing: Text(
               formatTime(sleepSchedule.bedHour, sleepSchedule.bedMinute),
@@ -51,7 +49,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
           ListTile(
             enabled: !scheduleLoading && !scheduleSaving,
             horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.time),
+            leading: const _SleepSemanticGlyph(kind: BilSemanticIconKind.time),
             title: Text(scheduleLabels.$2),
             trailing: Text(
               formatTime(sleepSchedule.wakeHour, sleepSchedule.wakeMinute),
@@ -61,7 +59,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
           ListTile(
             key: const Key('sleep-scheduled-window'),
             horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.time),
+            leading: const _SleepSemanticGlyph(kind: BilSemanticIconKind.time),
             title: Text(tr('Scheduled window', 'نافذة النوم المجدولة')),
             subtitle: Text(
               tr(
@@ -72,9 +70,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
           ),
           ListTile(
             horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.goals,
-            ),
+            leading: const _SleepSemanticGlyph(kind: BilSemanticIconKind.goals),
             title: Text('${tr('Sleep', 'النوم')} · ${tr('Goal', 'الهدف')}'),
             subtitle: Text(
               '${goalHours.toStringAsFixed(goalHours % 1 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
@@ -98,7 +94,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
           ),
           ListTile(
             horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(
+            leading: const _SleepSemanticGlyph(
               kind: BilSemanticIconKind.notifications,
             ),
             title: Text('${tr('Sleep', 'النوم')} · ${tr('Reminder', 'تذكير')}'),
@@ -152,6 +148,31 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Quiet monochrome sleep icons match the rest of the page's information rows.
+/// The fixed slot preserves alignment while the parent tile keeps semantics.
+class _SleepSemanticGlyph extends StatelessWidget {
+  const _SleepSemanticGlyph({required this.kind});
+
+  final BilSemanticIconKind kind;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ExcludeSemantics(
+      child: SizedBox.square(
+        dimension: 48,
+        child: Center(
+          child: Icon(
+            BilSemanticIcons.spec(kind).iconFor(theme.platform),
+            size: 20,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
       ),
     );
   }

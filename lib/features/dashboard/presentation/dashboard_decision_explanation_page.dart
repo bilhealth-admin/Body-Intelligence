@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -145,7 +146,7 @@ class _ExplanationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Card(
+    return BilPearlMaterialCard(
       margin: const EdgeInsets.only(bottom: PremiumDesignTokens.spaceMd),
       child: Padding(
         padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),

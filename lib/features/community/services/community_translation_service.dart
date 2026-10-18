@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final communityTranslationProvider = Provider<CommunityTranslationPort>(
-  (ref) => const DeviceCommunityTranslation(),
+  (ref) => CloudCommunityTranslation(),
 );
 
 class CommunityTranslationResult {
@@ -90,5 +91,75 @@ class DeviceCommunityTranslation implements CommunityTranslationPort {
     } on MissingPluginException {
       /* Unsupported hosts keep the original text. */
     }
+  }
+}
+
+/// Authenticated, explicit translation. The server key never reaches the app.
+/// Retired visits and changed accounts cannot apply a late response.
+class CloudCommunityTranslation implements CommunityTranslationPort {
+  CloudCommunityTranslation({SupabaseClient? client})
+    : _providedClient = client;
+  final SupabaseClient? _providedClient;
+  SupabaseClient get _client => _providedClient ?? Supabase.instance.client;
+  final _active = <String>{};
+  @override
+  Future<CommunityTranslationResult> translate({
+    required String requestId,
+    required Map<String, String> texts,
+    required String targetTag,
+    String? statusLabel,
+    String? cancelLabel,
+  }) async {
+    if (texts.isEmpty ||
+        texts.length > 2 ||
+        texts.keys.any((key) => key != 'title' && key != 'body') ||
+        texts.values.any((text) => text.length > 12000)) {
+      throw const FormatException('invalid_translation_input');
+    }
+    final client = _client;
+    final owner = client.auth.currentUser?.id;
+    if (owner == null) {
+      throw const FormatException('translation_session_required');
+    }
+    _active.add(requestId);
+    try {
+      final response = await client.functions
+          .invoke(
+            'community-translate',
+            body: {'texts': texts, 'targetTag': targetTag},
+          )
+          .timeout(const Duration(seconds: 18));
+      if (!_active.contains(requestId) ||
+          client.auth.currentUser?.id != owner) {
+        throw const FormatException('translation_cancelled');
+      }
+      final data = response.data;
+      final output = data is Map ? data['texts'] : null;
+      if (response.status != 200 ||
+          data is! Map ||
+          data['engine'] != 'google' ||
+          output is! Map ||
+          output.length != texts.length ||
+          texts.keys.any(
+            (key) =>
+                output[key] is! String ||
+                (texts[key]!.trim().isNotEmpty &&
+                    (output[key] as String).trim().isEmpty),
+          )) {
+        throw const FormatException('invalid_translation_result');
+      }
+      return CommunityTranslationResult(
+        {for (final key in texts.keys) key: output[key] as String},
+        'google',
+        sameLanguage: data['sameLanguage'] == true,
+      );
+    } finally {
+      _active.remove(requestId);
+    }
+  }
+
+  @override
+  Future<void> cancel(String requestId) async {
+    _active.remove(requestId);
   }
 }

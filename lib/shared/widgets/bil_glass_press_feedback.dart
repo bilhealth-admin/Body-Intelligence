@@ -15,13 +15,15 @@ class BilGlassPressFeedback extends StatefulWidget {
   });
   final Widget child;
 
-  /// Rasterized arrows, approved dock glyphs and meal-goal edit opt in.
+  /// Force the pearl press bubble for approved non-arrow controls.
+  /// Arrow and sync glyphs keep their bubble automatically.
   final bool always;
   @override
   State<BilGlassPressFeedback> createState() => _GlassPressState();
 }
 
 class _GlassPressState extends State<BilGlassPressFeedback> {
+  static const double _sdkArrowHitTolerance = 1;
   static final _visible = <_GlassPressState>{};
   static final _lifecycle = _GlassPressLifecycle();
   static OverlayEntry? _sdkBubble;
@@ -29,10 +31,13 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
   static Offset? _origin;
   bool _pressed = false;
   bool _registered = false;
+  int? _activePointer;
+  Offset? _pressOrigin;
   bool get _eligible =>
       widget.always ||
       widget.child is Icon &&
           BilArrowGlyph.isArrow((widget.child as Icon).icon);
+
   static void _route(PointerEvent event) {
     if (event is PointerDownEvent) {
       if (_pointer != null) {
@@ -44,17 +49,15 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
       final hit = HitTestResult();
       GestureBinding.instance.hitTestInView(hit, event.position, event.viewId);
       final targets = hit.path.map((entry) => entry.target).toSet();
-      var decorated = false;
-      for (final state in _visible.toList()) {
-        final box = state._interactiveBox();
-        if (box == null || !box.attached || !targets.contains(box)) continue;
-        final rect = box.localToGlobal(Offset.zero) & box.size;
-        if (rect.contains(event.position)) {
-          state._show(true);
-          decorated = true;
-        }
-      }
-      if (!decorated) _decorateSdkArrow(hit);
+
+      // Locally wrapped app controls render their own bubble. The global path
+      // is only a fallback for framework-owned arrows such as calendar and
+      // dropdown controls, which cannot be wrapped without replacing behavior.
+      final hasLocalFeedback = _visible.any((state) {
+        final render = state.context.findRenderObject();
+        return render != null && render.attached && targets.contains(render);
+      });
+      if (!hasLocalFeedback) _decorateSdkArrow(hit, event.position);
     } else if (event.pointer == _pointer &&
         (event is PointerUpEvent ||
             event is PointerCancelEvent ||
@@ -71,55 +74,98 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
     _sdkBubble?.dispose();
     _sdkBubble = null;
     for (final state in _visible.toList()) {
+      state._activePointer = null;
+      state._pressOrigin = null;
       state._show(false);
     }
   }
 
-  static void _decorateSdkArrow(HitTestResult hit) {
-    final controls = hit.path
-        .map((entry) => entry.target)
-        .whereType<RenderObject>()
-        .where(
-          (control) =>
-              control is RenderSemanticsGestureHandler &&
-                  control.onTap != null ||
-              control is RenderSemanticsAnnotations &&
-                  (control.properties.onTap != null ||
-                      control.properties.button == true &&
-                          control.properties.enabled == true),
-        );
-    RenderParagraph? icon;
-    void findIcon(RenderObject render) {
-      if (icon != null) return;
-      if (render is RenderParagraph) {
-        final span = render.text;
-        final glyph = span.toPlainText();
-        final family = span.style?.fontFamily ?? '';
-        if (glyph.runes.length == 1 &&
-            (family.contains('MaterialIcons') ||
-                family.contains('CupertinoIcons')) &&
-            BilArrowGlyph.containsCodePoint(glyph.runes.single, family)) {
-          icon = render;
+  static void _decorateSdkArrow(HitTestResult hit, Offset globalPosition) {
+    final controls =
+        hit.path
+            .map((entry) => entry.target)
+            .whereType<RenderObject>()
+            .where(
+              (control) =>
+                  control is RenderSemanticsGestureHandler &&
+                      control.onTap != null ||
+                  control is RenderSemanticsAnnotations &&
+                      (control.properties.onTap != null ||
+                          control.properties.button == true &&
+                              control.properties.enabled == true),
+            )
+            .where((control) => control.attached && control is RenderBox)
+            .toList()
+          ..sort((left, right) {
+            final leftBox = left as RenderBox;
+            final rightBox = right as RenderBox;
+            return (leftBox.size.width * leftBox.size.height).compareTo(
+              rightBox.size.width * rightBox.size.height,
+            );
+          });
+
+    RenderParagraph? paragraph;
+    for (final control in controls) {
+      final candidates = <RenderParagraph>[];
+      void findArrows(RenderObject render) {
+        if (render is RenderParagraph) {
+          final span = render.text;
+          final glyph = span.toPlainText();
+          final family = span.style?.fontFamily ?? '';
+          if (glyph.runes.length == 1 &&
+              (family.contains('MaterialIcons') ||
+                  family.contains('CupertinoIcons')) &&
+              BilArrowGlyph.containsCodePoint(glyph.runes.single, family)) {
+            candidates.add(render);
+          }
         }
+        render.visitChildren(findArrows);
       }
-      render.visitChildren(findIcon);
+
+      findArrows(control);
+      if (candidates.isEmpty) continue;
+      double distanceTo(RenderParagraph candidate) {
+        final rect = MatrixUtils.transformRect(
+          candidate.getTransformTo(null),
+          Offset.zero & candidate.size,
+        );
+        final dx = globalPosition.dx < rect.left
+            ? rect.left - globalPosition.dx
+            : globalPosition.dx > rect.right
+            ? globalPosition.dx - rect.right
+            : 0.0;
+        final dy = globalPosition.dy < rect.top
+            ? rect.top - globalPosition.dy
+            : globalPosition.dy > rect.bottom
+            ? globalPosition.dy - rect.bottom
+            : 0.0;
+        return dx * dx + dy * dy;
+      }
+
+      candidates.sort(
+        (left, right) => distanceTo(left).compareTo(distanceTo(right)),
+      );
+      // SDK fallback feedback is for a press on the visible arrow glyph,
+      // not any nearby point inside a larger row or card hit target.
+      if (distanceTo(candidates.first) >
+          _sdkArrowHitTolerance * _sdkArrowHitTolerance) {
+        continue;
+      }
+      paragraph = candidates.first;
+      break;
     }
 
-    for (final control in controls) {
-      findIcon(control);
-      if (icon != null) break;
-    }
-    final paragraph = icon;
-    if (paragraph == null || !paragraph.attached || _visible.isEmpty) return;
+    final arrowParagraph = paragraph;
+    if (arrowParagraph == null || _visible.isEmpty) return;
     final context = _visible.first.context;
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return;
     final overlayBox = overlay.context.findRenderObject();
     if (overlayBox is! RenderBox || !overlayBox.hasSize) return;
-    final matrix = paragraph.getTransformTo(overlayBox);
-    final rect = MatrixUtils.transformRect(
+    final matrix = arrowParagraph.getTransformTo(overlayBox);
+    final overlayRect = MatrixUtils.transformRect(
       matrix,
-      Offset.zero & paragraph.size,
+      Offset.zero & arrowParagraph.size,
     );
     final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -128,8 +174,8 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
         media?.highContrast == true || media?.accessibleNavigation == true;
     _sdkBubble = OverlayEntry(
       builder: (_) => Positioned(
-        left: rect.center.dx - 24,
-        top: rect.center.dy - 24,
+        left: overlayRect.center.dx - 24,
+        top: overlayRect.center.dy - 24,
         width: 48,
         height: 48,
         child: IgnorePointer(
@@ -171,9 +217,9 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
                       child: Transform.flip(
                         flipX: matrix.storage[0] < 0,
                         child: RichText(
-                          text: paragraph.text,
-                          textDirection: paragraph.textDirection,
-                          textScaler: paragraph.textScaler,
+                          text: arrowParagraph.text,
+                          textDirection: arrowParagraph.textDirection,
+                          textScaler: arrowParagraph.textScaler,
                         ),
                       ),
                     ),
@@ -186,6 +232,26 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
       ),
     );
     overlay.insert(_sdkBubble!);
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    if (!_eligible || _activePointer != null) return;
+    _activePointer = event.pointer;
+    _pressOrigin = event.position;
+    _show(true);
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    final origin = _pressOrigin;
+    if (event.pointer != _activePointer || origin == null) return;
+    if ((event.position - origin).distance > kTouchSlop) _show(false);
+  }
+
+  void _onPointerEnd(PointerEvent event) {
+    if (event.pointer != _activePointer) return;
+    _activePointer = null;
+    _pressOrigin = null;
+    _show(false);
   }
 
   static bool _key(KeyEvent event) {
@@ -203,29 +269,6 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
       }
     }
     return false; // The original Focus/Actions pipeline owns activation.
-  }
-
-  RenderBox? _interactiveBox() {
-    RenderBox? result;
-    context.visitAncestorElements((element) {
-      final widget = element.widget;
-      final enabled = widget is InkResponse
-          ? widget.onTap != null || widget.onLongPress != null
-          : widget is GestureDetector
-          ? widget.onTap != null || widget.onLongPress != null
-          : widget is IconButton
-          ? widget.onPressed != null
-          : widget is ButtonStyleButton
-          ? widget.onPressed != null || widget.onLongPress != null
-          : null;
-      if (enabled == null) return true;
-      if (enabled) {
-        final render = element.findRenderObject();
-        if (render is RenderBox && render.hasSize) result = render;
-      }
-      return false;
-    });
-    return result;
   }
 
   void _show(bool value) {
@@ -278,7 +321,7 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
   @override
   Widget build(BuildContext context) {
     final original = widget.child;
-    final child = original is Icon && _eligible
+    final child = original is Icon && BilArrowGlyph.isArrow(original.icon)
         ? BilArrowGlyph.modern(original)
         : original;
     if (!_eligible) return child;
@@ -286,72 +329,79 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
     final media = MediaQuery.maybeOf(context);
     final solid =
         media?.highContrast == true || media?.accessibleNavigation == true;
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
-        if (_pressed)
-          Positioned.fill(
-            child: ExcludeSemantics(
-              child: IgnorePointer(
-                child: Center(
-                  child: OverflowBox(
-                    minWidth: 48,
-                    maxWidth: 48,
-                    minHeight: 48,
-                    maxHeight: 48,
-                    child: DecoratedBox(
-                      key: const Key('bil-glass-press-bubble'),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: dark ? .18 : .09,
-                            ),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: BackdropFilter(
-                          filter: ui.ImageFilter.blur(
-                            sigmaX: solid ? 0 : 8,
-                            sigmaY: solid ? 0 : 8,
-                          ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: dark
-                                    ? [
-                                        Color(
-                                          0xFF243A50,
-                                        ).withValues(alpha: solid ? 1 : .86),
-                                        Color(
-                                          0xFF15283C,
-                                        ).withValues(alpha: solid ? 1 : .74),
-                                      ]
-                                    : [
-                                        Colors.white.withValues(
-                                          alpha: solid ? 1 : .88,
-                                        ),
-                                        Color(
-                                          0xFFE4F2FC,
-                                        ).withValues(alpha: solid ? 1 : .74),
-                                      ],
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerUp: _onPointerEnd,
+      onPointerCancel: _onPointerEnd,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          if (_pressed)
+            Positioned.fill(
+              child: ExcludeSemantics(
+                child: IgnorePointer(
+                  child: Center(
+                    child: OverflowBox(
+                      minWidth: 48,
+                      maxWidth: 48,
+                      minHeight: 48,
+                      maxHeight: 48,
+                      child: DecoratedBox(
+                        key: const Key('bil-glass-press-bubble'),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: dark ? .18 : .09,
                               ),
-                              border: Border.all(
-                                color: dark
-                                    ? Colors.white.withValues(alpha: .24)
-                                    : Colors.white.withValues(alpha: .94),
-                                width: solid ? 1.5 : .9,
-                              ),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
                             ),
-                            child: const SizedBox.expand(),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: BackdropFilter(
+                            filter: ui.ImageFilter.blur(
+                              sigmaX: solid ? 0 : 8,
+                              sigmaY: solid ? 0 : 8,
+                            ),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: dark
+                                      ? [
+                                          Color(
+                                            0xFF243A50,
+                                          ).withValues(alpha: solid ? 1 : .86),
+                                          Color(
+                                            0xFF15283C,
+                                          ).withValues(alpha: solid ? 1 : .74),
+                                        ]
+                                      : [
+                                          Colors.white.withValues(
+                                            alpha: solid ? 1 : .88,
+                                          ),
+                                          Color(
+                                            0xFFE4F2FC,
+                                          ).withValues(alpha: solid ? 1 : .74),
+                                        ],
+                                ),
+                                border: Border.all(
+                                  color: dark
+                                      ? Colors.white.withValues(alpha: .24)
+                                      : Colors.white.withValues(alpha: .94),
+                                  width: solid ? 1.5 : .9,
+                                ),
+                              ),
+                              child: const SizedBox.expand(),
+                            ),
                           ),
                         ),
                       ),
@@ -360,9 +410,9 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
                 ),
               ),
             ),
-          ),
-        child,
-      ],
+          child,
+        ],
+      ),
     );
   }
 
@@ -473,9 +523,6 @@ abstract final class BilArrowGlyph {
     Icons.sync,
     Icons.sync_problem_rounded,
     Icons.sync_rounded,
-    Icons.trending_down_rounded,
-    Icons.trending_flat_rounded,
-    Icons.trending_up_rounded,
     Icons.upload_rounded,
   };
   static bool isArrow(IconData? data) =>

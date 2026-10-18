@@ -43,7 +43,7 @@ class _LegacySleepTrackerPageState
               stream: ref.read(dailyLogRepositoryProvider).watchForDay(today),
               builder: (context, snapshot) {
                 final recorded = snapshot.data?.sleepHours;
-                return Card(
+                return BilPearlMaterialCard(
                   child: Padding(
                     padding: const EdgeInsets.all(22),
                     child: Column(

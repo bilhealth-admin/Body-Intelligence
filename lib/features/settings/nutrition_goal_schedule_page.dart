@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../../shared/widgets/bil_controller_dialog.dart';
 import 'package:flutter/material.dart';
@@ -196,89 +197,93 @@ class _NutritionGoalSchedulePageState
       builder: (dialogContext) {
         String? error;
         return StatefulBuilder(
-          builder: (dialogContext, setDialogState) => AlertDialog(
-            scrollable: true,
-            title: Text(
-              _text(context, NutritionGoalScheduleRuntimeCopy.editGoal),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final entry in const <(String, int)>[
-                  (NutritionGoalScheduleRuntimeCopy.calories, 0),
-                  (NutritionGoalScheduleRuntimeCopy.carbohydratesGrams, 1),
-                  (NutritionGoalScheduleRuntimeCopy.proteinGrams, 2),
-                  (NutritionGoalScheduleRuntimeCopy.fatGrams, 3),
-                ])
-                  TextField(
-                    controller: values[entry.$2],
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: _text(context, entry.$1),
-                    ),
-                  ),
-                if (error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
+          builder: (dialogContext, setDialogState) =>
+              BilPearlMaterialAlertDialog(
+                scrollable: true,
+                title: Text(
+                  _text(context, NutritionGoalScheduleRuntimeCopy.editGoal),
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final entry in const <(String, int)>[
+                      (NutritionGoalScheduleRuntimeCopy.calories, 0),
+                      (NutritionGoalScheduleRuntimeCopy.carbohydratesGrams, 1),
+                      (NutritionGoalScheduleRuntimeCopy.proteinGrams, 2),
+                      (NutritionGoalScheduleRuntimeCopy.fatGrams, 3),
+                    ])
+                      TextField(
+                        controller: values[entry.$2],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: _text(context, entry.$1),
+                        ),
+                      ),
+                    if (error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          error!,
+                          style: TextStyle(
+                            color: Theme.of(dialogContext).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext, (true, null)),
                     child: Text(
-                      error!,
-                      style: TextStyle(
-                        color: Theme.of(dialogContext).colorScheme.error,
+                      _text(
+                        context,
+                        NutritionGoalScheduleRuntimeCopy.useDefault,
                       ),
                     ),
                   ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, (true, null)),
-                child: Text(
-                  _text(context, NutritionGoalScheduleRuntimeCopy.useDefault),
-                ),
+                  FilledButton(
+                    onPressed: () {
+                      final numbers = values
+                          .map(
+                            (controller) =>
+                                _parseGoalNumber(context, controller.text),
+                          )
+                          .toList();
+                      if (numbers.any((number) => number == null)) {
+                        setDialogState(
+                          () => error = _text(
+                            context,
+                            NutritionGoalScheduleRuntimeCopy.enterValidNumbers,
+                          ),
+                        );
+                        return;
+                      }
+                      try {
+                        final target = NutritionGoalTarget.fromGrams(
+                          calories: numbers[0]!,
+                          carbsGrams: numbers[1]!,
+                          proteinGrams: numbers[2]!,
+                          fatGrams: numbers[3]!,
+                        );
+                        Navigator.pop(dialogContext, (true, target));
+                      } on ArgumentError {
+                        setDialogState(
+                          () => error = _text(
+                            context,
+                            NutritionGoalScheduleRuntimeCopy
+                                .macroGramsMustMatchCalories,
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(
+                      _text(context, NutritionGoalScheduleRuntimeCopy.save),
+                    ),
+                  ),
+                ],
               ),
-              FilledButton(
-                onPressed: () {
-                  final numbers = values
-                      .map(
-                        (controller) =>
-                            _parseGoalNumber(context, controller.text),
-                      )
-                      .toList();
-                  if (numbers.any((number) => number == null)) {
-                    setDialogState(
-                      () => error = _text(
-                        context,
-                        NutritionGoalScheduleRuntimeCopy.enterValidNumbers,
-                      ),
-                    );
-                    return;
-                  }
-                  try {
-                    final target = NutritionGoalTarget.fromGrams(
-                      calories: numbers[0]!,
-                      carbsGrams: numbers[1]!,
-                      proteinGrams: numbers[2]!,
-                      fatGrams: numbers[3]!,
-                    );
-                    Navigator.pop(dialogContext, (true, target));
-                  } on ArgumentError {
-                    setDialogState(
-                      () => error = _text(
-                        context,
-                        NutritionGoalScheduleRuntimeCopy
-                            .macroGramsMustMatchCalories,
-                      ),
-                    );
-                  }
-                },
-                child: Text(
-                  _text(context, NutritionGoalScheduleRuntimeCopy.save),
-                ),
-              ),
-            ],
-          ),
         );
       },
     );

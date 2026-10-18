@@ -1,0 +1,142 @@
+[
+  {
+    "function": "account-data-deletion",
+    "file": "account-data-deletion/index.ts",
+    "status": "identical"
+  },
+  {
+    "function": "account-data-deletion",
+    "file": "_shared/account_deletion_storage.ts",
+    "status": "different",
+    "formatted_equal": false
+  },
+  {
+    "function": "account-data-deletion",
+    "file": "_shared/account_deletion_worker.ts",
+    "status": "identical"
+  },
+  {
+    "function": "account-data-deletion",
+    "file": "_shared/apple_sign_in_token_lifecycle.ts",
+    "status": "different",
+    "formatted_equal": false
+  },
+  {
+    "function": "ai-coach-global-reset",
+    "file": "ai-coach-global-reset/index.ts",
+    "status": "identical"
+  },
+  {
+    "function": "ai-coach-global-reset",
+    "file": "ai-coach-global-reset/server.ts",
+    "status": "identical"
+  },
+  {
+    "function": "ai-coach-global-reset",
+    "file": "ai-coach-global-reset/subscription_operations.ts",
+    "status": "identical"
+  },
+  {
+    "function": "ai-coach-global-reset",
+    "file": "_shared/mobile_integrity.ts",
+    "status": "identical"
+  },
+  {
+    "function": "app-attest",
+    "file": "app-attest/index.ts",
+    "status": "different",
+    "formatted_equal": true
+  },
+  {
+    "function": "apple-sign-in-notifications",
+    "file": "apple-sign-in-notifications/index.ts",
+    "status": "identical"
+  },
+  {
+    "function": "apple-sign-in-notifications",
+    "file": "_shared/apple_sign_in_token_lifecycle.ts",
+    "status": "identical"
+  },
+  {
+    "function": "apple-sign-in-token",
+    "file": "apple-sign-in-token/index.ts",
+    "status": "identical"
+  },
+  {
+    "function": "apple-sign-in-token",
+    "file": "_shared/apple_sign_in_token_lifecycle.ts",
+    "status": "identical"
+  },
+  {
+    "function": "barcode-lookup",
+    "file": "barcode-lookup/index.ts",
+    "status": "different",
+    "formatted_equal": true
+  },
+  {
+    "function": "barcode-lookup",
+    "file": "_shared/gtin.ts",
+    "status": "different",
+    "formatted_equal": true
+  },
+  {
+    "function": "bil-admin-web-ops-v1",
+    "file": "bil-admin-web-ops-v1/index.ts",
+    "status": "live_only"
+  },
+  {
+    "function": "bil-admin-web-ops-v1",
+    "file": "bil-admin-web-ops-v1/ops_server.mjs",
+    "status": "live_only"
+  },
+  {
+    "function": "bil-admin-web-ops-v1",
+    "file": "bil-admin-web-ops-v1/policy.mjs",
+    "status": "live_only"
+  },
+  {
+    "function": "bil-admin-web-v1",
+    "file": "bil-admin-web-v1/index.ts",
+    "status": "live_only"
+  },
+  {
+    "function": "bil-admin-web-v1",
+    "file": "bil-admin-web-v1/policy.mjs",
+    "status": "live_only"
+  },
+  {
+    "function": "bil-admin-web-v1",
+    "file": "bil-admin-web-v1/server.mjs",
+    "status": "live_only"
+  },
+  {
+    "function": "community-push-dispatch",
+    "file": "community-push-dispatch/index.ts",
+    "status": "identical"
+  },
+  {
+    "function": "community-push-dispatch",
+    "file": "community-push-dispatch/server.ts",
+    "status": "identical"
+  },
+  {
+    "function": "play-integrity",
+    "file": "play-integrity/index.ts",
+    "status": "identical"
+  },
+  {
+    "function": "push-provider-gateway",
+    "file": "push-provider-gateway/index.ts",
+    "status": "identical"
+  },
+  {
+    "function": "push-provider-gateway",
+    "file": "push-provider-gateway/server.ts",
+    "status": "identical"
+  },
+  {
+    "function": "reviewer-password-bootstrap",
+    "file": "reviewer-password-bootstrap/index.ts",
+    "status": "identical"
+  }
+]

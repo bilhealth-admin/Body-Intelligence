@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../../shared/widgets/bil_controller_dialog.dart';
 import 'package:flutter/material.dart';
@@ -281,7 +282,7 @@ class MealCalorieGoalsPage extends ConsumerWidget {
 
           return PopScope(
             canPop: !saving,
-            child: AlertDialog(
+            child: BilPearlMaterialAlertDialog(
               title: Text(_copy(context, meal)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,

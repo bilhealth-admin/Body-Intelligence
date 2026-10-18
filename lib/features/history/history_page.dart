@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:math' as math;
 
@@ -47,7 +48,7 @@ class HistoryPage extends ConsumerWidget {
         >(
           context: context,
           builder: (dialogContext) => StatefulBuilder(
-            builder: (context, setDialogState) => AlertDialog(
+            builder: (context, setDialogState) => BilPearlMaterialAlertDialog(
               title: Text(
                 context.strings.text(
                   entry == null ? 'Add weight' : 'Edit weight',
@@ -212,7 +213,7 @@ class HistoryPage extends ConsumerWidget {
     final displayed = UnitConverter.weightFromKg(entry.weight, system);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (_) => BilPearlMaterialAlertDialog(
         title: Text(context.strings.text('Delete weight?')),
         content: Text(
           '${context.strings.text('Delete')} ${displayed.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} ${context.strings.text('from history?')}',

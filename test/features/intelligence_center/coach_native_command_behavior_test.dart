@@ -161,7 +161,7 @@ Future<void> _openNativeAction(
   expect(action.hitTestable(), findsOneWidget);
   await tester.tap(action);
   await tester.pumpAndSettle();
-  expect(find.byType(AlertDialog), findsOneWidget);
+  expect(find.bySubtype<AlertDialog>(), findsOneWidget);
 }
 
 Future<void> _confirmNative(WidgetTester tester) async {

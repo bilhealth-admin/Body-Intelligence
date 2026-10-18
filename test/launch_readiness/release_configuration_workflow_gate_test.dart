@@ -45,20 +45,33 @@ void main() {
         reason: path,
       );
       final expectedSourceBinding = path.contains('ios')
-          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V36_AUDITED_SOURCE_SHA }}'
+          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}'
           : r'BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}';
       expect(source, contains(expectedSourceBinding), reason: path);
+      expect(source, contains('BIL_RELEASE_EXPECTED_BUILD_NUMBER:'));
       expect(
         source,
         contains(
           r'BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}',
         ),
+        reason: 'Signing uses only the explicitly dispatched build number.',
+      );
+      expect(
+        source,
+        contains('test/features/commerce/app_purchase_confirmation_test.dart'),
+        reason: '$path must keep the focused purchase regression gate.',
       );
       expect(
         source,
         contains(
-          'python3 tool/release/run_portable_release_tests.py --code-only',
+          'test/features/commerce/app_subscription_confirmation_test.dart',
         ),
+        reason: '$path must keep the focused subscription regression gate.',
+      );
+      expect(
+        source,
+        isNot(contains('run_portable_release_tests.py --code-only')),
+        reason: '$path must not duplicate the independent owner suite.',
       );
       expect(source, contains('BIL_FACEBOOK_REQUIRED: true'), reason: path);
       expect(
@@ -71,11 +84,11 @@ void main() {
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
     expect(android, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_IOS_V36_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_IOS_V37_AUDITED_SOURCE_SHA'));
     expect(android, contains('BIL_ANDROID_V33_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V36_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V37_AUDITED_SOURCE_SHA'));
     expect(ios, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V36_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V37_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
@@ -84,10 +97,10 @@ void main() {
     final androidWorkflow = _read(workflows.first);
     final iosWorkflow = _read(workflows.last);
     final androidManifest = _read(
-      'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+      'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
     );
     final iosManifest = _read(
-      'docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+      'docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
     );
 
     expect(androidManifest, contains('STAGING_MANIFEST_COMPLETE: YES'));
@@ -107,7 +120,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
       ),
     );
     expect(
@@ -121,13 +134,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 36 release manifest', () {
+  test('iOS validator consumes only the build 37 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V36_FROZEN_SOURCE_MANIFEST_2026-10-14.md',
+        'docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
       ),
     );
     expect(
@@ -139,7 +152,7 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 36 ))'));
+    expect(source, contains('(( BUILD_NUMBER == 37 ))'));
     expect(source, isNot(contains('(( BUILD_NUMBER == 35 ))')));
   });
 

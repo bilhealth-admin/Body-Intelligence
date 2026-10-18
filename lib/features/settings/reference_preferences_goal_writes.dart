@@ -24,7 +24,7 @@ Future<bool> _saveAdditionalGoal(
     final ar = Localizations.localeOf(context).languageCode == 'ar';
     final accepted = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(ar ? 'مراجعة الهدف المخصص' : 'Review custom target'),
         content: Text(
           ar
@@ -74,7 +74,7 @@ Future<bool> _restoreAllNutritionGoals(
   final ar = Localizations.localeOf(context).languageCode == 'ar';
   final confirmed = await showDialog<bool>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
+    builder: (dialogContext) => BilPearlMaterialAlertDialog(
       title: Text(ar ? 'استعادة الأهداف' : 'Restore targets'),
       content: Text(
         ar

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -90,7 +91,7 @@ class _SourceCard extends StatelessWidget {
   final bool arabic;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     clipBehavior: Clip.antiAlias,
     child: Semantics(
       key: ValueKey('health-source-${source.id}'),

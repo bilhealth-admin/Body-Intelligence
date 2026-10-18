@@ -174,7 +174,7 @@ void _coachMealCommitBehaviorCases() {
         );
         await _pumpUntil(
           tester,
-          () => find.byType(AlertDialog).evaluate().isNotEmpty,
+          () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
         );
         await meals.updateMealItem(id: original.id, quantity: 3);
         final latest = await meals.getMealItem(original.id);
@@ -238,7 +238,7 @@ void _coachMealCommitBehaviorCases() {
         );
         await _pumpUntil(
           tester,
-          () => find.byType(AlertDialog).evaluate().isNotEmpty,
+          () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
         );
         owner = 'owner-b';
         changes.add(owner);

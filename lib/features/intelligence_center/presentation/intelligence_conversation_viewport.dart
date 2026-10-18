@@ -11,11 +11,13 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
     // The daily brief is already the opening Coach surface. Do not stack the
     // synthetic welcome beneath it; retain it as the fallback when context is
     // unavailable. This is presentation-only: user turns/history are untouched.
-    final presentedMessages = dailyBrief == null
-        ? visibleMessages
-        : visibleMessages
-              .where((message) => !message.id.startsWith('welcome'))
-              .toList(growable: false);
+    final openingMessage = visibleMessages
+        .where((message) => message.id.startsWith('welcome'))
+        .firstOrNull;
+    final presentedMessages = visibleMessages
+        .where((message) => !message.id.startsWith('welcome'))
+        .toList(growable: false);
+    final showOpeningSurface = dailyBrief != null || openingMessage != null;
     // Suggested actions belong to the available-context introduction, not to
     // message history. Pending/failed context must not advertise saved data.
     final showStarters =
@@ -24,7 +26,9 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
           (message) => message.role == IntelligenceMessageRole.user,
         );
     final ids = <String>[
-      if (dailyBrief != null) 'coach-session-brief',
+      // One anchored identity for the welcome transcript and its data-backed
+      // replacement prevents refreshes from resetting the reading position.
+      if (showOpeningSurface) 'coach-session-brief',
       ...presentedMessages.map((message) => message.id),
       if (showLiveVoiceDraft) 'coach-live-draft',
       if (showReplyThinking) 'coach-reply-thinking',
@@ -36,7 +40,10 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
       itemBuilder: (context, index) {
         final id = ids[index];
         if (id == 'coach-session-brief') {
-          final brief = dailyBrief!;
+          final brief = dailyBrief;
+          if (brief == null) {
+            return _buildMessage(openingMessage!, messageFeedback);
+          }
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -70,7 +77,7 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
           );
         }
         return _buildMessage(
-          presentedMessages[index - (dailyBrief == null ? 0 : 1)],
+          presentedMessages[index - (showOpeningSurface ? 1 : 0)],
           messageFeedback,
         );
       },

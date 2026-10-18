@@ -201,7 +201,7 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
         setState(() => _confirmingReplacement = true);
         final replace = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => BilPearlMaterialAlertDialog(
             key: const Key('community-message-replacement-confirmation'),
             title: Text(copy.sendNewMessage),
             content: Text(copy.replacementBody),

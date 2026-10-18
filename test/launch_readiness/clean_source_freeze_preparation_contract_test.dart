@@ -114,7 +114,7 @@ void main() {
     'validator targets the current non-self-referential Android 33 preparation manifest',
     () {
       const currentManifestPath =
-          'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-14.md';
+          'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md';
       final validator = File(
         'tool/release/validate_release_configuration.dart',
       ).readAsStringSync();

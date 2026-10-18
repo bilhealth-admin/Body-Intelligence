@@ -114,9 +114,17 @@ extension _DailyLogMutationActions on _DailyLogPageState {
             items: [(foodId: food.id, quantity: quantityGrams)],
           );
       ref.invalidate(selectedDailyLedgerProvider);
+      // A successful atomic write may finish before a table-watched join
+      // publishes its next UI snapshot. Explicitly refresh the authoritative
+      // meal list so the saved food becomes visible in this same meal.
+      // Never refresh or show a success state before the repository commits.
+      ref.invalidate(dailyMealsProvider);
       if (mounted) {
         _updateState(() {
           if (selectedFood?.id == food.id) selectedFood = null;
+          // A successful save completes this query. It must not reopen the
+          // separate search or displace the saved meal list.
+          foodSearch.clear();
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || !scrollController.hasClients) return;
@@ -245,7 +253,7 @@ extension _DailyLogMutationActions on _DailyLogPageState {
     if (!mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(context.strings.text('Remove meal item?')),
         content: Text(
           '${context.strings.text('Remove')} $foodName ${context.strings.text('from this meal?')}',
@@ -273,7 +281,7 @@ extension _DailyLogMutationActions on _DailyLogPageState {
     final controller = TextEditingController(text: item.quantity.toString());
     final updated = await showDialog<double>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text('${context.strings.text('Edit')} ${food.name}'),
         content: TextField(
           controller: controller,
@@ -316,7 +324,7 @@ extension _DailyLogMutationActions on _DailyLogPageState {
         ? await ref.read(foodRepositoryProvider).isFavorite(food.id)
         : false;
     if (!mounted) return;
-    final action = await showModalBottomSheet<String>(
+    final action = await showBilPearlBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(

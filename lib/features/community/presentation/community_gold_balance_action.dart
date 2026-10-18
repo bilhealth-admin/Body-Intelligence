@@ -12,12 +12,16 @@ import 'community_copy.dart';
 class CommunityGoldBalanceAction extends StatefulWidget {
   const CommunityGoldBalanceAction({
     this.compact = false,
+    this.showEarn = true,
+    this.showBalance = true,
     this.repository,
     this.client,
     super.key,
   });
 
   final bool compact;
+  final bool showEarn;
+  final bool showBalance;
   final CommunityRepository? repository;
   final SupabaseClient? client;
 
@@ -134,6 +138,56 @@ class _CommunityGoldBalanceActionState
   Future<void> _openEarn() =>
       _open(() => context.push('/community/compose?origin=earn'));
 
+  Widget _earnAction(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final color = dark ? const Color(0xFFFFE6A0) : const Color(0xFF765100);
+    final background = dark ? const Color(0xFF443714) : const Color(0xFFFFF0C2);
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const BilGoldCoin(size: 18),
+        const SizedBox(width: 5),
+        Text(
+          communityText(context, 'Earn', 'اكسب'),
+          style: TextStyle(fontWeight: FontWeight.w800, color: color),
+        ),
+      ],
+    );
+    if (widget.compact) {
+      return Semantics(
+        button: true,
+        label: communityText(context, 'Earn in Community', 'اكسب في المجتمع'),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: const Key('ai-coach-earn-post'),
+            onTap: _opening ? null : _openEarn,
+            borderRadius: const BorderRadius.all(Radius.circular(24)),
+            child: const SizedBox.square(
+              dimension: 48,
+              child: Center(child: BilGoldCoin(size: 20)),
+            ),
+          ),
+        ),
+      );
+    }
+    final button = TextButton(
+      key: const Key('ai-coach-earn-post'),
+      onPressed: _opening ? null : _openEarn,
+      style: TextButton.styleFrom(
+        minimumSize: const Size(64, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        foregroundColor: color,
+        backgroundColor: background,
+        side: BorderSide(color: color.withValues(alpha: .26)),
+        shape: const StadiumBorder(),
+        textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+      ),
+      child: content,
+    );
+    return button;
+  }
+
   @override
   void dispose() {
     _visit?.dispose();
@@ -142,12 +196,16 @@ class _CommunityGoldBalanceActionState
 
   @override
   Widget build(BuildContext context) {
-    if (_repository == null) return const SizedBox.shrink();
+    if (!widget.showBalance) {
+      return widget.showEarn ? _earnAction(context) : const SizedBox.shrink();
+    }
+    if (_repository == null) {
+      return widget.showEarn ? _earnAction(context) : const SizedBox.shrink();
+    }
     final scheme = Theme.of(context).colorScheme;
-    final earn = communityText(context, 'Earn', 'اكسب');
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 6,
+      spacing: widget.compact ? 4 : 6,
       children: [
         FutureBuilder<CommunityGoldBalance?>(
           key: ValueKey(_visit?.epoch),
@@ -163,33 +221,39 @@ class _CommunityGoldBalanceActionState
                 child: Semantics(
                   button: true,
                   label: balance == null ? 'BIL Gold' : 'BIL Gold: $balance',
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minHeight: 48,
-                      minWidth: 68,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: scheme.outlineVariant),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const BilGoldCoin(size: 18),
-                        const SizedBox(width: 5),
-                        Text(
-                          balance?.toString() ?? '—',
-                          style: TextStyle(
-                            color: scheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                          ),
+                  child: SizedBox(
+                    height: widget.compact ? 44 : 48,
+                    child: Center(
+                      child: Container(
+                        constraints: BoxConstraints(
+                          minHeight: widget.compact ? 36 : 48,
+                          minWidth: widget.compact ? 48 : 56,
                         ),
-                      ],
+                        padding: EdgeInsets.symmetric(
+                          horizontal: widget.compact ? 6 : 8,
+                          vertical: widget.compact ? 3 : 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: scheme.outlineVariant),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            BilGoldCoin(size: widget.compact ? 16 : 18),
+                            SizedBox(width: widget.compact ? 4 : 5),
+                            Text(
+                              balance?.toString() ?? '—',
+                              style: TextStyle(
+                                color: scheme.onSurface,
+                                fontWeight: FontWeight.w700,
+                                fontSize: widget.compact ? 14 : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -210,13 +274,7 @@ class _CommunityGoldBalanceActionState
             }),
             icon: Icon(Icons.refresh_rounded, color: scheme.error, size: 18),
           ),
-        TextButton.icon(
-          key: const Key('ai-coach-earn-post'),
-          onPressed: _opening ? null : _openEarn,
-          icon: const Icon(Icons.edit_outlined, size: 18),
-          label: Text(earn),
-          style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
-        ),
+        if (widget.showEarn) _earnAction(context),
       ],
     );
   }

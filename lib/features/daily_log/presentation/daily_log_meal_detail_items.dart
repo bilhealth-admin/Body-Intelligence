@@ -6,6 +6,7 @@ class DailyMealDetailItems extends StatelessWidget {
     required this.meal,
     required this.onEdit,
     required this.onActions,
+    this.onAddFood,
     this.showFoodTimestamps = true,
     this.showFoodInsights = true,
     this.useNetCarbs = false,
@@ -14,6 +15,7 @@ class DailyMealDetailItems extends StatelessWidget {
   final MealWithItems? meal;
   final Future<void> Function(MealItem item, Food food) onEdit;
   final Future<void> Function(MealItem item, Food? food) onActions;
+  final VoidCallback? onAddFood;
   final bool showFoodTimestamps;
   final bool showFoodInsights;
   final bool useNetCarbs;
@@ -23,7 +25,7 @@ class DailyMealDetailItems extends StatelessWidget {
     final items = [...?meal?.items]
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
     final scheme = Theme.of(context).colorScheme;
-    return Card(
+    return BilPearlMaterialCard(
       key: const Key('daily-meal-detail-items'),
       margin: EdgeInsets.zero,
       elevation: 0,
@@ -35,20 +37,46 @@ class DailyMealDetailItems extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              _mealListText(context, 'foodsInMeal'),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _mealListText(context, 'foodsInMeal'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                if (items.isNotEmpty && onAddFood != null)
+                  IconButton(
+                    key: const Key('daily-meal-populated-add-food'),
+                    tooltip: context.strings.text('Add food'),
+                    onPressed: onAddFood,
+                    icon: const Icon(Icons.add_circle_outline_rounded),
+                  ),
+              ],
             ),
             if (items.isEmpty) ...[
-              const SizedBox(height: 14),
-              Icon(
-                Icons.add_circle_outline_rounded,
-                color: scheme.primary,
-                size: 30,
+              const SizedBox(height: 4),
+              Center(
+                child: IconButton(
+                  key: const Key('daily-meal-empty-add-food'),
+                  tooltip: context.strings.text('Add food'),
+                  onPressed: onAddFood,
+                  // Keep the reviewed icon/text positions while making the
+                  // formerly decorative plus a full 48px touch target.
+                  constraints: const BoxConstraints.tightFor(
+                    width: 48,
+                    height: 48,
+                  ),
+                  padding: const EdgeInsets.only(top: 10, bottom: 8),
+                  icon: Icon(
+                    Icons.add_circle_outline_rounded,
+                    color: scheme.primary,
+                    size: 30,
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
               Text(
                 _mealListText(context, 'emptyMeal'),
                 textAlign: TextAlign.center,
@@ -257,7 +285,7 @@ class _DiaryEmptyMeals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return BilPearlMaterialCard(
       elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(24),

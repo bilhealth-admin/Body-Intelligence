@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -155,7 +156,7 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
     final busy = _busyId == pack.id;
     final permitted = _permits(pack.access);
     final size = (pack.sizeBytes / (1024 * 1024)).toStringAsFixed(1);
-    return Card(
+    return BilPearlMaterialCard(
       child: ListTile(
         title: Text(pack.title),
         subtitle: Text(

@@ -111,9 +111,15 @@ void main() {
     expect(page, contains("'Your health partner, always with you'"));
     expect(page, contains('class _CoachHeaderAction'));
     expect(page, contains("'Search conversations'"));
-    expect(page, contains('BoxConstraints.tightFor(width: 48, height: 48)'));
+    expect(page, contains('final backSize = 48.0;'));
+    expect(
+      page,
+      contains(
+        'constraints: BoxConstraints.tightFor(width: size, height: size)',
+      ),
+    );
     expect(page, contains("'Conversation history'"));
-    expect(page, contains('size: 48'));
+    expect(page, contains('this.size = 48'));
     expect(page, isNot(contains("Key('ai-coach-hero-start')")));
     expect(hasWidgetKey('ai-coach-voice-button'), isTrue);
     expect(page, contains('Icons.graphic_eq_rounded'));
@@ -179,7 +185,9 @@ void main() {
       ),
     );
     expect(page, contains('final showReplyThinking = sending;'));
-    expect(page, contains('Thinking…'));
+    expect(page, contains('Preparing your reply…'));
+    expect(page, contains('CoachThinkingStatus'));
+    expect(page, isNot(contains("intelligenceText(context, 'Thinking…'")));
     expect(page, isNot(contains('Preparing your answer')));
     expect(page, isNot(contains("? tr('Thinking with your BIL data'")));
     expect(page, contains('final visibleMessages = messages'));

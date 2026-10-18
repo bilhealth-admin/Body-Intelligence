@@ -1,0 +1,100 @@
+{
+  "observed_at_utc": "2026-10-16T02:18:38Z",
+  "app_store_connect_app_id": "6805349703",
+  "source_branch": "integration/bil-qa-media-policy-20261011",
+  "source_sha": "a6f0a9a15188aabca0dcb739269ab17079ed4504",
+  "evidence_method": "Read-only App Store Connect UI readback after owner removed old submission items and after saving each product localization.",
+  "previous_submission": {
+    "submission_id": "d92bf043-3499-4e1f-95e9-f050ed0f66c5",
+    "submitted_at_display": "Oct 4, 2026 at 11:56 PM (App Store Connect UI; timezone not identified)",
+    "status": "Removed",
+    "items": [
+      { "item": "iOS App 1.0.0", "type": "App Version", "status": "Removed", "historical_issue": "Guideline 5.1.2(i) - Legal - Privacy - Data Use and Sharing" },
+      { "item": "BIL Membership", "type": "Subscription Group", "status": "Removed" },
+      { "item": "BIL Premium AI Coach Annual", "type": "Subscription", "product_id": "bil_premium_ai_coach_annual", "status": "Removed" },
+      { "item": "BIL Premium AI Coach Monthly", "type": "Subscription", "product_id": "bil_premium_ai_coach", "status": "Removed" },
+      { "item": "BIL Premium Annual", "type": "Subscription", "product_id": "bil_premium_annual", "status": "Removed" },
+      { "item": "BIL Premium Monthly", "type": "Subscription", "product_id": "bil_premium", "status": "Removed" },
+      { "item": "BIL AI Boost 2,500 Tokens", "type": "Consumable In-App Purchase", "product_id": "bil_ai_boost", "status": "Removed" }
+    ],
+    "removal_actor": "Owner action in App Store Connect, reported by owner and confirmed by live UI readback.",
+    "all_seven_items_confirmed_removed": true
+  },
+  "product_localizations": [
+    {
+      "reference_name": "BIL Premium AI Coach Monthly",
+      "product_id": "bil_premium_ai_coach",
+      "apple_id": "6806555282",
+      "locale": "en-US",
+      "description": "2,500 AI tokens weekly, max 10,000 monthly",
+      "character_count": 42,
+      "saved_and_read_back": true,
+      "apple_product_status_after_save": "Developer Rejected"
+    },
+    {
+      "reference_name": "BIL Premium AI Coach Annual",
+      "product_id": "bil_premium_ai_coach_annual",
+      "apple_id": "6806555344",
+      "locale": "en-US",
+      "description": "2,500 AI tokens weekly, max 10,000 monthly",
+      "character_count": 42,
+      "saved_and_read_back": true,
+      "apple_product_status_after_save": "Developer Rejected"
+    },
+    {
+      "reference_name": "BIL Premium Monthly",
+      "product_id": "bil_premium",
+      "apple_id": "6806555342",
+      "locale": "en-US",
+      "description": "Ad-free nutrition, fitness, sleep and trends",
+      "character_count": 44,
+      "saved_and_read_back": true,
+      "apple_product_status_after_save": "Developer Rejected"
+    },
+    {
+      "reference_name": "BIL Premium Annual",
+      "product_id": "bil_premium_annual",
+      "apple_id": "6806555198",
+      "locale": "en-US",
+      "description": "Ad-free nutrition, fitness, sleep and trends",
+      "character_count": 44,
+      "saved_and_read_back": true,
+      "apple_product_status_after_save": "Developer Rejected"
+    },
+    {
+      "reference_name": "BIL AI Boost 2,500 Tokens",
+      "product_id": "bil_ai_boost",
+      "apple_id": "6806561724",
+      "locale": "en-US",
+      "description": "2,500 non-expiring AI Coach tokens",
+      "character_count": 34,
+      "saved_and_read_back": true,
+      "apple_product_status_after_save": "Developer Rejected"
+    }
+  ],
+  "official_description_limit_characters": 45,
+  "all_descriptions_within_official_limit": true,
+  "code_basis": {
+    "ai_coach_allowance": "lib/features/commerce/presentation/bil_store_copy.dart:130 and matching Supabase entitlement configuration: 2,500 weekly, 10,000 monthly.",
+    "boost_expiry": "lib/features/commerce/presentation/premium_route_glass_gate.dart:313: Boost tokens are described as non-expiring.",
+    "premium_ads": "lib/app/localization/runtime_copy_extended.dart: BIL states Premium is always ad-free; Premium route copy defines nutrition, fitness, sleep and trends benefits."
+  },
+  "review_submission_action": {
+    "add_for_review_clicked": false,
+    "submission_resubmitted": false,
+    "apple_message_sent": false,
+    "build_linked_to_version_1_0_0": false
+  },
+  "unchanged": [
+    "Product IDs and reference names",
+    "Prices, subscription durations, trials and offers",
+    "Product availability and account access"
+  ],
+  "release_gates": {
+    "localized_changes_approved_by_apple": false,
+    "ipa_36_att_device_id_issue_closed": false,
+    "guideline_5_1_2_i_closed": false,
+    "signed_build_and_device_review_tested": false
+  },
+  "sensitive_data": "No passwords, tokens, receipts, or private reviewer credentials recorded."
+}

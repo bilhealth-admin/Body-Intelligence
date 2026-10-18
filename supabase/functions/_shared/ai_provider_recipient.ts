@@ -7,9 +7,15 @@ export function disclosedGeminiEndpoint(configured: string): string {
   } catch {
     throw new Error("provider_endpoint_not_allowed");
   }
+  const host = url.hostname.toLowerCase();
+  const path = url.pathname.replace(/\/$/, "");
+  const googleGemini = host === "generativelanguage.googleapis.com" &&
+    /^\/v1(?:beta)?$/.test(path);
+  const googleVertexGemini = host === "aiplatform.googleapis.com" &&
+    /^\/v1(?:beta1)?\/publishers\/google$/.test(path);
   if (
+    (!googleGemini && !googleVertexGemini) ||
     url.protocol !== "https:" ||
-    url.hostname.toLowerCase() !== "generativelanguage.googleapis.com" ||
     url.username || url.password || url.port || url.search || url.hash
   ) {
     throw new Error("provider_endpoint_not_allowed");

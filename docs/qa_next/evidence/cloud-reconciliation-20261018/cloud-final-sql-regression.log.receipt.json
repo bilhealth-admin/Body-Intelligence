@@ -1,0 +1,10 @@
+{
+  "path": "build\\cloud-final-sql-regression.log",
+  "sha256": "416238191427677c5338c7ea7ecce9927e29ae18bd3ffafd8f147970715e99ab",
+  "bytes": 1521,
+  "tail": [
+    "",
+    "ok | 11 passed | 0 failed (7s)",
+    ""
+  ]
+}

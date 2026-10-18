@@ -1,6 +1,34 @@
 part of 'intelligence_locale_copy.dart';
 
 const _authored = <String, Map<String, String>>{
+  "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.": {
+    "fr":
+        "Le coach IA n’a pas pu terminer la réponse. Votre question reste dans cette conversation ; vérifiez les actions précédentes avant de réessayer.",
+    "es":
+        "El coach de IA no pudo completar la respuesta. Tu pregunta permanece en este chat; revisa las acciones anteriores antes de volver a intentarlo.",
+    "tr":
+        "Yapay zekâ koçu yanıtı tamamlayamadı. Sorunuz bu sohbette kalır; yeniden denemeden önce önceki işlemleri gözden geçirin.",
+  },
+  'Preparing your reply…': {
+    'fr': 'Je prépare votre réponse…',
+    'es': 'Preparando tu respuesta…',
+    'tr': 'Yanıtınız hazırlanıyor…',
+  },
+  'Working on your question…': {
+    'fr': 'Je travaille sur votre question…',
+    'es': 'Trabajando en tu pregunta…',
+    'tr': 'Sorunuz üzerinde çalışıyorum…',
+  },
+  'Thanks for waiting…': {
+    'fr': 'Merci de patienter…',
+    'es': 'Gracias por esperar…',
+    'tr': 'Beklediğiniz için teşekkürler…',
+  },
+  'Copy message': {
+    'fr': 'Copier le message',
+    'es': 'Copiar mensaje',
+    'tr': 'Mesajı kopyala',
+  },
   'Thinking…': {'fr': 'Réflexion…', 'es': 'Pensando…', 'tr': 'Düşünüyor…'},
   'Personalized Remote AI': {
     'fr': 'IA distante personnalisée',

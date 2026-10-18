@@ -1,0 +1,16 @@
+[
+  {
+    "case": "coach-unauthenticated",
+    "http_status": 401,
+    "error": "authentication_required",
+    "verified": null,
+    "entitlement_active": null
+  },
+  {
+    "case": "store-forbidden-reconciliation",
+    "http_status": 403,
+    "error": "reconciliation_forbidden",
+    "verified": false,
+    "entitlement_active": false
+  }
+]

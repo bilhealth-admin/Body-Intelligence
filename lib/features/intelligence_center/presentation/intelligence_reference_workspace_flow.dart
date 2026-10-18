@@ -3,9 +3,11 @@ part of 'intelligence_center_page.dart';
 extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
   Future<void> _showCoachMenuSheet(BuildContext anchor) async {
     final menuTheme = Theme.of(anchor);
-    final action = await showModalBottomSheet<String>(
+    final action = await showBilPearlBottomSheet<String>(
       context: context,
       useSafeArea: true,
+      isDismissible: true,
+      enableDrag: true,
       showDragHandle: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -65,6 +67,17 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
     }
   }
 
+  Future<void> _openCoachWorkspaceRoute(String route) async {
+    final uri = Uri.parse(route);
+    final query = Map<String, String>.from(uri.queryParameters);
+    if (uri.path == '/plan') query.putIfAbsent('origin', () => 'coach');
+    if (uri.path == '/daily-log' || uri.path == '/daily-log/water') {
+      query.putIfAbsent('from', () => '/intelligence-center');
+    }
+    final target = uri.replace(queryParameters: query).toString();
+    await _openCoachRoute(target, push: true);
+  }
+
   Widget _buildReferencePresentation(BuildContext context) {
     if (_referenceOverview) {
       final snapshot = ref.watch(coachContextSnapshotProvider).asData?.value;
@@ -72,7 +85,8 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
         snapshot: snapshot,
         now: ref.read(intelligenceConversationClockProvider)(),
         onChat: () => _updateState(() => _referenceOverview = false),
-        onRoute: (route) => context.push(route),
+        onRoute: (route) => unawaited(_openCoachWorkspaceRoute(route)),
+        onQuickAdd: () => unawaited(_navigateReference(2)),
         onPhoto: () {
           _updateState(() => _referenceOverview = false);
           unawaited(_analyzeFoodImageInChat());

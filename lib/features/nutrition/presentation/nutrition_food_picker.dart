@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/database/app_database.dart';
@@ -58,7 +59,7 @@ class _NutritionFoodPickerState extends ConsumerState<NutritionFoodPicker> {
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    return AlertDialog(
+    return BilPearlMaterialAlertDialog(
       title: Text(
         ar ? 'اختر مكوّنًا بقيمه الغذائية' : 'Choose a food with nutrition',
       ),

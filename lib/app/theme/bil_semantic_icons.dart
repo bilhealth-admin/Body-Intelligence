@@ -588,6 +588,7 @@ class BilSemanticIconBadge extends StatelessWidget {
     this.iconOverride,
     this.appleIconOverride,
     this.platformOverride,
+    this.colorOverride,
   });
 
   final BilSemanticIconKind kind;
@@ -598,12 +599,12 @@ class BilSemanticIconBadge extends StatelessWidget {
   final IconData? iconOverride;
   final IconData? appleIconOverride;
   final TargetPlatform? platformOverride;
+  final Color? colorOverride;
 
   @override
   Widget build(BuildContext context) {
     final spec = BilSemanticIcons.spec(kind);
     final theme = Theme.of(context);
-    final brightness = theme.brightness;
     final platform = platformOverride ?? theme.platform;
     final resolvedIcon = switch (platform) {
       TargetPlatform.iOS ||
@@ -614,26 +615,12 @@ class BilSemanticIconBadge extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color.lerp(spec.accent(brightness), Colors.white, .18)!,
-              spec.accent(brightness),
-            ],
-          ),
-          shape: shape,
-          borderRadius: shape == BoxShape.rectangle
-              ? BorderRadius.circular(size * .3)
-              : null,
-        ),
         alignment: Alignment.center,
         child: BilNativeSymbolGlyph(
           symbol: BilSemanticIcons.nativeSymbol(kind),
           fallback: resolvedIcon,
           size: iconSize,
-          color: spec.onAccent(brightness),
+          color: colorOverride ?? theme.colorScheme.onSurfaceVariant,
           platformOverride: platformOverride,
         ),
       ),

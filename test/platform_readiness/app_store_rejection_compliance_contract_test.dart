@@ -62,7 +62,7 @@ void main() {
         'if (defaultTargetPlatform == TargetPlatform.iOS) {',
       );
       final prePermissionStart = voice.indexOf(
-        'final continueRequest = await showDialog<bool>(',
+        'final continueRequest = await showBilPearlPermissionDecision(',
       );
 
       expect(nativeRequestStart, greaterThanOrEqualTo(0));

@@ -76,7 +76,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             title: Text('${_mealCopy('didYouMean')} $correction?'),
             onTap: () {
               controller.text = correction;
-              controller.openView();
+              _openFoodSearchView();
             },
           ),
         ListTile(
@@ -254,7 +254,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       ),
     );
 
-    return Card(
+    return BilPearlMaterialCard(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       elevation: 0,
       color: scheme.surface,

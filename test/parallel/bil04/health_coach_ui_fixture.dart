@@ -122,7 +122,7 @@ Future<void> _sendHealthPrompt(WidgetTester tester, String text) async {
 }
 
 Future<void> _expectHealthDialog(WidgetTester tester) async {
-  final dialog = find.byType(AlertDialog);
+  final dialog = find.bySubtype<AlertDialog>();
   for (var attempt = 0; attempt < 80 && dialog.evaluate().isEmpty; attempt++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
@@ -161,7 +161,7 @@ Future<void> _confirmHealthDialog(WidgetTester tester) async {
 Future<void> _cancelHealthDialog(WidgetTester tester) async {
   await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
   await tester.pumpAndSettle();
-  expect(find.byType(AlertDialog), findsNothing);
+  expect(find.bySubtype<AlertDialog>(), findsNothing);
 }
 
 Future<void> _undoHealthAction(WidgetTester tester) async {

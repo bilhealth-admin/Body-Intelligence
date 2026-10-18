@@ -102,9 +102,14 @@ Deno.test("provider overrides cannot route images or credentials off vendor", ()
   for (const endpoint of unsafeEndpoints) {
     let rejected = false;
     try {
-      loadProviderConfig("gemini", (name) =>
-        name === "BIL_GEMINI_API_KEY" ? "test-only" :
-        name === "BIL_GEMINI_VISION_ENDPOINT" ? endpoint : undefined
+      loadProviderConfig(
+        "gemini",
+        (name) =>
+          name === "BIL_GEMINI_API_KEY"
+            ? "test-only"
+            : name === "BIL_GEMINI_VISION_ENDPOINT"
+            ? endpoint
+            : undefined,
       );
     } catch (error) {
       rejected = error instanceof VisionProviderError &&
@@ -347,4 +352,40 @@ Deno.test("surface artifacts are removed and visible foods are deduplicated", ()
   if (names.join("|") !== "salmon|green herbs") {
     throw new Error("surface filtering or deduplication failed");
   }
+});
+
+Deno.test("Vision accepts only Google-published Gemini on Vertex with header-only credentials", () => {
+  const config = loadProviderConfig("gemini", (name) =>
+    ({
+      BIL_GEMINI_API_KEY: "synthetic-key",
+      BIL_GEMINI_VISION_ENDPOINT:
+        "https://aiplatform.googleapis.com/v1beta1/publishers/google",
+      BIL_GEMINI_VISION_MODEL: "gemini-test",
+    } as Record<string, string>)[name]);
+  const request = buildProviderRequest(config, {
+    imageBase64: "AAAA",
+    mimeType: "image/jpeg",
+    requestedLocale: "ar",
+  });
+  if (
+    request.url !==
+      "https://aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-test:generateContent" ||
+    request.url.includes("synthetic-key") ||
+    request.headers["x-goog-api-key"] !== "synthetic-key"
+  ) throw new Error("Vertex Gemini request contract violated");
+  let denied = false;
+  try {
+    loadProviderConfig(
+      "gemini",
+      (name) =>
+        name === "BIL_GEMINI_API_KEY"
+          ? "synthetic-key"
+          : name === "BIL_GEMINI_VISION_ENDPOINT"
+          ? "https://aiplatform.googleapis.com/v1/publishers/other"
+          : undefined,
+    );
+  } catch {
+    denied = true;
+  }
+  if (!denied) throw new Error("Undisclosed Vertex publisher accepted");
 });

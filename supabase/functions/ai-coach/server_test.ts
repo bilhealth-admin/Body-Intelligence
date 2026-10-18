@@ -977,6 +977,60 @@ Deno.test("provider timeout refunds exactly one established reservation", async 
   assertEquals(fake.settlements[0].p_succeeded, false);
 });
 
+Deno.test("failure diagnostics correlate a redacted request without user data", async () => {
+  const requestId = "coach-test-safe-diagnostic-request-0001";
+  const privateText = "private member prompt and health context";
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+  const diagnostics: Array<Record<string, unknown>> = [];
+  const response = await handler(
+    new Request("https://example.test", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer test",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        request_id: requestId,
+        locale: "en",
+        messages: [{ role: "user", content: privateText }],
+        context: { verified_record: privateText },
+      }),
+    }),
+    {
+      clients: fake.create as never,
+      geminiCall: () =>
+        Promise.reject(
+          new Error("provider_http_503_INTERNAL_SERVER_ERROR"),
+        ),
+      diagnosticLog: (event) => {
+        diagnostics.push(event as unknown as Record<string, unknown>);
+      },
+    },
+  );
+
+  assertEquals(response.status, 503);
+  assertEquals(diagnostics.length, 1);
+  const diagnostic = diagnostics[0];
+  assertEquals(diagnostic.event, "ai_coach_failure");
+  assertEquals(diagnostic.stage, "gemini_provider");
+  assertEquals(diagnostic.error_code, "provider_http_503");
+  assertEquals(diagnostic.http_status, 503);
+  assertEquals(diagnostic.reservation_established, true);
+  assertEquals(diagnostic.compensation_attempted, true);
+  assertEquals(diagnostic.compensation_succeeded, true);
+  assertEquals(
+    /^[a-f0-9]{16}$/.test(String(diagnostic.request_id_hash)),
+    true,
+  );
+  const serialized = JSON.stringify(diagnostic);
+  assertEquals(serialized.includes(requestId), false);
+  assertEquals(serialized.includes(privateText), false);
+  assertEquals(
+    serialized.includes("00000000-0000-4000-8000-000000000001"),
+    false,
+  );
+});
+
 Deno.test("settlement outage does not hide the original provider failure", async () => {
   let settlementCalls = 0;
   const response = await handler(requestBody("coach-test-settlement-outage"), {
@@ -1379,12 +1433,16 @@ export async function exerciseHealthCitationHandlerContract({
   version,
   citations = ["cdc_healthy_eating"],
   failPrimaryOnce = false,
+  firstCitations,
+  elapsedBeforeValidationMs,
 }: {
   handlerUnderTest?: typeof handler;
   geminiUnderTest?: typeof geminiCall;
   version?: unknown;
   citations?: string[];
   failPrimaryOnce?: boolean;
+  firstCitations?: string[];
+  elapsedBeforeValidationMs?: number;
 } = {}) {
   const rpcCalls: Array<{ name: string; params: Record<string, unknown> }> = [];
   const providerRequests: Array<Record<string, unknown>> = [];
@@ -1397,8 +1455,12 @@ export async function exerciseHealthCitationHandlerContract({
     headers: baseRequest.headers,
     body: JSON.stringify(body),
   });
+  let clockReads = 0;
   return await withGeminiTestKey(async () => {
     const response = await handlerUnderTest(request, {
+      now: elapsedBeforeValidationMs === undefined
+        ? undefined
+        : () => clockReads++ === 0 ? 0 : elapsedBeforeValidationMs,
       clients: ((authorization: string) => {
         const client = fake.create(authorization);
         const rpc = client.admin.rpc;
@@ -1447,7 +1509,14 @@ export async function exerciseHealthCitationHandlerContract({
                     finishReason: "STOP",
                     content: {
                       parts: [{
-                        text: JSON.stringify(citationContractReply(citations)),
+                        text: JSON.stringify(
+                          citationContractReply(
+                            firstCitations !== undefined &&
+                              providerRequests.length === 1
+                              ? firstCitations
+                              : citations,
+                          ),
+                        ),
                       }],
                     },
                   }],
@@ -1645,4 +1714,41 @@ Deno.test("version2 fallback preserves the same citation catalog across both rea
   }
   assertEquals(result.settlements.length, 1);
   assertEquals(result.settlements[0].p_succeeded, true);
+});
+
+Deno.test("one missing-citation reply is regenerated under one reservation and settled once", async () => {
+  const result = await exerciseHealthCitationHandlerContract({
+    firstCitations: [],
+  });
+  assertEquals(result.response.status, 200);
+  assertEquals(result.providerRequests.length, 2);
+  assertEquals(result.payload.citations, ["cdc_healthy_eating"]);
+  assertEquals(result.settlements.length, 1);
+  assertEquals(result.settlements[0].p_succeeded, true);
+  assertEquals(result.settlements[0].p_input_tokens, 40);
+  assertEquals(result.settlements[0].p_output_tokens, 20);
+  assertEquals(
+    result.rpcCalls.filter((x) => x.name === "bil_reserve_ai_usage").length,
+    1,
+  );
+});
+Deno.test("two citation failures stay rejected and refund the single reservation", async () => {
+  const result = await exerciseHealthCitationHandlerContract({ citations: [] });
+  assertEquals(result.response.status, 503);
+  assertEquals(result.payload.error, "missing_health_citation");
+  assertEquals(result.providerRequests.length, 2);
+  assertEquals(result.settlements.length, 1);
+  assertEquals(result.settlements[0].p_succeeded, false);
+});
+
+Deno.test("citation regeneration cannot exceed the remaining client deadline", async () => {
+  const result = await exerciseHealthCitationHandlerContract({
+    firstCitations: [],
+    elapsedBeforeValidationMs: 23000,
+  });
+  assertEquals(result.response.status, 503);
+  assertEquals(result.payload.error, "missing_health_citation");
+  assertEquals(result.providerRequests.length, 1);
+  assertEquals(result.settlements.length, 1);
+  assertEquals(result.settlements[0].p_succeeded, false);
 });

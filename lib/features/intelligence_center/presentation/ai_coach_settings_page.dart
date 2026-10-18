@@ -24,6 +24,8 @@ import '../../commerce/providers/app_purchase_providers.dart';
 import '../../onboarding/onboarding_runtime_copy.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/coach_context_preferences.dart';
+import '../domain/coach_action_permission.dart';
+import 'coach_action_permission_provider.dart';
 import '../services/ai_boost_purchase_service.dart';
 import '../services/coach_settings_context_provider.dart';
 import '../services/coach_context_provider.dart';

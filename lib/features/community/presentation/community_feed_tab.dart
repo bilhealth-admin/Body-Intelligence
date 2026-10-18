@@ -47,7 +47,17 @@ class _FeedTabState extends State<_FeedTab>
     return scoped;
   }
 
-  final _scroll = ScrollController(keepScrollOffset: false);
+  final _modePages = <CommunityFeedMode, _FeedModePage>{};
+  final _modePrefetch = <CommunityFeedMode, Future<CommunityFeedModeBatch>>{};
+  int _modeReadEpoch = 0;
+  final _modeScroll = <CommunityFeedMode, ScrollController>{};
+  ScrollController get _scroll => _modeScroll.putIfAbsent(
+    _selectedFeedMode,
+    () => ScrollController(
+      keepScrollOffset: true,
+      initialScrollOffset: widget.preview.scrollOffsets[_selectedFeedMode] ?? 0,
+    ),
+  );
   bool _restoreOffset = false;
   double _targetOffset = 0;
   final _draft = _CommunityComposerDraft();
@@ -93,7 +103,9 @@ class _FeedTabState extends State<_FeedTab>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _rememberOffset();
-    _scroll.dispose();
+    for (final controller in _modeScroll.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -137,6 +149,9 @@ class _FeedTabState extends State<_FeedTab>
     final locale = Localizations.localeOf(context).toLanguageTag();
     if (_policyState == null || _policyLocale != locale) {
       if (_policyLocale == null || _policyLocale != locale) {
+        _modeReadEpoch++;
+        _modePages.clear();
+        _modePrefetch.clear();
         _feed = Future<List<CommunityPost>>.sync(_loadFirst);
       }
       _policyLocale = locale;
@@ -287,7 +302,7 @@ class _FeedTabState extends State<_FeedTab>
       moderationReason = await showDialog<String>(
         context: context,
         builder: (dialogContext) => visit.guard(
-          SimpleDialog(
+          BilPearlMaterialSimpleDialog(
             title: Text(
               action == 'moderate_hide'
                   ? communityText(context, 'Hide post', 'إخفاء المنشور')
@@ -317,7 +332,7 @@ class _FeedTabState extends State<_FeedTab>
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => visit.guard(
-          AlertDialog(
+          BilPearlMaterialAlertDialog(
             title: Text(
               action == 'delete'
                   ? communityText(context, 'Delete post?', 'حذف المشاركة؟')
@@ -393,6 +408,9 @@ class _FeedTabState extends State<_FeedTab>
       visit.check();
       if (!mounted) return;
       if (refreshFeed) {
+        _modeReadEpoch++;
+        _modePages.clear();
+        _modePrefetch.clear();
         final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
         setState(() {
           _feed = refreshedFeed;
@@ -458,7 +476,9 @@ class _FeedTabState extends State<_FeedTab>
       _selectedFeedMode = mode;
       _targetOffset = widget.preview.scrollOffsets[mode] ?? 0;
       _restoreOffset = true;
-      _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+      if (!_useReadyMode(mode)) {
+        _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+      }
     });
     try {
       await _feed;
@@ -474,6 +494,9 @@ class _FeedTabState extends State<_FeedTab>
     if (_openingComposer || _managingPost) return;
     final visit = _captureFeedVisit();
     if (visit == null) return;
+    _modeReadEpoch++;
+    _modePages.clear();
+    _modePrefetch.clear();
     final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
     final topics = visit.run(() => visit.repository.loadCommunityTopics());
     setState(() {

@@ -58,7 +58,12 @@ class _CommunityFeedReferenceHeaderState
     final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final uniqueAuthors = <String, CommunityPost>{};
+    final currentUserId = widget.repository.currentUserId.trim().toLowerCase();
     for (final post in widget.posts) {
+      if (currentUserId.isNotEmpty &&
+          post.authorId.trim().toLowerCase() == currentUserId) {
+        continue;
+      }
       uniqueAuthors.putIfAbsent(post.authorId, () => post);
       if (uniqueAuthors.length >= 4) break;
     }
@@ -91,6 +96,7 @@ class _CommunityFeedReferenceHeaderState
               ),
               for (final post in uniqueAuthors.values)
                 _CommunityStoryBubble(
+                  key: ValueKey('community-story-${post.authorId}'),
                   label:
                       post.authorName ??
                       communityText(context, 'BIL member', 'عضو BIL'),
@@ -125,15 +131,21 @@ class _CommunityFeedReferenceHeaderState
                 ),
                 child: Row(
                   children: [
-                    FutureBuilder<CommunityProfileOverview?>(
-                      future: _profile,
-                      initialData: widget.initialProfile,
-                      builder: (context, snapshot) => BilAccountAvatar(
-                        radius: 18,
-                        networkUrl: snapshot.data?.avatarUrl,
-                        ownerId: widget.repository.currentUserId,
-                        loading:
-                            snapshot.connectionState != ConnectionState.done,
+                    Container(
+                      key: const Key('community-create-post-icon'),
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: scheme.primary.withValues(alpha: .10),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: scheme.primary.withValues(alpha: .14),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.post_add_rounded,
+                        size: 20,
+                        color: scheme.primary,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -303,6 +315,7 @@ class _CommunityStoryBubble extends StatelessWidget {
     this.accent = false,
     this.add = false,
     this.onTap,
+    super.key,
   });
 
   final String label;

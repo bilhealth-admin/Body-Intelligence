@@ -19,7 +19,7 @@ extension _SettingsPageActions on SettingsPage {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(_settingsActionText(context, 'review_title')),
         content: Text(_settingsActionText(context, 'review_body')),
         actions: [

@@ -1,3 +1,4 @@
+import '../../../../shared/widgets/bil_pearl_material.dart';
 import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
@@ -6,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../../../../app/localization/bil_written_language_resolver.dart';
 import '../../../../shared/widgets/chat_history_viewport.dart';
+import '../../../../shared/widgets/bil_pearl_alert_dialog.dart';
 import '../../domain/community_text_policy.dart';
 import '../../presentation/community_return_button.dart';
 import '../../presentation/community_surface.dart';
@@ -245,6 +247,161 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
     if (_current(controller)) await controller.loadDirectory();
   }
 
+  /// The dialog never submits a message, report or block on appearance.
+  /// Every request is an explicit user action owned by the current channel
+  /// visit, with another owner check after the awaited system UI.
+  Future<void> _messageSafety(
+    CommunityChannelsController controller,
+    CommunityChannelMessage message,
+  ) async {
+    final safetySource = widget.repository;
+    final owner = controller.ownerId;
+    final channel = controller.channelId;
+    if (safetySource is! CommunityChannelSafetyRepository ||
+        owner == null ||
+        channel == null ||
+        message.authorId == owner ||
+        !_current(controller)) {
+      return;
+    }
+    final CommunityChannelSafetyRepository safety =
+        safetySource as CommunityChannelSafetyRepository;
+    final action = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => BilPearlAlertDialog(
+        title: Text(_copy(CommunityChannelsCopyKey.messageSafety)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              key: const Key('bil07-safety-report-option'),
+              leading: const Icon(Icons.outlined_flag_rounded),
+              title: Text(_copy(CommunityChannelsCopyKey.reportMessage)),
+              onTap: () => Navigator.pop(dialogContext, 'report'),
+            ),
+            ListTile(
+              key: const Key('bil07-safety-block-option'),
+              leading: const Icon(Icons.person_off_outlined),
+              title: Text(_copy(CommunityChannelsCopyKey.blockMember)),
+              onTap: () => Navigator.pop(dialogContext, 'block'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(_copy(CommunityChannelsCopyKey.cancel)),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || !_current(controller) || action == null) return;
+    final scope = ChannelRequestScope(
+      ownerId: owner,
+      visitGeneration: controller.visitGeneration,
+      isCurrentVisit: () => _current(controller),
+    );
+    try {
+      if (action == 'report') {
+        final reason = await _chooseChannelReportReason();
+        if (reason == null || !_current(controller)) return;
+        await safety.reportMessage(
+          scope,
+          channelId: channel,
+          messageId: message.id,
+          reason: reason,
+        );
+        if (!mounted || !_current(controller)) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_copy(CommunityChannelsCopyKey.reportSubmitted)),
+          ),
+        );
+      } else if (action == 'block') {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => BilPearlAlertDialog(
+            title: Text(_copy(CommunityChannelsCopyKey.blockMember)),
+            content: Text(_copy(CommunityChannelsCopyKey.messageSafety)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(_copy(CommunityChannelsCopyKey.cancel)),
+              ),
+              FilledButton(
+                key: const Key('bil07-confirm-block'),
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(_copy(CommunityChannelsCopyKey.confirm)),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true || !mounted || !_current(controller)) return;
+        await safety.blockMember(scope, message.authorId);
+        if (!mounted || !_current(controller)) return;
+        await _refresh(controller);
+        if (!mounted || !_current(controller)) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_copy(CommunityChannelsCopyKey.blockConfirmed)),
+          ),
+        );
+      }
+    } on Object {
+      if (!mounted || !_current(controller)) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_copy(CommunityChannelsCopyKey.safetyUnavailable)),
+        ),
+      );
+    }
+  }
+
+  Future<String?> _chooseChannelReportReason() {
+    String selected = 'spam';
+    const options = <String, CommunityChannelsCopyKey>{
+      'spam': CommunityChannelsCopyKey.reportSpam,
+      'harassment': CommunityChannelsCopyKey.reportHarassment,
+      'hate_speech': CommunityChannelsCopyKey.reportHate,
+      'other': CommunityChannelsCopyKey.reportOther,
+    };
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, update) => BilPearlAlertDialog(
+          title: Text(_copy(CommunityChannelsCopyKey.reportCategory)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final entry in options.entries)
+                ListTile(
+                  key: Key('bil07-report-reason-${entry.key}'),
+                  title: Text(_copy(entry.value)),
+                  leading: Icon(
+                    selected == entry.key
+                        ? Icons.radio_button_checked_rounded
+                        : Icons.radio_button_off_rounded,
+                  ),
+                  onTap: () => update(() => selected = entry.key),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(_copy(CommunityChannelsCopyKey.cancel)),
+            ),
+            FilledButton(
+              key: const Key('bil07-submit-report'),
+              onPressed: () => Navigator.pop(dialogContext, selected),
+              child: Text(_copy(CommunityChannelsCopyKey.reportMessage)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _send(
     CommunityChannelsController controller, {
     bool retry = false,
@@ -403,7 +560,7 @@ class _ChannelNotice extends StatelessWidget {
   final Widget? detail;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

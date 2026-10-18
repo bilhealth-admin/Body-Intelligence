@@ -19,7 +19,7 @@ class _ProgressSelector extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     margin: EdgeInsets.zero,
     clipBehavior: Clip.antiAlias,
     child: InkWell(
@@ -96,7 +96,7 @@ class _ProgressChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Card(
+    return BilPearlMaterialCard(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: DecoratedBox(
@@ -265,7 +265,7 @@ class _ProgressEmptyState extends StatelessWidget {
   final VoidCallback? onAction;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     margin: EdgeInsets.zero,
     child: Padding(
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
@@ -322,7 +322,7 @@ class _ProgressLoadingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Card(
+    return BilPearlMaterialCard(
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(18),

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:ui';
 
@@ -189,7 +190,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
       return;
     }
 
-    showModalBottomSheet<void>(
+    showBilPearlBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
@@ -226,7 +227,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
 
   Future<void> _pickTimezone() async {
     var query = '';
-    final selected = await showModalBottomSheet<String>(
+    final selected = await showBilPearlBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
@@ -618,7 +619,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     final copy = _CommunityProfileCopy.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => BilPearlMaterialAlertDialog(
         title: Text(copy.deleteAccount),
         content: Text(copy.deleteAccountHelp),
         actions: [
@@ -665,7 +666,7 @@ class _CommunityProfileUnavailable extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Card(
+      child: BilPearlMaterialCard(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(

@@ -11,7 +11,7 @@ on:
       - .github/workflows/bil_apple_google_policy_gate.yml
       - .github/scripts/bil_native_bounded_command.py
       - .github/scripts/test_bil_native_bounded_command.py
-      - .github/scripts/bil_ios36_native_integration.sh
+      - .github/scripts/bil_ios37_native_integration.sh
       - .github/scripts/bil_ios_simulator_adhoc_sign.py
       - .github/scripts/test_bil_ios_simulator_adhoc_sign.py
       - android/**

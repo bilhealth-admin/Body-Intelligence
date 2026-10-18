@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +18,7 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return BilPearlMaterialCard(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(

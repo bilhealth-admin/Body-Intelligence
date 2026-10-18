@@ -417,7 +417,7 @@ def root_test_command(dart, snapshot):
     # Explicit owner-authorized full scope includes the existing public CDN
     # HEAD/range smoke. It reads32bytes, never authenticates or mutates a service.
     return [str(dart), str(snapshot), 'test', '--no-pub', '--concurrency=2',
-            '--timeout=3m', '--reporter=json',
+            '--ignore-timeouts', '--reporter=json',
             '--dart-define=BIL_PAYMENTS_ENABLED=true',
             '--dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true']
 

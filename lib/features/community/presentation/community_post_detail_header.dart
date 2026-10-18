@@ -46,7 +46,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   final Listenable? ownerChanges;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     margin: EdgeInsets.zero,
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -88,26 +88,16 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                 TextButton(
                   key: const Key('community-post-detail-follow'),
                   onPressed: followBusy ? null : onToggleFollow,
-                  child: followBusy
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          profile.viewerFollows
-                              ? communityText(context, 'Following', 'يتابع')
-                              : communityText(context, 'Follow', 'متابعة'),
-                        ),
+                  child: Text(
+                    profile.viewerFollows
+                        ? communityText(context, 'Following', 'يتابع')
+                        : communityText(context, 'Follow', 'متابعة'),
+                  ),
                 ),
               PopupMenuButton<String>(
                 key: const Key('community-post-detail-actions'),
                 enabled: !managingPost,
-                icon: managingPost
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(Icons.more_horiz_rounded),
                 onSelected: onPostAction,
                 itemBuilder: (context) => [
                   if (post.authorId == repository.currentUserId)
@@ -192,16 +182,11 @@ class _CommunityPostDetailHeader extends StatelessWidget {
               TextButton.icon(
                 key: const Key('community-post-detail-like'),
                 onPressed: liking ? null : onLike,
-                icon: liking
-                    ? const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        stats.liked
-                            ? Icons.thumb_up_rounded
-                            : Icons.thumb_up_outlined,
-                      ),
+                icon: Icon(
+                  stats.liked
+                      ? Icons.thumb_up_rounded
+                      : Icons.thumb_up_outlined,
+                ),
                 label: Text('${stats.likeCount}'),
               ),
               _CommunityPostDetailMetric(
@@ -223,16 +208,11 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                       )
                     : communityText(context, 'Save post', 'حفظ المنشور'),
                 onPressed: saving ? null : onSave,
-                icon: saving
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        saved
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                      ),
+                icon: Icon(
+                  saved
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                ),
               ),
               Builder(
                 builder: (shareContext) => IconButton(
@@ -243,12 +223,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                     'مشاركة المنشور',
                   ),
                   onPressed: sharing ? null : () => onShare(shareContext),
-                  icon: sharing
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.share_outlined),
+                  icon: const Icon(Icons.share_outlined),
                 ),
               ),
             ],

@@ -46,7 +46,7 @@ class _NavigationRepository extends CommunityRepository {
   @override
   bool get useServerCommunityReferenceParity => false;
   @override
-  Future<bool> isCommunityModerator() async => false;
+  Future<bool> isCommunityModerator() async => true;
   @override
   Future<CommunityProfile?> loadMyProfile() async => const CommunityProfile(
     userId: owner,
@@ -221,6 +221,14 @@ Future<void> _mode(WidgetTester tester, CommunityFeedMode mode) async {
   await tester.tap(find.byKey(const Key('community-settings')));
   await tester.pumpAndSettle();
   expect(find.byKey(const Key('community-navigation-sheet')), findsOneWidget);
+  expect(
+    find.byKey(const Key('community-nav-/community/moderation')),
+    findsNothing,
+  );
+  expect(
+    find.byKey(const Key('community-nav-/community/food-review')),
+    findsNothing,
+  );
   await tester.tap(find.byKey(const Key('community-feed-mode-menu')));
   await tester.pumpAndSettle();
   for (final value in CommunityFeedMode.values) {
@@ -314,7 +322,6 @@ void main() {
       CommunityFeedMode.following,
       CommunityFeedMode.friends,
       CommunityFeedMode.forYou,
-      CommunityFeedMode.explore,
     ]);
     expect(
       repository.requests.every(

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/localization/app_localizations.dart';
@@ -14,7 +15,7 @@ class LifeContextPage extends ConsumerWidget {
       context.strings.text(en);
 
   Future<void> addContext(BuildContext context, WidgetRef ref) async {
-    final type = await showModalBottomSheet<String>(
+    final type = await showBilPearlBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (context) => SafeArea(
@@ -43,7 +44,7 @@ class LifeContextPage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+        builder: (context, setState) => BilPearlMaterialAlertDialog(
           title: Text(_label(context, type)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -148,7 +149,7 @@ class LifeContextPage extends ConsumerWidget {
                 itemCount: rows.length,
                 itemBuilder: (context, index) {
                   final row = rows[index];
-                  return Card(
+                  return BilPearlMaterialCard(
                     child: ListTile(
                       leading: BilSemanticIconBadge(
                         kind: _kind(row.type),

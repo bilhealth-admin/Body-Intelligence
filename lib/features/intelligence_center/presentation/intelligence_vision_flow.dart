@@ -303,7 +303,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
         intelligenceCoachMealVisionConsentProvider,
       )(context);
       if (!consent || !await _mediaRequestCurrent(request) || !mounted) return;
-      final source = await showModalBottomSheet<ImageSource>(
+      final source = await showBilPearlBottomSheet<ImageSource>(
         context: context,
         useSafeArea: true,
         showDragHandle: true,
@@ -508,7 +508,7 @@ class _CoachMediaGramsDialogState extends State<_CoachMediaGramsDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
+  Widget build(BuildContext context) => BilPearlMaterialAlertDialog(
     scrollable: true,
     title: Text(widget.copy.quantityTitle),
     content: Column(

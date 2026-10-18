@@ -101,4 +101,36 @@ void main() {
     expect(page, contains('saveMyProfilePrivacy'));
     expect(models, contains('this.showMembershipTier = false'));
   });
+
+  test('friend totals count accepted visible links and avoid duplicate labels', () {
+    final projection = File(
+      'supabase/migrations/20261003064812_community_profile_projection_privacy_v1.sql',
+    ).readAsStringSync();
+    final visibility = File(
+      'supabase/migrations/20260908013800_bil_community_social_v2.sql',
+    ).readAsStringSync();
+    final header = File(
+      'lib/features/community/presentation/community_member_profile_header.dart',
+    ).readAsStringSync();
+
+    expect(
+      projection,
+      contains('p_user_id=v_viewer or v_profile.show_friends'),
+    );
+    expect(projection, contains("where f.status='accepted'"));
+    expect(
+      projection,
+      contains('bil_social_member_visible_v2(f.addressee_id)'),
+    );
+    expect(
+      projection,
+      contains('bil_social_member_visible_v2(f.requester_id)'),
+    );
+    expect(visibility, contains('public.bil_blocks'));
+    expect(header, contains('showAcceptedStatus: profile.friendCount == null'));
+    expect(
+      header,
+      contains('CommunityRelationshipStatus.accepted when showAcceptedStatus'),
+    );
+  });
 }

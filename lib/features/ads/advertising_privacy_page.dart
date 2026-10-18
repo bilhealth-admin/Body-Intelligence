@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -449,7 +450,7 @@ class _AdvertisingPrivacyPageState
         children: [
           Text(copy.boundary, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
-          Card(
+          BilPearlMaterialCard(
             child: ListTile(
               key: const Key('advertising-audience-eligibility'),
               leading: Icon(
@@ -461,7 +462,7 @@ class _AdvertisingPrivacyPageState
               subtitle: Text(_eligibilityDetail(locale, ageEligibility)),
             ),
           ),
-          Card(
+          BilPearlMaterialCard(
             child: ListTile(
               key: const Key('advertising-contextual-policy'),
               leading: const BilSemanticIconBadge(
@@ -472,7 +473,7 @@ class _AdvertisingPrivacyPageState
             ),
           ),
           if (_umpEnabled && _umpSnapshot.privacyOptionsRequired)
-            Card(
+            BilPearlMaterialCard(
               child: ListTile(
                 key: const Key('advertising-google-privacy-options'),
                 leading: const BilSemanticIconBadge(
@@ -492,7 +493,7 @@ class _AdvertisingPrivacyPageState
               ),
             ),
           if (_umpEnabled && _umpSnapshot.phase == UmpConsentPhase.blocked)
-            Card(
+            BilPearlMaterialCard(
               child: ListTile(
                 key: const Key('advertising-google-consent-blocked'),
                 leading: Icon(
@@ -515,7 +516,7 @@ class _AdvertisingPrivacyPageState
               child: LinearProgressIndicator(),
             ),
           if (!providerConfigured)
-            Card(
+            BilPearlMaterialCard(
               child: ListTile(
                 key: const Key('advertising-provider-unavailable'),
                 leading: const Icon(Icons.visibility_off_outlined),

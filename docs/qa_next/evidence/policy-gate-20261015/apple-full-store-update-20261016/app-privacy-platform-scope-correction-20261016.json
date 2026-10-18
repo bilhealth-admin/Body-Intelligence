@@ -1,0 +1,71 @@
+{
+  "recorded_at_utc": "2026-10-16T02:23:23Z",
+  "app_store_connect_app_id": "6805349703",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "source_sha": "a6f0a9a15188aabca0dcb739269ab17079ed4504",
+  "trigger": {
+    "kind": "owner_reported_telephone_call",
+    "reported_issue": "Apple told the owner the App Privacy information mixed Android and Apple platform practices.",
+    "transcript_or_written_apple_notice_available": false,
+    "note": "The call wording is owner-reported and was not independently recorded in App Store Connect."
+  },
+  "confirmed_live_asc_changes_by_agent": [
+    {
+      "data_type": "User ID",
+      "before": {
+        "purposes": ["App Functionality", "Product Personalization", "Third-Party Advertising"],
+        "linked_to_identity": true,
+        "tracking": true
+      },
+      "after": {
+        "purposes": ["App Functionality", "Analytics"],
+        "linked_to_identity": true,
+        "tracking": false
+      }
+    },
+    {
+      "data_type": "Product Interaction",
+      "before": {
+        "purposes": ["App Functionality", "Analytics", "Product Personalization", "Third-Party Advertising"],
+        "linked_to_identity": true,
+        "tracking": true
+      },
+      "after": {
+        "purposes": ["App Functionality", "Analytics", "Product Personalization", "Third-Party Advertising"],
+        "linked_to_identity": true,
+        "tracking": false
+      }
+    }
+  ],
+  "unchanged_data_type": {
+    "data_type": "Device ID",
+    "purposes": ["App Functionality", "Analytics", "Third-Party Advertising"],
+    "linked_to_identity": true,
+    "tracking": true
+  },
+  "source_scope_review": {
+    "evidence_used_for_change": "The cited Google Sign-In and Google Mobile Ads privacy declarations were found in a compiled iOS bundle: GoogleSignIn_GoogleSignIn.bundle/PrivacyInfo.xcprivacy and Frameworks/GoogleMobileAds.framework/PrivacyInfo.xcprivacy.",
+    "android_manifest_was_the_direct_source_for_these_two_edits": false,
+    "complete_android_runtime_collection_reconciled_to_asc": false,
+    "complete_ios_runtime_collection_reconciled_to_asc": false,
+    "exact_signed_ipa_36_tested": false,
+    "assessment": "The direct evidence was iOS-specific, but it was insufficient to certify app-level App Privacy answers across all platforms and third-party partners. SDK manifests are declarations, not proof of complete runtime practices."
+  },
+  "apple_documentation": {
+    "rule": "App Store Connect App Privacy responses are provided at app level, should accurately represent practices across platforms, and must include integrated third-party partners. Use the most comprehensive and inclusive answer where one platform collects more.",
+    "official_url": "https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy/",
+    "read_on": "2026-10-16"
+  },
+  "status": {
+    "live_answers_reverted": false,
+    "further_live_edits_after_owner_reported_call": false,
+    "app_review_guideline_5_1_2_i": "OPEN_P0",
+    "cross_platform_app_privacy_certified": false,
+    "required_next_evidence": [
+      "Inventory the actual data collection and sharing behavior on iOS and Android independently.",
+      "Map every collected data type, purpose, linked status, tracking status, and third-party partner to the app-level ASC answers.",
+      "Verify final iOS and Android release artifacts and relevant runtime behavior before claiming compliance."
+    ]
+  },
+  "sensitive_data": "No credentials, passwords, JWTs, receipts, or reviewer login data recorded."
+}

@@ -335,7 +335,7 @@ class _Section extends StatelessWidget {
   final IconData icon;
   final List<Widget> children;
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     margin: const EdgeInsets.only(top: 14),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -779,7 +779,7 @@ class _MacroDistributionState extends State<_MacroDistribution> {
           ),
         ),
         if (showTooltip)
-          Card(
+          BilPearlMaterialCard(
             key: const Key('weekly-macro-tooltip'),
             color: const Color(0xFF263238),
             child: Padding(

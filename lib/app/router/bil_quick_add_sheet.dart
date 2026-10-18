@@ -5,6 +5,7 @@ import '../../shared/widgets/bil_wordmark.dart';
 import '../localization/bil_locale_policy.dart';
 import '../localization/runtime_copy.dart';
 import '../theme/bil_semantic_icons.dart';
+import '../theme/bil_pearl_finish.dart';
 import 'bil_quick_add_locale_copy.dart';
 
 class BilQuickAddSheet extends StatelessWidget {
@@ -209,31 +210,13 @@ class BilQuickAddSheet extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final action = primaryActions[index];
                               final spec = BilSemanticIcons.spec(action.kind);
-                              final premiumGradient = switch (action.kind) {
-                                BilSemanticIconKind.voice => const <Color>[
-                                  Color(0xFF243B8F),
-                                  Color(0xFF6D4AE8),
-                                ],
-                                BilSemanticIconKind.mealPhoto => const <Color>[
-                                  Color(0xFF075A8C),
-                                  Color(0xFF0A84FF),
-                                ],
-                                _ => null,
-                              };
                               final tile = _PrimaryQuickAction(
                                 actionKey: Key('quick-add-primary-$index'),
                                 badgeKey: Key('quick-add-primary-badge-$index'),
                                 iconKey: Key('quick-add-primary-icon-$index'),
                                 icon: spec.iconFor(baseTheme.platform),
-                                // Keep the canonical semantic badge identity
-                                // even when Voice/Photo uses a premium card gradient.
-                                backgroundColor: spec.accent(
-                                  baseTheme.brightness,
-                                ),
-                                foregroundColor: spec.onAccent(
-                                  baseTheme.brightness,
-                                ),
-                                premiumGradient: premiumGradient,
+                                foregroundColor:
+                                    baseTheme.colorScheme.onSurfaceVariant,
                                 label: action.label,
                                 onTap: action.onTap,
                               );
@@ -258,7 +241,7 @@ class BilQuickAddSheet extends StatelessWidget {
                                     'quick-add-secondary-icon-$index',
                                   ),
                                   icon: spec.iconFor(baseTheme.platform),
-                                  color: spec.accent(baseTheme.brightness),
+                                  color: baseTheme.colorScheme.onSurfaceVariant,
                                   label: action.label,
                                   onTap: action.onTap,
                                 );
@@ -307,22 +290,18 @@ class _PrimaryQuickAction extends StatelessWidget {
     required this.badgeKey,
     required this.iconKey,
     required this.icon,
-    required this.backgroundColor,
     required this.foregroundColor,
     required this.label,
     required this.onTap,
-    this.premiumGradient,
   });
 
   final Key actionKey;
   final Key badgeKey;
   final Key iconKey;
   final IconData icon;
-  final Color backgroundColor;
   final Color foregroundColor;
   final String label;
   final VoidCallback onTap;
-  final List<Color>? premiumGradient;
 
   @override
   Widget build(BuildContext context) => _GlassActionSurface(
@@ -330,7 +309,6 @@ class _PrimaryQuickAction extends StatelessWidget {
     semanticLabel: label.replaceAll('\n', ' '),
     radius: 19,
     onTap: onTap,
-    premiumGradient: premiumGradient,
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Column(
@@ -340,10 +318,6 @@ class _PrimaryQuickAction extends StatelessWidget {
             key: badgeKey,
             width: 32,
             height: 32,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              shape: BoxShape.circle,
-            ),
             alignment: Alignment.center,
             child: BilGlassPressFeedback(
               child: Icon(icon, key: iconKey, color: foregroundColor, size: 20),
@@ -357,9 +331,7 @@ class _PrimaryQuickAction extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: premiumGradient == null
-                    ? Theme.of(context).colorScheme.onSurface
-                    : Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -.08,
               ),
@@ -400,17 +372,9 @@ class _QuickActionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         child: Row(
           children: [
-            Container(
+            SizedBox(
               width: 36,
               height: 36,
-              decoration: BoxDecoration(
-                color: color.withValues(
-                  alpha: Theme.of(context).brightness == Brightness.dark
-                      ? .22
-                      : .12,
-                ),
-                shape: BoxShape.circle,
-              ),
               child: BilGlassPressFeedback(
                 child: Icon(key: iconKey, icon, color: color, size: 20),
               ),
@@ -449,7 +413,6 @@ class _GlassActionSurface extends StatelessWidget {
     required this.radius,
     required this.onTap,
     required this.child,
-    this.premiumGradient,
   });
 
   final Key actionKey;
@@ -457,7 +420,6 @@ class _GlassActionSurface extends StatelessWidget {
   final double radius;
   final VoidCallback onTap;
   final Widget child;
-  final List<Color>? premiumGradient;
 
   @override
   Widget build(BuildContext context) {
@@ -469,30 +431,18 @@ class _GlassActionSurface extends StatelessWidget {
       onTap: onTap,
       excludeSemantics: true,
       child: Material(
-        color: premiumGradient == null
-            ? scheme.surface.withValues(alpha: .94)
-            : Colors.transparent,
+        color: Colors.transparent,
         elevation: 0,
         shadowColor: const Color(0xFF4D62FF).withValues(alpha: .24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius),
-          side: BorderSide(
-            color: premiumGradient == null
-                ? scheme.outlineVariant
-                : Colors.white.withValues(alpha: .16),
-          ),
+          side: BorderSide(color: scheme.outlineVariant),
         ),
         clipBehavior: Clip.antiAlias,
         child: Ink(
-          decoration: premiumGradient == null
-              ? null
-              : BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: AlignmentDirectional.topStart,
-                    end: AlignmentDirectional.bottomEnd,
-                    colors: premiumGradient!,
-                  ),
-                ),
+          decoration: BoxDecoration(
+            gradient: BilPearlFinish.panel(context, shadow: false).gradient,
+          ),
           child: InkWell(
             // Semantics owns the single accessible tap action above; InkWell
             // remains the visual/pointer target for touch and mouse input.

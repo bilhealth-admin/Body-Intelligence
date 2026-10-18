@@ -117,7 +117,7 @@ void main() {
     expect(issues, isEmpty);
   });
 
-  test('frozen iOS release configuration requires build 36', () {
+  test('frozen iOS release configuration requires build 37', () {
     final issues = ReleaseConfigurationValidator.validate(
       ReleaseConfiguration(
         production: true,
@@ -145,7 +145,7 @@ void main() {
         candidateFrozenOrAccepted: true,
         unresolvedReviewCount: 0,
         manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 36,
+        manifestReleaseBuildNumber: 37,
       ),
     );
 
@@ -187,7 +187,7 @@ void main() {
     final releaseIssue = issues.singleWhere(
       (issue) => issue.code == 'wrong_frozen_release_version',
     );
-    expect(releaseIssue.message, contains('build 36 for ios'));
+    expect(releaseIssue.message, contains('build 37 for ios'));
   });
 
   test('production rejects mismatched feature integrity and freeze gates', () {

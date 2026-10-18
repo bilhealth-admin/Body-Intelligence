@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -158,7 +159,7 @@ final class CommunityComposerVoiceInputService {
       }
       final open = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog.adaptive(
+        builder: (dialogContext) => BilPearlMaterialAlertDialog(
           title: Text(
             _copy(
               dialogContext,
@@ -203,7 +204,7 @@ final class CommunityComposerVoiceInputService {
 
     final proceed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog.adaptive(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           _copy(
             dialogContext,

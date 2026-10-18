@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
@@ -87,6 +88,8 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   final Map<String, Future<RecipeCatalogCardFacts>> _cardFacts = {};
   final RecipeImageRequestCache _recipeImages = RecipeImageRequestCache();
   bool _initialRecipeHandled = false;
+  Animation<double>? _initialRecipeAnimation;
+  AnimationStatusListener? _initialRecipeAnimationListener;
 
   @override
   void initState() {
@@ -112,6 +115,10 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
 
   @override
   void dispose() {
+    final listener = _initialRecipeAnimationListener;
+    if (listener != null) {
+      _initialRecipeAnimation?.removeStatusListener(listener);
+    }
     _search.dispose();
     _ownedImageClient?.dispose();
     super.dispose();
@@ -512,7 +519,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   }
 
   Future<void> _chooseCuisine(List<String> cuisines) async {
-    final selected = await showModalBottomSheet<String>(
+    final selected = await showBilPearlBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
@@ -598,7 +605,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   }
 
   Future<void> _open(RecipeCatalogSummary summary) async {
-    showModalBottomSheet<void>(
+    showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -633,7 +640,32 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
       // A deep link has the same authority boundary as a manual recipe open.
       // The shared gate owns loading, failure/retry, expiry and verified Free;
       // an unresolved lookup is never a reason to redirect a paid member.
-      _open(recipe);
+      final route = ModalRoute.of(context);
+      final animation = route?.animation;
+      if (animation == null || animation.status == AnimationStatus.completed) {
+        if (route?.isCurrent ?? true) _open(recipe);
+        return;
+      }
+      // A popup pushed during the page's entrance can freeze its predecessor
+      // before that outgoing route disposes. Wait on the actual route signal.
+      void settled(AnimationStatus status) {
+        if (status != AnimationStatus.completed &&
+            status != AnimationStatus.dismissed) {
+          return;
+        }
+        animation.removeStatusListener(settled);
+        _initialRecipeAnimation = null;
+        _initialRecipeAnimationListener = null;
+        if (mounted &&
+            route!.isCurrent &&
+            status == AnimationStatus.completed) {
+          _open(recipe);
+        }
+      }
+
+      _initialRecipeAnimation = animation;
+      _initialRecipeAnimationListener = settled;
+      animation.addStatusListener(settled);
     });
   }
 }

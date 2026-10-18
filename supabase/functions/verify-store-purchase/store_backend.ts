@@ -2203,6 +2203,11 @@ export async function handler(
         ? error.status
         : code === "authentication_required" || code === "invalid_session"
         ? 401
+        // A rejected administrator-only reconciliation is an authorization
+        // denial, not an upstream store outage. Never retry or relax its
+        // constant-time shared-secret check to silence a 503.
+        : code === "reconciliation_forbidden"
+        ? 403
         : clientCodes.has(code)
         ? 400
         : 503,

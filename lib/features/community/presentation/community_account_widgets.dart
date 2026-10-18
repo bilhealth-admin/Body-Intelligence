@@ -245,7 +245,7 @@ class _CommunityProfileMetric extends StatelessWidget {
   }
 }
 
-class _CommunityAccountMenu extends StatefulWidget {
+class _CommunityAccountMenu extends StatelessWidget {
   const _CommunityAccountMenu({
     required this.repository,
     required this.onProfileChanged,
@@ -254,66 +254,42 @@ class _CommunityAccountMenu extends StatefulWidget {
   final VoidCallback onProfileChanged;
 
   @override
-  State<_CommunityAccountMenu> createState() => _CommunityAccountMenuState();
-}
-
-class _CommunityAccountMenuState extends State<_CommunityAccountMenu> {
-  late final Future<bool> _moderator = widget.repository.isCommunityModerator();
-
-  @override
-  Widget build(BuildContext context) => FutureBuilder<bool>(
-    future: _moderator,
-    builder: (context, snapshot) => PopupMenuButton<String>(
-      tooltip: communityText(context, 'Community actions', 'إجراءات المجتمع'),
-      position: PopupMenuPosition.under,
-      icon: const Icon(Icons.tune_rounded),
-      onSelected: (route) async {
-        FocusManager.instance.primaryFocus?.unfocus();
-        await context.push(route);
-        if (context.mounted && route == '/community/profile') {
-          widget.onProfileChanged();
-        }
-      },
-      itemBuilder: (context) => [
-        _communityAction(
-          context,
-          '/community/profile',
-          'Community profile',
-          'ملف المجتمع',
-        ),
-        _communityAction(
-          context,
-          '/community/connections',
-          'Friends and requests',
-          'الأصدقاء والطلبات',
-        ),
-        _communityAction(
-          context,
-          '/community/people',
-          'Find people',
-          'البحث عن أصدقاء',
-        ),
-        _communityAction(
-          context,
-          '/community/safety',
-          'Safety and policy',
-          'الأمان والسياسة',
-        ),
-        // Food-review authorization is distinct from Community moderation.
-        _communityAction(
-          context,
-          '/community/food-review',
-          'Review foods',
-          'مراجعة الأغذية',
-        ),
-        if (snapshot.data == true)
-          _communityAction(
-            context,
-            '/community/moderation',
-            'Community moderation',
-            'مراجعة المجتمع',
-          ),
-      ],
-    ),
+  Widget build(BuildContext context) => PopupMenuButton<String>(
+    tooltip: communityText(context, 'Community actions', 'إجراءات المجتمع'),
+    position: PopupMenuPosition.under,
+    icon: const Icon(Icons.tune_rounded),
+    onSelected: (route) async {
+      FocusManager.instance.primaryFocus?.unfocus();
+      await context.push(route);
+      if (context.mounted && route == '/community/profile') {
+        onProfileChanged();
+      }
+    },
+    itemBuilder: (context) => [
+      _communityAction(
+        context,
+        '/community/profile',
+        'Community profile',
+        'ملف المجتمع',
+      ),
+      _communityAction(
+        context,
+        '/community/connections',
+        'Friends and requests',
+        'الأصدقاء والطلبات',
+      ),
+      _communityAction(
+        context,
+        '/community/people',
+        'Find people',
+        'البحث عن أصدقاء',
+      ),
+      _communityAction(
+        context,
+        '/community/safety',
+        'Safety and policy',
+        'الأمان والسياسة',
+      ),
+    ],
   );
 }

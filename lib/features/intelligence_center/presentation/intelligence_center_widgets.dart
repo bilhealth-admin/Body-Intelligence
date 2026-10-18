@@ -164,31 +164,36 @@ class _CoachHeroPortrait extends StatelessWidget {
       'Open conversation history',
       'افتح سجل المحادثات',
     );
-    return Semantics(
-      button: onTap != null,
-      label: label,
-      child: Tooltip(
-        message: label,
-        child: InkWell(
-          key: const Key('ai-coach-conversation-history-button'),
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: Container(
-            width: size,
-            height: size,
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHigh,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outlineVariant,
-                width: 2,
-              ),
-            ),
-            child: ClipOval(
-              child: const BilCoachPortrait(
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.medium,
+    return SizedBox.square(
+      dimension: size < 48 ? 48 : size,
+      child: Semantics(
+        button: onTap != null,
+        label: label,
+        child: Tooltip(
+          message: label,
+          child: InkWell(
+            key: const Key('ai-coach-conversation-history-button'),
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Center(
+              child: Container(
+                width: size,
+                height: size,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    width: 2,
+                  ),
+                ),
+                child: ClipOval(
+                  child: const BilCoachPortrait(
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                  ),
+                ),
               ),
             ),
           ),

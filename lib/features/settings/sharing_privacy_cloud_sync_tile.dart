@@ -116,16 +116,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
           .runOnce();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _privacyText(
-              context,
-              result.completed
-                  ? 'Encrypted cloud sync completed.'
-                  : 'Cloud sync could not run. Check consent and internet.',
-            ),
-          ),
-        ),
+        SnackBar(content: Text(cloudManualSyncOutcomeText(context, result))),
       );
       ref.invalidate(cloudRuntimePreparationProvider);
     } on Object {
@@ -152,7 +143,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
       final confirmed =
           await showDialog<bool>(
             context: context,
-            builder: (dialogContext) => AlertDialog(
+            builder: (dialogContext) => BilPearlMaterialAlertDialog(
               title: Text(
                 dialogContext.strings.text(CloudSyncConsentCopy.title),
               ),
@@ -199,14 +190,15 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _privacyText(
-              context,
-              !granted
-                  ? 'Cloud sync preference updated.'
-                  : syncResult?.completed == true
-                  ? 'Encrypted cloud sync completed.'
-                  : 'Cloud sync could not run. Check consent and internet.',
-            ),
+            !granted
+                ? _privacyText(context, 'Cloud sync preference updated.')
+                : cloudManualSyncOutcomeText(
+                    context,
+                    syncResult ??
+                        const CloudManualSyncResult(
+                          disposition: CloudManualSyncDisposition.unavailable,
+                        ),
+                  ),
           ),
         ),
       );

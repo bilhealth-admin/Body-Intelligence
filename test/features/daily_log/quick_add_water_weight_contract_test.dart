@@ -91,7 +91,22 @@ void main() {
     expect(coordinator, contains('onBusyChanged(true)'));
     expect(coordinator, contains('onBusyChanged(false)'));
     expect(waterPage, contains('Water could not be saved. Try again.'));
-    expect(waterPage, contains('canPop: false'));
+    expect(
+      waterPage,
+      contains(
+        'final routerCanPop = GoRouter.maybeOf(context)?.canPop() ?? false;',
+      ),
+    );
+    expect(
+      waterPage,
+      contains(
+        'final navigatorCanPop = Navigator.maybeOf(context)?.canPop() ?? false;',
+      ),
+    );
+    expect(
+      waterPage,
+      contains('canPop: !saving && (routerCanPop || navigatorCanPop)'),
+    );
     expect(waterPage, contains('if (!didPop && !saving) leave();'));
     expect(section, contains('enabled: !saving'));
     expect(section, contains('onPressed: saving ? null'));

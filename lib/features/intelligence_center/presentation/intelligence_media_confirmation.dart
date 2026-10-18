@@ -75,7 +75,7 @@ extension _CoachMediaConfirmation on _IntelligenceCenterPageState {
 
             return PopScope(
               canPop: !committing,
-              child: Dialog(
+              child: BilPearlMaterialDialog(
                 key: const Key('bil02-food-review-host'),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(

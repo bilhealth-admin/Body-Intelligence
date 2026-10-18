@@ -866,11 +866,12 @@ export async function geminiCall(
   thinkingLevel: "LOW" | "MEDIUM" | "HIGH" = "MEDIUM",
   fetcher: typeof fetch = fetch,
   citationCatalogVersion: HealthCitationCatalogVersion = 1,
+  attemptTimeoutMs = geminiAttemptTimeoutMs,
 ) {
   const key = env("BIL_GEMINI_API_KEY");
   if (!key) throw new Error("provider_not_configured");
-  // Prefer the already-proven Gemini endpoint used by Vision. A separately
-  // configured text endpoint remains supported when Vision has no override.
+  // Both endpoints are Google-operated Gemini APIs. The server's existing
+  // Vertex key must use Vertex; do not widen the key or permit other providers.
   const endpoint = disclosedGeminiEndpoint(
     env("BIL_GEMINI_VISION_ENDPOINT") ||
       env("BIL_GEMINI_TEXT_ENDPOINT") ||
@@ -885,7 +886,9 @@ export async function geminiCall(
     try {
       response = await fetchDisclosedProvider(fetcher, url, {
         method: "POST",
-        signal: AbortSignal.timeout(geminiAttemptTimeoutMs),
+        signal: AbortSignal.timeout(
+          Math.max(1, Math.min(geminiAttemptTimeoutMs, attemptTimeoutMs)),
+        ),
         headers: { "content-type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
@@ -1014,7 +1017,107 @@ export type AiCoachHandlerDependencies = {
   geminiCall?: typeof geminiCall;
   now?: () => number;
   requireIntegrity?: typeof requireMobileIntegrityGrant;
+  diagnosticLog?: (event: AiCoachFailureDiagnostic) => void;
 };
+
+type AiCoachFailureDiagnostic = {
+  event: "ai_coach_failure";
+  request_id_hash: string | null;
+  stage: string;
+  error_code: string;
+  http_status: number;
+  elapsed_ms: number;
+  reservation_established: boolean;
+  compensation_attempted: boolean;
+  compensation_succeeded: boolean | null;
+};
+
+const safeAiCoachDiagnosticCodes = new Set([
+  "authentication_required",
+  "invalid_session",
+  "invalid_request_id",
+  "invalid_health_citation_catalog_version",
+  "raw_voice_audio_not_supported",
+  "context_too_large",
+  "consent_check_failed",
+  "ai_consent_required",
+  "reservation_failed",
+  "ai_usage_exhausted",
+  "duplicate_request",
+  "provider_not_configured",
+  "provider_endpoint_not_allowed",
+  "provider_failed",
+  "provider_timeout",
+  "provider_rate_limited",
+  "provider_invalid_response",
+  "provider_incomplete_response",
+  "ai_safety_blocked",
+  "malformed_response",
+  "malformed_spoken_response",
+  "malformed_health_citation_classification",
+  "missing_health_citation",
+  "malformed_transcript",
+  "settlement_failed",
+]);
+
+function safeAiCoachDiagnosticCode(code: string) {
+  const normalized = code.trim().toLowerCase();
+  if (safeAiCoachDiagnosticCodes.has(normalized)) return normalized;
+  const providerStatus = /^provider_http_([1-5]\d\d)(?:_[a-z0-9_]{1,80})?$/
+    .exec(
+      normalized,
+    );
+  if (providerStatus) {
+    // Only documented, non-personal Google reason enums may reach logs.
+    const reason = normalized.replace(/^provider_http_[1-5]\d\d_?/, "");
+    const safeReasons = new Set([
+      "api_key_invalid",
+      "api_key_service_blocked",
+      "api_key_http_referrer_blocked",
+      "api_key_ip_address_blocked",
+      "api_key_android_app_blocked",
+      "api_key_ios_app_blocked",
+      "service_disabled",
+      "billing_disabled",
+      "consumer_invalid",
+      "permission_denied",
+      "access_token_scope_insufficient",
+    ]);
+    return `provider_http_${providerStatus[1]}${
+      safeReasons.has(reason) ? `_${reason}` : ""
+    }`;
+  }
+  return "coach_failed";
+}
+
+async function requestCorrelationHash(requestId: string) {
+  if (!requestId) return null;
+  try {
+    const digest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(requestId),
+    );
+    return Array.from(new Uint8Array(digest)).slice(0, 8)
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  } catch {
+    return null;
+  }
+}
+
+function writeAiCoachFailureDiagnostic(
+  event: AiCoachFailureDiagnostic,
+  logger?: (event: AiCoachFailureDiagnostic) => void,
+) {
+  try {
+    if (logger) {
+      logger(event);
+    } else {
+      console.error(JSON.stringify(event));
+    }
+  } catch {
+    // Diagnostics must never change the request outcome.
+  }
+}
 
 export async function handler(
   request: Request,
@@ -1035,6 +1138,7 @@ export async function handler(
   let requestId = "";
   let admin: ReturnType<typeof clients>["admin"] | null = null;
   let reserved = false;
+  let failureStage = "authentication";
   try {
     const authorization = request.headers.get("authorization") ?? "";
     if (!authorization) throw new Error("authentication_required");
@@ -1044,6 +1148,7 @@ export async function handler(
     // Parse the bounded request while Supabase validates the bearer token.
     // Neither operation depends on the other and both are required before any
     // reservation or provider call.
+    failureStage = "authentication_and_body";
     const [authResult, rawBody] = await Promise.all([
       c.auth.auth.getUser(),
       request.json() as Promise<Record<string, unknown>>,
@@ -1051,6 +1156,7 @@ export async function handler(
     const { data, error } = authResult;
     if (error || !data.user) throw new Error("invalid_session");
     ownerId = data.user.id;
+    failureStage = "mobile_integrity";
     const body = await requireIntegrity({
       admin: adminClient as never,
       ownerId,
@@ -1061,6 +1167,12 @@ export async function handler(
       body.health_citation_catalog_version,
     );
     rejectRawVoiceAudio(body.audio);
+    requestId = String(body.request_id ?? "").trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(requestId)) {
+      requestId = "";
+      throw new Error("invalid_request_id");
+    }
+    failureStage = "remote_ai_consent";
     const { data: consent, error: consentError } = await adminClient.rpc(
       "bil_has_remote_ai_consent",
       { p_owner_id: ownerId },
@@ -1069,10 +1181,7 @@ export async function handler(
     if (consent !== true) {
       throw new Error("ai_consent_required");
     }
-    requestId = String(body.request_id ?? "").trim();
-    if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(requestId)) {
-      throw new Error("invalid_request_id");
-    }
+    failureStage = "request_validation";
     const requestedLocale = resolveBilLocale(body.locale);
     const messages = boundedMessages(body.messages);
     const detectedLanguageHint = safeLanguageHint(body.language_hint);
@@ -1082,6 +1191,7 @@ export async function handler(
       detectedLanguageHint,
     );
     const context = boundedContext(body.context);
+    failureStage = "credit_reservation";
     const { data: reservation, error: reserveError } = await adminClient.rpc(
       "bil_reserve_ai_usage",
       {
@@ -1127,6 +1237,7 @@ export async function handler(
       role: message.role === "assistant" ? "model" : "user",
       parts: [{ text: message.content }],
     }));
+    failureStage = "gemini_provider";
     const providerCall = await geminiCallWithFallback(
       callGemini,
       model,
@@ -1137,18 +1248,70 @@ export async function handler(
       simple ? "LOW" : "MEDIUM",
       citationCatalogVersion,
     );
-    const provider = providerCall.provider;
+    let provider = providerCall.provider;
     const servedModel = providerCall.model;
-    const candidate = requireSafeGeminiCandidate(provider.data);
-    const content = candidate.content as
-      | Record<string, unknown>
-      | undefined;
-    const parts = content?.parts as Array<Record<string, unknown>> | undefined;
-    const result = parseModelJson(
-      extractModelText(parts),
-      false,
-      citationCatalogVersion,
-    );
+    failureStage = "gemini_response_validation";
+    const decode = (data: Record<string, unknown>) => {
+      const candidate = requireSafeGeminiCandidate(data);
+      const content = candidate.content as Record<string, unknown> | undefined;
+      return parseModelJson(
+        extractModelText(
+          content?.parts as Array<Record<string, unknown>> | undefined,
+        ),
+        false,
+        citationCatalogVersion,
+      );
+    };
+    let result: ReturnType<typeof parseModelJson>;
+    try {
+      result = decode(provider.data);
+    } catch (error) {
+      const budget = Math.min(6000, 24000 - (now() - started));
+      if (
+        !(error instanceof Error) ||
+        error.message !== "missing_health_citation" || budget < 1500
+      ) throw error;
+      // Regenerate once under the SAME reservation and catalog. Never invent
+      // or attach a citation to unreviewed text and never weaken parseModelJson.
+      failureStage = "health_citation_repair";
+      const originalUsage = (provider.data.usageMetadata ?? {}) as Record<
+        string,
+        unknown
+      >;
+      const repair = await callGemini(
+        servedModel,
+        contents,
+        system +
+          " The previous answer was rejected as missing_health_citation. Regenerate a complete answer with the exact allowed citation IDs supporting every general health recommendation, named inline. Do not invent a source or make unsupported claims. For a pure account action or repetition of the user's records with no guidance, use requires_health_citation=false. Return only the required JSON.",
+        4096,
+        false,
+        "LOW",
+        undefined,
+        citationCatalogVersion,
+        budget,
+      );
+      result = decode(repair.data);
+      const repairedUsage = (repair.data.usageMetadata ?? {}) as Record<
+        string,
+        unknown
+      >;
+      provider = {
+        ...repair,
+        attempts: provider.attempts + repair.attempts,
+        data: {
+          ...repair.data,
+          usageMetadata: {
+            promptTokenCount: Number(originalUsage.promptTokenCount ?? 0) +
+              Number(repairedUsage.promptTokenCount ?? 0),
+            candidatesTokenCount:
+              Number(originalUsage.candidatesTokenCount ?? 0) +
+              Number(repairedUsage.candidatesTokenCount ?? 0),
+            thoughtsTokenCount: Number(originalUsage.thoughtsTokenCount ?? 0) +
+              Number(repairedUsage.thoughtsTokenCount ?? 0),
+          },
+        },
+      };
+    }
     // A short acceptance refers to the immediately preceding assistant offer.
     // Recover this safe read-only navigation deterministically if the model's
     // prose promises the control but omits the structured action.
@@ -1178,6 +1341,7 @@ export async function handler(
     const billedOutputTokens = visibleOutputTokens + thinkingTokens;
     const latency = now() - started;
     const cost = estimateCost(servedModel, inputTokens, billedOutputTokens);
+    failureStage = "credit_settlement";
     const { error: settleError } = await adminClient.rpc(
       "bil_settle_ai_usage",
       {
@@ -1214,17 +1378,25 @@ export async function handler(
     });
   } catch (error) {
     const code = error instanceof Error ? error.message : "coach_failed";
+    let compensationAttempted = false;
+    let compensationSucceeded: boolean | null = null;
     if (reserved && admin && ownerId && requestId) {
+      compensationAttempted = true;
       try {
-        await admin.rpc("bil_settle_ai_usage", {
-          p_owner_id: ownerId,
-          p_request_id: requestId,
-          p_capability: "text",
-          p_succeeded: false,
-          p_provider: "gemini",
-          p_latency_ms: now() - started,
-        });
+        const { error: compensationError } = await admin.rpc(
+          "bil_settle_ai_usage",
+          {
+            p_owner_id: ownerId,
+            p_request_id: requestId,
+            p_capability: "text",
+            p_succeeded: false,
+            p_provider: "gemini",
+            p_latency_ms: now() - started,
+          },
+        );
+        compensationSucceeded = compensationError == null;
       } catch {
+        compensationSucceeded = false;
         // Preserve the original client-visible failure. A transient settlement
         // outage is recovered by the reservation-expiry reconciliation path.
       }
@@ -1245,6 +1417,18 @@ export async function handler(
           code === "raw_voice_audio_not_supported"
       ? 400
       : 503;
+    const diagnostic: AiCoachFailureDiagnostic = {
+      event: "ai_coach_failure",
+      request_id_hash: await requestCorrelationHash(requestId),
+      stage: failureStage,
+      error_code: safeAiCoachDiagnosticCode(code),
+      http_status: status,
+      elapsed_ms: Math.max(0, now() - started),
+      reservation_established: reserved,
+      compensation_attempted: compensationAttempted,
+      compensation_succeeded: compensationSucceeded,
+    };
+    writeAiCoachFailureDiagnostic(diagnostic, dependencies.diagnosticLog);
     return json({ error: code }, status);
   }
 }

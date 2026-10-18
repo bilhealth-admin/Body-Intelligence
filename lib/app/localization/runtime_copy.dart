@@ -48,6 +48,7 @@ import 'runtime_copy_recipe_editor.dart';
 import 'runtime_copy_apple_ai_privacy.dart';
 import 'runtime_copy_food_log.dart';
 import 'runtime_copy_reference_delta.dart';
+import 'runtime_copy_coach_quick_prompts.dart';
 import 'runtime_copy_invalid_route.dart';
 import 'runtime_copy_quality_feedback.dart';
 
@@ -95,6 +96,8 @@ abstract final class RuntimeCopy {
     if (controls != null) return controls;
     final next = NextWorkspaceRuntimeCopy.resolve(english, localeTag);
     if (next != null) return next;
+    final coachPrompt = CoachQuickPromptRuntimeCopy.resolve(english, localeTag);
+    if (coachPrompt != null) return coachPrompt;
     final referenceDelta = ReferenceDeltaRuntimeCopy.resolve(
       english,
       localeTag,

@@ -20,6 +20,23 @@ class _StatusApi implements LocalCoachApi {
 }
 
 void main() {
+  test('greetings require whole words and do not match ordinary questions', () {
+    final engine = IntelligenceCenterEngine(
+      localApi: _StatusApi(CoachServiceStatus.temporarilyUnavailable),
+    );
+    for (final greeting in ['hi', 'hi, coach', 'hello there', 'كيفك؟']) {
+      expect(engine.isGreetingQuestion(greeting), isTrue, reason: greeting);
+    }
+    for (final question in [
+      'Analyze my weight this week',
+      'حلل وزني خلال اسبوع',
+      'This is a progress update',
+      'What is my height?',
+      'I need help with nutrition',
+    ]) {
+      expect(engine.isGreetingQuestion(question), isFalse, reason: question);
+    }
+  });
   for (final question in ['hi', 'كيفك']) {
     test(
       'local greeting is complete after transient provider failure: $question',
@@ -54,7 +71,7 @@ void main() {
   test('a substantive question retains its real transient failure', () async {
     final reply = await IntelligenceCenterEngine(
       localApi: _StatusApi(CoachServiceStatus.temporarilyUnavailable),
-    ).answer(question: 'Explain balanced nutrition', arabic: false);
+    ).answer(question: 'Analyze my weight this week', arabic: false);
     expect(reply.serviceStatus, CoachServiceStatus.temporarilyUnavailable);
   });
 }

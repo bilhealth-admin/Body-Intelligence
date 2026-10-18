@@ -110,7 +110,7 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
     }
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           communityText(context, 'Remove profile cover?', 'إزالة غلاف الملف؟'),
         ),
@@ -173,7 +173,7 @@ class _CommunityProfileCoverEditor extends StatelessWidget {
   final VoidCallback onRemove;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: const Key('community-profile-cover-editor'),
     clipBehavior: Clip.antiAlias,
     margin: EdgeInsets.zero,

@@ -95,7 +95,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
         builder: (context, setDialogState) {
           return PopScope(
             canPop: !busy,
-            child: AlertDialog(
+            child: BilPearlMaterialAlertDialog(
               title: Text(context.strings.text('Delete custom food?')),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -191,10 +191,10 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
       unit: food.servingUnit,
       localeTag: localeTag,
     );
-    return Card(
+    return BilPearlMaterialCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
-        onTap: () => showModalBottomSheet<void>(
+        onTap: () => showBilPearlBottomSheet<void>(
           context: context,
           isScrollControlled: true,
           useSafeArea: true,
@@ -250,7 +250,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                           if (!context.mounted) return;
                           await showDialog<void>(
                             context: context,
-                            builder: (context) => AlertDialog(
+                            builder: (context) => BilPearlMaterialAlertDialog(
                               title: Text(t('Source')),
                               content: SelectableText(food.source),
                               actions: [

@@ -109,7 +109,7 @@ void main() {
       'Proceed with prepared BIL operation',
       'addWater-log_water',
     );
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.bySubtype<AlertDialog>(), findsOneWidget);
     _container(tester).read(coachActionPermissionModeProvider.notifier).state =
         CoachActionPermissionMode.readOnly;
     await tester.pump();
@@ -167,7 +167,7 @@ void main() {
       'Set my target weight to 79 kg',
       'updateGoal-update-goal-79.0',
     );
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.bySubtype<AlertDialog>(), findsOneWidget);
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
     await tester.pumpAndSettle();
     expect(
@@ -229,7 +229,7 @@ void main() {
       await tester.ensureVisible(chip);
       await tester.tap(chip);
       await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.bySubtype<AlertDialog>(), findsOneWidget);
       await _acceptIfVisible(tester);
       expect(
         (await UserProfileRepository(
@@ -270,7 +270,7 @@ void main() {
           'Proceed with prepared BIL operation $index',
           'addWater-log_water',
         );
-        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.bySubtype<AlertDialog>(), findsOneWidget);
         await _acceptIfVisible(tester);
       }
       final receipts = await fixture.committedReceipts();
@@ -330,7 +330,7 @@ void main() {
           'Proceed with prepared BIL operation $index',
           'updateGoal-update_goal',
         );
-        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.bySubtype<AlertDialog>(), findsOneWidget);
         await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
         await tester.pumpAndSettle();
       }

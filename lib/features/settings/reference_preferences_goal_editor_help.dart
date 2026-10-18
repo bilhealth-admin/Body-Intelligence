@@ -23,7 +23,7 @@ class _GoalEditorBook extends StatelessWidget {
         builder: (dialogContext) => Consumer(
           builder: (context, ref, _) {
             ref.watch(nutritionGoalOwnerVisitProvider);
-            return AlertDialog(
+            return BilPearlMaterialAlertDialog(
               title: Text(_nutritionGoalText(context, label)),
               content: SizedBox(
                 width: 520,

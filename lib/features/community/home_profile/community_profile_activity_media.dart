@@ -475,7 +475,7 @@ class _CommunityProfileReplyTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     margin: const EdgeInsets.only(bottom: 10),
     child: ListTile(
       key: Key('community-profile-reply-${item.comment.id}'),

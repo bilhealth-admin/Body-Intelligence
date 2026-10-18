@@ -38,7 +38,7 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
               ),
             ),
           for (final channel in channels)
-            Card(
+            BilPearlMaterialCard(
               key: ValueKey('bil07-channel-${channel.id}'),
               margin: const EdgeInsets.symmetric(vertical: 5),
               elevation: 0,

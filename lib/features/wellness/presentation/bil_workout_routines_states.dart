@@ -196,7 +196,7 @@ class _WorkoutMetadataPreviewCard extends StatelessWidget {
     button: true,
     label:
         '$title. ${WorkoutRoutinesStateCopy.of(context).metadataPreviewLabel}',
-    child: Card(
+    child: BilPearlMaterialCard(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,

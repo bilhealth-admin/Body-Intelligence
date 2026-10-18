@@ -1,5 +1,5 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
-
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../data/database/app_database.dart';
 import '../domain/unified_food.dart';
@@ -19,7 +19,7 @@ Future<Food?> showBarcodeFoodReviewDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => StatefulBuilder(
-      builder: (context, setDialogState) => AlertDialog(
+      builder: (context, setDialogState) => BilPearlMaterialAlertDialog(
         title: Text(copy.title, key: const Key('barcode-food-review-title')),
         content: SingleChildScrollView(
           child: Column(

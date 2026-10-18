@@ -1,0 +1,17 @@
+[
+  {
+    "path": "bil07_channel_messages_v1?select=id",
+    "http_status": 401,
+    "code": "42501"
+  },
+  {
+    "path": "rpc/bil07_channel_capabilities_v1",
+    "http_status": 401,
+    "code": "42501"
+  },
+  {
+    "path": "rpc/bil07_channel_review_queue_v1",
+    "http_status": 401,
+    "code": "42501"
+  }
+]

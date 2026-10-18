@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-10-16T01:49:45.707Z",
+  "mode": "single-field-update-with-readback",
+  "appId": "6805349703",
+  "versionId": "7a132506-d5a8-4810-a51f-b2dc2bd636cf",
+  "versionState": "PREPARE_FOR_SUBMISSION",
+  "buildAttached": false,
+  "localizationId": "3866ba6c-b637-4f70-9c53-d6274c37bc62",
+  "locale": "en-US",
+  "changedField": "description",
+  "previousDescriptionSha256": "8840595bb138e4e701f9aa6c693a9b3ecbc108e4af40df24b9b24b93baf4bc01",
+  "currentDescriptionSha256": "8fa0fa5901be167ee4169409817898ce4079ddc2a0d201946273315e6de03954",
+  "descriptionCharacters": 3135,
+  "descriptionLimit": 4000,
+  "exactParagraphReplacedOnce": true,
+  "allNonTargetLocalizationAttributesPreserved": true,
+  "patchReturnedData": true,
+  "verifiedByGetReadback": true,
+  "productVersionsChanged": false,
+  "privacyQuestionnaireChanged": false,
+  "screenshotsChanged": false,
+  "pricesTrialsAvailabilityOrCredentialsChanged": false
+}

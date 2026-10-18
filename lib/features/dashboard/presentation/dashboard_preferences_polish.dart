@@ -143,38 +143,14 @@ class _DashboardLuxeIconBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final spec = BilSemanticIcons.spec(kind);
-    final accent = spec.accent(theme.brightness);
-    return Container(
-      width: size,
-      height: size,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            accent.withValues(alpha: active ? .30 : .18),
-            accent.withValues(alpha: active ? .12 : .06),
-          ],
+    return SizedBox.square(
+      dimension: size,
+      child: Center(
+        child: BilSemanticIconBadge(
+          kind: kind,
+          size: size - 8,
+          iconSize: iconSize,
         ),
-        borderRadius: BorderRadius.circular(size * .31),
-        border: Border.all(color: accent.withValues(alpha: active ? .48 : .25)),
-        boxShadow: active
-            ? [
-                BoxShadow(
-                  color: accent.withValues(alpha: .20),
-                  blurRadius: 15,
-                  spreadRadius: -7,
-                ),
-              ]
-            : const [],
-      ),
-      child: BilSemanticIconBadge(
-        kind: kind,
-        size: size - 6,
-        iconSize: iconSize,
       ),
     );
   }

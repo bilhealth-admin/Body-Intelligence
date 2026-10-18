@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -66,7 +67,7 @@ class _LegacyAccountGatewayPageState
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           authFiveLocaleText(
             'Restore previous data?',
@@ -134,7 +135,7 @@ class _LegacyAccountGatewayPageState
                       : const Duration(milliseconds: 500),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 560),
-                    child: Card(
+                    child: BilPearlMaterialCard(
                       color: const Color(0xE80A1827),
                       child: Padding(
                         padding: const EdgeInsets.all(28),

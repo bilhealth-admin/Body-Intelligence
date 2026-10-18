@@ -15,7 +15,7 @@ extension _WorkoutLibraryActions on _WorkoutLibraryPageState {
   Future<void> _chooseSortOrder() async {
     var draft = sortDescending;
     var sheetSaving = false;
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isDismissible: false,
@@ -244,7 +244,7 @@ extension _WorkoutLibraryActions on _WorkoutLibraryPageState {
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => PopScope(
           canPop: !dialogSaving,
-          child: AlertDialog(
+          child: BilPearlMaterialAlertDialog(
             title: Text(tr('Create exercise', 'إنشاء تمرين')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -361,7 +361,7 @@ extension _WorkoutLibraryActions on _WorkoutLibraryPageState {
     if (customMutationBusy) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(tr('Delete exercise?', 'حذف التمرين؟')),
         content: Text(
           tr(

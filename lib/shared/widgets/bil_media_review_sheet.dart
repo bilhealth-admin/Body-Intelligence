@@ -1,3 +1,4 @@
+import 'bil_pearl_material.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ Future<List<T>?> showBilMediaReviewSheet<T>(
   final failed = <BilMediaReviewEntry<T>>{};
   var accepted = false;
 
-  return showModalBottomSheet<List<T>>(
+  return showBilPearlBottomSheet<List<T>>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

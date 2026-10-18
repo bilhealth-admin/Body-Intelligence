@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,7 @@ class DashboardIntelligenceCenterCard extends StatelessWidget {
         ).languageCode.toLowerCase()] ??
         _intelligenceCenterCopy['en']!;
     final scheme = Theme.of(context).colorScheme;
-    return Card(
+    return BilPearlMaterialCard(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onOpen,

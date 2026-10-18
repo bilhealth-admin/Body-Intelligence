@@ -26,7 +26,7 @@ on:
         type: boolean
         default: false
       ios_only:
-        description: Run only the Swift and iOS 36 simulator certification job
+        description: Run only the Swift and iOS 37 simulator certification job
         required: false
         type: boolean
         default: false
@@ -133,7 +133,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          OUT=artifacts/qa/text18/ios36-simulators
+          OUT=artifacts/qa/text18/ios37-simulators
           mkdir -p "$OUT"
           xcodebuild -version | tee "$OUT/xcode-version.txt"
           pod install --project-directory=ios 2>&1 | tee "$OUT/pod-install.log"
@@ -181,7 +181,7 @@ jobs:
         # the plugin build remains traced, and Podfile.lock is not committed.
         run: >-
           flutter --verbose build ios --simulator --debug --no-codesign --no-pub
-          --build-number 36
+          --build-number 37
           --dart-define=BIL_ENVIRONMENT=testing
           --dart-define=BIL_USE_SUPABASE=false
           --dart-define=SUPABASE_URL=
@@ -206,7 +206,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          OUT=artifacts/qa/text18/ios36-simulators
+          OUT=artifacts/qa/text18/ios37-simulators
           mkdir -p "$OUT"
           SOURCE_PACKAGES="$GITHUB_WORKSPACE/build/ios/SourcePackages"
           xcodebuild \
@@ -283,16 +283,16 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Run iOS 36 native integration journeys on iPhone and iPad
+      - name: Run iOS 37 native integration journeys on iPhone and iPad
         if: matrix.flutter-build == 'ios'
-        run: bash .github/scripts/bil_ios36_native_integration.sh
+        run: bash .github/scripts/bil_ios37_native_integration.sh
 
-      - name: Upload iOS 36 iPhone and iPad evidence
+      - name: Upload iOS 37 iPhone and iPad evidence
         if: always() && matrix.flutter-build == 'ios'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: bil-ios36-iphone-ipad-integration-${{ github.sha }}
-          path: artifacts/qa/text18/ios36-simulators
+          name: bil-ios37-iphone-ipad-integration-${{ github.sha }}
+          path: artifacts/qa/text18/ios37-simulators
           if-no-files-found: warn
           retention-days: 14
 
@@ -795,13 +795,13 @@ jobs:
       - name: Drive each actual test entrypoint on iPhone and iPad
         env:
           BIL_NATIVE_TARGET: ${{ inputs.native_target }}
-        run: bash .github/scripts/bil_ios36_native_integration.sh
+        run: bash .github/scripts/bil_ios37_native_integration.sh
       - name: Upload exact native test evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: bil-ios36-native-only-${{ github.sha }}
-          path: artifacts/qa/text18/ios36-simulators
+          name: bil-ios37-native-only-${{ github.sha }}
+          path: artifacts/qa/text18/ios37-simulators
           if-no-files-found: warn
           retention-days: 14
 

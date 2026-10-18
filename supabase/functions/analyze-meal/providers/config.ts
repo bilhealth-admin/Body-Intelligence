@@ -1,3 +1,4 @@
+import { disclosedGeminiEndpoint } from "../../_shared/ai_provider_recipient.ts";
 import {
   ProviderConfig,
   VisionProviderError,
@@ -49,7 +50,10 @@ const names: Record<
 
 const allowedEndpointHosts: Record<VisionProviderName, ReadonlySet<string>> = {
   openai: new Set(["api.openai.com"]),
-  gemini: new Set(["generativelanguage.googleapis.com"]),
+  gemini: new Set([
+    "generativelanguage.googleapis.com",
+    "aiplatform.googleapis.com",
+  ]),
   mistral: new Set(["api.mistral.ai"]),
 };
 
@@ -89,6 +93,17 @@ export function loadProviderConfig(
       `${spec.endpoint} must use the HTTPS endpoint for ${provider}`,
       provider,
     );
+  }
+  if (provider === "gemini") {
+    try {
+      disclosedGeminiEndpoint(endpoint);
+    } catch {
+      throw new VisionProviderError(
+        "not_configured",
+        "Gemini endpoint is not a disclosed Google API",
+        provider,
+      );
+    }
   }
   return {
     provider,

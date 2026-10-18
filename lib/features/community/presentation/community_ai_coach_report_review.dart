@@ -31,7 +31,7 @@ extension _CommunityAiCoachReportReview on _CommunityPostModerationPageState {
     if (decisionLabel == null) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           communityText(
             context,

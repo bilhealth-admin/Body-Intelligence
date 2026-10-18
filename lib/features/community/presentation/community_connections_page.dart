@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'community_messages_page.dart' show CommunityMessageOwnerVisit;
@@ -369,7 +370,7 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                       final name = row.displayName ?? copy.member;
                       final avatar = row.avatarUrl;
                       final busy = _busyConnections.contains(row.id);
-                      return Card(
+                      return BilPearlMaterialCard(
                         child: ListTile(
                           leading: BilAccountAvatar(
                             radius: 20,
@@ -590,7 +591,7 @@ class _ConnectionsEducation extends StatelessWidget {
   final _ConnectionsCopy copy;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     color: Theme.of(context).colorScheme.primaryContainer,
     child: ListTile(
       leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.privacy),
@@ -609,7 +610,7 @@ class _ConnectionsUnavailable extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Card(
+      child: BilPearlMaterialCard(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(

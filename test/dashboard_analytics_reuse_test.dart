@@ -32,7 +32,12 @@ void main() {
     expect(dashboard, isNot(contains('AnalyticsWeeklyProgressCard(')));
     expect(dashboard, contains("context.go('/analytics')"));
     expect(analytics, contains('showDashboardBack'));
-    expect(analytics, contains("context.go('/dashboard')"));
+    expect(analytics, contains('if (context.canPop()) {'));
+    expect(analytics, contains('context.pop();'));
+    expect(
+      analytics,
+      contains("context.go(dashboardBack ? '/dashboard' : '/settings')"),
+    );
     expect(dashboard, isNot(contains('WeightTrendChart(')));
     expect(
       RegExp(r'^\s*WeeklyProgressCard\(', multiLine: true).hasMatch(dashboard),

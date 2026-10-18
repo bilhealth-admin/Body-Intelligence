@@ -71,6 +71,7 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
 
 const _communityCopy = <String, Map<String, String>>{
   'fr': {
+    'Loading posts': 'Chargement des publications',
     'Community moderation': 'Modération de la communauté',
     'Pending review': 'En attente d’examen',
     'Approved': 'Approuvée',
@@ -266,6 +267,7 @@ const _communityCopy = <String, Map<String, String>>{
         'Impossible de charger la communauté. Aucune donnée n’a été perdue.',
   },
   'es': {
+    'Loading posts': 'Cargando publicaciones',
     'Community moderation': 'Moderación de la comunidad',
     'Pending review': 'Pendiente de revisión',
     'Approved': 'Aprobada',
@@ -459,6 +461,7 @@ const _communityCopy = <String, Map<String, String>>{
         'No se pudo cargar la comunidad. No se perdió ningún dato.',
   },
   'tr': {
+    'Loading posts': 'Gönderiler yükleniyor',
     'Community moderation': 'Topluluk moderasyonu',
     'Pending review': 'İnceleme bekliyor',
     'Approved': 'Onaylandı',

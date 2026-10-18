@@ -1,7 +1,7 @@
 name: BIL independent remaining QA — native + local cloud (no release changes)
 
 # Owner requested completion of missing tests without touching the signed
-# Android 33 / iOS 36 candidates, their workflows, stores, or Production.
+# Android 33 / iOS 37 candidates, their workflows, stores, or Production.
 # This file ONLY dispatches EXISTING read-only native / isolated local-cloud
 # test jobs. It never checks out application source, builds signed binaries,
 # modifies repository variables, or changes production services.

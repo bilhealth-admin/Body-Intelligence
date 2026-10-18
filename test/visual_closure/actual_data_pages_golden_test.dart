@@ -33,6 +33,7 @@ import 'package:body_intelligence_log/features/nutrition/presentation/food_barco
 import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_guide_page.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/bil_gold_coin.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
@@ -526,15 +527,27 @@ void main() {
         await tester.tap(logFood);
         await tester.pumpAndSettle();
         final searchBar = find.byType(SearchBar).last;
-        // Opening the meal entry reveals its search field; opening the field
-        // itself presents SearchAnchor's result view, just as a user does.
+        // The separate search stays open while SQLite publishes its result.
+        // Wait for the actual food instead of assuming fake time advances IO.
         await tester.ensureVisible(searchBar);
         await tester.tap(searchBar);
         await tester.pumpAndSettle();
         await tester.enterText(searchBar, 'Plain Greek');
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 1500));
+        for (
+          var attempt = 0;
+          attempt < 40 && find.text('Plain Greek yogurt').evaluate().isEmpty;
+          attempt++
+        ) {
+          await tester.pump(const Duration(milliseconds: 100));
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+        }
         expect(find.text('Plain Greek yogurt'), findsOneWidget);
+        // Capture the settled page, not the phase of a blinking text caret.
+        // Unfocusing keeps the same result route and reference raster intact.
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pumpAndSettle();
       },
     );
   });
@@ -717,6 +730,65 @@ void main() {
         final decision = _coachOpeningSurface();
         expect(field, findsOneWidget);
         expect(decision, findsOneWidget);
+        expect(
+          MediaQuery.viewInsetsOf(tester.element(field)).bottom,
+          0,
+          reason: 'The keyboard is closed in this Coach capture.',
+        );
+        expect(
+          find.byKey(const Key('bil-reference-navigation')),
+          findsOneWidget,
+          reason: 'The five-item Coach navigation remains visible.',
+        );
+        final coachHero = find.byKey(const ValueKey('ai-coach-hero'));
+        final coachTitle = find.descendant(
+          of: coachHero,
+          matching: find.text('AI Coach'),
+        );
+        final earnAction = find.byKey(const Key('ai-coach-earn-post'));
+        final earnCoin = find.descendant(
+          of: earnAction,
+          matching: find.byType(BilGoldCoin),
+        );
+        final historyAction = find.byTooltip('Conversation history');
+        final controlsAction = find.byTooltip('Coach controls');
+        final coachSubtitle = find.text('Your health partner, always with you');
+        expect(coachTitle, findsOneWidget);
+        expect(earnAction, findsOneWidget);
+        expect(earnCoin, findsOneWidget);
+        expect(
+          find.descendant(of: earnAction, matching: find.text('Earn')),
+          findsNothing,
+          reason: 'The Coach header shows only the gold coin action.',
+        );
+        final searchAction = find.byTooltip('Search conversations');
+        expect(historyAction, findsOneWidget);
+        expect(searchAction, findsOneWidget);
+        expect(controlsAction, findsOneWidget);
+        expect(coachSubtitle, findsOneWidget);
+        final titleCenterY = tester.getRect(coachTitle).center.dy;
+        expect(
+          tester.getRect(earnAction).width,
+          lessThanOrEqualTo(48),
+          reason: 'Only the gold coin hit target appears in the Coach header.',
+        );
+        for (final action in [
+          earnAction,
+          searchAction,
+          historyAction,
+          controlsAction,
+        ]) {
+          expect(
+            (tester.getRect(action).center.dy - titleCenterY).abs(),
+            lessThan(6),
+            reason: 'Coach title, Earn, and header controls share one row.',
+          );
+        }
+        expect(
+          tester.getRect(coachSubtitle).top - tester.getRect(coachTitle).bottom,
+          lessThan(10),
+          reason: 'The subtitle stays close under the Coach title.',
+        );
         final viewport =
             tester.view.physicalSize / tester.view.devicePixelRatio;
         for (final target in [field, decision]) {

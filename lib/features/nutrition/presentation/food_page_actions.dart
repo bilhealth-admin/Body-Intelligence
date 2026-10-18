@@ -70,35 +70,20 @@ extension _FoodPageActions on _FoodPageState {
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(context.strings.text('Camera access is off')),
-          content: Text(
+      final open = await showBilPearlPermissionDecision(
+        context,
+        title: context.strings.text('Camera access is off'),
+        description:
             '${context.strings.text('Enable camera access in system settings to scan a barcode. Manual barcode entry remains available.')} '
             '${context.strings.text('BIL opens the camera only for the barcode scan you selected and never at startup.')}',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(context.strings.text('Not now')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(context.strings.text('Open system settings')),
-            ),
-          ],
-        ),
+        cancelLabel: context.strings.text('Not now'),
+        confirmLabel: context.strings.text('Open system settings'),
       );
-      if (open == true) await policy.openSettings();
+      if (open && mounted) await policy.openSettings();
       return false;
     }
-    return await policy.request(BilRuntimeCapability.camera) ==
-        BilRuntimePermissionState.granted;
+    final result = await policy.request(BilRuntimeCapability.camera);
+    return mounted && result == BilRuntimePermissionState.granted;
   }
 
   Future<void> _lookupBarcodeValue(String barcode) async {
@@ -115,7 +100,7 @@ extension _FoodPageActions on _FoodPageState {
     if (outcome.invalid) {
       await showDialog<void>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => BilPearlAlertDialog(
           title: Text(barcodeCopy.invalidTitle),
           content: Text(barcodeCopy.invalidBody),
           actions: [
@@ -148,7 +133,7 @@ extension _FoodPageActions on _FoodPageState {
       final arabic = Localizations.localeOf(context).languageCode == 'ar';
       final submitReview = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => BilPearlAlertDialog(
           title: Text(
             productKindLabel(
               outcome.product!.kind,
@@ -195,7 +180,7 @@ extension _FoodPageActions on _FoodPageState {
 
     final action = await showDialog<_UnverifiedBarcodeAction>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => BilPearlAlertDialog(
         title: Text(
           outcome.degraded ? t('Catalog unavailable') : t('Barcode not found'),
         ),

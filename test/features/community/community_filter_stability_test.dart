@@ -233,6 +233,15 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('community-hub-explore-tab')));
       await tester.pump();
+      expect(find.text('EXPLORE fixture 0'), findsOneWidget);
+      // An explicit refresh still requests new authority; returning to a ready
+      // tab alone no longer blanks and reloads its already authorized page.
+      unawaited(
+        tester
+            .widget<RefreshIndicator>(find.byType(RefreshIndicator))
+            .onRefresh(),
+      );
+      await tester.pump();
       repo.complete(2, 'CURRENT fixture');
       await tester.pump();
       await tester.pump();
@@ -243,7 +252,12 @@ void main() {
       expect(find.text('LATE following 0'), findsNothing);
       expect(repo.policyReads, 1);
       expect(repo.profileReads, 1);
-      expect(repo.topicReads, 1);
+      expect(
+        repo.topicReads,
+        2,
+        reason:
+            'Only the explicit refresh rereads topics; tab swaps reuse the visit.',
+      );
       await tester.tap(find.byKey(const Key('community-hub-following-tab')));
       await tester.pump();
       repo.requests[3].$2.completeError(StateError('synthetic filter failure'));
@@ -257,7 +271,7 @@ void main() {
       await tester.pump();
       expect(find.textContaining('synthetic'), findsNothing);
       expect(tester.getTopLeft(header).dy, y);
-      repo.complete(4, '');
+      expect(find.text('CURRENT fixture 0'), findsOneWidget);
       await tester.pump();
       await tester.pump();
       for (final r in repo.requests) {
@@ -344,17 +358,15 @@ void main() {
       await tester.pump();
       await tester.tap(find.byKey(const Key('community-hub-explore-tab')));
       await tester.pump();
-      repo.complete(2, 'EXPLORE', count: 20);
       await tester.pump();
       await tester.pump();
       expect(position().pixels, 700);
       await tester.tap(find.byKey(const Key('community-hub-following-tab')));
       await tester.pump();
+      expect(position().pixels, 400);
       await tester.tap(find.byKey(const Key('community-hub-explore-tab')));
       await tester.pump();
-      repo.complete(3, 'LATE', count: 20);
       await tester.pump();
-      repo.complete(4, 'EXPLORE', count: 20);
       await tester.pump();
       await tester.pump();
       expect(position().pixels, 700);
@@ -363,7 +375,7 @@ void main() {
       await tester.pump();
       await tester.tap(find.byKey(const Key('community-hub-explore-tab')));
       await tester.pump();
-      repo.complete(5, 'EXPLORE', count: 20);
+      repo.complete(2, 'EXPLORE', count: 20);
       await tester.pump();
       await tester.pump();
       expect(position().pixels, 700);

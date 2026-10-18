@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -110,7 +111,7 @@ class _CloudRestoreScopeControlsState
       if (granted) {
         final confirmed = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => BilPearlMaterialAlertDialog(
             title: Text(CloudRestoreCopy.text(context, _title(scope))),
             scrollable: true,
             content: Column(

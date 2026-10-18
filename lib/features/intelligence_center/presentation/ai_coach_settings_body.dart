@@ -56,6 +56,8 @@ extension _AiCoachSettingsBody on _AiCoachSettingsPageState {
                   ),
           ),
         const SizedBox(height: 20),
+        _CoachActionPermissionCard(t: t),
+        const SizedBox(height: 20),
         _SectionTitle(
           icon: Icons.privacy_tip_outlined,
           title: t(

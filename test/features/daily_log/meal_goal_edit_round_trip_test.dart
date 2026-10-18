@@ -391,7 +391,7 @@ void main() {
           await tester.tap(
             find
                 .descendant(
-                  of: find.byType(AlertDialog),
+                  of: find.bySubtype<AlertDialog>(),
                   matching: find.byType(FilledButton),
                 )
                 .last,

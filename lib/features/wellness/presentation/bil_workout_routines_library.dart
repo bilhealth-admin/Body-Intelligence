@@ -128,6 +128,27 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
+                          if (_tabs.index == 0 && verifiedVideoCount == 0) ...[
+                            const SizedBox(height: 10),
+                            Text(
+                              _copy(
+                                context,
+                                'No verified workout pack is installed',
+                                'لا توجد حزمة تمارين موثقة مثبتة',
+                              ),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              WorkoutRoutinesStateCopy.of(
+                                context,
+                              ).previewExplanation,
+                              key: const ValueKey(
+                                'workout-video-pack-not-installed',
+                              ),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
                         ],
                       );
 
@@ -141,11 +162,31 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
                           overflow: TextOverflow.ellipsis,
                         ),
                       );
+                      final managePacksButton =
+                          _tabs.index == 0 && verifiedVideoCount == 0
+                          ? FilledButton.tonalIcon(
+                              key: const ValueKey(
+                                'workout-verified-packs-action',
+                              ),
+                              onPressed: () =>
+                                  context.push('/wellness/content-packs'),
+                              icon: const Icon(
+                                Icons.download_for_offline_outlined,
+                              ),
+                              label: Text(
+                                WorkoutRoutinesStateCopy.of(
+                                  context,
+                                ).manageReviewedPacks,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            )
+                          : null;
                       final programsActions = Wrap(
                         spacing: 10,
                         runSpacing: 8,
                         crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [programsButton],
+                        children: [programsButton, ?managePacksButton],
                       );
 
                       if (constraints.maxWidth < 560) {

@@ -208,7 +208,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
               : ListView(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
                   children: [
-                    Card(
+                    BilPearlMaterialCard(
                       key: const Key('fasting-reference-introduction'),
                       clipBehavior: Clip.antiAlias,
                       child: Padding(
@@ -292,7 +292,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                             ),
                     ),
                     const SizedBox(height: 18),
-                    Card(
+                    BilPearlMaterialCard(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Column(

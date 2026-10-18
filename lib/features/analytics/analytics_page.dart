@@ -108,14 +108,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
           dashboardBack ? 'العودة إلى الرئيسية' : 'العودة إلى الإعدادات',
         ),
         onPressed: () {
-          if (dashboardBack) {
-            context.go('/dashboard');
-            return;
-          }
           if (context.canPop()) {
             context.pop();
           } else {
-            context.go('/settings');
+            context.go(dashboardBack ? '/dashboard' : '/settings');
           }
         },
         icon: const BackButtonIcon(),

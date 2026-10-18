@@ -2,6 +2,60 @@
 /// architecture source-size ceiling.
 abstract final class RuntimeCopyPrimary {
   static const values = <String, Map<String, String>>{
+    "Subscription check unavailable": {
+      "ar": "تعذر التحقق من الاشتراك",
+      "en": "Subscription check unavailable",
+      "fr": "Vérification de l’abonnement indisponible",
+      "es": "No se puede comprobar la suscripción",
+      "tr": "Abonelik kontrolü kullanılamıyor",
+    },
+    "Preparing your reply…": {
+      "ar": "أجهّز ردك…",
+      "en": "Preparing your reply…",
+      "fr": "Je prépare votre réponse…",
+      "es": "Preparando tu respuesta…",
+      "tr": "Yanıtınız hazırlanıyor…",
+    },
+    "Working on your question…": {
+      "ar": "أعمل على سؤالك…",
+      "en": "Working on your question…",
+      "fr": "Je travaille sur votre question…",
+      "es": "Trabajando en tu pregunta…",
+      "tr": "Sorunuz üzerinde çalışıyorum…",
+    },
+    "Thanks for waiting…": {
+      "ar": "شكرًا لانتظارك…",
+      "en": "Thanks for waiting…",
+      "fr": "Merci de patienter…",
+      "es": "Gracias por esperar…",
+      "tr": "Beklediğiniz için teşekkürler…",
+    },
+    "Copy message": {
+      "ar": "نسخ الرسالة",
+      "en": "Copy message",
+      "fr": "Copier le message",
+      "es": "Copiar mensaje",
+      "tr": "Mesajı kopyala",
+    },
+    "Loading posts": {
+      "ar": "تحميل المنشورات",
+      "en": "Loading posts",
+      "fr": "Chargement des publications",
+      "es": "Cargando publicaciones",
+      "tr": "Gönderiler yükleniyor",
+    },
+    "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.": {
+      "ar":
+          "تعذر على المدرب الذكي إكمال الرد. يبقى سؤالك في هذه المحادثة؛ راجع أي إجراءات سابقة قبل إعادة المحاولة.",
+      "en":
+          "AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.",
+      "fr":
+          "Le coach IA n’a pas pu terminer la réponse. Votre question reste dans cette conversation ; vérifiez les actions précédentes avant de réessayer.",
+      "es":
+          "El coach de IA no pudo completar la respuesta. Tu pregunta permanece en este chat; revisa las acciones anteriores antes de volver a intentarlo.",
+      "tr":
+          "Yapay zekâ koçu yanıtı tamamlayamadı. Sorunuz bu sohbette kalır; yeniden denemeden önce önceki işlemleri gözden geçirin.",
+    },
     "Apply saved categories": {
       "ar": "تطبيق الفئات المحفوظة",
       "en": "Apply saved categories",

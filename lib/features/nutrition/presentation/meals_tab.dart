@@ -79,7 +79,7 @@ class _MealsTab extends ConsumerWidget {
             ),
           ),
         for (final meal in meals.take(100))
-          Card(
+          BilPearlMaterialCard(
             child: ListTile(
               title: Text(meal.meal.name),
               subtitle: Text(

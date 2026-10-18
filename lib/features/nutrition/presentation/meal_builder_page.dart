@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +64,7 @@ class _MealBuilderPageState extends ConsumerState<MealBuilderPage> {
       builder: (dialogContext) {
         String? error;
         return StatefulBuilder(
-          builder: (context, update) => AlertDialog(
+          builder: (context, update) => BilPearlMaterialAlertDialog(
             title: Text(_label(food)),
             content: Column(
               mainAxisSize: MainAxisSize.min,

@@ -12,7 +12,7 @@ class _HiddenPostCard extends StatelessWidget {
   final VoidCallback onRestore;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: Key('community-hidden-post-${post.id}'),
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -108,7 +108,7 @@ class _PendingPostCardState extends State<_PendingPostCard> {
       (index, ready) => _markDecoded(epoch, index, ready);
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: Key('community-moderation-post-${post.id}'),
     clipBehavior: Clip.antiAlias,
     child: Padding(
@@ -210,7 +210,7 @@ class _OpenReportCard extends StatelessWidget {
   final bool busy;
   final VoidCallback onReview;
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: Key('community-moderation-report-${report['id']}'),
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -327,7 +327,7 @@ class _ModerationPollPreview extends StatelessWidget {
   final CommunityPoll poll;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: Key('community-moderation-poll-$postId'),
     margin: EdgeInsets.zero,
     child: Padding(
@@ -454,7 +454,7 @@ class _CommunityModerationQueue {
 class _ReviewVersionUnavailable extends StatelessWidget {
   const _ReviewVersionUnavailable();
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => BilPearlMaterialCard(
     key: const Key('community-review-version-unavailable'),
     child: Padding(
       padding: const EdgeInsets.all(16),

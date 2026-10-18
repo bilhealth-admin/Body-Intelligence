@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.bySubtype<AlertDialog>(), findsOneWidget);
     expect(
       find.text('Could not save step settings. Try again.'),
       findsOneWidget,

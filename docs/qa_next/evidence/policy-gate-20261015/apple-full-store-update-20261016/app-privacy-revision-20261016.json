@@ -1,0 +1,66 @@
+{
+  "observed_at_utc": "2026-10-16T02:06:25Z",
+  "app_store_connect_app_id": "6805349703",
+  "page": "App Privacy",
+  "source_branch": "integration/bil-qa-media-policy-20261011",
+  "source_sha": "a6f0a9a15188aabca0dcb739269ab17079ed4504",
+  "changes": [
+    {
+      "data_type": "User ID",
+      "before": {
+        "purposes": ["App Functionality", "Product Personalization", "Third-Party Advertising"],
+        "linked_to_identity": true,
+        "tracking": true
+      },
+      "after": {
+        "purposes": ["App Functionality", "Analytics"],
+        "linked_to_identity": true,
+        "tracking": false
+      },
+      "basis": "App user ID is used for authentication/ownership and the compiled Google Sign-In manifest declares Analytics, not tracking. The app's AdMob gateway does not pass the BIL user UUID in its ad request."
+    },
+    {
+      "data_type": "Product Interaction",
+      "before": {
+        "purposes": ["App Functionality", "Analytics", "Product Personalization", "Third-Party Advertising"],
+        "linked_to_identity": true,
+        "tracking": true
+      },
+      "after": {
+        "purposes": ["App Functionality", "Analytics", "Product Personalization", "Third-Party Advertising"],
+        "linked_to_identity": true,
+        "tracking": false
+      },
+      "basis": "The inspected Google Mobile Ads privacy manifest declares Product Interaction linked=true and tracking=false. This is store metadata readback, not final signed-runtime proof."
+    }
+  ],
+  "unchanged": {
+    "device_id": {
+      "purposes": ["App Functionality", "Analytics", "Third-Party Advertising"],
+      "linked_to_identity": true,
+      "tracking": true,
+      "reason": "The inspected Google Mobile Ads privacy manifest declares Device ID tracking=true; do not remove this disclosure without evidence from the exact release artifact/runtime."
+    },
+    "data_type_count": 22,
+    "other_data_type_answers": "unchanged",
+    "privacy_policy_url": "https://www.bilhealth.com/privacy",
+    "user_privacy_choices_url": "https://www.bilhealth.com/account-deletion"
+  },
+  "post_change_preview": {
+    "data_used_to_track_you": ["Identifiers"],
+    "page_readback": "App Store Connect showed User ID and Product Interaction without tracking-purpose bullets; Device ID retained the tracking-purpose bullet; Product Page Preview listed Identifiers as data used to track."
+  },
+  "release_gate": {
+    "apple_guideline_5_1_2_i": "OPEN_P0",
+    "candidate_ipa_36_runtime_verified": false,
+    "att_in_current_ios_source_verified": false,
+    "device_id_tracking_resolved": false,
+    "review_submission_sent": false
+  },
+  "iap_review_submission": {
+    "agent_removed_items": false,
+    "prior_delete_api_result": "HTTP 409 STATE_ERROR.ENTITY_STATE_INVALID: item already submitted",
+    "owner_will_remove_items_manually": true
+  },
+  "sensitive_data": "No credentials or tokens recorded."
+}

@@ -159,6 +159,47 @@ void main() {
     });
   });
 
+  testWidgets('every semantic entry icon is flat and neutral like More', (
+    tester,
+  ) async {
+    for (final brightness in Brightness.values) {
+      final theme = ThemeData(brightness: brightness);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (final kind in BilSemanticIconKind.values)
+                    BilSemanticIconBadge(kind: kind, key: ValueKey(kind)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final kind in BilSemanticIconKind.values) {
+        final entry = find.byKey(ValueKey(kind));
+        expect(
+          find.descendant(of: entry, matching: find.byType(DecoratedBox)),
+          findsNothing,
+        );
+        final glyph = tester.widget<Icon>(
+          find.descendant(of: entry, matching: find.byType(Icon)),
+        );
+        expect(
+          glyph.color,
+          theme.colorScheme.onSurfaceVariant,
+          reason: kind.name,
+        );
+        expect(tester.getSize(entry), const Size(40, 40));
+      }
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('a badge inside a labelled tile does not repeat its label', (
     tester,
   ) async {

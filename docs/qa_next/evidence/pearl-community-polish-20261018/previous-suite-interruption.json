@@ -1,0 +1,16 @@
+{
+  "label": "cloud-runtime-closure-20261018-003",
+  "head": "ceb3570cc46c387f25e7e9821bb4aa4120b53d71",
+  "source_fingerprint": "c99b4c52a885ac38255f3770b5f88db2adcf013c7682a2f1cec183d21ccc49df",
+  "phase": "completed",
+  "accepted": false,
+  "counts": {
+    "success": 3655,
+    "failure": 0,
+    "error": 1,
+    "skip": 0
+  },
+  "tests_completed": 3656,
+  "exit_code": 1,
+  "stable_source": false
+}

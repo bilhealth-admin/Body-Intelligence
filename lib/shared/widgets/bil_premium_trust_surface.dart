@@ -1,3 +1,4 @@
+import 'bil_pearl_material.dart';
 import 'bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../app/theme/bil_pearl_finish.dart';
@@ -305,7 +306,7 @@ Future<bool?> showBilPremiumAiConsentSheet({
   Key? allowKey,
   Key? declineKey,
 }) {
-  return showModalBottomSheet<bool>(
+  return showBilPearlBottomSheet<bool>(
     context: context,
     useSafeArea: true,
     isScrollControlled: true,

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
@@ -139,7 +140,7 @@ class _CommunityPostModerationPageState
     }
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           communityText(context, 'Restore post?', 'استعادة المنشور؟'),
         ),
@@ -237,7 +238,7 @@ class _CommunityPostModerationPageState
     if (confirmedReason == null || !mounted || !visit.isCurrent) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(
           communityText(
             context,
@@ -315,7 +316,7 @@ class _CommunityPostModerationPageState
     final approving = decision == CommunityPostModerationDecision.approved;
     return await showDialog<bool>(
           context: context,
-          builder: (dialogContext) => AlertDialog(
+          builder: (dialogContext) => BilPearlMaterialAlertDialog(
             title: Text(
               communityText(
                 context,

@@ -238,7 +238,7 @@ void main() {
           await tester.tap(find.text('Breakfast'));
           await _waitUntil(
             tester,
-            () => find.byType(AlertDialog).evaluate().isNotEmpty,
+            () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
             'initial actual meal edit dialog',
           );
           await tester.enterText(find.byType(TextField), '620');
@@ -246,7 +246,7 @@ void main() {
           await _waitUntil(
             tester,
             () =>
-                find.byType(AlertDialog).evaluate().isEmpty &&
+                find.bySubtype<AlertDialog>().evaluate().isEmpty &&
                 find.text('620 kcal').evaluate().isNotEmpty,
             'initial SQLite write/readback',
           );
@@ -260,7 +260,7 @@ void main() {
             await tester.tap(find.text('Breakfast'));
             await _waitUntil(
               tester,
-              () => find.byType(AlertDialog).evaluate().isNotEmpty,
+              () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
               'real dialog remains open while paid access expires',
             );
             await tester.enterText(find.byType(TextField), '900');
@@ -294,7 +294,7 @@ void main() {
             await tester.tap(find.text('Breakfast'));
             await _waitUntil(
               tester,
-              () => find.byType(AlertDialog).evaluate().isNotEmpty,
+              () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
               'post-expiry stale real editor',
             );
             await tester.enterText(find.byType(TextField), '900');
@@ -307,7 +307,7 @@ void main() {
           }
           await _waitUntil(
             tester,
-            () => find.byType(AlertDialog).evaluate().isEmpty,
+            () => find.bySubtype<AlertDialog>().evaluate().isEmpty,
             'stale real editor is closed without a new SQLite write',
           );
           String? persisted;

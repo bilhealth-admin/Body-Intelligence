@@ -32,7 +32,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
     if (_formOpen) return;
     setState(() => _formOpen = true);
     try {
-      final submitted = await showModalBottomSheet<bool>(
+      final submitted = await showBilPearlBottomSheet<bool>(
         context: context,
         isScrollControlled: true,
         useSafeArea: true,
@@ -93,7 +93,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
           const Center(child: CircularProgressIndicator()),
         if (snapshot.hasError) _InlineError(onRetry: () => setState(_reload)),
         for (final row in snapshot.data ?? const <Map<String, dynamic>>[])
-          Card(
+          BilPearlMaterialCard(
             child: ListTile(
               title: Text(row['canonical_name'] as String),
               subtitle: Text(switch (row['status']) {

@@ -7,7 +7,7 @@ class _SignInRequired extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Card(
+      child: BilPearlMaterialCard(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(

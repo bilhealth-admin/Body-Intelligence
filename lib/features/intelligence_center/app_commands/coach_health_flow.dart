@@ -106,7 +106,7 @@ extension _CoachHealthFlow on _IntelligenceCenterPageState {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (dialogContext, setDialogState) => AlertDialog(
+        builder: (dialogContext, setDialogState) => BilPearlMaterialAlertDialog(
           scrollable: true,
           icon: BilGlassPressFeedback(child: Icon(_iconForAction(action.type))),
           title: Text(tr('Confirm action', 'تأكيد الإجراء')),

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +128,7 @@ class ExperimentsPage extends ConsumerWidget {
   ) async {
     final t = context.strings.text;
     var duration = 7;
-    final accepted = await showModalBottomSheet<bool>(
+    final accepted = await showBilPearlBottomSheet<bool>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -210,7 +211,7 @@ class ExperimentsPage extends ConsumerWidget {
     final variable = TextEditingController();
     final data = TextEditingController();
     var duration = 7;
-    final confirmed = await showModalBottomSheet<bool>(
+    final confirmed = await showBilPearlBottomSheet<bool>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -344,7 +345,7 @@ class ExperimentsPage extends ConsumerWidget {
     final limitations = TextEditingController();
     var adherence = 80.0;
     String confidence = 'low';
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showBilPearlBottomSheet<bool>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -454,7 +455,7 @@ class ExperimentsPage extends ConsumerWidget {
     final t = context.strings.text;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => BilPearlMaterialAlertDialog(
         title: Text(t('Delete this experiment?')),
         content: Text(t('It will no longer guide BIL decisions.')),
         actions: [

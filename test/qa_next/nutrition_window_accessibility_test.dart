@@ -97,7 +97,7 @@ void main() {
         await tester.pumpAndSettle();
         for (
           var i = 0;
-          i < 100 && find.byType(AlertDialog).evaluate().isEmpty;
+          i < 100 && find.bySubtype<AlertDialog>().evaluate().isEmpty;
           i++
         ) {
           await tester.runAsync(
@@ -105,7 +105,7 @@ void main() {
           );
           await tester.pump(const Duration(milliseconds: 16));
         }
-        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.bySubtype<AlertDialog>(), findsOneWidget);
         tester.view.viewInsets = const FakeViewPadding(bottom: 280);
         await tester.pumpAndSettle();
         final cancel = find.widgetWithText(TextButton, 'إلغاء');
@@ -113,12 +113,12 @@ void main() {
         await tester.pumpAndSettle();
         await captureClosureSurface(
           tester,
-          find.byType(AlertDialog),
+          find.bySubtype<AlertDialog>(),
           '$kind-ar-320-keyboard-2x',
         );
         await tester.tap(cancel);
         await tester.pumpAndSettle();
-        expect(find.byType(AlertDialog), findsNothing);
+        expect(find.bySubtype<AlertDialog>(), findsNothing);
         expect(await db.select(db.foods).get(), isEmpty);
         expect(await db.select(db.mealItems).get(), isEmpty);
         expect(tester.takeException(), isNull);

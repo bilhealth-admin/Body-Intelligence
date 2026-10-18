@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -224,7 +225,7 @@ Future<void> _showVerifiedSetupQr(
   final setupCopy = PartnerSetupCopy.of(context);
   await showDialog<void>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
+    builder: (dialogContext) => BilPearlMaterialAlertDialog(
       title: Text(
         '${setupCopy.text(PartnerSetupCopy.officialSetup)} · ${_text(dialogContext, entry.id)}',
       ),

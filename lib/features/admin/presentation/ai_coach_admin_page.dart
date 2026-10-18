@@ -1,7 +1,7 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/router/invalid_route_page.dart';
 import '../services/ai_coach_admin_service.dart';
@@ -29,21 +29,24 @@ class AiCoachAdminPage extends ConsumerWidget {
 
   Widget _console(BuildContext context) {
     String copy(String key) => adminConsoleCopy(context, key);
-    Widget action(String key, IconData icon, Widget Function() page) => Card(
-      child: ListTile(
-        key: Key('admin-action-$key'),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 12,
-        ),
-        leading: BilGlassPressFeedback(child: Icon(icon)),
-        title: Text(copy(key)),
-        trailing: const BilGlassPressFeedback(child: Icon(Icons.chevron_right)),
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => page())),
-      ),
-    );
+    Widget action(String key, IconData icon, Widget Function() page) =>
+        BilPearlMaterialCard(
+          child: ListTile(
+            key: Key('admin-action-$key'),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 12,
+            ),
+            leading: BilGlassPressFeedback(child: Icon(icon)),
+            title: Text(copy(key)),
+            trailing: const BilGlassPressFeedback(
+              child: Icon(Icons.chevron_right),
+            ),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => page())),
+          ),
+        );
     Widget tab(List<Widget> children) =>
         ListView(padding: const EdgeInsets.all(16), children: children);
     Widget panel(String key, Widget child) =>
@@ -85,21 +88,6 @@ class AiCoachAdminPage extends ConsumerWidget {
               ),
             ]),
             tab([
-              Card(
-                child: ListTile(
-                  key: const Key('admin-action-approvals'),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  leading: const Icon(Icons.fact_check_outlined),
-                  title: Text(copy('approvals')),
-                  trailing: const BilGlassPressFeedback(
-                    child: Icon(Icons.chevron_right),
-                  ),
-                  onTap: () => context.push('/community/moderation'),
-                ),
-              ),
               action(
                 'moderators',
                 Icons.admin_panel_settings_outlined,

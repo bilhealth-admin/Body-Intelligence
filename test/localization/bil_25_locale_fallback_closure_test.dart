@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
+import 'package:body_intelligence_log/features/intelligence_center/intelligence_locale_copy.dart';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
@@ -14,6 +16,42 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../tool/localization/locale_fallback_closure.dart';
 
 void main() {
+  test('Coach waiting, copy, recovery and feed labels cover every locale', () {
+    const sources = [
+      'Preparing your reply…',
+      'Working on your question…',
+      'Thanks for waiting…',
+      'Copy message',
+      'Loading posts',
+      'AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.',
+      'Subscription check unavailable',
+    ];
+    for (final tag in BilLocalePolicy.productionTags) {
+      expect(
+        communityTextForLanguage(tag, 'Loading posts', 'تحميل المنشورات'),
+        RuntimeCopy.resolve('Loading posts', tag),
+        reason: 'Feed adapter: $tag',
+      );
+      for (final source in sources.take(4)) {
+        expect(
+          intelligenceTextFor(tag, source, RuntimeCopy.resolve(source, 'ar')!),
+          RuntimeCopy.resolve(source, tag),
+          reason: 'Coach adapter: $tag: $source',
+        );
+      }
+    }
+    for (final source in sources) {
+      for (final tag in BilLocalePolicy.productionTags) {
+        final translated = RuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        if (tag != 'en') {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+      }
+    }
+  });
+
   test(
     'Coach literal audit includes new part helpers and Dart quote forms',
     () {

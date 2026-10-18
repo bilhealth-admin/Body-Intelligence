@@ -200,7 +200,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
     ];
     return PopScope(
       canPop: !saving,
-      child: AlertDialog(
+      child: BilPearlMaterialAlertDialog(
         title: Text(
           t(widget.food == null ? 'Create custom food' : 'Edit custom food'),
         ),

@@ -237,7 +237,7 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
                             context,
                             topic.slug,
                           );
-                      return Card(
+                      return BilPearlMaterialCard(
                         child: InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () => _openTopic(visit, topic),

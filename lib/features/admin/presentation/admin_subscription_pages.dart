@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +44,7 @@ class _GrantState extends ConsumerState<AdminSubscriptionGrantForm> {
     final days = _days;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialog) => AlertDialog(
+      builder: (dialog) => BilPearlMaterialAlertDialog(
         title: Text(copy('confirm')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -119,7 +120,7 @@ class _GrantState extends ConsumerState<AdminSubscriptionGrantForm> {
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
-    child: Card(
+    child: BilPearlMaterialCard(
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Form(
@@ -218,7 +219,7 @@ class _ListState extends ConsumerState<AdminSubscriptionList> {
   String? _busyId, _error;
   final Map<String, String> _revokeKeys = {};
   String copy(String key) => adminConsoleCopy(context, key);
-  Widget _entryCard(AdminSubscriptionEntry entry) => Card(
+  Widget _entryCard(AdminSubscriptionEntry entry) => BilPearlMaterialCard(
     key: Key('admin-subscription-${entry.id}'),
     child: Padding(
       padding: const EdgeInsets.all(16),

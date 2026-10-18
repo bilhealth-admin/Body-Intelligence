@@ -3,6 +3,7 @@ import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_cloud_sync.dart';
 import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_manual_sync_status_provider.dart';
+import 'package:body_intelligence_log/features/connected_health/connected_health_copy.dart';
 import 'package:body_intelligence_log/features/settings/cloud_sync_status_presentation.dart';
 import 'package:body_intelligence_log/features/settings/reference_settings_copy.dart';
 import 'package:flutter/material.dart';
@@ -105,13 +106,34 @@ const _privacySources = <String>{
 };
 
 const _syncStatusSources = <String>{
-  'Latest synchronization',
+  'Last sync',
+  'Review backup conflicts.',
   'Waiting for first sync',
   'Synchronizing',
   'Unavailable',
 };
 
 void main() {
+  test('short cloud sync copy is translated in every shipped locale', () {
+    for (final locale in AppLocalizations.supportedLocales) {
+      final tag = BilLocalePolicy.canonicalTag(locale);
+      expect(
+        connectedHealthTextForLanguage(tag, 'Last sync', 'آخر مزامنة'),
+        isNotEmpty,
+        reason: '$tag has a Last sync label',
+      );
+      expect(
+        connectedHealthTextForLanguage(
+          tag,
+          'Review backup conflicts.',
+          'راجع تعارضات النسخة الاحتياطية.',
+        ),
+        isNotEmpty,
+        reason: '$tag has concise conflict guidance',
+      );
+    }
+  });
+
   test('settings and privacy copy is complete for all 25 locales', () {
     expect(AppLocalizations.supportedLocales, hasLength(25));
     for (final locale in AppLocalizations.supportedLocales) {
@@ -161,6 +183,10 @@ void main() {
         CloudManualSyncStatus(
           phase: CloudManualSyncPhase.idle,
           lastSuccessfulSyncAt: DateTime.utc(2026, 8, 21, 9, 30),
+        ),
+        const CloudManualSyncStatus(
+          phase: CloudManualSyncPhase.idle,
+          reason: 'conflict_review_required',
         ),
       ]) {
         await tester.pumpWidget(_statusApp(locale, status));

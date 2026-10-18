@@ -85,7 +85,6 @@ void main() {
       '/community/compose',
       '/community/rewards',
       '/community/connections',
-      '/community/food-review',
       '/community/profile',
       '/community/profile/:userId',
       '/community/safety',
@@ -114,14 +113,8 @@ void main() {
         ),
       ),
     );
-    expect(
-      router,
-      matches(
-        RegExp(
-          r"path: '/community/moderation'[\s\S]{0,260}CommunityPostModerationPage",
-        ),
-      ),
-    );
+    expect(router, isNot(contains("path: '/community/moderation'")));
+    expect(router, isNot(contains("path: '/community/food-review'")));
   });
 
   test('plans describe friends and messages under Free, not paid benefits', () {

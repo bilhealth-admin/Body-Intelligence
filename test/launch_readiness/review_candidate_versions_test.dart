@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  for (final candidate in [('ios', 36), ('android', 33)]) {
+  for (final candidate in [('ios', 37), ('android', 33)]) {
     test(
       'review candidate ${candidate.$1} uses exact independent build number',
       () async {

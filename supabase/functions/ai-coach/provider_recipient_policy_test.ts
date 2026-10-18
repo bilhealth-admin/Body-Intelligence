@@ -128,3 +128,34 @@ Deno.test("Coach does not accept a redirect response as a provider answer", asyn
     },
   );
 });
+
+Deno.test("Coach uses the configured Google Vertex Gemini base with a header-only key", async () => {
+  await withEndpoint(
+    "https://aiplatform.googleapis.com/v1beta1/publishers/google",
+    async () => {
+      const fetcher: typeof fetch = (input, init) => {
+        assertEquals(
+          String(input),
+          "https://aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-test:generateContent",
+        );
+        assertEquals(init?.redirect, "error");
+        assertEquals(
+          new Headers(init?.headers).get("x-goog-api-key"),
+          "synthetic-non-secret-test-key",
+        );
+        return Promise.resolve(
+          new Response('{"candidates":[]}', { status: 200 }),
+        );
+      };
+      await geminiCall(
+        "gemini-test",
+        [],
+        "synthetic",
+        32,
+        false,
+        "LOW",
+        fetcher,
+      );
+    },
+  );
+});

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:math' as math;
 
@@ -300,7 +301,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
 
   Future<void> _pickMetric() async {
     final copy = _ProgressCopy.of(context);
-    final selected = await showModalBottomSheet<ProgressMetric>(
+    final selected = await showBilPearlBottomSheet<ProgressMetric>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
@@ -333,7 +334,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
 
   Future<void> _pickRange() async {
     final copy = _ProgressCopy.of(context);
-    final selected = await showModalBottomSheet<ProgressRange>(
+    final selected = await showBilPearlBottomSheet<ProgressRange>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(
@@ -423,7 +424,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     }
     var saving = false;
     String? error;
-    await showModalBottomSheet<void>(
+    await showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
@@ -587,42 +588,43 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
   }
 
   Widget _loading() => const _ProgressLoadingState();
-  Widget _error(_ProgressCopy copy, VoidCallback onRetry) => Card(
-    margin: EdgeInsets.zero,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
-      child: Column(
-        children: [
-          Container(
-            width: 62,
-            height: 62,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.errorContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.cloud_off_rounded,
-              color: Theme.of(context).colorScheme.onErrorContainer,
-            ),
+  Widget _error(_ProgressCopy copy, VoidCallback onRetry) =>
+      BilPearlMaterialCard(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+          child: Column(
+            children: [
+              Container(
+                width: 62,
+                height: 62,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.cloud_off_rounded,
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Text(
+                copy.unavailable,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 14),
+              FilledButton.tonalIcon(
+                onPressed: onRetry,
+                icon: const BilGlassPressFeedback(
+                  child: Icon(Icons.refresh_rounded),
+                ),
+                label: Text(copy.retry),
+              ),
+            ],
           ),
-          const SizedBox(height: 15),
-          Text(
-            copy.unavailable,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 14),
-          FilledButton.tonalIcon(
-            onPressed: onRetry,
-            icon: const BilGlassPressFeedback(
-              child: Icon(Icons.refresh_rounded),
-            ),
-            label: Text(copy.retry),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 IconData _metricIcon(ProgressMetric metric) => switch (metric) {

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:convert';
 
@@ -167,7 +168,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           const SizedBox(height: 20),
           ...plan.meals.map((meal) {
             final recipe = recipeById(meal.recipeId)!;
-            return Card(
+            return BilPearlMaterialCard(
               child: ListTile(
                 leading: CircleAvatar(child: Text('${meal.day + 1}')),
                 title: Text(recipe.title),
@@ -287,7 +288,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ...plan.meals.map((meal) {
           final recipe = recipeById(meal.recipeId)!;
           final details = plannerRecipeDetails[recipe.id]!;
-          return Card(
+          return BilPearlMaterialCard(
             child: ExpansionTile(
               title: Text('${copy.day(meal.day)} — ${recipe.title}'),
               subtitle: Text(
@@ -402,7 +403,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
 
   void _showRecipe(_PlannerCopy copy, PlannerRecipe recipe) {
     final details = plannerRecipeDetails[recipe.id];
-    showModalBottomSheet<void>(
+    showBilPearlBottomSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => Padding(

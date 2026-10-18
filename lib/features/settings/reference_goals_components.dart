@@ -230,7 +230,7 @@ class _StoredFitnessNumberState extends ConsumerState<_StoredFitnessNumber> {
           context: context,
           builder: (dialogContext) {
             return StatefulBuilder(
-              builder: (_, setDialog) => AlertDialog(
+              builder: (_, setDialog) => BilPearlMaterialAlertDialog(
                 title: Text(
                   _copy[widget.label]?[Localizations.localeOf(
                         context,

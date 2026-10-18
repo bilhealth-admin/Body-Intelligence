@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -402,7 +403,7 @@ class _TrustSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return BilPearlMaterialCard(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(18),

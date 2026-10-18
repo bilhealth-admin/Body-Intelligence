@@ -5,11 +5,13 @@ abstract final class _CommunityRoutes {
     return [
       GoRoute(
         path: '/community',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.community,
-          child: CommunityEntryGate(
-            showWelcome: true,
-            child: CommunityHubPage(entryWelcomeHandled: true),
+        pageBuilder: (_, _) => const NoTransitionPage(
+          child: PremiumRouteGlassGate(
+            feature: PremiumGateFeature.community,
+            child: CommunityEntryGate(
+              showWelcome: true,
+              child: CommunityHubPage(entryWelcomeHandled: true),
+            ),
           ),
         ),
       ),
@@ -136,28 +138,12 @@ abstract final class _CommunityRoutes {
           ),
         ),
       ),
-      // Moderation uses a server-verified role, not a customer purchase.
-      // Its RPCs fail closed; a moderator need not own Premium.
-      GoRoute(
-        path: '/community/moderation',
-        builder: (_, _) =>
-            const CommunitySurface(child: CommunityPostModerationPage()),
-      ),
       GoRoute(
         path: '/community/connections',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
           child: CommunityEntryGate(
             child: CommunitySurface(child: CommunityConnectionsPage()),
-          ),
-        ),
-      ),
-      GoRoute(
-        path: '/community/food-review',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.community,
-          child: CommunityEntryGate(
-            child: CommunitySurface(child: CommunityFoodReviewPage()),
           ),
         ),
       ),

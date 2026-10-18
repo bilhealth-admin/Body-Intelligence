@@ -338,7 +338,7 @@ class _MealImagePhonePreview extends StatelessWidget {
       ),
       const SizedBox(height: 14),
       for (final item in const ['grilled_chicken', 'rice', 'mixed_salad'])
-        Card(
+        BilPearlMaterialCard(
           margin: const EdgeInsets.only(bottom: 9),
           child: CheckboxListTile(
             dense: true,

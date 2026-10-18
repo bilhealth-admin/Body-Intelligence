@@ -113,11 +113,11 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         ),
         const SizedBox(height: 18),
         if (connectedSleep != null) ...[
-          Card(
+          BilPearlMaterialCard(
             key: const Key('sleep-connected-source'),
             child: ListTile(
               horizontalTitleGap: 12,
-              leading: const BilSemanticIconBadge(
+              leading: const _SleepSemanticGlyph(
                 kind: BilSemanticIconKind.devices,
               ),
               title: Text(
@@ -132,7 +132,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           ),
           if (connectedSleep.measuredStages.isNotEmpty) ...[
             const SizedBox(height: 10),
-            Card(
+            BilPearlMaterialCard(
               key: const Key('sleep-measured-stages'),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -164,14 +164,14 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           const SizedBox(height: 14),
         ],
         if (recordLoading)
-          const Card(
+          const BilPearlMaterialCard(
             child: SizedBox(
               height: 220,
               child: Center(child: CircularProgressIndicator()),
             ),
           )
         else if (recordError != null)
-          Card(
+          BilPearlMaterialCard(
             child: ListTile(
               contentPadding: const EdgeInsets.all(20),
               leading: const Icon(Icons.error_outline_rounded),
@@ -194,11 +194,11 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           _sleepEditorCard(),
         if (connectedSleep == null && recordedHours != null) ...[
           const SizedBox(height: 10),
-          Card(
+          BilPearlMaterialCard(
             key: const Key('sleep-manual-source'),
             child: ListTile(
               horizontalTitleGap: 12,
-              leading: const BilSemanticIconBadge(
+              leading: const _SleepSemanticGlyph(
                 kind: BilSemanticIconKind.notes,
               ),
               title: Text('${tr('Source', 'المصدر')}: ${tr('Manual', 'يدوي')}'),
@@ -259,7 +259,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
     return _ConnectedSleepEvidence(signal: latest, lastSyncAt: sync);
   }
 
-  Widget _sleepEditorCard() => Card(
+  Widget _sleepEditorCard() => BilPearlMaterialCard(
     child: Padding(
       padding: const EdgeInsets.all(22),
       child: Column(
@@ -372,7 +372,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
             ),
           ),
           const SizedBox(height: 14),
-          Card(
+          BilPearlMaterialCard(
             key: const Key('sleep-stage-overview'),
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -472,7 +472,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
               ),
             ),
             const SizedBox(height: 18),
-            Card(
+            BilPearlMaterialCard(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
                 child: SizedBox(

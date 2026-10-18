@@ -127,8 +127,8 @@ void main() {
     final accessGate = File(
       'lib/features/nutrition_plans/presentation/nutrition_pathway_access_gate.dart',
     ).readAsStringSync();
-    final planPage = File(
-      'lib/features/profile/plan_page.dart',
+    final pathwayContext = File(
+      'lib/features/profile/plan_pathway_context_card.dart',
     ).readAsStringSync();
 
     expect(
@@ -155,11 +155,11 @@ void main() {
     expect(editor, contains('dietPlanCommandProvider'));
     expect(editor, isNot(contains('dietPlanRepositoryProvider).activate')));
     expect(
-      planPage,
+      pathwayContext,
       contains('Selecting a pathway does not change your targets.'),
     );
     expect(
-      planPage,
+      pathwayContext,
       contains('Clinician review is required before activation.'),
     );
   });

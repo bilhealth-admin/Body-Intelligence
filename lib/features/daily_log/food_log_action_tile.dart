@@ -7,7 +7,7 @@ extension _FoodLogActionTilePresentation on _FoodLogPageState {
     required String label,
     required VoidCallback onTap,
   }) {
-    return Card(
+    return BilPearlMaterialCard(
       key: key,
       margin: EdgeInsets.zero,
       elevation: 0,

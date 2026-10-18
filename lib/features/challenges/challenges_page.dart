@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/database/meal_food_evidence.dart';
@@ -147,7 +148,7 @@ class ChallengesPage extends ConsumerWidget {
         data: (items) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
+            BilPearlMaterialCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -177,7 +178,7 @@ class ChallengesPage extends ConsumerWidget {
                 ),
               ),
             ),
-            Card(
+            BilPearlMaterialCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
@@ -256,7 +257,7 @@ class ChallengesPage extends ConsumerWidget {
 
   Future<void> _choose(BuildContext context, WidgetRef ref) async {
     final t = context.strings.text;
-    final selected = await showModalBottomSheet<(String, String, int)>(
+    final selected = await showBilPearlBottomSheet<(String, String, int)>(
       context: context,
       showDragHandle: true,
       builder: (context) => ListView(
@@ -318,7 +319,7 @@ class _SharedChallengesUnavailableCard extends StatelessWidget {
       key: const Key('shared-challenges-unavailable'),
       container: true,
       label: '$title. ${audiences.join(', ')}. $reason',
-      child: Card(
+      child: BilPearlMaterialCard(
         margin: const EdgeInsets.only(top: 10),
         color: colors.surfaceContainerLow,
         child: ExcludeSemantics(
@@ -375,7 +376,7 @@ class _ChallengeTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(challengeProgressProvider(challenge));
     final t = context.strings.text;
-    return Card(
+    return BilPearlMaterialCard(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: progress.when(

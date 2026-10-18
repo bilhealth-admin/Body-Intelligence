@@ -9,13 +9,20 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     bool autoSpeakReply = false,
   }) async {
     if (!mounted) return;
+    final submittedText = textOverride ?? question.text;
+    if (inputChannel == CoachInputChannel.text) {
+      // Capture the draft before focus changes and before the voice-media
+      // handoff yields. This keeps a just-submitted question stable if the
+      // platform IME updates its composing range while it closes.
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
     if (inputChannel == CoachInputChannel.text &&
         textOverride == null &&
         await _submitPendingVoiceDraft()) {
       return;
     }
     if (!mounted) return;
-    final rawText = (textOverride ?? question.text).trim();
+    final rawText = submittedText.trim();
     final text = inputChannel == CoachInputChannel.voice
         ? normalizeCoachVoiceTranscript(rawText)
         : rawText;
@@ -408,6 +415,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         actionLinks: persistedActions.values.toList(growable: false),
       );
       final repeatedServiceNotice =
+          !addUserMessage &&
           reply.serviceStatus != CoachServiceStatus.ready &&
           lastServiceStatus == reply.serviceStatus &&
           messages.reversed.any(
@@ -472,7 +480,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       // expiring goal proposal also remains until it succeeds or is cancelled;
       // every other write and every destructive action stays transient.
       if (transientActions.isNotEmpty && mounted) {
-        await showModalBottomSheet<void>(
+        await showBilPearlBottomSheet<void>(
           context: context,
           showDragHandle: true,
           builder: (context) =>
@@ -499,8 +507,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           role: IntelligenceMessageRole.bil,
           kind: IntelligenceMessageKind.safety,
           text: tr(
-            'AI Coach could not prepare your context. Your data was not changed; try again.',
-            'تعذر تجهيز سياق AI Coach الآن. لم تتغير بياناتك؛ أعد المحاولة.',
+            'AI Coach could not complete the reply. Your question remains in this chat; review any earlier actions before retrying.',
+            'لم يتمكّن AI Coach من إكمال الرد. بقي سؤالك في المحادثة؛ راجع أي إجراءات سابقة قبل إعادة المحاولة.',
           ),
           createdAt: DateTime.now(),
           evidence: const ['local-coach-runtime'],
