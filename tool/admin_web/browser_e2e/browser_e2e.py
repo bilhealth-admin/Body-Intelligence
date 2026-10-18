@@ -98,6 +98,37 @@ with sync_playwright() as p:
     page.add_script_tag(content=fixtures_js)
     page.add_script_tag(content=script)
     page.wait_for_function("document.getElementById('admin-view').hidden === false",timeout=18000)
+    # Operator-facing security gate is explained, not an inert unexplained button.
+    assert page.locator('#ops-explain').is_enabled()
+    page.locator('#ops-explain').click()
+    assert 'مقفلة' in page.locator('#notice').inner_text()
+    if width<=800:
+      # iOS-style off-canvas navigation closes on every expected pathway.
+      page.locator('#mobile-menu').click()
+      assert 'open' in page.locator('#sidebar').get_attribute('class')
+      assert not page.locator('#sidebar-scrim').is_hidden()
+      assert page.locator('#mobile-menu').get_attribute('aria-expanded')=='true'
+      # Tap outside on the dimmed area to dismiss (particularly narrow 320px screens).
+      page.locator('#sidebar-scrim').click(position={'x':12,'y':240},force=True)
+      assert 'open' not in page.locator('#sidebar').get_attribute('class')
+      assert page.locator('#sidebar-scrim').is_hidden()
+      assert page.locator('#mobile-menu').get_attribute('aria-expanded')=='false'
+      page.locator('#mobile-menu').click()
+      page.keyboard.press('Escape')
+      assert 'open' not in page.locator('#sidebar').get_attribute('class')
+      page.locator('#mobile-menu').click()
+      page.locator('#sidebar-close').click()
+      assert 'open' not in page.locator('#sidebar').get_attribute('class')
+      page.locator('#mobile-menu').click()
+      page.locator('[data-page="notifications"]').click()
+      assert 'open' not in page.locator('#sidebar').get_attribute('class')
+      assert page.locator('#sidebar-scrim').is_hidden()
+      page.locator('[data-page="overview"]').first.evaluate('(e)=>e.click()')
+    # Backend raw failures are localized per-operation; an active financial
+    # service must not cause a false assertion that every service is writable.
+    error_text=page.evaluate("explainBackendError('not_authorized','review')")
+    assert 'not_authorized' not in error_text
+    assert 'هذه الوظيفة' in error_text
     for section in ('overview','finance','moderators','members','audit','coach','notifications','moderation','security'):
       page.locator(f'[data-page="{section}"]').first.evaluate('(e)=>e.click()')
       if section=='audit':page.wait_for_function("document.querySelector('#audit-content .data-table')!==null",timeout=9000)

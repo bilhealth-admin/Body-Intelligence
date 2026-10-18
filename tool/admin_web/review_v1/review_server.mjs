@@ -95,6 +95,9 @@ function parse(body){
 }
 function errorFromProvider(err,operation){
   const detail=String(err?.message||'');
+  if((operation==='bil_admin_web_review_context_v1'||operation==='bil_admin_web_review_reward_policy_v1') &&
+     /42501|permission denied|service_role_required/i.test(detail))
+    throw new WebAdminError('review_context_configuration_error',503);
   if(/42501|administrator_required|moderator_required|not.authorized|permission denied/i.test(detail))
     throw new WebAdminError('not_authorized',403);
   if(/conflict|content.changed|review_content_changed|already.moderated|already_reviewed|40001/i.test(detail))
@@ -133,13 +136,22 @@ async function postSnapshot(user,id,actor){
   const snap=rows.find(v=>v?.post?.id===id);
   return safeSnapshot(snap,id,actor);
 }
-async function signedMedia(service,post){
+// All privileged case metadata is read through a service-role-only,
+// active-admin-checked SECURITY DEFINER RPC. No direct SELECT grants to the
+// browser, authenticated role, or even service_role on private tables.
+async function reviewContext(service,post,actor){
+  const context=await rpc(service,'bil_admin_web_review_context_v1',{
+    p_actor_id:actor,p_post_id:post.id
+  });
+  requireCondition(context && typeof context==='object' &&
+    context.post_id===post.id && context.author_id===post.author_id &&
+    Array.isArray(context.media) && context.media.length<=12,
+    'review_context_unavailable',503);
+  return context;
+}
+async function signedMedia(service,post,context){
   const id=post.id;
-  const mediaQuery=await service.from('bil_community_post_media_v1')
-    .select('post_id,position,object_path,mime_type,bytes,width,height')
-    .eq('post_id',id).order('position',{ascending:true}).limit(15);
-  if(mediaQuery.error)errorFromProvider(mediaQuery.error,'media');
-  const manifest=checkedRecords(mediaQuery.data??[],15);
+  const manifest=checkedRecords(context?.media,12).map(m=>({...m}));
   if(post.media_object_path && !manifest.some(m=>m.object_path===post.media_object_path)){
     manifest.unshift({post_id:id,position:-1,object_path:post.media_object_path,mime_type:post.media_mime_type,
       bytes:post.media_bytes,width:post.media_width,height:post.media_height});
@@ -161,31 +173,24 @@ async function signedMedia(service,post){
   }
   return media;
 }
-
 async function postDetail(user,service,id,actor){
   const snap=await postSnapshot(user,id,actor);
   const post=snap.post;
-  const media=await signedMedia(service,post);
-  const extra=await Promise.all([
-    service.from('bil_community_post_hashtags_v1').select('hashtag').eq('post_id',id).limit(20),
-    service.from('bil_community_poll_options').select('option_text,position').eq('post_id',id).order('position',{ascending:true}).limit(20),
-    service.from('bil_community_polls').select('question,allow_multiple,closes_at').eq('post_id',id).maybeSingle(),
-  ]);
-  for(const res of extra)if(res.error)errorFromProvider(res.error,'post_context');
+  const context=await reviewContext(service,post,actor);
+  const media=await signedMedia(service,post,context);
   const emailRecords=checkedRecords(await rpc(service,'bil_admin_web_reporter_contacts_v1',{
     p_actor_id:actor,p_report_kind:'posts',p_report_ids:[id]
   }),1);
   const matching=emailRecords.find(x=>x.record_id===id&&x.reporter_user_id===post.author_id);
   return {
-    post_id:id,revision:snap.revision,author_id:post.author_id,author_name:post.author_name??null,
+    post_id:id,revision:snap.revision,author_id:post.author_id,author_name:context.author_name??null,
     author_email:typeof matching?.reporter_email==='string'?matching.reporter_email:null,
-    title:post.title??null,body:post.body??'',created_at:post.created_at,edited_at:post.edited_at,
-    visibility:post.visibility??null,location:post.location_label??null,
-    hashtags:(extra[0].data??[]).map(x=>x.hashtag).filter(x=>typeof x==='string').slice(0,20),
-    poll:extra[2].data?{
-      question:extra[2].data.question,allow_multiple:extra[2].data.allow_multiple,
-      options:(extra[1].data??[]).map(x=>x.option_text),closes_at:extra[2].data.closes_at
-    }:null,
+    title:post.title??context.title??null,body:post.body??'',created_at:post.created_at,edited_at:post.edited_at,
+    visibility:post.visibility??null,location:context.location??post.location_label??null,
+    hashtags:Array.isArray(context.hashtags)?context.hashtags:[],
+    topics:Array.isArray(context.topics)?context.topics:[],
+    circles:Array.isArray(context.circles)?context.circles:[],
+    poll:context.poll??null,
     images:media,media_count:media.length,media_complete:true,
     expires_in_seconds:media.length?180:null,
     moderation_status:post.moderation_status,
@@ -202,26 +207,21 @@ async function allQueue(user,service,actor,limit){
     }catch(err){
       // Never silently approve a post whose media cannot be reviewed.
       rows.push({id:item.id,post_id:item.id,author_id:item.author_id,
-        author_name:item.author_name??null,created_at:item.created_at,
-        media_complete:false,preview_error:err instanceof WebAdminError?err.code:'preview_unavailable',
+        author_name:item.author_name??null,title:item.title??null,body:item.body??null,
+        created_at:item.created_at,media_complete:false,
+        preview_error:err instanceof WebAdminError?err.code:'preview_unavailable',
         can_decide:false});
     }
   }
   return {rows,has_more:raw.length===limit};
 }
-async function rewardPolicy(service){
-  const r=await service.from('bil_community_post_reward_policy')
-    .select('tokens_per_approval,max_rewarded_posts_per_owner_per_utc_day,updated_at')
-    .eq('singleton',true).maybeSingle();
-  if(r.error)errorFromProvider(r.error,'reward_policy');
-  const policy=r.data;
+async function rewardPolicy(service,actor){
+  const policy=await rpc(service,'bil_admin_web_review_reward_policy_v1',{p_actor_id:actor});
   requireCondition(policy&&Number.isSafeInteger(policy.tokens_per_approval)&&policy.tokens_per_approval>=0&&
-    Number.isSafeInteger(policy.max_rewarded_posts_per_owner_per_utc_day)&&policy.max_rewarded_posts_per_owner_per_utc_day>=0,
+    Number.isSafeInteger(policy.max_rewarded_posts_per_owner_per_utc_day)&&policy.max_rewarded_posts_per_owner_per_utc_day>=0&&
+    policy.max_daily_tokens===policy.tokens_per_approval*policy.max_rewarded_posts_per_owner_per_utc_day,
     'reward_policy_unavailable',503);
-  return {tokens_per_approval:policy.tokens_per_approval,
-    max_rewarded_posts_per_owner_per_utc_day:policy.max_rewarded_posts_per_owner_per_utc_day,
-    max_daily_tokens:policy.tokens_per_approval*policy.max_rewarded_posts_per_owner_per_utc_day,
-    updated_at:policy.updated_at};
+  return policy;
 }
 async function earnQueue(user,service,actor){
   const raw=checkedRecords(await rpc(user,'bil_community_reward_review_queue_v2',{p_limit:35}),35);
@@ -237,13 +237,18 @@ async function earnQueue(user,service,actor){
       const value=data?.user?.email;
       if(typeof value==='string'&&value.length<=254&&value.includes('@'))email=value.toLowerCase();
     }
-    let images=[],media_complete=false,preview_error=null;
-    try{images=await signedMedia(service,post);media_complete=true;}
-    catch(e){preview_error=e instanceof WebAdminError?e.code:'preview_unavailable';}
-    rows.push({post_id:post.id,title:post.title??null,body:post.body??'',
-      author_id:post.author_id,author_email:email,revision:row.revision,
+    let images=[],context=null,media_complete=false,preview_error=null;
+    try{
+      context=await reviewContext(service,post,actor);
+      images=await signedMedia(service,post,context);media_complete=true;
+    }catch(e){preview_error=e instanceof WebAdminError?e.code:'preview_unavailable';}
+    rows.push({post_id:post.id,title:post.title??context?.title??null,body:post.body??'',
+      author_id:post.author_id,author_name:context?.author_name??null,
+      author_email:email,revision:row.revision,
       request_id:row.request_id,status:row.status,can_grant:row.can_grant===true,
       reviewed_at:post.reviewed_at,created_at:post.created_at,
+      location:context?.location??null,hashtags:context?.hashtags??[],topics:context?.topics??[],
+      circles:context?.circles??[],poll:context?.poll??null,
       images:media_complete?images:undefined,media_count:media_complete?images.length:null,
       media_complete,preview_error});
   }
@@ -267,14 +272,15 @@ async function run(op,body,user,service,actor){
     case 'posts.queue':return allQueue(user,service,actor,body.limit);
     case 'posts.detail':return postDetail(user,service,body.post_id,actor);
     case 'earn.queue':return earnQueue(user,service,actor);
-    case 'earn.policy':return rewardPolicy(service);
+    case 'earn.policy':return rewardPolicy(service,actor);
     case 'reports.content':return rpc(user,'bil_community_report_content_v1',{
       p_report_id:body.report_id,p_source:body.source});
     case 'posts.review': {
       // Rechecking the same revision immediately before mutation detects edits.
       const snap=await postSnapshot(user,body.post_id,actor);
       requireCondition(snap.revision===body.expected_revision,'stale_content',409);
-      await signedMedia(service,snap.post);
+      const material=await reviewContext(service,snap.post,actor);
+      await signedMedia(service,snap.post,material);
       const d=await rpc(user,'bil_moderate_community_post_v2',{
         p_post_id:body.post_id,p_expected_revision:body.expected_revision,p_decision:body.decision,
         p_operation_id:body.operation_id,p_reason:body.reason,p_reward_mode:'eligible'

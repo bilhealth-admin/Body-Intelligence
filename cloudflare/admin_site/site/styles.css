@@ -116,3 +116,76 @@ input[dir=ltr],.bidi-isolate[dir=ltr],.email-field[dir=ltr]{direction:ltr;text-a
   .report-actions button{min-width:0;width:100%;font-size:.81rem}
   .review-policy-info{padding:16px}
 }
+
+
+/* BIL 18 October 2026 — production operator UI refinements */
+:root{
+  --bg:#f5f7f5;--surface:rgba(255,255,255,.94);--surface-solid:#fff;
+  --text:#193229;--secondary:#607568;--border:#dee9e1;
+  --green:#205d45;--bright:#d8f1d9;
+  --shadow:0 7px 28px rgba(23,60,42,.045);
+}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(circle at 94% 0%,#e3eee5 0,transparent 42%),#f5f7f5}
+.sidebar{background:rgba(255,255,255,.97);border-inline-end:1px solid #e7ede8;box-shadow:none}
+.sidebar .brand{gap:11px;margin-inline:10px}
+.sidebar .brand-symbol{background:#194936;color:#f2ffde;box-shadow:none;border-radius:13px}
+.sidebar .brand small{font-weight:750;letter-spacing:.08em;color:#7c9988}
+.nav-item{border:1px solid transparent;gap:12px;min-height:47px;font-size:.9rem;border-radius:11px}
+.nav-item.selected{background:#eaf4e9;color:#15543a;border:1px solid #d9e9d9}
+.nav-item:hover{background:#f1f7f0}
+.nav-icon{font-size:0;min-width:23px;color:#637e6e}
+.nav-item.selected .nav-icon{color:#266e4b}
+.nav-icon svg{width:19px;height:19px;display:block;flex:none}
+.sidebar-scrim[hidden]{display:none!important}
+.sidebar-close{display:none;margin-inline-start:auto;flex-shrink:0;border:1px solid #dce5dc;background:#f9fbf9;border-radius:11px;width:37px;height:37px;color:#305540;font-size:28px;line-height:1;align-items:center;justify-content:center}
+.topbar{background:rgba(255,255,255,.84);backdrop-filter:blur(18px);border-bottom:1px solid #e4eee6;z-index:30}
+.content{max-width:1280px;padding-top:33px}
+.hero{min-height:110px;margin-bottom:20px}
+.hero h1{font-size:clamp(1.65rem,2.2vw,2.25rem);letter-spacing:-.025em}
+.hero .eyebrow{color:#6a9a7d;letter-spacing:.09em}
+.glass{border:1px solid #e4ebe5;border-radius:18px;background:var(--surface);box-shadow:var(--shadow)}
+.metric{min-height:130px;padding:21px}
+.metric-value{font-size:1.95rem;margin-top:13px}
+.metric-footer{font-size:.75rem}
+.section-card{padding:24px}
+.section-card h2{font-size:1.18rem}
+.primary,.secondary,.danger{font-weight:700;transition:background .16s,border-color .16s,transform .12s}
+.primary:not(:disabled):active,.secondary:not(:disabled):active,.danger:not(:disabled):active{transform:scale(.987)}
+button:focus-visible,[role=button]:focus-visible,a:focus-visible{outline:3px solid #74b48c;outline-offset:3px}
+button:disabled{opacity:.58;cursor:not-allowed;filter:saturate(.65)}
+.ops-why-button{display:inline-flex;margin-top:11px;min-height:40px}
+.report-field{background:#fbfdfb}
+.report-field-label{font-weight:700}
+.report-field-value{color:#223d2e}
+.post-gallery{background:#f8fcf8}
+.pill{padding:7px 11px}
+.warning{background:#fff9ef;color:#7f581a;border-color:#f1e1bb}
+@media(max-width:850px){
+  .sidebar{position:fixed;inset-block:0;inset-inline-start:0;width:min(326px,87vw)!important;height:100dvh;max-height:100dvh;z-index:1002;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 22px) 17px calc(env(safe-area-inset-bottom) + 15px);box-shadow:0 20px 80px rgba(17,42,29,.18)}
+  .sidebar-scrim:not([hidden]){display:block;position:fixed;inset:0;z-index:1001;background:rgba(20,38,28,.4);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+  body.admin-nav-open{overflow:hidden;overscroll-behavior:none;touch-action:pan-y}
+  .sidebar-close{display:inline-flex}
+  .mobile-menu{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d9e6db;border-radius:12px;background:#fff;color:#24533b;padding:9px}
+  .mobile-menu svg{width:22px;height:22px;display:block}
+  .topbar{min-height:65px;padding-inline:13px}
+  .main{max-width:100vw;min-width:0}
+  .content{padding:20px 13px 50px}
+  .hero{margin-bottom:16px;min-height:65px}
+  .hero .eyebrow{font-size:.58rem;letter-spacing:.05em}
+  .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:480px){
+  .topbar-actions{gap:6px}
+  .breadcrumb{gap:5px}
+  .hero h1{font-size:1.78rem}
+  .section-card{padding:16px}
+  .section-card h2{font-size:1.1rem}
+  .metric{padding:15px;min-height:115px}
+  .metric-value{font-size:1.72rem}
+  .metric-footer{font-size:.66rem}
+  .report-card{padding:12px}
+  .report-actions button{min-height:45px}
+  .brand{margin-bottom:25px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

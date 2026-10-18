@@ -164,3 +164,36 @@ test('refreshing server status cannot reenable unreviewed or broken-media action
   assert.match(source,/button\.dataset\.caseEligible='false'/);
   assert.match(source,/b\.disabled=!reviewWrite\|\|b\.dataset\.caseEligible==='false'/);
 });
+
+test('iPhone sidebar closes on tap outside, Escape, close and navigation',()=>{
+ const css=readFileSync(new URL('../site/styles.css',import.meta.url),'utf8');
+ assert.match(index,/id="sidebar-scrim"/);
+ assert.match(index,/id="sidebar-close"/);
+ assert.match(index,/id="mobile-menu"/);
+ assert.match(source,/function closeSidebar\(/);
+ assert.match(source,/function toggleSidebar\(/);
+ assert.match(source,/\$\('sidebar-scrim'\)\.addEventListener\('click'/);
+ assert.match(source,/event\.key==='Escape'/);
+ assert.match(source,/document\.addEventListener\('pointerdown'/);
+ assert.match(source,/closeSidebar\(\)/);
+ assert.match(css,/\.sidebar-scrim:not\(\[hidden\]\)/);
+ assert.match(css,/body\.admin-nav-open/);
+});
+test('review errors translate granular server codes rather than misleading owner denial',()=>{
+ assert.match(source,/function explainBackendError\(/);
+ assert.match(source,/review_context_configuration_error/);
+ assert.match(source,/reviewDataPermission/);
+ assert.match(source,/scopedAuthorizationFailure/);
+ assert.match(source,/moderation_writes_locked/);
+ assert.match(source,/function api\(/);
+ assert.match(source,/e\.backendCode=code/);
+});
+test('permissions separate finance, ops, review and safely disabled case buttons',()=>{
+ assert.match(source,/function updateStatuses\(/);
+ assert.match(source,/const financeWrite=/);
+ assert.match(source,/const reviewWrite=/);
+ assert.match(source,/const lock=ops/);
+ assert.match(source,/b\.disabled=!reviewWrite\|\|b\.dataset\.caseEligible==='false'/);
+ assert.match(source,/button\.dataset\.caseEligible='false'/);
+ assert.match(index,/id="ops-explain"/);
+});

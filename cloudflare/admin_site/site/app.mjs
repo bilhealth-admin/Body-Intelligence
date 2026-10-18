@@ -161,6 +161,44 @@ Object.assign(en,{
   pendingPosts:'Posts awaiting review',reviewPolicyDetails:'Earn rewards and notifications',noClaimOfDelivery:'The receipt proves the server decision, not guaranteed delivery to a device.',
   authorizedReview:'Secure moderation gateway',moderationLockedReason:'Locked because a required administrative validation or test has not completed, not a broken button.'
 });
+Object.assign(ar,{
+  reviewReadFailure:'تعذّر تحميل محتوى المراجعة بسبب إعدادات القراءة في الخادم، وليس بسبب عدم أهلية حسابك. جرّب تحديث القسم.',
+  reviewDataPermission:'لم تكتمل صلاحية قراءة مرفقات المنشور أو سياسة المكافآت. أُوقفت قرارات هذا المحتوى لحمايته.',
+  scopedAuthorizationFailure:'هذه الوظيفة تحديدًا رفضت الإذن. يمكنك الاستمرار في بقية الأقسام، أو تحديث الجلسة وإعادة المحاولة.',
+  sessionExpired:'انتهت جلسة الدخول. أعد تسجيل الدخول للمواصلة بأمان.',
+  reviewChanged:'تغيّر المحتوى أثناء المراجعة. حدّث المنشور واقرأ التفاصيل مجددًا قبل اتخاذ قرار.',
+  retryAfterLimit:'وصلت الطلبات للحد المسموح مؤقتًا. انتظر ثم أعد المحاولة.',
+  protectedWriteLocked:'الأزرار الإدارية المؤثرة في الحسابات أو التوكنات مقفلة على الخادم إلى حين اعتماد اختبار فعلي آمن. الاتصال والقراءة يعملان بصورة مستقلة.',
+  moderationReadAndDecisions:'القراءة وقرارات المراجعة متاحتان',
+  connectionReadOnly:'القراءة متاحة · التعديلات مقفلة',
+  connectionReadWrite:'القراءة والتعديلات متاحتان',
+  connectionPartial:'اتصال جزئي؛ تحقّق من الأقسام',
+  menuClose:'إغلاق قائمة الإدارة',
+  moderatorsHelp:'قائمة حسابات المشرفين المصرّح لهم بمراجعة المحتوى. قد تبقى صلاحيات تغيير المشرفين مقفلة بينما تعمل القراءة.',
+  auditHelp:'سجل الخادم الفعلي للمنح والسحب. المعرفات التقنية تساعد التدقيق لكنها ليست بديلًا عن بريد المستفيد والنتيجة.',
+  whyNotWorking:'لماذا بعض الأزرار غير متاحة؟',
+  availableReadOnly:'القسم متاح للقراءة. تنفيذ التغييرات يحتاج تفعيلًا منفصلًا بعد اختبار الصلاحيات.',
+  unknownError:'تعذّر إكمال الطلب. لم يحدث تغيير مؤكد؛ جرّب إعادة المحاولة أو مراجعة حالة الاتصال.'
+});
+Object.assign(en,{
+  reviewReadFailure:'The moderation data service could not read a required resource. This is not proof that your administrator account lacks permission. Refresh this section.',
+  reviewDataPermission:'The service could not read the post attachments or reward policy. Decisions on this content are blocked for safety.',
+  scopedAuthorizationFailure:'This operation was denied. Other authorized areas can still work; refresh your session and retry.',
+  sessionExpired:'Your sign-in session expired. Sign in again to continue safely.',
+  reviewChanged:'This content changed during review. Reload and examine it before taking action.',
+  retryAfterLimit:'This action was rate limited. Please wait before retrying.',
+  protectedWriteLocked:'Account and token-changing administrative actions are locked at the server pending a safe live acceptance test. Read access is independent.',
+  moderationReadAndDecisions:'Reading and moderation decisions enabled',
+  connectionReadOnly:'Reading available · changes locked',
+  connectionReadWrite:'Reading and changes available',
+  connectionPartial:'Some services need attention',
+  menuClose:'Close admin navigation',
+  moderatorsHelp:'Authorized moderation accounts. Role changes may be locked while records are readable.',
+  auditHelp:'Real grant and revoke receipts. Technical identifiers should accompany a recipient email and outcome.',
+  whyNotWorking:'Why are some buttons unavailable?',
+  availableReadOnly:'This section is readable; changes require separate production acceptance approval.',
+  unknownError:'This request could not be completed. No change was confirmed. Please retry or inspect connection status.'
+});
 const dict={ar,en};
 const state={language:'ar',page:'overview',queue:'posts',email:'',factor:null,finance:null,ops:null,user:null,financeRows:[],auditRows:[],mods:[],members:[],queueRows:[],review:null,earnPolicy:null,financeOffset:0,hasMore:false,pendingCommand:null,authenticated:false,modalResolve:null,loading:false};
 const $ = id=>document.getElementById(id);
@@ -169,7 +207,19 @@ const elem=(name,text,cls)=>{const e=document.createElement(name);if(text!==unde
 function setText(id,x){$(id).textContent=String(x)}
 function showNotice(message,bad=false){const n=$('notice');n.textContent=String(message);n.classList.toggle('error',bad);n.hidden=false;clearTimeout(showNotice.timer);showNotice.timer=setTimeout(()=>n.hidden=true,13000)}
 function translate(){document.documentElement.lang=state.language;document.documentElement.dir=state.language==='ar'?'rtl':'ltr';for(const node of document.querySelectorAll('[data-i18n]')){node.textContent=tr(node.dataset.i18n)}$('language').textContent=state.language==='ar'?'EN':'AR';setText('breadcrumb',tr(state.page));setText('page-title',tr(state.page));updateNotificationHelp();}
-function setPage(page){if(!document.getElementById(page+'-page'))return;state.page=page;for(const panel of document.querySelectorAll('.page'))panel.classList.toggle('active',panel.id===page+'-page');for(const item of document.querySelectorAll('[data-page]'))item.classList.toggle('selected',item.dataset.page===page);setText('breadcrumb',tr(page));setText('page-title',tr(page));$('sidebar').classList.remove('open')}
+function setPage(page){
+  if(!document.getElementById(page+'-page'))return;
+  state.page=page;
+  for(const panel of document.querySelectorAll('.page'))panel.classList.toggle('active',panel.id===page+'-page');
+  for(const item of document.querySelectorAll('[data-page]'))item.classList.toggle('selected',item.dataset.page===page);
+  setText('breadcrumb',tr(page));setText('page-title',tr(page));
+  const summaries={overview:'intro',finance:'grantWarning',coach:'individualResetHelp',
+    notifications:'notificationWarning',moderation:'reportNotice',
+    moderators:'moderatorsHelp',members:'membersHelp',audit:'auditHelp',security:'securityText'};
+  setText('page-subtitle',tr(summaries[page]||'intro'));
+  closeSidebar();
+  window.scrollTo({top:0,behavior:'instant'});
+}
 function authUi(view){$('auth-view').hidden=view==='admin';$('admin-view').hidden=view!=='admin';$('logout').hidden=view!=='admin'&&view!=='mfa';$('top-status').textContent=view==='admin'?tr('online'):tr('offline');$('top-status').classList.toggle('connected',view==='admin')}
 function count(rows){return Array.isArray(rows)?rows.length:'—'}
 function rowsOf(data){if(Array.isArray(data))return data;if(!data||typeof data!=='object')return[];if(Array.isArray(data.rows))return data.rows;if(Array.isArray(data.items))return data.items;if(Array.isArray(data.reports))return data.reports;if(Array.isArray(data.posts))return data.posts;return []}
@@ -395,7 +445,36 @@ function updateNotificationHelp(){
   if(kind==='custom')tokenAck.checked=false;
 }
 function token(){return crypto.randomUUID()}
-async function api(type,body){const {data:{session},error}=await sdk.auth.getSession();if(error||!session?.access_token)throw new Error('authentication_required');const response=await fetch(edge[type],{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'content-type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY,'authorization':`Bearer ${session.access_token}`},body:JSON.stringify(body)});let data;try{data=await response.json()}catch{throw new Error('invalid_backend_response')}if(!response.ok){const e=new Error(data?.error||'backend_unavailable');e.httpStatus=response.status;e.detail=data;throw e}return data}
+function explainBackendError(code,scope){
+  const reason=String(code??'');
+  if(reason==='review_context_configuration_error'||reason==='review_service_read_unavailable'||reason==='invalid_backend_result')
+    return tr('reviewDataPermission');
+  if(reason==='not_authorized'||reason==='not_found'||reason==='administrator_required')
+    return tr('scopedAuthorizationFailure');
+  if(reason==='authentication_required'||reason==='invalid_session'||reason==='mfa_required')
+    return tr('sessionExpired');
+  if(reason==='admin_ops_writes_locked'||reason==='moderation_writes_locked')
+    return tr('protectedWriteLocked');
+  if(reason==='stale_content'||reason==='content_changed'||reason==='post_not_reviewable')
+    return tr('reviewChanged');
+  if(reason==='rate_limited')return tr('retryAfterLimit');
+  return tr('unknownError');
+}
+async function api(type,body){
+  const {data:{session},error}=await sdk.auth.getSession();
+  if(error||!session?.access_token)throw new Error(tr('sessionExpired'));
+  const response=await fetch(edge[type],{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',
+    headers:{'content-type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY,
+      'authorization':`Bearer ${session.access_token}`},body:JSON.stringify(body)});
+  let data;try{data=await response.json()}catch{throw new Error(tr('unknownError'))}
+  if(!response.ok){
+    const code=String(data?.error||'backend_unavailable');
+    const e=new Error(explainBackendError(code,type));
+    e.httpStatus=response.status;e.backendCode=code;e.gateway=type;e.operation=body?.operation;
+    throw e;
+  }
+  return data;
+}
 async function emailOtp(ev){ev.preventDefault();const value=$('email').value.trim().toLowerCase();if(!value)return;const btn=ev.submitter;btn.disabled=true;try{const {error}=await sdk.auth.signInWithOtp({email:value,options:{shouldCreateUser:false}});if(error)throw error;state.email=value;$('email-form').hidden=true;$('otp-form').hidden=false;showNotice(state.language==='ar'?'تم طلب رمز الدخول. تحقق من بريدك.':'Sign-in code requested. Check your email.')}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
 async function verifyEmail(ev){ev.preventDefault();const code=$('email-code').value.trim();const btn=ev.submitter;btn.disabled=true;try{const {error}=await sdk.auth.verifyOtp({email:state.email,token:code,type:'email'});if(error)throw error;$('otp-form').hidden=true;await enterMfaFlow()}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
 async function findFactor(){const {data,error}=await sdk.auth.mfa.listFactors();if(error)throw error;return (data?.totp??[]).find(f=>f.status==='verified')??null}
@@ -404,7 +483,40 @@ async function verifyFactor(code){if(!state.factor?.id)throw new Error(tr('missi
 async function verifyMfa(ev){ev.preventDefault();const btn=ev.submitter;btn.disabled=true;try{const code=$('mfa-code').value.trim();await verifyFactor(code);$('mfa-code').value='';$('mfa-area').hidden=true;await loadAdmin()}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
 async function verifyEnroll(ev){ev.preventDefault();const btn=ev.submitter;btn.disabled=true;try{await verifyFactor($('enroll-code').value.trim());$('enroll-code').value='';$('enroll-area').hidden=true;await loadAdmin()}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
 async function loadAdmin(){const {data:{user}}=await sdk.auth.getUser();if(!user)throw new Error('invalid_session');state.user=user;const finance=await api('finance',{operation:'status'});if(finance.access!=='authorized')throw new Error('unauthorized');state.finance=finance;let ops=null;try{ops=await api('ops',{operation:'status'})}catch(e){ops={access:'unavailable',error:e.message,writes_enabled:false}}state.ops=ops;let review=null;try{review=await api('review',{operation:'status'})}catch(e){review={access:'unavailable',error:e.message,moderation_writes_enabled:false}}state.review=review;state.authenticated=true;authUi('admin');restorePending();updateStatuses();await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue()]);updateStatuses()}
-function updateStatuses(){const finance=state.finance?.access==='authorized';const ops=state.ops?.access==='authorized';const review=state.review?.access==='authorized';setText('top-status',finance?tr('online'):tr('offline'));$('top-status').classList.toggle('connected',finance);const container=$('status-cards');container.replaceChildren();addRow(container,tr('financeGateway'),finance?tr('active'):tr('notAvailable'),finance?'':'bad');addRow(container,tr('operationsGateway'),ops?tr('active'):tr('notAvailable'),ops?'':'bad');addRow(container,tr('serverReview'),review?tr('active'):tr('notAvailable'),review?'':'bad');addRow(container,tr('twoFactor'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');addRow(container,tr('protectedRole'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');const lock=state.ops?.writes_enabled===true;for(const b of document.querySelectorAll('.ops-write'))b.disabled=!lock;const reviewWrite=state.review?.moderation_writes_enabled===true;for(const b of document.querySelectorAll('.review-write'))b.disabled=!reviewWrite||b.dataset.caseEligible==='false';$('ops-lock').textContent=lock?tr('testRequired'):tr('statusLocked');for(const message of document.querySelectorAll('.write-explanation:not(.review-write-explanation)'))message.hidden=lock;for(const message of document.querySelectorAll('.review-write-explanation')){message.hidden=reviewWrite;message.textContent=tr('reviewBlocked')}const identity=$('identity-content');identity.replaceChildren();addRow(identity,tr('signedIn'),state.user?.email||'—');addRow(identity,tr('twoFactor'),state.authenticated?'AAL2':'—');addRow(identity,tr('financeGateway'),finance?(state.finance.financial_writes_enabled?tr('active'):tr('locked')):tr('notAvailable'),finance?'':'bad');addRow(identity,tr('operationsGateway'),ops?(lock?tr('active'):tr('locked')):tr('notAvailable'),ops?(lock?'':'pending'):'bad');addRow(identity,tr('serverReview'),review?(reviewWrite?tr('active'):tr('locked')):tr('notAvailable'),review?(reviewWrite?'':'pending'):'bad');}
+function updateStatuses(){
+  const finance=state.finance?.access==='authorized';
+  const ops=state.ops?.access==='authorized';
+  const review=state.review?.access==='authorized';
+  const lock=ops&&state.ops?.writes_enabled===true;
+  const reviewWrite=review&&state.review?.moderation_writes_enabled===true;
+  const financeWrite=finance&&state.finance?.financial_writes_enabled===true;
+  setText('top-status',finance&&ops&&review?tr('online'):finance||ops||review?tr('connectionPartial'):tr('offline'));
+  $('top-status').classList.toggle('connected',finance&&ops&&review);
+  const container=$('status-cards');container.replaceChildren();
+  addRow(container,tr('financeGateway'),finance?(financeWrite?tr('connectionReadWrite'):tr('connectionReadOnly')):tr('notAvailable'),finance?(financeWrite?'':'pending'):'bad');
+  addRow(container,tr('operationsGateway'),ops?(lock?tr('connectionReadWrite'):tr('connectionReadOnly')):tr('notAvailable'),ops?(lock?'':'pending'):'bad');
+  addRow(container,tr('serverReview'),review?(reviewWrite?tr('moderationReadAndDecisions'):tr('connectionReadOnly')):tr('notAvailable'),review?(reviewWrite?'':'pending'):'bad');
+  addRow(container,tr('twoFactor'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');
+  addRow(container,tr('protectedRole'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');
+  for(const b of document.querySelectorAll('.ops-write')){
+    b.disabled=!lock;
+    b.title=!lock?tr('protectedWriteLocked'):'';
+    b.setAttribute('aria-describedby','ops-lock');
+  }
+  for(const b of document.querySelectorAll('.review-write'))
+    b.disabled=!reviewWrite||b.dataset.caseEligible==='false';
+  $('ops-lock').textContent=lock?tr('testRequired'):tr('protectedWriteLocked');
+  for(const message of document.querySelectorAll('.write-explanation:not(.review-write-explanation)'))message.hidden=lock;
+  for(const message of document.querySelectorAll('.review-write-explanation')){
+    message.hidden=reviewWrite;message.textContent=tr('reviewBlocked');
+  }
+  const identity=$('identity-content');identity.replaceChildren();
+  addRow(identity,tr('signedIn'),state.user?.email||'—');
+  addRow(identity,tr('twoFactor'),state.authenticated?'AAL2':'—');
+  addRow(identity,tr('financeGateway'),finance?(financeWrite?tr('connectionReadWrite'):tr('connectionReadOnly')):tr('notAvailable'),finance?'':'bad');
+  addRow(identity,tr('operationsGateway'),ops?(lock?tr('connectionReadWrite'):tr('connectionReadOnly')):tr('notAvailable'),ops?'':'bad');
+  addRow(identity,tr('serverReview'),review?(reviewWrite?tr('moderationReadAndDecisions'):tr('connectionReadOnly')):tr('notAvailable'),review?'':'bad');
+}
 async function init(){
   translate();authUi('auth');
   sdk.auth.onAuthStateChange((event)=>{
@@ -441,8 +553,12 @@ async function loadQueue(){
     if(current==='reports')setText('metric-reports',String(rows.length));
     renderRecords(c,rows,current);
     if(current==='earn'||current==='posts')await loadReviewPolicy();
-  }catch(err){if(current!==state.queue)return;empty(c,tr('failedRead'));
-    if(current==='reports')setText('metric-reports','—');showNotice(err.message||tr('failedRead'),true)}
+  }catch(err){
+    if(current!==state.queue)return;
+    empty(c,`${tr('failedRead')} · ${err.message||tr('reviewReadFailure')}`);
+    if(current==='reports')setText('metric-reports','—');
+    showNotice(err.message||tr('reviewReadFailure'),true);
+  }
 }
 async function reviewQueueRecord(queue,row,decision){
   if(!state.review?.moderation_writes_enabled){showNotice(tr('reviewBlocked'),true);return}
@@ -543,7 +659,21 @@ async function showReviewDecision(row,decision){
 }
 
 async function refreshAll(){if(!state.authenticated)return;await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue(),loadAudit()]);updateStatuses()}
-async function statusRefresh(){try{state.finance=await api('finance',{operation:'status'});state.ops=await api('ops',{operation:'status'});state.review=await api('review',{operation:'status'});updateStatuses();await refreshAll()}catch(e){showNotice(e.message||tr('failed'),true)}}
+async function statusRefresh(){
+  const sources=['finance','ops','review'];
+  const settled=await Promise.allSettled(sources.map(type=>api(type,{operation:'status'})));
+  const failures=[];
+  settled.forEach((result,i)=>{
+    const type=sources[i];
+    state[type]=result.status==='fulfilled'?result.value:{access:'unavailable',
+      writes_enabled:false,moderation_writes_enabled:false,financial_writes_enabled:false};
+    if(result.status==='rejected')failures.push(result.reason?.message||tr('unknownError'));
+  });
+  updateStatuses();
+  if(state.authenticated)await refreshAll();
+  if(failures.length)showNotice(`${tr('connectionPartial')} · ${failures[0]}`,true);
+  else $('notice').hidden=true;
+}
 async function showStepUp(){return new Promise((resolve)=>{state.modalResolve=resolve;$('mfa-modal').hidden=false;$('step-up-code').value='';$('step-up-code').focus()})}
 function resolveStepUp(ok){$('mfa-modal').hidden=true;$('step-up-code').value='';const cb=state.modalResolve;state.modalResolve=null;if(cb)cb(ok)}
 async function confirmStepUp(){const code=$('step-up-code').value.trim();const btn=$('confirm-stepup');btn.disabled=true;try{state.factor=await findFactor();await verifyFactor(code);resolveStepUp(true)}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
@@ -606,6 +736,63 @@ function clearPrivateView(){
   setText('pending-operation',tr('noPending'));
   updateStatuses();
 }
-function setNavigation(){for(const b of document.querySelectorAll('[data-page]'))b.addEventListener('click',()=>{setPage(b.dataset.page);if(b.dataset.page==='audit'&&state.authenticated)loadAudit()});$('mobile-menu').addEventListener('click',()=>$('sidebar').classList.toggle('open'));for(const b of document.querySelectorAll('[data-queue]'))b.addEventListener('click',()=>{state.queue=b.dataset.queue;for(const btn of document.querySelectorAll('[data-queue]'))btn.classList.toggle('selected',btn===b);setText('queue-title',tr(state.queue));if(state.authenticated)loadQueue()});$('language').addEventListener('click',()=>{state.language=state.language==='ar'?'en':'ar';translate();updateStatuses();if(state.authenticated){if(state.page==='finance')loadFinance();else if(state.page==='audit')loadAudit();else if(state.page==='moderators')loadModerators();else if(state.page==='members')loadMembers();else if(state.page==='moderation')previewRows($('queue-content'),state.queueRows,'id',state.queue)}})}
+function closeSidebar(restoreFocus=false){
+  const aside=$('sidebar');
+  if(!aside.classList.contains('open'))return;
+  aside.classList.remove('open');
+  $('sidebar-scrim').hidden=true;
+  $('mobile-menu').setAttribute('aria-expanded','false');
+  document.body.classList.remove('admin-nav-open');
+  if(restoreFocus)$('mobile-menu').focus({preventScroll:true});
+}
+function toggleSidebar(){
+  const aside=$('sidebar');
+  if(aside.classList.contains('open')){closeSidebar(true);return}
+  if(document.activeElement?.matches?.('input,textarea,select'))document.activeElement.blur();
+  aside.classList.add('open');
+  $('sidebar-scrim').hidden=false;
+  $('mobile-menu').setAttribute('aria-expanded','true');
+  document.body.classList.add('admin-nav-open');
+}
+function setNavigation(){
+  for(const b of document.querySelectorAll('[data-page]'))b.addEventListener('click',()=>{
+    setPage(b.dataset.page);
+    if(b.dataset.page==='audit'&&state.authenticated)loadAudit();
+  });
+  $('mobile-menu').addEventListener('click',toggleSidebar);
+  $('sidebar-close').addEventListener('click',()=>closeSidebar(true));
+  $('sidebar-scrim').addEventListener('click',()=>closeSidebar(true));
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape' && $('sidebar').classList.contains('open')){
+      event.preventDefault();closeSidebar(true);
+    }
+  });
+  document.addEventListener('pointerdown',event=>{
+    if($('sidebar').classList.contains('open') &&
+       !$('sidebar').contains(event.target) &&
+       !$('mobile-menu').contains(event.target))closeSidebar();
+  },{capture:true});
+  window.addEventListener('resize',()=>{
+    if(window.innerWidth>850)closeSidebar();
+  });
+  for(const b of document.querySelectorAll('[data-queue]'))b.addEventListener('click',()=>{
+    state.queue=b.dataset.queue;
+    for(const btn of document.querySelectorAll('[data-queue]'))btn.classList.toggle('selected',btn===b);
+    setText('queue-title',tr(state.queue));
+    if(state.authenticated)loadQueue();
+  });
+  $('language').addEventListener('click',()=>{
+    closeSidebar();
+    state.language=state.language==='ar'?'en':'ar';translate();updateStatuses();
+    if(state.authenticated){
+      if(state.page==='finance')loadFinance();
+      else if(state.page==='audit')loadAudit();
+      else if(state.page==='moderators')loadModerators();
+      else if(state.page==='members')loadMembers();
+      else if(state.page==='moderation')previewRows($('queue-content'),state.queueRows,'id',state.queue);
+    }
+  });
+}
 function setEvents(){setNavigation();$('email-form').addEventListener('submit',emailOtp);$('otp-form').addEventListener('submit',verifyEmail);$('mfa-form').addEventListener('submit',verifyMfa);$('enroll-form').addEventListener('submit',verifyEnroll);$('back-email').addEventListener('click',()=>{$('otp-form').hidden=true;$('email-form').hidden=false});$('logout').addEventListener('click',async()=>{await sdk.auth.signOut();clearPrivateView();showNotice(tr('offline'))});$('grant-form').addEventListener('submit',grantForm);$('refresh-status').addEventListener('click',statusRefresh);$('refresh-finance').addEventListener('click',loadFinance);$('refresh-audit').addEventListener('click',loadAudit);$('refresh-mods').addEventListener('click',loadModerators);$('refresh-members').addEventListener('click',loadMembers);$('refresh-queue').addEventListener('click',loadQueue);$('finance-next').addEventListener('click',()=>{state.financeOffset+=50;loadFinance()});$('finance-prev').addEventListener('click',()=>{state.financeOffset=Math.max(0,state.financeOffset-50);loadFinance()});$('reconcile').addEventListener('click',reconcile);$('cancel-stepup').addEventListener('click',()=>resolveStepUp(false));$('confirm-stepup').addEventListener('click',confirmStepUp);makeOpsForm('moderator-form','moderators.add',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase()}));makeOpsForm('member-form','members.suspend',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase(),reason:String(f.get('reason')).trim()}));makeOpsForm('coach-individual-form','coach.reset.user',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase(),reason:String(f.get('reason')).trim(),message:String(f.get('message')).trim()}));makeOpsForm('coach-global-form','coach.reset.all',f=>({confirm_phrase:String(f.get('confirm_phrase')).trim(),message:String(f.get('message')).trim()}));makeOpsForm('notification-form','notifications.send',f=>({kind:String(f.get('kind')),audience:String(f.get('audience')),email:String(f.get('email')||'').trim().toLowerCase(),confirm_target:String(f.get('confirm_target')||'').trim(),message:String(f.get('message')||'').trim(),acknowledge_token_grant:f.get('acknowledge_token_grant')==='on'}));for(const name of ['kind','audience'])$('notification-form').elements.namedItem(name).addEventListener('change',updateNotificationHelp)}
+$('ops-explain').addEventListener('click',()=>showNotice(tr('protectedWriteLocked')));
 setEvents();init();
