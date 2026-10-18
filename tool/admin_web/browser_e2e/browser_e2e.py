@@ -48,16 +48,18 @@ window.__moderationWriteEnabled=false;
 window.__mediaRequests=[];
 const payload=(type,op,body)=>{
  if(type==='finance'){
-   if(op==='status')return {access:'authorized',financial_writes_enabled:false};
-   if(op==='list')return {rows:[{id:grant,email:'account.with.very.long.name@example.invalid',status:'revoked',plan_id:'premium_ai_coach',created_at:created}],has_more:false};
-   if(op==='audit')return {rows:[{id:report,actor_id:author,operation:'revoke',created_at:created,matched:true,changed:true,grant_id:grant}]};
+   if(op==='status')return {access:'authorized',financial_writes_enabled:true};
+   if(op==='list')return {rows:[{id:grant,email:'account.with.very.long.name@example.invalid',status:'revoked',plan_id:'premium_ai_coach',created_at:created},{id:'ffffffff-ffff-4fff-8fff-ffffffffffff',email:'active.account@example.invalid',status:'active',plan_id:'premium',created_at:created,expires_at:'2026-11-18T00:00:00Z'}],has_more:false};
+   if(op==='audit')return {rows:[{id:report,actor_id:author,operation:'revoke',created_at:created,matched:true,changed:true,grant_id:grant,recipient_email:'account.with.very.long.name@example.invalid',actor_email:'owner@example.invalid',plan_id:'premium_ai_coach'}]};
+   if(op==='grant'||op==='revoke')return {state:'verified',receipt:{matched:true,changed:true,grant_id:grant}};
  }
  if(type==='ops'){
-   if(op==='status')return {access:'authorized',writes_enabled:false};
+   if(op==='status')return {access:'authorized',writes_enabled:true};
    if(op==='moderators.list')return {receipt:[{user_id:author,email:'moderator.long.name@example.invalid',protected_administrator:false,created_at:created}]};
    if(op==='members.list')return {receipt:[{user_id:author,email:'suspended.long.name@example.invalid',reason:'Community rule breaches',suspended_at:created}]};
    if(op==='moderation.safety.open')return {receipt:[{report_id:report,reporter_email:'reporting.user@example.invalid',reporter_user_id:author,reason:'unsafe',status:'open',locale:'ar',runtime:'local_fallback',created_at:created,user_note:'كنت بحاجة إلى دعم من المدرب الذكي',answer_text:'المدرب غير متاح حالياً. حاول مرة أخرى لاحقاً.'}]};
    if(op==='moderation.reports.open')return {receipt:[{id:report,reporter_email:'reported.member@example.invalid',reporter_user_id:author,status:'open',target_kind:'post',target_id:post,reason:'محتوى غير مناسب',created_at:created}]};
+   if(['moderators.add','moderators.remove','members.suspend','members.reinstate','coach.reset.all','coach.reset.user','notifications.send'].includes(op))return {state:'executed',receipt:{operation:op,confirmation:'synthetic'}};
  }
  if(type==='review'){
    if(op==='status')return {access:'authorized',moderation_writes_enabled:window.__moderationWriteEnabled};
@@ -90,6 +92,7 @@ with sync_playwright() as p:
     page=browser.new_page(viewport={'width':width,'height':900},device_scale_factor=1)
     errors=[]
     page.on('pageerror',lambda e:errors.append(str(e)))
+    page.on('dialog',lambda d:d.accept())
     sample_image=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAHgAAABkCAIAAADCEmNlAAABKElEQVR4nO3dwQnCMBiAUSsO5wKCAziCY7iBCwgu6dVra/NZ6HvnEMLHT3pLp/PzdmC8478PsBdCR4SOCB0ROiJ0ROiI0BGhI0JHhI4IHRE6InTkNGv16/IYdI7Nur7vq+xjoiNCR4SOzLujv611eW3QiE+RiY4IHRE6InRE6IjQEaEjQkeEjggdEToidEToiNARoSNCR4SOCB0ROiJ0ROiI0BGhI0JHhI4IHRE6InRE6IjQEaEjQkeEjggdEToidEToiNARoSNCR4SOCB0ROiJ0ROiI0BGhI0JHhI4IHRE6InRk+eNVO3xs8BcmOiJ0ROjI5F9ZDRMdEToidEToiNARoSNCR4SOCB0ROiJ0ROiI0BGhI0JHhI4IHRE6InRE6IjQEaEjQkc+yS4K5B2hCwQAAAAASUVORK5CYII=')
     page.route('**/storage/v1/object/sign/**',lambda route:route.fulfill(status=200,body=sample_image,content_type='image/png'))
     page.set_content(markup,wait_until='load')
@@ -101,7 +104,7 @@ with sync_playwright() as p:
     # Operator-facing security gate is explained, not an inert unexplained button.
     assert page.locator('#ops-explain').is_enabled()
     page.locator('#ops-explain').click()
-    assert 'مقفلة' in page.locator('#notice').inner_text()
+    assert 'متاحة' in page.locator('#notice').inner_text()
     if width<=800:
       # iOS-style off-canvas navigation closes on every expected pathway.
       page.locator('#mobile-menu').click()
@@ -200,6 +203,70 @@ with sync_playwright() as p:
       assert page.evaluate("window.__requests.find(r=>r.operation==='earn.decide').body.approve") is True
       page.locator('[data-queue="posts"]').evaluate('(e)=>e.click()')
       page.wait_for_function("document.querySelector('#queue-content .report-card')!==null",timeout=9000)
+    if width==390:
+      # Full synthetic admin operations workflow: every privileged button sends a
+      # verified operation only after typed recipient confirmation and MFA.
+      async_ops=set()
+      def execute_form(page_name,form_id,values,expected_operation):
+        page.locator(f'[data-page="{page_name}"]').first.evaluate('(e)=>e.click()')
+        form=page.locator('#'+form_id)
+        for name,value in values.items():
+          item=form.locator('[name="'+name+'"]')
+          if isinstance(value,bool):
+            if value:item.check()
+            else:item.uncheck()
+          elif item.evaluate('(el)=>el.tagName')=='SELECT':item.select_option(str(value))
+          else:item.fill(str(value))
+        form.locator('button').last.click()
+        page.wait_for_function("!document.getElementById('mfa-modal').hidden",timeout=9000)
+        page.locator('#step-up-code').fill('123456')
+        page.locator('#confirm-stepup').click()
+        page.wait_for_function("window.__requests.some(r=>r.operation==='"+expected_operation+"')",timeout=9000)
+        async_ops.add(expected_operation)
+        page.wait_for_function("document.getElementById('mfa-modal').hidden",timeout=9000)
+
+      execute_form('moderators','moderator-form',{
+        'email':'mod.example@example.invalid','confirm_email':'mod.example@example.invalid'
+      },'moderators.add')
+      execute_form('members','member-form',{
+        'email':'user.example@example.invalid','confirm_email':'user.example@example.invalid',
+        'reason':'Verified community policy violation'
+      },'members.suspend')
+      execute_form('coach','coach-individual-form',{
+        'email':'user.example@example.invalid','confirm_email':'user.example@example.invalid',
+        'reason':'Verified support request','message':'AI Coach allowance restored'
+      },'coach.reset.user')
+      execute_form('coach','coach-global-form',{
+        'message':'Allowance counters restored','confirm_phrase':'RESET ALL AI COACH ACCOUNTS'
+      },'coach.reset.all')
+      execute_form('notifications','notification-form',{
+        'kind':'gift','audience':'all','message':'A gift for every BIL member',
+        'confirm_target':'SEND TO ALL','confirm_mass_grant':'GRANT 2500 AI TOKENS TO ALL USERS',
+        'acknowledge_token_grant':True
+      },'notifications.send')
+      request=page.evaluate("window.__requests.filter(r=>r.operation==='notifications.send').slice(-1)[0]")
+      assert request['body']['confirm_mass_grant']=='GRANT 2500 AI TOKENS TO ALL USERS'
+      assert request['body']['acknowledge_token_grant'] is True
+      page.locator('[data-page="finance"]').first.evaluate('(e)=>e.click()')
+      page.locator('#grant-form [name="email"]').fill('grant.user@example.invalid')
+      page.locator('#grant-form [name="confirm_email"]').fill('grant.user@example.invalid')
+      page.locator('#grant-form [name="reason"]').fill('Verified goodwill support grant')
+      page.locator('#grant-form [name="external_grant"]').check()
+      page.locator('#grant-submit').click()
+      page.wait_for_function("!document.getElementById('mfa-modal').hidden",timeout=9000)
+      page.locator('#step-up-code').fill('123456')
+      page.locator('#confirm-stepup').click()
+      page.wait_for_function("window.__requests.some(r=>r.operation==='grant')",timeout=9000)
+      assert page.locator('#finance-list').inner_text().count('active.account@example.invalid')>0
+      assert page.locator('#audit-content').count()==1
+      assert len(async_ops)==5
+      # Search actually filters visible records; no fictitious rows.
+      page.locator('#finance-filter').fill('active.account')
+      assert 'active.account@example.invalid' in page.locator('#finance-list').inner_text()
+      assert 'account.with.very.long.name@example.invalid' not in page.locator('#finance-list').inner_text()
+      page.locator('#finance-filter').fill('')
+      page.locator('[data-page="audit"]').first.evaluate('(e)=>e.click()')
+      assert 'owner@example.invalid' in page.locator('#audit-content').inner_text()
     if width in (375,390,1280):
       path=Path(os.getenv('BIL_ADMIN_E2E_ARTIFACTS','/mnt/data/bil-admin-global-20261018/evidence'))
       path.mkdir(parents=True,exist_ok=True)

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild site/app.mjs --bundle --minify --format=esm --target=es2022 --outfile=site/app.bundle.js",
-    "check": "node --check site/app.mjs && node --test tests/site.test.mjs"
+    "check": "node --check site/app.mjs && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.3"

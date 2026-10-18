@@ -6,6 +6,8 @@ on:
     paths:
       - 'cloudflare/admin_site/**'
       - 'tool/admin_web/review_v1/**'
+      - 'tool/admin_web/ops_v1/**'
+      - 'tool/admin_web/backend_v4/**'
       - '.github/workflows/bil_secure_admin_cloudflare.yml'
   workflow_dispatch:
 permissions:
@@ -34,6 +36,10 @@ jobs:
           node --check ../../tool/admin_web/review_v1/review_server.mjs
           node --check ../../tool/admin_web/review_v1/policy.mjs
           node --test ../../tool/admin_web/review_v1/review_server.test.mjs
+          node --check ../../tool/admin_web/ops_v1/ops_server.mjs
+          node --test ../../tool/admin_web/ops_v1/ops_server.test.mjs
+          node --check ../../tool/admin_web/backend_v4/policy.mjs
+          node --test ../../tool/admin_web/backend_v4/audit_context_v2.test.mjs
           npm run build
           test -s site/app.bundle.js
           test -s site/index.html

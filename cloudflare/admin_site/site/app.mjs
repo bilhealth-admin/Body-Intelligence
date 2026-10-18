@@ -12,10 +12,10 @@ const edge = Object.freeze({
 });
 
 const ar = {
-  portal:'بوابة الإدارة',overview:'نظرة عامة',finance:'الاشتراكات والمنح',coach:'إدارة المدرب الذكي',notifications:'الإشعارات',moderation:'المراجعة والبلاغات',moderators:'المشرفون',members:'وصول الأعضاء',audit:'سجل التدقيق',security:'الأمن والاتصال',protected:'بوابة محمية بصلاحيات الخادم',offline:'غير متصل',online:'متصل وآمن',logout:'خروج',intro:'إدارة BIL بأذونات واضحة وسجل عمليات قابل للتدقيق.',secureLogin:'تسجيل دخول الإدارة',secureLoginDesc:'التحقق عبر بريدك الإلكتروني ثم رمز المصادقة الثنائية. الوصول للمالك المخوّل فقط.',email:'البريد الإلكتروني',sendCode:'إرسال رمز الدخول',emailCode:'الرمز الذي وصل إلى بريدك',verifyEmail:'تأكيد البريد',changeEmail:'تغيير البريد',totp:'رمز المصادقة الثنائية',verifyMfa:'تحقق وأدخل',enrollHelp:'أضف هذا الحساب إلى تطبيق المصادقة ثم أكد رمز الأمان.',noPasswords:'لا تُعرض مفاتيح الخادم أو كلمات المرور داخل هذا الموقع.',grants:'المنح الإدارية',sourceFinance:'مصدرها دفتر المنح الفعلي',authorizedCount:'بعد التحقق من الصلاحيات',reports:'البلاغات المفتوحة',sourceReports:'قائمة المراجعة الفعلية',suspended:'الأعضاء الموقوفون',sourceMembers:'وفق سجل الوصول الفعلي',connection:'حالة الاتصال',refresh:'تحديث',principles:'ضوابط التشغيل',principlesText:'تظهر البيانات الحقيقية فقط بعد اعتماد جلسة المالك. الوظائف غير المختبرة تبقى مقفلة، ولا تُستخدم مفاتيح إدارة البيانات في المتصفح.',opsLock:'تغييرات الإدارة الأخرى مقفلة إلى حين اكتمال التحقق',newGrant:'منح اشتراك جديد',grantWarning:'المنحة الإدارية مستقلة عن مشتريات المتجر وأرصدة Boost. لا تستخدم حسابات حقيقية لأغراض الاختبار.',recipientEmail:'بريد المستفيد',plan:'الباقة',duration:'المدة',reason:'سبب المنحة',confirmEmail:'تأكيد البريد (أعد كتابته)',grantAck:'أؤكد أن هذه منحة إدارية وليست شراءً من المتجر.',submitGrant:'مراجعة المنحة وإرسالها',existingGrants:'المنح القائمة',loadData:'اضغط تحديث لجلب السجل الحقيقي',prev:'السابق',next:'التالي',lastCommand:'آخر أمر مالي غير محسوم',noPending:'لا يوجد أمر معلّق في هذه الجلسة.',reconcile:'تحقق من الإيصال',individualReset:'إعادة ضبط حساب واحد',message:'رسالة الإشعار',execute:'تنفيذ',globalReset:'إعادة ضبط جميع الحسابات',globalWarning:'عملية واسعة التأثير. لا يمكن استخدامها للاختبارات على المستخدمين الحقيقيين.',confirmPhrase:'أدخل عبارة التأكيد الإنجليزية',composeNotification:'إعداد إشعار BIL',notificationWarning:'إشعارات التعويض والهدية قد تؤثر في التوكنات؛ لا تُرسل دون تفويض واختبار.',kind:'النوع',audience:'المستفيدون',confirmTarget:'تأكيد المستفيد (أو SEND TO ALL)',tokenAcknowledgment:'أفهم أن تعويضًا أو هدية قد يضيف توكنات.',send:'إرسال',posts:'المنشورات',safety:'سلامة المدرب',addModerator:'إضافة مشرف',suspendMember:'تعليق وصول عضو',financialAudit:'سجل العمليات المالية',identity:'حالة الهوية',securityBoundaries:'حدود الأمان',securityText:'كل طلب يمرّ من بوابة Supabase ويُراجع الخادم صلاحياته. مفاتيح الخدمة والإدارة المالية لا تُخزن في المتصفح. عمليات الكتابة غير المختبرة تبقى معطّلة.',noRealUsers:'لا تُنفذ تجارب على مستخدمين حقيقيين أو أرصدتهم.',stepUp:'تأكيد المصادقة الثنائية قبل تنفيذ العملية',stepUpDesc:'أدخل الرمز الجديد من تطبيق المصادقة. لن ننفذ العملية دون التحقق من صلاحياتك.',cancel:'إلغاء',confirm:'تأكيد',locked:'مقفلة',active:'نشطة',available:'متاحة',notAvailable:'غير متاحة',financeGateway:'بوابة الاشتراكات المالية',operationsGateway:'بوابة بقية الإدارة',signedIn:'الجلسة',twoFactor:'التحقق الثنائي',protectedRole:'صلاحية المالك',enableNotice:'وظائف الكتابة قيد الاعتماد؛ يمكن الاطلاع على السجلات المصرح بها.',notAuthorized:'هذه الجلسة لا تملك صلاحية الإدارة المطلوبة.',confirmAction:'هل تريد تنفيذ هذا الإجراء على البيانات الفعلية؟',completed:'اكتملت العملية، وتم استلام إيصال الخادم.',pending:'قد تكون العملية نُفذت لكن تأكيد النتيجة معلّق. استرجع الإيصال قبل إعادة المحاولة.',failed:'تعذّر تنفيذ العملية أو تأكيد نتيجتها.',empty:'لا توجد سجلات في الصفحة الحالية.',loading:'جاري القراءة من الخادم...',failedRead:'تعذّر جلب البيانات. لم تُعرض أي بيانات وهمية.',revoke:'سحب المنحة',remove:'إزالة',reinstate:'استعادة الوصول',unavailable:'غير مفعل: قيد اعتماد الربط السحابي',testRequired:'متاح تقنيًا، لكن يُرجى استخدام حساب اختبار آمن عند التجربة الأولى.',account:'الحساب',result:'النتيجة',created:'التاريخ',status:'الحالة',actions:'إجراءات',formatError:'فشل التحقق من تنسيق رد الخادم.',missingMfa:'يلزم إعداد المصادقة الثنائية أولًا.'
+  portal:'بوابة الإدارة',overview:'نظرة عامة',finance:'الاشتراكات والمنح',coach:'إدارة المدرب الذكي',notifications:'الإشعارات',moderation:'المراجعة والبلاغات',moderators:'المشرفون',members:'وصول الأعضاء',audit:'سجل التدقيق',security:'الأمن والاتصال',protected:'بوابة محمية بصلاحيات الخادم',offline:'غير متصل',online:'متصل وآمن',logout:'خروج',intro:'إدارة BIL بأذونات واضحة وسجل عمليات قابل للتدقيق.',secureLogin:'تسجيل دخول الإدارة',secureLoginDesc:'التحقق عبر بريدك الإلكتروني ثم رمز المصادقة الثنائية. الوصول للمالك المخوّل فقط.',email:'البريد الإلكتروني',sendCode:'إرسال رمز الدخول',emailCode:'الرمز الذي وصل إلى بريدك',verifyEmail:'تأكيد البريد',changeEmail:'تغيير البريد',totp:'رمز المصادقة الثنائية',verifyMfa:'تحقق وأدخل',enrollHelp:'أضف هذا الحساب إلى تطبيق المصادقة ثم أكد رمز الأمان.',noPasswords:'لا تُعرض مفاتيح الخادم أو كلمات المرور داخل هذا الموقع.',grants:'المنح الإدارية',sourceFinance:'مصدرها دفتر المنح الفعلي',authorizedCount:'بعد التحقق من الصلاحيات',reports:'البلاغات المفتوحة',sourceReports:'قائمة المراجعة الفعلية',suspended:'الأعضاء الموقوفون',sourceMembers:'وفق سجل الوصول الفعلي',connection:'حالة الاتصال',refresh:'تحديث',principles:'ضوابط التشغيل',principlesText:'أوامر الإدارة مُقيّدة بهوية المسؤول، والمصادقة الثنائية، وتأكيد المستفيد؛ كل عملية تُسجل على الخادم. لا تُعرض مفاتيح البيانات في المتصفح.',opsLock:'تغييرات الإدارة الأخرى مقفلة إلى حين اكتمال التحقق',newGrant:'منح اشتراك جديد',grantWarning:'المنحة الإدارية مستقلة عن مشتريات المتجر وأرصدة Boost. لا تستخدم حسابات حقيقية لأغراض الاختبار.',recipientEmail:'بريد المستفيد',plan:'الباقة',duration:'المدة',reason:'سبب المنحة',confirmEmail:'تأكيد البريد (أعد كتابته)',grantAck:'أؤكد أن هذه منحة إدارية وليست شراءً من المتجر.',submitGrant:'مراجعة المنحة وإرسالها',existingGrants:'المنح القائمة',loadData:'اضغط تحديث لجلب السجل الحقيقي',prev:'السابق',next:'التالي',lastCommand:'آخر أمر مالي غير محسوم',noPending:'لا يوجد أمر معلّق في هذه الجلسة.',reconcile:'تحقق من الإيصال',individualReset:'إعادة ضبط حساب واحد',message:'رسالة الإشعار',execute:'تنفيذ',globalReset:'إعادة ضبط جميع الحسابات',globalWarning:'إجراء شامل يعيد ضبط عدادات استخدام المدرب للفترة الحالية لجميع الحسابات المستحقة ويرسل إشعارات لهم. لا يُلغي مشتريات المتجر أو يمسح المحادثات. يتطلب كتابة العبارة المحددة ورمز مصادقة جديد.',confirmPhrase:'أدخل عبارة التأكيد الإنجليزية',composeNotification:'إعداد إشعار BIL',notificationWarning:'المخصص: رسالة فقط. الهدية أو التعويض: يمنح الخادم ٢٬٥٠٠ توكن AI لكل مستفيد. راجع المستفيدين ونص الإشعار جيداً وأكّد المصادقة الثنائية.',kind:'النوع',audience:'المستفيدون',confirmTarget:'تأكيد المستفيد (أو SEND TO ALL)',tokenAcknowledgment:'أفهم أن تعويضًا أو هدية قد يضيف توكنات.',send:'إرسال',posts:'المنشورات',safety:'سلامة المدرب',addModerator:'إضافة مشرف',suspendMember:'تعليق وصول عضو',financialAudit:'سجل العمليات المالية',identity:'حالة الهوية',securityBoundaries:'حدود الأمان',securityText:'كل طلب يمرّ من بوابة Supabase ويُراجع الخادم صلاحياته. مفاتيح الخدمة والإدارة المالية لا تُخزن في المتصفح. عمليات الكتابة غير المختبرة تبقى معطّلة.',noRealUsers:'لا تُنفذ تجارب على مستخدمين حقيقيين أو أرصدتهم.',stepUp:'تأكيد المصادقة الثنائية قبل تنفيذ العملية',stepUpDesc:'أدخل الرمز الجديد من تطبيق المصادقة. لن ننفذ العملية دون التحقق من صلاحياتك.',cancel:'إلغاء',confirm:'تأكيد',locked:'مقفلة',active:'نشطة',available:'متاحة',notAvailable:'غير متاحة',financeGateway:'بوابة الاشتراكات المالية',operationsGateway:'بوابة بقية الإدارة',signedIn:'الجلسة',twoFactor:'التحقق الثنائي',protectedRole:'صلاحية المالك',enableNotice:'وظائف الكتابة قيد الاعتماد؛ يمكن الاطلاع على السجلات المصرح بها.',notAuthorized:'هذه الجلسة لا تملك صلاحية الإدارة المطلوبة.',confirmAction:'هل تريد تنفيذ هذا الإجراء على البيانات الفعلية؟',completed:'اكتملت العملية، وتم استلام إيصال الخادم.',pending:'قد تكون العملية نُفذت لكن تأكيد النتيجة معلّق. استرجع الإيصال قبل إعادة المحاولة.',failed:'تعذّر تنفيذ العملية أو تأكيد نتيجتها.',empty:'لا توجد سجلات في الصفحة الحالية.',loading:'جاري القراءة من الخادم...',failedRead:'تعذّر جلب البيانات. لم تُعرض أي بيانات وهمية.',revoke:'سحب المنحة',remove:'إزالة',reinstate:'استعادة الوصول',unavailable:'غير مفعل: قيد اعتماد الربط السحابي',testRequired:'متاح تقنيًا، لكن يُرجى استخدام حساب اختبار آمن عند التجربة الأولى.',account:'الحساب',result:'النتيجة',created:'التاريخ',status:'الحالة',actions:'إجراءات',formatError:'فشل التحقق من تنسيق رد الخادم.',missingMfa:'يلزم إعداد المصادقة الثنائية أولًا.'
 };
 const en = {
-  portal:'Administration',overview:'Overview',finance:'Subscriptions & grants',coach:'AI Coach management',notifications:'Notifications',moderation:'Moderation & reports',moderators:'Moderators',members:'Member access',audit:'Audit trail',security:'Security & connectivity',protected:'Server-authorized management',offline:'Disconnected',online:'Connected securely',logout:'Sign out',intro:'BIL management with explicit permissions and auditable actions.',secureLogin:'Administration sign-in',secureLoginDesc:'Sign in via email verification then authenticator TOTP. Owner-only access.',email:'Email address',sendCode:'Send sign-in code',emailCode:'Code sent to your email',verifyEmail:'Verify email',changeEmail:'Change email',totp:'Authenticator code',verifyMfa:'Verify and enter',enrollHelp:'Enroll in your authenticator, scan the code below, then verify your TOTP.',noPasswords:'No backend secrets or passwords are stored in this website.',grants:'Administrative grants',sourceFinance:'From the authoritative grants ledger',authorizedCount:'After permission verification',reports:'Open reports',sourceReports:'Authoritative review queue',suspended:'Suspended members',sourceMembers:'From authoritative access records',connection:'Connection status',refresh:'Refresh',principles:'Operating controls',principlesText:'Real data is visible only after owner session approval. Untested actions remain locked and service-role keys never enter the browser.',opsLock:'Other administrative writes are locked pending live testing.',newGrant:'New subscription grant',grantWarning:'Admin grants are separate from store purchases and Boost. Do not test on real users.',recipientEmail:'Recipient email',plan:'Plan',duration:'Duration',reason:'Grant reason',confirmEmail:'Confirm recipient email (type again)',grantAck:'I acknowledge this is an external admin grant, not a store purchase.',submitGrant:'Review and send grant',existingGrants:'Existing grants',loadData:'Select refresh to read live records',prev:'Previous',next:'Next',lastCommand:'Last unresolved command',noPending:'No pending command in this session.',reconcile:'Reconcile receipt',individualReset:'Reset one AI Coach account',message:'Notification message',execute:'Execute',globalReset:'Reset ALL AI Coach accounts',globalWarning:'High-impact operation. Do not test against real accounts.',confirmPhrase:'Enter the English confirmation phrase',composeNotification:'Compose BIL notification',notificationWarning:'Gift and compensation notifications may affect token balances. Do not send without approval and testing.',kind:'Kind',audience:'Audience',confirmTarget:'Confirm recipient (or SEND TO ALL)',tokenAcknowledgment:'I understand gift or compensation may grant tokens.',send:'Send',posts:'Posts',safety:'AI Coach safety',addModerator:'Add moderator',suspendMember:'Suspend access',financialAudit:'Financial audit trail',identity:'Identity status',securityBoundaries:'Security boundaries',securityText:'Every request is verified by Supabase and server-side admin authority. Service-role keys stay server-side, untested writes remain disabled.',noRealUsers:'Do not test with real user accounts or balances.',stepUp:'Fresh TOTP required for this action',stepUpDesc:'Enter a new authenticator code. No action proceeds without verified permissions.',cancel:'Cancel',confirm:'Confirm',locked:'Locked',active:'Active',available:'Available',notAvailable:'Unavailable',financeGateway:'Financial grants gateway',operationsGateway:'Administrative ops gateway',signedIn:'Session',twoFactor:'Two-factor verification',protectedRole:'Owner permissions',enableNotice:'Write operations are pending authorization. Allowed records can be read.',notAuthorized:'Your account is not authorized for administration.',confirmAction:'Execute this action against live data?',completed:'The operation completed and a server receipt was received.',pending:'The operation may have committed, but readback is pending. Reconcile before retrying.',failed:'The operation failed or could not be confirmed.',empty:'No records on this page.',loading:'Reading from the server...',failedRead:'Could not load authoritative data. No fabricated records are shown.',revoke:'Revoke grant',remove:'Remove',reinstate:'Reinstate access',unavailable:'Disabled: pending secure backend cutover',testRequired:'Technically enabled, but use an isolated test account for first verification.',account:'Account',result:'Result',created:'Created',status:'Status',actions:'Actions',formatError:'Invalid backend response.',missingMfa:'A verified TOTP factor is required.'
+  portal:'Administration',overview:'Overview',finance:'Subscriptions & grants',coach:'AI Coach management',notifications:'Notifications',moderation:'Moderation & reports',moderators:'Moderators',members:'Member access',audit:'Audit trail',security:'Security & connectivity',protected:'Server-authorized management',offline:'Disconnected',online:'Connected securely',logout:'Sign out',intro:'BIL management with explicit permissions and auditable actions.',secureLogin:'Administration sign-in',secureLoginDesc:'Sign in via email verification then authenticator TOTP. Owner-only access.',email:'Email address',sendCode:'Send sign-in code',emailCode:'Code sent to your email',verifyEmail:'Verify email',changeEmail:'Change email',totp:'Authenticator code',verifyMfa:'Verify and enter',enrollHelp:'Enroll in your authenticator, scan the code below, then verify your TOTP.',noPasswords:'No backend secrets or passwords are stored in this website.',grants:'Administrative grants',sourceFinance:'From the authoritative grants ledger',authorizedCount:'After permission verification',reports:'Open reports',sourceReports:'Authoritative review queue',suspended:'Suspended members',sourceMembers:'From authoritative access records',connection:'Connection status',refresh:'Refresh',principles:'Operating controls',principlesText:'Admin actions require verified owner identity, fresh two-factor confirmation, exact recipients and server audit receipts. No service-role secrets enter the browser.',opsLock:'Other administrative writes are locked pending live testing.',newGrant:'New subscription grant',grantWarning:'Admin grants are separate from store purchases and Boost. Do not test on real users.',recipientEmail:'Recipient email',plan:'Plan',duration:'Duration',reason:'Grant reason',confirmEmail:'Confirm recipient email (type again)',grantAck:'I acknowledge this is an external admin grant, not a store purchase.',submitGrant:'Review and send grant',existingGrants:'Existing grants',loadData:'Select refresh to read live records',prev:'Previous',next:'Next',lastCommand:'Last unresolved command',noPending:'No pending command in this session.',reconcile:'Reconcile receipt',individualReset:'Reset one AI Coach account',message:'Notification message',execute:'Execute',globalReset:'Reset ALL AI Coach accounts',globalWarning:'Global action: resets AI Coach usage counters for current eligible periods and notifies users. It does not delete chats or store purchases. Requires typed confirmation and fresh MFA.',confirmPhrase:'Enter the English confirmation phrase',composeNotification:'Compose BIL notification',notificationWarning:'Custom notifications send text only. Gifts and compensation credit 2,500 AI tokens per recipient. Verify the recipients, message and fresh MFA before sending.',kind:'Kind',audience:'Audience',confirmTarget:'Confirm recipient (or SEND TO ALL)',tokenAcknowledgment:'I understand gift or compensation may grant tokens.',send:'Send',posts:'Posts',safety:'AI Coach safety',addModerator:'Add moderator',suspendMember:'Suspend access',financialAudit:'Financial audit trail',identity:'Identity status',securityBoundaries:'Security boundaries',securityText:'Every request is verified by Supabase and server-side admin authority. Service-role keys stay server-side, untested writes remain disabled.',noRealUsers:'Do not test with real user accounts or balances.',stepUp:'Fresh TOTP required for this action',stepUpDesc:'Enter a new authenticator code. No action proceeds without verified permissions.',cancel:'Cancel',confirm:'Confirm',locked:'Locked',active:'Active',available:'Available',notAvailable:'Unavailable',financeGateway:'Financial grants gateway',operationsGateway:'Administrative ops gateway',signedIn:'Session',twoFactor:'Two-factor verification',protectedRole:'Owner permissions',enableNotice:'Write operations are pending authorization. Allowed records can be read.',notAuthorized:'Your account is not authorized for administration.',confirmAction:'Execute this action against live data?',completed:'The operation completed and a server receipt was received.',pending:'The operation may have committed, but readback is pending. Reconcile before retrying.',failed:'The operation failed or could not be confirmed.',empty:'No records on this page.',loading:'Reading from the server...',failedRead:'Could not load authoritative data. No fabricated records are shown.',revoke:'Revoke grant',remove:'Remove',reinstate:'Reinstate access',unavailable:'Disabled: pending secure backend cutover',testRequired:'Technically enabled, but use an isolated test account for first verification.',account:'Account',result:'Result',created:'Created',status:'Status',actions:'Actions',formatError:'Invalid backend response.',missingMfa:'A verified TOTP factor is required.'
 };
 // Human-readable, safety-conscious labels. All detailed records remain bound to verified owner sessions.
 Object.assign(ar,{
@@ -199,6 +199,36 @@ Object.assign(en,{
   availableReadOnly:'This section is readable; changes require separate production acceptance approval.',
   unknownError:'This request could not be completed. No change was confirmed. Please retry or inspect connection status.'
 });
+Object.assign(ar,{
+  taskCenter:'مركز التشغيل',taskCenterIntro:'قائمة عمل يومية متصلة ببيانات BIL الفعلية، لا أرقام تقديرية.',
+  quickModeration:'راجع المنشورات والبلاغات',quickGrants:'إدارة الاشتراكات',quickMembers:'إدارة الحسابات والمشرفين',
+  quickAudit:'فتح سجل العمليات',awaitingPosts:'منشورات بانتظار القرار',awaitingEarn:'طلبات ومراجعات Earn',
+  fromLiveQueue:'من بيانات طابور المراجعة',recentUpdated:'آخر تحديث',searchCurrentGrants:'ابحث في منح الصفحة الحالية بالاسم أو البريد أو المعرّف أو الحالة',
+  searchCurrentAudit:'ابحث في السجل بالعملية أو البريد أو المعرّف',expiresAt:'تاريخ الانتهاء',adminActor:'نفّذها',
+  grantReason:'سبب المنحة',financialReceipt:'معرّف الإيصال',fullIdentifier:'إظهار المعرّف الكامل',copyIdentifier:'نسخ المعرّف',
+  copied:'تم نسخ المعرّف',notCopied:'يمكن تحديد المعرّف الكامل ونسخه يدويًا',
+  noMatchingSearch:'لا توجد نتائج تطابق البحث في هذه الصفحة.',operatorModeActive:'أوامر الإدارة متاحة للمسؤول المخوّل مع تأكيد مصادقة ثنائية جديد لكل عملية.',
+  compMassWarning:'هذه عملية جماعية تؤثر في رصيد AI لجميع المستفيدين. اكتب العبارة الإنجليزية للتأكيد على علمك بالأثر.',
+  highImpactLabel:'تأكيد إضافي لمنح 2,500 توكن لكل حساب في إشعار جماعي',highImpactPhrase:'GRANT 2500 AI TOKENS TO ALL USERS',
+  grantActionConfirm:'تأكيد المنحة',revokeActionConfirm:'تأكيد سحب المنحة',adminActionConfirm:'تأكيد التغيير الإداري',
+  noRecipientsYet:'لم يتم العثور على سجلات فعلية، أو لم يتحقق تحميلها بعد.',scopeReadWrite:'قراءة وتنفيذ محمي',
+  operatorIntro:'لوحة عمل للمنح، والتدقيق، ومراجعة المحتوى، وإدارة الحسابات. تُسجّل النتائج على الخادم وتحتاج العمليات الحساسة لتأكيد حديث.',
+});
+Object.assign(en,{
+  taskCenter:'Operations command center',taskCenterIntro:'Daily workflow with live BIL data—no estimated counts.',
+  quickModeration:'Review posts and reports',quickGrants:'Manage subscriptions',quickMembers:'Manage members and moderators',
+  quickAudit:'View financial audit',awaitingPosts:'Posts awaiting review',awaitingEarn:'Earn review items',
+  fromLiveQueue:'From the actual review queue',recentUpdated:'Last updated',searchCurrentGrants:'Search current page by name, email, ID or status',
+  searchCurrentAudit:'Search audit by operation, email or ID',expiresAt:'Expires',adminActor:'Performed by',
+  grantReason:'Grant reason',financialReceipt:'Receipt ID',fullIdentifier:'Show full identifier',copyIdentifier:'Copy ID',
+  copied:'Identifier copied',notCopied:'You can select and copy the full identifier manually.',
+  noMatchingSearch:'No records on this page match that search.',operatorModeActive:'Owner-only administration is enabled with fresh two-factor confirmation on every write.',
+  compMassWarning:'Global operation: this may credit every recipient. Type the exact English phrase to confirm the impact.',
+  highImpactLabel:'Extra approval for 2,500 AI tokens per account in an all-users message',highImpactPhrase:'GRANT 2500 AI TOKENS TO ALL USERS',
+  grantActionConfirm:'Confirm subscription grant',revokeActionConfirm:'Confirm revocation',adminActionConfirm:'Confirm admin change',
+  noRecipientsYet:'No authoritative records found, or data not loaded yet.',scopeReadWrite:'Authorized read/write',
+  operatorIntro:'Manage subscriptions, audit, community moderation and accounts. Server-signed receipts and fresh MFA protect sensitive changes.',
+});
 const dict={ar,en};
 const state={language:'ar',page:'overview',queue:'posts',email:'',factor:null,finance:null,ops:null,user:null,financeRows:[],auditRows:[],mods:[],members:[],queueRows:[],review:null,earnPolicy:null,financeOffset:0,hasMore:false,pendingCommand:null,authenticated:false,modalResolve:null,loading:false};
 const $ = id=>document.getElementById(id);
@@ -239,9 +269,19 @@ function badge(value){
   return span;
 }
 function identifier(id) {
-  const s=String(id??'');
-  const el=elem('span',s.length>23?s.slice(0,8)+'…'+s.slice(-5):(s||'—'),'short-id');
-  el.dir='ltr';el.title=s;return el;
+  const value=String(id??'');
+  if(!value)return elem('span','—','short-id');
+  const root=elem('details',null,'full-identifier');
+  const summary=elem('summary',value.length>23?value.slice(0,8)+'…'+value.slice(-5):value,'short-id');
+  summary.title=tr('fullIdentifier');summary.dir='ltr';
+  const text=elem('code',value,'complete-id');text.dir='ltr';
+  const copy=elem('button',tr('copyIdentifier'),'copy-id secondary');copy.type='button';
+  copy.addEventListener('click',async()=>{
+    try{await navigator.clipboard.writeText(value);showNotice(tr('copied'))}
+    catch{showNotice(tr('notCopied'),true);text.focus()}
+  });
+  text.tabIndex=0;
+  root.append(summary,text,copy);return root;
 }
 function textNode(value,{email=false,code=false}={}){
   if(code)return identifier(value);
@@ -443,6 +483,10 @@ function updateNotificationHelp(){
   const tokenAck=form.elements.namedItem('acknowledge_token_grant');
   tokenAck.required=kind!=='custom';
   if(kind==='custom')tokenAck.checked=false;
+  const mass=$('mass-grant-confirmation'),needsMass=kind!=='custom'&&aud==='all';
+  if(mass){mass.hidden=!needsMass;
+    const input=mass.querySelector('input');input.required=needsMass;input.disabled=!needsMass;
+    if(!needsMass)input.value='';}
 }
 function token(){return crypto.randomUUID()}
 function explainBackendError(code,scope){
@@ -482,7 +526,7 @@ async function enterMfaFlow(){authUi('mfa');const {data}=await sdk.auth.mfa.getA
 async function verifyFactor(code){if(!state.factor?.id)throw new Error(tr('missingMfa'));if(!/^\d{6,8}$/.test(code))throw new Error('invalid_totp');const {data,error}=await sdk.auth.mfa.challengeAndVerify({factorId:state.factor.id,code});if(error)throw error;return data}
 async function verifyMfa(ev){ev.preventDefault();const btn=ev.submitter;btn.disabled=true;try{const code=$('mfa-code').value.trim();await verifyFactor(code);$('mfa-code').value='';$('mfa-area').hidden=true;await loadAdmin()}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
 async function verifyEnroll(ev){ev.preventDefault();const btn=ev.submitter;btn.disabled=true;try{await verifyFactor($('enroll-code').value.trim());$('enroll-code').value='';$('enroll-area').hidden=true;await loadAdmin()}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
-async function loadAdmin(){const {data:{user}}=await sdk.auth.getUser();if(!user)throw new Error('invalid_session');state.user=user;const finance=await api('finance',{operation:'status'});if(finance.access!=='authorized')throw new Error('unauthorized');state.finance=finance;let ops=null;try{ops=await api('ops',{operation:'status'})}catch(e){ops={access:'unavailable',error:e.message,writes_enabled:false}}state.ops=ops;let review=null;try{review=await api('review',{operation:'status'})}catch(e){review={access:'unavailable',error:e.message,moderation_writes_enabled:false}}state.review=review;state.authenticated=true;authUi('admin');restorePending();updateStatuses();await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue()]);updateStatuses()}
+async function loadAdmin(){const {data:{user}}=await sdk.auth.getUser();if(!user)throw new Error('invalid_session');state.user=user;const finance=await api('finance',{operation:'status'});if(finance.access!=='authorized')throw new Error('unauthorized');state.finance=finance;let ops=null;try{ops=await api('ops',{operation:'status'})}catch(e){ops={access:'unavailable',error:e.message,writes_enabled:false}}state.ops=ops;let review=null;try{review=await api('review',{operation:'status'})}catch(e){review={access:'unavailable',error:e.message,moderation_writes_enabled:false}}state.review=review;state.authenticated=true;authUi('admin');restorePending();updateStatuses();await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue(),loadDashboardWorkload()]);updateStatuses()}
 function updateStatuses(){
   const finance=state.finance?.access==='authorized';
   const ops=state.ops?.access==='authorized';
@@ -505,7 +549,7 @@ function updateStatuses(){
   }
   for(const b of document.querySelectorAll('.review-write'))
     b.disabled=!reviewWrite||b.dataset.caseEligible==='false';
-  $('ops-lock').textContent=lock?tr('testRequired'):tr('protectedWriteLocked');
+  $('ops-lock').textContent=lock?tr('operatorModeActive'):tr('protectedWriteLocked');
   for(const message of document.querySelectorAll('.write-explanation:not(.review-write-explanation)'))message.hidden=lock;
   for(const message of document.querySelectorAll('.review-write-explanation')){
     message.hidden=reviewWrite;message.textContent=tr('reviewBlocked');
@@ -525,8 +569,75 @@ async function init(){
   try{const {data:{session}}=await sdk.auth.getSession();if(session){await enterMfaFlow()}}
   catch(e){showNotice(e.message||tr('failed'),true)}
 }
-async function loadFinance(){if(!state.authenticated)return;const c=$('finance-list');c.textContent=tr('loading');try{const d=await api('finance',{operation:'list',offset:state.financeOffset});if(!Array.isArray(d.rows)||typeof d.has_more!=='boolean')throw new Error(tr('formatError'));state.financeRows=d.rows;state.hasMore=d.has_more;setText('metric-grants',state.financeOffset===0?String(d.rows.length)+(d.has_more?'+':''):String(d.rows.length));$('finance-prev').disabled=state.financeOffset===0;$('finance-next').disabled=!d.has_more;$('finance-page-index').textContent=String(state.financeOffset/50+1);makeTable(c,[tr('account'),tr('plan'),tr('status'),tr('created'),tr('actions')],d.rows,row=>{const action=elem('button',tr('revoke'),'secondary');action.type='button';action.disabled=!(state.finance?.financial_writes_enabled===true)||row.status!=='active';action.addEventListener('click',()=>revokeGrant(row));return[textNode(row.email,{email:true}),row.plan_id==='premium_ai_coach'?'Premium + AI Coach':'Premium',badge(row.status),fmtDate(row.created_at),action]},tr('empty'))}catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}}
-async function loadAudit(){const c=$('audit-content');c.textContent=tr('loading');try{const d=await api('finance',{operation:'audit',offset:0});if(!Array.isArray(d.rows))throw new Error(tr('formatError'));state.auditRows=d.rows;makeTable(c,[tr('created'),tr('operation'),tr('result'),tr('account'),tr('grantIdentifier')],d.rows,row=>[fmtDate(row.created_at),tr(row.operation==='grant'?'operationGrant':'operationRevoke'),badge(row.changed?'changed':row.matched?'unchanged':'unmatched'),textNode(state.financeRows.find(g=>g.id===row.grant_id)?.email??tr('unknownRecipient'),{email:true}),identifier(row.grant_id)])}catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}}
+function searchableText(record){
+  return Object.values(record??{}).filter(v=>v!=null&&typeof v!=='object').join(' ').toLowerCase();
+}
+function grantPlan(plan){return plan==='premium_ai_coach'?'Premium + AI Coach':plan==='premium'?'Premium':String(plan||'—')}
+function filtered(rows,inputId){
+  const value=$(inputId)?.value?.trim().toLowerCase()||'';
+  return value?rows.filter(row=>searchableText(row).includes(value)):rows;
+}
+function renderFinanceRows(){
+  const c=$('finance-list'),rows=filtered(state.financeRows,'finance-filter');
+  makeTable(c,[tr('account'),tr('plan'),tr('status'),tr('created'),tr('expiresAt'),tr('grantIdentifier'),tr('actions')],rows,row=>{
+    const action=elem('button',tr('revoke'),'secondary');action.type='button';
+    action.disabled=!(state.finance?.financial_writes_enabled===true)||row.status!=='active';
+    action.title=action.disabled?tr('unavailable'):tr('revoke');
+    action.addEventListener('click',()=>revokeGrant(row));
+    return [textNode(row.email,{email:true}),grantPlan(row.plan_id),badge(row.status),fmtDate(row.created_at),
+      fmtDate(row.expires_at),identifier(row.id),action];
+  },$('finance-filter')?.value?.trim()?tr('noMatchingSearch'):tr('empty'));
+}
+function renderAuditRows(){
+  const c=$('audit-content'),rows=filtered(state.auditRows,'audit-filter');
+  makeTable(c,[tr('created'),tr('operation'),tr('result'),tr('account'),tr('plan'),tr('grantIdentifier'),tr('adminActor')],rows,row=>{
+    const email=row.recipient_email||state.financeRows.find(g=>g.id===row.grant_id)?.email||null;
+    return [fmtDate(row.created_at),tr(row.operation==='grant'?'operationGrant':'operationRevoke'),
+      badge(row.changed?'changed':row.matched?'unchanged':'unmatched'),textNode(email??tr('unknownRecipient'),{email:!!email}),
+      grantPlan(row.plan_id),identifier(row.grant_id),
+      textNode(row.actor_email??row.actor_id??'—',{email:!!row.actor_email})];
+  },$('audit-filter')?.value?.trim()?tr('noMatchingSearch'):tr('empty'));
+}
+async function loadFinance(){
+  if(!state.authenticated)return;
+  const c=$('finance-list');c.textContent=tr('loading');
+  try{
+    const d=await api('finance',{operation:'list',offset:state.financeOffset});
+    if(!Array.isArray(d.rows)||typeof d.has_more!=='boolean')throw Error(tr('formatError'));
+    state.financeRows=d.rows;state.hasMore=d.has_more;
+    setText('metric-grants',state.financeOffset===0?String(d.rows.length)+(d.has_more?'+':''):String(d.rows.length));
+    $('finance-prev').disabled=state.financeOffset===0;$('finance-next').disabled=!d.has_more;
+    $('finance-page-index').textContent=String(state.financeOffset/50+1);
+    renderFinanceRows();updateLastSync();
+  }catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}
+}
+async function loadAudit(){
+  if(!state.authenticated)return;
+  const c=$('audit-content');c.textContent=tr('loading');
+  try{
+    const d=await api('finance',{operation:'audit',offset:0});
+    if(!Array.isArray(d.rows))throw Error(tr('formatError'));
+    state.auditRows=d.rows;renderAuditRows();updateLastSync();
+  }catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}
+}
+function updateLastSync(){
+  const el=$('last-synced');if(el)el.textContent=tr('recentUpdated')+': '+fmtDate(new Date().toISOString());
+}
+async function loadDashboardWorkload(){
+  if(!state.authenticated)return;
+  const checks=[
+    ['metric-posts','review',{operation:'posts.queue',limit:25},v=>rowsOf(v?.receipt).length],
+    ['metric-earn','review',{operation:'earn.queue'},v=>rowsOf(v?.receipt).length],
+    ['metric-reports','ops',{operation:'moderation.reports.open'},v=>rowsOf(v?.receipt).length]
+  ];
+  const responses=await Promise.allSettled(checks.map(([,type,body])=>api(type,body)));
+  responses.forEach((result,i)=>{
+    const [metric,,,countRecords]=checks[i];
+    if(result.status==='fulfilled')setText(metric,String(countRecords(result.value)));
+    else setText(metric,'—');
+  });
+  updateLastSync();
+}
 async function loadModerators(){const c=$('moderator-content');c.textContent=tr('loading');try{const d=await api('ops',{operation:'moderators.list'});const rows=rowsOf(d.receipt);if(!Array.isArray(d.receipt)&&!Array.isArray(d.receipt?.rows))throw new Error(tr('formatError'));state.mods=rows;setText('metric-mods',String(rows.length));makeTable(c,[tr('account'),tr('created'),tr('status'),tr('actions')],rows,row=>{const action=elem('button',tr('remove'),'secondary');action.type='button';action.disabled=!state.ops?.writes_enabled||row.protected_administrator===true;action.addEventListener('click',()=>opsConfirm('moderators.remove',{user_id:row.user_id,confirm_user_id:row.user_id}));return[textNode(row.email,{email:true}),fmtDate(row.created_at),row.protected_administrator?tr('protectedModerator'):tr('regularModerator'),action]},tr('noModerators'))}catch(e){empty(c,tr('failedRead'));setText('metric-mods','—');showNotice(e.message||tr('failedRead'),true)}}
 async function loadMembers(){const c=$('member-content');c.textContent=tr('loading');try{const d=await api('ops',{operation:'members.list'});const rows=rowsOf(d.receipt);if(!Array.isArray(d.receipt)&&!Array.isArray(d.receipt?.rows))throw new Error(tr('formatError'));state.members=rows;setText('metric-members',String(rows.length));makeTable(c,[tr('account'),tr('reason'),tr('created'),tr('actions')],rows,row=>{const action=elem('button',tr('reinstate'),'secondary');action.type='button';action.disabled=!state.ops?.writes_enabled;action.addEventListener('click',()=>opsConfirm('members.reinstate',{user_id:row.user_id,confirm_user_id:row.user_id}));return[textNode(row.email,{email:true}),String(row.reason??'—'),fmtDate(row.suspended_at),action]},tr('noSuspendedMembers'))}catch(e){empty(c,tr('failedRead'));setText('metric-members','—');showNotice(e.message||tr('failedRead'),true)}}
 async function loadReviewPolicy(){
@@ -658,7 +769,7 @@ async function showReviewDecision(row,decision){
   });
 }
 
-async function refreshAll(){if(!state.authenticated)return;await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue(),loadAudit()]);updateStatuses()}
+async function refreshAll(){if(!state.authenticated)return;await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue(),loadAudit(),loadDashboardWorkload()]);updateStatuses()}
 async function statusRefresh(){
   const sources=['finance','ops','review'];
   const settled=await Promise.allSettled(sources.map(type=>api(type,{operation:'status'})));
@@ -677,7 +788,23 @@ async function statusRefresh(){
 async function showStepUp(){return new Promise((resolve)=>{state.modalResolve=resolve;$('mfa-modal').hidden=false;$('step-up-code').value='';$('step-up-code').focus()})}
 function resolveStepUp(ok){$('mfa-modal').hidden=true;$('step-up-code').value='';const cb=state.modalResolve;state.modalResolve=null;if(cb)cb(ok)}
 async function confirmStepUp(){const code=$('step-up-code').value.trim();const btn=$('confirm-stepup');btn.disabled=true;try{state.factor=await findFactor();await verifyFactor(code);resolveStepUp(true)}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
-async function transaction(type,payload){if(!window.confirm(tr('confirmAction')))return null;const fresh=await showStepUp();if(!fresh)return null;return await api(type,payload)}
+function actionConfirmation(type,payload){
+  const op=String(payload?.operation||'');
+  if(type==='finance')return [tr(op==='grant'?'grantActionConfirm':'revokeActionConfirm'),
+    payload?.email||payload?.grant_id||'',grantPlan(payload?.plan_id||''),
+    payload?.duration_days?String(payload.duration_days)+' days':'',
+    tr('stepUpDesc')].filter(Boolean).join('\n');
+  const scope=payload?.email||payload?.user_id||payload?.audience||'';
+  const consequence=op==='coach.reset.all'?'RESET ALL AI COACH ACCOUNTS':
+    op==='notifications.send'&&payload?.audience==='all'&&payload?.kind!=='custom'?
+      '2,500 AI TOKENS per recipient':op==='members.suspend'?'COMMUNITY ACCESS ONLY':op;
+  return [tr('adminActionConfirm'),consequence,scope,
+    payload?.message?payload.message:'',tr('stepUpDesc')].filter(Boolean).join('\n');
+}
+async function transaction(type,payload){
+  if(!window.confirm(actionConfirmation(type,payload)))return null;
+  const fresh=await showStepUp();if(!fresh)return null;return await api(type,payload)
+}
 const PENDING_STORAGE_KEY='bil:admin:pending-financial-receipt:v1';
 function persistPending(){
   try {
@@ -793,6 +920,15 @@ function setNavigation(){
     }
   });
 }
-function setEvents(){setNavigation();$('email-form').addEventListener('submit',emailOtp);$('otp-form').addEventListener('submit',verifyEmail);$('mfa-form').addEventListener('submit',verifyMfa);$('enroll-form').addEventListener('submit',verifyEnroll);$('back-email').addEventListener('click',()=>{$('otp-form').hidden=true;$('email-form').hidden=false});$('logout').addEventListener('click',async()=>{await sdk.auth.signOut();clearPrivateView();showNotice(tr('offline'))});$('grant-form').addEventListener('submit',grantForm);$('refresh-status').addEventListener('click',statusRefresh);$('refresh-finance').addEventListener('click',loadFinance);$('refresh-audit').addEventListener('click',loadAudit);$('refresh-mods').addEventListener('click',loadModerators);$('refresh-members').addEventListener('click',loadMembers);$('refresh-queue').addEventListener('click',loadQueue);$('finance-next').addEventListener('click',()=>{state.financeOffset+=50;loadFinance()});$('finance-prev').addEventListener('click',()=>{state.financeOffset=Math.max(0,state.financeOffset-50);loadFinance()});$('reconcile').addEventListener('click',reconcile);$('cancel-stepup').addEventListener('click',()=>resolveStepUp(false));$('confirm-stepup').addEventListener('click',confirmStepUp);makeOpsForm('moderator-form','moderators.add',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase()}));makeOpsForm('member-form','members.suspend',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase(),reason:String(f.get('reason')).trim()}));makeOpsForm('coach-individual-form','coach.reset.user',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase(),reason:String(f.get('reason')).trim(),message:String(f.get('message')).trim()}));makeOpsForm('coach-global-form','coach.reset.all',f=>({confirm_phrase:String(f.get('confirm_phrase')).trim(),message:String(f.get('message')).trim()}));makeOpsForm('notification-form','notifications.send',f=>({kind:String(f.get('kind')),audience:String(f.get('audience')),email:String(f.get('email')||'').trim().toLowerCase(),confirm_target:String(f.get('confirm_target')||'').trim(),message:String(f.get('message')||'').trim(),acknowledge_token_grant:f.get('acknowledge_token_grant')==='on'}));for(const name of ['kind','audience'])$('notification-form').elements.namedItem(name).addEventListener('change',updateNotificationHelp)}
-$('ops-explain').addEventListener('click',()=>showNotice(tr('protectedWriteLocked')));
+function setEvents(){setNavigation();$('email-form').addEventListener('submit',emailOtp);$('otp-form').addEventListener('submit',verifyEmail);$('mfa-form').addEventListener('submit',verifyMfa);$('enroll-form').addEventListener('submit',verifyEnroll);$('back-email').addEventListener('click',()=>{$('otp-form').hidden=true;$('email-form').hidden=false});$('logout').addEventListener('click',async()=>{await sdk.auth.signOut();clearPrivateView();showNotice(tr('offline'))});$('grant-form').addEventListener('submit',grantForm);$('refresh-status').addEventListener('click',statusRefresh);$('refresh-finance').addEventListener('click',loadFinance);$('refresh-audit').addEventListener('click',loadAudit);$('refresh-mods').addEventListener('click',loadModerators);$('refresh-members').addEventListener('click',loadMembers);$('refresh-queue').addEventListener('click',loadQueue);$('finance-next').addEventListener('click',()=>{state.financeOffset+=50;loadFinance()});$('finance-prev').addEventListener('click',()=>{state.financeOffset=Math.max(0,state.financeOffset-50);loadFinance()});$('reconcile').addEventListener('click',reconcile);$('cancel-stepup').addEventListener('click',()=>resolveStepUp(false));$('confirm-stepup').addEventListener('click',confirmStepUp);makeOpsForm('moderator-form','moderators.add',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase()}));makeOpsForm('member-form','members.suspend',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase(),reason:String(f.get('reason')).trim()}));makeOpsForm('coach-individual-form','coach.reset.user',f=>({email:String(f.get('email')).trim().toLowerCase(),confirm_email:String(f.get('confirm_email')).trim().toLowerCase(),reason:String(f.get('reason')).trim(),message:String(f.get('message')).trim()}));makeOpsForm('coach-global-form','coach.reset.all',f=>({confirm_phrase:String(f.get('confirm_phrase')).trim(),message:String(f.get('message')).trim()}));makeOpsForm('notification-form','notifications.send',f=>({kind:String(f.get('kind')),audience:String(f.get('audience')),email:String(f.get('email')||'').trim().toLowerCase(),confirm_target:String(f.get('confirm_target')||'').trim(),message:String(f.get('message')||'').trim(),acknowledge_token_grant:f.get('acknowledge_token_grant')==='on',confirm_mass_grant:String(f.get('confirm_mass_grant')||'').trim()}));for(const name of ['kind','audience'])$('notification-form').elements.namedItem(name).addEventListener('change',updateNotificationHelp)}
+$('ops-explain').addEventListener('click',()=>showNotice(tr('operatorModeActive')));
+$('finance-filter').addEventListener('input',()=>{if(state.authenticated)renderFinanceRows()});
+$('audit-filter').addEventListener('input',()=>{if(state.authenticated)renderAuditRows()});
+for(const btn of document.querySelectorAll('[data-quick-nav]'))btn.addEventListener('click',()=>{
+  const page=btn.dataset.quickNav;setPage(page);
+  if(page==='moderation'&&state.authenticated){state.queue='posts';
+    for(const q of document.querySelectorAll('[data-queue]'))q.classList.toggle('selected',q.dataset.queue==='posts');
+    setText('queue-title',tr('posts'));loadQueue();}
+  else if(page==='audit'&&state.authenticated)loadAudit();
+});
 setEvents();init();

@@ -189,3 +189,43 @@ button:disabled{opacity:.58;cursor:not-allowed;filter:saturate(.65)}
   .brand{margin-bottom:25px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Modern BIL operator center — data dense, accessible and mobile-first */
+:root{--bg:#f6f8fb;--surface:rgba(255,255,255,.97);--text:#15283a;--secondary:#657789;--border:#e2eaf0;--green:#126a4b;--bright:#dbf2e3;--shadow:0 12px 32px rgba(23,52,66,.048)}
+body{background:linear-gradient(160deg,#f2f7f6 0%,#f6f8fc 49%,#f8fafb 100%)}
+.sidebar{background:#fff;border-inline-end:1px solid #e4eaf0}
+.brand-symbol{background:#153f34;box-shadow:none}
+.topbar{background:rgba(255,255,255,.92);border-bottom:1px solid #e3ebe8}
+.glass{background:rgba(255,255,255,.96);border:1px solid #e5ebe9;box-shadow:0 8px 28px rgba(15,45,58,.047)}
+.content{max-width:1420px}
+.operator-deck{padding:26px 29px;margin:0 0 23px;background:linear-gradient(115deg,#fff 5%,#f1f8f4 93%);border-color:#dfece6}
+.deck-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.deck-heading h2{font-size:1.44rem;letter-spacing:-.025em;margin:0 0 5px;color:#153c2d}
+.deck-heading .eyebrow{margin-bottom:5px;font-size:.68rem;color:#5e9674}
+.deck-heading p:not(.eyebrow){font-size:.88rem;color:#667c70;margin:0}
+.last-sync{font-size:.74rem;color:#7b9088;white-space:normal;font-variant-numeric:tabular-nums}
+.quick-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.quick-action{display:flex;align-items:center;gap:10px;min-width:0;text-align:start;background:#fff;border:1px solid #dfe9e3;padding:13px 12px;border-radius:12px;color:#264e3e;font-size:.86rem;font-weight:730;min-height:58px}
+.quick-action:hover{background:#eaf6ee;border-color:#acd8b7}
+.quick-action>span:nth-child(2){flex:1;min-width:0}
+.quick-action>span:last-child{color:#7e9a86}
+.quick-icon{font-size:18px;display:grid;place-items:center;background:#eaf5ed;width:28px;height:28px;flex:none;border-radius:9px;color:#237049}
+.metric-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.metric{min-height:120px}
+.metric-label{font-size:.85rem;color:#587262}
+.metric-value{font-size:2rem;color:#173c2e}
+.section-card{border-radius:16px}
+.search-control{display:grid;gap:9px;margin:10px 0 15px;font-size:.83rem;color:#476554;font-weight:680}
+.search-control input{padding:12px 15px;min-height:43px;border:1px solid #dce8e1;background:#fcfdfc}
+.full-identifier{display:grid;gap:8px;min-width:0}
+.full-identifier summary{font-size:.8rem;color:#255d46;cursor:pointer;user-select:none;outline-offset:3px}
+.complete-id{display:block;user-select:text;white-space:normal;overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.7rem;color:#425a63;background:#f4f7f8;padding:9px;border-radius:8px}
+.copy-id{justify-self:start;min-height:28px;font-size:.72rem;padding:6px 8px}
+.mass-grant-box{display:grid;gap:10px;border:1px solid #e9c9b8;border-radius:14px;padding:15px;background:#fff9f4}
+.mass-grant-box[hidden]{display:none!important}
+.mass-grant-box .warning{margin:0}
+.primary:not(:disabled){box-shadow:0 6px 13px rgba(20,103,68,.10)}
+#admin-view .page-help{max-width:100ch}
+@media(max-width:1050px){.quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:850px){.operator-deck{padding:18px}.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+@media(max-width:440px){.quick-actions{grid-template-columns:minmax(0,1fr)}.operator-deck{padding:16px}.quick-action{min-height:46px;padding:10px 11px}.metric-grid{gap:10px}.metric{min-height:108px}}
