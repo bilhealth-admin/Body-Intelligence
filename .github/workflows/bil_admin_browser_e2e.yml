@@ -1,0 +1,41 @@
+name: BIL Admin Synthetic Mobile Browser E2E
+on:
+  push:
+    branches: [feat/bil-secure-admin-ops-20261018]
+    paths:
+      - 'cloudflare/admin_site/site/**'
+      - 'tool/admin_web/browser_e2e/**'
+      - '.github/workflows/bil_admin_browser_e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Install isolated browser test requirements
+        shell: bash
+        run: |
+          python3 -m venv /tmp/bil-e2e
+          /tmp/bil-e2e/bin/pip install --quiet playwright==1.56.0
+          if ! command -v google-chrome >/dev/null && ! command -v chromium >/dev/null; then
+            /tmp/bil-e2e/bin/python -m playwright install chromium
+          fi
+      - name: Synthetic responsive browser E2E, no Production calls
+        run: |
+          mkdir -p /tmp/bil-admin-screenshots
+          BIL_ADMIN_E2E_ARTIFACTS=/tmp/bil-admin-screenshots \
+            /tmp/bil-e2e/bin/python tool/admin_web/browser_e2e/browser_e2e.py
+      - name: Save synthetic screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-admin-synthetic-mobile-proof
+          path: /tmp/bil-admin-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 7
