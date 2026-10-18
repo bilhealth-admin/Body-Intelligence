@@ -126,7 +126,12 @@ with sync_playwright() as p:
     page.wait_for_function("document.querySelector('#queue-content .report-card')!==null",timeout=9000)
     assert page.locator('#queue-content img').count()==2
     if width==390:
+      # A failed signed-image render must lock review even after refreshing backend status.
+      page.locator('#queue-content .post-image-wrap img').first.evaluate('(e)=>e.dispatchEvent(new Event("error"))')
       page.evaluate("""state.review.moderation_writes_enabled=true;updateStatuses();""")
+      assert page.locator('#queue-content button.review-write').first.is_disabled(), 'Expired/failed media was re-enabled by status refresh'
+      page.evaluate("""fakePost.media_complete=true;loadQueue();""")
+      page.wait_for_function("document.querySelector('#queue-content button.review-write')?.disabled===false",timeout=9000)
       assert page.locator('#queue-content button.review-write').first.is_enabled()
       page.locator('#queue-content button.review-write').first.click()
       page.wait_for_function("!document.getElementById('review-confirm-modal').hidden",timeout=9000)

@@ -158,3 +158,9 @@ test('human moderation receipts disclose exact Earn policy but never preclaim pu
  assert.match(source,/showReviewDecision\(/);
  assert.match(source,/require.*TOTP|showStepUp\(/);
 });
+
+test('refreshing server status cannot reenable unreviewed or broken-media actions',()=>{
+  assert.match(source,/button\.dataset\.caseEligible=String\(isVerified/);
+  assert.match(source,/button\.dataset\.caseEligible='false'/);
+  assert.match(source,/b\.disabled=!reviewWrite\|\|b\.dataset\.caseEligible==='false'/);
+});
