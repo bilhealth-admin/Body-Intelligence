@@ -253,13 +253,26 @@ def wait_for_boot_broadcast_idle(evidence: Path) -> bool:
         flush=True,
     )
     try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=BOOT_BROADCAST_IDLE_TIMEOUT,
-            check=False,
-        )
+        for attempt in range(3):
+            remaining = BOOT_BROADCAST_IDLE_TIMEOUT - (time.monotonic() - started)
+            if remaining <= 0:
+                raise subprocess.TimeoutExpired(command, BOOT_BROADCAST_IDLE_TIMEOUT)
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=BOOT_BROADCAST_IDLE_TIMEOUT if attempt == 0 else remaining,
+                check=False,
+            )
+            # ActivityManager may restart during Android 29 boot. Retry only
+            # this interrupted Binder read, before any app installation/launch.
+            # The genuine idle marker and the total time limit remain required.
+            interrupted = result.returncode != 0 and "Broken pipe" in (
+                result.stdout + result.stderr
+            )
+            if not interrupted or attempt == 2:
+                break
+            time.sleep(1)
         stdout, stderr, return_code = result.stdout, result.stderr, result.returncode
         marker_found = BOOT_BROADCAST_IDLE_MARKER in (
             line.strip() for line in stdout.splitlines()

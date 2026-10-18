@@ -146,12 +146,15 @@ jobs:
           print('LIVE_ASSOCIATION_PRESERVATION=PASS')
           PY
 
+      - name: Complete BIL routes while preserving deployed app-link identities
+        run: node tool/release/merge_site_associations.mjs public_site/.well-known/apple-app-site-association
+
       - name: Verify site worker contracts
         shell: bash
         run: |
           set -euo pipefail
           python3 tool/release/generate_app_link_associations.py --self-test
-          node --test tool/release/bilhealth_site_worker.test.mjs
+          node --test tool/release/bilhealth_site_worker.test.mjs tool/release/merge_site_associations.test.mjs
           node --input-type=module <<'JS'
           import { readFileSync } from 'node:fs';
           import {

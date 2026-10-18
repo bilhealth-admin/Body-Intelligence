@@ -28,16 +28,15 @@ jobs:
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Apply exact-byte source edits and format
+      - name: Check committed source without applying historical patches
         run: |
           set -euo pipefail
-          python3 tool/sapphire/prepare.py
           flutter pub get
           python3 - <<'PY'
           import pathlib,subprocess
-          paths=subprocess.check_output(['git','diff','--name-only','59839c7deb4d1cc860275b9e69578e299cc24d0a']).decode().splitlines()
+          paths=subprocess.check_output(['git','diff','--name-only','8ec83ed81066c324cfd7119363ab31d73a8d4b97']).decode().splitlines()
           dart=[p for p in paths if p.endswith('.dart') and pathlib.Path(p).is_file()]
-          if dart: subprocess.run(['dart','format',*dart],check=True)
+          if dart: subprocess.run(['dart','format','--output=none','--set-exit-if-changed',*dart],check=True)
           PY
       - name: Enforce immutable prepared source before reference verification
         id: source
@@ -56,7 +55,7 @@ jobs:
           mkdir -p /tmp/sapphire-source
           git rev-parse HEAD > /tmp/sapphire-source/source-sha.txt
           git status --porcelain > /tmp/sapphire-source/worktree-status.txt
-          git diff 59839c7deb4d1cc860275b9e69578e299cc24d0a --binary > /tmp/sapphire-source/source.patch
+          git diff 8ec83ed81066c324cfd7119363ab31d73a8d4b97 --binary > /tmp/sapphire-source/source.patch
           python3 - <<'PY'
           import pathlib,subprocess,zipfile
           paths=subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
@@ -90,11 +89,11 @@ jobs:
       - name: Verify native Watch and current-value UI remain unchanged
         run: |
           set -euo pipefail
-          git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner android/app/src ':(exclude)android/app/src/main/AndroidManifest.xml' ':(exclude)android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt' ':(exclude)android/app/src/main/res/values*/strings.xml' ':(exclude)android/app/src/main/res/values*/styles.xml' lib/features/dashboard ':(exclude)lib/features/dashboard/widgets/dashboard_shell.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_reference_phone_components.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_grid.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_reference_phone.dart' ':(exclude)lib/features/dashboard/widgets/premium_dashboard_benchmark.dart' ':(exclude)lib/features/dashboard/widgets/premium_dashboard_card_lock.dart' lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart
+          git diff --exit-code 8ec83ed81066c324cfd7119363ab31d73a8d4b97 HEAD -- ios/Runner android/app/src ':(exclude)android/app/src/main/AndroidManifest.xml' ':(exclude)android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt' ':(exclude)android/app/src/main/res/values*/strings.xml' ':(exclude)android/app/src/main/res/values*/styles.xml' lib/features/dashboard ':(exclude)lib/features/dashboard/widgets/dashboard_shell.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_reference_phone_components.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_grid.dart' ':(exclude)lib/features/dashboard/widgets/dashboard_reference_phone.dart' ':(exclude)lib/features/dashboard/widgets/premium_dashboard_benchmark.dart' ':(exclude)lib/features/dashboard/widgets/premium_dashboard_card_lock.dart' lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart
           python3 - <<'PY'
           import pathlib,subprocess
           path='lib/features/connected_health/connected_health_signal_detail_page.dart'
-          old=subprocess.check_output(['git','show','59839c7deb4d1cc860275b9e69578e299cc24d0a:'+path]).decode()
+          old=subprocess.check_output(['git','show','8ec83ed81066c324cfd7119363ab31d73a8d4b97:'+path]).decode()
           new=pathlib.Path(path).read_text()
           def live(s): return s[s.index('class _MeasuredSignalCard'):s.index('class _SignalHistoryCard')]
           assert live(old)==live(new),'Live Watch/current-value card changed'

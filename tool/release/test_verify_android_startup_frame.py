@@ -242,6 +242,29 @@ class VerifyAndroidWindowFocusTest(unittest.TestCase):
                 )
                 self.assertEqual(result["window_status"], expected)
 
+    def test_boot_idle_retries_interrupted_binder_read_but_requires_idle(self) -> None:
+        from verify_android_startup_frame import wait_for_boot_broadcast_idle
+        broken = subprocess.CompletedProcess([], 224, "cmd: Failure calling service activity: Broken pipe (32)", "")
+        idle = subprocess.CompletedProcess([], 0, "All broadcast queues are idle!\n", "")
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            with patch("verify_android_startup_frame.subprocess.run", side_effect=[broken, idle]) as run:
+                with patch("verify_android_startup_frame.time.sleep"):
+                    self.assertTrue(wait_for_boot_broadcast_idle(evidence))
+            self.assertEqual(run.call_count, 2)
+            receipt = json.loads((evidence / "prelaunch-boot-idle-receipt.json").read_text())
+            self.assertTrue(receipt["broadcast_idle_confirmed"])
+            self.assertFalse(receipt["app_startup_proven"])
+
+    def test_boot_idle_does_not_accept_persistent_broken_binder(self) -> None:
+        from verify_android_startup_frame import wait_for_boot_broadcast_idle
+        broken = subprocess.CompletedProcess([], 224, "cmd: Failure calling service activity: Broken pipe (32)", "")
+        with tempfile.TemporaryDirectory() as directory:
+            with patch("verify_android_startup_frame.subprocess.run", return_value=broken) as run:
+                with patch("verify_android_startup_frame.time.sleep"):
+                    self.assertFalse(wait_for_boot_broadcast_idle(Path(directory)))
+            self.assertEqual(run.call_count, 3)
+
     def test_prelaunch_health_checks_window_without_accepting_a_bil_frame(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             window = Path(directory) / "window.txt"
