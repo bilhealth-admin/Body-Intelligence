@@ -229,6 +229,16 @@ Object.assign(en,{
   noRecipientsYet:'No authoritative records found, or data not loaded yet.',scopeReadWrite:'Authorized read/write',
   operatorIntro:'Manage subscriptions, audit, community moderation and accounts. Server-signed receipts and fresh MFA protect sensitive changes.',
 });
+Object.assign(ar,{
+  grantAlreadyRevoked:'هذه المنحة ملغاة بالفعل؛ لا تحتاج سحبًا آخر.',
+  grantAlreadyExpired:'انتهت هذه المنحة؛ لا توجد منحة نشطة لسحبها.',
+  grantNotActive:'لا يمكن سحب هذه المنحة لأنها غير نشطة.',
+});
+Object.assign(en,{
+  grantAlreadyRevoked:'This grant is already revoked; no further revocation is needed.',
+  grantAlreadyExpired:'This grant has expired; there is no active grant to revoke.',
+  grantNotActive:'This grant cannot be revoked because it is not active.',
+});
 const dict={ar,en};
 const state={language:'ar',page:'overview',queue:'posts',email:'',factor:null,finance:null,ops:null,user:null,financeRows:[],auditRows:[],mods:[],members:[],queueRows:[],review:null,earnPolicy:null,financeOffset:0,hasMore:false,pendingCommand:null,authenticated:false,modalResolve:null,loading:false};
 const $ = id=>document.getElementById(id);
@@ -577,12 +587,20 @@ function filtered(rows,inputId){
   const value=$(inputId)?.value?.trim().toLowerCase()||'';
   return value?rows.filter(row=>searchableText(row).includes(value)):rows;
 }
+function revokeAvailability(status,canWrite){
+  if(!canWrite)return {disabled:true,titleKey:'protectedWriteLocked'};
+  if(status==='revoked')return {disabled:true,titleKey:'grantAlreadyRevoked'};
+  if(status==='expired')return {disabled:true,titleKey:'grantAlreadyExpired'};
+  if(status!=='active')return {disabled:true,titleKey:'grantNotActive'};
+  return {disabled:false,titleKey:'revoke'};
+}
 function renderFinanceRows(){
   const c=$('finance-list'),rows=filtered(state.financeRows,'finance-filter');
   makeTable(c,[tr('account'),tr('plan'),tr('status'),tr('created'),tr('expiresAt'),tr('grantIdentifier'),tr('actions')],rows,row=>{
     const action=elem('button',tr('revoke'),'secondary');action.type='button';
-    action.disabled=!(state.finance?.financial_writes_enabled===true)||row.status!=='active';
-    action.title=action.disabled?tr('unavailable'):tr('revoke');
+    const availability=revokeAvailability(row.status,state.finance?.financial_writes_enabled===true);
+    action.disabled=availability.disabled;
+    action.title=tr(availability.titleKey);
     action.addEventListener('click',()=>revokeGrant(row));
     return [textNode(row.email,{email:true}),grantPlan(row.plan_id),badge(row.status),fmtDate(row.created_at),
       fmtDate(row.expires_at),identifier(row.id),action];
