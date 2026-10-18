@@ -56,18 +56,9 @@ function fake(options={}){
       return {data:null,error:{message:'unknown rpc '+name}};
     }
   };
-  const fromTable=table=>({
-    select(){return this},eq(){return this},order(){return this},in(){return this},
-    limit:async()=>({data:table==='bil_community_post_media_v1'?[{post_id:postId,position:0,
-      object_path:'bbbb/post1/first.jpg',mime_type:'image/jpeg',bytes:1200,width:640,height:800},
-      {post_id:postId,position:1,object_path:'bbbb/post1/second.jpg',mime_type:'image/jpeg',bytes:1200,width:640,height:800}]:
-      table==='bil_community_post_hashtags_v1'?[{hashtag:'nutrition'}]:
-      table==='bil_community_poll_options'?[{option_text:'A'},{option_text:'B'}]:[],error:null}),
-    maybeSingle:async()=>({data:table==='bil_community_post_reward_policy'?{
-      tokens_per_approval:5,max_rewarded_posts_per_owner_per_utc_day:5,
-      updated_at:'2026-10-18T00:00:00Z'}:table==='bil_community_polls'?
-      {question:'What is right?',allow_multiple:false,closes_at:null}:null,error:null})
-  });
+  // The service role intentionally has no direct table SELECT privileges.
+  // Any service.from(...) call is a production security regression.
+  const fromTable=table=>{throw new Error('FORBIDDEN_DIRECT_TABLE_READ:'+table)};
   const service={
     from:fromTable,
     storage:{from:()=>({createSignedUrl:async(path,ttl)=>{
@@ -81,6 +72,21 @@ function fake(options={}){
       if(name==='bil_admin_web_reporter_contacts_v1')return {data:[{
         record_id:postId,reporter_user_id:author,reporter_email:authorEmail
       }]};
+      if(name==='bil_admin_web_review_context_v1'){
+        if(options.contextPermissionFailure)return {data:null,error:{message:'permission denied for table bil_community_post_media_v1'}};
+        return {data:{post_id:postId,author_id:author,author_name:'Alice Synthetic',title:fakePost.title,
+          location:'Amman',hashtags:['nutrition'],topics:['fitness'],circles:['strength'],
+          poll:{question:'What is right?',allow_multiple:false,closes_at:null,options:['A','B']},
+          media_count:2,media:[
+            {post_id:postId,position:0,object_path:'bbbb/post1/first.jpg',mime_type:'image/jpeg',bytes:1200,width:640,height:800},
+            {post_id:postId,position:1,object_path:'bbbb/post1/second.jpg',mime_type:'image/jpeg',bytes:1200,width:640,height:800}
+          ]}};
+      }
+      if(name==='bil_admin_web_review_reward_policy_v1'){
+        if(options.policyPermissionFailure)return {data:null,error:{message:'permission denied for table bil_community_post_reward_policy'}};
+        return {data:{tokens_per_approval:5,max_rewarded_posts_per_owner_per_utc_day:5,
+          max_daily_tokens:25,updated_at:'2026-10-18T00:00:00Z'}};
+      }
       return {data:null,error:{message:'unknown service rpc '+name}};
     }
   };
@@ -212,4 +218,38 @@ test('invalid operation never calls provider and never reflects user text',async
   const r=await response({operation:'secret.admin.dump'});
   assert.equal(r.status,400);assert.equal(r.calls.some(x=>x.kind==='service'),false);
   assert.ok(!JSON.stringify(r.data).includes('stack'));
+});
+
+
+test('new metadata context is scoped to owner via service RPC and no direct SQL table select',async()=>{
+  const r=await response({operation:'posts.queue',limit:10});
+  assert.equal(r.status,200);
+  const context=r.calls.find(x=>x.name==='bil_admin_web_review_context_v1');
+  assert.equal(context.kind,'service');
+  assert.equal(context.args.p_actor_id,actor);
+  assert.equal(context.args.p_post_id,postId);
+  const policy=await response({operation:'earn.policy'});
+  assert.equal(policy.status,200);
+  const receipt=policy.calls.find(x=>x.name==='bil_admin_web_review_reward_policy_v1');
+  assert.equal(receipt.args.p_actor_id,actor);
+});
+test('permission failure on read context cannot mislabel authenticated owner as unauthorized',async()=>{
+  const r=await response({operation:'posts.queue'}, {contextPermissionFailure:true});
+  assert.equal(r.status,200);
+  assert.equal(r.data.receipt.rows[0].media_complete,false);
+  assert.equal(r.data.receipt.rows[0].preview_error,'review_context_configuration_error');
+  assert.equal(r.data.receipt.rows[0].body,fakePost.body);
+  const p=await response({operation:'earn.policy'},{policyPermissionFailure:true});
+  assert.equal(p.status,503);
+  assert.equal(p.data.error,'review_context_configuration_error');
+});
+test('post context includes title, location, topics, circle and poll without leaking service role',async()=>{
+  const r=await response({operation:'posts.detail',post_id:postId});
+  assert.equal(r.status,200);
+  assert.equal(r.data.receipt.author_name,'Alice Synthetic');
+  assert.equal(r.data.receipt.location,'Amman');
+  assert.deepEqual(r.data.receipt.topics,['fitness']);
+  assert.deepEqual(r.data.receipt.circles,['strength']);
+  assert.deepEqual(r.data.receipt.poll.options,['A','B']);
+  assert.equal(JSON.stringify(r.data).includes('serviceRole'),false);
 });
