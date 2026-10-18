@@ -27,7 +27,7 @@ const WRITE = new Set([
   'coach.reset.all','coach.reset.user','notifications.send',
   'moderation.posts.review','moderation.reports.decide','moderation.safety.decide',
 ]);
-const VERSION = '2026-10-18-web-ops-v2';
+const VERSION = '2026-10-18-web-ops-v4';
 
 function json(obj, code=200, origin=null) {
   const headers = {...REPLY_HEADERS};
@@ -154,6 +154,55 @@ function compatibleResult(value) {
   return value;
 }
 
+
+/**
+ * Enrich ONLY records supplied by an authenticated, scoped report-list RPC.
+ * Never accept report IDs from a caller as a stand-alone email directory.
+ * A separate service-role-only SQL function checks the verified admin again.
+ */
+async function attachAuthorizedReportContacts(operation,data,service,userId) {
+  const kinds={
+    'moderation.safety.open':'safety',
+    'moderation.reports.open':'community',
+    'moderation.posts.pending':'posts',
+  };
+  const kind=kinds[operation];
+  if(!kind) return data;
+  if(!Array.isArray(data)) throw new WebAdminError('invalid_report_queue_response',503);
+  if(data.length>200) throw new WebAdminError('invalid_report_queue_response',503);
+  const extractId=row=>kind==='safety'?row?.report_id:row?.id;
+  const visibleIds=[...new Set(data.map(extractId).filter(okUUID))];
+  if(data.length>0 && visibleIds.length===0)
+    throw new WebAdminError('invalid_report_queue_response',503);
+  if(visibleIds.length===0)return data;
+  const contactById=new Map();
+  for(let offset=0;offset<visibleIds.length;offset+=50){
+    const ids=visibleIds.slice(offset,offset+50);
+    const contacts=await rpc(service,'bil_admin_web_reporter_contacts_v1',{
+      p_actor_id:userId,p_report_kind:kind,p_report_ids:ids
+    });
+    if(!Array.isArray(contacts)||contacts.length>ids.length)
+      throw new WebAdminError('invalid_report_contact_response',503);
+    for(const contact of contacts){
+      if(!contact || !ids.includes(contact.record_id) ||
+         !okUUID(contact.reporter_user_id) ||
+         typeof contact.reporter_email!=='string' ||
+         !EMAIL.test(contact.reporter_email.toLowerCase()) ||
+         contact.reporter_email.length>254 || contactById.has(contact.record_id))
+        throw new WebAdminError('invalid_report_contact_response',503);
+      contactById.set(contact.record_id,{
+        reporter_email:contact.reporter_email.toLowerCase(),
+        reporter_user_id:contact.reporter_user_id,
+      });
+    }
+  }
+  return data.map(row=>({
+    ...row,
+    reporter_email:contactById.get(extractId(row))?.reporter_email??null,
+    reporter_user_id:contactById.get(extractId(row))?.reporter_user_id??null,
+  }));
+}
+
 async function perform(op,req,userId,user,service) {
   switch(op){
   case 'moderators.list': return rpc(service,'bil_list_community_moderators_for_admin',{p_actor_id:userId});
@@ -255,7 +304,8 @@ export async function handleOps(request,deps) {
       p_limit:write?20:120,p_window_seconds:3600});
     if(rate?.error) errorFromRpc(rate.error);
     const service=deps.makeServiceClient();
-    const data=compatibleResult(await perform(op,fields,userId,user,service));
+    let data=compatibleResult(await perform(op,fields,userId,user,service));
+    data=await attachAuthorizedReportContacts(op,data,service,userId);
     return json({state:'executed',operation:op,receipt:data,version:VERSION},200,origin);
   } catch(err) {
     if(err instanceof WebAdminError)

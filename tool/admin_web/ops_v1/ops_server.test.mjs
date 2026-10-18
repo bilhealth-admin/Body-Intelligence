@@ -124,3 +124,74 @@ test('pending moderation uses pending posts and never substitutes reward request
  assert.ok(calls.some(x=>x.name==='bil_list_pending_community_posts'&&x.args.p_limit===20));
  assert.ok(!calls.some(x=>x.name==='bil_community_reward_review_queue_v2'));
 });
+
+test('owner safety report shows reporter email only from service-role scoped lookup',async()=>{
+  const rid='11111111-1111-4111-8111-111111111111';
+  const calls=[];const deps=dependencies({serviceSpy:calls});
+  deps.makeUserClient=()=>({
+    auth:{getUser:async()=>({data:{user:{id:uid}}})},
+    rpc:async name=>({data:name==='bil_can_manage_ai_coach'?true:
+      name==='bil_consume_rate_limit'?null:
+      [{report_id:rid,reason:'unsafe',status:'open',answer_text:'Example only'}],error:null})
+  });
+  deps.makeServiceClient=()=>({
+    rpc:async(name,args)=>{
+      calls.push({name,args});
+      return {error:null,data:[{record_id:rid,reporter_email:'reporter@example.invalid',
+        reporter_user_id:'22222222-2222-4222-8222-222222222222'}]};
+    }
+  });
+  const [status,v]=await read(await handleOps(request({operation:'moderation.safety.open'}),deps));
+  assert.equal(status,200);
+  assert.equal(v.receipt[0].reporter_email,'reporter@example.invalid');
+  assert.equal(v.receipt[0].reporter_user_id,'22222222-2222-4222-8222-222222222222');
+  assert.deepEqual(calls[0],{name:'bil_admin_web_reporter_contacts_v1',
+    args:{p_actor_id:uid,p_report_kind:'safety',p_report_ids:[rid]}});
+});
+
+test('unlisted report identity lookup operation is not public API',async()=>{
+  const [status,v]=await read(await handleOps(request({
+    operation:'reporter.contacts',report_ids:['11111111-1111-4111-8111-111111111111']
+  }),dependencies()));
+  assert.equal(status,400);
+  assert.equal(v.error,'unknown_operation');
+});
+
+test('unexpected contact ID is rejected, no arbitrary user identity disclosure',async()=>{
+  const rid='11111111-1111-4111-8111-111111111111';
+  const deps=dependencies();
+  deps.makeUserClient=()=>({auth:{getUser:async()=>({data:{user:{id:uid}}})},
+    rpc:async name=>({data:name==='bil_can_manage_ai_coach'?true:
+      name==='bil_consume_rate_limit'?null:[{report_id:rid}],error:null})});
+  deps.makeServiceClient=()=>({rpc:async()=>({data:[{
+    record_id:'ffffffff-ffff-4fff-8fff-ffffffffffff',
+    reporter_email:'notauthorized@example.invalid',
+    reporter_user_id:'22222222-2222-4222-8222-222222222222'
+  }],error:null})});
+  const [status,v]=await read(await handleOps(request({operation:'moderation.safety.open'}),deps));
+  assert.equal(status,503);
+  assert.equal(v.error,'invalid_report_contact_response');
+});
+
+test('missing identity is explicitly null, not confused with reporter ID',async()=>{
+  const rid='11111111-1111-4111-8111-111111111111';
+  const deps=dependencies();
+  deps.makeUserClient=()=>({auth:{getUser:async()=>({data:{user:{id:uid}}})},
+    rpc:async name=>({data:name==='bil_can_manage_ai_coach'?true:
+      name==='bil_consume_rate_limit'?null:[{id:rid,reporter_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'}],error:null})});
+  deps.makeServiceClient=()=>({rpc:async()=>({data:[],error:null})});
+  const [status,v]=await read(await handleOps(request({operation:'moderation.reports.open'}),deps));
+  assert.equal(status,200);assert.equal(v.receipt[0].reporter_email,null);
+});
+
+test('unauthorized session never invokes contact RPC',async()=>{
+  const calls=[];const [status]=await read(await handleOps(
+    request({operation:'moderation.safety.open'}),dependencies({allow:false,serviceSpy:calls})));
+  assert.equal(status,404);assert.equal(calls.length,0);
+});
+
+test('AAL1 never loads reporter identity even if user is on allowlist',async()=>{
+  const [status]=await read(await handleOps(
+    request({operation:'moderation.safety.open'},{jwt:token('aal1')}),dependencies()));
+  assert.equal(status,403);
+});
