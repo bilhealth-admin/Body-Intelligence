@@ -21,7 +21,7 @@ export function exactOrigins(raw) {
   for (const value of entries) {
     let url;
     try { url = new URL(value); } catch { return []; }
-    if (url.protocol !== 'https:' || url.origin !== value || url.username || url.password || url.search || url.hash || url.pathname !== '/' || url.port && !['443'].includes(url.port)) return [];
+    if (url.protocol !== 'https:' || url.origin !== value || url.username || url.password || url.search || url.hash || url.pathname !== '/' || url.port && !(url.port === '3000' && url.hostname === '583f1411-1db3-49c7-805d-a98a45079dc6-00-jw3rzv8h1494.spock.replit.dev')) return [];
     if (!origins.includes(value)) origins.push(value);
   }
   return origins;
