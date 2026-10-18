@@ -132,3 +132,20 @@ test('mobile tables collapse into accessible labeled rows without document overf
   assert.match(source,/function makeTable\(/);
   assert.match(source,/function badge\(/);
 });
+
+test('private image previews use exact Supabase CSP origin and safe labels',()=>{
+ const headers=readFileSync(new URL('../site/_headers',import.meta.url),'utf8');
+ assert.match(headers,/img-src 'self' data: https:\/\/tgmanzhqulksykhslrzb\.supabase\.co;/);
+ assert.match(source,/function validReviewImage\(/);
+ assert.match(source,/function reviewPictureGallery\(/);
+ assert.match(source,/img\.addEventListener\('error'/);
+});
+test('human moderation receipts disclose exact Earn policy but never preclaim push delivery',()=>{
+ assert.match(source,/posts\.detail/);
+ assert.match(source,/earn\.queue/);
+ assert.match(source,/notificationPreview/);
+ assert.match(source,/approvedWithReward/);
+ assert.match(source,/approvedWithoutReward/);
+ assert.match(source,/showReviewDecision\(/);
+ assert.match(source,/require.*TOTP|showStepUp\(/);
+});

@@ -8,6 +8,7 @@ const sdk = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
 const edge = Object.freeze({
   finance: `${SUPABASE_URL}/functions/v1/bil-admin-web-v1`,
   ops: `${SUPABASE_URL}/functions/v1/bil-admin-web-ops-v1`,
+  review: `${SUPABASE_URL}/functions/v1/bil-admin-web-review-v1`,
 });
 
 const ar = {
@@ -16,88 +17,152 @@ const ar = {
 const en = {
   portal:'Administration',overview:'Overview',finance:'Subscriptions & grants',coach:'AI Coach management',notifications:'Notifications',moderation:'Moderation & reports',moderators:'Moderators',members:'Member access',audit:'Audit trail',security:'Security & connectivity',protected:'Server-authorized management',offline:'Disconnected',online:'Connected securely',logout:'Sign out',intro:'BIL management with explicit permissions and auditable actions.',secureLogin:'Administration sign-in',secureLoginDesc:'Sign in via email verification then authenticator TOTP. Owner-only access.',email:'Email address',sendCode:'Send sign-in code',emailCode:'Code sent to your email',verifyEmail:'Verify email',changeEmail:'Change email',totp:'Authenticator code',verifyMfa:'Verify and enter',enrollHelp:'Enroll in your authenticator, scan the code below, then verify your TOTP.',noPasswords:'No backend secrets or passwords are stored in this website.',grants:'Administrative grants',sourceFinance:'From the authoritative grants ledger',authorizedCount:'After permission verification',reports:'Open reports',sourceReports:'Authoritative review queue',suspended:'Suspended members',sourceMembers:'From authoritative access records',connection:'Connection status',refresh:'Refresh',principles:'Operating controls',principlesText:'Real data is visible only after owner session approval. Untested actions remain locked and service-role keys never enter the browser.',opsLock:'Other administrative writes are locked pending live testing.',newGrant:'New subscription grant',grantWarning:'Admin grants are separate from store purchases and Boost. Do not test on real users.',recipientEmail:'Recipient email',plan:'Plan',duration:'Duration',reason:'Grant reason',confirmEmail:'Confirm recipient email (type again)',grantAck:'I acknowledge this is an external admin grant, not a store purchase.',submitGrant:'Review and send grant',existingGrants:'Existing grants',loadData:'Select refresh to read live records',prev:'Previous',next:'Next',lastCommand:'Last unresolved command',noPending:'No pending command in this session.',reconcile:'Reconcile receipt',individualReset:'Reset one AI Coach account',message:'Notification message',execute:'Execute',globalReset:'Reset ALL AI Coach accounts',globalWarning:'High-impact operation. Do not test against real accounts.',confirmPhrase:'Enter the English confirmation phrase',composeNotification:'Compose BIL notification',notificationWarning:'Gift and compensation notifications may affect token balances. Do not send without approval and testing.',kind:'Kind',audience:'Audience',confirmTarget:'Confirm recipient (or SEND TO ALL)',tokenAcknowledgment:'I understand gift or compensation may grant tokens.',send:'Send',posts:'Posts',safety:'AI Coach safety',addModerator:'Add moderator',suspendMember:'Suspend access',financialAudit:'Financial audit trail',identity:'Identity status',securityBoundaries:'Security boundaries',securityText:'Every request is verified by Supabase and server-side admin authority. Service-role keys stay server-side, untested writes remain disabled.',noRealUsers:'Do not test with real user accounts or balances.',stepUp:'Fresh TOTP required for this action',stepUpDesc:'Enter a new authenticator code. No action proceeds without verified permissions.',cancel:'Cancel',confirm:'Confirm',locked:'Locked',active:'Active',available:'Available',notAvailable:'Unavailable',financeGateway:'Financial grants gateway',operationsGateway:'Administrative ops gateway',signedIn:'Session',twoFactor:'Two-factor verification',protectedRole:'Owner permissions',enableNotice:'Write operations are pending authorization. Allowed records can be read.',notAuthorized:'Your account is not authorized for administration.',confirmAction:'Execute this action against live data?',completed:'The operation completed and a server receipt was received.',pending:'The operation may have committed, but readback is pending. Reconcile before retrying.',failed:'The operation failed or could not be confirmed.',empty:'No records on this page.',loading:'Reading from the server...',failedRead:'Could not load authoritative data. No fabricated records are shown.',revoke:'Revoke grant',remove:'Remove',reinstate:'Reinstate access',unavailable:'Disabled: pending secure backend cutover',testRequired:'Technically enabled, but use an isolated test account for first verification.',account:'Account',result:'Result',created:'Created',status:'Status',actions:'Actions',formatError:'Invalid backend response.',missingMfa:'A verified TOTP factor is required.'
 };
-
+// Human-readable, safety-conscious labels. All detailed records remain bound to verified owner sessions.
 Object.assign(ar,{
-  active:'نشطة',revoked:'ملغاة',expired:'منتهية',open:'مفتوح',reviewing:'قيد المراجعة',closed:'مغلق',approved:'مقبول',rejected:'مرفوض',
-  protectedModerator:'مسؤول محمي',regularModerator:'مشرف',pendingStatus:'بانتظار المراجعة',
-  reportEmail:'بريد صاحب البلاغ',accountIdentifier:'معرّف حساب BIL',reportId:'رقم البلاغ',
-  postAuthor:'صاحب المنشور',reportReason:'سبب البلاغ',contentType:'نوع المحتوى',contentIdentifier:'معرّف المحتوى',
-  reportDate:'تاريخ البلاغ',userMessage:'ملاحظة المستخدم',coachReply:'رد المدرب المُبلّغ عنه',postBody:'نص المنشور',
-  reportRuntime:'حالة تشغيل المدرب',reportLocale:'لغة البلاغ',reportDecision:'نتيجة المراجعة',
-  findReporterUnavailable:'البريد غير متاح؛ قد يكون الحساب محذوفًا.',
-  identityExplanation:'هذا بريد صاحب البلاغ، وقد يختلف عن صاحب المحتوى. استخدمه لمتابعة البلاغ فقط.',
-  prepareCompensation:'إعداد تعويض لهذا المستخدم',
-  prepareCompensationDone:'وضعت بريد صاحب البلاغ في إعداد الإشعار. راجع المعلومات وأكد بنفسك؛ لم يُرسل شيء.',
-  reasonUnsafe:'إجابة غير آمنة',reasonInaccurate:'إجابة غير دقيقة',reasonOffensive:'محتوى مسيء',reasonOther:'سبب آخر',
-  runtimeLocalFallback:'رد احتياطي عند تعذّر خدمة المدرب',
-  approve:'قبول المنشور',reject:'رفض المنشور',dismissReport:'إغلاق البلاغ دون حذف',removeContent:'إزالة المحتوى المخالف',
-  noViolation:'لا توجد مخالفة',confirmedIssue:'مشكلة سلامة مؤكدة',reviewStatusReviewed:'تمت المراجعة',
-  operation:'العملية',operationGrant:'منح اشتراك',operationRevoke:'سحب منحة',resultChanged:'تم تغيير الحالة',
-  resultUnchanged:'دون تغيير',resultUnmatched:'لم يُعثر على المستفيد',grantIdentifier:'معرّف المنحة',
-  whyLocked:'زر التنفيذ مقفل بإعداد أمني على الخادم، وليس بسبب عطل. لا يُفتح قبل اختبار حساب مخصص وتأكيد المصادقة الثنائية والإيصالات.',
-  individualResetHelp:'يعيد ضبط استهلاك AI Coach الحالي للحساب المحدد ويُرسل إشعارًا، دون حذف محادثاته أو اشتراكه.',
-  globalWarning:'عملية واسعة التأثير: تصفّر عدادات استخدام AI Coach للفترة الحالية للحسابات المؤهلة وتُنشئ إشعارات. لا تلغي المشتريات أو الاشتراكات. مقفلة الآن لحين اختبار آمن؛ لا يوجد عطل بالزر.',
-  notificationWarning:'إشعار مخصص: رسالة فقط دون توكنات. هدية أو تعويض: قد يمنح 2,500 توكن لكل مستفيد وفق عقد الخادم. أكّد البريد أو عبارة الإرسال للجميع. الإرسال مقفل حاليًا حتى اختبار الأمان.',
-  notificationKindHelpCustom:'إشعار مخصّص: رسالة معلوماتية فقط دون توكنات.',
-  notificationKindHelpGift:'هدية: قد تمنح توكنات AI Coach، فتأكد من المستفيد والسجل.',
-  notificationKindHelpCompensation:'تعويض: بعد التحقق من بلاغ المستخدم، وقد يمنح توكنات وفق عقد الخادم.',
-  notificationAudienceAll:'جميع الحسابات: اكتب SEND TO ALL للتأكيد. ممنوع التجربة على مستخدمين حقيقيين.',
-  notificationAudienceEmail:'حساب واحد: أعد كتابة البريد نفسه للتأكيد.',
-  giftLabel:'هدية',compensationLabel:'تعويض',customLabel:'إشعار مخصص',
-  oneAccountLabel:'حساب واحد',allAccountsLabel:'جميع الحسابات',
-  moderatorsHelp:'المشرف يراجع المجتمع ولا يحصل على صلاحية مالية أو Premium تلقائيًا. المسؤول المحمي لا يمكن إزالته هنا.',
-  membersHelp:'هذه الصفحة تعلّق أو تستعيد مشاركة العضو في المجتمع فقط؛ لا تحذف حسابه ولا تلغي اشتراكه أو مشترياته.',
-  auditHelp:'سجل خادمي للمنح والسحب وتوقيتها ونتائجها. «دون تغيير» لا تعني تلقائيًا فشل العملية.',
-  noSuspendedMembers:'لا يوجد أعضاء موقوفون بالمجتمع.',noModerators:'لا يوجد مشرفون في القائمة.',
-  noReports:'لا توجد بلاغات في القائمة.',noPosts:'لا توجد منشورات بانتظار المراجعة.',
-  privacyNotice:'تظهر معلومات صاحب البلاغ للمسؤول المخوّل فقط، وتُستخدم للمتابعة والتعويض عند الاستحقاق.',
-  viewDetails:'قراءة التفاصيل كاملة',notProvided:'لم يُضف المستخدم نصًا',
-  statusLocked:'مقفلة حتى اجتياز الاختبارات',
+  operation:'العملية',active:'نشطة',revoked:'ملغاة',expired:'منتهية',open:'مفتوح',reviewing:'قيد المراجعة',closed:'مغلق',approved:'مقبول',rejected:'مرفوض',
+  protectedModerator:'مسؤول محمي',regularModerator:'مشرف',pendingStatus:'بانتظار المراجعة',unknownStatus:'غير معروفة',
+  reportSender:'صاحب البلاغ',reportEmail:'بريد صاحب البلاغ',accountIdentifier:'معرّف الحساب',reportId:'رقم البلاغ',postAuthor:'صاحب المنشور',
+  reportReason:'سبب البلاغ',contentType:'نوع المحتوى',contentIdentifier:'معرّف المحتوى',reportDate:'تاريخ البلاغ',
+  userMessage:'رسالة المستخدم',coachReply:'رد المدرب المُبلّغ عنه',postBody:'نص المنشور',reportRuntime:'بيئة عمل المدرب',
+  reportLocale:'لغة البلاغ',reportedStatus:'حالة البلاغ',reportDecision:'قرار المراجعة',
+  findReporterUnavailable:'تعذّر العثور على بريد صاحب البلاغ؛ قد يكون الحساب محذوفًا.',
+  identityExplanation:'هذا البريد لصاحب البلاغ، وقد يختلف عن صاحب المحتوى المُبلّغ عنه. يُستخدم لمتابعة البلاغ فقط.',
+  prepareCompensation:'إعداد رسالة تعويض لهذا المستخدم',prepareCompensationDone:'تم ملء بريد صاحب البلاغ في نموذج الإشعارات. راجع السبب والرسالة ثم أكد بنفسك؛ لم يُرسل أي شيء.',
+  senderNotAvailable:'هوية المُبلّغ غير متاحة لهذه القائمة',
+  reasonUnsafe:'إجابة غير آمنة',reasonInaccurate:'معلومات غير صحيحة',reasonOffensive:'محتوى مسيء',reasonOther:'سبب آخر',
+  runtimeLocalFallback:'رد محلي احتياطي عند تعذّر خدمة المدرب',
+  approve:'قبول المنشور',reject:'رفض المنشور',dismissReport:'إغلاق البلاغ دون حذف المحتوى',removeContent:'حذف المحتوى المخالف',
+  noViolation:'لا توجد مخالفة',confirmedIssue:'مشكلة سلامة مؤكدة',
+  reviewStatusOpen:'مفتوح',reviewStatusReviewed:'تمت المراجعة',
+  operationGrant:'منح اشتراك',operationRevoke:'سحب منحة',resultChanged:'تم تغيير الحالة',resultUnchanged:'دون تغيير',resultUnmatched:'لم يُعثر على المستفيد',
+  grantIdentifier:'معرّف المنحة',readOnlyTitle:'متاحة للقراءة فقط',whyLocked:'زر التنفيذ معطّل بإعداد أمني للخادم، وليس بسبب خطأ في الصفحة. يُفعَّل بعد اختبار حساب مخصّص والمصادقة الثنائية والتحقق من الإيصالات.',
+  individualResetHelp:'يُعيد ضبط استخدام المدرب الذكي للحساب المحدد في الفترة الحالية ويرسل له إشعارًا، دون حذف المحادثات أو الاشتراك. يحتاج تأكيدًا صريحًا.',
+  globalWarning:'عملية واسعة الأثر: تُصفّر عدادات استخدام AI Coach الحالية للحسابات المؤهلة، وتُنشئ إشعارات لهم. لا تلغي الاشتراكات أو مشتريات المتجر. الوظيفة مقفلة حاليًا حتى اعتماد اختبار آمن، وليست معطّلة بسبب عطل.',
+  notificationWarning:'إشعار مخصّص: رسالة فقط دون توكنات. الهدية والتعويض: قد يمنح كل مستفيد 2,500 توكن طبقًا لعقد الخادم. اختر المستفيد وأكد البريد أو عبارة الإرسال للجميع قبل التنفيذ. إرسال الإشعارات مقفل حتى اختبار الأمان.',
+  notificationKindHelpCustom:'إشعار مخصّص: نص إعلامي فقط، لا يمنح توكنات.',
+  notificationKindHelpGift:'هدية: رسالة مع أثر محتمل على رصيد توكنات AI Coach. تأكد من المستفيد والسجل.',
+  notificationKindHelpCompensation:'تعويض: استعمله بعد التحقق من بلاغ المستخدم؛ قد يمنح توكنات وفق سياسة الخادم.',
+  notificationAudienceAll:'سيصل إلى جميع الحسابات إذا فُعّل لاحقًا. اكتب SEND TO ALL في خانة التأكيد. لا تجربة على مستخدمين حقيقيين.',
+  notificationAudienceEmail:'سيصل إلى الحساب الذي تكتبه فقط. أعد كتابة البريد نفسه في خانة التأكيد.',
+  giftLabel:'هدية',compensationLabel:'تعويض',customLabel:'إشعار مخصّص',oneAccountLabel:'حساب واحد',allAccountsLabel:'جميع الحسابات',
+  moderatorsHelp:'المشرف مسؤول عن مراجعة محتوى المجتمع؛ لا يحصل تلقائيًا على صلاحية مالية أو اشتراك Premium. لا يمكن إزالة مسؤول محمي هنا.',
+  membersHelp:'هذه الصفحة للتحكم بوصول الحساب إلى ميزات المجتمع فقط: تعليق التفاعل ثم استعادته بعد المراجعة. لا تحذف حساب BIL ولا تلغي الاشتراكات أو مشتريات المتجر.',
+  auditHelp:'يعرض هذا السجل الأوامر المالية التي وثّقها الخادم: وقت العملية ونوعها ونتيجتها. «دون تغيير» تعني أن الأمر لم يغيّر المنحة، وليس فشلًا تقنيًا.',
+  noSuspendedMembers:'لا يوجد أعضاء معلّق وصولهم إلى المجتمع.',noModerators:'لا يوجد مشرفون في القائمة.',
+  noReports:'لا توجد بلاغات في القائمة الحالية.', noPosts:'لا توجد منشورات تنتظر المراجعة.',
+  unknownRecipient:'لا يظهر بريد المستفيد في هذه الصفحة من السجل؛ يمكن مراجعة المنحة في قسم الاشتراكات.',
+  privacyNotice:'تُعرض معلومات صاحب البلاغ للمسؤول المخوّل فقط، ويجب استخدامها للمتابعة والتعويض عند الاستحقاق.',
+  viewDetails:'عرض النص الكامل',hideDetails:'إخفاء التفاصيل',notProvided:'لم يُضف المستخدم نصًا',
+  statusActive:'نشطة',statusLocked:'مقفلة حتى اكتمال الاختبارات',
   resetAllButton:'مراجعة إعادة ضبط جميع الحسابات',resetIndividualButton:'مراجعة إعادة ضبط هذا الحساب',
-  suspendButton:'مراجعة تعليق وصول المجتمع',notificationSendButton:'مراجعة الإشعار وإرساله'
+  suspendButton:'مراجعة تعليق وصول المجتمع',notificationSendButton:'مراجعة الإشعار وإرساله',
+  emailOnlyHint:'بريد صاحب البلاغ يظهر عند وجود حساب مسجّل وصلاحية إدارية للتحقق.'
 });
 Object.assign(en,{
-  active:'Active',revoked:'Revoked',expired:'Expired',open:'Open',reviewing:'Under review',closed:'Closed',approved:'Approved',rejected:'Rejected',
-  protectedModerator:'Protected administrator',regularModerator:'Moderator',pendingStatus:'Awaiting review',
-  reportEmail:'Reporter email',accountIdentifier:'BIL account ID',reportId:'Report ID',
-  postAuthor:'Post author',reportReason:'Report reason',contentType:'Content type',contentIdentifier:'Content ID',
-  reportDate:'Reported on',userMessage:'User note',coachReply:'Reported AI Coach answer',postBody:'Post text',
-  reportRuntime:'AI Coach runtime',reportLocale:'Report language',reportDecision:'Review outcome',
+  operation:'Operation',active:'Active',revoked:'Revoked',expired:'Expired',open:'Open',reviewing:'Under review',closed:'Closed',approved:'Approved',rejected:'Rejected',
+  protectedModerator:'Protected administrator',regularModerator:'Moderator',pendingStatus:'Awaiting review',unknownStatus:'Unknown',
+  reportSender:'Report submitted by',reportEmail:'Reporter email',accountIdentifier:'Account ID',reportId:'Report ID',postAuthor:'Post author',
+  reportReason:'Report reason',contentType:'Content type',contentIdentifier:'Content ID',reportDate:'Reported on',
+  userMessage:'User message',coachReply:'Reported AI Coach response',postBody:'Post text',reportRuntime:'AI Coach runtime',
+  reportLocale:'Report language',reportedStatus:'Report status',reportDecision:'Review decision',
   findReporterUnavailable:'Reporter email unavailable; the account may have been deleted.',
-  identityExplanation:'This email belongs to the reporter, who may differ from the content author. Use it only for case follow-up.',
-  prepareCompensation:'Prepare compensation for this user',
-  prepareCompensationDone:'Reporter email was prefilled. Review the details and confirm manually; nothing has been sent.',
-  reasonUnsafe:'Unsafe answer',reasonInaccurate:'Inaccurate answer',reasonOffensive:'Offensive content',reasonOther:'Other reason',
-  runtimeLocalFallback:'Local fallback while AI Coach was unavailable',
-  approve:'Approve post',reject:'Reject post',dismissReport:'Dismiss report without removal',removeContent:'Remove violating content',
-  noViolation:'No violation',confirmedIssue:'Confirmed safety issue',reviewStatusReviewed:'Reviewed',
-  operation:'Operation',operationGrant:'Grant subscription',operationRevoke:'Revoke grant',resultChanged:'Status changed',
-  resultUnchanged:'No change',resultUnmatched:'No matching recipient',grantIdentifier:'Grant ID',
-  whyLocked:'Execution is locked by the server-side safety setting, not a broken button. Isolated account E2E, fresh TOTP, and receipt verification are required first.',
-  individualResetHelp:'Resets current-period AI Coach usage for one account and notifies the user; conversations and paid rights are retained.',
-  globalWarning:'High impact: resets current-period AI Coach usage counters for eligible accounts and sends notices. It does not cancel purchases or subscriptions. Locked pending isolated E2E testing.',
-  notificationWarning:'Custom: text only, no tokens. Gift or compensation: the server may grant 2,500 tokens per recipient. Confirm email or SEND TO ALL. Sending is locked pending security testing.',
-  notificationKindHelpCustom:'Custom notification: information only, without token grants.',
-  notificationKindHelpGift:'Gift: may grant AI Coach tokens. Verify recipient and receipt.',
-  notificationKindHelpCompensation:'Compensation: only after verifying a user report; may grant tokens.',
-  notificationAudienceAll:'All accounts: type SEND TO ALL. Never test on real users.',
-  notificationAudienceEmail:'One account: re-enter the exact email address.',
-  giftLabel:'Gift',compensationLabel:'Compensation',customLabel:'Custom notice',
-  oneAccountLabel:'One account',allAccountsLabel:'All accounts',
-  moderatorsHelp:'Moderators review community content; this does not confer financial access or Premium. Protected administrators cannot be removed here.',
-  membersHelp:'This suspends or restores access to community features only; it does not delete the BIL account or cancel a purchase or subscription.',
-  auditHelp:'Server-recorded grant/revoke commands, timestamps and outcomes. “No change” does not itself indicate a technical failure.',
-  noSuspendedMembers:'No suspended community members.',noModerators:'No moderators listed.',
-  noReports:'No reports in this queue.',noPosts:'No posts awaiting moderation.',
-  privacyNotice:'Reporter details are visible only to the authorized owner and should be used for case follow-up and justified compensation.',
-  viewDetails:'View full details',notProvided:'No note provided',
-  statusLocked:'Locked pending E2E verification',
-  resetAllButton:'Review reset of all accounts',resetIndividualButton:'Review this account reset',
-  suspendButton:'Review community suspension',notificationSendButton:'Review and send notification'
+  identityExplanation:'This email belongs to the reporter, who may differ from the reported content author. Use it only for case follow-up.',
+  prepareCompensation:'Prepare compensation notification for this user',prepareCompensationDone:'Reporter email was prefilled in Notifications. Review the reason and manually confirm; nothing was sent.',
+  senderNotAvailable:'Reporter identity is not available for this record',
+  reasonUnsafe:'Unsafe response',reasonInaccurate:'Inaccurate answer',reasonOffensive:'Offensive content',reasonOther:'Other reason',
+  runtimeLocalFallback:'Local fallback response while AI Coach was unavailable',
+  approve:'Approve post',reject:'Reject post',dismissReport:'Dismiss report, keep content',removeContent:'Remove violating content',
+  noViolation:'No violation',confirmedIssue:'Confirmed safety issue',
+  reviewStatusOpen:'Open',reviewStatusReviewed:'Reviewed',
+  operationGrant:'Grant subscription',operationRevoke:'Revoke grant',resultChanged:'State changed',resultUnchanged:'No change',resultUnmatched:'No matching recipient',
+  grantIdentifier:'Grant ID',readOnlyTitle:'Read-only access',whyLocked:'Execution is disabled by a server-side security lock, not a page error. An isolated test account, fresh MFA, and receipt verification are required before enabling writes.',
+  individualResetHelp:'Resets the AI Coach usage counters for the specified account in the current period and notifies the user. It does not delete conversations or purchased subscriptions.',
+  globalWarning:'High-impact operation: resets the current AI Coach usage counters for eligible accounts and issues notifications. Store purchases and subscriptions remain intact. Disabled by the server-side safety gate pending isolated E2E testing.',
+  notificationWarning:'Custom: sends text only and does not grant tokens. Gift or compensation: the server may grant 2,500 AI Coach tokens per recipient. Select recipients and confirm the email, or SEND TO ALL. Sending is locked until safety testing.',
+  notificationKindHelpCustom:'Custom notice: information only, no tokens added.',notificationKindHelpGift:'Gift: message with potential AI Coach token credit. Verify recipient and audit.',
+  notificationKindHelpCompensation:'Compensation: use after verifying a user report; may grant tokens under the server policy.',
+  notificationAudienceAll:'This would notify every account if activated. Type SEND TO ALL to confirm. Never test on real users.',
+  notificationAudienceEmail:'One registered account only. Re-enter the exact email to confirm.',
+  giftLabel:'Gift',compensationLabel:'Compensation',customLabel:'Custom notice',oneAccountLabel:'One account',allAccountsLabel:'All accounts',
+  moderatorsHelp:'Moderators review community content; this does not give finance access or Premium rights. Protected administrators cannot be removed here.',
+  membersHelp:'This manages access to community features only: suspend participation, then reinstate after review. It does not delete the BIL account or cancel subscriptions or purchases.',
+  auditHelp:'Shows server-recorded financial commands, timestamps and outcomes. “No change” means the grant record was not modified; it is not necessarily a technical failure.',
+  noSuspendedMembers:'No suspended community members.',noModerators:'No moderators listed.',noReports:'No reports in the current queue.',noPosts:'No posts waiting for review.',
+  unknownRecipient:'Recipient email is not available from this audit row. Check the grant in Subscriptions.',
+  privacyNotice:'Reporter details are visible only to authorized administrators and must be used only for case follow-up and justified compensation.',
+  viewDetails:'View full text',hideDetails:'Hide details',notProvided:'No additional user text',
+  statusActive:'Active',statusLocked:'Locked pending verification',
+  resetAllButton:'Review global AI Coach reset',resetIndividualButton:'Review individual AI Coach reset',
+  suspendButton:'Review community suspension',notificationSendButton:'Review and send notification',
+  emailOnlyHint:'Reporter email appears only when a registered identity is available to an authorized administrator.'
 });
 
+Object.assign(ar,{
+  earn:'طلبات Earn',postTitle:'عنوان المنشور',postBody:'النص الكامل للمنشور',postPhotos:'صور المنشور كاملة',postImage:'صورة',
+  postVisibility:'الخصوصية',postLocation:'الموقع',postTags:'الوسوم',postPoll:'استطلاع المنشور',postAuthorEmail:'بريد صاحب المنشور',
+  moderatorReview:'قرار مراجعة المنشور',viewOriginal:'فتح الصورة كاملة',imageUnavailable:'تعذرت معاينة الصور بالكامل. أُوقفت أزرار القرار لحماية المستخدم.',
+  imageEmpty:'لم يرفق المنشور صورًا',imageAll:'الصور المعتمدة للمنشور',earnEligible:'مكافأة Earn عند اعتماد المنشور',
+  earnDescription:'قبول المنشور المؤهل يمنح 5 توكنات AI، حتى 5 منشورات مكافأة للمستخدم خلال يوم UTC واحد؛ إذا بلغ الحد، تكون المكافأة 0. يحدد الخادم النتيجة ويمنع التكرار.',
+  earnQueueHelp:'طلبات Earn منفصلة عن قبول المنشور. تظهر المنشورات المعتمدة التي تحتاج مراجعة مكافأة مستقلة، ولا تُصرف مكافأة إضافية لمنشور سبق صرفها له.',
+  earnRequest:'فتح طلب مكافأة',earnApprove:'اعتماد مكافأة Earn',earnReject:'رفض طلب المكافأة',
+  earnRequestStatus:'حالة طلب المكافأة',earnNoRequest:'لم تُقدَّم مراجعة مكافأة',earnRequested:'طلب ينتظر قرارًا',
+  earnAlreadyHandled:'تمت مراجعة المكافأة',earnNoRows:'لا توجد طلبات مكافأة للمراجعة الآن.',
+  earnAmount:'مقدار Earn',earnDailyCap:'الحد اليومي',earnMaximum:'الحد الأقصى يوميًا',
+  earnReceipt:'نتيجة صرف التوكنات من الخادم',earnedGranted:'تم منح 5 AI Tokens',earnedZero:'0 توكنات: بلغ المستخدم حد المكافأة أو لم يستحقها',
+  earnNotification:'إشعار قبول المنشور: «تم اعتماد منشورك وأُكدت مكافأة 5 توكنات AI» عند الصرف الفعلي، أو إشعار اعتماد دون توكنات عند بلوغ الحد. إشعار الرفض: «منشورك يحتاج تعديلات». يُنشئ الخادم إيصالًا وإشعارًا داخل التطبيق ويضع الإشعار الفوري في قائمة الإرسال؛ نجاح التسليم الخارجي يحتاج تحققًا مستقلًا.',
+  reviewDetailsRequired:'يجب مشاهدة عنوان المنشور ونصه وصوره كاملة قبل اتخاذ قرار.',reviewAllAcknowledged:'راجعت عنوان المنشور ونصه وجميع الصور والمرفقات المتاحة.',
+  rejectionReason:'سبب الرفض (إلزامي ويُسجل للمراجعة)',reviewFreshMfa:'يتطلب القرار تأكيدًا حديثًا من المصادقة الثنائية.',
+  chooseDecision:'راجع القرار قبل التنفيذ',cancelReview:'إلغاء القرار',confirmReview:'متابعة إلى تأكيد TOTP',
+  reviewBlocked:'عمليات المراجعة معطلة حاليًا بإعداد خادمي مستقل. إذا كانت نشطة، يلزم مراجعة المنشور كاملًا ثم تأكيد TOTP جديد.',
+  reviewEnabled:'المراجعة متاحة للمسؤول المخوّل مع تأكيد TOTP حديث',
+  noteMediaExpiry:'روابط الصور خاصة ومؤقتة لمدة 3 دقائق؛ أعد تحميل المعاينة إذا انتهت.',
+  missingDetails:'تفاصيل المنشور غير مكتملة؛ لا يمكن قبول أو رفض قبل معاينتها.',
+  decisionApproved:'تم قبول المنشور',decisionRejected:'تم رفض المنشور',
+  rewardDecisionFailed:'لم يؤكد الخادم منح أي توكنات. راجع الإيصال ولا تعاود التنفيذ تلقائيًا.',
+  notificationPreview:'نص الإشعار المتوقع',approvedWithReward:'تم اعتماد منشورك وأُكدت مكافأة 5 توكنات AI. Post approved; +5 AI tokens confirmed.',approvedWithoutReward:'تم اعتماد منشورك، لكن حد المكافأة اليومي اكتمل. Post approved; the daily reward limit was reached.',rejectedCopy:'منشورك يحتاج تعديلات. Your post needs changes.',receiptExplanation:'يصرف الخادم المكافأة بحسب الحد اليومي ويكتب إيصالًا غير قابل للتكرار. قد يتأخر وصول Push الفعلي.',
+  serverReview:'بوابة مراجعة المحتوى وEarn',viewGrantExplanation:'معرّف المنحة: رمز تقني فريد لربط عملية المنح بسجل السحب؛ ليس بريد الحساب ولا رقم شراء متجر.',
+  noEarnPreview:'تعذرت مراجعة تفاصيل المكافأة؛ لا يتم أي صرف دون معاينة.',
+  reviewOutcome:'نتيجة القرار',receiptTokens:'التوكنات الفعلية',rewardCapped:'بلغ حد المكافآت اليومي',
+  noMediaApproval:'منع القرار لأن بعض الصور لم تُعايَن.',
+  mediaLoaded:'تم التحقق من النص والصور',postContentChanged:'تغير المنشور أثناء المراجعة؛ حدّث تفاصيله ولا تستخدم قرارًا قديمًا.',
+  moderationPolicy:'نظام المراجعة والمكافأة',reportNotice:'يجب فحص النص والصور والبلاغ وسبب القرار قبل النشر أو الإزالة، مع عدم كشف بيانات المستخدم خارج لوحة الإدارة.',
+  pendingPosts:'المنشورات بانتظار المراجعة',reviewPolicyDetails:'مكافآت Earn وسياسة الإشعار',noClaimOfDelivery:'الإيصال يثبت قرار الخادم فقط، لا يثبت وصول إشعار Push إلى الهاتف.',
+  authorizedReview:'بوابة المراجعة الآمنة',moderationLockedReason:'مقفلة لأن خطوة تحقق إدارية أو اختبارًا مطلوبًا لم يكتمل، وليست لأن الزر معطّل عشوائيًا.'
+});
+Object.assign(en,{
+  earn:'Earn requests',postTitle:'Full post title',postBody:'Complete post text',postPhotos:'All post photos',postImage:'Image',
+  postVisibility:'Visibility',postLocation:'Location',postTags:'Hashtags',postPoll:'Poll',postAuthorEmail:'Post author email',
+  moderatorReview:'Post moderation decision',viewOriginal:'Open full-size image',imageUnavailable:'Image previews could not be verified; moderation is blocked until all evidence can be reviewed.',
+  imageEmpty:'This post has no images',imageAll:'Verified post images',earnEligible:'Earn on post approval',
+  earnDescription:'An eligible approval earns 5 AI tokens, for at most 5 rewarded posts per user per UTC day. Once the daily cap is reached, the award is 0. SQL decides the real award and prevents duplicates.',
+  earnQueueHelp:'Earn requests are separate from post publishing. Approved posts needing an additional reward review appear here; already credited posts never receive duplicate rewards.',
+  earnRequest:'Request reward review',earnApprove:'Approve Earn reward',earnReject:'Reject reward request',
+  earnRequestStatus:'Earn request status',earnNoRequest:'No reward review requested',earnRequested:'Reward decision pending',
+  earnAlreadyHandled:'Reward already reviewed',earnNoRows:'No Earn requests awaiting review.',
+  earnAmount:'Earn amount',earnDailyCap:'Daily reward cap',earnMaximum:'Maximum per UTC day',
+  earnReceipt:'Actual token grant receipt',earnedGranted:'5 AI tokens credited',earnedZero:'0 tokens: daily cap or ineligible',
+  earnNotification:'If 5 tokens are granted, the app notifies the user that the post was approved and +5 AI tokens were confirmed. At the daily limit, approval is still communicated but no tokens are awarded. Rejected posts receive “Your post needs changes.” In-app receipts and push delivery queues are created by SQL; actual push delivery needs separate verification.',
+  reviewDetailsRequired:'Inspect the entire title, text and all images before acting.',reviewAllAcknowledged:'I have inspected the full title, content and every available attachment.',
+  rejectionReason:'Rejection reason (required and audited)',reviewFreshMfa:'A fresh authenticator verification is required.',
+  chooseDecision:'Review before applying this decision',cancelReview:'Cancel review',confirmReview:'Continue to TOTP verification',
+  reviewBlocked:'Moderation is disabled by a separate backend gate. When enabled, actions require reviewing complete content and fresh TOTP.',
+  reviewEnabled:'Authorized moderation available with a fresh TOTP verification',
+  noteMediaExpiry:'Private signed previews expire in 3 minutes; refresh if needed.',
+  missingDetails:'Incomplete review evidence; cannot publish or reject yet.',
+  decisionApproved:'Post approved',decisionRejected:'Post rejected',
+  rewardDecisionFailed:'The backend did not confirm any tokens. Reconcile the receipt, do not retry blindly.',
+  notificationPreview:'Expected notification copy',approvedWithReward:'تم اعتماد منشورك وأُكدت مكافأة 5 توكنات AI. Post approved; +5 AI tokens confirmed.',approvedWithoutReward:'تم اعتماد منشورك، لكن حد المكافأة اليومي اكتمل. Post approved; the daily reward limit was reached.',rejectedCopy:'منشورك يحتاج تعديلات. Your post needs changes.',receiptExplanation:'The server enforces the daily cap, returns an idempotent receipt and queues notifications. Actual push delivery may be delayed.',
+  serverReview:'Content moderation and Earn gateway',viewGrantExplanation:'A grant ID is a unique technical identifier linking grant and revoke audit receipts; it is neither an email nor a store purchase ID.',
+  noEarnPreview:'Reward content not fully verified; nothing was awarded.',
+  reviewOutcome:'Decision outcome',receiptTokens:'Actual tokens granted',rewardCapped:'Daily reward limit reached',
+  noMediaApproval:'Cannot approve without reviewing every photo.',
+  mediaLoaded:'Text and images verified',postContentChanged:'This post changed while you were reviewing it. Refresh the content; do not apply a stale decision.',
+  moderationPolicy:'Review and rewards policy',reportNotice:'Inspect the complete content, images and report reason before publishing/removing. Keep account information visible only to administrators.',
+  pendingPosts:'Posts awaiting review',reviewPolicyDetails:'Earn rewards and notifications',noClaimOfDelivery:'The receipt proves the server decision, not guaranteed delivery to a device.',
+  authorizedReview:'Secure moderation gateway',moderationLockedReason:'Locked because a required administrative validation or test has not completed, not a broken button.'
+});
 const dict={ar,en};
-const state={language:'ar',page:'overview',queue:'posts',email:'',factor:null,finance:null,ops:null,user:null,financeRows:[],auditRows:[],mods:[],members:[],queueRows:[],financeOffset:0,hasMore:false,pendingCommand:null,authenticated:false,modalResolve:null,loading:false};
+const state={language:'ar',page:'overview',queue:'posts',email:'',factor:null,finance:null,ops:null,user:null,financeRows:[],auditRows:[],mods:[],members:[],queueRows:[],review:null,earnPolicy:null,financeOffset:0,hasMore:false,pendingCommand:null,authenticated:false,modalResolve:null,loading:false};
 const $ = id=>document.getElementById(id);
 const tr=k=>(dict[state.language][k]??k);
 const elem=(name,text,cls)=>{const e=document.createElement(name);if(text!==undefined&&text!==null)e.textContent=String(text);if(cls)e.className=cls;return e};
@@ -109,152 +174,224 @@ function authUi(view){$('auth-view').hidden=view==='admin';$('admin-view').hidde
 function count(rows){return Array.isArray(rows)?rows.length:'—'}
 function rowsOf(data){if(Array.isArray(data))return data;if(!data||typeof data!=='object')return[];if(Array.isArray(data.rows))return data.rows;if(Array.isArray(data.items))return data.items;if(Array.isArray(data.reports))return data.reports;if(Array.isArray(data.posts))return data.posts;return []}
 function fmtDate(v){if(!v)return '—';const d=new Date(v);return Number.isNaN(+d)?'—':new Intl.DateTimeFormat(state.language,{dateStyle:'medium',timeStyle:'short'}).format(d)}
-function localizedState(value) {
- const code=String(value??'').toLowerCase();
- const labels={active:'active',revoked:'revoked',expired:'expired',open:'open',reviewing:'reviewing',
-   closed:'closed',approved:'approved',rejected:'rejected',reviewed:'reviewStatusReviewed',
-   pending:'pendingStatus',no_violation:'noViolation',confirmed_safety_issue:'confirmedIssue',
-   changed:'resultChanged',unchanged:'resultUnchanged',unmatched:'resultUnmatched'};
- return labels[code]?tr(labels[code]):String(value??'—');
+function statusLabel(value) {
+  const code=String(value??'').toLowerCase();
+  const map={active:'active',revoked:'revoked',expired:'expired',open:'open',reviewing:'reviewing',closed:'closed',
+    approved:'approved',rejected:'rejected',reviewed:'reviewStatusReviewed',pending:'pendingStatus',
+    no_violation:'noViolation',confirmed_safety_issue:'confirmedIssue',protected:'protectedModerator',changed:'resultChanged',unchanged:'resultUnchanged',unmatched:'resultUnmatched'};
+  return map[code]?tr(map[code]):(value??'—');
 }
 function badge(value){
- const code=String(value??'').toLowerCase(),el=elem('span',localizedState(value),'pill');
- el.dataset.status=code;
- if(/revoked|expired|rejected|closed|confirmed_safety_issue/.test(code))el.classList.add('revoked');
- return el;
+  const code=String(value??'').toLowerCase();
+  const span=elem('span',statusLabel(value),'pill');
+  span.setAttribute('data-status',code);
+  if(/revoked|expired|rejected|removed|closed|inactive|confirmed_safety_issue/.test(code))span.classList.add('revoked');
+  return span;
 }
-function shortId(value){
- const txt=String(value??'');
- const span=elem('span',txt.length>22?txt.slice(0,8)+'…'+txt.slice(-5):txt||'—','short-id');
- span.dir='ltr';span.title=txt;return span;
+function identifier(id) {
+  const s=String(id??'');
+  const el=elem('span',s.length>23?s.slice(0,8)+'…'+s.slice(-5):(s||'—'),'short-id');
+  el.dir='ltr';el.title=s;return el;
 }
-function emailNode(value){
- const node=elem('span',value??'—','email-field');
- node.dir='ltr';return node;
+function textNode(value,{email=false,code=false}={}){
+  if(code)return identifier(value);
+  const e=elem('span',value??'—',email?'bidi-isolate email-field':'bidi-isolate');
+  if(email || /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(String(value??'')))e.dir='ltr';
+  return e;
 }
 function empty(parent,text=tr('empty')){parent.replaceChildren(elem('div',text,'empty-state'))}
 function addRow(container,key,value,className){const row=elem('div',null,'status-row');row.append(elem('span',key),elem('strong',value,className));container.append(row)}
 function makeTable(container,headers,rows,render,emptyMessage=tr('empty')){
- container.classList.remove('empty-state');container.replaceChildren();
- if(!Array.isArray(rows)||!rows.length){empty(container,emptyMessage);return}
- const table=elem('table',null,'data-table'),head=elem('thead'),trh=elem('tr');
- for(const label of headers){const th=elem('th',label);th.scope='col';trh.append(th)}
- head.append(trh);const body=elem('tbody');
- for(const data of rows){
-   const row=elem('tr');
-   render(data).forEach((cell,i)=>{
-     const td=elem('td');td.dataset.label=headers[i]||'';
-     if(cell instanceof Node)td.append(cell);else td.textContent=String(cell??'—');
-     row.append(td);
-   });
-   body.append(row);
- }
- table.append(head,body);container.append(table);
+  container.classList.remove('empty-state');
+  container.replaceChildren();
+  if(!Array.isArray(rows)||rows.length===0){empty(container,emptyMessage);return}
+  container.classList.remove('empty-state');
+  const table=elem('table',null,'data-table'),head=elem('thead'),trh=elem('tr');
+  for(const x of headers){const h=elem('th',x);h.scope='col';trh.append(h)}head.append(trh);
+  const body=elem('tbody');
+  for(const record of rows){
+    const row=elem('tr');const columns=render(record);
+    for(let i=0;i<columns.length;i++){
+      const cell=columns[i],td=elem('td');td.dataset.label=headers[i]||'';
+      if(cell instanceof Node)td.append(cell);else td.append(textNode(cell));
+      row.append(td);
+    }
+    body.append(row);
+  }
+  table.append(head,body);container.append(table);
 }
-function recordField(label,value,{email=false,code=false,paragraph=false}={}){
- const field=elem('div',null,'report-field'),dt=elem('dt',label,'report-field-label'),dd=elem('dd',null,'report-field-value');
- if(code)dd.append(shortId(value));
- else if(email)dd.append(emailNode(value));
- else if(paragraph){
-   const txt=String(value??'').trim();
-   if(txt.length>200){
-     const details=elem('details',null,'report-disclosure');
-     details.append(elem('summary',txt.slice(0,140)+'…','report-summary'),elem('p',txt,'report-long-text'));
-     dd.append(details);
-   }else dd.append(elem('p',txt||tr('notProvided'),'report-long-text'));
- }else dd.textContent=String(value??'—');
- field.append(dt,dd);return field;
+function displayDetail(label,value,{email=false,identifierValue=false,paragraph=false,muted=false}={}){
+  const wrap=elem('div',null,'report-field');
+  wrap.append(elem('dt',label,'report-field-label'));
+  const dd=elem('dd',null,'report-field-value');
+  if(identifierValue)dd.append(identifier(value));
+  else if(paragraph){
+    const raw=String(value??'').trim();
+    if(raw.length>1800){
+      const details=elem('details',null,'report-disclosure');
+      details.open=true;details.append(elem('summary',raw.slice(0,145)+'…','report-summary'),elem('p',raw,'report-long-text'));
+      dd.append(details);
+    }else dd.append(elem('p',raw||tr('notProvided'),'report-long-text'));
+  }else dd.append(textNode(value,{email}));
+  if(muted)dd.classList.add('soft');
+  wrap.append(dd);
+  return wrap;
+}
+function labelReason(value){
+  const map={unsafe:'reasonUnsafe',inaccurate:'reasonInaccurate',offensive:'reasonOffensive',other:'reasonOther'};
+  return tr(map[String(value??'').toLowerCase()]||String(value??'')||'reasonOther');
+}
+function labelRuntime(value){return value==='local_fallback'?tr('runtimeLocalFallback'):String(value||'—').replaceAll('_',' ')}
+function renderReporterContact(card,row,{reporter=true}={}){
+  const email=reporter?row?.reporter_email:(row?.author_email??row?.reporter_email);
+  const ownerId=row?.reporter_user_id??row?.reporter_id??null;
+  const area=elem('div',null,'report-identity');
+  area.append(displayDetail(reporter?tr('reportEmail'):tr('postAuthorEmail'),email||tr('findReporterUnavailable'),{email:!!email}));
+  if(ownerId)area.append(displayDetail(tr('accountIdentifier'),ownerId,{identifierValue:true}));
+  if(reporter)area.append(elem('p',tr('identityExplanation'),'privacy-note'));
+  if(email && reporter){
+    const button=elem('button',tr('prepareCompensation'),'secondary compensation-draft');button.type='button';
+    button.addEventListener('click',()=>prepareCompensation(email));
+    area.append(button);
+  }
+  card.append(area);
 }
 function prepareCompensation(email){
- if(!state.authenticated||!state.user||!email)return;
- const f=$('notification-form');
- f.elements.namedItem('kind').value='compensation';
- f.elements.namedItem('audience').value='email';
- f.elements.namedItem('email').value=email;
- f.elements.namedItem('confirm_target').value='';
- f.elements.namedItem('acknowledge_token_grant').checked=false;
- f.elements.namedItem('message').value='';
- updateNotificationHelp();setPage('notifications');showNotice(tr('prepareCompensationDone'));
+  if(!state.authenticated||!state.user)return;
+  const form=$('notification-form');
+  form.elements.namedItem('kind').value='compensation';
+  form.elements.namedItem('audience').value='email';
+  form.elements.namedItem('email').value=email;
+  form.elements.namedItem('confirm_target').value='';
+  form.elements.namedItem('acknowledge_token_grant').checked=false;
+  form.elements.namedItem('message').value='';
+  updateNotificationHelp();
+  setPage('notifications');
+  showNotice(tr('prepareCompensationDone'));
 }
-function reporterPanel(card,row,reporter=true){
- const email=row?.reporter_email;
- const box=elem('section',null,'report-identity');
- box.append(recordField(tr('reportEmail'),email||tr('findReporterUnavailable'),{email:!!email}));
- const id=row?.reporter_user_id??row?.reporter_id??null;
- if(id)box.append(recordField(tr('accountIdentifier'),id,{code:true}));
- if(reporter)box.append(elem('p',tr('identityExplanation'),'privacy-note'));
- if(email&&reporter){
-  const button=elem('button',tr('prepareCompensation'),'secondary compensation-draft');
-  button.type='button';button.addEventListener('click',()=>prepareCompensation(email));box.append(button);
- }
- card.append(box);
+function validReviewImage(url){
+  if(typeof url!=='string'||url.length>2000)return false;
+  try{
+    const u=new URL(url);
+    return u.origin===new URL(SUPABASE_URL).origin && u.protocol==='https:' &&
+      u.pathname.startsWith('/storage/v1/object/sign/community-post-images/') &&
+      u.searchParams.has('token');
+  }catch{return false}
 }
-function reasonText(value){
- const labels={unsafe:'reasonUnsafe',inaccurate:'reasonInaccurate',offensive:'reasonOffensive',other:'reasonOther'};
- return labels[String(value||'').toLowerCase()]?tr(labels[String(value).toLowerCase()]):String(value||tr('reasonOther'));
+function cardButtonsForMediaRow(row){return Array.isArray(row._reviewButtons)?row._reviewButtons:[]}
+function reviewPictureGallery(images,count,row){
+  const figure=elem('section',null,'post-gallery');
+  figure.append(elem('h4',`${tr('postPhotos')} (${count})`));
+  if(!Array.isArray(images)||images.length!==count||images.some(x=>!validReviewImage(x.url))){
+    figure.append(elem('p',tr('imageUnavailable'),'warning'));return figure;
+  }
+  if(!count){figure.append(elem('p',tr('imageEmpty'),'muted'));return figure}
+  const grid=elem('div',null,'post-gallery-grid');
+  for(let i=0;i<images.length;i++){
+    const img=images[i];
+    const wrap=elem('figure',null,'post-image-wrap');
+    const a=elem('a');a.href=img.url;a.target='_blank';a.rel='noopener noreferrer';
+    a.setAttribute('aria-label',`${tr('viewOriginal')} ${i+1}`);
+    const picture=elem('img');picture.src=img.url;picture.loading='lazy';
+    picture.decoding='async';picture.referrerPolicy='no-referrer';
+    picture.alt=`${tr('postImage')} ${i+1} / ${count}`;
+    picture.addEventListener('error',()=>{wrap.classList.add('media-broken');
+      row.media_complete=false;picture.alt=tr('imageUnavailable');
+      for(const button of cardButtonsForMediaRow(row))button.disabled=true;
+      showNotice(tr('imageUnavailable'),true)});
+    a.append(picture);wrap.append(a,elem('figcaption',`${tr('postImage')} ${i+1} / ${count}`));grid.append(wrap);
+  }
+  figure.append(grid,elem('p',tr('noteMediaExpiry'),'micro'));return figure;
 }
 function renderRecords(container,rows,queue){
- container.classList.remove('empty-state');container.replaceChildren();
- if(!Array.isArray(rows)||!rows.length){
-   empty(container,tr(queue==='posts'?'noPosts':queue==='reports'?'noReports':'empty'));return;
- }
- for(const row of rows){
-   if(!row||typeof row!=='object'||Array.isArray(row))continue;
-   const card=elem('article',null,'report-card');
-   const h=elem('header',null,'report-header');
-   h.append(elem('strong',tr(queue==='posts'?'posts':queue==='reports'?'reports':'safety'),'report-title'),
-    badge(row.status??row.moderation_status));card.append(h);
-   const dl=elem('dl',null,'report-grid');
-   const id=row.report_id??row.id??row.post_id;
-   if(queue==='posts'){
-     dl.append(recordField(tr('postAuthor'),row.author_name??row.author_id??'—'));
-     if(row.reporter_email)reporterPanel(card,row,false);
-     dl.append(recordField(tr('reportDate'),fmtDate(row.created_at)));
-     dl.append(recordField(tr('postBody'),row.body,{paragraph:true}));
-     dl.append(recordField(tr('contentIdentifier'),id,{code:true}));
-   }else if(queue==='reports'){
-     reporterPanel(card,row);
-     dl.append(recordField(tr('reportReason'),row.reason,{paragraph:true}));
-     dl.append(recordField(tr('contentType'),String(row.target_kind??'—')));
-     dl.append(recordField(tr('reportDate'),fmtDate(row.created_at)));
-     dl.append(recordField(tr('reportId'),id,{code:true}));
-     if(row.target_id)dl.append(recordField(tr('contentIdentifier'),row.target_id,{code:true}));
-   }else if(queue==='safety'){
-     reporterPanel(card,row);
-     dl.append(recordField(tr('reportReason'),reasonText(row.reason)));
-     dl.append(recordField(tr('reportDate'),fmtDate(row.created_at)));
-     dl.append(recordField(tr('reportLocale'),String(row.locale??'—').toUpperCase()));
-     dl.append(recordField(tr('reportRuntime'),row.runtime==='local_fallback'?tr('runtimeLocalFallback'):String(row.runtime??'—').replaceAll('_',' ')));
-     if(row.user_note)dl.append(recordField(tr('userMessage'),row.user_note,{paragraph:true}));
-     if(row.answer_text)dl.append(recordField(tr('coachReply'),row.answer_text,{paragraph:true}));
-     if(row.decision)dl.append(recordField(tr('reportDecision'),localizedState(row.decision)));
-     dl.append(recordField(tr('reportId'),id,{code:true}));
-   }
-   card.append(dl);
-   const actions=elem('div',null,'report-actions');
-   const choices=queue==='posts'?[[tr('approve'),'approved'],[tr('reject'),'rejected']]:
-     queue==='reports'?[[tr('dismissReport'),'dismiss'],[tr('removeContent'),'remove']]:
-       queue==='safety'?[[tr('noViolation'),'no_violation'],[tr('confirmedIssue'),'confirmed_safety_issue']]:[];
-   for(const [label,decision] of choices){
-     const b=elem('button',label,['rejected','remove','confirmed_safety_issue'].includes(decision)?'danger':'secondary');
-     b.type='button';b.disabled=!state.ops?.writes_enabled || queue==='safety'&&row.status==='reviewed';
-     b.title=b.disabled?tr('whyLocked'):label;
-     b.addEventListener('click',()=>reviewQueueRecord(queue,row,decision));actions.append(b);
-   }
-   card.append(actions);container.append(card);
- }
+  container.classList.remove('empty-state');container.replaceChildren();
+  const emptyKey=queue==='posts'?'noPosts':queue==='earn'?'earnNoRows':queue==='reports'?'noReports':'empty';
+  if(!Array.isArray(rows)||!rows.length){empty(container,tr(emptyKey));return}
+  for(const row of rows){
+    if(!row||typeof row!=='object'||Array.isArray(row))continue;
+    const card=elem('article',null,'report-card case-card');
+    const id=row.post_id??row.report_id??row.id;
+    const heading=elem('strong',queue==='posts'?tr('pendingPosts'):queue==='earn'?tr('earn'):queue==='safety'?tr('safety'):tr('reports'),'report-title');
+    const hdr=elem('header',null,'report-header');hdr.append(heading,badge(row.status??row.moderation_status));card.append(hdr);
+    const dl=elem('dl',null,'report-grid');
+    if(queue==='posts'||queue==='earn'){
+      const posterEmail=row.author_email??row.reporter_email;
+      const contact=elem('div',null,'report-identity');
+      contact.append(displayDetail(tr('postAuthorEmail'),posterEmail??'—',{email:!!posterEmail}));
+      if(row.author_id)contact.append(displayDetail(tr('accountIdentifier'),row.author_id,{identifierValue:true}));
+      card.append(contact);
+      dl.append(displayDetail(tr('postAuthor'),row.author_name??'—'));
+      dl.append(displayDetail(tr('postTitle'),row.title??'—',{paragraph:true}));
+      dl.append(displayDetail(tr('postBody'),row.body??tr('notProvided'),{paragraph:true}));
+      dl.append(displayDetail(tr('reportDate'),fmtDate(row.created_at)));
+      dl.append(displayDetail(tr('contentIdentifier'),id,{identifierValue:true}));
+      if(row.visibility)dl.append(displayDetail(tr('postVisibility'),row.visibility));
+      if(row.location)dl.append(displayDetail(tr('postLocation'),row.location));
+      if(Array.isArray(row.hashtags)&&row.hashtags.length)dl.append(displayDetail(tr('postTags'),row.hashtags.join(' · ')));
+      if(row.poll?.question)dl.append(displayDetail(tr('postPoll'),`${row.poll.question} — ${(row.poll.options??[]).join(' • ')}`,{paragraph:true}));
+      if(queue==='earn'){
+        const st=row.request_id?(row.status==='requested'?tr('earnRequested'):tr('earnAlreadyHandled')):tr('earnNoRequest');
+        dl.append(displayDetail(tr('earnRequestStatus'),st));
+      }
+    }else if(queue==='reports'){
+      renderReporterContact(card,row,{reporter:true});
+      dl.append(displayDetail(tr('reportReason'),row.reason??tr('notProvided'),{paragraph:true}));
+      dl.append(displayDetail(tr('contentType'),row.target_kind??'—'));
+      dl.append(displayDetail(tr('reportDate'),fmtDate(row.created_at)));
+      dl.append(displayDetail(tr('reportId'),id,{identifierValue:true}));
+      if(row.target_id)dl.append(displayDetail(tr('contentIdentifier'),row.target_id,{identifierValue:true}));
+    }else if(queue==='safety'){
+      renderReporterContact(card,row,{reporter:true});
+      dl.append(displayDetail(tr('reportReason'),labelReason(row.reason)));
+      dl.append(displayDetail(tr('reportDate'),fmtDate(row.created_at)));
+      dl.append(displayDetail(tr('reportLocale'),String(row.locale||'—').toUpperCase()));
+      dl.append(displayDetail(tr('reportRuntime'),labelRuntime(row.runtime)));
+      if(row.user_note)dl.append(displayDetail(tr('userMessage'),row.user_note,{paragraph:true}));
+      if(row.answer_text)dl.append(displayDetail(tr('coachReply'),row.answer_text,{paragraph:true}));
+      if(row.decision)dl.append(displayDetail(tr('reportDecision'),statusLabel(row.decision)));
+      dl.append(displayDetail(tr('reportId'),id,{identifierValue:true}));
+    }
+    card.append(dl);
+    if(queue==='posts'||queue==='earn'){
+      card.append(reviewPictureGallery(row.images||[],Number(row.media_count??(row.images?.length??0)),row));
+      if(row.media_complete!==true)card.append(elem('p',tr('imageUnavailable'),'warning'));
+    }
+    const actions=elem('div',null,'report-actions');
+    const canWrite=state.review?.moderation_writes_enabled===true;
+    const specs=queue==='posts'?[[tr('approve'),'approved'],[tr('reject'),'rejected']]:
+      queue==='earn'?row.request_id && row.status==='requested'?
+        [[tr('earnApprove'),'earn-approve'],[tr('earnReject'),'earn-reject']]:
+        !row.request_id?[[tr('earnRequest'),'earn-request']]:[]:
+      queue==='reports'?[[tr('dismissReport'),'dismiss'],[tr('removeContent'),'remove']]:
+      queue==='safety'?[[tr('noViolation'),'no_violation'],[tr('confirmedIssue'),'confirmed_safety_issue']]:[];
+    for(const [label,decision] of specs){
+      const button=elem('button',label,(decision==='rejected'||decision==='earn-reject'||decision==='remove'||decision==='confirmed_safety_issue')?'danger':'secondary');
+      button.type='button';button.classList.add('review-write');
+      const isVerified=queue!=='posts'&&queue!=='earn'||row.media_complete===true;
+      button.disabled=!canWrite||!isVerified||queue==='safety'&&row.status==='reviewed';
+      button.title=!canWrite?tr('reviewBlocked'):!isVerified?tr('missingDetails'):label;
+      button.addEventListener('click',()=>reviewQueueRecord(queue,row,decision));(row._reviewButtons??=[]).push(button);actions.append(button);
+    }
+    if(queue==='posts'||queue==='earn'){
+      const expand=elem('button',tr('refresh'),'secondary');expand.type='button';
+      expand.title=tr('reviewDetailsRequired');
+      expand.addEventListener('click',()=>loadQueue());actions.append(expand);
+    }
+    card.append(actions);container.append(card);
+  }
 }
+
 function previewRows(container,rows,label='id',queue=null){renderRecords(container,rows,queue)}
 function updateNotificationHelp(){
- const form=$('notification-form');
- if(!form)return;
- const kind=form.elements.namedItem('kind').value,audience=form.elements.namedItem('audience').value;
- $('notification-kind-help').textContent=tr('notificationKindHelp'+kind[0].toUpperCase()+kind.slice(1));
- $('notification-audience-help').textContent=tr(audience==='all'?'notificationAudienceAll':'notificationAudienceEmail');
- const email=form.elements.namedItem('email');email.required=audience==='email';email.disabled=audience!=='email';
- if(audience==='all')email.value='';
- const ack=form.elements.namedItem('acknowledge_token_grant');ack.required=kind!=='custom';
- if(kind==='custom')ack.checked=false;
+  const form=$('notification-form'),kind=form.elements.namedItem('kind').value;
+  const aud=form.elements.namedItem('audience').value;
+  $('notification-kind-help').textContent=tr('notificationKindHelp'+kind[0].toUpperCase()+kind.slice(1));
+  $('notification-audience-help').textContent=tr(aud==='all'?'notificationAudienceAll':'notificationAudienceEmail');
+  const target=form.elements.namedItem('email');target.required=aud==='email';target.disabled=aud!=='email';
+  if(aud==='all')target.value='';
+  const tokenAck=form.elements.namedItem('acknowledge_token_grant');
+  tokenAck.required=kind!=='custom';
+  if(kind==='custom')tokenAck.checked=false;
 }
 function token(){return crypto.randomUUID()}
 async function api(type,body){const {data:{session},error}=await sdk.auth.getSession();if(error||!session?.access_token)throw new Error('authentication_required');const response=await fetch(edge[type],{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'content-type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY,'authorization':`Bearer ${session.access_token}`},body:JSON.stringify(body)});let data;try{data=await response.json()}catch{throw new Error('invalid_backend_response')}if(!response.ok){const e=new Error(data?.error||'backend_unavailable');e.httpStatus=response.status;e.detail=data;throw e}return data}
@@ -265,8 +402,8 @@ async function enterMfaFlow(){authUi('mfa');const {data}=await sdk.auth.mfa.getA
 async function verifyFactor(code){if(!state.factor?.id)throw new Error(tr('missingMfa'));if(!/^\d{6,8}$/.test(code))throw new Error('invalid_totp');const {data,error}=await sdk.auth.mfa.challengeAndVerify({factorId:state.factor.id,code});if(error)throw error;return data}
 async function verifyMfa(ev){ev.preventDefault();const btn=ev.submitter;btn.disabled=true;try{const code=$('mfa-code').value.trim();await verifyFactor(code);$('mfa-code').value='';$('mfa-area').hidden=true;await loadAdmin()}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
 async function verifyEnroll(ev){ev.preventDefault();const btn=ev.submitter;btn.disabled=true;try{await verifyFactor($('enroll-code').value.trim());$('enroll-code').value='';$('enroll-area').hidden=true;await loadAdmin()}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
-async function loadAdmin(){const {data:{user}}=await sdk.auth.getUser();if(!user)throw new Error('invalid_session');state.user=user;const finance=await api('finance',{operation:'status'});if(finance.access!=='authorized')throw new Error('unauthorized');state.finance=finance;let ops=null;try{ops=await api('ops',{operation:'status'})}catch(e){ops={access:'unavailable',error:e.message,writes_enabled:false}}state.ops=ops;state.authenticated=true;authUi('admin');restorePending();updateStatuses();await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue()]);updateStatuses()}
-function updateStatuses(){const finance=state.finance?.access==='authorized';const ops=state.ops?.access==='authorized';setText('top-status',finance?tr('online'):tr('offline'));$('top-status').classList.toggle('connected',finance);const container=$('status-cards');container.replaceChildren();addRow(container,tr('financeGateway'),finance?tr('active'):tr('notAvailable'),finance?'':'bad');addRow(container,tr('operationsGateway'),ops?tr('active'):tr('notAvailable'),ops?'':'bad');addRow(container,tr('twoFactor'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');addRow(container,tr('protectedRole'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');const lock=state.ops?.writes_enabled===true;for(const b of document.querySelectorAll('.ops-write'))b.disabled=!lock;$('ops-lock').textContent=lock?tr('testRequired'):tr('statusLocked');for(const note of document.querySelectorAll('.write-explanation'))note.hidden=lock;const identity=$('identity-content');identity.replaceChildren();addRow(identity,tr('signedIn'),state.user?.email||'—');addRow(identity,tr('twoFactor'),state.authenticated?'AAL2':'—');addRow(identity,tr('financeGateway'),finance?(state.finance.financial_writes_enabled?tr('active'):tr('locked')):tr('notAvailable'),finance?'':'bad');addRow(identity,tr('operationsGateway'),ops?(lock?tr('active'):tr('locked')):tr('notAvailable'),ops?(lock?'':'pending'):'bad');}
+async function loadAdmin(){const {data:{user}}=await sdk.auth.getUser();if(!user)throw new Error('invalid_session');state.user=user;const finance=await api('finance',{operation:'status'});if(finance.access!=='authorized')throw new Error('unauthorized');state.finance=finance;let ops=null;try{ops=await api('ops',{operation:'status'})}catch(e){ops={access:'unavailable',error:e.message,writes_enabled:false}}state.ops=ops;let review=null;try{review=await api('review',{operation:'status'})}catch(e){review={access:'unavailable',error:e.message,moderation_writes_enabled:false}}state.review=review;state.authenticated=true;authUi('admin');restorePending();updateStatuses();await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue()]);updateStatuses()}
+function updateStatuses(){const finance=state.finance?.access==='authorized';const ops=state.ops?.access==='authorized';const review=state.review?.access==='authorized';setText('top-status',finance?tr('online'):tr('offline'));$('top-status').classList.toggle('connected',finance);const container=$('status-cards');container.replaceChildren();addRow(container,tr('financeGateway'),finance?tr('active'):tr('notAvailable'),finance?'':'bad');addRow(container,tr('operationsGateway'),ops?tr('active'):tr('notAvailable'),ops?'':'bad');addRow(container,tr('serverReview'),review?tr('active'):tr('notAvailable'),review?'':'bad');addRow(container,tr('twoFactor'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');addRow(container,tr('protectedRole'),state.authenticated?tr('active'):tr('notAvailable'),state.authenticated?'':'bad');const lock=state.ops?.writes_enabled===true;for(const b of document.querySelectorAll('.ops-write'))b.disabled=!lock;const reviewWrite=state.review?.moderation_writes_enabled===true;for(const b of document.querySelectorAll('.review-write'))b.disabled=!reviewWrite;$('ops-lock').textContent=lock?tr('testRequired'):tr('statusLocked');for(const message of document.querySelectorAll('.write-explanation:not(.review-write-explanation)'))message.hidden=lock;for(const message of document.querySelectorAll('.review-write-explanation')){message.hidden=reviewWrite;message.textContent=tr('reviewBlocked')}const identity=$('identity-content');identity.replaceChildren();addRow(identity,tr('signedIn'),state.user?.email||'—');addRow(identity,tr('twoFactor'),state.authenticated?'AAL2':'—');addRow(identity,tr('financeGateway'),finance?(state.finance.financial_writes_enabled?tr('active'):tr('locked')):tr('notAvailable'),finance?'':'bad');addRow(identity,tr('operationsGateway'),ops?(lock?tr('active'):tr('locked')):tr('notAvailable'),ops?(lock?'':'pending'):'bad');addRow(identity,tr('serverReview'),review?(reviewWrite?tr('active'):tr('locked')):tr('notAvailable'),review?(reviewWrite?'':'pending'):'bad');}
 async function init(){
   translate();authUi('auth');
   sdk.auth.onAuthStateChange((event)=>{
@@ -275,45 +412,137 @@ async function init(){
   try{const {data:{session}}=await sdk.auth.getSession();if(session){await enterMfaFlow()}}
   catch(e){showNotice(e.message||tr('failed'),true)}
 }
-async function loadFinance(){if(!state.authenticated)return;const c=$('finance-list');c.textContent=tr('loading');try{const d=await api('finance',{operation:'list',offset:state.financeOffset});if(!Array.isArray(d.rows)||typeof d.has_more!=='boolean')throw new Error(tr('formatError'));state.financeRows=d.rows;state.hasMore=d.has_more;setText('metric-grants',state.financeOffset===0?String(d.rows.length)+(d.has_more?'+':''):String(d.rows.length));$('finance-prev').disabled=state.financeOffset===0;$('finance-next').disabled=!d.has_more;$('finance-page-index').textContent=String(state.financeOffset/50+1);makeTable(c,[tr('account'),tr('plan'),tr('status'),tr('created'),tr('actions')],d.rows,row=>{const action=elem('button',tr('revoke'),'secondary');action.type='button';action.disabled=!(state.finance?.financial_writes_enabled===true)||row.status!=='active';action.addEventListener('click',()=>revokeGrant(row));return[emailNode(row.email),row.plan_id==='premium_ai_coach'?'Premium + AI Coach':'Premium',badge(row.status),fmtDate(row.created_at),action]},tr('empty'))}catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}}
-async function loadAudit(){const c=$('audit-content');c.textContent=tr('loading');try{const d=await api('finance',{operation:'audit',offset:0});if(!Array.isArray(d.rows))throw new Error(tr('formatError'));state.auditRows=d.rows;makeTable(c,[tr('created'),tr('operation'),tr('result'),tr('grantIdentifier')],d.rows,row=>[fmtDate(row.created_at),tr(row.operation==='grant'?'operationGrant':'operationRevoke'),badge(row.changed?'changed':row.matched?'unchanged':'unmatched'),shortId(row.grant_id)])}catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}}
-async function loadModerators(){const c=$('moderator-content');c.textContent=tr('loading');try{const d=await api('ops',{operation:'moderators.list'});const rows=rowsOf(d.receipt);if(!Array.isArray(d.receipt)&&!Array.isArray(d.receipt?.rows))throw new Error(tr('formatError'));state.mods=rows;setText('metric-mods',String(rows.length));makeTable(c,[tr('account'),tr('created'),tr('status'),tr('actions')],rows,row=>{const action=elem('button',tr('remove'),'secondary');action.type='button';action.disabled=!state.ops?.writes_enabled||row.protected_administrator===true;action.addEventListener('click',()=>opsConfirm('moderators.remove',{user_id:row.user_id,confirm_user_id:row.user_id}));return[emailNode(row.email),fmtDate(row.created_at),row.protected_administrator?tr('protectedModerator'):tr('regularModerator'),action]},tr('noModerators'))}catch(e){empty(c,tr('failedRead'));setText('metric-mods','—');showNotice(e.message||tr('failedRead'),true)}}
-async function loadMembers(){const c=$('member-content');c.textContent=tr('loading');try{const d=await api('ops',{operation:'members.list'});const rows=rowsOf(d.receipt);if(!Array.isArray(d.receipt)&&!Array.isArray(d.receipt?.rows))throw new Error(tr('formatError'));state.members=rows;setText('metric-members',String(rows.length));makeTable(c,[tr('account'),tr('reason'),tr('created'),tr('actions')],rows,row=>{const action=elem('button',tr('reinstate'),'secondary');action.type='button';action.disabled=!state.ops?.writes_enabled;action.addEventListener('click',()=>opsConfirm('members.reinstate',{user_id:row.user_id,confirm_user_id:row.user_id}));return[emailNode(row.email??'—'),String(row.reason??'—'),fmtDate(row.suspended_at),action]},tr('noSuspendedMembers'))}catch(e){empty(c,tr('failedRead'));setText('metric-members','—');showNotice(e.message||tr('failedRead'),true)}}
-async function loadQueue(){const c=$('queue-content');c.textContent=tr('loading');const cases={posts:{op:'moderation.posts.pending',args:{limit:30}},reports:{op:'moderation.reports.open',args:{}},safety:{op:'moderation.safety.open',args:{}}};const q=cases[state.queue];try{const d=await api('ops',{operation:q.op,...q.args});const rows=rowsOf(d.receipt);state.queueRows=rows;if(state.queue==='reports')setText('metric-reports',String(rows.length));previewRows(c,rows,'id',state.queue)}catch(e){empty(c,tr('failedRead'));if(state.queue==='reports')setText('metric-reports','—');showNotice(e.message||tr('failedRead'),true)}}
-
-async function reviewQueueRecord(queue,row,decision){
-  if(!state.ops?.writes_enabled){showNotice(tr('unavailable'),true);return}
-  try{
-    if(queue==='posts'){
-      const postId=row?.id;
-      if(typeof postId!=='string')throw new Error('missing_post_id');
-      const snapshots=await api('ops',{operation:'moderation.posts.snapshots',post_ids:[postId]});
-      const snap=rowsOf(snapshots.receipt).find(x=>x?.post?.id===postId);
-      if(!snap||!/^[0-9a-f]{64}$/i.test(snap.revision))throw new Error('missing_review_snapshot');
-      const reason=decision==='rejected'?window.prompt('Reason for rejection (required, maximum 160 characters):',''):'';
-      if(reason===null||decision==='rejected'&&!reason.trim())return;
-      await opsConfirm('moderation.posts.review',{
-        post_id:postId,expected_revision:snap.revision,decision,reward_mode:'eligible',
-        reason:reason.trim(),operation_id:token()});
-    }else if(queue==='reports'){
-      const reportId=row?.id;
-      const source=row?.target_kind==='comment'?'comment':'community';
-      const response=await api('ops',{operation:'moderation.reports.content',report_id:reportId,source});
-      const snapshot=response.receipt;
-      if(!snapshot||!/^[0-9a-f]{64}$/i.test(snapshot.revision))throw new Error('missing_report_revision');
-      if(!window.confirm(`Report: ${reportId}\nAction: ${decision}. Continue?`))return;
-      await opsConfirm('moderation.reports.decide',{
-        report_id:reportId,source,expected_revision:snapshot.revision,
-        remove:decision==='remove',confirm_remove:decision==='remove',operation_id:token()});
-    }else if(queue==='safety'){
-      if(!row.report_id)throw new Error('missing_safety_report_id');
-      await opsConfirm('moderation.safety.decide',{
-        report_id:row.report_id,decision,operation_id:token()});
-    }
-  }catch(e){showNotice(e.message||tr('failed'),true)}
+async function loadFinance(){if(!state.authenticated)return;const c=$('finance-list');c.textContent=tr('loading');try{const d=await api('finance',{operation:'list',offset:state.financeOffset});if(!Array.isArray(d.rows)||typeof d.has_more!=='boolean')throw new Error(tr('formatError'));state.financeRows=d.rows;state.hasMore=d.has_more;setText('metric-grants',state.financeOffset===0?String(d.rows.length)+(d.has_more?'+':''):String(d.rows.length));$('finance-prev').disabled=state.financeOffset===0;$('finance-next').disabled=!d.has_more;$('finance-page-index').textContent=String(state.financeOffset/50+1);makeTable(c,[tr('account'),tr('plan'),tr('status'),tr('created'),tr('actions')],d.rows,row=>{const action=elem('button',tr('revoke'),'secondary');action.type='button';action.disabled=!(state.finance?.financial_writes_enabled===true)||row.status!=='active';action.addEventListener('click',()=>revokeGrant(row));return[textNode(row.email,{email:true}),row.plan_id==='premium_ai_coach'?'Premium + AI Coach':'Premium',badge(row.status),fmtDate(row.created_at),action]},tr('empty'))}catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}}
+async function loadAudit(){const c=$('audit-content');c.textContent=tr('loading');try{const d=await api('finance',{operation:'audit',offset:0});if(!Array.isArray(d.rows))throw new Error(tr('formatError'));state.auditRows=d.rows;makeTable(c,[tr('created'),tr('operation'),tr('result'),tr('account'),tr('grantIdentifier')],d.rows,row=>[fmtDate(row.created_at),tr(row.operation==='grant'?'operationGrant':'operationRevoke'),badge(row.changed?'changed':row.matched?'unchanged':'unmatched'),textNode(state.financeRows.find(g=>g.id===row.grant_id)?.email??tr('unknownRecipient'),{email:true}),identifier(row.grant_id)])}catch(e){empty(c,tr('failedRead'));showNotice(e.message||tr('failedRead'),true)}}
+async function loadModerators(){const c=$('moderator-content');c.textContent=tr('loading');try{const d=await api('ops',{operation:'moderators.list'});const rows=rowsOf(d.receipt);if(!Array.isArray(d.receipt)&&!Array.isArray(d.receipt?.rows))throw new Error(tr('formatError'));state.mods=rows;setText('metric-mods',String(rows.length));makeTable(c,[tr('account'),tr('created'),tr('status'),tr('actions')],rows,row=>{const action=elem('button',tr('remove'),'secondary');action.type='button';action.disabled=!state.ops?.writes_enabled||row.protected_administrator===true;action.addEventListener('click',()=>opsConfirm('moderators.remove',{user_id:row.user_id,confirm_user_id:row.user_id}));return[textNode(row.email,{email:true}),fmtDate(row.created_at),row.protected_administrator?tr('protectedModerator'):tr('regularModerator'),action]},tr('noModerators'))}catch(e){empty(c,tr('failedRead'));setText('metric-mods','—');showNotice(e.message||tr('failedRead'),true)}}
+async function loadMembers(){const c=$('member-content');c.textContent=tr('loading');try{const d=await api('ops',{operation:'members.list'});const rows=rowsOf(d.receipt);if(!Array.isArray(d.receipt)&&!Array.isArray(d.receipt?.rows))throw new Error(tr('formatError'));state.members=rows;setText('metric-members',String(rows.length));makeTable(c,[tr('account'),tr('reason'),tr('created'),tr('actions')],rows,row=>{const action=elem('button',tr('reinstate'),'secondary');action.type='button';action.disabled=!state.ops?.writes_enabled;action.addEventListener('click',()=>opsConfirm('members.reinstate',{user_id:row.user_id,confirm_user_id:row.user_id}));return[textNode(row.email,{email:true}),String(row.reason??'—'),fmtDate(row.suspended_at),action]},tr('noSuspendedMembers'))}catch(e){empty(c,tr('failedRead'));setText('metric-members','—');showNotice(e.message||tr('failedRead'),true)}}
+async function loadReviewPolicy(){
+  try{const p=await api('review',{operation:'earn.policy'});const value=p?.receipt;
+    if(!Number.isInteger(value?.tokens_per_approval)||!Number.isInteger(value?.max_rewarded_posts_per_owner_per_utc_day))throw Error('invalid_reward_policy');
+    state.earnPolicy=value;
+    const text=`${tr('earnAmount')}: ${value.tokens_per_approval} AI Tokens · ${tr('earnDailyCap')}: ${value.max_rewarded_posts_per_owner_per_utc_day} · ${tr('earnMaximum')}: ${value.max_daily_tokens}`;
+    setText('earn-policy-summary',text);
+  }catch(err){state.earnPolicy=null;setText('earn-policy-summary',tr('failedRead'));showNotice(err.message||tr('failedRead'),true)}
 }
+async function loadQueue(){
+  if(!state.authenticated)return;
+  const c=$('queue-content');c.textContent=tr('loading');
+  const cases={posts:{type:'review',op:'posts.queue',args:{limit:12}},earn:{type:'review',op:'earn.queue',args:{}},
+    reports:{type:'ops',op:'moderation.reports.open',args:{}},
+    safety:{type:'ops',op:'moderation.safety.open',args:{}}};
+  const current=state.queue;const q=cases[current];if(!q)return;
+  try{
+    const d=await api(q.type,{operation:q.op,...q.args});
+    const rows=current==='posts'?d.receipt?.rows:rowsOf(d.receipt);
+    if(!Array.isArray(rows))throw Error(tr('formatError'));
+    if(current!==state.queue)return;
+    state.queueRows=rows;
+    if(current==='reports')setText('metric-reports',String(rows.length));
+    renderRecords(c,rows,current);
+    if(current==='earn'||current==='posts')await loadReviewPolicy();
+  }catch(err){if(current!==state.queue)return;empty(c,tr('failedRead'));
+    if(current==='reports')setText('metric-reports','—');showNotice(err.message||tr('failedRead'),true)}
+}
+async function reviewQueueRecord(queue,row,decision){
+  if(!state.review?.moderation_writes_enabled){showNotice(tr('reviewBlocked'),true);return}
+  const mediaRequired=queue==='posts'||queue==='earn';
+  if(mediaRequired && (row.media_complete!==true||row.preview_error)){
+    showNotice(tr('missingDetails'),true);return;
+  }
+  try{
+    let body=null;
+    if(queue==='posts'){
+      const latest=await api('review',{operation:'posts.detail',post_id:row.post_id||row.id});
+      if(latest.receipt?.revision!==row.revision||latest.receipt?.media_complete!==true){
+        showNotice(tr('postContentChanged'),true);await loadQueue();return;
+      }
+      const confirmation=await showReviewDecision(row,decision);
+      if(!confirmation)return;
+      body={operation:'posts.review',post_id:row.post_id||row.id,confirm_post_id:row.post_id||row.id,
+        expected_revision:row.revision,decision,reason:confirmation.reason,
+        acknowledge_full_content:confirmation.acknowledged,operation_id:token()};
+    }else if(queue==='earn'){
+      const latest=await api('review',{operation:'earn.queue'});
+      const selected=rowsOf(latest.receipt).find(x=>x.post_id===row.post_id);
+      if(!selected||selected.revision!==row.revision){showNotice(tr('postContentChanged'),true);await loadQueue();return}
+      const yes=await showReviewDecision(row,decision);
+      if(!yes)return;
+      if(decision==='earn-request')body={operation:'earn.request',post_id:row.post_id,confirm_post_id:row.post_id,expected_revision:row.revision};
+      else body={operation:'earn.decide',request_id:row.request_id,confirm_request_id:row.request_id,
+        approve:decision==='earn-approve',reason:yes.reason};
+    }else if(queue==='reports'){
+      const id=row.id;
+      const source=row.target_kind==='comment'?'comment':'community';
+      const record=await api('review',{operation:'reports.content',report_id:id,source});
+      const rev=record?.receipt?.revision;
+      if(!/^[0-9a-f]{64}$/i.test(rev||''))throw Error('missing_report_revision');
+      const yes=await showReviewDecision(row,decision);
+      if(!yes)return;
+      body={operation:'reports.decide',report_id:id,confirm_report_id:id,source,
+        expected_revision:rev,remove:decision==='remove',confirm_remove:decision==='remove',operation_id:token()};
+    }else if(queue==='safety'){
+      const yes=await showReviewDecision(row,decision);
+      if(!yes)return;
+      body={operation:'safety.decide',report_id:row.report_id,confirm_report_id:row.report_id,
+        decision,operation_id:token()};
+    }
+    if(!body)return;
+    const verified=await showStepUp();if(!verified)return;
+    const result=await api('review',body);
+    const receipt=result?.receipt;
+    if(receipt==null)throw Error('invalid_review_receipt');
+    if(queue==='posts'){
+      if(receipt.decision!==decision||!Number.isInteger(receipt.tokens_granted))throw Error('invalid_post_receipt');
+      const award=receipt.tokens_granted;
+      showNotice(`${decision==='approved'?tr('decisionApproved'):tr('decisionRejected')} · ${tr('receiptTokens')}: ${award} AI Tokens${receipt.reward_reason==='daily_cap_reached'?' · '+tr('rewardCapped'):''}`);
+    }else if(queue==='earn'){
+      showNotice(`${tr('reviewOutcome')}: ${statusLabel(receipt.status)} · ${tr('receiptTokens')}: ${Number(receipt.tokens_granted??0)} AI Tokens`);
+    }else showNotice(tr('completed'));
+    await loadQueue();
+  }catch(err){if(err.httpStatus===409)showNotice(tr('postContentChanged'),true);
+    else showNotice(err.message||tr('failed'),true)}
+}
+async function showReviewDecision(row,decision){
+  const dlg=$('review-confirm-modal');
+  const info=$('review-confirm-text');info.replaceChildren();
+  const fields=[
+    [tr('chooseDecision'),decision.startsWith('earn')?tr('earn'):tr('moderatorReview')],
+    [tr('postTitle'),row.title??tr('notProvided')],
+    [tr('postBody'),row.body??tr('notProvided')],
+    [tr('postPhotos'),String(row.media_count??0)],
+    [row.author_email?tr('postAuthorEmail'):tr('reportEmail'),row.author_email??row.reporter_email??'—'],
+    [tr('earnEligible'),tr('earnDescription')],
+    [tr('noClaimOfDelivery'),tr('receiptExplanation')]
+  ];
+  for(const [k,v] of fields)info.append(displayDetail(k,v,{paragraph:k===tr('postBody')}));
+  // These bilingual copies are server-defined post-review receipt templates.
+  // The final amount can still be 0 after the author's daily cap; never promise delivery.
+  const preview=decision==='approved'?[tr('approvedWithReward'),tr('approvedWithoutReward')]:
+    decision==='rejected'?[tr('rejectedCopy')]:[];
+  if(preview.length)info.append(displayDetail(tr('notificationPreview'),preview.join(' / '),{paragraph:true}));
+  $('review-confirm-checkbox').checked=false;
+  $('review-confirm-reason').value='';
+  const needsReason=['rejected','earn-reject'].includes(decision);
+  $('review-reason-container').hidden=!needsReason;
+  $('review-confirm-reason').required=needsReason;
+  dlg.hidden=false;
+  return await new Promise(resolve=>{
+    const cancel=$('review-confirm-cancel'),submit=$('review-confirm-accept');
+    const finish=value=>{dlg.hidden=true;cancel.removeEventListener('click',onCancel);submit.removeEventListener('click',onSubmit);resolve(value)};
+    const onCancel=()=>finish(null);
+    const onSubmit=()=>{
+      const acknowledged=$('review-confirm-checkbox').checked;
+      const reason=$('review-confirm-reason').value.trim();
+      if(!acknowledged){showNotice(tr('reviewAllAcknowledged'),true);return}
+      if(needsReason && !reason){showNotice(tr('rejectionReason'),true);return}
+      finish({acknowledged,reason});
+    };
+    cancel.addEventListener('click',onCancel);submit.addEventListener('click',onSubmit);
+  });
+}
+
 async function refreshAll(){if(!state.authenticated)return;await Promise.allSettled([loadFinance(),loadModerators(),loadMembers(),loadQueue(),loadAudit()]);updateStatuses()}
-async function statusRefresh(){try{state.finance=await api('finance',{operation:'status'});state.ops=await api('ops',{operation:'status'});updateStatuses();await refreshAll()}catch(e){showNotice(e.message||tr('failed'),true)}}
+async function statusRefresh(){try{state.finance=await api('finance',{operation:'status'});state.ops=await api('ops',{operation:'status'});state.review=await api('review',{operation:'status'});updateStatuses();await refreshAll()}catch(e){showNotice(e.message||tr('failed'),true)}}
 async function showStepUp(){return new Promise((resolve)=>{state.modalResolve=resolve;$('mfa-modal').hidden=false;$('step-up-code').value='';$('step-up-code').focus()})}
 function resolveStepUp(ok){$('mfa-modal').hidden=true;$('step-up-code').value='';const cb=state.modalResolve;state.modalResolve=null;if(cb)cb(ok)}
 async function confirmStepUp(){const code=$('step-up-code').value.trim();const btn=$('confirm-stepup');btn.disabled=true;try{state.factor=await findFactor();await verifyFactor(code);resolveStepUp(true)}catch(e){showNotice(e.message||tr('failed'),true)}finally{btn.disabled=false}}
@@ -363,7 +592,7 @@ async function reconcile(){
 async function opsConfirm(operation,args){if(!state.ops?.writes_enabled){showNotice(tr('unavailable'),true);return}const key=token();try{const d=await transaction('ops',{operation,...args,idempotency_key:key});if(!d)return;if(d.state!=='executed')showNotice(tr('pending'),true);else showNotice(tr('completed'));await refreshAll()}catch(e){showNotice(e.message||tr('failed'),true)}}
 function makeOpsForm(id,operation,fields){$(id).addEventListener('submit',ev=>{ev.preventDefault();const f=new FormData(ev.target),args=fields(f);opsConfirm(operation,args)})}
 function clearPrivateView(){
-  state.authenticated=false;state.finance=null;state.ops=null;state.user=null;
+  state.authenticated=false;state.finance=null;state.ops=null;state.review=null;state.user=null;
   state.financeRows=[];state.auditRows=[];state.mods=[];state.members=[];state.queueRows=[];
   for(const name of ['finance-list','audit-content','moderator-content','member-content','queue-content']){
     const container=$(name);if(container)empty(container,tr('loadData'));

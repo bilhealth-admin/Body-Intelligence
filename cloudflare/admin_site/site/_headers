@@ -4,5 +4,5 @@
   Referrer-Policy: no-referrer
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self' https://tgmanzhqulksykhslrzb.supabase.co wss://tgmanzhqulksykhslrzb.supabase.co; img-src 'self' data:; style-src 'self'; font-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; manifest-src 'self'
+  Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self' https://tgmanzhqulksykhslrzb.supabase.co wss://tgmanzhqulksykhslrzb.supabase.co; img-src 'self' data: https://tgmanzhqulksykhslrzb.supabase.co; style-src 'self'; font-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; manifest-src 'self'
   Cache-Control: no-store

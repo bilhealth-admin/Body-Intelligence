@@ -30,6 +30,9 @@ jobs:
           set -euo pipefail
           npm install --no-audit --no-fund
           npm run check
+          node --check ../../tool/admin_web/review_v1/review_server.mjs
+          node --check ../../tool/admin_web/review_v1/policy.mjs
+          node --test ../../tool/admin_web/review_v1/review_server.test.mjs
           npm run build
           test -s site/app.bundle.js
           test -s site/index.html
@@ -94,7 +97,7 @@ jobs:
           node --input-type=module <<'JS'
           const origin=process.env.ADMIN_WEB_ORIGIN;
           const api='https://tgmanzhqulksykhslrzb.supabase.co/functions/v1';
-          for(const slug of ['bil-admin-web-v1','bil-admin-web-ops-v1']){
+          for(const slug of ['bil-admin-web-v1','bil-admin-web-ops-v1','bil-admin-web-review-v1']){
             const endpoint=api+'/'+slug;
             const preflight=await fetch(endpoint,{method:'OPTIONS',headers:{
               Origin:origin,'Access-Control-Request-Method':'POST',

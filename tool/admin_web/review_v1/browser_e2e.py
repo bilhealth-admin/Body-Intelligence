@@ -1,0 +1,177 @@
+"""Synthetic, offline Playwright E2E of the actual owner-only BIL admin frontend.
+No browser requests go to Supabase/production. No real account or money touched.
+"""
+from pathlib import Path
+import json, os, shutil, io
+from PIL import Image
+from playwright.sync_api import sync_playwright
+ROOT=Path(__file__).resolve().parents[1]
+site=ROOT/'site'
+html=(site/'index.html').read_text()
+css=(site/'styles.css').read_text()
+app=(site/'app.mjs').read_text()
+header="import { createClient } from '@supabase/supabase-js';\nimport { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config.mjs';\n"
+assert app.startswith(header)
+mock_auth="""
+const SUPABASE_URL='https://tgmanzhqulksykhslrzb.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_synthetic_browser_test';
+const createClient=()=>({auth:{
+  onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),
+  getSession:async()=>({data:{session:{access_token:'eyJhbGciOiJub25lIn0.eyJzdWIiOiJzeW50aGV0aWMifQ.signature'}}}),
+  getUser:async()=>({data:{user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',email:'owner@example.invalid'}}}),
+  mfa:{getAuthenticatorAssuranceLevel:async()=>({data:{currentLevel:'aal2'}}),
+       listFactors:async()=>({data:{totp:[{id:'factor-synthetic',status:'verified'}]}}),
+       challengeAndVerify:async()=>({data:{id:'challenge-synthetic'}})},
+  signOut:async()=>({error:null})
+}});
+"""
+script=mock_auth+app[len(header):]
+assert '<link rel="stylesheet" href="./styles.css">' in html
+assert '<script type="module" src="./app.bundle.js"></script>' in html
+markup=html.replace('<link rel="stylesheet" href="./styles.css">','<style>'+css+'</style>').replace('<script type="module" src="./app.bundle.js"></script>','')
+fixtures_js=r'''const author='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const post='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const report='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+const grant='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+const revision='f'.repeat(64);
+const created='2026-10-18T03:30:00Z';
+const photo=(idx)=>'https://tgmanzhqulksykhslrzb.supabase.co/storage/v1/object/sign/community-post-images/synthetic/'+idx+'.png?token=SYNTHETIC';
+const fakePost={id:post,post_id:post,revision,title:'عنوان منشور مهم كامل عن التغذية والصحة، حتى يظهر كله',
+ body:'هذه مشاركة طويلة للاختبار فقط تتضمن كل التفاصيل اللازمة للمراجعة. '.repeat(20),
+ author_id:author,author_name:'Synthetic Community Contributor',author_email:'posting.author@example.invalid',
+ status:'pending',moderation_status:'pending',created_at:created,location:'Cairo',hashtags:['nutrition','fitness'],
+ poll:{question:'ما رأيكم؟',options:['ممتاز','يحتاج تعديل']},visibility:'community',
+ images:[{url:photo(1),position:0},{url:photo(2),position:1}],media_count:2,media_complete:true,can_decide:true};
+window.__requests=[];
+window.__moderationWriteEnabled=false;
+window.__mediaRequests=[];
+const payload=(type,op,body)=>{
+ if(type==='finance'){
+   if(op==='status')return {access:'authorized',financial_writes_enabled:false};
+   if(op==='list')return {rows:[{id:grant,email:'account.with.very.long.name@example.invalid',status:'revoked',plan_id:'premium_ai_coach',created_at:created}],has_more:false};
+   if(op==='audit')return {rows:[{id:report,actor_id:author,operation:'revoke',created_at:created,matched:true,changed:true,grant_id:grant}]};
+ }
+ if(type==='ops'){
+   if(op==='status')return {access:'authorized',writes_enabled:false};
+   if(op==='moderators.list')return {receipt:[{user_id:author,email:'moderator.long.name@example.invalid',protected_administrator:false,created_at:created}]};
+   if(op==='members.list')return {receipt:[{user_id:author,email:'suspended.long.name@example.invalid',reason:'Community rule breaches',suspended_at:created}]};
+   if(op==='moderation.safety.open')return {receipt:[{report_id:report,reporter_email:'reporting.user@example.invalid',reporter_user_id:author,reason:'unsafe',status:'open',locale:'ar',runtime:'local_fallback',created_at:created,user_note:'كنت بحاجة إلى دعم من المدرب الذكي',answer_text:'المدرب غير متاح حالياً. حاول مرة أخرى لاحقاً.'}]};
+   if(op==='moderation.reports.open')return {receipt:[{id:report,reporter_email:'reported.member@example.invalid',reporter_user_id:author,status:'open',target_kind:'post',target_id:post,reason:'محتوى غير مناسب',created_at:created}]};
+ }
+ if(type==='review'){
+   if(op==='status')return {access:'authorized',moderation_writes_enabled:window.__moderationWriteEnabled};
+   if(op==='posts.queue')return {receipt:{rows:[fakePost],has_more:false}};
+   if(op==='posts.detail')return {receipt:fakePost};
+   if(op==='earn.policy')return {receipt:{tokens_per_approval:5,max_rewarded_posts_per_owner_per_utc_day:5,max_daily_tokens:25}};
+   if(op==='earn.queue')return {receipt:[{...fakePost,status:'requested',request_id:report,reviewed_at:created}]};
+   if(op==='posts.review')return {receipt:{post_id:post,decision:body.decision,tokens_granted:body.decision==='approved'?5:0,reward_reason:'granted',receipt_state:'executed'}};
+   if(op==='earn.decide')return {receipt:{request_id:report,status:body.approve?'executed':'rejected',tokens_granted:body.approve?5:0,reward_reason:'granted'}};
+ }
+ return {error:'bad_synthetic_operation:'+type+':'+op};
+};
+window.fetch=async (url,options)=>{
+ if(/storage\/v1/.test(url))throw Error('Images are handled by mocked browser route');
+ const type=String(url).endsWith('bil-admin-web-v1')?'finance':String(url).endsWith('bil-admin-web-ops-v1')?'ops':'review';
+ let body={};try{body=JSON.parse(options?.body||'{}')}catch{}
+ window.__requests.push({type,operation:body.operation,body});
+ const data=payload(type,body.operation,body);
+ return {ok:!data.error,status:data.error?400:200,json:async()=>data};
+};
+'''
+widths=(320,375,390,430,768,1280)
+results=[]
+with sync_playwright() as p:
+  chrome=shutil.which('chromium') or shutil.which('google-chrome')
+  opts={'headless':True,'args':['--no-sandbox','--disable-dev-shm-usage']}
+  if chrome:opts['executable_path']=chrome
+  browser=p.chromium.launch(**opts)
+  for width in widths:
+    page=browser.new_page(viewport={'width':width,'height':900},device_scale_factor=1)
+    errors=[]
+    page.on('pageerror',lambda e:errors.append(str(e)))
+    im=Image.new('RGB',(180,135),(90,180,113)); b=io.BytesIO();im.save(b,format='PNG');sample_image=b.getvalue()
+    page.route('**/storage/v1/object/sign/**',lambda route:route.fulfill(status=200,body=sample_image,content_type='image/png'))
+    page.set_content(markup,wait_until='load')
+    assert 'posting.author@example.invalid' not in page.locator('body').inner_text(), 'PII disclosed before auth'
+    page.add_script_tag(content="if(!crypto.randomUUID)Object.defineProperty(crypto,'randomUUID',{value:()=> '7fe15286-8325-4508-bf07-e22bda32ae22'});")
+    page.add_script_tag(content=fixtures_js)
+    page.add_script_tag(content=script)
+    page.wait_for_function("document.getElementById('admin-view').hidden === false",timeout=18000)
+    for section in ('overview','finance','moderators','members','audit','coach','notifications','moderation','security'):
+      page.locator(f'[data-page="{section}"]').first.evaluate('(e)=>e.click()')
+      if section=='audit':page.wait_for_function("document.querySelector('#audit-content .data-table')!==null",timeout=9000)
+      if section=='moderation':
+        for q in ('posts','earn','reports','safety'):
+          page.locator(f'[data-queue="{q}"]').evaluate('(e)=>e.click()')
+          page.wait_for_function("document.querySelector('#queue-content .report-card')!==null",timeout=9000)
+          txt=page.locator('#queue-content').inner_text()
+          if q=='posts':
+            assert 'عنوان منشور مهم كامل عن التغذية' in txt
+            assert 'posting.author@example.invalid' in txt
+            assert 'هذه مشاركة طويلة' in txt
+            assert page.locator('#queue-content .post-image-wrap img').count()==2
+            assert page.locator('#queue-content button.review-write').first.is_disabled(), 'Unsafe review enabled'
+          if q=='earn':
+            assert 'posting.author@example.invalid' in txt
+            assert '5 AI Tokens' in page.locator('#earn-policy-summary').inner_text()
+            assert page.locator('#queue-content img').count()==2
+          if q=='safety':
+            assert 'reporting.user@example.invalid' in txt
+            assert 'كنت بحاجة' in txt
+      dims=page.evaluate('({width:innerWidth,body:document.body.scrollWidth,doc:document.documentElement.scrollWidth})')
+      assert max(dims['body'],dims['doc'])<=width+3,f'Horizontal overflow: {section} {width} {dims}'
+    page.locator('[data-page="moderation"]').first.evaluate('(e)=>e.click()')
+    page.locator('[data-queue="posts"]').evaluate('(e)=>e.click()')
+    page.wait_for_function("document.querySelector('#queue-content .report-card')!==null",timeout=9000)
+    assert page.locator('#queue-content img').count()==2
+    if width==390:
+      page.evaluate("""state.review.moderation_writes_enabled=true;updateStatuses();""")
+      assert page.locator('#queue-content button.review-write').first.is_enabled()
+      page.locator('#queue-content button.review-write').first.click()
+      page.wait_for_function("!document.getElementById('review-confirm-modal').hidden",timeout=9000)
+      assert 'عنوان منشور مهم كامل' in page.locator('#review-confirm-text').inner_text()
+      assert 'مكافأة' in page.locator('#review-confirm-text').inner_text()
+      page.locator('#review-confirm-checkbox').check()
+      page.locator('#review-confirm-accept').click()
+      try: page.wait_for_function("!document.getElementById('mfa-modal').hidden",timeout=9000)
+      except Exception:
+        print('DEBUG_MODAL',page.evaluate("""({requests:window.__requests,notice:document.getElementById('notice')?.innerText,reviewModal:document.getElementById('review-confirm-modal').hidden,mfa:document.getElementById('mfa-modal').hidden,errors:document.querySelector('.notice.error')?.innerText})"""))
+        raise
+      page.locator('#step-up-code').fill('123456')
+      page.locator('#confirm-stepup').click()
+      page.wait_for_function("window.__requests.some(r=>r.operation==='posts.review')",timeout=9000)
+      request=page.evaluate("window.__requests.find(r=>r.operation==='posts.review')")
+      assert request['body']['decision']=='approved'
+      assert request['body']['acknowledge_full_content'] is True
+      assert request['type']=='review'
+      page.wait_for_function("document.getElementById('review-confirm-modal').hidden",timeout=9000)
+      page.wait_for_function("document.getElementById('mfa-modal').hidden",timeout=9000)
+      # Reward approval from independent Earn queue is a separate operation.
+      page.locator('[data-queue="earn"]').evaluate('(e)=>e.click()')
+      page.wait_for_function("document.querySelector('#queue-content button.review-write')!==null",timeout=9000)
+      page.locator('#queue-content button.review-write').first.click()
+      page.wait_for_function("!document.getElementById('review-confirm-modal').hidden",timeout=9000)
+      page.locator('#review-confirm-checkbox').check()
+      page.locator('#review-confirm-accept').click()
+      try: page.wait_for_function("!document.getElementById('mfa-modal').hidden",timeout=9000)
+      except Exception:
+        print('DEBUG_MODAL',page.evaluate("""({requests:window.__requests,notice:document.getElementById('notice')?.innerText,reviewModal:document.getElementById('review-confirm-modal').hidden,mfa:document.getElementById('mfa-modal').hidden,errors:document.querySelector('.notice.error')?.innerText})"""))
+        raise
+      page.locator('#step-up-code').fill('123456')
+      page.locator('#confirm-stepup').click()
+      page.wait_for_function("window.__requests.some(r=>r.operation==='earn.decide')",timeout=9000)
+      assert page.evaluate("window.__requests.find(r=>r.operation==='earn.decide').body.approve") is True
+      page.locator('[data-queue="posts"]').evaluate('(e)=>e.click()')
+      page.wait_for_function("document.querySelector('#queue-content .report-card')!==null",timeout=9000)
+    if width in (375,390,1280):
+      path=Path(os.getenv('BIL_ADMIN_E2E_ARTIFACTS','/mnt/data/bil-admin-global-20261018/evidence'))
+      path.mkdir(parents=True,exist_ok=True)
+      page.screenshot(path=str(path/f'ugc_review_mobile_{width}.png'),full_page=True)
+    page.locator('#language').click()
+    assert page.evaluate('document.documentElement.dir')=='ltr'
+    assert page.evaluate('document.documentElement.scrollWidth')<=width+3
+    assert not errors,repr(errors)
+    results.append({'width':width,'modules':9,'queues':4,'postTitleAndFullBody':True,'privatePhotoPreviews':2,'earnPolicy':5,'rtl':True,'ltr':True,'overflow':False,'js_errors':0})
+    page.close()
+  browser.close()
+print('BIL_SYNTHETIC_BROWSER_E2E_PASS '+json.dumps(results,ensure_ascii=False))
