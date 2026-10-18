@@ -16,7 +16,7 @@ Deno.serve((request:Request) => {
       if(key==='BIL_ADMIN_WEB_ALLOWED_ORIGINS')return origin;
       if(key==='BIL_ADMIN_WEB_FINANCE_OWNER_IDS')return 'cabcec51-9f56-4bd8-af59-ec0cc5c09e72';
       if(key==='BIL_ADMIN_REVIEW_ENABLED')return 'true';
-      if(key==='BIL_ADMIN_REVIEW_WRITE_ENABLED')return 'true'; // verified-owner moderation writes via AAL2 + fresh TOTP, versioned SQL receipts
+      if(key==='BIL_ADMIN_REVIEW_WRITE_ENABLED')return 'true'; // explicitly enabled for verified owner, AAL2 + fresh TOTP and versioned SQL receipts
       return Deno.env.get(key)?.trim()||'';
     },
     now:()=>Date.now(),

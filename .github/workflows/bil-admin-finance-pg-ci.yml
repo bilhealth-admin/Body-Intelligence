@@ -1,5 +1,6 @@
 name: BIL Admin — isolated PostgreSQL finance contract
 on:
+  workflow_dispatch:
   push:
     branches:
       - admin-web-readonly-direct-20261017

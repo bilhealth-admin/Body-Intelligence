@@ -2,6 +2,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {handleOps} from './ops_server.mjs';
+import {assertRpcArguments} from '../rpc_contracts/assert_arguments.mjs';
 
 const uid='cabcec51-9f56-4bd8-af59-ec0cc5c09e72';
 const origin='https://guilty-crazy-operation--bilhealthapp.replit.app';
@@ -30,10 +31,19 @@ function dependencies({allow=true,write=false,serviceSpy=[],userSpy=[],override=
     })[key],
     makeUserClient:()=>({
       auth:{getUser:async()=>({data:{user:{id:uid}}})},
-      rpc:async(name,args)=>{userSpy.push({name,args});return {data:name==='bil_can_manage_ai_coach'?allow:name==='bil_consume_rate_limit'?null:name==='bil_list_ai_coach_safety_reports_v1'?[{report_id:uid}]:[{id:uid}],error:null}}
+      rpc:async(name,args)=>{
+        assertRpcArguments(name,args);
+        userSpy.push({name,args});
+        if(name==='bil_consume_rate_limit' &&
+          !(args.p_window_seconds===3600 &&
+            ((args.p_action==='admin_subscription_list'&&args.p_limit===120)||
+             (args.p_action==='admin_subscription_grant'&&args.p_limit===60))))
+          return {data:null,error:{code:'22023',message:'invalid_rate_limit_contract'}};
+        return {data:name==='bil_can_manage_ai_coach'?allow:name==='bil_consume_rate_limit'?null:name==='bil_list_ai_coach_safety_reports_v1'?[{report_id:uid}]:[{id:uid}],error:null};
+      }
     }),
     makeServiceClient:()=>({
-      rpc:async(name,args)=>{serviceSpy.push({name,args});return {data:name==='bil_admin_web_reporter_contacts_v1'?[]:[{id:uid}],error:null}}
+      rpc:async(name,args)=>{assertRpcArguments(name,args);serviceSpy.push({name,args});return {data:name==='bil_admin_web_reporter_contacts_v1'?[]:[{id:uid}],error:null}}
     })
   };
 }

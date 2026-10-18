@@ -361,7 +361,8 @@ export async function handleReview(request,deps){
     if(write) requireRecentTotp(claims,now);
     const limitResult=await user.rpc('bil_consume_rate_limit',{
       p_action:write?'admin_subscription_grant':'admin_subscription_list',
-      p_limit:write?20:120,p_window_seconds:3600
+      // Exact existing SQL allowlist contract, shared with the financial endpoint.
+      p_limit:write?60:120,p_window_seconds:3600
     });
     if(limitResult?.error)errorFromProvider(limitResult.error,'rate_check');
     const service=deps.makeServiceClient();

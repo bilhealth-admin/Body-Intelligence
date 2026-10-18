@@ -304,7 +304,8 @@ export async function handleOps(request,deps) {
     if(write) requireRecentTotp(claims,now);
     const rate=await user.rpc('bil_consume_rate_limit',{
       p_action:write?'admin_subscription_grant':'admin_subscription_list',
-      p_limit:write?20:120,p_window_seconds:3600});
+      // Exact existing SQL allowlist contract; never invent a smaller quota tuple.
+      p_limit:write?60:120,p_window_seconds:3600});
     if(rate?.error) errorFromRpc(rate.error);
     const service=deps.makeServiceClient();
     let data=compatibleResult(await perform(op,fields,userId,user,service));

@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {assertRpcArguments} from '../rpc_contracts/assert_arguments.mjs';
 import {handleReview} from './review_server.mjs';
 
 const actor='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -30,9 +31,15 @@ function fake(options={}){
   const user={
     auth:{getUser:async()=>({data:{user:{id:options.verifiedUser||actor}},error:options.authFailure?{message:'invalid'}:null})},
     rpc:async(name,args)=>{
+      assertRpcArguments(name,args);
       calls.push({kind:'user',name,args});
       if(name==='bil_can_manage_ai_coach')return {data:options.ownerAuthorized===false?false:true};
-      if(name==='bil_consume_rate_limit')return {data:null};
+      if(name==='bil_consume_rate_limit'){
+        const accepted=args.p_window_seconds===3600 &&
+          ((args.p_action==='admin_subscription_list'&&args.p_limit===120)||
+           (args.p_action==='admin_subscription_grant'&&args.p_limit===60));
+        return accepted?{data:null}:{data:null,error:{code:'22023',message:'invalid_rate_limit_contract'}};
+      }
       if(name==='bil_list_pending_community_posts')return {data:options.emptyQueue?[]:[{
         id:postId,author_id:author,author_name:'Alice Synthetic',body:fakePost.body,created_at:fakePost.created_at
       }]};
@@ -68,6 +75,7 @@ function fake(options={}){
     }})},
     auth:{admin:{getUserById:async()=>({data:{user:{id:author,email:authorEmail}}})}},
     rpc:async(name,args)=>{
+      assertRpcArguments(name,args);
       calls.push({kind:'service',name,args});
       if(name==='bil_admin_web_reporter_contacts_v1')return {data:[{
         record_id:postId,reporter_user_id:author,reporter_email:authorEmail

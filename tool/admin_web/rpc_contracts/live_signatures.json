@@ -1,0 +1,210 @@
+{
+  "recorded_utc": "2026-10-18",
+  "scope": "Read-only pg_proc signature snapshot; no data, permissions or writes changed.",
+  "functions": [
+    {
+      "proname": "bil_add_community_moderator_by_email",
+      "identity_arguments": "p_actor_id uuid, p_email text, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_email text, p_idempotency_key text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_admin_web_execute_financial_command",
+      "identity_arguments": "p_actor_id uuid, p_step_up_epoch bigint, p_idempotency_key text, p_operation text, p_email text, p_plan_id text, p_duration_days integer, p_reason text, p_grant_id uuid",
+      "arguments": "p_actor_id uuid, p_step_up_epoch bigint, p_idempotency_key text, p_operation text, p_email text DEFAULT NULL::text, p_plan_id text DEFAULT NULL::text, p_duration_days integer DEFAULT NULL::integer, p_reason text DEFAULT ''::text, p_grant_id uuid DEFAULT NULL::uuid",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_admin_web_list_subscription_commands_v2",
+      "identity_arguments": "p_actor_id uuid, p_offset integer",
+      "arguments": "p_actor_id uuid, p_offset integer DEFAULT 0",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_admin_web_reconcile_subscription_command",
+      "identity_arguments": "p_actor_id uuid, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_idempotency_key text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_admin_web_reporter_contacts_v1",
+      "identity_arguments": "p_actor_id uuid, p_report_kind text, p_report_ids uuid[]",
+      "arguments": "p_actor_id uuid, p_report_kind text, p_report_ids uuid[]",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_admin_web_review_context_v1",
+      "identity_arguments": "p_actor_id uuid, p_post_id uuid",
+      "arguments": "p_actor_id uuid, p_post_id uuid",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_admin_web_review_reward_policy_v1",
+      "identity_arguments": "p_actor_id uuid",
+      "arguments": "p_actor_id uuid",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_can_manage_ai_coach",
+      "identity_arguments": "",
+      "arguments": "",
+      "result": "boolean"
+    },
+    {
+      "proname": "bil_community_report_content_v1",
+      "identity_arguments": "p_report_id uuid, p_source text",
+      "arguments": "p_report_id uuid, p_source text DEFAULT 'community'::text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_community_review_snapshots_v2",
+      "identity_arguments": "p_post_ids uuid[]",
+      "arguments": "p_post_ids uuid[]",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_community_reward_review_queue_v2",
+      "identity_arguments": "p_limit integer",
+      "arguments": "p_limit integer DEFAULT 100",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_consume_rate_limit",
+      "identity_arguments": "p_action text, p_limit integer, p_window_seconds integer",
+      "arguments": "p_action text, p_limit integer, p_window_seconds integer",
+      "result": "void"
+    },
+    {
+      "proname": "bil_decide_community_post_reward_v2",
+      "identity_arguments": "p_request_id uuid, p_approve boolean, p_reason text",
+      "arguments": "p_request_id uuid, p_approve boolean, p_reason text DEFAULT ''::text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_decide_community_report_v1",
+      "identity_arguments": "p_report_id uuid, p_source text, p_expected_revision text, p_remove boolean, p_operation_id uuid",
+      "arguments": "p_report_id uuid, p_source text, p_expected_revision text, p_remove boolean, p_operation_id uuid",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_enqueue_admin_notification",
+      "identity_arguments": "p_actor_id uuid, p_notification_kind text, p_audience text, p_target_id uuid, p_custom_body text, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_notification_kind text, p_audience text, p_target_id uuid, p_custom_body text, p_idempotency_key text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_enqueue_admin_notification_with_message",
+      "identity_arguments": "p_actor_id uuid, p_notification_kind text, p_audience text, p_target_id uuid, p_message text, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_notification_kind text, p_audience text, p_target_id uuid, p_message text, p_idempotency_key text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_global_reset_ai_coach",
+      "identity_arguments": "p_actor_id uuid, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_idempotency_key text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_global_reset_ai_coach",
+      "identity_arguments": "p_actor_id uuid, p_idempotency_key text, p_message text",
+      "arguments": "p_actor_id uuid, p_idempotency_key text, p_message text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_individual_reset_ai_coach",
+      "identity_arguments": "p_actor_id uuid, p_target_id uuid, p_reason text, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_target_id uuid, p_reason text, p_idempotency_key text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_individual_reset_ai_coach",
+      "identity_arguments": "p_actor_id uuid, p_target_id uuid, p_reason text, p_idempotency_key text, p_message text",
+      "arguments": "p_actor_id uuid, p_target_id uuid, p_reason text, p_idempotency_key text, p_message text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_list_admin_subscriptions",
+      "identity_arguments": "p_actor_id uuid, p_offset integer",
+      "arguments": "p_actor_id uuid, p_offset integer DEFAULT 0",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_list_ai_coach_safety_reports_v1",
+      "identity_arguments": "",
+      "arguments": "",
+      "result": "SETOF jsonb"
+    },
+    {
+      "proname": "bil_list_community_moderators_for_admin",
+      "identity_arguments": "p_actor_id uuid",
+      "arguments": "p_actor_id uuid",
+      "result": "TABLE(user_id uuid, email text, created_at timestamp with time zone, protected_administrator boolean)"
+    },
+    {
+      "proname": "bil_list_open_community_reports",
+      "identity_arguments": "",
+      "arguments": "",
+      "result": "SETOF bil_community_reports"
+    },
+    {
+      "proname": "bil_list_pending_community_posts",
+      "identity_arguments": "p_limit integer",
+      "arguments": "p_limit integer DEFAULT 100",
+      "result": "TABLE(id uuid, author_id uuid, body text, visibility text, created_at timestamp with time zone, media_object_path text, media_mime_type text, media_bytes integer, media_width integer, media_height integer, moderation_status text, reviewed_at timestamp with time zone, author_name text, author_avatar_url text)"
+    },
+    {
+      "proname": "bil_list_suspended_community_members_for_admin",
+      "identity_arguments": "p_actor_id uuid",
+      "arguments": "p_actor_id uuid",
+      "result": "TABLE(user_id uuid, email text, reason text, suspended_at timestamp with time zone)"
+    },
+    {
+      "proname": "bil_moderate_community_post_v2",
+      "identity_arguments": "p_post_id uuid, p_expected_revision text, p_decision text, p_operation_id uuid, p_reason text, p_reward_mode text",
+      "arguments": "p_post_id uuid, p_expected_revision text, p_decision text, p_operation_id uuid, p_reason text DEFAULT ''::text, p_reward_mode text DEFAULT 'eligible'::text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_reinstate_community_member",
+      "identity_arguments": "p_actor_id uuid, p_user_id uuid, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_user_id uuid, p_idempotency_key text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_remove_community_moderator",
+      "identity_arguments": "p_actor_id uuid, p_user_id uuid, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_user_id uuid, p_idempotency_key text",
+      "result": "boolean"
+    },
+    {
+      "proname": "bil_request_community_post_reward_v2",
+      "identity_arguments": "p_post_id uuid, p_expected_revision text",
+      "arguments": "p_post_id uuid, p_expected_revision text",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_resolve_admin_notification_target",
+      "identity_arguments": "p_actor_id uuid, p_normalized_email text",
+      "arguments": "p_actor_id uuid, p_normalized_email text",
+      "result": "uuid"
+    },
+    {
+      "proname": "bil_resolve_ai_coach_reset_target",
+      "identity_arguments": "p_actor_id uuid, p_normalized_email text",
+      "arguments": "p_actor_id uuid, p_normalized_email text",
+      "result": "uuid"
+    },
+    {
+      "proname": "bil_review_ai_coach_safety_report_v1",
+      "identity_arguments": "p_report_id uuid, p_decision text, p_operation_id uuid",
+      "arguments": "p_report_id uuid, p_decision text, p_operation_id uuid",
+      "result": "jsonb"
+    },
+    {
+      "proname": "bil_suspend_community_member_by_email",
+      "identity_arguments": "p_actor_id uuid, p_email text, p_reason text, p_idempotency_key text",
+      "arguments": "p_actor_id uuid, p_email text, p_reason text, p_idempotency_key text",
+      "result": "jsonb"
+    }
+  ]
+}
