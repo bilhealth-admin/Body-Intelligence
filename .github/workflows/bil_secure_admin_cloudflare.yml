@@ -5,6 +5,7 @@ on:
       - feat/bil-secure-admin-ops-20261018
     paths:
       - 'cloudflare/admin_site/**'
+      - 'tool/admin_web/review_v1/**'
       - '.github/workflows/bil_secure_admin_cloudflare.yml'
   workflow_dispatch:
 permissions:
