@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {handleReview} from '../edge/review_server.mjs';
+import {handleReview} from './review_server.mjs';
 
 const actor='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const author='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
