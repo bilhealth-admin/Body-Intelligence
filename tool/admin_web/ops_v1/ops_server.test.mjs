@@ -30,10 +30,10 @@ function dependencies({allow=true,write=false,serviceSpy=[],userSpy=[],override=
     })[key],
     makeUserClient:()=>({
       auth:{getUser:async()=>({data:{user:{id:uid}}})},
-      rpc:async(name,args)=>{userSpy.push({name,args});return {data:name==='bil_can_manage_ai_coach'?allow:name==='bil_consume_rate_limit'?null:[{id:uid}],error:null}}
+      rpc:async(name,args)=>{userSpy.push({name,args});return {data:name==='bil_can_manage_ai_coach'?allow:name==='bil_consume_rate_limit'?null:name==='bil_list_ai_coach_safety_reports_v1'?[{report_id:uid}]:[{id:uid}],error:null}}
     }),
     makeServiceClient:()=>({
-      rpc:async(name,args)=>{serviceSpy.push({name,args});return {data:[{id:uid}],error:null}}
+      rpc:async(name,args)=>{serviceSpy.push({name,args});return {data:name==='bil_admin_web_reporter_contacts_v1'?[]:[{id:uid}],error:null}}
     })
   };
 }
