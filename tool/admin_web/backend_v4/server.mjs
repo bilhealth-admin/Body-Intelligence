@@ -122,7 +122,7 @@ export async function handleWebAdmin(request, deps) {
         ...receipt, policy_version: POLICY_VERSION }, 200, origin);
     }
     if (body.operation === 'audit') {
-      const result=await service.rpc('bil_admin_web_list_subscription_commands',
+      const result=await service.rpc('bil_admin_web_list_subscription_commands_v2',
         {p_actor_id:userId,p_offset:body.offset});
       if (result?.error) {
         if (/administrator_required/i.test(String(result.error.message||'')))
