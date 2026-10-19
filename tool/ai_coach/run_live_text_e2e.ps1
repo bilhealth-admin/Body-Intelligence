@@ -1,6 +1,7 @@
 param([string]$ProjectRef = 'tgmanzhqulksykhslrzb')
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '..\release\http_failure_body.ps1')
 $baseUrl = "https://$ProjectRef.supabase.co"
 $userId = $null
 $authToken = $null
@@ -25,16 +26,6 @@ function Invoke-DbQuery([string]$Sql) {
   }
   if ($code -ne 0) { throw 'Supabase database query failed.' }
   $raw | ConvertFrom-Json
-}
-
-function Get-HttpFailureBody($Exception) {
-  if ($null -eq $Exception.Response) { return $Exception.Message }
-  if ($null -ne $Exception.Response.Content) {
-    return $Exception.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
-  }
-  $reader = [IO.StreamReader]::new($Exception.Response.GetResponseStream())
-  try { return $reader.ReadToEnd() }
-  finally { $reader.Dispose() }
 }
 
 try {
@@ -107,7 +98,13 @@ try {
     $response = Invoke-RestMethod -Method Post -Uri "$baseUrl/functions/v1/ai-coach" -Headers $userHeaders -ContentType 'application/json' -Body $body -TimeoutSec 45
   }
   catch {
-    throw "AI Coach HTTP failure: $(Get-HttpFailureBody $_.Exception)"
+    $httpStatus = $null
+    try { if ($_.Exception.Response.StatusCode) { $httpStatus = [int]$_.Exception.Response.StatusCode } } catch {}
+    $failureBody = Get-HttpFailureBody $_
+    if ($null -ne $httpStatus) {
+      throw "AI Coach HTTP failure (HTTP $httpStatus): $failureBody"
+    }
+    throw "AI Coach HTTP failure: $failureBody"
   }
   finally {
     $requestWatch.Stop()

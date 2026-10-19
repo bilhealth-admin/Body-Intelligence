@@ -24,6 +24,21 @@ class VisionDeployReadinessStaticContract(unittest.TestCase):
         self.assertIn("nonRetryableProviderValidation", runner)
         self.assertIn("malformed_response|not_configured", runner)
 
+    def test_live_http_failure_diagnostics_keep_the_original_response(self):
+        helper = (ROOT / "tool/release/http_failure_body.ps1").read_text(encoding="utf-8")
+        self.assertIn("$Failure.ErrorDetails.Message", helper)
+        self.assertIn("$content.ReadAsStringAsync()", helper)
+        self.assertIn("return [string]$exception.Message", helper)
+        self.assertNotIn("Get-HttpFailureBody($Exception)", helper)
+        for relative in (
+            "tool/ai_coach/run_live_text_e2e.ps1",
+            "tool/meal_vision_benchmark/run_live_synthetic_benchmark.ps1",
+            "tool/meal_vision_benchmark/run_live_supabase_e2e.ps1",
+        ):
+            runner = (ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn("http_failure_body.ps1", runner)
+            self.assertIn("Get-HttpFailureBody $_", runner)
+
     def test_versioned_pro_pricing_migration_is_additive(self):
         migration = (ROOT / "supabase/migrations/202608110003_bil_gemini_25_pro_pricing.sql").read_text(encoding="utf-8")
         self.assertIn("gemini-2.5-pro", migration)

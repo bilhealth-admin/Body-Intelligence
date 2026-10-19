@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '..\release\http_failure_body.ps1')
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $manifestFile = (Resolve-Path (Join-Path $root $ManifestPath)).Path
 $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding utf8 | ConvertFrom-Json
@@ -39,12 +40,6 @@ function Convert-ToGramAmount($Candidate) {
     'kg' { return $amount*1000 }
     default { return $null }
   }
-}
-
-function Get-HttpFailureBody($Exception) {
-  if($null -eq $Exception.Response){return $Exception.Message}
-  $reader=[IO.StreamReader]::new($Exception.Response.GetResponseStream())
-  try{return $reader.ReadToEnd()}finally{$reader.Dispose()}
 }
 
 $rawCases=@(); $runs=@(); $receipts=@(); $failure=$null
@@ -108,7 +103,7 @@ try {
         break
       }catch{
         $status=if($_.Exception.Response){[int]$_.Exception.Response.StatusCode}else{0}
-        $failureBody=Get-HttpFailureBody $_.Exception
+        $failureBody=Get-HttpFailureBody $_
         if($status -eq 422 -and $case.category -eq 'non_food' -and
             $failureBody -match '"error"\s*:\s*"non_food_or_unrecognized"'){
           $nonFoodBody=$failureBody | ConvertFrom-Json

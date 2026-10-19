@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '..\release\http_failure_body.ps1')
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $resolvedImage = (Resolve-Path (Join-Path $root $ImagePath)).Path
 $baseUrl = "https://$ProjectRef.supabase.co"
@@ -25,15 +26,6 @@ function Invoke-DbQuery([string]$Sql) {
     if ($attempt -lt 3) { Start-Sleep -Seconds 2 }
   }
   throw 'Supabase database query failed after three attempts.'
-}
-
-function Get-HttpFailureBody($Exception) {
-  if ($null -eq $Exception.Response) { return $Exception.Message }
-  if ($null -ne $Exception.Response.Content) {
-    return $Exception.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
-  }
-  $reader = New-Object System.IO.StreamReader($Exception.Response.GetResponseStream())
-  try { return $reader.ReadToEnd() } finally { $reader.Dispose() }
 }
 
 try {
@@ -102,7 +94,7 @@ try {
     $consentDeniedBody = if ($_.ErrorDetails.Message) {
       $_.ErrorDetails.Message
     } else {
-      Get-HttpFailureBody $_.Exception
+      Get-HttpFailureBody $_
     }
     $consentDeniedJson = try { $consentDeniedBody | ConvertFrom-Json } catch { $null }
     $consentDeniedError = $consentDeniedJson.error
@@ -137,7 +129,7 @@ try {
     $failureBody = if ($_.ErrorDetails.Message) {
       $_.ErrorDetails.Message
     } else {
-      Get-HttpFailureBody $_.Exception
+      Get-HttpFailureBody $_
     }
     $failureJson = try { $failureBody | ConvertFrom-Json } catch { $null }
     $failedReceiptQuery = Invoke-DbQuery "select state,provider,model,latency_ms,input_tokens,output_tokens,cost_usd,provider_attempts,cost_source from public.bil_ai_usage_events where owner_id='$userId' and capability='vision' and request_id='$requestId'"
