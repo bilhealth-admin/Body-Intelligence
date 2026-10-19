@@ -10,7 +10,8 @@ permissions:
 
 concurrency:
   group: bil-rc-mobile-test-${{ github.ref }}
-  cancel-in-progress: true
+  # Preserve the RC run being monitored; newer exact-source validations queue.
+  cancel-in-progress: false
 
 env:
   FLUTTER_VERSION: 3.44.6
