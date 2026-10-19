@@ -145,6 +145,7 @@ jobs:
           python3 -m unittest discover -s tool/release -p 'test_verify_android_startup_frame.py' -v 2>&1 | tee "$POLICY_OUT/android-startup-health-unit.log"
           python3 -m unittest discover -s .github/scripts -p 'test_bil_native_bounded_command.py' -v 2>&1 | tee "$POLICY_OUT/native-supervisor-unit.log"
           python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_simulator_adhoc_sign.py' -v 2>&1 | tee "$POLICY_OUT/ios-simulator-signing-host-unit.log"
+          python3 -m unittest tool.meal_vision_benchmark.test_deploy_readiness_static_contract -v 2>&1 | tee "$POLICY_OUT/live-release-regression-unit.log"
           python3 tool/release/verify_android_16k_alignment.py --self-test
           python3 tools/qa/bil_store_policy_gate.py --output "$POLICY_OUT/source-checks-before-lint.json"
           python3 tool/prebuild/store_policy_source_guard.py --json-out "$POLICY_OUT/legacy-source-policy-preflight.json"
