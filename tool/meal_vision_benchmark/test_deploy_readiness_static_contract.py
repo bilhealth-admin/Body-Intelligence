@@ -39,6 +39,19 @@ class VisionDeployReadinessStaticContract(unittest.TestCase):
             self.assertIn("http_failure_body.ps1", runner)
             self.assertIn("Get-HttpFailureBody $_", runner)
 
+    def test_live_auth_fixture_creation_recovers_ambiguous_gateway_timeouts_safely(self):
+        helper = (ROOT / "tool/release_certification/auth_admin_user_create.ps1").read_text(encoding="utf-8")
+        coach = (ROOT / "tool/ai_coach/run_live_text_e2e.ps1").read_text(encoding="utf-8")
+        rc_fixture = (ROOT / "tool/release_certification/native_cloud_fixture.ps1").read_text(encoding="utf-8")
+        self.assertIn("Find-BilAuthAdminUserByEmail", helper)
+        self.assertIn("Invoke-BilAuthAdminUserCreateWithRecovery", helper)
+        self.assertIn("$status -in @(408, 429, 502, 503, 504)", helper)
+        self.assertIn("-FetchPage $fetchUsersPage", coach)
+        self.assertIn("-CreateRequest $createRequest", coach)
+        self.assertIn("id='';email=$email", rc_fixture)
+        self.assertIn("-FetchPage $fetchUsersPage", rc_fixture)
+        self.assertIn("$state.users[-1].id", rc_fixture)
+
     def test_android_connected_health_deep_link_uses_android_page_title(self):
         page = (ROOT / "lib/features/connected_health/connected_health_page.dart").read_text(encoding="utf-8")
         verifier = (ROOT / "tool/release/verify_android_deep_link_ui.py").read_text(encoding="utf-8")

@@ -2,6 +2,7 @@ param([string]$ProjectRef = 'tgmanzhqulksykhslrzb')
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot '..\release\http_failure_body.ps1')
+. (Join-Path $PSScriptRoot '..\release_certification\auth_admin_user_create.ps1')
 $baseUrl = "https://$ProjectRef.supabase.co"
 $userId = $null
 $authToken = $null
@@ -53,11 +54,24 @@ try {
   $email = "coach-e2e-$suffix@bilhealth.invalid"
   $password = "Bil!$([guid]::NewGuid().ToString('N'))a9"
   $adminHeaders = @{ apikey = $serverKey; Authorization = "Bearer $serverKey" }
-  $created = Invoke-RestMethod -Method Post -Uri "$baseUrl/auth/v1/admin/users" -Headers $adminHeaders -UserAgent 'BIL-Coach-E2E/1.1' -ContentType 'application/json' -Body (@{
+  $createBody = @{
       email = $email
       password = $password
       email_confirm = $true
-    } | ConvertTo-Json)
+    } | ConvertTo-Json
+  $createRequest = ({
+    Invoke-RestMethod -Method Post -Uri "$baseUrl/auth/v1/admin/users" -Headers $adminHeaders -UserAgent 'BIL-Coach-E2E/1.1' -ContentType 'application/json' -Body $createBody
+  }).GetNewClosure()
+  $fetchUsersPage = ({
+    param($page, $perPage)
+    Invoke-RestMethod -Uri "$baseUrl/auth/v1/admin/users?page=$page&per_page=$perPage" -Headers $adminHeaders -UserAgent 'BIL-Coach-E2E/1.1'
+  }).GetNewClosure()
+  $findCreatedUser = ({
+    Find-BilAuthAdminUserByEmail -Email $email -FetchPage $fetchUsersPage
+  }).GetNewClosure()
+  $created = Invoke-BilAuthAdminUserCreateWithRecovery `
+    -CreateRequest $createRequest `
+    -FindUser $findCreatedUser
   $userId = [string]$created.id
   $expiry = [DateTime]::UtcNow.AddHours(1).ToString('o')
   [void](Invoke-RestMethod -Method Post -Uri "$baseUrl/rest/v1/rpc/bil_set_ai_closed_test_access" -Headers $adminHeaders -ContentType 'application/json' -Body (@{
@@ -168,6 +182,15 @@ try {
   }
 }
 finally {
+  if (-not $userId -and $email -and $adminHeaders) {
+    try {
+      $pendingUser = Find-BilAuthAdminUserByEmail -Email $email -FetchPage $fetchUsersPage
+      if ($pendingUser) {
+        $userId = [string]$pendingUser.id
+      }
+    }
+    catch { $userId = $null }
+  }
   if ($authToken -and $publishableKey) {
     try {
       [void](Invoke-RestMethod -Method Post -Uri "$baseUrl/auth/v1/logout?scope=global" -Headers @{
