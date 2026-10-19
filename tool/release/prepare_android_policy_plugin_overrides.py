@@ -23,6 +23,10 @@ from urllib.request import url2pathname
 RECIPE = "bil-android-policy-plugin-overrides-v1"
 MARKER = ".bil-android-policy-overlay.json"
 OVERLAY = Path(".dart_tool/bil-android-policy-overrides")
+# Android Gradle Plugin writes ABI/CMake intermediates inside the jni package.
+# They are build output, not upstream source, and must not enter the overlay copy
+# or source provenance digest.
+GENERATED_ANDROID_OUTPUT_DIRS = frozenset({"android/.cxx"})
 CAMERA = "android/src/main/java/io/flutter/plugins/camerax/CameraXLibrary.g.kt"
 SCANNER = "android/src/main/kotlin/dev/steenbakker/mobile_scanner/MobileScanner.kt"
 LENS = "android/src/main/kotlin/dev/steenbakker/mobile_scanner/MobileScannerCameraLensSelector.kt"
@@ -63,6 +67,22 @@ def _linked(path: Path) -> bool:
     return path.is_symlink() or getattr(path, "is_junction", lambda: False)()
 
 
+def _validate_regular_tree(root: Path) -> None:
+    """Reject links and special entries even inside ignored generated output."""
+    pending = [root]
+    while pending:
+        directory = pending.pop()
+        if _linked(directory):
+            raise OverlayError(f"Linked package directory is forbidden: {directory}")
+        for entry in sorted(directory.iterdir()):
+            if _linked(entry):
+                raise OverlayError(f"Linked package entry is forbidden: {entry}")
+            if entry.is_dir():
+                pending.append(entry)
+            elif not entry.is_file():
+                raise OverlayError(f"Non-regular package entry is forbidden: {entry}")
+
+
 def inventory(root: Path) -> dict[str, str]:
     """Hash all regular files; never follow source or destination links."""
     result = {}
@@ -75,12 +95,30 @@ def inventory(root: Path) -> dict[str, str]:
             if _linked(entry):
                 raise OverlayError(f"Linked package entry is forbidden: {entry}")
             if entry.is_dir():
+                relative = entry.relative_to(root).as_posix()
+                if relative in GENERATED_ANDROID_OUTPUT_DIRS:
+                    _validate_regular_tree(entry)
+                    continue
                 pending.append(entry)
             elif entry.is_file():
                 result[entry.relative_to(root).as_posix()] = sha256(entry.read_bytes())
             else:
                 raise OverlayError(f"Non-regular package entry is forbidden: {entry}")
     return dict(sorted(result.items()))
+
+
+def _ignore_generated_android_outputs(source: Path):
+    source = source.resolve()
+
+    def ignore(directory: str, names: list[str]) -> set[str]:
+        if Path(directory).resolve() != source / "android":
+            return set()
+        return {
+            name for name in names
+            if Path("android", name).as_posix() in GENERATED_ANDROID_OUTPUT_DIRS
+        }
+
+    return ignore
 
 
 def _once(text: str, old: str, new: str, label: str) -> str:
@@ -289,7 +327,12 @@ def prepare(project_root: Path) -> dict:
         if not destination.exists():
             stage = Path(tempfile.mkdtemp(prefix=f".{name}-", dir=base))
             package = stage / "package"
-            shutil.copytree(source, package, copy_function=shutil.copy2)
+            shutil.copytree(
+                source,
+                package,
+                copy_function=shutil.copy2,
+                ignore=_ignore_generated_android_outputs(source),
+            )
             if inventory(package) != marker["source_files_sha256"]:
                 raise OverlayError(f"Source changed while copying: {name}")
             for relative in SPECS[name][1]:

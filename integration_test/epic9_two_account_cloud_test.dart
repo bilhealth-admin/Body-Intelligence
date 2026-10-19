@@ -1,5 +1,56 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+Future<void> acceptCurrentCommunityPolicyForDisposableAccount(
+  SupabaseClient client,
+  String userId,
+  String accountLabel,
+) async {
+  final initialRaw = await client.rpc('bil_current_community_policy_status');
+  if (initialRaw is! Map) {
+    throw const FormatException('Invalid Community policy status payload');
+  }
+  final initial = CommunityPolicyState.fromServerSnapshot(
+    Map<String, dynamic>.from(initialRaw),
+  );
+  expect(
+    initial.status,
+    CommunityPolicyStatus.acceptanceRequired,
+    reason:
+        '$accountLabel must begin as a fresh disposable account that has not '
+        'accepted Community policy.',
+  );
+  final policy = initial.policy;
+  if (policy == null) {
+    throw const FormatException('Active Community policy is unavailable');
+  }
+
+  // These run-scoped identities are created by native_cloud_fixture.ps1 and
+  // deleted after this test. Model the explicit consent action through the
+  // same authenticated write used by CommunityRepository; never use the
+  // service role or fabricate acceptance for a real account.
+  await client.from('bil_content_policy_acceptances').upsert({
+    'user_id': userId,
+    'policy_version': policy.version,
+  });
+
+  final verifiedRaw = await client.rpc('bil_current_community_policy_status');
+  if (verifiedRaw is! Map) {
+    throw const FormatException('Invalid Community policy status payload');
+  }
+  final verified = CommunityPolicyState.fromServerSnapshot(
+    Map<String, dynamic>.from(verifiedRaw),
+  );
+  expect(
+    verified.status,
+    CommunityPolicyStatus.accepted,
+    reason:
+        '$accountLabel must have its current Community policy acceptance '
+        'verified by the server before the cloud test continues.',
+  );
+  expect(verified.acceptedVersion, policy.version);
+}
 
 void main() {
   const enabled = bool.fromEnvironment(
@@ -37,6 +88,16 @@ void main() {
       final userA = authA.user!;
       final userB = authB.user!;
       expect(userA.id, isNot(userB.id));
+      await acceptCurrentCommunityPolicyForDisposableAccount(
+        clientA,
+        userA.id,
+        'Disposable QA account A',
+      );
+      await acceptCurrentCommunityPolicyForDisposableAccount(
+        clientB,
+        userB.id,
+        'Disposable QA account B',
+      );
 
       await clientA.from('bil_blocks').delete().eq('blocked_id', userB.id);
       await clientB.from('bil_blocks').delete().eq('blocked_id', userA.id);

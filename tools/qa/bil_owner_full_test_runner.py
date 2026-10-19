@@ -105,6 +105,60 @@ def fingerprint(values):
     return hashlib.sha256('\n'.join(f'{name}:{sha}' for name, sha in sorted(values.items())).encode()).hexdigest()
 
 
+def verified_branch(head, branch):
+    """Allow this runner's isolated detached worktree only at the exact remote SHA."""
+    if branch == ALLOWED_BRANCH:
+        return {'branch': branch, 'verified_remote_ref': None}
+    if branch:
+        raise RuntimeError('the frozen SHA and authorized integration branch must match')
+    remote_ref = f'origin/{ALLOWED_BRANCH}'
+    try:
+        remote_head = git('rev-parse', '--verify', remote_ref)
+    except subprocess.CalledProcessError as error:
+        raise RuntimeError('detached HEAD requires the authorized origin ref to be available') from error
+    if remote_head != head:
+        raise RuntimeError('detached HEAD must exactly match the authorized origin integration ref')
+    return {'branch': branch, 'verified_remote_ref': remote_ref}
+
+
+def tail_lines(path, limit=100, block_size=8192):
+    """Read only the newest progress lines for the live page."""
+    with Path(path).open('rb') as stream:
+        stream.seek(0, os.SEEK_END)
+        position = stream.tell()
+        content = bytearray()
+        while position > 0 and content.count(b'\n') <= limit:
+            size = min(block_size, position)
+            position -= size
+            stream.seek(position)
+            content[:0] = stream.read(size)
+    return content.decode('utf-8', errors='replace').splitlines()[-limit:]
+
+
+def dashboard_snapshot(state, lines):
+    """Shape the owned runner ledger for the local, read-only dashboard."""
+    visible_lines = [line.rstrip('\r\n') for line in lines[-100:]
+                     if 'PROGRESS ' in line or ' ERROR ' in line or ' START ' in line
+                     or 'PROCESS_EXIT ' in line]
+    return {**state, 'current': True, 'lines': visible_lines}
+
+
+def publish_dashboard(directory, state, progress_lines=()):
+    if directory is None:
+        return
+    snapshot = dashboard_snapshot(state, list(progress_lines))
+    atomic_json(directory / 'state', snapshot)
+    source_fingerprint = state.get('source_fingerprint') or state.get('expected_head') or ''
+    step = {'name': 'owner full Flutter root suite',
+            'exit_code': state.get('exit_code'),
+            'stable_source': state.get('stable_source')}
+    atomic_json(directory / 'current-work', {
+        'phase': state.get('phase', 'preflight'),
+        'fingerprint': source_fingerprint,
+        'steps': [step],
+    })
+
+
 def console_safe_text(message, encoding):
     """Keep localized test names from terminating progress output on Windows."""
     try:
@@ -151,9 +205,10 @@ def atomic_json(path, value, retry_timeout=0.25):
 
 class LiveStatusPublisher:
     """Presentation failures must not interrupt the owned test event stream."""
-    def __init__(self, path, progress):
+    def __init__(self, path, progress, dashboard_dir=None):
         self.path = path
         self.progress = progress
+        self.dashboard_dir = dashboard_dir
         self.failures = 0
         self.degraded = False
         self.last_success = None
@@ -193,6 +248,21 @@ class LiveStatusPublisher:
         self.degraded = False
         self.last_success = published_at
         state['status_publication'] = candidate['status_publication']
+        if self.dashboard_dir is not None:
+            try:
+                publish_dashboard(
+                    self.dashboard_dir, candidate,
+                    tail_lines(self.progress.name),
+                )
+            except OSError as error:
+                diagnostic = json.dumps({
+                    'event': 'dashboard_publication_degraded', 'utc': utc(),
+                    'runner_pid': os.getpid(), 'error': f'{type(error).__name__}: {error}',
+                }, ensure_ascii=True)
+                if not self.progress.closed:
+                    self.progress.write(diagnostic + '\n')
+                    self.progress.flush()
+                console_print(diagnostic, stream=sys.stderr)
         return True
 
 
@@ -374,15 +444,29 @@ def main():
     parser.add_argument('label')
     parser.add_argument('--expect-head', required=True)
     parser.add_argument('--flutter', required=True)
+    parser.add_argument('--dashboard-dir', type=Path)
     args = parser.parse_args()
     if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,90}', args.label):
         parser.error('plain unique run label required')
     folder = ROOT / 'build/owner-full' / args.label
     folder.mkdir(parents=True, exist_ok=False)
+    dashboard_dir = args.dashboard_dir
+    if dashboard_dir is not None:
+        if not dashboard_dir.is_absolute():
+            dashboard_dir = ROOT / dashboard_dir
+        dashboard_dir.mkdir(parents=True, exist_ok=False)
+        args.dashboard_dir = dashboard_dir
+        shutil.copyfile(ROOT / 'tools/qa/owner_full_dashboard.html',
+                        dashboard_dir / 'index.html')
     state = {'phase': 'preflight', 'label': args.label, 'expected_head': args.expect_head,
              'started_utc': utc(), 'runner_pid': os.getpid(), 'flutter_started': False,
              'accepted': False, 'automatic_retry': False}
     atomic_json(folder / 'status.json', state)
+    if dashboard_dir is not None:
+        atomic_json(dashboard_dir / 'github-state', {
+            'snapshot_utc': utc(), 'runs': [],
+        })
+        publish_dashboard(dashboard_dir, state)
     owned = []
     lock = ExclusiveRun(ROOT / 'build/owner-full/active-run.lock')
     lock_acquired = False
@@ -406,6 +490,8 @@ def main():
         state.update(phase='failed_preflight' if phase == 'preflight' else 'failed_start' if not state['flutter_started'] else 'failed_runner',
                      finished_utc=utc(), owned_process_termination=termination)
         write_failure_state(folder, state)
+        if dashboard_dir is not None:
+            publish_dashboard(dashboard_dir, state)
         print(json.dumps({'phase': state['phase'], 'flutter_started': state['flutter_started'], 'error': state['runner_error']}, ensure_ascii=True), file=sys.stderr)
         return 79
     finally:
@@ -424,8 +510,9 @@ def root_test_command(dart, snapshot):
 
 def execute(args, folder, state, owned):
     head, branch = git('rev-parse', 'HEAD'), git('branch', '--show-current')
-    if head != args.expect_head or branch != ALLOWED_BRANCH:
+    if head != args.expect_head:
         raise RuntimeError('the frozen SHA and authorized integration branch must match')
+    branch_evidence = verified_branch(head, branch)
     # Freeze the exact local working source, including intentional edits that
     # have not been committed yet. The input manifest below, not a clean-tree
     # requirement, defines what this run tested.
@@ -450,6 +537,7 @@ def execute(args, folder, state, owned):
     atomic_json(folder / 'expected-files.json', expected_files)
     command = root_test_command(dart, snapshot)
     state.update({'phase': 'starting', 'label': args.label, 'head': head, 'branch': branch,
+             **branch_evidence,
              'started_utc': utc(), 'runner_pid': os.getpid(), 'command': command,
              'flutter': version, 'resources': machine, 'expected_test_files': len(expected_files),
              'source_fingerprint': fingerprint(frozen_inputs), 'fingerprint_version': 4,
@@ -465,7 +553,7 @@ def execute(args, folder, state, owned):
         process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', errors='replace', bufsize=1)
         owned.append(process)
         state.update(phase='running', flutter_pid=process.pid, flutter_started=True)
-        publisher = LiveStatusPublisher(folder / 'status.json', progress)
+        publisher = LiveStatusPublisher(folder / 'status.json', progress, args.dashboard_dir)
         publisher.publish(state)
         last_written = time.monotonic()
         for line in process.stdout:
@@ -514,6 +602,8 @@ def execute(args, folder, state, owned):
     state['accepted'] = accepted(state)
     atomic_json(folder / 'errors.json', ledger.errors)
     atomic_json(folder / 'test-outcomes.json', [{'id': key, 'name': ledger.tests.get(key, {}).get('name'), 'file': ledger.file_for(ledger.tests.get(key, {})), 'result': result} for key, result in ledger.outcomes.items()])
+    if 'publisher' in locals():
+        publisher.publish(state)
     write_final_result(folder, state)
     console_print(json.dumps({key: state[key] for key in ('head', 'exit_code', 'counts', 'accepted', 'stable_source')}, ensure_ascii=True))
     return 0 if state['accepted'] else (exit_code or 79)

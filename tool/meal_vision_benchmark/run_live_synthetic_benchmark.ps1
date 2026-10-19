@@ -20,7 +20,7 @@ function Invoke-DbQuery([string]$Sql) {
   for ($attempt=1; $attempt -le 3; $attempt++) {
     $old=$ErrorActionPreference; $ErrorActionPreference='Continue'
     try {
-      $raw=(& npx --yes supabase@latest db query --linked $Sql 2>$null)-join "`n"
+      $raw=(& npx --yes supabase@latest db query --linked --output-format json $Sql 2>$null)-join "`n"
       $exit=$LASTEXITCODE
     } finally { $ErrorActionPreference=$old }
     if ($exit -eq 0) { return $raw | ConvertFrom-Json }

@@ -6,7 +6,7 @@ $cleaned = $false
 function Invoke-DbQuery([string]$Sql) {
   $old = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
-  try { $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef 2>$null) -join "`n"; $code = $LASTEXITCODE }
+  try { $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef --output-format json 2>$null) -join "`n"; $code = $LASTEXITCODE }
   finally { $ErrorActionPreference = $old }
   if ($code -ne 0) { throw 'Voice metering database query failed' }
   $raw | ConvertFrom-Json

@@ -434,7 +434,11 @@ jobs:
       - name: Run complete Flutter test suite shard ${{ matrix.shard }} of 8
         shell: pwsh
         run: |
-          flutter test --no-pub --total-shards=8 --shard-index=${{ matrix.shard }}
+          flutter test `
+            --no-pub `
+            --dart-define=BIL_PAYMENTS_ENABLED=true `
+            --total-shards=8 `
+            --shard-index=${{ matrix.shard }}
 
       - name: Preserve failed golden screenshots from this shard
         if: failure()

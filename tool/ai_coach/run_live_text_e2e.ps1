@@ -17,7 +17,7 @@ function Invoke-DbQuery([string]$Sql) {
   try {
     # Pipe SQL over stdin so PowerShell cannot split a query containing spaces
     # into multiple native-process arguments on Windows.
-    $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef 2>$null) -join "`n"
+    $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef --output-format json 2>$null) -join "`n"
     $code = $LASTEXITCODE
   }
   finally {

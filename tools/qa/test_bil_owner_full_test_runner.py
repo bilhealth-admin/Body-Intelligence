@@ -18,6 +18,88 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+class RunnerPreflightTests(unittest.TestCase):
+    def test_detached_head_requires_exact_authorized_remote_sha(self):
+        with patch.object(runner, 'git', return_value='frozen') as git:
+            evidence = runner.verified_branch('frozen', '')
+        self.assertEqual(evidence, {
+            'branch': '',
+            'verified_remote_ref': f'origin/{runner.ALLOWED_BRANCH}',
+        })
+        git.assert_called_once_with('rev-parse', '--verify', f'origin/{runner.ALLOWED_BRANCH}')
+
+    def test_detached_head_mismatch_is_rejected(self):
+        with patch.object(runner, 'git', return_value='different'):
+            with self.assertRaisesRegex(RuntimeError, 'exactly match'):
+                runner.verified_branch('frozen', '')
+
+    def test_unrelated_named_branch_is_rejected(self):
+        with patch.object(runner, 'git') as git:
+            with self.assertRaisesRegex(RuntimeError, 'authorized integration branch'):
+                runner.verified_branch('frozen', 'codex/other-work')
+        git.assert_not_called()
+
+    def test_dashboard_snapshot_shows_current_counts_and_only_progress_lines(self):
+        state = {'phase': 'running', 'tests_completed': 25,
+                 'counts': {'success': 24, 'failure': 1, 'error': 0, 'skip': 0}}
+        snapshot = runner.dashboard_snapshot(state, [
+            '2026-10-19T00:00 START case one\n',
+            '2026-10-19T00:01 PROGRESS completed=25 failed=1\n',
+            '2026-10-19T00:02 SUCCESS hidden detail\n',
+        ])
+        self.assertTrue(snapshot['current'])
+        self.assertEqual(snapshot['tests_completed'], 25)
+        self.assertEqual(len(snapshot['lines']), 2)
+        self.assertIn('PROGRESS completed=25', snapshot['lines'][-1])
+
+    def test_dashboard_tail_keeps_latest_progress_without_reading_full_log(self):
+        with tempfile.TemporaryDirectory() as name:
+            log = Path(name) / 'progress.log'
+            log.write_text(''.join(f'line-{n:04d}\n' for n in range(1000)),
+                           encoding='utf-8')
+            self.assertEqual(runner.tail_lines(log, limit=4, block_size=64), [
+                'line-0996', 'line-0997', 'line-0998', 'line-0999',
+            ])
+
+    def test_live_publisher_updates_dashboard_and_source_summary(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            dashboard = root / 'dashboard'
+            dashboard.mkdir()
+            progress_path = root / 'progress.log'
+            status_path = root / 'status.json'
+            state = {'phase': 'running', 'head': 'frozen',
+                     'verified_remote_ref': f'origin/{runner.ALLOWED_BRANCH}',
+                     'source_fingerprint': 'source-hash', 'tests_completed': 25,
+                     'counts': {'success': 25, 'failure': 0, 'error': 0, 'skip': 0}}
+            with progress_path.open('w', encoding='utf-8') as progress:
+                progress.write('2026-10-19 PROGRESS completed=25 failed=0\n')
+                publisher = runner.LiveStatusPublisher(status_path, progress, dashboard)
+                publisher.publish(state)
+            visible = json.loads((dashboard / 'state').read_text(encoding='utf-8'))
+            work = json.loads((dashboard / 'current-work').read_text(encoding='utf-8'))
+            self.assertTrue(visible['current'])
+            self.assertEqual(visible['tests_completed'], 25)
+            self.assertEqual(work['fingerprint'], 'source-hash')
+            self.assertEqual(work['steps'][0]['name'], 'owner full Flutter root suite')
+
+    def test_dashboard_publication_error_after_suite_does_not_break_final_result(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            progress_path = root / 'progress.log'
+            with progress_path.open('w', encoding='utf-8') as progress:
+                progress.write('completed\n')
+                publisher = runner.LiveStatusPublisher(
+                    root / 'status.json', progress, root / 'missing-dashboard'
+                )
+            state = {'phase': 'completed', 'tests_completed': 1,
+                     'counts': {'success': 1, 'failure': 0, 'error': 0, 'skip': 0}}
+            with patch.object(runner, 'console_print') as output:
+                self.assertTrue(publisher.publish(state))
+            self.assertTrue((root / 'status.json').is_file())
+            output.assert_called_once()
+
+
 class LedgerTests(unittest.TestCase):
     def test_loading_failure_cannot_be_reported_as_empty_success(self):
         ledger = runner.Ledger()

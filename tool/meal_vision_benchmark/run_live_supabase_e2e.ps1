@@ -16,7 +16,7 @@ function Invoke-DbQuery([string]$Sql) {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-      $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef 2>$null) -join "`n"
+      $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef --output-format json 2>$null) -join "`n"
       $exitCode = $LASTEXITCODE
     } finally {
       $ErrorActionPreference = $previousErrorActionPreference

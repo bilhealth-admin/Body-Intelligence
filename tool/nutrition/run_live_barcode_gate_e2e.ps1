@@ -1,6 +1,6 @@
 param([string]$ProjectRef='tgmanzhqulksykhslrzb')
 $ErrorActionPreference='Stop';$base="https://$ProjectRef.supabase.co";$uid=$null;$clean=$false
-function Db([string]$sql){$old=$ErrorActionPreference;$ErrorActionPreference='Continue';try{$raw=($sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef 2>$null)-join "`n";$exit=$LASTEXITCODE}finally{$ErrorActionPreference=$old};if($exit-ne 0){throw 'db query failed'};$raw|ConvertFrom-Json}
+function Db([string]$sql){$old=$ErrorActionPreference;$ErrorActionPreference='Continue';try{$raw=($sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef --output-format json 2>$null)-join "`n";$exit=$LASTEXITCODE}finally{$ErrorActionPreference=$old};if($exit-ne 0){throw 'db query failed'};$raw|ConvertFrom-Json}
 try{
   $keys=((& npx --yes supabase@latest projects api-keys --project-ref $ProjectRef --reveal --output json 2>$null)-join "`n")|ConvertFrom-Json
   $svc=($keys|?{$_.name-eq'service_role'}|select -First 1).api_key;$pub=($keys|?{$_.name-eq'anon'-and $_.type-eq'legacy'}|select -First 1).api_key

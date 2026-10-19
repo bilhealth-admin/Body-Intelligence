@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الشاملة الحالية — BIL QA</title>
+<style>
+  :root{font-family:Segoe UI,Tahoma,sans-serif;color:#172a3a;background:#edf3f9}
+  body{margin:0;padding:18px;max-width:1100px;margin-inline:auto}
+  header{position:sticky;top:0;background:#edf3f9f5;padding:12px 0;backdrop-filter:blur(8px)}
+  h1{font-size:22px;margin:0 0 8px}.counts{display:flex;gap:8px;flex-wrap:wrap}
+  .counts div,.panel{background:#fff;border:1px solid #dbe5ee;border-radius:14px;padding:14px}
+  .counts div{min-width:90px}.counts b{display:block;font-size:26px}
+  .bad{color:#bf2636}.ok{color:#157449}.panel{margin:16px 0}
+  pre{direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;background:#f8fbfe;border-radius:10px;padding:12px;line-height:1.65}
+  #runs p{overflow-wrap:anywhere}a{color:#1769d2}
+</style>
+<header>
+  <h1>الشاملة الحالية — تحديث كل 25 اختبارًا</h1>
+  <p id="status">تحضير التشغيل…</p>
+  <div class="counts">
+    <div>المكتملة<b id="completed">—</b></div>
+    <div class="ok">نجاح<b id="passed">—</b></div>
+    <div class="bad">فشل<b id="failed">—</b></div>
+    <div class="bad">أخطاء<b id="errors">—</b></div>
+    <div>متخطاة<b id="skipped">—</b></div>
+  </div>
+  <p>هذه الجولة الحالية فقط. نجاح الشاملة المحلية لا يثبت نجاح GitHub أو اختبارات الجهاز والسحابة.</p>
+</header>
+<section class="panel">
+  <h2>المصدر وسلامة التشغيل</h2>
+  <p id="source"></p>
+  <pre id="steps"></pre>
+</section>
+<section class="panel">
+  <h2>حالة GitHub</h2>
+  <p id="ghstamp">لم تُسجل إعادة تشغيل في هذه الجولة بعد.</p>
+  <div id="runs"></div>
+</section>
+<section class="panel">
+  <h2>السجل المباشر</h2>
+  <pre id="lines"></pre>
+</section>
+<script>
+async function refresh(){
+  try{
+    const s=await(await fetch('/state',{cache:'no-store'})).json(),c=s.counts||{};
+    document.getElementById('status').textContent=(s.phase==='running'?'التشغيل مستمر':s.phase)+' · آخر قراءة '+new Date().toLocaleTimeString('ar-EG');
+    document.getElementById('completed').textContent=s.tests_completed??0;
+    document.getElementById('passed').textContent=c.success??0;
+    document.getElementById('failed').textContent=c.failure??0;
+    document.getElementById('errors').textContent=c.error??0;
+    document.getElementById('skipped').textContent=c.skip??0;
+    document.getElementById('source').textContent='SHA: '+(s.head||s.expected_head||'غير محدد')+' · المرجع المتحقق: '+(s.branch||s.verified_remote_ref||'قيد التحقق')+' · المصدر ثابت: '+(s.stable_source===true?'نعم':s.stable_source===false?'لا':'قيد التحقق');
+    document.getElementById('steps').textContent='المرحلة: '+s.phase+'\nملفات الاختبار المتوقعة: '+(s.expected_test_files??'—')+'\nملفات محملة: '+(s.files_loaded??'—')+'\nملفات لها نتيجة: '+(s.files_with_test_outcomes??'—')+'\nقبول الجولة: '+(s.accepted===true?'نعم':s.accepted===false?'لا':'قيد التشغيل');
+    document.getElementById('lines').textContent=(s.lines||[]).join('\n');
+  }catch{document.getElementById('status').textContent='تعذر تحديث اللوحة؛ هذا لا يعني توقف الاختبارات.'}
+}
+async function github(){
+  try{
+    const s=await(await fetch('/github-state',{cache:'no-store'})).json();
+    document.getElementById('ghstamp').textContent='آخر لقطة GitHub: '+(s.snapshot_utc||'غير متاحة');
+    const root=document.getElementById('runs');root.replaceChildren();
+    for(const r of s.runs||[]){const p=document.createElement('p'),a=document.createElement('a');a.href=r.url;a.target='_blank';a.rel='noopener';a.textContent=(r.databaseId||r.id)+' · '+(r.displayTitle||r.workflowName)+' · '+(r.conclusion||r.status)+' · '+(r.headSha||'').slice(0,8);p.append(a);root.append(p)}
+  }catch{}
+}
+async function work(){
+  try{const s=await(await fetch('/current-work',{cache:'no-store'})).json(),rows=s.steps||[];document.getElementById('steps').textContent+='\n\nخطة الجولة: '+s.phase+' · البصمة '+(s.fingerprint||'').slice(0,12)+'\n'+rows.map(x=>x.name+' · exit='+(x.exit_code??'قيد التشغيل')+' · sourceStable='+(x.stable_source??'قيد التحقق')).join('\n')}
+  catch{}
+}
+refresh();github();work();setInterval(refresh,2000);setInterval(github,10000);setInterval(work,3000);
+</script>
+</html>

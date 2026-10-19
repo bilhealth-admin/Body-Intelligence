@@ -14,7 +14,7 @@ $email = "$local+bil-delete-$suffix@$domain"
 $password = "Bil!$([guid]::NewGuid().ToString('N'))a9"
 
 function Invoke-DbQuery([string]$Sql) {
-  $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef 2>$null) -join "`n"
+  $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef --output-format json 2>$null) -join "`n"
   if ($LASTEXITCODE -ne 0) { throw 'Supabase database query failed.' }
   return $raw | ConvertFrom-Json
 }

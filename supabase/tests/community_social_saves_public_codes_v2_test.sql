@@ -85,32 +85,90 @@ insert into auth.users (
     pg_catalog.clock_timestamp(), pg_catalog.clock_timestamp()
   );
 
+-- A new profile is community content. Each synthetic user accepts the active
+-- policy and creates their own profile through the authenticated boundary.
+select pg_catalog.set_config(
+  'request.jwt.claim.sub',
+  '11000000-0000-4000-8000-000000000001',
+  true
+);
+select pg_catalog.set_config('request.jwt.claim.role', 'authenticated', true);
+select pg_catalog.set_config(
+  'request.jwt.claims',
+  '{"sub":"11000000-0000-4000-8000-000000000001","role":"authenticated"}',
+  true
+);
+set local role authenticated;
+insert into public.bil_content_policy_acceptances(user_id, policy_version)
+select '11000000-0000-4000-8000-000000000001'::uuid, policy.version
+from public.bil_content_policies policy
+where policy.active
+  and policy.effective_at <= pg_catalog.clock_timestamp();
 insert into public.bil_public_profiles (
   user_id, display_name, profile_visibility, discoverable,
   allow_friend_requests
-) values
-  (
-    '11000000-0000-4000-8000-000000000001',
-    'Save Actor', 'public', true, true
-  ),
-  (
-    '11000000-0000-4000-8000-000000000002',
-    'Code Target', 'public', true, true
-  ),
-  (
-    '11000000-0000-4000-8000-000000000003',
-    'Post Moderator', 'private', false, false
-  )
-on conflict (user_id) do update
-set display_name = excluded.display_name,
-    profile_visibility = excluded.profile_visibility,
-    discoverable = excluded.discoverable,
-    allow_friend_requests = excluded.allow_friend_requests;
+) values (
+  '11000000-0000-4000-8000-000000000001',
+  'Save Actor', 'public', true, true
+);
+reset role;
+
+select pg_catalog.set_config(
+  'request.jwt.claim.sub',
+  '11000000-0000-4000-8000-000000000002',
+  true
+);
+select pg_catalog.set_config('request.jwt.claim.role', 'authenticated', true);
+select pg_catalog.set_config(
+  'request.jwt.claims',
+  '{"sub":"11000000-0000-4000-8000-000000000002","role":"authenticated"}',
+  true
+);
+set local role authenticated;
+insert into public.bil_content_policy_acceptances(user_id, policy_version)
+select '11000000-0000-4000-8000-000000000002'::uuid, policy.version
+from public.bil_content_policies policy
+where policy.active
+  and policy.effective_at <= pg_catalog.clock_timestamp();
+insert into public.bil_public_profiles (
+  user_id, display_name, profile_visibility, discoverable,
+  allow_friend_requests
+) values (
+  '11000000-0000-4000-8000-000000000002',
+  'Code Target', 'public', true, true
+);
+reset role;
+
+select pg_catalog.set_config(
+  'request.jwt.claim.sub',
+  '11000000-0000-4000-8000-000000000003',
+  true
+);
+select pg_catalog.set_config('request.jwt.claim.role', 'authenticated', true);
+select pg_catalog.set_config(
+  'request.jwt.claims',
+  '{"sub":"11000000-0000-4000-8000-000000000003","role":"authenticated"}',
+  true
+);
+set local role authenticated;
+insert into public.bil_content_policy_acceptances(user_id, policy_version)
+select '11000000-0000-4000-8000-000000000003'::uuid, policy.version
+from public.bil_content_policies policy
+where policy.active
+  and policy.effective_at <= pg_catalog.clock_timestamp();
+insert into public.bil_public_profiles (
+  user_id, display_name, profile_visibility, discoverable,
+  allow_friend_requests
+) values (
+  '11000000-0000-4000-8000-000000000003',
+  'Post Moderator', 'private', false, false
+);
+reset role;
 
 insert into public.bil_community_moderators(user_id)
 values ('11000000-0000-4000-8000-000000000003');
 
--- The real client boundary creates the actor's exact-version receipt and post.
+-- The actor publishes through the real authenticated client boundary.
 select pg_catalog.set_config(
   'request.jwt.claim.sub',
   '11000000-0000-4000-8000-000000000001',
@@ -124,16 +182,6 @@ select pg_catalog.set_config(
 );
 
 set local role authenticated;
-insert into public.bil_content_policy_acceptances(
-  user_id, policy_version
-)
-select
-  '11000000-0000-4000-8000-000000000001'::uuid,
-  policy.version
-from public.bil_content_policies policy
-where policy.active
-  and policy.effective_at <= pg_catalog.clock_timestamp();
-
 insert into public.bil_community_posts(id, author_id, body, visibility)
 values (
   '11000000-0000-4000-8000-000000000101',
@@ -433,9 +481,31 @@ $test_post_authors_batch$;
 reset role;
 
 -- Private profiles and blocked pairs are intentionally indistinguishable.
+select pg_catalog.set_config(
+  'request.jwt.claim.sub',
+  '11000000-0000-4000-8000-000000000002',
+  true
+);
+select pg_catalog.set_config(
+  'request.jwt.claims',
+  '{"sub":"11000000-0000-4000-8000-000000000002","role":"authenticated"}',
+  true
+);
+set local role authenticated;
 update public.bil_public_profiles
 set profile_visibility = 'private'
 where user_id = '11000000-0000-4000-8000-000000000002';
+reset role;
+select pg_catalog.set_config(
+  'request.jwt.claim.sub',
+  '11000000-0000-4000-8000-000000000001',
+  true
+);
+select pg_catalog.set_config(
+  'request.jwt.claims',
+  '{"sub":"11000000-0000-4000-8000-000000000001","role":"authenticated"}',
+  true
+);
 set local role authenticated;
 do $test_private_code_hidden$
 begin
@@ -457,6 +527,17 @@ end
 $test_private_code_hidden$;
 reset role;
 
+select pg_catalog.set_config(
+  'request.jwt.claim.sub',
+  '11000000-0000-4000-8000-000000000002',
+  true
+);
+select pg_catalog.set_config(
+  'request.jwt.claims',
+  '{"sub":"11000000-0000-4000-8000-000000000002","role":"authenticated"}',
+  true
+);
+set local role authenticated;
 update public.bil_public_profiles
 set profile_visibility = 'public'
 where user_id = '11000000-0000-4000-8000-000000000002';
@@ -464,6 +545,17 @@ insert into public.bil_blocks(blocker_id, blocked_id)
 values (
   '11000000-0000-4000-8000-000000000002',
   '11000000-0000-4000-8000-000000000001'
+);
+reset role;
+select pg_catalog.set_config(
+  'request.jwt.claim.sub',
+  '11000000-0000-4000-8000-000000000001',
+  true
+);
+select pg_catalog.set_config(
+  'request.jwt.claims',
+  '{"sub":"11000000-0000-4000-8000-000000000001","role":"authenticated"}',
+  true
 );
 set local role authenticated;
 do $test_blocked_code_hidden$
