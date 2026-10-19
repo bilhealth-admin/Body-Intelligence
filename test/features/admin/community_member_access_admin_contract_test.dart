@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
-import 'package:body_intelligence_log/features/admin/presentation/community_member_access_admin_panel.dart';
+import '../../support/legacy_mobile_admin/features/admin/presentation/community_member_access_admin_panel.dart';
 import 'package:body_intelligence_log/features/admin/services/community_member_access_admin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,7 +17,7 @@ void main() {
       'supabase/functions/ai-coach-global-reset/server.ts',
     ).readAsStringSync();
     final adminPage = File(
-      'lib/features/admin/presentation/ai_coach_admin_page.dart',
+      'test/support/legacy_mobile_admin/features/admin/presentation/ai_coach_admin_page.dart',
     ).readAsStringSync();
     final gateway = File(
       'lib/features/admin/services/community_member_access_admin_service.dart',

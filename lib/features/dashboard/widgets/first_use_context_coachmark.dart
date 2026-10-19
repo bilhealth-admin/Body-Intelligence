@@ -1,12 +1,10 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
-import '../../../shared/widgets/first_use_target_guide.dart';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-
-import 'first_use_glass_surface.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../shared/widgets/bil_experience_presentation.dart';
+import '../../../shared/widgets/first_use_target_guide.dart';
 
-/// A glass bubble placed by the real control's target wrapper. Standalone
-/// surfaces may place it inline; Skip never writes food or blocks navigation.
+/// Actual target actions advance anchored steps; Skip is inside the pearl card.
 class FirstUseContextCoachmark extends StatelessWidget {
   const FirstUseContextCoachmark({
     super.key,
@@ -24,22 +22,27 @@ class FirstUseContextCoachmark extends StatelessWidget {
     this.stepCount,
     this.pointerAlignment = AlignmentDirectional.centerStart,
   });
-
-  final String title;
-  final String message;
+  final String title, message;
   final VoidCallback onSkip;
   final VoidCallback? onAction;
   final String? actionLabel;
   final IconData icon;
   final Color accent;
-  final Key? skipKey;
-  final Key? actionKey;
+  final Key? skipKey, actionKey;
   final bool compact;
-  final int? step;
-  final int? stepCount;
+  final int? step, stepCount;
   final AlignmentGeometry pointerAlignment;
+  String get _emoji {
+    if (icon == Icons.scale_rounded) return '⚖️';
+    if (icon == Icons.touch_app_rounded) return '👆';
+    if (icon == Icons.restaurant_rounded) return '🍽️';
+    if (icon == Icons.calendar_month_rounded) return '📅';
+    if (icon == Icons.check_circle_outline_rounded) return '✅';
+    if (icon == Icons.search_rounded) return '🔎';
+    return '🎉';
+  }
 
-  String _skipLabel(BuildContext context) =>
+  String _skip(BuildContext context) =>
       switch (Localizations.localeOf(context).languageCode) {
         'ar' => 'تخطي',
         'fr' => 'Ignorer',
@@ -47,182 +50,120 @@ class FirstUseContextCoachmark extends StatelessWidget {
         'tr' => 'Atla',
         _ => 'Skip',
       };
-
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<bool>(
     valueListenable: BilExperiencePresentation.occupied,
     builder: (context, busy, _) =>
-        busy ? const SizedBox.shrink() : _guide(context),
+        busy ? const SizedBox.shrink() : _card(context),
   );
-
-  Widget _guide(BuildContext context) {
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final below = FirstUseGuidePlacement.belowOf(context);
-    final pointer = Align(
-      alignment:
-          FirstUseGuidePlacement.maybeOf(context)?.pointerAlignment ??
-          pointerAlignment,
-      child: Padding(
-        padding: FirstUseGuidePlacement.maybeOf(context) == null
-            ? const EdgeInsetsDirectional.only(start: 25)
-            : EdgeInsets.zero,
-        child: RotatedBox(
-          quarterTurns: below ? 2 : 0,
-          child: CustomPaint(
-            size: const Size(25, 11),
-            painter: _GlassGuidePointer(accent),
-          ),
-        ),
-      ),
-    );
+  Widget _card(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final anchored = FirstUseGuidePlacement.maybeOf(context) != null;
+    final reduced = MediaQuery.disableAnimationsOf(context);
     return Semantics(
       container: true,
+      liveRegion: true,
       label: '$title. $message',
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: reduceMotion ? 1 : 0, end: 1),
-        duration: Duration(milliseconds: reduceMotion ? 1 : 520),
-        curve: Curves.easeOutCubic,
-        builder: (context, value, child) => Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, (1 - value) * 17),
-            child: child,
-          ),
+      child: Container(
+        decoration: BilPearlFinish.panel(
+          context,
+          radius: BorderRadius.circular(26),
         ),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (below) pointer,
-            FirstUseGlassSurface(
-              accent: accent,
-              padding: EdgeInsets.symmetric(
-                horizontal: compact ? 15 : 20,
-                vertical: compact ? 13 : 18,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: compact ? 36 : 43,
-                        height: compact ? 36 : 43,
-                        decoration: BoxDecoration(
-                          color: accent.withValues(alpha: .17),
-                          borderRadius: BorderRadius.circular(13),
-                          border: Border.all(
-                            color: accent.withValues(alpha: .36),
-                          ),
-                        ),
-                        child: BilGlassPressFeedback(
-                          child: Icon(
-                            icon,
-                            color: accent,
-                            size: compact ? 20 : 25,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-
-                      if (step != null && stepCount != null)
-                        Text(
-                          '$step / $stepCount',
-                          style: const TextStyle(
-                            color: Color(0xFFD6E9F3),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: compact ? 8 : 14),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: compact ? 17 : 22,
-                      height: 1.2,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    message,
-                    style: TextStyle(
-                      fontSize: compact ? 12.5 : 14,
-                      height: 1.45,
-                      color: const Color(0xFFD9E9F0),
-                    ),
-                  ),
-                  if (step != null && stepCount != null) ...[
-                    const SizedBox(height: 17),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     Row(
                       children: [
-                        for (var i = 1; i <= stepCount!; i++) ...[
-                          Expanded(
-                            child: AnimatedContainer(
-                              duration: Duration(
-                                milliseconds: reduceMotion ? 1 : 260,
-                              ),
-                              height: 3,
-                              decoration: BoxDecoration(
-                                color: i <= step!
-                                    ? accent
-                                    : Colors.white.withValues(alpha: .22),
-                                borderRadius: BorderRadius.circular(5),
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: 1),
+                          duration: Duration(milliseconds: reduced ? 0 : 720),
+                          builder: (_, value, child) => Transform.rotate(
+                            angle: reduced
+                                ? 0
+                                : math.sin(value * math.pi * 4) *
+                                      .15 *
+                                      (1 - value),
+                            child: child,
+                          ),
+                          child: ExcludeSemantics(
+                            child: Text(
+                              _emoji,
+                              style: const TextStyle(
+                                fontSize: 34,
+                                fontFamilyFallback: [
+                                  'Apple Color Emoji',
+                                  'Segoe UI Emoji',
+                                  'Noto Color Emoji',
+                                ],
                               ),
                             ),
                           ),
-                          if (i < stepCount!) const SizedBox(width: 7),
-                        ],
-                      ],
-                    ),
-                  ],
-                  if (onAction != null && actionLabel != null) ...[
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-
-                      child: FilledButton(
-                        key: actionKey,
-                        onPressed: onAction,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: accent,
-                          foregroundColor: const Color(0xFF0A2638),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              height: 1.5,
+                              color: scheme.onSurface,
+                            ),
                           ),
                         ),
-                        child: Text(
-                          actionLabel!,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      message,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        height: 1.8,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
+                    if (step != null && stepCount != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '$step / $stepCount',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                    if (!anchored && onAction != null && actionLabel != null)
+                      TextButton(
+                        key: actionKey,
+                        onPressed: onAction,
+                        child: Text(actionLabel!),
+                      ),
                   ],
-                ],
+                ),
               ),
             ),
-            if (!below) pointer,
             Align(
               alignment: AlignmentDirectional.centerEnd,
               child: TextButton(
                 key: skipKey,
                 onPressed: onSkip,
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color(0xF0102B49),
+                  foregroundColor: theme.brightness == Brightness.dark
+                      ? BilPearlFinish.darkInk
+                      : const Color(0xFF38648B),
                   minimumSize: const Size(48, 48),
-                ),
-                child: Text(
-                  _skipLabel(context),
-                  style: const TextStyle(
-                    fontSize: 12,
+                  textStyle: theme.textTheme.labelLarge?.copyWith(
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                child: Text(_skip(context)),
               ),
             ),
           ],
@@ -230,34 +171,4 @@ class FirstUseContextCoachmark extends StatelessWidget {
       ),
     );
   }
-}
-
-class _GlassGuidePointer extends CustomPainter {
-  const _GlassGuidePointer(this.accent);
-
-  final Color accent;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..close();
-    canvas.drawPath(
-      path,
-      Paint()..color = Color.lerp(const Color(0xFF102B49), accent, .16)!,
-    );
-    canvas.drawLine(
-      Offset.zero,
-      Offset(size.width / 2, size.height),
-      Paint()
-        ..color = accent.withValues(alpha: .4)
-        ..strokeWidth = 1,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _GlassGuidePointer oldDelegate) =>
-      oldDelegate.accent != accent;
 }

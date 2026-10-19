@@ -11,7 +11,6 @@ import re
 import shutil
 import sys
 import subprocess
-import sys
 import tempfile
 import zipfile
 from dataclasses import dataclass
@@ -112,7 +111,33 @@ def _relro_end_addresses(readelf_output: str, *, library: str) -> list[int]:
             raise GateError(f"Unreviewable GNU_RELRO range in {library}.")
         end = int(tokens[2], 16) + int(tokens[5], 16)
         if end % MINIMUM_ELF_LOAD_ALIGNMENT_BYTES:
-            raise GateError(f"{library} has a GNU_RELRO end not aligned to 16 KB.")
+            # Android explicitly permits RELRO in a separate LOAD segment:
+            # rounding protection up is safe when it touches no writable data.
+            # https://developer.android.com/guide/practices/page-sizes#relro
+            start = int(tokens[2], 16)
+            protected_end = ((end + MINIMUM_ELF_LOAD_ALIGNMENT_BYTES - 1)
+                             // MINIMUM_ELF_LOAD_ALIGNMENT_BYTES
+                             * MINIMUM_ELF_LOAD_ALIGNMENT_BYTES)
+            containing = False
+            for header in readelf_output.splitlines():
+                load = header.strip().split()
+                if not load or load[0] != "LOAD":
+                    continue
+                if len(load) < 8 or any(
+                    re.fullmatch(r"0x[0-9a-fA-F]+", load[i]) is None
+                    for i in (2, 5)
+                ):
+                    raise GateError(f"Unreviewable LOAD range in {library}.")
+                if "W" not in "".join(load[6:-1]):
+                    continue
+                load_start = int(load[2], 16)
+                load_end = load_start + int(load[5], 16)
+                if load_start <= start < load_end and load_end <= end:
+                    containing = True
+                if max(load_start, end) < min(load_end, protected_end):
+                    raise GateError(f"{library} has a GNU_RELRO end not aligned to 16 KB and overlaps writable LOAD data.")
+            if not containing:
+                raise GateError(f"{library} has an unaligned GNU_RELRO without a separate covered LOAD segment.")
         ends.append(end)
     # No GNU_RELRO is trivially aligned for this check, not proof of hardening.
     return ends

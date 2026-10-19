@@ -19,7 +19,7 @@ void main() {
     expect(resolver, contains('ensureInstalled(root)'));
     expect(resolver, contains('UsdaCoreCatalogRepository.open(path)'));
     expect(installer, contains('catalog_registry.json'));
-    expect(installer, contains('usda-core-2026-04-v1'));
+    expect(installer, contains('usda-core-2026-04-v2-magnesium'));
     expect(repository, contains('search_alias'));
     expect(repository, contains('food_fts MATCH ?'));
     expect(repository, contains('arabic-query-expansion'));

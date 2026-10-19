@@ -13,6 +13,7 @@ for audit in   tool/epic11_localization_audit.dart   tool/epic12_security_audit.
 do
   dart run "$audit" 2>&1 | tee -a "$OUT/release-audits.log"
 done
+python3 -m unittest discover -s tool/prebuild -p test_audit_repository.py -v 2>&1 | tee "$OUT/repository-audit-self-tests.log"
 python3 tool/prebuild/audit_repository.py | tee "$OUT/repository-audit.log"
 python3 - "$OUT" <<'PY'
 import json, pathlib, shutil, sys

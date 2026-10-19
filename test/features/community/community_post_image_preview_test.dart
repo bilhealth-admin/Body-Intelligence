@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/media/private_image_pixels.dart';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -65,16 +66,20 @@ void main() {
         'assets/images/professional/recipes/shakshuka.jpg',
         'assets/images/onboarding_2026/bil_onboarding_meal_quick_add_photo_v1.webp',
       ]) {
-        final original = validateCommunityPostImage(
-          await File(path).readAsBytes(),
-        );
+        final diskBytes = await File(path).readAsBytes();
+        final original = validateCommunityPostImage(diskBytes);
         final preview = await _preview(original);
         _expectBounded(preview);
         expect(
           preview.width / preview.height,
           closeTo(original.aspectRatio, .02),
         );
-        expect(original.bytes, await File(path).readAsBytes());
+        expect(
+          await File(path).readAsBytes(),
+          orderedEquals(diskBytes),
+          reason: 'Preparing a private upload must not modify the source file.',
+        );
+        expect(imageBytesAreMetadataFree(original.bytes), isTrue);
       }
     },
   );
@@ -130,7 +135,12 @@ void main() {
       final decoded = img.decodeImage(preview.bytes)!;
       expect(decoded.getPixel(64, 20).r, greaterThan(200));
       expect(decoded.getPixel(64, 230).b, greaterThan(200));
-      expect(original.bytes, encoded);
+      expect(original.bytes, isNot(orderedEquals(encoded)));
+      expect(imageBytesAreMetadataFree(original.bytes), isTrue);
+      expect(
+        img.decodeImage(original.bytes)!.exif.imageIfd.orientation,
+        isNull,
+      );
     },
   );
 

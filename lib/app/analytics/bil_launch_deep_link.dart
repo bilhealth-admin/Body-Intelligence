@@ -25,6 +25,9 @@ final class BilLaunchDeepLink {
   };
 
   static BilLaunchDeepLink? parse(Uri uri) {
+    if (uri.userInfo.isNotEmpty || uri.hasPort || uri.fragment.isNotEmpty) {
+      return null;
+    }
     final isCustom = uri.scheme.toLowerCase() == 'bil';
     final isWeb =
         uri.scheme.toLowerCase() == 'https' &&

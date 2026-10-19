@@ -1,5 +1,7 @@
 const AASA_PATH = '/.well-known/apple-app-site-association';
 const ASSETLINKS_PATH = '/.well-known/assetlinks.json';
+const POLICY_PATHS = new Set(['/privacy', '/terms', '/subscription-terms',
+  '/health-disclaimer', '/data-deletion', '/account-deletion', '/support', '/community-guidelines', '/contact']);
 const BUNDLE_ID = 'com.bilhealth.bodyintelligencelog';
 const REQUIRED_RETURN_PATHS = new Set([
   '/auth/callback',
@@ -63,6 +65,24 @@ function failClosed(status, message) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const policyPath = url.pathname.replace(/\/+$/, '');
+    if (POLICY_PATHS.has(policyPath)) {
+      if (request.method !== 'GET' && request.method !== 'HEAD') {
+        return failClosed(405, 'Method not allowed.');
+      }
+      const lang = url.searchParams.get('lang') === 'ar' ? 'ar' : 'en';
+      const asset = new URL(`/policy-pages${policyPath}.${lang}.html`, url);
+      const response = await env.ASSETS.fetch(new Request(asset, { method: 'GET' }));
+      const html = await response.text();
+      if (!response.ok || !html.includes(`data-bil-document="${policyPath}"`)) {
+        return failClosed(503, 'Policy document is temporarily unavailable.');
+      }
+      const headers = new Headers(response.headers);
+      headers.set('Content-Type', 'text/html; charset=utf-8');
+      headers.set('Content-Language', lang);
+      headers.set('X-Content-Type-Options', 'nosniff');
+      return new Response(request.method === 'HEAD' ? null : html, {status:200, headers});
+    }
     if (!url.pathname.startsWith('/.well-known/')) {
       return env.ASSETS.fetch(request);
     }

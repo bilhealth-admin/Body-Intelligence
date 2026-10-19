@@ -44,6 +44,15 @@ cleanup() {
     label="${pair%%:*}"
     [ -n "$device" ] || continue
     if [ "$original_status" -ne 0 ]; then
+      if [ "$device" = "$ACTIVE_DEVICE" ]; then
+        # These are fresh synthetic QA simulators. Capture launch/signature
+        # diagnostics before deletion so a SpringBoard denial is actionable.
+        stage "$label-launch-diagnostics" 45 "$OUT/$label-launch-diagnostics.log" \
+          xcrun simctl spawn "$device" log show --last 3m --style compact \
+          --predicate 'process == "Runner" OR (process == "SpringBoard" AND (eventMessage CONTAINS "com.bilhealth.bodyintelligencelog"))'
+        stage "$label-bundle-signature-verification" 30 "$OUT/$label-bundle-signature-verification.log" \
+          codesign --verify --deep --strict --verbose=4 "$GITHUB_WORKSPACE/build/ios/iphonesimulator/Runner.app"
+      fi
       stage "$label-failure-screen" 30 "$OUT/$label-failure-screen.log" \
         xcrun simctl io "$device" screenshot "$OUT/$label-failure.png"
       collect_app_files "$label" "$device"

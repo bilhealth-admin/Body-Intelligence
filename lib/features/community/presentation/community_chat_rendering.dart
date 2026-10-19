@@ -24,7 +24,13 @@ extension _CommunityChatRendering on _CommunityChatPageState {
       ),
     ),
     body: BilPearlBackdrop(
-      child: _ownerCancelled
+      child: _safetyBlocked
+          ? Center(
+              child: Text(
+                communityText(context, 'Member blocked.', 'تم حظر العضو.'),
+              ),
+            )
+          : _ownerCancelled
           ? Center(
               child: Text(
                 communityText(
@@ -226,6 +232,45 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                             spacing: 4,
                                             runSpacing: 4,
                                             children: [
+                                              if (!mine)
+                                                bilPearlPopupMenuButton<String>(
+                                                  key: Key(
+                                                    'community-message-safety-${message.id}',
+                                                  ),
+                                                  enabled: !_safetyBusy,
+                                                  tooltip: communityText(
+                                                    context,
+                                                    'Message actions',
+                                                    'إجراءات الرسالة',
+                                                  ),
+                                                  onSelected: (action) =>
+                                                      _messageSafety(
+                                                        message,
+                                                        action,
+                                                      ),
+                                                  itemBuilder: (_) => [
+                                                    PopupMenuItem(
+                                                      value: 'report',
+                                                      child: Text(
+                                                        communityText(
+                                                          context,
+                                                          'Report',
+                                                          'إبلاغ',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    PopupMenuItem(
+                                                      value: 'block',
+                                                      child: Text(
+                                                        communityText(
+                                                          context,
+                                                          'Block member',
+                                                          'حظر العضو',
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               Text(
                                                 TimeOfDay.fromDateTime(
                                                   message.createdAt.toLocal(),
@@ -389,7 +434,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                 padding: const EdgeInsets.fromLTRB(4, 0, 6, 6),
                                 child: Row(
                                   children: [
-                                    PopupMenuButton<String>(
+                                    bilPearlPopupMenuButton<String>(
                                       key: const Key('community-chat-emoji'),
                                       tooltip: communityText(
                                         context,

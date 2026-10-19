@@ -29,6 +29,33 @@ abstract final class LegalStatusRuntimeCopy {
   };
 
   static const values = <String, Map<String, String>>{
+    'Last updated: 2026-10-19 • BIL Health': {
+      'ar': 'آخر تحديث: 2026-10-19 • BIL Health',
+      'en': 'Last updated: 2026-10-19 • BIL Health',
+      'fr': 'Dernière mise à jour : 2026-10-19 • BIL Health',
+      'es': 'Última actualización: 2026-10-19 • BIL Health',
+      'tr': 'Son güncelleme: 2026-10-19 • BIL Health',
+      'de': 'Zuletzt aktualisiert: 2026-10-19 • BIL Health',
+      'it': 'Ultimo aggiornamento: 2026-10-19 • BIL Health',
+      'pt-BR': 'Última atualização: 2026-10-19 • BIL Health',
+      'pt-PT': 'Última atualização: 2026-10-19 • BIL Health',
+      'ur': 'آخری تازہ کاری: 2026-10-19 • BIL Health',
+      'fa': 'آخرین به‌روزرسانی: 2026-10-19 • BIL Health',
+      'hi': 'अंतिम अपडेट: 2026-10-19 • BIL Health',
+      'id': 'Terakhir diperbarui: 2026-10-19 • BIL Health',
+      'ms': 'Kemas kini terakhir: 2026-10-19 • BIL Health',
+      'ja': '最終更新日： 2026-10-19 • BIL Health',
+      'ko': '최종 업데이트: 2026-10-19 • BIL Health',
+      'zh-Hans': '最后更新： 2026-10-19 • BIL Health',
+      'zh-Hant': '最後更新： 2026-10-19 • BIL Health',
+      'ru': 'Последнее обновление: 2026-10-19 • BIL Health',
+      'bn': 'সর্বশেষ আপডেট: 2026-10-19 • BIL Health',
+      'vi': 'Cập nhật lần cuối: 2026-10-19 • BIL Health',
+      'th': 'อัปเดตล่าสุด: 2026-10-19 • BIL Health',
+      'pl': 'Ostatnia aktualizacja: 2026-10-19 • BIL Health',
+      'nl': 'Laatst bijgewerkt: 2026-10-19 • BIL Health',
+      'uk': 'Останнє оновлення: 2026-10-19 • BIL Health',
+    },
     'Privacy Policy': {
       'en': 'Privacy Policy',
       'ar': 'سياسة الخصوصية',

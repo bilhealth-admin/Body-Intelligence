@@ -24,6 +24,42 @@ void main() {
   tearDown(() => controller.dispose());
 
   testWidgets(
+    'submitted pending circle explains review rather than announcing publication',
+    (tester) async {
+      await bil06UiSize(tester);
+      gateway.onCreate = (id, draft) async {
+        final base = gateway.save(id, 'create');
+        final receipt = CircleMutationReceipt(
+          ownerId: base.ownerId,
+          requestId: id,
+          operation: 'create',
+          circleSlug: base.circleSlug,
+          circle: ManagedCommunityCircle(
+            circle: bil06Circle(),
+            displayName: draft.displayName,
+            reviewStatus: 'pending',
+          ),
+        );
+        gateway.receipts[id] = receipt;
+        return receipt;
+      };
+      await bil06MountPanel(tester, controller);
+      await bil06ReviewCreate(tester);
+      await bil06Tap(tester, 'bil06-create-submit');
+      expect(
+        find.text(
+          'Circle submitted for review. It will appear to others after approval.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Circle created and confirmed.'), findsNothing);
+      expect(controller.managedCircle!.awaitingReview, isTrue);
+      expect(gateway.createCalls, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'capability failure offers a read retry and never a fake create',
     (tester) async {
       await bil06UiSize(tester);

@@ -1,3 +1,4 @@
+import 'package:image/image.dart' as img;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +15,7 @@ import 'circle_management_model_test.dart'
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
 CommunityPostImageDraft _syntheticImage() => CommunityPostImageDraft(
-  bytes: Uint8List.fromList([1, 2, 3]),
+  bytes: Uint8List.fromList(img.encodePng(img.Image(width: 1, height: 1))),
   mimeType: 'image/png',
   extension: 'png',
   width: 1,
@@ -420,6 +421,76 @@ void main() {
         expect(controller.isCurrent, isFalse);
         expect(controller.searchRows, isEmpty);
         expect(controller.operations, isEmpty);
+      },
+    );
+
+    test(
+      'GPS normalization precedes Circle reservation and preserves its manifest',
+      () async {
+        final source = img.Image(width: 80, height: 60);
+        source.exif.gpsIfd.setGpsLocation(
+          latitude: 12.34567,
+          longitude: 45.6789,
+        );
+        final raw = Uint8List.fromList(img.encodeJpg(source));
+        expect(img.decodeJpg(raw)!.exif.gpsIfd.hasGPSLatitude, isTrue);
+        final result = await controller.uploadMedia(
+          circleSlug: 'synthetic-circle',
+          kind: CircleMediaKind.avatar,
+          image: CommunityPostImageDraft(
+            bytes: raw,
+            mimeType: 'image/jpeg',
+            extension: 'jpg',
+            width: 80,
+            height: 60,
+          ),
+        );
+        expect(result.succeeded, isTrue);
+        final prepared = gateway.preparedImage!;
+        expect(
+          img.decodeImage(prepared.bytes)!.exif.gpsIfd.hasGPSLatitude,
+          isFalse,
+        );
+        expect(gateway.uploadedImage!.bytes, orderedEquals(prepared.bytes));
+        expect(result.receipt!.media!.media.byteLength, prepared.byteLength);
+        expect(
+          img.decodeJpg(raw)!.exif.gpsIfd.hasGPSLatitude,
+          isTrue,
+          reason: 'The selected original must not be mutated.',
+        );
+      },
+    );
+
+    test(
+      'overlapping metadata normalization preserves one Circle upload',
+      () async {
+        final source = img.Image(width: 80, height: 60);
+        source.exif.gpsIfd.setGpsLocation(
+          latitude: 12.34567,
+          longitude: 45.6789,
+        );
+        final raw = Uint8List.fromList(img.encodeJpg(source));
+        final image = CommunityPostImageDraft(
+          bytes: raw,
+          mimeType: 'image/jpeg',
+          extension: 'jpg',
+          width: 80,
+          height: 60,
+        );
+        final results = await Future.wait(
+          List.generate(
+            3,
+            (_) => controller.uploadMedia(
+              circleSlug: 'synthetic-circle',
+              kind: CircleMediaKind.avatar,
+              image: image,
+            ),
+          ),
+        );
+        expect(results.every((value) => value.succeeded), isTrue);
+        expect(gateway.prepareCalls, 1);
+        expect(gateway.uploadCalls, 1);
+        expect(gateway.finishCalls, 1);
       },
     );
 

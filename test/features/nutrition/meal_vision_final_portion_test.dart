@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_review_dialog.dart';
 import 'package:body_intelligence_log/features/nutrition/services/meal_image_gateway_contract.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -204,7 +205,14 @@ void main() {
       tester.widgetList<RawImage>(images).every((image) => image.image == null),
       isTrue,
     );
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(InteractiveViewer),
+        matching: find.byType(BilFeatureWelcomeStatus),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     final original = tester.widget<Image>(
       find.descendant(
         of: find.byType(InteractiveViewer),

@@ -1,6 +1,9 @@
+import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'dart:io';
 import 'dart:ui';
 
@@ -484,16 +487,7 @@ class _PremiumVisionReviewDialogState
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: light
-                          ? const Color(0xFFFFF4DD)
-                          : const Color(0x503C2E10),
-                      border: Border.all(
-                        color: const Color(0x88EDBD64),
-                        width: 0.8,
-                      ),
-                    ),
+                    decoration: _glassDecoration(context),
                     child: Row(
                       children: [
                         const Icon(

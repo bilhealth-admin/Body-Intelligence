@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/community/presentation/community_post_surface.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -38,13 +39,99 @@ class _NavigationRepository extends CommunityRepository {
           String? beforeId,
         })
       >[];
+  bool simulateCachedRefreshFailure = false;
+  bool refreshAuthorIdentity = false;
+  String cachedAuthorId = owner;
+  String cachedAuthorName = 'QA member';
+  String? cachedAuthorHandle;
+  String? customBody;
+  List<CommunityTopic> topicData = const [];
+  final categoryRequests = <String>[];
+  Future<CommunityTopicPostBatch> Function(String, DateTime?, String?)?
+  categoryRead;
+
+  @override
+  Future<CommunityTopicPostBatch> loadCommunityTopicPosts({
+    required String slug,
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  }) async {
+    expect(limit, 30);
+    categoryRequests.add(slug);
+    if (categoryRead != null) return categoryRead!(slug, before, beforeId);
+    return CommunityTopicPostBatch(
+      posts: [
+        CommunityPost(
+          id: slug == 'nutrition'
+              ? '77777777-7777-4777-8777-777777777777'
+              : '88888888-8888-4888-8888-888888888888',
+          authorId: owner,
+          body: '$slug category post',
+          createdAt: DateTime.utc(2026, 10, 19),
+        ),
+      ],
+      hasMore: false,
+    );
+  }
+
+  Completer<List<CommunityPostAuthorIdentity>>? authorIdentity;
+  @override
+  bool get useServerCommunityReferenceParity => refreshAuthorIdentity;
+  @override
+  Future<List<CommunityPostAuthorIdentity>> loadPostAuthorIdentities(
+    List<String> ids,
+  ) {
+    expect(ids, [cachedAuthorId]);
+    return authorIdentity?.future ?? Future.value(const []);
+  }
+
+  @override
+  Future<CommunityPostStats> setPostLiked(
+    String postId, {
+    required bool liked,
+  }) async => CommunityPostStats(
+    postId: postId,
+    liked: liked,
+    likeCount: liked ? 1 : 0,
+    commentCount: 0,
+  );
+
+  VoidCallback? failCachedRefresh;
+  @override
+  Future<CommunityFeedModeBatch> loadCommunityFeedCachedFirst({
+    required CommunityFeedMode mode,
+    required String locale,
+    required bool Function() current,
+    required void Function(CommunityFeedModeBatch) onRefresh,
+    required VoidCallback onRefreshing,
+    required void Function(Object) onRefreshError,
+    int limit = 40,
+  }) async {
+    if (!simulateCachedRefreshFailure) {
+      return super.loadCommunityFeedCachedFirst(
+        mode: mode,
+        locale: locale,
+        current: current,
+        onRefresh: onRefresh,
+        onRefreshing: onRefreshing,
+        onRefreshError: onRefreshError,
+        limit: limit,
+      );
+    }
+    await Future<void>.delayed(Duration.zero);
+    if (current()) onRefreshing();
+    failCachedRefresh = () {
+      if (current()) onRefreshError(StateError('Synthetic offline refresh'));
+    };
+    return page(mode);
+  }
+
   bool twoPages = false;
   bool empty = false;
   Completer<CommunityFeedModeBatch>? delayedExplore;
   @override
   String get currentUserId => owner;
-  @override
-  bool get useServerCommunityReferenceParity => false;
   @override
   Future<bool> isCommunityModerator() async => true;
   @override
@@ -58,7 +145,7 @@ class _NavigationRepository extends CommunityRepository {
   Future<CommunityProfileOverview?> loadMyProfileOverview() async =>
       CommunityProfileOverview.fromProfile((await loadMyProfile())!);
   @override
-  Future<List<CommunityTopic>> loadCommunityTopics() async => const [];
+  Future<List<CommunityTopic>> loadCommunityTopics() async => topicData;
   @override
   Future<List<CommunityCircle>> loadCommunityCircles() async => const [];
   @override
@@ -93,9 +180,12 @@ class _NavigationRepository extends CommunityRepository {
         for (var index = 0; index < 2; index++)
           CommunityPost(
             id: '66666666-6666-4666-8666-6666666666${mode.index}${older ? index + 2 : index}',
-            authorId: owner,
-            authorName: 'QA member',
-            body: '${mode.wireValue} server item ${older ? index + 2 : index}',
+            authorId: cachedAuthorId,
+            authorName: cachedAuthorName,
+            authorHandle: cachedAuthorHandle,
+            body:
+                customBody ??
+                '${mode.wireValue} server item ${older ? index + 2 : index}',
             createdAt: DateTime.utc(2026, 10, 5, 10 - index),
           ),
     ];
@@ -139,6 +229,27 @@ class _NavigationRepository extends CommunityRepository {
   }
 }
 
+List<CommunityTopic> _categories() => [
+  for (final slug in ['nutrition', 'fitness', 'motivation-support', 'wellness'])
+    CommunityTopic(
+      slug: slug,
+      titleCopyKey: 'topic_title',
+      descriptionCopyKey: 'topic_description',
+      iconKey: 'group',
+      featured: false,
+      followerCount: 0,
+      postCount: 0,
+      following: false,
+    ),
+];
+
+CommunityPost _categoryPost(String slug, {String? id}) => CommunityPost(
+  id: id ?? '77777777-7777-4777-8777-777777777777',
+  authorId: _NavigationRepository.owner,
+  body: '$slug response',
+  createdAt: DateTime.utc(2026, 10, 19),
+);
+
 Future<GoRouter> _mount(
   WidgetTester tester,
   _NavigationRepository repository, {
@@ -147,38 +258,42 @@ Future<GoRouter> _mount(
   Brightness brightness = Brightness.light,
   double scale = 1,
   GlobalKey? captureKey,
+  bool nestedNavigator = false,
 }) async {
   tester.view.physicalSize = const Size(414, 896);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
+  final routes = <RouteBase>[
+    GoRoute(
+      path: '/community',
+      builder: (_, _) =>
+          CommunityHubPage(repository: repository, entryWelcomeHandled: true),
+    ),
+    GoRoute(
+      path: '/community/notifications',
+      builder: (_, _) => CommunitySurface(
+        child: CommunityNotificationsPage(repository: repository),
+      ),
+    ),
+    for (final route in [
+      '/dashboard',
+      '/intelligence-center',
+      '/settings',
+      '/daily-log',
+    ])
+      GoRoute(
+        path: route,
+        builder: (_, state) => Scaffold(
+          appBar: AppBar(),
+          body: Text(state.uri.toString(), key: const Key('destination')),
+        ),
+      ),
+  ];
   final router = GoRouter(
     initialLocation: initial,
-    routes: [
-      GoRoute(
-        path: '/community',
-        builder: (_, _) =>
-            CommunityHubPage(repository: repository, entryWelcomeHandled: true),
-      ),
-      GoRoute(
-        path: '/community/notifications',
-        builder: (_, _) => CommunitySurface(
-          child: CommunityNotificationsPage(repository: repository),
-        ),
-      ),
-      for (final route in [
-        '/dashboard',
-        '/intelligence-center',
-        '/settings',
-        '/daily-log',
-      ])
-        GoRoute(
-          path: route,
-          builder: (_, state) => Scaffold(
-            appBar: AppBar(),
-            body: Text(state.uri.toString(), key: const Key('destination')),
-          ),
-        ),
-    ],
+    routes: nestedNavigator
+        ? [ShellRoute(builder: (_, _, child) => child, routes: routes)]
+        : routes,
   );
   addTearDown(router.dispose);
   await tester.pumpWidget(
@@ -282,6 +397,290 @@ void main() {
     expect(find.byKey(const Key('bil-reference-navigation')), findsOneWidget);
   });
 
+  testWidgets('Explore uses bounded body with working inline expansion', (
+    tester,
+  ) async {
+    repository.customBody = List.filled(
+      24,
+      'A useful community post.',
+    ).join(' ');
+    final capture = GlobalKey();
+    await _mount(tester, repository, captureKey: capture);
+    await tester.pumpAndSettle();
+    final firstId = repository.page(CommunityFeedMode.explore).posts.first.id;
+    final body = find.byKey(Key('community-post-body-$firstId'));
+    await tester.ensureVisible(body);
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(body).maxLines, 3);
+    final surface = find.ancestor(
+      of: body,
+      matching: find.byType(CommunityPostSurface),
+    );
+    expect(surface, findsOneWidget);
+    final paint =
+        tester
+                .widget<Container>(
+                  find
+                      .descendant(of: surface, matching: find.byType(Container))
+                      .first,
+                )
+                .decoration!
+            as BoxDecoration;
+    expect(paint.color, Colors.white);
+    expect(paint.gradient, isNull);
+    final height = tester.getSize(body).height;
+    final expand = find.byKey(Key('community-post-expand-$firstId'));
+    await tester.ensureVisible(expand);
+    await tester.pumpAndSettle();
+    await _capture(tester, capture, 'explore_compact_post');
+    await tester.tap(expand);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SelectableText>(body).data, repository.customBody);
+    expect(tester.getSize(body).height, greaterThan(height));
+    await tester.ensureVisible(expand);
+    await tester.pumpAndSettle();
+    await tester.tap(expand);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(body).height, closeTo(height, .1));
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final language in ['ar', 'en']) {
+    testWidgets(
+      'category tabs filter inline, select blue and return All $language',
+      (tester) async {
+        repository.topicData = _categories();
+        final capture = GlobalKey();
+        final router = await _mount(
+          tester,
+          repository,
+          language: language,
+          captureKey: capture,
+        );
+        await tester.pumpAndSettle();
+        final nutrition = find.byKey(const Key('community-category-nutrition'));
+        await tester.tap(nutrition);
+        await tester.pumpAndSettle();
+        expect(router.routeInformationProvider.value.uri.path, '/community');
+        expect(find.text('nutrition category post'), findsOneWidget);
+        expect(find.text('explore server item 0'), findsNothing);
+        final label = find.descendant(
+          of: nutrition,
+          matching: find.byType(Text),
+        );
+        expect(
+          tester.widget<Text>(label).style!.color,
+          Theme.of(tester.element(label)).colorScheme.primary,
+        );
+        expect(repository.categoryRequests, ['nutrition']);
+        await _capture(tester, capture, 'category_selected_$language');
+        await tester.tap(find.byKey(const Key('community-category-all')));
+        await tester.pumpAndSettle();
+        expect(find.text('nutrition category post'), findsNothing);
+        expect(find.text('explore server item 0'), findsOneWidget);
+        expect(repository.categoryRequests, ['nutrition']);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('late category response cannot replace another category or All', (
+    tester,
+  ) async {
+    repository.topicData = _categories();
+    final delayed = Completer<CommunityTopicPostBatch>();
+    repository.categoryRead = (slug, before, beforeId) async {
+      if (slug == 'nutrition') return delayed.future;
+      return CommunityTopicPostBatch(
+        posts: [_categoryPost('fitness')],
+        hasMore: false,
+      );
+    };
+    await _mount(tester, repository);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-category-nutrition')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('community-category-fitness')));
+    await tester.pumpAndSettle();
+    expect(find.text('fitness response'), findsOneWidget);
+    delayed.complete(
+      CommunityTopicPostBatch(
+        posts: [_categoryPost('nutrition')],
+        hasMore: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('nutrition response'), findsNothing);
+    expect(find.text('fitness response'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('community-category-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('fitness response'), findsNothing);
+    expect(find.text('explore server item 0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'category pagination uses its own cursor and deduplicates posts',
+    (tester) async {
+      repository.topicData = _categories();
+      var reads = 0;
+      final cursor = DateTime.utc(2026, 10, 18);
+      final first = _categoryPost('first');
+      final older = _categoryPost(
+        'older',
+        id: '99999999-9999-4999-8999-999999999999',
+      );
+      repository.categoryRead = (slug, before, beforeId) async {
+        expect(slug, 'nutrition');
+        reads++;
+        if (reads == 1) {
+          expect(before, isNull);
+          expect(beforeId, isNull);
+          return CommunityTopicPostBatch(
+            posts: [first],
+            hasMore: true,
+            nextBefore: cursor,
+            nextBeforeId: first.id,
+          );
+        }
+        expect(before, cursor);
+        expect(beforeId, first.id);
+        return CommunityTopicPostBatch(posts: [first, older], hasMore: false);
+      };
+      await _mount(tester, repository);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-category-nutrition')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-category-nutrition')));
+      await tester.pumpAndSettle();
+      expect(reads, 1);
+      final more = find.byKey(const Key('community-category-load-more'));
+      await tester.ensureVisible(more);
+      await tester.pumpAndSettle();
+      await tester.tap(more);
+      await tester.pumpAndSettle();
+      expect(reads, 2);
+      expect(find.text('first response'), findsOneWidget);
+      expect(find.text('older response'), findsOneWidget);
+      expect(more, findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'failed category retries without a separate page or wrong posts',
+    (tester) async {
+      repository.topicData = _categories();
+      var reads = 0;
+      repository.categoryRead = (slug, before, beforeId) async {
+        if (++reads == 1) throw StateError('Synthetic category read failure');
+        return CommunityTopicPostBatch(
+          posts: [_categoryPost('retry')],
+          hasMore: false,
+        );
+      };
+      final router = await _mount(tester, repository);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-category-nutrition')));
+      await tester.pumpAndSettle();
+      expect(find.text('explore server item 0'), findsNothing);
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(find.text('retry response'), findsOneWidget);
+      expect(reads, 2);
+      expect(router.routeInformationProvider.value.uri.path, '/community');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('return All cancels a pending category result', (tester) async {
+    repository.topicData = _categories();
+    final pending = Completer<CommunityTopicPostBatch>();
+    repository.categoryRead = (slug, before, beforeId) => pending.future;
+    await _mount(tester, repository);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-category-nutrition')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('community-category-all')));
+    await tester.pumpAndSettle();
+    pending.complete(
+      CommunityTopicPostBatch(
+        posts: [_categoryPost('retired')],
+        hasMore: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('retired response'), findsNothing);
+    expect(find.text('explore server item 0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'pull refresh reloads selected category and keeps the active tab',
+    (tester) async {
+      repository.topicData = _categories();
+      var reads = 0;
+      repository.categoryRead = (slug, before, beforeId) async {
+        expect(slug, 'nutrition');
+        expect(before, isNull);
+        expect(beforeId, isNull);
+        return CommunityTopicPostBatch(
+          posts: [_categoryPost('refresh ${++reads}')],
+          hasMore: false,
+        );
+      };
+      await _mount(tester, repository);
+      await tester.pumpAndSettle();
+      final tab = find.byKey(const Key('community-category-nutrition'));
+      await tester.tap(tab);
+      await tester.pumpAndSettle();
+      expect(find.text('refresh 1 response'), findsOneWidget);
+      await tester.fling(
+        find.byType(CustomScrollView).first,
+        const Offset(0, 500),
+        1000,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('refresh 2 response'), findsOneWidget);
+      expect(find.text('refresh 1 response'), findsNothing);
+      expect(reads, 2);
+      final label = find.descendant(of: tab, matching: find.byType(Text));
+      expect(
+        tester.widget<Text>(label).style!.color,
+        Theme.of(tester.element(label)).colorScheme.primary,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('category reaction invalidates All cache before returning', (
+    tester,
+  ) async {
+    repository.topicData = _categories();
+    await _mount(tester, repository);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-category-nutrition')));
+    await tester.pumpAndSettle();
+    final initialRequests = repository.requests.length;
+    final like = find.byKey(
+      const Key('community-post-like-77777777-7777-4777-8777-777777777777'),
+    );
+    await tester.ensureVisible(like);
+    await tester.pumpAndSettle();
+    await tester.tap(like);
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, 1400),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-category-all')));
+    await tester.pumpAndSettle();
+    expect(repository.requests.length, greaterThan(initialRequests));
+    expect(find.text('explore server item 0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Community opened over another page provides real Back', (
     tester,
   ) async {
@@ -293,6 +692,123 @@ void main() {
     await tester.pumpAndSettle();
     expect(router.routeInformationProvider.value.uri.path, '/dashboard');
   });
+
+  for (final nested in [false, true]) {
+    testWidgets(
+      'Back from inline Circles retains Community and its entry page (nested=$nested)',
+      (tester) async {
+        final router = await _mount(
+          tester,
+          repository,
+          initial: '/intelligence-center',
+          nestedNavigator: nested,
+        );
+        router.push('/community');
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('community-hub-circles-tab')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('community-circles-list')), findsOneWidget);
+        await tester.tap(find.byKey(const Key('community-safe-return')));
+        await tester.pumpAndSettle();
+        expect(find.byType(CommunityHubPage), findsOneWidget);
+        expect(
+          GoRouterState.of(
+            tester.element(find.byType(CommunityHubPage)),
+          ).uri.path,
+          '/community',
+        );
+        expect(
+          find.byKey(const Key('community-hub-explore-tab')),
+          findsOneWidget,
+        );
+        await tester.tap(find.byKey(const Key('community-safe-return')));
+        await tester.pumpAndSettle();
+        expect(
+          router.routeInformationProvider.value.uri.path,
+          '/intelligence-center',
+        );
+      },
+    );
+  }
+
+  testWidgets(
+    'cached post and author bubble refresh identity even when full feed refresh fails',
+    (tester) async {
+      const author = '22222222-2222-4222-8222-222222222222';
+      final identity = Completer<List<CommunityPostAuthorIdentity>>();
+      repository
+        ..simulateCachedRefreshFailure = true
+        ..refreshAuthorIdentity = true
+        ..cachedAuthorId = author
+        ..cachedAuthorName = 'Old member name'
+        ..cachedAuthorHandle = 'member_old'
+        ..authorIdentity = identity;
+      await _mount(tester, repository);
+      await tester.pump(const Duration(milliseconds: 200));
+      repository.failCachedRefresh!();
+      await tester.pumpAndSettle();
+      expect(find.text('Old member name'), findsWidgets);
+      identity.complete(const [
+        CommunityPostAuthorIdentity(
+          userId: author,
+          displayName: 'Updated public name',
+          social: CommunityPostAuthorSocial(
+            userId: author,
+            handle: 'updated_handle',
+            relationship: CommunityRelationshipStatus.none,
+            canRequest: true,
+          ),
+        ),
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.text('Old member name'), findsNothing);
+      expect(find.text('@member_old'), findsNothing);
+      expect(find.text('Updated public name'), findsWidgets);
+      expect(find.text('@updated_handle'), findsWidgets);
+      expect(
+        find.byKey(
+          const ValueKey(
+            'community-story-22222222-2222-4222-8222-222222222222',
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('community-feed-cache-refresh-error')),
+        findsOneWidget,
+      );
+      expect(find.text('explore server item 0'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'failed cache refresh retry keeps the first post at the same position',
+    (tester) async {
+      repository.simulateCachedRefreshFailure = true;
+      await _mount(tester, repository);
+      await tester.pump(const Duration(milliseconds: 200));
+      repository.failCachedRefresh!();
+      await tester.pumpAndSettle();
+      final notice = find.byKey(
+        const Key('community-feed-cache-refresh-error'),
+      );
+      expect(notice, findsOneWidget);
+      final firstPost = find.text('explore server item 0');
+      expect(firstPost, findsOneWidget);
+      final position = tester.getTopLeft(firstPost);
+      await tester.tap(
+        find.descendant(of: notice, matching: find.byType(IconButton)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(tester.getTopLeft(firstPost), position);
+      repository.failCachedRefresh!();
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(firstPost), position);
+      expect(notice, findsOneWidget);
+    },
+  );
 
   testWidgets('one Home tab row retains all four authoritative feed modes', (
     tester,
@@ -430,6 +946,24 @@ void main() {
         testWidgets(
           'native Home and Notifications $language ${brightness.name} $scale',
           (tester) async {
+            repository.topicData = [
+              for (final slug in [
+                'nutrition',
+                'fitness',
+                'motivation-support',
+                'wellness',
+              ])
+                CommunityTopic(
+                  slug: slug,
+                  titleCopyKey: 'topic_title',
+                  descriptionCopyKey: 'topic_description',
+                  iconKey: 'group',
+                  featured: false,
+                  followerCount: 0,
+                  postCount: 0,
+                  following: false,
+                ),
+            ];
             final key = GlobalKey();
             final router = await _mount(
               tester,
@@ -470,23 +1004,57 @@ void main() {
               closeTo(tallestTabText + 20 < 48 ? 48 : tallestTabText + 20, .1),
             );
             for (final id in ['photo', 'poll', 'circles', 'coach']) {
-              final action = find.byKey(Key('community-compose-$id'));
-              final bounds = tester.getRect(action);
-              expect(bounds.height, greaterThanOrEqualTo(48));
-              expect(bounds.width, greaterThanOrEqualTo(48));
-              final icon = tester.getRect(
-                find.descendant(of: action, matching: find.byType(Icon)),
-              );
-              final label = tester.getRect(
-                find.descendant(of: action, matching: find.byType(Text)),
-              );
-              if (language == 'ar') {
-                expect(icon.left, greaterThanOrEqualTo(label.right));
-              } else {
-                expect(icon.right, lessThanOrEqualTo(label.left));
-              }
-              expect((icon.center.dy - label.center.dy).abs(), lessThan(1));
+              expect(find.byKey(Key('community-compose-$id')), findsNothing);
             }
+            final filters = find.byKey(
+              const Key('community-reference-topic-chips'),
+            );
+            final composer = find.byKey(const Key('community-create-post'));
+            final row = tester.widget<Row>(
+              find.descendant(of: filters, matching: find.byType(Row)).first,
+            );
+            expect(row.children.length, 9);
+            expect(
+              tester.widget<SingleChildScrollView>(filters).scrollDirection,
+              Axis.horizontal,
+            );
+            expect(
+              find.descendant(of: filters, matching: find.byType(Material)),
+              findsNothing,
+            );
+            final all = find.byKey(const Key('community-category-all'));
+            final allText = find.descendant(
+              of: all,
+              matching: find.byType(Text),
+            );
+            final selectedStyle = tester.widget<Text>(allText).style!;
+            final primary = Theme.of(
+              tester.element(allText),
+            ).colorScheme.primary;
+            expect(selectedStyle.color, primary);
+            expect(tester.widget<Text>(allText).softWrap, isFalse);
+            expect(
+              tester.getSize(allText).height + 20,
+              lessThanOrEqualTo(tester.getSize(filters).height + .1),
+            );
+            final nutrition = find.byKey(
+              const Key('community-category-nutrition'),
+            );
+            final nutritionText = find.descendant(
+              of: nutrition,
+              matching: find.byType(Text),
+            );
+            expect(
+              tester.widget<Text>(nutritionText).style!.color,
+              Theme.of(
+                tester.element(nutritionText),
+              ).colorScheme.onSurfaceVariant,
+            );
+            expect(
+              tester.getTopLeft(filters).dy - tester.getBottomLeft(composer).dy,
+              lessThan(12),
+            );
+            expect(tester.getSize(filters).height, greaterThanOrEqualTo(52));
             expect(tester.takeException(), isNull);
             await _capture(
               tester,

@@ -341,7 +341,7 @@ void main() {
     expect(publicPolicy, contains('ليست مشفرة من طرف إلى طرف'));
     expect(publicPolicy, contains('لا يحمّل أداة تحليلات ويب من BIL'));
 
-    expect(inAppPolicy, contains("bilLegalPolicyRevision = '2026-09-05'"));
+    expect(inAppPolicy, contains("bilLegalPolicyRevision = '2026-10-19'"));
     expect(
       inAppPolicy,
       contains('Google Gemini, a third-party AI service operated by Google'),

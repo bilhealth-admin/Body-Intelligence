@@ -1,3 +1,4 @@
+import '../../../shared/media/private_image_pixels.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
@@ -169,8 +170,9 @@ Uint8List _compressOversizedCommunityPostImage(Uint8List bytes) {
             interpolation: img.Interpolation.linear,
           )
         : oriented;
+    final clean = privateImagePixels(resized, flattenAlpha: true);
     for (final quality in <int>[84, 76, 68, 60]) {
-      last = Uint8List.fromList(img.encodeJpg(resized, quality: quality));
+      last = Uint8List.fromList(img.encodeJpg(clean, quality: quality));
       if (last.lengthInBytes <= communityPostImageTargetBytes) return last;
     }
   }
@@ -186,9 +188,35 @@ CommunityPostImageDraft validateCommunityPostImage(Uint8List bytes) {
   if (bytes.lengthInBytes > communityPostImageMaxBytes) {
     throw const CommunityPostImageException(CommunityPostImageFailure.tooLarge);
   }
-  final metadata = _inspectCommunityPostImage(bytes);
+  final snapshot = Uint8List.fromList(bytes);
+  final decoded = _decodeCommunityPostImage(snapshot);
+  if (imageBytesAreMetadataFree(snapshot)) {
+    return CommunityPostImageDraft(
+      bytes: snapshot.asUnmodifiableView(),
+      mimeType: decoded.mimeType,
+      extension: decoded.extension,
+      width: decoded.image.width,
+      height: decoded.image.height,
+    );
+  }
+  final clean = privateImagePixels(
+    decoded.image,
+    flattenAlpha: decoded.mimeType == 'image/jpeg',
+  );
+  var encoded = Uint8List.fromList(switch (decoded.mimeType) {
+    'image/png' => img.encodePng(clean),
+    'image/webp' => img.encodeWebP(clean),
+    _ => img.encodeJpg(clean, quality: 84),
+  });
+  if (encoded.lengthInBytes > communityPostImageMaxBytes) {
+    encoded = _compressOversizedCommunityPostImage(encoded);
+  }
+  if (encoded.isEmpty || encoded.lengthInBytes > communityPostImageMaxBytes) {
+    throw const CommunityPostImageException(CommunityPostImageFailure.tooLarge);
+  }
+  final metadata = _inspectCommunityPostImage(encoded);
   return CommunityPostImageDraft(
-    bytes: bytes,
+    bytes: encoded.asUnmodifiableView(),
     mimeType: metadata.mimeType,
     extension: metadata.extension,
     width: metadata.width,
@@ -207,14 +235,7 @@ Future<CommunityPostImageDraft> validateCommunityPostImageAsync(
   if (bytes.lengthInBytes > communityPostImageMaxBytes) {
     throw const CommunityPostImageException(CommunityPostImageFailure.tooLarge);
   }
-  final metadata = await compute(_inspectCommunityPostImage, bytes);
-  return CommunityPostImageDraft(
-    bytes: bytes,
-    mimeType: metadata.mimeType,
-    extension: metadata.extension,
-    width: metadata.width,
-    height: metadata.height,
-  );
+  return compute(validateCommunityPostImage, Uint8List.fromList(bytes));
 }
 
 typedef _CommunityPostImageMetadata = ({

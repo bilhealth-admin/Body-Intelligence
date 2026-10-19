@@ -61,6 +61,29 @@ class _FeedTabState extends State<_FeedTab>
   bool _restoreOffset = false;
   double _targetOffset = 0;
   final _draft = _CommunityComposerDraft();
+  CommunityTopic? _selectedTopic;
+  bool _topicMutated = false;
+  final _topicFeedKey = GlobalKey<_CommunityInlineTopicFeedState>();
+
+  void _selectTopic(CommunityTopic? topic) {
+    if (_openingComposer ||
+        _managingPost ||
+        _captureFeedVisit() == null ||
+        _selectedTopic?.slug == topic?.slug) {
+      return;
+    }
+    setState(() {
+      _selectedTopic = topic;
+      if (topic == null && _topicMutated) {
+        _topicMutated = false;
+        _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+      }
+    });
+  }
+
+  Future<void> _refreshSelectedFeed() => _selectedTopic == null
+      ? _refresh()
+      : (_topicFeedKey.currentState?.refresh() ?? Future<void>.value());
   @override
   final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
       <String, CommunityPostReferenceMetadata>{};
@@ -71,6 +94,11 @@ class _FeedTabState extends State<_FeedTab>
       <String, CommunityComment>{};
   @override
   final Map<String, String> _membershipTierByAuthor = <String, String>{};
+  final _authorIdentities = <String, CommunityPostAuthorIdentity>{};
+  final _authorIdentityReads = <String, int>{};
+  int _authorIdentityRead = 0;
+  Future<CommunityProfileOverview?>? _identityProfileFuture;
+
   late Future<List<CommunityTopic>> _suggestedTopics = widget.preview.topics;
   bool _managingPost = false;
   bool _openingComposer = false;
@@ -79,6 +107,7 @@ class _FeedTabState extends State<_FeedTab>
   @override
   void initState() {
     super.initState();
+    _identityProfileFuture = widget.preview.profile;
     WidgetsBinding.instance.addObserver(this);
     _selectedFeedMode = widget.initialMode;
     _targetOffset = widget.preview.scrollOffsets[_selectedFeedMode] ?? 0;
@@ -90,6 +119,10 @@ class _FeedTabState extends State<_FeedTab>
   @override
   void didUpdateWidget(covariant _FeedTab oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(_identityProfileFuture, widget.preview.profile)) {
+      _identityProfileFuture = widget.preview.profile;
+      unawaited(_refreshVisibleAuthorIdentities());
+    }
     if (!identical(oldWidget.preview.policy, _policyState)) {
       _policyState = widget.preview.policy;
     }
@@ -293,41 +326,21 @@ class _FeedTabState extends State<_FeedTab>
   }
 
   Future<void> _managePost(CommunityPost post, String action) async {
+    if (!const {'report', 'delete', 'block'}.contains(action)) return;
     if (_openingComposer || _managingPost) return;
     final visit = _captureFeedVisit();
     if (visit == null) return;
     final repository = visit.repository;
-    String? moderationReason;
-    if (action == 'moderate_remove' || action == 'moderate_hide') {
-      moderationReason = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => visit.guard(
-          BilPearlMaterialSimpleDialog(
-            title: Text(
-              action == 'moderate_hide'
-                  ? communityText(context, 'Hide post', 'إخفاء المنشور')
-                  : communityText(context, 'Remove post', 'إزالة المنشور'),
-            ),
-            children: [
-              for (final reason in const [
-                'spam',
-                'abuse',
-                'misleading',
-                'privacy',
-                'unsafe_or_inappropriate',
-                'other',
-              ])
-                SimpleDialogOption(
-                  onPressed: () => Navigator.pop(dialogContext, reason),
-                  child: Text(reason),
-                ),
-            ],
-          ),
-        ),
-      );
-      if (moderationReason == null || !visit.isCurrent()) return;
-    }
     if (!mounted) return;
+    CommunityReportDraft? reportDraft;
+    if (action == 'report') {
+      reportDraft = await showCommunityReportSheet(
+        context,
+        target: CommunityReportTarget.post,
+        guard: visit.guard,
+      );
+      if (reportDraft == null || !mounted || !visit.isCurrent()) return;
+    }
     if (action == 'delete' || action == 'block') {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -382,25 +395,13 @@ class _FeedTabState extends State<_FeedTab>
           await repository.report(
             targetKind: 'post',
             targetId: post.id,
-            reason: 'user_reported_from_feed',
+            reason: reportDraft!.reason,
           );
         } else if (action == 'delete') {
           await repository.deletePost(post.id);
           refreshFeed = true;
         } else if (action == 'block') {
           await repository.blockMember(post.authorId);
-          refreshFeed = true;
-        } else if (action == 'moderate_remove') {
-          await repository.removePublishedPostAsModerator(
-            postId: post.id,
-            reason: moderationReason!,
-          );
-          refreshFeed = true;
-        } else if (action == 'moderate_hide') {
-          await repository.hidePublishedPostAsModerator(
-            postId: post.id,
-            reason: moderationReason!,
-          );
           refreshFeed = true;
         }
         visit.check();
@@ -428,16 +429,6 @@ class _FeedTabState extends State<_FeedTab>
               context,
               'Member blocked.',
               'تم حظر العضو.',
-            ),
-            'moderate_remove' => communityText(
-              context,
-              'Post removed by moderation.',
-              'تمت إزالة المنشور بواسطة الإشراف.',
-            ),
-            'moderate_hide' => communityText(
-              context,
-              'Post hidden by moderation.',
-              'تم إخفاء المنشور بواسطة الإشراف.',
             ),
             _ => communityText(context, 'Post deleted.', 'تم حذف المشاركة.'),
           }),
@@ -473,6 +464,7 @@ class _FeedTabState extends State<_FeedTab>
     }
     _rememberOffset();
     setState(() {
+      _selectedTopic = null;
       _selectedFeedMode = mode;
       _targetOffset = widget.preview.scrollOffsets[mode] ?? 0;
       _restoreOffset = true;
@@ -491,13 +483,23 @@ class _FeedTabState extends State<_FeedTab>
   }
 
   Future<void> _refresh() async {
-    if (_openingComposer || _managingPost) return;
+    if (_openingComposer ||
+        _managingPost ||
+        _feedRefreshing ||
+        _cacheRefreshing) {
+      return;
+    }
     final visit = _captureFeedVisit();
     if (visit == null) return;
     _modeReadEpoch++;
     _modePages.clear();
     _modePrefetch.clear();
-    final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
+    // Retain the visible failure row while retrying; removing it moves every
+    // cached post up and down when the network remains unavailable.
+    final keepRefreshNotice = _cacheRefreshFailed;
+    final refreshedFeed = Future<List<CommunityPost>>.sync(
+      () => _loadFirst(keepRefreshNotice: keepRefreshNotice),
+    );
     final topics = visit.run(() => visit.repository.loadCommunityTopics());
     setState(() {
       _feed = refreshedFeed;

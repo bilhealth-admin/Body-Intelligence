@@ -9,6 +9,8 @@ on:
       - 'public_site/**'
       - 'wrangler.site.jsonc'
       - 'tool/release/bilhealth_site_worker.mjs'
+      - 'tool/release/render_public_policy_pages.mjs'
+      - 'tool/release/public_policy_pages.test.mjs'
       - '.github/workflows/bil_public_site_deploy.yml'
 
 permissions:
@@ -175,6 +177,12 @@ jobs:
           }
           console.log('PRESERVED_ASSOCIATION_WORKER_CONTRACT=PASS');
           JS
+
+      - name: Verify readable public policies and association routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tool/release/public_policy_pages.test.mjs tool/release/bilhealth_site_worker.test.mjs
 
       - name: Deploy bilhealth.com static assets
         shell: bash

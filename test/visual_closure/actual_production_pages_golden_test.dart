@@ -1859,7 +1859,8 @@ void main() {
       name: 'help_center_phone',
       interact: (tester) async {
         final rows = tester.widgetList<ListTile>(find.byType(ListTile));
-        expect(rows.length, 8);
+        expect(rows.length, 9);
+        expect(find.text('Google Translate'), findsOneWidget);
         expect(rows.every((row) => row.leading == null), isTrue);
       },
     );

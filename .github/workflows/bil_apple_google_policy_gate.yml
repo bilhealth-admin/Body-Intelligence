@@ -1,4 +1,5 @@
 name: BIL APPLE & GOOGLE POLICY COMPLIANCE GATE
+run-name: "BIL policy - ${{ inputs.evidence_scope || 'source-regressions' }} - ${{ github.sha }}"
 
 # Independent evidence collection. Integration pushes run source regressions;
 # the explicit full-Lint path remains available. No signing/deployment,
@@ -50,7 +51,7 @@ on:
   workflow_dispatch:
     inputs:
       evidence_scope:
-        description: Full Lint is currently vendor-blocked; source-regressions explicitly preserves that blocker
+        description: Full Android Lint and Play Insights, or explicitly limited source regressions
         type: choice
         required: true
         default: full-with-android-lint
@@ -304,6 +305,12 @@ jobs:
             --candidate-model "$POLICY_OUT/android-runtime-dependencies.json" \
             2>&1 | tee "$POLICY_OUT/okhttp-compatibility.log"
 
+      - name: Verify catalog evidence guards preserve existing values and reject mismatched sources
+        run: python3 -m unittest discover -s tool/nutrition_platform -p test_enrich_core_magnesium.py -v
+
+      - name: Verify audit launcher preserves failures and exits after detector crashes
+        run: python3 -m unittest discover -s tool/release -p test_lint_compat.py -v
+
       - name: Run every built-in and official Play Insights rule in GLOBAL mode
         id: android_lint
         if: env.POLICY_EVIDENCE_SCOPE == 'full-with-android-lint'
@@ -311,7 +318,8 @@ jobs:
         run: |
           set -euo pipefail
           cd android
-          # Both vendor failures are preserved, never marked PASS by a source-only run.
+          # Source-only success never stands for full Lint. The full runtime uses
+          # the pinned, metadata-verified origin-context bridge; no rule is removed.
           # AGP 9.0.1 module-partial mode crashes Insights 0.1.5 LoginCredentials.
           # The matching official Lint 32.0.1 GLOBAL runtime uses all AGP models
           # and all rule JARs. No detector, severity, dependency or baseline filter.
@@ -339,6 +347,8 @@ jobs:
           lint = 'PASS' if outcome == 'success' else ('FAIL' if outcome == 'failure' else 'BLOCKED_VENDOR_NOT_RERUN')
           r['evidence_scope'] = os.environ['BIL_EVIDENCE_SCOPE']
           r['full_android_lint_status'] = lint
+          r['full_android_lint_runtime'] = 'Lint 32.0.1 plus pinned GradleDetector origin-context bridge; all rule IDs, severities and scopes preserved'
+          r['lint_context_bridge_evidence'] = 'android-lint-global/debug.inputs.json and release.inputs.json'
           r['lint_blocker_evidence'] = 'docs/qa_next/evidence/policy-gate-20261015/lint32-global-crash-investigation.json'
           result_path.write_text(json.dumps(r, ensure_ascii=False, indent=2) + '\n')
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:

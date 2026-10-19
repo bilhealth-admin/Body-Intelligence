@@ -683,6 +683,18 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       await Clipboard.setData(ClipboardData(text: comment.body));
       return;
     }
+    CommunityReportDraft? reportDraft;
+    if (action == 'report') {
+      reportDraft = await showCommunityReportSheet(
+        context,
+        target: comment.parentId == null
+            ? CommunityReportTarget.comment
+            : CommunityReportTarget.reply,
+        guard: _detailOwnerScope.guard,
+      );
+      _detailOwnerScope.check();
+      if (reportDraft == null || !mounted || !_detailOwnerIsCurrent) return;
+    }
     if (!_busyComments.add(comment.id)) return;
     setState(() {});
     try {
@@ -729,7 +741,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       } else if (action == 'report') {
         await widget.repository.reportComment(
           comment.id,
-          reason: 'user_reported_from_post_detail',
+          reason: reportDraft!.reason,
         );
         _detailOwnerScope.check();
       } else if (action == 'block') {

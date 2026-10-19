@@ -153,9 +153,9 @@ class _CoachFoodReviewCardState extends State<CoachFoodReviewCard> {
           const SizedBox(height: 2),
           Text(
             copy.day(widget.day),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
-              color: CoachFoodCardPalette.muted,
+              color: CoachFoodCardPalette.muted(context),
             ),
           ),
           if (_busy ||
@@ -249,7 +249,7 @@ class _CoachFoodReviewCardState extends State<CoachFoodReviewCard> {
                       children: [
                         Text(
                           copy.reviewLabel(portion),
-                          style: const TextStyle(fontSize: 11.5, height: 1.5),
+                          style: TextStyle(fontSize: 11.5, height: 1.5),
                         ),
                         if (estimated)
                           Container(
@@ -266,9 +266,9 @@ class _CoachFoodReviewCardState extends State<CoachFoodReviewCard> {
                             ),
                             child: Text(
                               copy.estimated,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 9,
-                                color: CoachFoodCardPalette.muted,
+                                color: CoachFoodCardPalette.muted(context),
                               ),
                             ),
                           ),
@@ -294,7 +294,7 @@ class _CoachFoodReviewCardState extends State<CoachFoodReviewCard> {
       backgroundColor: const Color(0xFF2684FF),
       foregroundColor: Colors.white,
       disabledBackgroundColor: const Color(0xFF24394D),
-      disabledForegroundColor: CoachFoodCardPalette.muted,
+      disabledForegroundColor: CoachFoodCardPalette.muted(context),
       minimumSize: const Size(0, 42),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       textStyle: Theme.of(
@@ -309,7 +309,7 @@ class _CoachFoodReviewCardState extends State<CoachFoodReviewCard> {
     onPressed: _canAct ? () => _run(widget.onAdjust) : null,
     style: OutlinedButton.styleFrom(
       foregroundColor: CoachFoodCardPalette.white,
-      disabledForegroundColor: CoachFoodCardPalette.muted,
+      disabledForegroundColor: CoachFoodCardPalette.muted(context),
       backgroundColor: const Color(0xFF213245),
       side: const BorderSide(color: Color(0xFF3C5267)),
       minimumSize: const Size(0, 42),

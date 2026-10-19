@@ -1,5 +1,4 @@
-import 'first_use_target_guide.dart';
-import 'dart:math' as math;
+import 'first_use_spotlight.dart';
 
 import 'package:flutter/material.dart';
 
@@ -108,65 +107,11 @@ class _AnchoredGuideState extends State<FirstUseAnchoredGuide> {
   Widget build(BuildContext context) => OverlayPortal(
     overlayLocation: OverlayChildLocation.rootOverlay,
     controller: portal,
-    overlayChildBuilder: (context) {
-      final media = MediaQuery.of(context);
-      final width = math.min(360.0, media.size.width - 32);
-      final target = widget.anchor.target.currentContext?.findRenderObject();
-      final overlay = Overlay.of(
-        context,
-        rootOverlay: true,
-      ).context.findRenderObject();
-      if (target is! RenderBox || !target.hasSize) {
-        return const SizedBox.shrink();
-      }
-      final position = target.localToGlobal(Offset.zero, ancestor: overlay);
-      final center = position.dx + target.size.width / 2;
-      final left = (center - width / 2).clamp(
-        16.0,
-        media.size.width - width - 16,
-      );
-      return Positioned(
-        top: 0,
-        left: 0,
-        width: math.min(360, media.size.width - 32),
-        child: CompositedTransformFollower(
-          link: widget.anchor.link,
-          showWhenUnlinked: false,
-          targetAnchor: Alignment.topCenter,
-          followerAnchor: Alignment.bottomCenter,
-          offset: Offset(left + width / 2 - center, -12),
-          child: Align(
-            alignment: Alignment.topLeft,
-            widthFactor: 1,
-            heightFactor: 1,
-            child: SizedBox(
-              width: math.min(360, media.size.width - 32),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: math.max(
-                    120,
-                    position.dy - media.padding.top - 12,
-                  ),
-                ),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: SingleChildScrollView(
-                    child: FirstUseGuidePlacement(
-                      below: false,
-                      pointerAlignment: Alignment(
-                        ((center - left) / width * 2 - 1).clamp(-.88, .88),
-                        0,
-                      ),
-                      child: widget.guide,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    },
+    overlayChildBuilder: (_) => FirstUseSpotlight(
+      target: widget.anchor.target,
+      guide: widget.guide,
+      preferBelow: false,
+    ),
     child: widget.child,
   );
 }

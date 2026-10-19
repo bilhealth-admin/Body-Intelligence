@@ -236,6 +236,7 @@ class ManagedCommunityCircle extends CommunityCircle {
     this.rules,
     this.avatar,
     this.cover,
+    this.reviewStatus = 'approved',
   }) : super(
          slug: circle.slug,
          titleCopyKey: circle.titleCopyKey,
@@ -255,6 +256,9 @@ class ManagedCommunityCircle extends CommunityCircle {
   final String? rules;
   final CircleMediaReference? avatar;
   final CircleMediaReference? cover;
+  final String reviewStatus;
+
+  bool get awaitingReview => reviewStatus == 'pending';
 
   factory ManagedCommunityCircle.fromJson(Map<String, dynamic> json) {
     final circle = CommunityCircle.fromJson(json);
@@ -270,6 +274,15 @@ class ManagedCommunityCircle extends CommunityCircle {
     }
 
     final name = circleNullableString(json['display_name'], maximum: 80);
+    final reviewStatus = json['review_status'] ?? 'approved';
+    if (!const [
+      'pending',
+      'approved',
+      'rejected',
+      'removed',
+    ].contains(reviewStatus)) {
+      throw const FormatException('Invalid circle review status');
+    }
     if (circle.titleCopyKey == circleNativeTitleCopyKey &&
         (name == null || name.trim().runes.length < 2)) {
       throw const FormatException('Native circle has no verified name');
@@ -279,6 +292,7 @@ class ManagedCommunityCircle extends CommunityCircle {
       displayName: name,
       description: circleNullableString(json['description'], maximum: 1000),
       rules: circleNullableString(json['rules'], maximum: 2000),
+      reviewStatus: reviewStatus as String,
       avatar: media(json['avatar'], CircleMediaKind.avatar),
       cover: media(json['cover'], CircleMediaKind.cover),
     );
@@ -289,6 +303,7 @@ class ManagedCommunityCircle extends CommunityCircle {
     required CircleMediaReference? cover,
   }) => ManagedCommunityCircle(
     circle: this,
+    reviewStatus: reviewStatus,
     displayName: displayName,
     description: description,
     rules: rules,
@@ -302,6 +317,7 @@ class ManagedCommunityCircle extends CommunityCircle {
     }
     return ManagedCommunityCircle(
       circle: base,
+      reviewStatus: reviewStatus,
       displayName: displayName,
       description: description,
       rules: rules,
@@ -323,6 +339,7 @@ class ManagedCommunityCircle extends CommunityCircle {
       membershipStatus: membershipStatus,
       clearMembership: clearMembership,
     ),
+    reviewStatus: reviewStatus,
     displayName: displayName,
     description: description,
     rules: rules,
@@ -442,7 +459,9 @@ class CircleMediaReservation {
     final status = json['status'];
     if (!const [
       'reserved',
+      'pending',
       'published',
+      'rejected',
       'cancelled',
       'superseded',
     ].contains(status)) {

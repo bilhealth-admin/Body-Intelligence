@@ -529,11 +529,17 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         // server may still have settled a reservation before its reply was
         // discarded. autoDispose clears the snapshot when this page is gone.
         ref.invalidate(aiCoachCreditAccessProvider);
+        ref
+            .read(aiCoachUsageRefreshProvider.notifier)
+            .requestAuthoritativeReload();
         ref.invalidate(aiVisionCreditStateProvider);
       }
       if (mounted && generation == requestGeneration) {
         // A cancelled, older response must not cancel the next turn's timer.
         replyDelayTimer?.cancel();
+        if (question.text.trim().isEmpty && questionFocus.hasFocus) {
+          questionFocus.unfocus();
+        }
         // A successful settlement or a quota rejection may have changed the
         // reserved-aware total. Refresh once after the request completes so
         // zero returns the AI Coach glass immediately without polling/loops.

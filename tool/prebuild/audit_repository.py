@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import subprocess
 import xml.etree.ElementTree as ET
+from urllib.parse import urlsplit
 
 from run_gate import EVIDENCE, ROOT
 
@@ -42,6 +43,39 @@ SECRETS = {
     "google_api_key": re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"),
     "credential_url": re.compile(r"(?:postgres(?:ql)?|https?)://[^\s/:]{2,}:[^\s/@]{6,}@"),
 }
+
+
+def reviewed_url_rejection_fixture(relative: str, source: str, offset: int) -> bool:
+    """Recognize two reviewed dummy inputs without exempting test files.
+
+    Only the exact placeholder credentials, recipient and path are synthetic.
+    Different credentials, URLs, source files or URL suffixes remain candidates.
+    """
+    recipients = {
+        "supabase/functions/ai-coach/provider_recipient_policy_test.ts":
+            ("generativelanguage.googleapis.com", "/v1beta"),
+        "test/features/nutrition/catalog_pack_security_test.dart":
+            ("downloads.example.com", "/catalog.sqlite"),
+    }
+    expected = recipients.get(relative)
+    if expected is None:
+        return False
+    literal = re.match(r"https://[^\s'\"<>]+", source[offset:])
+    if literal is None:
+        return False
+    end = offset + literal.end()
+    if end >= len(source) or source[end] not in "\"'":
+        return False
+    try:
+        value = urlsplit(literal.group())
+        return (
+            value.scheme == "https" and value.username == "user"
+            and value.password == "password" and value.port is None
+            and (value.hostname, value.path) == expected
+            and not value.query and not value.fragment
+        )
+    except ValueError:
+        return False
 
 
 def git(*args: str) -> str:
@@ -92,6 +126,7 @@ def main() -> int:
     hashes: dict[str, list[str]] = defaultdict(list)
     todos = []
     secrets = []
+    reviewed_fixtures = []
     publishable_configs = []
     conflicts = []
     syntax_errors = []
@@ -124,6 +159,15 @@ def main() -> int:
         for kind, pattern in SECRETS.items():
             for match in pattern.finditer(source):
                 line = source.count("\n", 0, match.start()) + 1
+                if kind == "credential_url" and reviewed_url_rejection_fixture(
+                    relative, source, match.start()
+                ):
+                    reviewed_fixtures.append({
+                        "path": relative, "line": line, "kind": kind,
+                        "classification": "reviewed_url_rejection_fixture",
+                        "value": "REDACTED",
+                    })
+                    continue
                 if kind == "google_api_key" and relative == "android/app/google-services.json":
                     publishable_configs.append({
                         "path": relative,
@@ -175,6 +219,7 @@ def main() -> int:
         "duplicate_public_class_names": {k: v for k, v in classes.items() if len(v) > 1},
         "dart_import_cycles": cycles(graph), "todo_candidates": todos,
         "secret_candidates": secrets,
+        "reviewed_synthetic_fixtures": reviewed_fixtures,
         "publishable_config_candidates": publishable_configs,
         "conflict_candidates": conflicts,
         "syntax_errors": syntax_errors,
@@ -187,6 +232,7 @@ def main() -> int:
                       "duplicate_class_names": len(report["duplicate_public_class_names"]),
                       "import_cycle_groups": len(report["dart_import_cycles"]),
                       "todo_candidates": len(todos), "redacted_secret_candidates": len(secrets),
+                      "reviewed_synthetic_fixtures": len(reviewed_fixtures),
                       "publishable_config_candidates": len(publishable_configs),
                       "conflict_candidates": len(conflicts), "syntax_errors": syntax_errors}))
     return int(bool(syntax_errors or conflicts))

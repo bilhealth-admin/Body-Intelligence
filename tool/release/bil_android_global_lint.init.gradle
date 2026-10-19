@@ -134,6 +134,56 @@ gradle.projectsEvaluated {
         [runtime: runtime, rules: rules, sdkHome: sdkHome, jdkHome: jdkHome]
     }
 
+    // Compatibility is explicit and reproducible; all official JARs remain
+    // intact. Only the reviewed deferred cookie/context association changes.
+    def helperSources = ['BilBoundedLintMain.java', 'BilLintOriginContextCompat.java'].collect {
+        new File(sourceRoot, "tool/release/lint_compat/${it}")
+    }
+    def configureLintEntrypoint = { JavaExec task, Map authority, boolean compat ->
+        def classes = new File(outputRoot, 'entrypoint-classes')
+        def patched = new File(outputRoot, 'origin-context-classes')
+        classes.mkdirs()
+        def compiler = javax.tools.ToolProvider.getSystemJavaCompiler()
+        if (compiler == null) throw new GradleException('Lint audit requires a full JDK compiler.')
+        def runtimePath = authority.runtime.collect { it.absolutePath }.join(File.pathSeparator)
+        def compileArgs = ['-encoding', 'UTF-8', '-cp', runtimePath, '-d', classes.absolutePath] +
+            helperSources.collect { it.absolutePath }
+        def status = compiler.run(null, System.out, System.err, compileArgs as String[])
+        if (status != 0) throw new GradleException("Lint audit entrypoint compilation failed: ${status}")
+        def evidence = [entrypoint: 'BilBoundedLintMain',
+            sources: helperSources.collect { fileEvidence(it) },
+            wrapper: fileEvidence(new File(classes, 'BilBoundedLintMain.class'))]
+        if (compat) {
+            def urls = ([classes] + authority.runtime).collect { it.toURI().toURL() } as URL[]
+            def loader = new URLClassLoader(urls, ClassLoader.getPlatformClassLoader())
+            try {
+                def adapter = loader.loadClass('BilLintOriginContextCompat')
+                def official = authority.runtime.find { it.name == "lint-checks-${expectedLint}.jar" }
+                adapter.getMethod('main', String[].class).invoke(null,
+                    [[official.absolutePath, patched.absolutePath] as String[]] as Object[])
+                def metadata = adapter.getMethod('registryMetadata', String.class, String.class)
+                def before = metadata.invoke(null, '', runtimePath).toString()
+                def after = metadata.invoke(null, patched.absolutePath, runtimePath).toString()
+                if (before != after) throw new GradleException('Lint issue IDs, severities or scopes changed.')
+                new File(outputRoot, 'builtin-registry-before.tsv').setText(before, 'UTF-8')
+                new File(outputRoot, 'builtin-registry-after.tsv').setText(after, 'UTF-8')
+                evidence.compatibility = [
+                    scope: 'Pinned Lint 32.0.1 GradleDetector deferred AGP cookie uses its originating Context',
+                    officialRuleJarsModified: false, detectorDisabled: false,
+                    builtinIssueMetadataUnchanged: true, builtinIssues: before.readLines().size(),
+                    registrySha256: sha256Text(before),
+                    originalRuntime: fileEvidence(official),
+                    generatedClass: fileEvidence(new File(patched,
+                        'com/android/tools/lint/checks/GradleDetector.class'))]
+            } finally {
+                loader.close()
+            }
+        }
+        task.classpath = app.files((compat ? [patched, classes] : [classes]) + authority.runtime)
+        task.mainClass.set('BilBoundedLintMain')
+        evidence
+    }
+
     def declaredComponentScope = { String variant ->
         def cap = variant.capitalize()
         def unitProducer = app.tasks.findByName("generate${cap}UnitTestLintModel")
@@ -247,6 +297,7 @@ gradle.projectsEvaluated {
             task.dependsOn(modelSets)
             task.inputs.files(modelSets)
             task.inputs.files(report.lintRuleJars)
+            task.inputs.files(helperSources)
             task.inputs.property('bilAgpVersion', expectedAgp)
             task.inputs.property('bilLintVersion', expectedLint)
             task.inputs.property('bilInsightsSha256', expectedInsightsSha256)
@@ -261,6 +312,7 @@ gradle.projectsEvaluated {
                     [startedAtUtc: Instant.now().toString(), status: 'NOT_COMPLETED',
                      mode: 'GLOBAL', variant: variant])
                 def authority = validateRuntimeAndRules(task, report)
+                def entrypointCompatibility = configureLintEntrypoint(task, authority, true)
                 def models = collectModels(report, variant)
                 if (!report.checkOnly.get().empty || report.fatalOnly.get() || report.autoFix.get()) {
                     throw new GradleException('GLOBAL audit forbids narrowed checks, fatal-only analysis, or automatic fixes.')
@@ -298,7 +350,7 @@ gradle.projectsEvaluated {
                     declaredComponents: models.declaredComponents, uast: uastEvidence,
                     models: models.evidence, rules: authority.rules.collect { fileEvidence(it) },
                     runtime: authority.runtime.collect { fileEvidence(it) }, arguments: arguments,
-                    entrypoint: entrypointEvidence,
+                    entrypoint: entrypointEvidence, compatibility: entrypointCompatibility,
                 ]
                 writeJson(new File(outputRoot, "${variant}.inputs.json"),
                     [startedAtUtc: Instant.now().toString(), inputSha256: sha256Text(JsonOutput.toJson(provenance)), inputs: provenance])
@@ -333,12 +385,14 @@ gradle.projectsEvaluated {
         task.timeout.set(java.time.Duration.ofMinutes(30))
         task.ignoreExitValue = false
         task.dependsOn(report.lintRuleJars)
+        task.inputs.files(helperSources)
         task.standardOutput = listing
         task.outputs.file(new File(outputRoot, 'issues.txt'))
         task.outputs.file(new File(outputRoot, 'issues.inputs.json'))
         task.outputs.upToDateWhen { false }
         task.doFirst {
             def authority = validateRuntimeAndRules(task, report)
+            def entrypointCompatibility = configureLintEntrypoint(task, authority, false)
             // Main --list only loads GLOBAL registries, before project discovery.
             // In Lint32, --lint-rule-jars overrides findRuleJars(project), while
             // findGlobalRuleJars ignores ANDROID_LINT_JARS for client-id=gradle.
@@ -352,6 +406,7 @@ gradle.projectsEvaluated {
                 [startedAtUtc: Instant.now().toString(), mode: 'LIST_ONLY', agp: expectedAgp, lint: expectedLint,
                  insights: expectedInsights, insightsSha256: expectedInsightsSha256,
                  expectedInsightsIds: expectedInsightsIds, entrypoint: entrypointEvidence,
+                 compatibility: entrypointCompatibility,
                  childEnvironment: [ANDROID_LINT_JARS: childRulePath],
                  rules: authority.rules.collect { fileEvidence(it) },
                  runtime: authority.runtime.collect { fileEvidence(it) }, arguments: arguments])

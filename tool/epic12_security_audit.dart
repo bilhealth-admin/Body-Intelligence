@@ -41,7 +41,7 @@ void main() {
     ).hasMatch(text)) {
       findings.add('$relative: probable embedded secret');
     }
-    if (hasTlsVerificationBypass(text)) {
+    if (shouldAuditTlsSource(relative) && hasTlsVerificationBypass(text)) {
       findings.add('$relative: TLS verification disabled');
     }
     if (RegExp(
@@ -99,4 +99,12 @@ bool hasTlsVerificationBypass(String text) {
   return patterns.any(
     (pattern) => RegExp(pattern, caseSensitive: false).hasMatch(text),
   );
+}
+
+/// Dependency API documentation can demonstrate an unsafe option without
+/// enabling it. Keep scanning executable dependency sources and first-party docs.
+bool shouldAuditTlsSource(String path) {
+  final normalized = path.replaceAll('\\', '/');
+  return !(normalized.contains('/node_modules/') &&
+      normalized.toLowerCase().endsWith('.md'));
 }

@@ -93,10 +93,11 @@ CommunityPostImagePreview _createCommunityPostImagePreview(
             interpolation: img.Interpolation.linear,
           )
         : original;
+    final clean = privateImagePixels(resized);
     final encoded = Uint8List.fromList(
-      resized.hasAlpha
-          ? img.encodePng(resized, level: 6)
-          : img.encodeJpg(resized, quality: 84),
+      clean.hasAlpha
+          ? img.encodePng(clean, level: 6)
+          : img.encodeJpg(clean, quality: 84),
     );
     if (encoded.lengthInBytes <= CommunityPostImagePreview.maxBytes) {
       return CommunityPostImagePreview._(

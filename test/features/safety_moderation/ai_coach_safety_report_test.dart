@@ -1,5 +1,5 @@
 import 'package:body_intelligence_log/features/safety_moderation/domain/ai_coach_safety_report.dart';
-import 'package:body_intelligence_log/features/safety_moderation/presentation/ai_coach_safety_report_queue_section.dart';
+import '../../support/legacy_mobile_admin/features/safety_moderation/presentation/ai_coach_safety_report_queue_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

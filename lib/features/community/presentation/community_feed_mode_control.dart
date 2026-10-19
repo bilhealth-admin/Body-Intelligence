@@ -26,7 +26,7 @@ class _CommunityFeedModeControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BilPearlMaterialCard(
     margin: const EdgeInsets.only(bottom: 8),
-    child: PopupMenuButton<CommunityFeedMode>(
+    child: bilPearlPopupMenuButton<CommunityFeedMode>(
       key: const Key('community-feed-mode-menu'),
       tooltip: _communityFeedModeLabel(context, selectedMode),
       initialValue: selectedMode,

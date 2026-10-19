@@ -1,5 +1,8 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
+import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
+import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
 import 'package:body_intelligence_log/features/nutrition/repositories/usda_core_catalog_repository.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
@@ -7,6 +10,60 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'official magnesium survives catalog, local food and gram-scaled meal evidence',
+    () async {
+      final catalog = UsdaCoreCatalogRepository.open(
+        'assets/catalogs/bil_food_core.sqlite',
+      );
+      addTearDown(catalog.close);
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final foods = FoodRepository(database);
+      final meals = MealRepository(database);
+      final mealId = await meals.createMeal(
+        date: DateTime(2026, 10, 18),
+        name: 'breakfast',
+        type: 'breakfast',
+      );
+      for (final (id, magnesium) in [
+        (170457, 11.0),
+        (168898, 112.0),
+        (171477, 29.0),
+      ]) {
+        final source = (await catalog.findById('usda:$id'))!;
+        expect(source.knownValue(FoodNutrient.magnesium), magnesium);
+        final local = await foods.materializeUnifiedFood(source);
+        expect(local.magnesium, magnesium);
+        expect(
+          UnifiedFood.evidenceFromMask(
+            local.nutrientEvidenceMask,
+            FoodNutrient.magnesium,
+          ),
+          isTrue,
+        );
+        await meals.addMealItem(
+          mealId: mealId,
+          foodId: local.id,
+          quantity: 200,
+          quantityInGrams: true,
+        );
+      }
+      final items = await (database.select(
+        database.mealItems,
+      )..where((row) => row.mealId.equals(mealId))).get();
+      expect(items, hasLength(3));
+      expect(items.map((item) => item.calories), [36.0, 726.0, 330.0]);
+      expect(
+        items.map(
+          (item) =>
+              MealFoodEvidence.read(item).value(TrackedNutrient.magnesium),
+        ),
+        [22.0, 224.0, 58.0],
+      );
+    },
+  );
+
   test(
     'bundled USDA core opens and returns attributed search results',
     () async {

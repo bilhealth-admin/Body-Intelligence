@@ -12,7 +12,7 @@ import 'package:body_intelligence_log/features/community/channels/domain/communi
 import 'package:body_intelligence_log/features/community/channels/presentation/community_channels_page.dart';
 import 'package:body_intelligence_log/features/community/circle_management/circle_management_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_circles.dart';
-import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
+import '../../support/legacy_mobile_admin/features/community/presentation/community_post_moderation_page.dart';
 import 'package:body_intelligence_log/features/safety_moderation/domain/ai_coach_safety_report.dart';
 import 'package:body_intelligence_log/features/community/services/community_post_image_picker.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';

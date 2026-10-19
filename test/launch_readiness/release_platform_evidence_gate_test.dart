@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -165,7 +166,23 @@ void main() {
     expect(generator, isNot(contains('PLAY_APP_SIGNING_SHA256 =')));
 
     expect(wrangler, contains('"binding": "ASSETS"'));
-    expect(wrangler, contains('"run_worker_first": ["/.well-known/*"]'));
+    final config = jsonDecode(wrangler) as Map<String, dynamic>;
+    final assets = config['assets'] as Map<String, dynamic>;
+    expect(
+      assets['run_worker_first'],
+      containsAll([
+        '/.well-known/*',
+        '/privacy',
+        '/terms',
+        '/support',
+        '/account-deletion',
+        '/data-deletion',
+        '/subscription-terms',
+        '/health-disclaimer',
+        '/community-guidelines',
+        '/contact',
+      ]),
+    );
     expect(worker, contains("sourceType.includes('text/html')"));
     expect(worker, contains("url.pathname.startsWith('/.well-known/')"));
     expect(worker, contains('return failClosed(404'));

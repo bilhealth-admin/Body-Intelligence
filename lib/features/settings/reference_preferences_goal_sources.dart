@@ -222,7 +222,7 @@ class _GoalSourceDetails extends StatelessWidget {
               ),
               mode: LaunchMode.externalApplication,
             ),
-            child: const Text('WHO · Dietary fibre'),
+            child: Text(_diaryText(context, 'WHO · Dietary fibre')),
           ),
         ],
         if (goal.needsReview)

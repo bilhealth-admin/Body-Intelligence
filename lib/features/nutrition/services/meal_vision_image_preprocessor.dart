@@ -1,3 +1,4 @@
+import '../../../shared/media/private_image_pixels.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
@@ -36,12 +37,10 @@ class DefaultMealVisionImagePreprocessor
   const DefaultMealVisionImagePreprocessor({
     this.maximumDimension = 1600,
     this.jpegQuality = 84,
-    this.smallImageByteThreshold = 350 * 1024,
   });
 
   final int maximumDimension;
   final int jpegQuality;
-  final int smallImageByteThreshold;
 
   @override
   Future<MealVisionPreparedImage> prepare({
@@ -61,10 +60,8 @@ class DefaultMealVisionImagePreprocessor
 
     final prepared = await compute(_prepareMealVisionImage, <String, Object>{
       'bytes': Uint8List.fromList(bytes),
-      'mimeType': mimeType,
       'maximumDimension': maximumDimension,
       'jpegQuality': jpegQuality,
-      'smallImageByteThreshold': smallImageByteThreshold,
     });
 
     return MealVisionPreparedImage(
@@ -103,53 +100,33 @@ class DefaultMealVisionImagePreprocessor
 
 Map<String, Object?> _prepareMealVisionImage(Map<String, Object> request) {
   final original = request['bytes']! as Uint8List;
-  final mimeType = request['mimeType']! as String;
   final maximumDimension = request['maximumDimension']! as int;
   final jpegQuality = request['jpegQuality']! as int;
-  final smallImageByteThreshold = request['smallImageByteThreshold']! as int;
 
+  int? encodedOrientation;
+  if (original.length >= 2 && original[0] == 0xff && original[1] == 0xd8) {
+    try {
+      // The JPEG decoder already rotates pixels and removes this tag.
+      encodedOrientation = img.decodeJpgExif(original)?.imageIfd.orientation;
+    } on Object {
+      // Pixel decoding below remains the validity gate for damaged metadata.
+    }
+  }
   img.Image? decoded;
   try {
     decoded = img.decodeImage(original);
   } catch (_) {
     decoded = null;
   }
-  // Preserve the tiny signature-only fixtures used by the established gateway
-  // contract. Real user images must decode successfully.
   if (decoded == null) {
-    if (original.length <= 64) {
-      return _mealVisionPreparedResult(
-        bytes: original,
-        mimeType: mimeType,
-        width: null,
-        height: null,
-        reencoded: false,
-        orientationCorrected: false,
-      );
-    }
     throw const MealImageAnalysisException(
       MealImageAnalysisFailure.invalidImage,
     );
   }
-
-  final oriented = img.bakeOrientation(decoded);
+  final orientation = encodedOrientation ?? decoded.exif.imageIfd.orientation;
   final orientationCorrected =
-      oriented.width != decoded.width || oriented.height != decoded.height;
-  final alreadyBounded =
-      oriented.width <= maximumDimension && oriented.height <= maximumDimension;
-  if (alreadyBounded &&
-      original.length <= smallImageByteThreshold &&
-      !orientationCorrected) {
-    return _mealVisionPreparedResult(
-      bytes: original,
-      mimeType: mimeType,
-      width: oriented.width,
-      height: oriented.height,
-      reencoded: false,
-      orientationCorrected: false,
-    );
-  }
-
+      orientation != null && orientation >= 2 && orientation <= 8;
+  final oriented = img.bakeOrientation(decoded);
   final longest = oriented.width > oriented.height
       ? oriented.width
       : oriented.height;
@@ -162,11 +139,15 @@ Map<String, Object?> _prepareMealVisionImage(Map<String, Object> request) {
           interpolation: img.Interpolation.linear,
         )
       : oriented;
+  // A fresh pixel-only image cannot carry EXIF GPS, private thumbnails,
+  // comments, XMP, PNG text or other metadata retained by decode/resize.
+  // Composite transparency onto white instead of exposing hidden RGB pixels.
+  final clean = privateImagePixels(resized, flattenAlpha: true);
   Uint8List encoded = Uint8List.fromList(
-    img.encodeJpg(resized, quality: jpegQuality.clamp(55, 95)),
+    img.encodeJpg(clean, quality: jpegQuality.clamp(55, 95)),
   );
   if (encoded.length > maximumMealImageBytes) {
-    encoded = Uint8List.fromList(img.encodeJpg(resized, quality: 68));
+    encoded = Uint8List.fromList(img.encodeJpg(clean, quality: 68));
   }
   if (encoded.isEmpty || encoded.length > maximumMealImageBytes) {
     throw const MealImageAnalysisException(

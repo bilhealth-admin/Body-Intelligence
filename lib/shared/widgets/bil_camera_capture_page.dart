@@ -1,3 +1,4 @@
+import 'bil_pearl_feature_welcome.dart';
 import 'bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:io';
@@ -255,7 +256,7 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                   }
                   if (!synchronous && frame == null) {
                     return const Center(
-                      child: CircularProgressIndicator(color: Colors.white),
+                      child: BilFeatureWelcomeStatus(color: Colors.white),
                     );
                   }
                   return child;
@@ -286,7 +287,9 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
               },
             )
           else
-            const Center(child: CircularProgressIndicator()),
+            const Center(
+              child: BilFeatureWelcomeStatus(color: Color(0xFF697178)),
+            ),
           if (_capturedForReview != null)
             Positioned(
               left: 12,
@@ -387,7 +390,9 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                         iconSize: 76,
                         color: Colors.white,
                         icon: _capturing
-                            ? const CircularProgressIndicator()
+                            ? const BilFeatureWelcomeStatus(
+                                color: Color(0xFF697178),
+                              )
                             : Container(
                                 width: 72,
                                 height: 72,

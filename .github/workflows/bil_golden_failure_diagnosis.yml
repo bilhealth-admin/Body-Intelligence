@@ -11,7 +11,9 @@ permissions:
 jobs:
   diagnose:
     if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
-    runs-on: ubuntu-24.04
+    # Approved references were rendered with the pinned Windows Flutter engine.
+    # Compare on that renderer, keeping exact pixels and all baselines unchanged.
+    runs-on: windows-2022
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -30,7 +32,7 @@ jobs:
           mkdir -p build/qa/golden-diagnosis
           flutter --version --machine > build/qa/golden-diagnosis/flutter-version.json
           git rev-parse HEAD > build/qa/golden-diagnosis/source-head.txt
-          python3 - <<'PY'
+          python - <<'PY'
           from pathlib import Path
           import hashlib, json, os, platform
           roots = {

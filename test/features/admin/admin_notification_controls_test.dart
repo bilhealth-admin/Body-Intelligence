@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
-import 'package:body_intelligence_log/features/admin/presentation/admin_notification_presets.dart';
-import 'package:body_intelligence_log/features/admin/presentation/ai_coach_admin_page.dart';
+import '../../support/legacy_mobile_admin/features/admin/presentation/admin_notification_presets.dart';
+import '../../support/legacy_mobile_admin/features/admin/presentation/ai_coach_admin_page.dart';
 import 'package:body_intelligence_log/features/admin/services/ai_coach_admin_service.dart';
 import 'package:body_intelligence_log/features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';
 import 'package:body_intelligence_log/features/notifications/services/ai_coach_reset_notice_service.dart';
@@ -85,7 +85,7 @@ void main() {
 
   test('every authored admin notification string is in the 25-locale map', () {
     final source = File(
-      'lib/features/admin/presentation/admin_notification_controls.dart',
+      'test/support/legacy_mobile_admin/features/admin/presentation/admin_notification_controls.dart',
     ).readAsStringSync();
     final authored = RegExp(
       r"_copy\(\s*'((?:\\.|[^'])*)',\s*ar:\s*'((?:\\.|[^'])*)',\s*fr:\s*'((?:\\.|[^'])*)',\s*es:\s*'((?:\\.|[^'])*)',\s*tr:\s*'((?:\\.|[^'])*)',\s*\)",

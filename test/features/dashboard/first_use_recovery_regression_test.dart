@@ -6,7 +6,6 @@ import 'package:body_intelligence_log/data/repositories/preferences_repository.d
 import 'package:body_intelligence_log/data/repositories/first_meal_milestone.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
-import 'package:body_intelligence_log/features/dashboard/widgets/first_use_glass_surface.dart';
 import 'package:body_intelligence_log/shared/widgets/first_use_target_guide.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -26,22 +25,17 @@ Future<int> seed(AppDatabase db) => FoodRepository(db).addFood(
   servingUnit: 'g',
 );
 
-void expectSkipBelowGlass(
+void expectSkipInsidePearl(
   WidgetTester tester,
   String guideKey,
   String skipKey,
 ) {
   final guide = find.byKey(Key(guideKey));
-  final glass = find.descendant(
-    of: guide,
-    matching: find.byType(FirstUseGlassSurface),
-  );
   expect(guide, findsOneWidget);
-  expect(glass, findsOneWidget);
-  expect(
-    tester.getRect(find.byKey(Key(skipKey))).top,
-    greaterThanOrEqualTo(tester.getRect(glass).bottom),
-  );
+  final card = tester.getRect(guide);
+  final skip = tester.getRect(find.byKey(Key(skipKey)));
+  expect(card.contains(skip.topLeft), isTrue);
+  expect(card.contains(skip.bottomRight - const Offset(.1, .1)), isTrue);
   expect(
     find.ancestor(of: guide, matching: find.byType(FirstUseGuidePlacement)),
     findsOneWidget,
@@ -54,7 +48,7 @@ void main() {
   tearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
   for (final phase in ['menu', 'search', 'choose', 'quantity', 'save']) {
     testWidgets(
-      '$phase Skip is below glass and preserves the real control without saving',
+      '$phase Skip is inside pearl and preserves the real control without saving',
       (tester) async {
         tester.view.physicalSize = const Size(390, 844);
         tester.view.devicePixelRatio = 1;
@@ -76,7 +70,7 @@ void main() {
         await tester.tap(find.byKey(const Key('shell-quick-add')));
         await tester.pumpAndSettle();
         if (phase == 'menu') {
-          expectSkipBelowGlass(
+          expectSkipInsidePearl(
             tester,
             'quick-add-food-guide',
             'quick-add-food-guide-skip',
@@ -116,7 +110,7 @@ void main() {
           }
           final guide = 'food-log-$phase-guide';
           final skip = '$guide-skip';
-          expectSkipBelowGlass(tester, guide, skip);
+          expectSkipInsidePearl(tester, guide, skip);
           await tester.tap(find.byKey(Key(skip)));
           await tester.pumpAndSettle();
           expect(find.byKey(Key(guide)), findsNothing);
@@ -157,10 +151,10 @@ void main() {
         addTearDown(router.dispose);
         await tester.pumpWidget(journeyApp(db, router, language));
         await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('dashboard-guide-next')));
+        await tester.tap(find.byKey(const Key('shell-quick-add')));
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('quick-add-primary-0')), findsOneWidget);
-        expectSkipBelowGlass(
+        expectSkipInsidePearl(
           tester,
           'quick-add-food-guide',
           'quick-add-food-guide-skip',

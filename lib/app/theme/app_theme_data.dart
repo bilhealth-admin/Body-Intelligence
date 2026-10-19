@@ -1,3 +1,4 @@
+import 'bil_feedback_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -106,10 +107,7 @@ class AppThemeData {
           borderRadius: PremiumDesignTokens.dialogRadius,
         ),
       ),
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
+      snackBarTheme: BilFeedbackTheme.resolve(colorScheme),
       dividerColor: divider,
       dividerTheme: DividerThemeData(color: divider, thickness: 1, space: 1),
       listTileTheme: ListTileThemeData(

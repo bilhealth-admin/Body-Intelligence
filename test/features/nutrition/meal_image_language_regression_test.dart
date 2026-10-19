@@ -1,5 +1,5 @@
+import '../../support/meal_vision_image_fixtures.dart';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
@@ -265,10 +265,7 @@ void main() {
     );
     await expectLater(
       service.analyze(
-        XFile.fromData(
-          Uint8List.fromList([0xff, 0xd8, 0xff, 0x00]),
-          mimeType: 'image/jpeg',
-        ),
+        XFile.fromData(validMealVisionJpegBytes(), mimeType: 'image/jpeg'),
       ),
       throwsA(
         isA<MealImageAnalysisException>().having(

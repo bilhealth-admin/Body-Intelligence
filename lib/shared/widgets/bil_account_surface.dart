@@ -1,3 +1,4 @@
+import '../../app/theme/bil_navigation_press_style.dart';
 import 'package:flutter/material.dart';
 
 import 'bil_wordmark.dart';
@@ -51,6 +52,9 @@ class BilAccountSurface extends StatelessWidget {
                         child: onBack == null
                             ? null
                             : IconButton.filledTonal(
+                                style: BilNavigationPressStyle.neutralBubble(
+                                  context,
+                                ),
                                 onPressed: onBack,
                                 icon: const BackButtonIcon(),
                               ),

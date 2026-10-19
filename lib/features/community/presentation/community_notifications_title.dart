@@ -24,6 +24,13 @@ extension _CommunityNotificationTitle on _CommunityNotificationsPageState {
         ),
       };
     }
+    // Historical activity used a different schema. Describe the reward kind
+    // without manufacturing a v2 receipt or using notification data as balance.
+    if (notification.kind == CommunityNotificationKind.rewardEarned &&
+        notification.copyKey == 'community_post_ai_reward_v1' &&
+        notification.metadata['currency'] == 'ai_tokens') {
+      return communityText(context, 'AI token reward', 'مكافأة توكنات AI');
+    }
     final actor = notification.actorDisplayName;
     return switch (notification.kind) {
       CommunityNotificationKind.friendRequest =>

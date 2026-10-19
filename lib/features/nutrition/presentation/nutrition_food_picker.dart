@@ -1,3 +1,4 @@
+import 'food_translation_attribution.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,14 +116,12 @@ class _NutritionFoodPickerState extends ConsumerState<NutritionFoodPicker> {
                         ),
                       for (final food in foods)
                         ListTile(
-                          title: Text(
-                            FoodPresentationLocalizer.foodName(
-                              name: food.name,
-                              arabicName: food.arabicName,
-                              localeTag: locale,
-                              isCustom: food.isCustom,
-                              source: food.source,
-                            ),
+                          title: GoogleFoodNameText(
+                            name: food.name,
+                            arabicName: food.arabicName,
+                            localeTag: locale,
+                            isCustom: food.isCustom,
+                            source: food.source,
                           ),
                           subtitle: Text(
                             '${food.servingSize} ${FoodPresentationLocalizer.servingUnit(food.servingUnit, locale)}',

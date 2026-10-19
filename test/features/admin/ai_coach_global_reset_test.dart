@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/app_router.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_ai_access.dart';
-import 'package:body_intelligence_log/features/admin/presentation/ai_coach_admin_page.dart';
+import '../../support/legacy_mobile_admin/features/admin/presentation/ai_coach_admin_page.dart';
 import 'package:body_intelligence_log/features/admin/services/ai_coach_admin_service.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';

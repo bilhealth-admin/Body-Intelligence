@@ -7,6 +7,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_attention_scope.dart';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -45,6 +47,7 @@ enum _Case {
   repeatedConsumable,
   contextAndUsageFailure,
   contextStorageFailure,
+  rewardRefresh,
 }
 
 class _ContextPreferences extends PreferencesRepository {
@@ -249,6 +252,7 @@ void main() {
         Supabase? ownedSupabase;
         AppDatabase? ownedDatabase;
         ProviderContainer? ownedContainer;
+        CommunityAttentionController? ownedAttention;
         ProviderSubscription<AsyncValue<String?>>? ownerSubscription;
         ProviderSubscription<AsyncValue<bool>>? coach;
         ProviderSubscription<AsyncValue<bool>>? vision;
@@ -366,6 +370,14 @@ void main() {
                   value &&
               container.read(aiBoostVisionAccessProvider).asData?.value ==
                   value;
+          var unseenRewards = 0;
+          final attention = ownedAttention = CommunityAttentionController(
+            () async => CommunityAttention(
+              activityUnseenByKind: {'reward_earned': unseenRewards},
+            ),
+          );
+          attention.setOwner(owner);
+          await attention.refresh();
           await tester.pumpWidget(
             UncontrolledProviderScope(
               container: container,
@@ -391,7 +403,10 @@ void main() {
                   AppLocalizations.delegate,
                   ...GlobalMaterialLocalizations.delegates,
                 ],
-                home: AiCoachSettingsPage(),
+                home: CommunityAttentionScope(
+                  controller: attention,
+                  child: const AiCoachSettingsPage(),
+                ),
               ),
             ),
           );
@@ -533,6 +548,35 @@ void main() {
               archiveBefore,
             );
             expect(server.balance, 0);
+            expect(server.verificationReads, 0);
+            expect(native.launches, 0);
+            expect(server.failure, isNull);
+            expect(tester.takeException(), isNull);
+            return;
+          }
+          if (scenario == _Case.rewardRefresh) {
+            final baselineReads = server.usageReads;
+            server.balance =
+                5; // Synthetic server truth, not notification data.
+            unseenRewards = 1;
+            await attention.refresh();
+            await _waitUntil(
+              tester,
+              () =>
+                  server.usageReads > baselineReads &&
+                  server.activeRequests == 0 &&
+                  container.read(aiCoachCreditAccessProvider).asData?.value ==
+                      true &&
+                  container.read(aiBoostVisionAccessProvider).asData?.value ==
+                      false,
+              'reward activity reloads actual Settings and access from the server',
+            );
+            await _reach(tester, find.text('5'));
+            expect(find.text('5'), findsOneWidget);
+            final settledReads = server.usageReads;
+            await attention.refresh();
+            await tester.pump(const Duration(milliseconds: 100));
+            expect(server.usageReads, settledReads);
             expect(server.verificationReads, 0);
             expect(native.launches, 0);
             expect(server.failure, isNull);
@@ -690,6 +734,7 @@ void main() {
               vision?.close();
               ownerSubscription?.close();
               ownedContainer?.dispose();
+              ownedAttention?.dispose();
             }
             if (server != null) {
               await _waitUntil(

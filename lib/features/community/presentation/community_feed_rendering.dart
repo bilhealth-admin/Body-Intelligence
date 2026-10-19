@@ -19,7 +19,13 @@ extension _CommunityFeedRendering on _FeedTabState {
                 _postModes[snapshot.data!] == _selectedFeedMode;
             final posts = widget.suspendAfterOwnerChange || !matched
                 ? const <CommunityPost>[]
-                : snapshot.data!;
+                : snapshot.data!
+                      .map(
+                        (post) =>
+                            _authorIdentities[post.authorId]?.applyTo(post) ??
+                            post,
+                      )
+                      .toList(growable: false);
             final failed =
                 snapshot.connectionState == ConnectionState.done &&
                 snapshot.hasError;
@@ -33,10 +39,11 @@ extension _CommunityFeedRendering on _FeedTabState {
                 return false;
               },
               child: RefreshIndicator(
-                onRefresh: _refresh,
+                onRefresh: _refreshSelectedFeed,
                 child: Semantics(
                   key: const Key('community-public-feed'),
-                  value: _feedModeLabel(_selectedFeedMode),
+                  value:
+                      _selectedTopic?.slug ?? _feedModeLabel(_selectedFeedMode),
                   label: communityText(
                     context,
                     'Shared with BIL members',
@@ -78,140 +85,189 @@ extension _CommunityFeedRendering on _FeedTabState {
                               !_managingPost &&
                               !widget.suspendAfterOwnerChange,
                           ownerIsCurrent: visit.isCurrent,
-                          onCompose: _openComposer,
-                          onOpenTopic: _openTopic,
+                          onCompose: ({tag, circle}) => _openComposer(
+                            tag: tag ?? _selectedTopic?.slug,
+                            circle: circle,
+                          ),
+                          selectedTopic: _selectedTopic?.slug,
+                          onSelectTopic: _selectTopic,
                           onOpenCircles: widget.onOpenCircles,
                         ),
                       ),
-                      if (!loading &&
-                          posts.isEmpty &&
-                          _selectedFeedMode == CommunityFeedMode.explore)
-                        SliverToBoxAdapter(
-                          child: _CommunityFeedTopicSuggestions(
-                            topics: _suggestedTopics,
-                            initialTopics:
-                                identical(
-                                  _suggestedTopics,
-                                  widget.preview.topics,
-                                )
-                                ? widget.preview.knownTopics
-                                : null,
-                            onOpen: _openTopic,
+                      if (_selectedTopic case final topic?)
+                        _CommunityInlineTopicFeed(
+                          key: _topicFeedKey,
+                          topic: topic,
+                          visit: visit,
+                          metadata: _referenceByPost,
+                          identities: _authorIdentities,
+                          viewCounts: _viewCountByPost,
+                          previews: _commentPreviewByPost,
+                          tiers: _membershipTierByAuthor,
+                          actionsEnabled: !_openingComposer && !_managingPost,
+                          onPostsLoaded: (loaded) => unawaited(
+                            _loadFeedExtras(visit, _feedGeneration, loaded),
                           ),
-                        ),
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          key: const Key('community-refresh-slot'),
-                          height: 3,
-                          child: (loading && matched) || _cacheRefreshing
-                              ? const LinearProgressIndicator()
-                              : const SizedBox.shrink(),
-                        ),
-                      ),
-                      if (_cacheRefreshFailed)
-                        SliverToBoxAdapter(
-                          child: CommunityFeedRefreshNotice(onRetry: _refresh),
-                        ),
-                      if (failed)
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: _InlineError(onRetry: _refresh),
+                          onMutation: () {
+                            _topicMutated = true;
+                            _modeReadEpoch++;
+                            _modePages.clear();
+                            _modePrefetch.clear();
+                          },
+                          onAction: (post, action) async {
+                            await _managePost(post, action);
+                            if (action != 'report') {
+                              await _topicFeedKey.currentState?.refresh();
+                            }
+                          },
                         )
-                      else if (loading && !matched)
-                        const SliverToBoxAdapter(
-                          child: _CommunityFeedSkeleton(
-                            key: Key('community-feed-cold-placeholder'),
-                          ),
-                        )
-                      else if (posts.isEmpty)
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 24, 24, 96),
-                            child: Center(
-                              child: Text(
-                                _emptyFeedMessage(),
-                                textAlign: TextAlign.center,
-                              ),
+                      else ...[
+                        if (!loading &&
+                            posts.isEmpty &&
+                            _selectedFeedMode == CommunityFeedMode.explore)
+                          SliverToBoxAdapter(
+                            child: _CommunityFeedTopicSuggestions(
+                              topics: _suggestedTopics,
+                              initialTopics:
+                                  identical(
+                                    _suggestedTopics,
+                                    widget.preview.topics,
+                                  )
+                                  ? widget.preview.knownTopics
+                                  : null,
+                              onOpen: _openTopic,
                             ),
                           ),
-                        )
-                      else
-                        SliverPadding(
-                          padding: EdgeInsets.fromLTRB(
-                            16,
-                            8,
-                            16,
-                            _hasMore ? 12 : 100,
-                          ),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate((
-                              context,
-                              index,
-                            ) {
-                              final post = posts[index];
-                              return Padding(
-                                key: ValueKey(post.id),
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _CommunityPostCard(
-                                  post: post,
-                                  repository: visit.repository,
-                                  ownerIsCurrent: visit.isCurrent,
-                                  ownerChanges: visit.changes,
-                                  currentUserId: visit.ownerId,
-                                  referenceMetadata: _referenceByPost[post.id],
-                                  viewCount: _viewCountByPost[post.id],
-                                  commentPreview:
-                                      _commentPreviewByPost[post.id],
-                                  authorMembershipTier:
-                                      _membershipTierByAuthor[post.authorId],
-                                  actionsEnabled:
-                                      !_openingComposer && !_managingPost,
-                                  onMutation: () {
-                                    _modeReadEpoch++;
-                                    _modePages.clear();
-                                    _modePrefetch.clear();
-                                  },
-                                  onAction: (value) => _managePost(post, value),
-                                ),
-                              );
-                            }, childCount: posts.length),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            key: const Key('community-refresh-slot'),
+                            height: 3,
+                            child: (loading && matched) || _cacheRefreshing
+                                ? const LinearProgressIndicator()
+                                : const SizedBox.shrink(),
                           ),
                         ),
-                      if (!failed && matched && posts.isNotEmpty && _hasMore)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                            child: Center(
-                              child: TextButton.icon(
-                                key: const Key('community-feed-load-more'),
-                                onPressed:
-                                    _loadingMore ||
-                                        _feedRefreshing ||
-                                        _cacheRefreshing
-                                    ? null
-                                    : () => _loadMore(posts),
-                                icon: _loadingMore
-                                    ? const SizedBox.square(
-                                        dimension: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                        if (_cacheRefreshFailed)
+                          SliverToBoxAdapter(
+                            child: CommunityFeedRefreshNotice(
+                              onRetry: _refresh,
+                            ),
+                          ),
+                        if (failed)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: _InlineError(onRetry: _refresh),
+                          )
+                        else if (loading && !matched)
+                          const SliverToBoxAdapter(
+                            child: _CommunityFeedSkeleton(
+                              key: Key('community-feed-cold-placeholder'),
+                            ),
+                          )
+                        else if (posts.isEmpty)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                24,
+                                24,
+                                24,
+                                96,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  _emptyFeedMessage(),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              8,
+                              16,
+                              _hasMore ? 12 : 100,
+                            ),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate((
+                                context,
+                                index,
+                              ) {
+                                final post = posts[index];
+                                return Padding(
+                                  key: ValueKey(post.id),
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: _CommunityPostCard(
+                                    post: post,
+                                    repository: visit.repository,
+                                    ownerIsCurrent: visit.isCurrent,
+                                    ownerChanges: visit.changes,
+                                    currentUserId: visit.ownerId,
+                                    referenceMetadata:
+                                        _referenceByPost[post.id],
+                                    viewCount: _viewCountByPost[post.id],
+                                    commentPreview:
+                                        _commentPreviewByPost[post.id],
+                                    authorMembershipTier:
+                                        _membershipTierByAuthor[post.authorId],
+                                    actionsEnabled:
+                                        !_openingComposer && !_managingPost,
+                                    onMutation: () {
+                                      _modeReadEpoch++;
+                                      _modePages.clear();
+                                      _modePrefetch.clear();
+                                    },
+                                    onAction: (value) =>
+                                        _managePost(post, value),
+                                  ),
+                                );
+                              }, childCount: posts.length),
+                            ),
+                          ),
+                        if (!failed && matched && posts.isNotEmpty && _hasMore)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                0,
+                                16,
+                                100,
+                              ),
+                              child: Center(
+                                child: TextButton.icon(
+                                  key: const Key('community-feed-load-more'),
+                                  onPressed:
+                                      _loadingMore ||
+                                          _feedRefreshing ||
+                                          _cacheRefreshing
+                                      ? null
+                                      : () => _loadMore(posts),
+                                  icon: _loadingMore
+                                      ? const SizedBox.square(
+                                          dimension: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const BilGlassPressFeedback(
+                                          child: Icon(
+                                            Icons.expand_more_rounded,
+                                          ),
                                         ),
-                                      )
-                                    : const BilGlassPressFeedback(
-                                        child: Icon(Icons.expand_more_rounded),
-                                      ),
-                                label: Text(
-                                  communityText(
-                                    context,
-                                    'Load older posts',
-                                    'تحميل منشورات أقدم',
+                                  label: Text(
+                                    communityText(
+                                      context,
+                                      'Load older posts',
+                                      'تحميل منشورات أقدم',
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                      ],
                     ],
                   ),
                 ),

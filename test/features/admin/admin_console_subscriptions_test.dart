@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
-import 'package:body_intelligence_log/features/admin/presentation/ai_coach_admin_page.dart';
+import '../../support/legacy_mobile_admin/features/admin/presentation/ai_coach_admin_page.dart';
 import 'package:body_intelligence_log/features/admin/services/admin_subscription_service.dart';
 import 'package:body_intelligence_log/features/admin/services/ai_coach_admin_service.dart';
 import 'package:flutter/material.dart';

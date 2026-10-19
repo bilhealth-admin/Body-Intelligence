@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_entry_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,16 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+CommunityPolicyState acceptedEntryPolicy() {
+  final policy = CommunityContentPolicy.fromJson({
+    'version': 'community-policy-v1',
+    'document_url': 'https://www.bilhealth.com/community-guidelines',
+    'locale_code': 'en',
+    'effective_at': '2026-09-08T00:00:00Z',
+  });
+  return CommunityPolicyState.accepted(policy, acceptedVersion: policy.version);
+}
 
 const _ownerA = '11111111-1111-4111-8111-111111111111';
 const _ownerB = '22222222-2222-4222-8222-222222222222';
@@ -95,6 +106,10 @@ CommunityPublicCode _code() => CommunityPublicCode(
 
 class _EntryRepository extends CommunityRepository {
   _EntryRepository(super.client);
+  @override
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async => acceptedEntryPolicy();
 
   final profiles = <String, CommunityProfile>{};
   final reads = <String>[];

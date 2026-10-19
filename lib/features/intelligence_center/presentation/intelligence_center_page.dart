@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'coach_thinking_status.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
@@ -222,6 +223,7 @@ class IntelligenceCenterPage extends ConsumerStatefulWidget {
 class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     with WidgetsBindingObserver {
   final question = TextEditingController();
+  final questionFocus = FocusNode(debugLabel: 'coach-composer');
   final conversationScroll = ScrollController();
   final coachMessageReadingAnchors = <String, GlobalKey>{};
   String? coachMessageReadingAnchorScope;
@@ -541,6 +543,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     entryWelcomeTimer?.cancel();
     unawaited(const BilTextToSpeech().stop());
     unawaited(speech.dispose());
+    questionFocus.dispose();
     question.dispose();
     conversationScroll.dispose();
     super.dispose();

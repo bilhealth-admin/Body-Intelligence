@@ -57,6 +57,8 @@ extension _CommunityChatOwnerScope on _CommunityChatPageState {
       }
     }
     _ownerCancelled = false;
+    _safetyBusy = false;
+    _safetyBlocked = false;
     _peerId = widget.userId;
     try {
       _ownerId = _repository?.currentUserId;

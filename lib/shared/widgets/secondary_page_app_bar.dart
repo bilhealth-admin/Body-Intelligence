@@ -1,3 +1,4 @@
+import '../../app/theme/bil_navigation_press_style.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -53,10 +54,7 @@ class SecondaryPageAppBar extends StatelessWidget
           key: const Key('secondary-page-back'),
           tooltip: arabic ? 'رجوع' : 'Back',
           onPressed: onBack ?? leaveSecondaryPage,
-          style: IconButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            foregroundColor: Theme.of(context).colorScheme.onSurface,
-          ),
+          style: BilNavigationPressStyle.neutralBubble(context),
           icon: const BackButtonIcon(),
         ),
       ),
@@ -66,10 +64,7 @@ class SecondaryPageAppBar extends StatelessWidget
             key: const Key('secondary-page-dashboard'),
             tooltip: arabic ? 'العودة إلى لوحة اليوم' : 'Return to Today',
             onPressed: () => context.go(dashboardPath),
-            style: IconButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: Theme.of(context).colorScheme.onSurface,
-            ),
+            style: BilNavigationPressStyle.neutralBubble(context),
             icon: const Icon(Icons.dashboard_outlined),
           ),
         if (showDashboardAction) const SizedBox(width: 8),

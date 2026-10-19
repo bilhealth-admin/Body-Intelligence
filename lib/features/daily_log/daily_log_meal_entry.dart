@@ -69,14 +69,16 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _displayFoodName(
-                              selectedFood!,
-                              FoodPresentationLocalizer.resultLocaleForQuery(
-                                query: foodSearch.text,
-                                interfaceLocaleTag: _mealLocale,
-                              ),
-                            ),
+                          GoogleFoodNameText(
+                            name: selectedFood!.name,
+                            arabicName: selectedFood!.arabicName,
+                            isCustom: selectedFood!.isCustom,
+                            source: selectedFood!.source,
+                            localeTag:
+                                FoodPresentationLocalizer.resultLocaleForQuery(
+                                  query: foodSearch.text,
+                                  interfaceLocaleTag: _mealLocale,
+                                ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleLarge

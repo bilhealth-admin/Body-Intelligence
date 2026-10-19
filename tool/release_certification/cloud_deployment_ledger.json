@@ -1,0 +1,1504 @@
+{
+  "schema": "bil.cloud.deployment-ledger.v1",
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "recorded_date": "2026-10-19",
+  "application_source": "8ec83ed81066c324cfd7119363ab31d73a8d4b97",
+  "admin_source": "96adfe96ae18ace7a799c8ed54448f4d5ef5077b",
+  "scope": "Exact source and deployed ledger drift detection; historical timestamp aliases are not raw migration parity or proof of runtime correctness. Live behavior is tested separately. No DDL is applied.",
+  "local_sql_sha256_lf": {
+    "202608020001_bil_cloud_foundation.sql": "c0f12da839e6312a0f5827dfab3f68d5afc89e787b7e51d6d353e91e2d944a5b",
+    "202608020002_bil_community_foundation.sql": "1aa5b982dcc7f12c79e5fb38d127653a3ba13d6de339a14a1b5dc8f8e00f37b3",
+    "202608020003_bil_commerce_foundation.sql": "82b00e3aa5f8239d20733a6c48f7a9dcced16aca416af06a9b3223f350fd5a49",
+    "202608020004_bil_community_hardening.sql": "ccf5efaf871eaa56bb93461d4a2bfda6a0e3c897c4976d58d60ba2e414cbcf1e",
+    "202608030001_bil_product_review_trust.sql": "8b2ff21ead7713992255f9c3e010163b3ce4b4752dcab6607da81fdfa0b712f1",
+    "202608040001_bil_community_release_hardening.sql": "b6ff05f3427066beb23c3cfdcf4aa1b92f1fab6c432d53fe2eb8460218d6e947",
+    "202608040002_bil_community_cloud_completion.sql": "a57ccabff027835a2c6d08b967837ae5a5ec4b33ae96ec82700ade56ad966149",
+    "202608040003_bil_security_privacy_closure.sql": "99e40cff235c2a7baefa06e3a0ca5804f0d8c661f3d93cdc059c70b0ab14cb7f",
+    "202608040004_bil_store_entitlement_truth.sql": "84b63707ad49f57e2c717463e0c69f994ff11e1a79b19a39d63f121f30666db3",
+    "202608090001_bil_store_atomic_entitlement_persistence.sql": "bccd856331c144d90e48f396e07e841389949e836ed771444b6b840b5ba1e013",
+    "202608100001_bil_pro_only_consumer_store.sql": "8d4a60e634c388a7f6353e2267a6c3a6b55e9d4109a2a380de9f954db09e89ef",
+    "202608100002_bil_cloud_ledger_sync.sql": "f5350a2c4db56475b21ad0cd295ec80c6fede2ca6f1e2ee0bb23b9d814f2e1cf",
+    "202608100003_bil_meal_vision_quota.sql": "49d228ed8da21b26c6d91502506eb0d0b32043b9c18754e093fc87f025b35d14",
+    "202608110001_bil_meal_vision_runtime_hardening.sql": "22cb3e24f0a59d3c8c55f2f530d1897f5ff9b10f708999ef16a7eda3f74c38a9",
+    "202608110002_bil_diary_sharing_and_support_contracts.sql": "7993047c10095a5e2f23b7d19fb59c599e931f0a729c1c795700afc352722d65",
+    "202608110003_bil_gemini_25_pro_pricing.sql": "15cda4a222bb295b34e14c898161bcb2608bafad7b09804067bba65432ee5e3b",
+    "202608110004_bil_ai_coach_weekly_usage_and_boost.sql": "9f3bed35870c35c11fa05886d528d173d6e23aed98f42e51816b9b79e4aa53b4",
+    "202608110005_bil_ai_vision_weekly_metering.sql": "deaf94cc97c8dc21009d0ef54a492ddefade6a68f062e821ad21c1415923e8cc",
+    "202608110006_bil_ai_vision_cache_and_nonfood_policy.sql": "805f71959fe3afecf99b903f3c4d1a6bbbba880119eba603c5fc622bbdf53480",
+    "202608110007_bil_ai_voice_actual_seconds.sql": "dabc03e74b2a4ff568672e3e4968e2a5f590a856fc336a864d0339eb39dd6634",
+    "202608110008_bil_ai_vision_nonfood_throttle.sql": "9ad4af53359a369ff4e9b14c9e5e27fae36a408607326cdf180ba8be50279185",
+    "202608110009_bil_premium_barcode_gateway.sql": "c1a6286e5120ba3aeb849120180fd0bf4ab1de0f0bc1f993af652dcbc369d305",
+    "202608130001_bil_remote_schema_lint_repair.sql": "370df6ee1ea19f30dc6f6001c3cbffd0bdbf47fbf9ce4d1d94a5eb71e35b7637",
+    "202608140001_bil_account_deletion_idempotency.sql": "3f97c9e072373a3aa4c5554f2c8e63a46ef90ac8e059c279869285d67eedc6f2",
+    "202608140002_bil_ai_agent_qa_grants.sql": "22f1dcc6baad1cc211bcbf3cce9f02b926952601e524ff06a1a4465b51fccb7e",
+    "202608150003_bil_community_post_owner_delete.sql": "f306df24175d7db20ad2d4485570979c047c55a781e6eb3b9e09f44e287a0b67",
+    "20260815225624_bil_canonical_consumer_tiers.sql": "a7a299b8f82a5b3ca07efc65d564bf8f16d50bc122b80cdb7372cc23ab35a903",
+    "20260815225751_bil_security_definer_execute_hardening.sql": "2b0518dce7389fbe8de9e600ed6e9bacc21edc8c097b42d9cf7b101a87507d4d",
+    "20260817103823_bil_cloud_key_custody.sql": "d495f39d202d68242bf33358ca09e13fbb70c64e2ca22aa591e79e19cba093ad",
+    "20260818163257_add_play_integrity_observe_log.sql": "a0f2ac945c979898fd20ad78cd8b240eb9c5d50f756a876c46be5ac2d400d57a",
+    "20260818165223_play_integrity_payload_binding.sql": "690fe2b4abdcbc871ffc43a5e5eba42c698ce19dca8fabee46563b9fbcf87ae4",
+    "20260818165240_play_integrity_payload_binding_index.sql": "e7f6baf2139a1a16448aa1b6a5e05e7f43f5c61f1585d7eb75282fa829532cbc",
+    "20260818165259_play_integrity_event_action_length_hardening.sql": "a888423eb9946de3527224bfefa44588155af037975b8e35c071feac9689c355",
+    "20260818182103_play_integrity_remove_duplicate_action_constraint.sql": "6c1bd8e8c289b8cef81242ebd2cd945f223a7f7a63310dcc6c37c9050aa3337e",
+    "20260818182144_play_integrity_payload_digest_not_null.sql": "89390c366b1096bcdcb2b2919ca8c7ff42c50fd407939c6a4f36e7f6291aa165",
+    "20260820115847_ai_coach_closed_test_feedback_and_consent.sql": "f4dd9b406ab9e63c9abbbd21dec774ab0fc3012c9dc3eda1f98b272216a9fe8c",
+    "20260820172843_ai_coach_rls_and_consent_invoker.sql": "67ac38c5bee9d11a9be8d618a3b51c261887be70d9aba207e779463c3575ca65",
+    "20260820215019_ai_coach_voice_feedback_capability.sql": "2a8751446b89f8b245a746349338406f43bbc91cb4d31df39eb94be83a5606a3",
+    "20260820231631_ai_coach_voice_consent_service_check.sql": "f275e206b38df53201470acacf07be0c70ff528f1addaf2a4e9b5f974b7accfe",
+    "20260820232033_ai_coach_voice_consent_column_access.sql": "1b1f94ba93875a346b88b6b145b8d30abb74661a37f7447d7c6de31c00a4e5ae",
+    "20260820235144_bil_coach_living_memory_and_experiments.sql": "4d2bd2d1a4f700d23e5d891656ed54a472e358477ae760a5d5655a5f66182f71",
+    "20260821052813_barcode_universal_product_cache.sql": "94bf9858b108c061dead7aacbb48a57230e2155f276781afed1216442fb3596a",
+    "20260821054046_community_food_live_search.sql": "9e214d260ec1e6693f5450ecccef0cf5824913048f7c700743090d7dac51014e",
+    "20260821074908_ai_coach_balanced_period_allowances.sql": "284884a25e61e11e81466f44a877db85fa67a38582a756b55d91d8d8ef2ac7a8",
+    "20260821075318_ai_coach_unified_credit_observatory.sql": "d52ebfe6882dad2cbdb7b02cd92a02331acdf909a7fa93f47b500507ed147b9e",
+    "20260821080542_ai_coach_unified_weekly_tokens.sql": "abd30edcf098fbb0870942c1477d5c710703152209202a2c59e29b2dee46c7bd",
+    "20260821102504_commerce_country_policy_and_ai_allowances.sql": "09291b4ab94d1443bfde000d5f4f1f0a7f528af411120c29793eaa496e062975",
+    "20260821123043_ai_coach_monthly_allowance_status_and_fallback.sql": "311c34fa25eb9cfe353d777e0645b213374277de95f225a1318a566267a3a27a",
+    "20260821123129_ai_coach_monthly_usage_backfill.sql": "909264a1611c7cc747ed34db2457475dd7dc6bcc9c9f81c038249eca424fd383",
+    "20260821124334_ai_trial_universal_1000_tokens.sql": "69879845e766374c1ea74c472817218a74fcbbac3d4a8bf23cde3dabb64dd67b",
+    "20260821124632_ai_trial_fixed_period_metering.sql": "dbaefc0623cef38f2467f097ad00c0c2f1a3734678864529bcefc2be4fc86472",
+    "20260821174122_require_paid_boost_for_meal_vision.sql": "9f748ec5a1c9b26a769386b06011181230d5e88ac869a5c5f851b434519e6893",
+    "202608220001_closed_test_full_premium_ai_coach.sql": "9e1f0a65f63ed5d52df354abe69ae856bb84f64cc7f1cab5e7ec72f651e14be1",
+    "202608220002_closed_test_ai_overlay.sql": "b8284a4650afcd0c1ac39be676d966b3185f10ce9ad92749857325b15f08eae0",
+    "202608220003_premium_community_friendships.sql": "db8b6418f4c1fdd0d74ed5bfa592c629f91140531b7dd27fe9274ac4e0e0f9c3",
+    "20260822005720_closed_test_full_premium_ai_coach.sql": "26e75bf607442de95a0f65375f201c07c22449c846db1205c8f8ce1060e8a5f5",
+    "20260822010050_closed_test_ai_overlay.sql": "0b91a4aa5ceec0fd5da49b13eb7c2c32d127e20604ecb5f3bc6764c0c009b8f7",
+    "20260822063821_premium_community_friendships.sql": "ea892a4f081785bd870267b57a4445e8aaebbefb899aa0bb6be286248ad08b30",
+    "20260822070041_bil_cloud_sync_legacy_column_compatibility.sql": "81a9ba1086492c46b234f8576340c55924930cca73cef008123243d00bebd31d",
+    "20260822070524_bil_cloud_sync_legacy_column_compatibility.sql": "e1f94a19b0211484c65880a6268a1cb82a667b2ea54b543499984f147552205e",
+    "20260822103316_bil_account_deletion_worker.sql": "e4ae9c97d0c0bc4165c737044facc8f2831867d397065adb9c96920938132c90",
+    "20260822134000_bil_account_deletion_worker.sql": "9a23e7e7cb458a29e3223a4a90379f0687042c360526211ebad6d4b61b438d21",
+    "20260822203050_add_profile_avatar_storage_contract.sql": "4afdb9b6fc5d7b00441005f2f9a3d30889be8143ef8b1f4212614c8dbe2848c6",
+    "20260822213343_community_profile_discovery_rpc.sql": "48a6221b792e66ebe2b699b9969eb45e13016f628cd22b6627db78f5019df07e",
+    "20260822215652_community_profile_discovery_indexes.sql": "728623a404709cce43e363c71bbfefd5a92433ce823aea13d37da6d5fe634caa",
+    "20260822233000_profile_avatar_storage.sql": "e8805e10a9d3f1e25d549965b14753aed15bfddd22f28ae2df5176f1160f9c64",
+    "20260823002000_community_profile_discovery_rpc.sql": "0bfed8b0b55495f2ccbe26c4d319ffd65cb19de7185ff3923561c1a4cb08fc07",
+    "20260823003000_community_profile_discovery_indexes.sql": "cf124aa6eeb2bb0d05b8291668f393f106d8f252a3585d2f6b84be1b31780e21",
+    "20260823014911_community_post_images.sql": "b9ffc2bda024c397d7de950c25f8ef621a1b415e3de0cea8752aaee4fe9c4079",
+    "20260823230839_community_post_images.sql": "7ace114d33f78620967c764c63b0d13b2e527a04d45dc3e9625ed0671a3667a3",
+    "202608240001_community_connection_identity_and_message_realtime.sql": "55f2b32a41b79156ca32b7c1320745df2ee6b98dcabeeff62945eda804d8a55a",
+    "202608240002_community_contact_exchange_policy.sql": "1468f3531364a25795210b603b8b77415ad49b39b8fc669712ee2efbd1c8c7f0",
+    "20260824015150_community_connection_identity_and_message_realtime.sql": "e639dc55ebcf1d327725940e973b8afeff7b090b9cdccad0d752902110a87698",
+    "20260824015152_community_contact_exchange_policy.sql": "b71de926cef6b9f232a8a225ee9c64d4bee3322e7ed204add63b6b7e535217a8",
+    "20260828220000_final_store_market_policy_alignment.sql": "35d2996cbe9c193dfa4b278aad10b5f141b739c1c3a3866592f6a8c498856801",
+    "20260830034302_disable_unsafe_account_deletion_cron.sql": "aae5d4e21fb529d97fbab1a7e014ae50db5642eac4f2db9f67df3d6a5dc43e4e",
+    "20260830053817_account_deletion_storage_cleanup_20260830093000.sql": "b909bd7dd8e811beedf04a338ca0978054e25cdf2d2a2a1bb0796c4382a380ba",
+    "20260830053941_account_deletion_worker_table_grants.sql": "f176d3120381614ab2a9fb98aaf2b45e45a10f84285b35a44ff14a8feb43023e",
+    "20260830054600_account_deletion_policy_initplan.sql": "47d45f3297a4d4344023b4e90a6cf5e4d421959c3742da768c62eb129173400e",
+    "20260830054752_account_deletion_dispatch_timeout.sql": "ff92fd02e783a0e74c69e04a1c27f17b8240b0823b4faa462bd48c9c064ba3fd",
+    "20260830120109_canonical_store_lifecycle_mirror_forward_20260830110000.sql": "c7c36a7d3ecf0a9a9132f6d9ceb25a80f2e06b672aea3299bd70a3eb5e5d537f",
+    "20260830175811_restrict_ai_trials_to_ai_coach_products.sql": "8dac68c25e343ec513ed80cd9df8d2d57f4e06a78a5271cf336e9795dc5e5288",
+    "20260830180011_canonical_store_market_pricing_policy.sql": "70813593fc36b3d0f65df70aee3307309ac6ca0ed9027ddeb7413b285f470657",
+    "20260831024716_register_apple_store_products.sql": "eb6f46eb4644cccfc87bff7e85556b3d68e857beca4a015cf7ab639d807fb3b2",
+    "20260831074550_closed_test_ai_allowance_resolution.sql": "b35fd44a5048fe08c9620ffd0b9f2c03fd1339d6066443bf7813a5d1b052f961",
+    "20260831151527_ai_coach_admin_global_individual_reset.sql": "e4e8c4d6ec2f25dc14d092f1e88463cb32d491fccfdaa90cab8af0236570ecb6",
+    "20260831192412_admin_notification_controls.sql": "a543d572385b995a48e6b972e6a834d82a53537a33cacfc639a048955d8ae204",
+    "20260831192516_admin_notification_audit_fk_indexes.sql": "efb3513731200d9ed4bd94ada7c7d53789911ecaf1ec7895c517b01b8f7c3e54",
+    "20260831194043_sync_display_locale_preferences.sql": "562d171801815b81ca8c37c7505ae7de1f09ac78441bc285bbdc6e0f4e57f517",
+    "20260901000000_bil_existing_cloud_key_recovery.sql": "bf83567d999dce3a06a82a5295dd1b990f92c9ccf87561feb0ed920483d5633a",
+    "20260901010000_admin_ai_boost_gifts.sql": "f1c2f7cfb27a75aa40f3ffdf1c21b7820ab9dbfd4c07993a50f6fb29162230dc",
+    "20260904010000_ai_coach_reset_token_grants.sql": "df5de4ee6e99aeccaef1c0122bbc40eb6d31408a946658ad8ed6000b4e9c69ed",
+    "20260904020000_register_google_store_products.sql": "d1f96ef3f395dc182c88a8fc3f67b151f1a6aa32cd6ebb7777fcab34c3b22cc7",
+    "20260904030000_community_post_human_moderation.sql": "ec9f08f7827641676c3447e2c99862e67c7f44a6fe919146dce920aed7e271b8",
+    "20260904040000_push_delivery_idempotency.sql": "790452380a3dc3b6e1870523a77e2e8c1cbdb6b251e594d5d4253ffa261ea951",
+    "20260905010000_mobile_integrity_jit_grants.sql": "bd080a11681d510b3a5d3134b270662b78277702e884b0b7469a2999a7642317",
+    "20260905143000_apple_sign_in_token_lifecycle.sql": "9fabdb795da415de3ebc4c6452bcea5a8fe30e777da851163377871cf77b7c20",
+    "20260905160000_admin_community_access_control.sql": "2d4d3bf46e9d5abc61a2146681fc459433872095d5ee40bb2d7e12888b0b43f8",
+    "20260905160100_fix_community_admin_coalesce.sql": "a0aee682886736026b5d0a527605b3cdb7e4530d632b18621dcaa19e4a073b6e",
+    "20260905160200_fix_community_suspend_uuid_aggregate.sql": "2e2c92282f830fa8c469cb63cfae8f9599324bbb5d1f7a8d30a733c99ea70044",
+    "20260905170000_owner_store_market_policy_nigeria_alignment.sql": "729d98b6b9a90b948a2b74c802f128bc9b2bc101d06f406ff2c8e7f4742a46a0",
+    "20260906100000_community_moderation_reviewer_and_message_privacy.sql": "0622057ac2edf50dd424c83af4ed36ca6dc57115411838913fd0394bee6b8bae",
+    "20260906110000_admin_community_friendship_access.sql": "ea0431148b059c03bfee3b775d3db4fb9df9e2f257906f813c5af9d34206c49a",
+    "20260906120000_owner_approved_second_administrator.sql": "bba5e0ee71446c68c7179ecd2983d0e67b91c0869bfbbd45e5d63cba4d4ba2f8",
+    "20260907010000_bil_backfill_community_food_live_search.sql": "92c4423566e9dc8a634b3a28ff091a61af577ed847c8a0239b36785cb32f3145",
+    "20260908013800_bil_community_social_v2.sql": "a44a3e659fbed85e13f1a24518c2035808c9ec26963275f2c4ee004877e91293",
+    "20260908032057_community_policy_v1_activation.sql": "7b91c11b9f115ba52fa653f13fffd02baba07c910e1c96c7a35cbde44c1404d4",
+    "20260908032453_community_message_block_visibility_hardening.sql": "b6d5489574c5de9935255de286a699894eb49792bd71eab7f1bfbbf311e69e24",
+    "20260908032558_community_block_pair_uuid_lock_fix.sql": "d2b1d0e6a80e22354fb0351a640a05b7282acc436d0b97bd21c9b176038f7d29",
+    "20260908132433_community_policy_client_status_rpc.sql": "ef820345cfee94ae6d149c1dfcaa24e62ce50298268371534b30a93ead430bfe",
+    "20260908141133_harden_public_default_table_privileges.sql": "6ff9a3f58b59af49eed60f476634d5a8335775554e0271ce87559b260ec0d61f",
+    "20260908175000_community_policy_storage_upload_guard.sql": "a60649c6d320f1c05c682814ab84e4d843795ae77c6ea12c95cbb826c9106f7a",
+    "20260908180500_community_policy_version_immutability.sql": "4354a83e1edc72c02ed3914973f7acc51c8605dc36dfe2a62e58bb3f3e43f62c",
+    "20260908181500_community_policy_ledger_postconditions.sql": "722a23d086739172ac0f62d8bf8397543b8d32ea6d7dfcf5069066c24aa4db81",
+    "20260908181600_harden_rate_limit_contract.sql": "83235032cfbee68c0a5960064d68882a74f93b47deb287802bbce6c4d9e7b7c8",
+    "20260908181700_community_social_saves_and_public_codes.sql": "df6958493ea247467992fbc7033256f27bf7fc50fffab5a4f8662297663b2ca5",
+    "20260908181800_backend_function_lint_closure.sql": "e49b188bcf0a36bd5e543507c6b7e1c8e3d4767217e93b25fe685c1b9540098d",
+    "20260908181900_community_social_post_authors_v2.sql": "42c6e63db47d4012be83f68aa91e8ffafa77ba1d2db55f8053467aa450594f76",
+    "20260908182000_community_social_post_authors_volatility.sql": "bc229a2764bced2c803d59dc2ddb4ac9c793f1cde36876383efff441ca0b1c6c",
+    "20260908182100_community_social_handle_backfill_and_reply_visibility.sql": "da9dd221266421f72448cad87c18470d0f5b7ea8a0216bed01c4853865d8005c",
+    "20260908182200_harden_vision_settlement_execution.sql": "be9348b82d80cda71c055f84cfe30d7ccb28d60147f536649812978d86e0d0c5",
+    "20260908182300_harden_shared_diary_read_access.sql": "4b89fffa62e9690983897a65b4c1abf96af5b0b89342c5c4623a18b3472af48b",
+    "20260908182400_harden_friendship_write_contract.sql": "f20921c998c1ec073fee73c81026376acb756d26b1f90206aede2747ac46b572",
+    "20260908235044_harden_legacy_community_writes_and_reports.sql": "be60c0a43487052de990725d46acc0ec5588e9b5f99e2daa2893ea6b2218c156",
+    "20260910014118_admin_subscription_grants.sql": "7616227132c71a28ed19d42bec8458f1a9d85a593300695a06c0c3c1a059d882",
+    "20260910035353_ai_coach_reset_balance_top_up.sql": "395190bfd8554aa8e3249bd9cea2090150c3835a34dd29ea5928ebff1a5c8bae",
+    "20260910090403_community_and_friendships_free.sql": "add7c18624f7c2de23e1c8059de1b6485e316e90bfbd20885d75473e914ce51f",
+    "20260914101500_align_ai_boost_product_id_with_storekit.sql": "568019c3938d6226377232a9f79627eeb163efb7087919d68879fe493fc2c1d4",
+    "20260915190000_bil_gemini_37_flash_pricing.sql": "28efc497d69c086a21bdaf5f1787524df0fe2b2010f5a985ae1c3a6a6351ed10",
+    "20260916103000_retryable_store_notification_leases.sql": "3cc84013d7eb676041d228ad60726b655e3526537bd54ea98c76b14ffbf82a63",
+    "20260916104000_verified_boost_refund_ledger.sql": "d6f142350ba890f7e551f45052cc10f2920c9fe24c5b82ec83c1160593c81896",
+    "20260916105000_canonical_trial_and_terminal_store_persistence.sql": "0d925966480dd67b1c7fc1858a478262831ee4c6be80ca6bc04148bc00b77652",
+    "20260916106000_order_verified_store_snapshots.sql": "8035a2086da690594891b2b341bfc1faa6f960e696ad7fbee498e9e312053c97",
+    "20260917190000_store_notification_error_diagnostics.sql": "ec36cd3c248dbd1b6d0766fd619939c1b28ea0ba587a57e2b746d8eb94677993",
+    "20260918120000_meal_vision_uses_shared_ai_coach_tokens.sql": "88981b9defbe2b6ed6c54835fe8c13f3d9313f45ea21363bb52c3aedffc96001",
+    "20260919090000_fix_community_post_owner_delete_policy.sql": "1bfb10de09515f19b479f8fd4784e1df8486998e37a007a7b9307b6410f08d90",
+    "20260920034051_store_server_rpc_boundaries.sql": "8f100033556a71cebf8580eac471a3a819683f304ccb816f9e8f79bf7fdab176",
+    "20260923090909_google_purchase_ownership_lineage.sql": "b3ac234799a8dbe4542d20ef8c0c94282a14a33d0d246efcd45f7c2ed71a29c3",
+    "202609240001_apple_ai_consent_policy_enforcement.sql": "5749eba511f3d5871b87f6ecb3bbce79d31e6294eb24a92b9d285a1a83632b5a",
+    "20260924071037_community_current_build_backend_repairs.sql": "548ece2ccc56b4be1c02bf7c521983cc0d12b4cfb38c6195b54a8280e3e8fa11",
+    "20260924090000_push_stale_backlog_quarantine.sql": "6c199226bbbfff2c031ba4ad7542d56791a10df426a87e1da2a70907e337aaff",
+    "20260924093000_community_published_post_moderator_removal.sql": "444f1c37117dd06075da257061fbb60e616322f8cf3cc3cf3886a4bac606301d",
+    "20260924200207_allow_meal_vision_ai_consent.sql": "66194ce7e28b3988b2c8f724dd555dec14dcb8b637a821415222cd191107d2d9",
+    "20260924223453_community_admin_moderation_visibility.sql": "7748689a3c73c050e67f829afb262dcc8e6f65dbfa12a62a85b2253e750bb844",
+    "20260925005354_final_hardening_cloud_consent_community_authority.sql": "0b99598d23f0f574db3c0c6c301bc7777a1227d78dabebdf7f25a7745b90d61d",
+    "20260925013813_community_push_dispatch_scheduler.sql": "b3bbf0ed8cbf7957f10b968526805cb6b7ad05d86bd286f005e45cb8d1a8a0e0",
+    "20260925050000_community_push_dispatch_scheduler.sql": "b0bb21bec1f27709cd0468654637581ad8b6b95e634e915db2cc5aa0d95e0e0f",
+    "20260925130000_push_dispatch_service_role_read.sql": "7cac868ebf504dd499c650af16d98d0296ec7cf3846790d0d1ac3ed0f33b96a4",
+    "20260927064211_audit_block_and_ai_period_hardening.sql": "ca9ba3b92c1ff089e178d07222952a4589845aafe65d7c5f7c53f379f14c2ff2",
+    "20260927064227_cloud_sync_cursor_and_page_hardening.sql": "cb0fe229c7969eac2eb8b691796ac6a293f38f4b27accc0443ce6e937dd36a59",
+    "20260927082755_ai_monthly_event_period_reconciliation.sql": "34588c6361587bc3cacfe4ac4c5678fff6abf725d73b3b4f6247e138d9d22fa9",
+    "20260927140000_store_reconciliation_revision_guard.sql": "3653a570853234f6086957bcc19b54dddc301ad2103b0f0d662404386470a5bf",
+    "20260927141000_ai_event_period_and_status_lock.sql": "3a3e5e78a52408b9bf879346378a62b059fa10722b55ea420b869c8f1f2e8637",
+    "20260927150000_cross_store_subscription_snapshots.sql": "4c2104965df08dca154e4b98483aa5ff190675dee2fa058920676007a6206e65",
+    "20260927151000_apple_notification_generation_guard.sql": "ecf77c7366e0c6a0c47b39f3ff98cd46ff1a6d143e5d98926154271af621d863",
+    "20260927172703_apple_store_lineage_ordering_guard.sql": "ccc170dcbb12b4bfdd61d84110be6c47aa8e3850b57266e34104965d950c3719",
+    "20260928112237_seed_sfda_arabic_food_catalog.sql": "60e3adf99c63faa5b9687df910730679d9aa1c8e38c31e6f59b5e68c3fe15f99",
+    "20260928115903_seed_verified_arabic_regional_foods.sql": "7124cfaaaf65225df1301b56928e93641f8b75b1acc3f3407cb91fd27c9864c4",
+    "20260928121235_seed_egypt_nni_arabic_food_catalog.sql": "6350a5b2349ca8d5a35d9f9fe4c9d25ab687926865e0acb6123f7dc4b4ad0a8c",
+    "20260928132118_seed_multilingual_global_food_catalog.sql": "0de10b6d4ebc986c597ac536c22c84b512396ff52f67056cded642b11923f34d",
+    "20260928133938_seed_bil_reference_food_items.sql": "6e054aac0ca0ada602bcd7caf61bf224a54eed0c40f9f7de6e2bc6fcc7c72360",
+    "20260928144345_add_food_translation_cache.sql": "3e26debef21f990eac7d61725d40db619a62dc4f72fa17b0b738c8401cdc5d41",
+    "20260929050616_fix_community_qr_friend_card_visibility.sql": "c96d26a7ca9878b809ffdc4d56c985377a0c98038293aa0b770c9714be39ee3a",
+    "20260929074359_community_attention_and_visible_reads.sql": "b0a7768aecc86e4f02eee2124e93e4add5ae829e13cffe3dc668681642f571eb",
+    "20260930014110_bil_rls_auth_initplan_optimization.sql": "a0949de9fdbdec62f298231fec6b4a817a77c62f12160c4321a47afc77575796",
+    "20260930015855_bil_foreign_key_index_hardening.sql": "27e7d305b0ed20e7db4bc594fcb6328dce965d5ca9ff946182f10e31cee37390",
+    "20261001031127_harden_community_helper_rpc_scope.sql": "9e98440bcc4cd7aec149f4ffe14d2b2781d9c63ec10b6589298899b25a47c02b",
+    "20261001032338_deduplicate_rls_write_policies.sql": "431d2e3b5156e2e9ec5f3f5968874b6ef976e19373099b9881c1111c7c198b69",
+    "20261002133802_fix_friend_request_visibility_without_public_profile_20261002.sql": "656f8a9450cceb265f0c77fbbede568490034f289f5eb6153a10ea6f437c375f",
+    "20261003011205_community_profileless_friend_request_e2e_20261003.sql": "7c9e32a3783b08ed3311605f1ece733aeee0fc6d0df12ead925cb541a7975ca0",
+    "20261003014554_community_friend_acceptance_attention_push_v2.sql": "64346c3bdd508270a9e81b9aafdcf5b6986a27e743cef9ff3818347889749b1e",
+    "20261003025229_community_notification_fk_indexes.sql": "49a4bbd6252a6a7af0b158866c3605e38ff6038efe018ede28b05ffeb0068ed8",
+    "20261003030031_community_gold_ledger_foundation_v1.sql": "4a663539d071003482ecacfced108ba1b14d2ac73817d86a36b4658eb6169906",
+    "20261003030729_community_reputation_xp_foundation_v1.sql": "9be26a55c7b02625c01cf2da5e60f163d8931454cbbb4304475a3543871d1013",
+    "20261003031504_community_activity_v2_compatibility_foundation.sql": "1c8e70939081b0639be01fa87272f4f137c7f43fd61df425fddb940744170156",
+    "20261003035646_community_quest_reward_engine_v1.sql": "9ccd212feb72bb3481ee574dd572f58c1ce290ccf8b317e28973fd2bc1ea64f1",
+    "20261003064812_community_profile_projection_privacy_v1.sql": "782fd1f89de1c1cd02c15d109953de23c95ddc69ce50923ffaf39263cab15c0d",
+    "20261003080333_community_referral_attribution_foundation_v1.sql": "e2da10982cdead81fd3f0ccb119f9d09a081ca65d40b050a98e807bd13a217f4",
+    "20261003080904_community_referral_relationship_acceptance_v1.sql": "519d314ec77ecb9f9e500fa63531a15af17246671ad13a549499e4019b89a777",
+    "20261003085331_community_topics_foundation_v1.sql": "c461c7ebd68b26a00475e36df616b3e837d244f173bad769ed601e475fa8fc12",
+    "20261003091136_community_circles_foundation_v1.sql": "d18197fe31f5c005e94c313aeef5b4e7e641982548383e4e3ff17e7e254376a1",
+    "20261003093710_community_feed_modes_v1.sql": "fe2cc9bbe73a4a37f2b245f76b9456d53bb560b0d5e40e22bb379722d6105d32",
+    "20261003094723_community_social_activity_emitters_v1.sql": "3e00d73dc81879fa5eca87e80953c59491b9c08df0e794ed5781cf357dc0f75d",
+    "20261003095405_community_polls_foundation_v1.sql": "a9ba117265121a5e1e9ca215baedecdaa9dab8067aed8dab2762757bdd0aa379",
+    "20261003095543_community_poll_votes_voter_index_v1.sql": "1c510b1f3a3ef89eb6457599322e210df44e9f42972d452ec1683de93192f5ec",
+    "20261003095854_community_poll_batch_read_v1.sql": "25e2aee5f4002b3233e983b4df106e7ae7f3230f8997d5fd5757c741d68a2608",
+    "20261003103409_community_multi_image_foundation_v1.sql": "c15cbdaeda0d475c9a64a4c477f12d089f23349be7e08b30d4573f1efba15b2c",
+    "20261003104726_community_post_location_foundation_v1.sql": "c919ed6d9ebd3a69b15ba915777ab1a63cf9d2c7e9e80135985fe10606274471",
+    "20261003105229_community_post_context_mentions_v1.sql": "831b51e715212c4621799c7a61a224572897c4c9a2ee1b21bbee949340e23aa8",
+    "20261003105654_community_profile_location_projection_v1.sql": "cabdeb6adba1b231745a73987f7f8951838f5fba4e83236ec4922d8d35539bd1",
+    "20261003110122_community_post_context_location_bridge_v1.sql": "d4ef85551e4a884d0fca87eabc3c2a5d8f4fd0ac90c5c92c67ee0a366c1dcfc6",
+    "20261003121612_community_comment_threads_v3.sql": "9a08e186a5a97649a5b082e1f4a68a6cd943a7c60078eb8f767119aa2ba9edbe",
+    "20261003141000_community_mention_rate_limit_contract_v1.sql": "31cb3088a21a540f20269e8dd3456f8c85b0ec251abf676462effd62ea11f9bf",
+    "20261003210000_community_reference_profile_creator_v1.sql": "9733d6cf54fb8c2e1dcd056f1fb6998bad38b869d8319e572dc6cf69ad589891",
+    "20261003211000_community_reference_composer_persistence_v1.sql": "fd6495b81ee9892b0c637147c6d7ee088258471832ce7184438c8ec28dcf0400",
+    "20261003211500_community_draft_work_in_progress_v1.sql": "d9a36fad02650dc675ec3de0a9fbd447a47332df1e0e5c5cb11b070b82cf6ef9",
+    "20261003212000_community_reference_collaboration_activity_v1.sql": "4574146f515ec9d3cd6b3fa23fafe8e6c2b232ad9f081cab1ea7b281e7276ad1",
+    "20261003212500_community_comment_membership_tier_v1.sql": "246c188971ad169712595b387481d111d28b5de5b286f0e63f11573573ab26ba",
+    "20261003213000_community_profile_cover_v1.sql": "3f8ae3b22b9a27cc24befc0f7097b7984dc4df95486586fac1e02f6704215379",
+    "20261004010500_community_feed_comment_previews_v1.sql": "9880677aa62fe07cb18ebd7622d90ac0bb982b5506f02b56bfd0f96ec350155c",
+    "20261004073453_community_prebuild_privacy_write_hardening_v1.sql": "625dedc4ace4c76267677c5fa2ea0849892f0d0699b6fbd7434aeef9d51d2951",
+    "20261004074954_community_atomic_publish_operation_v1.sql": "d7f830445bb172164d5146e2af69b01c03c5c0e7f79463a5249a1d96f277d15a",
+    "20261004094021_notification_delivery_preferences_authority_v1.sql": "80d86484d24e84b0e6b4e167c84d75021116beefcfb5b20167da67a92c3c32a4",
+    "20261004131411_community_draft_body_whitespace_contract_v1.sql": "d202673313f45d181b1c33ab963c87a58485aeb5419060454760097f867c3796",
+    "20261004170130_prebuild_remaining_fk_lookup_indexes_v1.sql": "cffff197a64c1fefa4cafc524b78de1846bf4b38118409042351f92ea98174a1",
+    "20261004170806_community_collaborator_projection_privacy_v1.sql": "46733b502e03f91636eb78506353f17901821f54b3208d32469f8710de4ef4d1",
+    "20261004171137_cloud_sync_authoritative_consent_boundary_v1.sql": "4af4064b46df3c3c34de5103d2eda0b798848cce6f16d608237e63a521219b59",
+    "20261004173646_ai_consent_receipt_completion_order_v1.sql": "7cf164cecd7acc4cbc3af4c8ab0f0081fc37eec0d4c55d6f5f444c07d7bf90c1",
+    "20261004175339_community_hidden_posts_null_limit_guard_v1.sql": "9ac44b43f5069471cd12d4e8efb67c3019975afe04785fda8bb136ade5dc9ecd",
+    "20261007130000_bil08_community_profile_activity_v1.sql": "a881cbd06c5b08813b9d02ab38162112169f7edddb4132644423ac53fda8706e",
+    "20261011193000_community_review_revision_v2.sql": "3b226e77790319bd716f6963f4cc455529a6e3c5945ef1edc9794d8fdc2d4a85",
+    "20261011211500_admin_authority_transaction_lock.sql": "e10b82d4b2abbfab9f3c558be344cc20b18e4ca890cf62851d0e3e05b1a6c93d",
+    "20261012052335_cloud_nutrition_goals_restore_v2.sql": "ccacdcef47bf2ff0e3d438826da6fc285015c4554e157834bdea052b5ee73966",
+    "20261012202029_admin_credit_authority_transaction_lock.sql": "a53858dfac88c3e5ba7dd311608b5a1832602c26d0fd25afcf17e12757cbf402",
+    "20261012204610_boost_refund_tombstone_service_read.sql": "045a80617915ddc4f6b36a460925bedca36c1c950f96b721d835bd5af369a267",
+    "20261013062209_community_message_delivery_v2.sql": "321b00a6f5b483c6ae555911c1153c4174fe78a2b4ff49d15c7c10487502a00d",
+    "20261013062221_community_safety_report_review_v1.sql": "8846b0e94d6fee14b76597c05bebb3f9239d71d0e0399127698fbaec7ef30e18",
+    "20261014100000_ai_coach_safety_reports_v1.sql": "aaad8ac351dd43983cffb7b4ad63491715c55aa3d59b490f1c32b0f30a13540f",
+    "20261014113000_community_post_review_receipts_v2.sql": "353ae56556e5f956e8210d887a523be2cb9b5c320d13a32904774d9d6a9dd183",
+    "20261015090000_restore_single_owner_administrator.sql": "4e46262ba06f8aa368c508a1f0937d28dd931f5642feeecffca943ab2a9be973",
+    "20261015090100_allow_authenticated_community_contact_guard.sql": "b01e111cc8a099d4ee93e13194a563837ae95d7e145e86503eb741b418446f03",
+    "20261015230655_restore_owner_approved_secondary_admin_identity_correction.sql": "68428113e1f6af74a6b4c6b8ff6eec4e68e6f3bd5d412d1a4ce523ed2fed569f",
+    "20261015231333_remove_legacy_store_reviewer_moderator_bootstrap.sql": "96d2af4ffb725190633882629f936a48d9a8bbe351e89eee735a2f85252474ab",
+    "20261018010609_bil07_channels_privacy_reporting_rate_guard_20261018.sql": "a55d2012585db8155c1d8e3d4c0ad8207d916cfc20446ac59f14dda89c72ce8c",
+    "20261018013620_ai_usage_actual_funding_allocation_20261018.sql": "7d541ba0072a0fa683d437b03f58566522146a8b87bbf97c9a828f4336e09900",
+    "20261018030056_community_translation_quota_20261018.sql": "3958d61f676cc6205faac9292f93b29fccfc2119c7157660516353cd8cbb40a4",
+    "20261018143000_vision_cache_replay_before_digest_reservation.sql": "15d2746a98a9640fc3e889647e9b0e4df03c77d4fda65f9cface1db36ba4a7ab",
+    "20261019040842_community_moderation_poll_batch_20261019.sql": "c6e67e93345e620b8e547ce6575312b7183d7d2af117cef20ce1a25aaa0be6b5",
+    "20261019071841_community_circle_reviewed_management_v1.sql": "abaa045f755fbfc988ba7fbb0e7eb4e873b829498dd7bbe945c2812da8ea355f",
+    "20261019073511_community_circle_owner_deletion_cleanup_v1.sql": "f8c0c8b5d626d3883e17e5f9a93d873584309dfb6a5749bf62976fc37c2c81e0",
+    "20261019075549_community_circle_storage_preflight_contract_v1.sql": "ff1d50c6facbe2151a3a10e336d1ac343e2da097e01533e26cc79d94f8abc70f",
+    "20261019075856_community_circle_multipart_preflight_contract_v1.sql": "c91a97ac4d9a90c5c4a8e39d453fa6f7532862e1ae42c27491cf8fd7c73c5205",
+    "20261019083913_community_profile_consent_guard_20261019.sql": "8787b6ce99ecadebc4e94bada2fb3bdde7ff765d1af55c310f499cbf5cdb8ec0"
+  },
+  "deployed_ledger": [
+    {
+      "version": "202608020001",
+      "name": "bil_cloud_foundation",
+      "statements_md5": "2fe551d0b3a8e7c776c53d2f0b940175"
+    },
+    {
+      "version": "202608020002",
+      "name": "bil_community_foundation",
+      "statements_md5": "b6968f6296f6b938026649287c53e710"
+    },
+    {
+      "version": "202608020003",
+      "name": "bil_commerce_foundation",
+      "statements_md5": "9c5295c02d228564a8a4f020c5bf0133"
+    },
+    {
+      "version": "202608020004",
+      "name": "bil_community_hardening",
+      "statements_md5": "85ab63a6fcd899cbf8c162bbef6d9717"
+    },
+    {
+      "version": "202608030001",
+      "name": "bil_product_review_trust",
+      "statements_md5": "5be572e41519d616139b76969f653937"
+    },
+    {
+      "version": "202608040001",
+      "name": "bil_community_release_hardening",
+      "statements_md5": "d4a51f3ee27f2d35edd3497f98e363ec"
+    },
+    {
+      "version": "202608040002",
+      "name": "bil_community_cloud_completion",
+      "statements_md5": "6a45f19da4601da18b015e20e874e58c"
+    },
+    {
+      "version": "202608040003",
+      "name": "bil_security_privacy_closure",
+      "statements_md5": "6d2613ac211f475756998ba6c4ef0995"
+    },
+    {
+      "version": "202608040004",
+      "name": "bil_store_entitlement_truth",
+      "statements_md5": "771ec1948f2cb679b362315262b2e83c"
+    },
+    {
+      "version": "202608090001",
+      "name": "bil_store_atomic_entitlement_persistence",
+      "statements_md5": "aa163858244e8d8985d7bfc3e4616439"
+    },
+    {
+      "version": "202608100001",
+      "name": "bil_pro_only_consumer_store",
+      "statements_md5": "2f29d7b0f5ec859babbfbbcc4322e8c3"
+    },
+    {
+      "version": "202608100002",
+      "name": "bil_cloud_ledger_sync",
+      "statements_md5": "2e6c5a0ff467a8ddbf05df57296073d1"
+    },
+    {
+      "version": "202608100003",
+      "name": "bil_meal_vision_quota",
+      "statements_md5": "ebcafe3e27ffae9a3d92d0f0c9eee8af"
+    },
+    {
+      "version": "202608110001",
+      "name": "bil_meal_vision_runtime_hardening",
+      "statements_md5": "2cee647e97e4e0960974a0c6dab77488"
+    },
+    {
+      "version": "202608110002",
+      "name": "bil_diary_sharing_and_support_contracts",
+      "statements_md5": "52300c5008c1973357aebceb472ccfa5"
+    },
+    {
+      "version": "202608110003",
+      "name": "bil_gemini_25_pro_pricing",
+      "statements_md5": "96f18143f4f3a624408d5144a86258f3"
+    },
+    {
+      "version": "202608110004",
+      "name": "bil_ai_coach_weekly_usage_and_boost",
+      "statements_md5": "404752f65763257cf3812ea2ec3e7135"
+    },
+    {
+      "version": "202608110005",
+      "name": "bil_ai_vision_weekly_metering",
+      "statements_md5": "8e821be6b06c628a27ee7dab3c24ae81"
+    },
+    {
+      "version": "202608110006",
+      "name": "bil_ai_vision_cache_and_nonfood_policy",
+      "statements_md5": "eba1969c5e8cccc10540c137a907db05"
+    },
+    {
+      "version": "202608110007",
+      "name": "bil_ai_voice_actual_seconds",
+      "statements_md5": "a988c7e2cc81a767c7aed6b7c7dacf78"
+    },
+    {
+      "version": "202608110008",
+      "name": "bil_ai_vision_nonfood_throttle",
+      "statements_md5": "efdcaadaf99aee190f00908d54d868dd"
+    },
+    {
+      "version": "202608110009",
+      "name": "bil_premium_barcode_gateway",
+      "statements_md5": "b6e68b308b6d2bd1b72bd607e4fff1ca"
+    },
+    {
+      "version": "202608130001",
+      "name": "bil_remote_schema_lint_repair",
+      "statements_md5": "605fcdb8f156c4771b14e44e633b60b3"
+    },
+    {
+      "version": "202608140001",
+      "name": "bil_account_deletion_idempotency",
+      "statements_md5": "9020a04dc2c4c04f83bda789b2919cbd"
+    },
+    {
+      "version": "202608140002",
+      "name": "bil_ai_agent_qa_grants",
+      "statements_md5": "52cd85ae91e3abca18582617b59ecc2a"
+    },
+    {
+      "version": "202608150003",
+      "name": "bil_community_post_owner_delete",
+      "statements_md5": "4b8c6e75472167f38ce9de18c134e356"
+    },
+    {
+      "version": "20260815225624",
+      "name": "bil_canonical_consumer_tiers",
+      "statements_md5": "6df712d3ea7e32ea30259c11a52e40f9"
+    },
+    {
+      "version": "20260815225751",
+      "name": "bil_security_definer_execute_hardening",
+      "statements_md5": "b9d4dcd881a484d33c9e803a921fe18e"
+    },
+    {
+      "version": "20260817103823",
+      "name": "bil_cloud_key_custody",
+      "statements_md5": "287fcdbe6bbac6604b1b4ebed134d834"
+    },
+    {
+      "version": "20260818163257",
+      "name": "add_play_integrity_observe_log",
+      "statements_md5": "1e2bb2c00482a79707719f1ff9ce6942"
+    },
+    {
+      "version": "20260818165223",
+      "name": "play_integrity_payload_binding",
+      "statements_md5": "a9cd2c5781945beb28b66fea60413cb3"
+    },
+    {
+      "version": "20260818165240",
+      "name": "play_integrity_payload_binding_index",
+      "statements_md5": "6f16c4ff3eead921dbd8d3b25c209f5d"
+    },
+    {
+      "version": "20260818165259",
+      "name": "play_integrity_event_action_length_hardening",
+      "statements_md5": "ba7374a4b430bb84eaec4124ad974399"
+    },
+    {
+      "version": "20260818182103",
+      "name": "play_integrity_remove_duplicate_action_constraint",
+      "statements_md5": "efac0c3885ba4f2ae4e1d0ce71d5fa65"
+    },
+    {
+      "version": "20260818182144",
+      "name": "play_integrity_payload_digest_not_null",
+      "statements_md5": "39c8fef8fbc13f3b3b74235783117f0b"
+    },
+    {
+      "version": "20260820115847",
+      "name": "ai_coach_closed_test_feedback_and_consent",
+      "statements_md5": "c0df95cdd2fd48934240855243d0e997"
+    },
+    {
+      "version": "20260820172843",
+      "name": "ai_coach_rls_and_consent_invoker",
+      "statements_md5": "6ce8d9d24133b6b91f8e5fec35ec7711"
+    },
+    {
+      "version": "20260820215019",
+      "name": "ai_coach_voice_feedback_capability",
+      "statements_md5": "63ffb9a80b4116d9e7d64ddf549d037d"
+    },
+    {
+      "version": "20260820231631",
+      "name": "ai_coach_voice_consent_service_check",
+      "statements_md5": "7f935c3530a7b8a8875b4e88a10030b0"
+    },
+    {
+      "version": "20260820232033",
+      "name": "ai_coach_voice_consent_column_access",
+      "statements_md5": "5d9b2400a2ea4c1478328df3e4a38c17"
+    },
+    {
+      "version": "20260820235144",
+      "name": "bil_coach_living_memory_and_experiments",
+      "statements_md5": "1e7728c2b3ee5cc40e21ce635a584c2f"
+    },
+    {
+      "version": "20260821052813",
+      "name": "barcode_universal_product_cache",
+      "statements_md5": "913995f8b729c7bb1835b2dcdeb262e0"
+    },
+    {
+      "version": "20260821054046",
+      "name": "community_food_live_search",
+      "statements_md5": "287a403167a780deb8425c8b8d70ecea"
+    },
+    {
+      "version": "20260821074908",
+      "name": "ai_coach_balanced_period_allowances",
+      "statements_md5": "29cc64479bbd2a7bc808a015a9832660"
+    },
+    {
+      "version": "20260821075318",
+      "name": "ai_coach_unified_credit_observatory",
+      "statements_md5": "1cd4f454472826d65bf612893b5a9304"
+    },
+    {
+      "version": "20260821080542",
+      "name": "ai_coach_unified_weekly_tokens",
+      "statements_md5": "f1cc834f580a8a3805a5577083b86fab"
+    },
+    {
+      "version": "20260821102504",
+      "name": "commerce_country_policy_and_ai_allowances",
+      "statements_md5": "04361a8f2dda8121a37fa54a8ac6cf37"
+    },
+    {
+      "version": "20260821123043",
+      "name": "ai_coach_monthly_allowance_status_and_fallback",
+      "statements_md5": "1657042654ae0d2866c4b69497d707cf"
+    },
+    {
+      "version": "20260821123129",
+      "name": "ai_coach_monthly_usage_backfill",
+      "statements_md5": "ecc463a6023e4d25058480acba4baa08"
+    },
+    {
+      "version": "20260821124334",
+      "name": "ai_trial_universal_1000_tokens",
+      "statements_md5": "195565fe0f37e737293a38f7f3cf61fe"
+    },
+    {
+      "version": "20260821124632",
+      "name": "ai_trial_fixed_period_metering",
+      "statements_md5": "2b66c9ac0765a6f085a187debc75d577"
+    },
+    {
+      "version": "20260821174122",
+      "name": "require_paid_boost_for_meal_vision",
+      "statements_md5": "79f7b5a7c937ae450a5f45992684e11b"
+    },
+    {
+      "version": "202608220001",
+      "name": "closed_test_full_premium_ai_coach",
+      "statements_md5": "85f19c4afdf22cbceefc8327dc15fbae"
+    },
+    {
+      "version": "202608220002",
+      "name": "closed_test_ai_overlay",
+      "statements_md5": "de4ffa0e8480b56ecfabd60f725b389d"
+    },
+    {
+      "version": "202608220003",
+      "name": "premium_community_friendships",
+      "statements_md5": "06b2275d1924cfb69b49b759e9959d20"
+    },
+    {
+      "version": "20260822005720",
+      "name": "closed_test_full_premium_ai_coach",
+      "statements_md5": "162fecc1bd5c76e28fe9326dfe96e426"
+    },
+    {
+      "version": "20260822010050",
+      "name": "closed_test_ai_overlay",
+      "statements_md5": "bf6af458ce64c9140857591486aa1b9c"
+    },
+    {
+      "version": "20260822063821",
+      "name": "premium_community_friendships",
+      "statements_md5": "1612160d4fecb8726a5e7887c583ea38"
+    },
+    {
+      "version": "20260822070041",
+      "name": "bil_cloud_sync_legacy_column_compatibility",
+      "statements_md5": "0451de176074874136bbeeeb5641c2f2"
+    },
+    {
+      "version": "20260822070524",
+      "name": "bil_cloud_sync_legacy_column_compatibility",
+      "statements_md5": "73ee5f0a3dd54e7387caeecdc0fa5444"
+    },
+    {
+      "version": "20260822103316",
+      "name": "bil_account_deletion_worker",
+      "statements_md5": "8344b73152671e37666a3cfb296cc707"
+    },
+    {
+      "version": "20260822134000",
+      "name": "bil_account_deletion_worker",
+      "statements_md5": "b3d5a4c62e393d970afaf20be2a2f9db"
+    },
+    {
+      "version": "20260822203050",
+      "name": "add_profile_avatar_storage_contract",
+      "statements_md5": "a935b77ccc384133a10fffeb72077a73"
+    },
+    {
+      "version": "20260822213343",
+      "name": "community_profile_discovery_rpc",
+      "statements_md5": "49608c4cb06778331e7b66b4136bf832"
+    },
+    {
+      "version": "20260822215652",
+      "name": "community_profile_discovery_indexes",
+      "statements_md5": "c08bd08021996771c4be4e6bcc4723e0"
+    },
+    {
+      "version": "20260822233000",
+      "name": "profile_avatar_storage",
+      "statements_md5": "806e37aeee54c6d062332b9c637b42b8"
+    },
+    {
+      "version": "20260823002000",
+      "name": "community_profile_discovery_rpc",
+      "statements_md5": "e2c46aded1c96ea28597925cb6f8963c"
+    },
+    {
+      "version": "20260823003000",
+      "name": "community_profile_discovery_indexes",
+      "statements_md5": "c6ce0fbeea9e3e858823ad1c144ba939"
+    },
+    {
+      "version": "20260823014911",
+      "name": "community_post_images",
+      "statements_md5": "c6d3a26e39396acb78b3320eb4ab3d44"
+    },
+    {
+      "version": "20260823230839",
+      "name": "community_post_images",
+      "statements_md5": "b2d4100a03bb9dcc643cb53f6b19cc46"
+    },
+    {
+      "version": "202608240001",
+      "name": "community_connection_identity_and_message_realtime",
+      "statements_md5": "728d59df892618508d9638455d4c1c94"
+    },
+    {
+      "version": "202608240002",
+      "name": "community_contact_exchange_policy",
+      "statements_md5": "37e9a0ef5ad2d3841dbc04f29fbcb4a2"
+    },
+    {
+      "version": "20260824015150",
+      "name": "community_connection_identity_and_message_realtime",
+      "statements_md5": "2bbdc9e6d0cb973e67586455fa75e1ba"
+    },
+    {
+      "version": "20260824015152",
+      "name": "community_contact_exchange_policy",
+      "statements_md5": "19cdbc3599ddf9b915b3f0f47f43059a"
+    },
+    {
+      "version": "20260828220000",
+      "name": "final_store_market_policy_alignment",
+      "statements_md5": "653126005cd4b4f5b148740625b30edd"
+    },
+    {
+      "version": "20260830034302",
+      "name": "disable_unsafe_account_deletion_cron",
+      "statements_md5": "e95a55e52d33f71de08d118b33de85a5"
+    },
+    {
+      "version": "20260830053817",
+      "name": "account_deletion_storage_cleanup_20260830093000",
+      "statements_md5": "36e4dae0e3a4ee81a3eb2f19896eb099"
+    },
+    {
+      "version": "20260830053941",
+      "name": "account_deletion_worker_table_grants",
+      "statements_md5": "864a0c6907ab9e4e4f817e78778204d2"
+    },
+    {
+      "version": "20260830054600",
+      "name": "account_deletion_policy_initplan",
+      "statements_md5": "c5348b29c9fb320d10a1d19f1925af61"
+    },
+    {
+      "version": "20260830054752",
+      "name": "account_deletion_dispatch_timeout",
+      "statements_md5": "5438cc36614756b1c70d5e72130a3bce"
+    },
+    {
+      "version": "20260830120109",
+      "name": "canonical_store_lifecycle_mirror_forward_20260830110000",
+      "statements_md5": "c438bec256d3961c07d1f655d2368803"
+    },
+    {
+      "version": "20260830175811",
+      "name": "restrict_ai_trials_to_ai_coach_products",
+      "statements_md5": "717e2d6b354fbc2ddf7e1638d7dd5952"
+    },
+    {
+      "version": "20260830180011",
+      "name": "canonical_store_market_pricing_policy",
+      "statements_md5": "a9055922ddfc0d2d7444e6ec2b4ac7cc"
+    },
+    {
+      "version": "20260831024716",
+      "name": "register_apple_store_products",
+      "statements_md5": "8e23e1fc7af171adca872ecc131c1805"
+    },
+    {
+      "version": "20260831074550",
+      "name": "closed_test_ai_allowance_resolution",
+      "statements_md5": "5eaa7707236ef3b5bd5cd7aa97b1e9ea"
+    },
+    {
+      "version": "20260831151527",
+      "name": "ai_coach_admin_global_individual_reset",
+      "statements_md5": "87a10de877091109060a8776dc6686d8"
+    },
+    {
+      "version": "20260831192412",
+      "name": "admin_notification_controls",
+      "statements_md5": "cd5387f04b6f9be80c69ba0f021a0728"
+    },
+    {
+      "version": "20260831192516",
+      "name": "admin_notification_audit_fk_indexes",
+      "statements_md5": "c415b162cd400250d2a0ef64d15669b4"
+    },
+    {
+      "version": "20260831194043",
+      "name": "sync_display_locale_preferences",
+      "statements_md5": "b063139e85e909eb5e47787eb76f43d3"
+    },
+    {
+      "version": "20260901000000",
+      "name": "bil_existing_cloud_key_recovery",
+      "statements_md5": "60c82df360fbbb69de0ccc578d163c2e"
+    },
+    {
+      "version": "20260901010000",
+      "name": "admin_ai_boost_gifts",
+      "statements_md5": "d3ad06f71efb33d018681b42e44e88ef"
+    },
+    {
+      "version": "20260904010000",
+      "name": "ai_coach_reset_token_grants",
+      "statements_md5": "bdca0aa2ffc70e4ddab4906a3ed05d09"
+    },
+    {
+      "version": "20260904020000",
+      "name": "register_google_store_products",
+      "statements_md5": "43bcb6117d5e365b66023cd843883201"
+    },
+    {
+      "version": "20260904030000",
+      "name": "community_post_human_moderation",
+      "statements_md5": "a480637c421fcb097ccaf52944b68429"
+    },
+    {
+      "version": "20260904040000",
+      "name": "push_delivery_idempotency",
+      "statements_md5": "37b2e0fc25acac03d2381d4b8f4b1740"
+    },
+    {
+      "version": "20260905010000",
+      "name": "mobile_integrity_jit_grants",
+      "statements_md5": "4f8d977e3a301736ce32530710a9275d"
+    },
+    {
+      "version": "20260905143000",
+      "name": "apple_sign_in_token_lifecycle",
+      "statements_md5": "130354b37f9c718796c3c9d75e5aa440"
+    },
+    {
+      "version": "20260905160000",
+      "name": "admin_community_access_control",
+      "statements_md5": "974b7171cabaffb1475bd99f24aaf81f"
+    },
+    {
+      "version": "20260905160100",
+      "name": "fix_community_admin_coalesce",
+      "statements_md5": "6eb1ddcde5fd393dfa3b3a5c83abf0f1"
+    },
+    {
+      "version": "20260905160200",
+      "name": "fix_community_suspend_uuid_aggregate",
+      "statements_md5": "9664e4b2901c17dfc162868d82dff1a2"
+    },
+    {
+      "version": "20260905170000",
+      "name": "owner_store_market_policy_nigeria_alignment",
+      "statements_md5": "b5f321376f8fef48f39dfc76143a8183"
+    },
+    {
+      "version": "20260906100000",
+      "name": "community_moderation_reviewer_and_message_privacy",
+      "statements_md5": "20523395fc65156e60b0b1b696758518"
+    },
+    {
+      "version": "20260906110000",
+      "name": "admin_community_friendship_access",
+      "statements_md5": "6878f8a069f3f971aed45654bb1a6ce3"
+    },
+    {
+      "version": "20260906120000",
+      "name": "owner_approved_second_administrator",
+      "statements_md5": "885a1a0854c3f1c8a6b52541be36c267"
+    },
+    {
+      "version": "20260907010000",
+      "name": "bil_backfill_community_food_live_search",
+      "statements_md5": "ae18dbac0b03642cd007186ce8462713"
+    },
+    {
+      "version": "20260908013800",
+      "name": "bil_community_social_v2",
+      "statements_md5": "0dda01ce48c0f10b369441231ad47a45"
+    },
+    {
+      "version": "20260908032057",
+      "name": "community_policy_v1_activation",
+      "statements_md5": "ea486a77f39d26d08c2c472955036222"
+    },
+    {
+      "version": "20260908032453",
+      "name": "community_message_block_visibility_hardening",
+      "statements_md5": "90c2a1e1ffaefb4b98b22a0fd66551f3"
+    },
+    {
+      "version": "20260908032558",
+      "name": "community_block_pair_uuid_lock_fix",
+      "statements_md5": "7569d2aa39782725775d75cfdc9cbd4e"
+    },
+    {
+      "version": "20260908132433",
+      "name": "community_policy_client_status_rpc",
+      "statements_md5": "5ce9635ab29b598f057e358f237a0064"
+    },
+    {
+      "version": "20260908141133",
+      "name": "harden_public_default_table_privileges",
+      "statements_md5": "17b774c1860e3c2c7987250623e127ac"
+    },
+    {
+      "version": "20260908175000",
+      "name": "community_policy_storage_upload_guard",
+      "statements_md5": "14c132814f5694ae4d85d4269411c810"
+    },
+    {
+      "version": "20260908180500",
+      "name": "community_policy_version_immutability",
+      "statements_md5": "4990866e67d352dc6927086a67f72515"
+    },
+    {
+      "version": "20260908181500",
+      "name": "community_policy_ledger_postconditions",
+      "statements_md5": "67468eae1ab38b8b053776dd0d89d05e"
+    },
+    {
+      "version": "20260908181600",
+      "name": "harden_rate_limit_contract",
+      "statements_md5": "2d9940d573a8bb1140d699eab37aaf2d"
+    },
+    {
+      "version": "20260908181700",
+      "name": "community_social_saves_and_public_codes",
+      "statements_md5": "b72e3ddbb2c63cd3c60c334ab9c7f6b6"
+    },
+    {
+      "version": "20260908181800",
+      "name": "backend_function_lint_closure",
+      "statements_md5": "b019bb05961e18c1e7c4aed204f7360b"
+    },
+    {
+      "version": "20260908181900",
+      "name": "community_social_post_authors_v2",
+      "statements_md5": "e4f9b26e163b4ea28823ce34ff2c6efd"
+    },
+    {
+      "version": "20260908182000",
+      "name": "community_social_post_authors_volatility",
+      "statements_md5": "4860970719d14f1640b783b02e9f9d72"
+    },
+    {
+      "version": "20260908182100",
+      "name": "community_social_handle_backfill_and_reply_visibility",
+      "statements_md5": "e24171c87dd831e5d762038b9131b485"
+    },
+    {
+      "version": "20260908182200",
+      "name": "harden_vision_settlement_execution",
+      "statements_md5": "0414c9ee6124173e6ab39af2d6c870dc"
+    },
+    {
+      "version": "20260908182300",
+      "name": "harden_shared_diary_read_access",
+      "statements_md5": "15113f03f618b75269742e3bb1225cde"
+    },
+    {
+      "version": "20260908182400",
+      "name": "harden_friendship_write_contract",
+      "statements_md5": "0816fb222aa3c183fe498a5244610ec7"
+    },
+    {
+      "version": "20260908235044",
+      "name": "harden_legacy_community_writes_and_reports",
+      "statements_md5": "6f2bcd6056e220ccf71d73292d0a938e"
+    },
+    {
+      "version": "20260910014118",
+      "name": "admin_subscription_grants",
+      "statements_md5": "7013b7667a75e4c99141f502a2abc191"
+    },
+    {
+      "version": "20260910035353",
+      "name": "ai_coach_reset_balance_top_up",
+      "statements_md5": "3ace4f12dacecf8af660ca9513eb2c47"
+    },
+    {
+      "version": "20260910090403",
+      "name": "community_and_friendships_free",
+      "statements_md5": "e97566fdd881c45a460ad91ff86de57f"
+    },
+    {
+      "version": "20260914101500",
+      "name": "align_ai_boost_product_id_with_storekit",
+      "statements_md5": "bb681037b8150a79fa31a5cf8221955b"
+    },
+    {
+      "version": "20260915190000",
+      "name": "bil_gemini_37_flash_pricing",
+      "statements_md5": "92d568d2b0c35c6160ca3be60b538930"
+    },
+    {
+      "version": "20260916103000",
+      "name": "retryable_store_notification_leases",
+      "statements_md5": "f150b46fd8b70b33d283ec874cca1436"
+    },
+    {
+      "version": "20260916104000",
+      "name": "verified_boost_refund_ledger",
+      "statements_md5": "bd53c3cd67577fb0a046bd7495d6099f"
+    },
+    {
+      "version": "20260916105000",
+      "name": "canonical_trial_and_terminal_store_persistence",
+      "statements_md5": "e656dbba610645b58378e0f38c7ec166"
+    },
+    {
+      "version": "20260916106000",
+      "name": "order_verified_store_snapshots",
+      "statements_md5": "44528c5315dc77281757ba10e024a008"
+    },
+    {
+      "version": "20260917190000",
+      "name": "store_notification_error_diagnostics",
+      "statements_md5": "5aa098e4630ebd9e4e90e5a151d4c5e3"
+    },
+    {
+      "version": "20260918120000",
+      "name": "meal_vision_uses_shared_ai_coach_tokens",
+      "statements_md5": "be282ced0e0b6df5379a5caa44c6689f"
+    },
+    {
+      "version": "20260919090000",
+      "name": "fix_community_post_owner_delete_policy",
+      "statements_md5": "3474d5796233c35e1a97c91e5105f153"
+    },
+    {
+      "version": "20260920034051",
+      "name": "store_server_rpc_boundaries",
+      "statements_md5": "32735cb6b5d3b598c4fbfee772c964ac"
+    },
+    {
+      "version": "20260923090909",
+      "name": "google_purchase_ownership_lineage",
+      "statements_md5": "4ef4c4a9386dbd8b9495b2d30fa01ece"
+    },
+    {
+      "version": "202609240001",
+      "name": "apple_ai_consent_policy_enforcement",
+      "statements_md5": "db2ab2a2629bc84fc1c9793f797e38bc"
+    },
+    {
+      "version": "20260924071037",
+      "name": "community_current_build_backend_repairs",
+      "statements_md5": "c73ab042d2b355584d10bde0c13a7bae"
+    },
+    {
+      "version": "20260924090000",
+      "name": "push_stale_backlog_quarantine",
+      "statements_md5": "8ae22d6fd5e866c24ffa9ebc7a4ca977"
+    },
+    {
+      "version": "20260924093000",
+      "name": "community_published_post_moderator_removal",
+      "statements_md5": "9df9e7a21c202a7b41acfdc9f664c2ad"
+    },
+    {
+      "version": "20260924200207",
+      "name": "allow_meal_vision_ai_consent",
+      "statements_md5": "321de2d03023be7d0645c1dbaa6d4093"
+    },
+    {
+      "version": "20260924223453",
+      "name": "community_admin_moderation_visibility",
+      "statements_md5": "64d01a7e0c935de9362e7e7864bacdfb"
+    },
+    {
+      "version": "20260925005354",
+      "name": "final_hardening_cloud_consent_community_authority",
+      "statements_md5": "78fb605c77396ab76dfcbf48c96cadc6"
+    },
+    {
+      "version": "20260925013813",
+      "name": "community_push_dispatch_scheduler",
+      "statements_md5": "fcc152b92c3623b8d0e5ce2b92eabdb1"
+    },
+    {
+      "version": "20260925050000",
+      "name": "community_push_dispatch_scheduler",
+      "statements_md5": "80e9a42c932c3e52f6c12899e58f72cb"
+    },
+    {
+      "version": "20260925130000",
+      "name": "push_dispatch_service_role_read",
+      "statements_md5": "edbca63fd84bb9e58a4b88aaa9c6ff64"
+    },
+    {
+      "version": "20260927064211",
+      "name": "audit_block_and_ai_period_hardening",
+      "statements_md5": "198611eb645f11e11238c49fb23524a2"
+    },
+    {
+      "version": "20260927064227",
+      "name": "cloud_sync_cursor_and_page_hardening",
+      "statements_md5": "ef37c0b2d42f6e2f34634acabb58d444"
+    },
+    {
+      "version": "20260927082755",
+      "name": "ai_monthly_event_period_reconciliation",
+      "statements_md5": "b5c42275dc69c7b07450f553326a08d4"
+    },
+    {
+      "version": "20260927140000",
+      "name": "store_reconciliation_revision_guard",
+      "statements_md5": "8f6f7b0cfbf14eee309f0acabb3bfe66"
+    },
+    {
+      "version": "20260927141000",
+      "name": "ai_event_period_and_status_lock",
+      "statements_md5": "0de425edcf0ff08d071f6c3b89e50192"
+    },
+    {
+      "version": "20260927150000",
+      "name": "cross_store_subscription_snapshots",
+      "statements_md5": "ab7dd1fe8c445c25f7d7de0be68f8fe3"
+    },
+    {
+      "version": "20260927151000",
+      "name": "apple_notification_generation_guard",
+      "statements_md5": "e7db64a0a28f000443ab5fc14fd242f0"
+    },
+    {
+      "version": "20260927172703",
+      "name": "apple_store_lineage_ordering_guard",
+      "statements_md5": "5ffada7c42332601d6c44ef9e0b7db5e"
+    },
+    {
+      "version": "20260928112237",
+      "name": "seed_sfda_arabic_food_catalog",
+      "statements_md5": "530a827802d4ee9cab4775d171cfa9a3"
+    },
+    {
+      "version": "20260928115903",
+      "name": "seed_verified_arabic_regional_foods",
+      "statements_md5": "6367a20e44473d507687384161d38a14"
+    },
+    {
+      "version": "20260928121235",
+      "name": "seed_egypt_nni_arabic_food_catalog",
+      "statements_md5": "649aed97f031b301f007cf1569a1649d"
+    },
+    {
+      "version": "20260928132118",
+      "name": "seed_multilingual_global_food_catalog",
+      "statements_md5": "e463fffe4fd8a80af606695662346d1d"
+    },
+    {
+      "version": "20260928133938",
+      "name": "seed_bil_reference_food_items",
+      "statements_md5": "e90e596d0d2c72ae3c3ef6647bf71856"
+    },
+    {
+      "version": "20260928144345",
+      "name": "add_food_translation_cache",
+      "statements_md5": "0b6afa3ea0f43909b72bd81736696998"
+    },
+    {
+      "version": "20260929050616",
+      "name": "fix_community_qr_friend_card_visibility",
+      "statements_md5": "cfd733ec54ea9898736dbdd7bfb0dd52"
+    },
+    {
+      "version": "20260929074359",
+      "name": "community_attention_and_visible_reads",
+      "statements_md5": "9c6cf1dffb9f63c5d2849860ed394f0f"
+    },
+    {
+      "version": "20260930014110",
+      "name": "bil_rls_auth_initplan_optimization",
+      "statements_md5": "10663ec36642726b98ba89adf3ef9c01"
+    },
+    {
+      "version": "20260930015855",
+      "name": "bil_foreign_key_index_hardening",
+      "statements_md5": "af691c653399f1968ea87d076bb6deaf"
+    },
+    {
+      "version": "20261001031127",
+      "name": "harden_community_helper_rpc_scope",
+      "statements_md5": "29113beb88bbfd50fab75952f2fa831f"
+    },
+    {
+      "version": "20261001032338",
+      "name": "deduplicate_rls_write_policies",
+      "statements_md5": "31e2c0f61a88b8f337b86cf27eeb4d77"
+    },
+    {
+      "version": "20261002133802",
+      "name": "fix_friend_request_visibility_without_public_profile_20261002",
+      "statements_md5": "0b4d982fbbc12ecaba3f2ec9714fc4d4"
+    },
+    {
+      "version": "20261003011205",
+      "name": "community_profileless_friend_request_e2e_20261003",
+      "statements_md5": "d8d0ae6c4c23c5c6eb21781c30d9a1a8"
+    },
+    {
+      "version": "20261003014554",
+      "name": "community_friend_acceptance_attention_push_v2",
+      "statements_md5": "a16b0cc98ad233baa2b2d8e7539e1d90"
+    },
+    {
+      "version": "20261003025229",
+      "name": "community_notification_fk_indexes",
+      "statements_md5": "0878331bad74957b7bc69527a270ab80"
+    },
+    {
+      "version": "20261003030031",
+      "name": "community_gold_ledger_foundation_v1",
+      "statements_md5": "9c923a48e27a510f9f423bb378146f87"
+    },
+    {
+      "version": "20261003030729",
+      "name": "community_reputation_xp_foundation_v1",
+      "statements_md5": "ce1606e82d23f415474db863d5e65019"
+    },
+    {
+      "version": "20261003031504",
+      "name": "community_activity_v2_compatibility_foundation",
+      "statements_md5": "f25dc5ee36eba06e7f72b0192327ad4e"
+    },
+    {
+      "version": "20261003035646",
+      "name": "community_quest_reward_engine_v1",
+      "statements_md5": "d5ffbe0382d43c865393ada983ef7fa2"
+    },
+    {
+      "version": "20261003064812",
+      "name": "community_profile_projection_privacy_v1",
+      "statements_md5": "7e8e172d8d31a38f1cf555bfcfae533e"
+    },
+    {
+      "version": "20261003080333",
+      "name": "community_referral_attribution_foundation_v1",
+      "statements_md5": "c7f123156ea83fa4efde0d7ccf4c7a6a"
+    },
+    {
+      "version": "20261003080904",
+      "name": "community_referral_relationship_acceptance_v1",
+      "statements_md5": "d84d1950fa9fda574001b7139da3ba68"
+    },
+    {
+      "version": "20261003085331",
+      "name": "community_topics_foundation_v1",
+      "statements_md5": "69aa327e739cf7b5c08521ec75a32cf4"
+    },
+    {
+      "version": "20261003091136",
+      "name": "community_circles_foundation_v1",
+      "statements_md5": "4ef9b626a1b47a0b59b423c3a09147b9"
+    },
+    {
+      "version": "20261003093710",
+      "name": "community_feed_modes_v1",
+      "statements_md5": "d63e7a712885c18b8d8fece58bc3fbc3"
+    },
+    {
+      "version": "20261003094723",
+      "name": "community_social_activity_emitters_v1",
+      "statements_md5": "ece9169f4c4941833c0d3a536f58b6a1"
+    },
+    {
+      "version": "20261003095405",
+      "name": "community_polls_foundation_v1",
+      "statements_md5": "c288a3749703594ae3f70ca461bdc8a6"
+    },
+    {
+      "version": "20261003095543",
+      "name": "community_poll_votes_voter_index_v1",
+      "statements_md5": "68fe44153a1f76720bec89fb1a9a4df2"
+    },
+    {
+      "version": "20261003095854",
+      "name": "community_poll_batch_read_v1",
+      "statements_md5": "c73bff83c142f68b003f90b2cd873567"
+    },
+    {
+      "version": "20261003103409",
+      "name": "community_multi_image_foundation_v1",
+      "statements_md5": "3bd68ecd872d1e3a14c292e3d8f5d873"
+    },
+    {
+      "version": "20261003104726",
+      "name": "community_post_location_foundation_v1",
+      "statements_md5": "62ee7d265ec2a37adecd02f250ae5152"
+    },
+    {
+      "version": "20261003105229",
+      "name": "community_post_context_mentions_v1",
+      "statements_md5": "7010ec37ac33d74d126df9b78857a653"
+    },
+    {
+      "version": "20261003105654",
+      "name": "community_profile_location_projection_v1",
+      "statements_md5": "11b088b316cb63ad2b959c5b4aa2f573"
+    },
+    {
+      "version": "20261003110122",
+      "name": "community_post_context_location_bridge_v1",
+      "statements_md5": "5d6165b5f3ed2b9f420b1459ca5471cf"
+    },
+    {
+      "version": "20261003121612",
+      "name": "community_comment_threads_v3",
+      "statements_md5": "5282b524d764c7f393b3db6a9bc477b4"
+    },
+    {
+      "version": "20261003141000",
+      "name": "community_mention_rate_limit_contract_v1",
+      "statements_md5": "c3bb38041c34b18c44484f51962648d1"
+    },
+    {
+      "version": "20261004040500",
+      "name": "community_reference_profile_creator_v1",
+      "statements_md5": "6f2cc40273cf93940e4948ec735d6d8e"
+    },
+    {
+      "version": "20261004040503",
+      "name": "community_reference_composer_persistence_v1",
+      "statements_md5": "d2399094fd5b93a261120d18a4e85bc2"
+    },
+    {
+      "version": "20261004040505",
+      "name": "community_draft_work_in_progress_v1",
+      "statements_md5": "c0f844ea2e4fe373520728f71094aad1"
+    },
+    {
+      "version": "20261004040507",
+      "name": "community_reference_collaboration_activity_v1",
+      "statements_md5": "87e321e925f7393ee58fdd8ee7289ff6"
+    },
+    {
+      "version": "20261004040509",
+      "name": "community_comment_membership_tier_v1",
+      "statements_md5": "5cd1e525daa65c9e1982a70e77582c54"
+    },
+    {
+      "version": "20261004040516",
+      "name": "community_profile_cover_v1",
+      "statements_md5": "6b5c54fdee191f20204ec42e3de31b7c"
+    },
+    {
+      "version": "20261004040518",
+      "name": "community_feed_comment_previews_v1",
+      "statements_md5": "b127444103c0d5148c22e8aa28ee9727"
+    },
+    {
+      "version": "20261004130400",
+      "name": "community_prebuild_privacy_write_hardening_v1",
+      "statements_md5": "f9615b26e78a6312e5330280ceae2845"
+    },
+    {
+      "version": "20261004130406",
+      "name": "community_atomic_publish_operation_v1",
+      "statements_md5": "f6b0a48ab7de18e8f7f7802314d51845"
+    },
+    {
+      "version": "20261004130413",
+      "name": "notification_delivery_preferences_authority_v1",
+      "statements_md5": "b7e9293f8420130cff7e60b213f9cf0d"
+    },
+    {
+      "version": "20261004165024",
+      "name": "community_draft_body_whitespace_contract_v1",
+      "statements_md5": "36bf673f611e2402227f3ab19e51f592"
+    },
+    {
+      "version": "20261004181338",
+      "name": "prebuild_remaining_fk_lookup_indexes_v1",
+      "statements_md5": "2cef2d546d92dbd5169a8e9598292543"
+    },
+    {
+      "version": "20261004181339",
+      "name": "community_collaborator_projection_privacy_v1",
+      "statements_md5": "1c312c5138c5515781a5d322f9ae01f0"
+    },
+    {
+      "version": "20261004181340",
+      "name": "cloud_sync_authoritative_consent_boundary_v1",
+      "statements_md5": "085b6f765ecc73d7286bd16d9f44a31c"
+    },
+    {
+      "version": "20261004181416",
+      "name": "ai_consent_receipt_completion_order_v1",
+      "statements_md5": "a27663e3e306df4456a43feea2a170c5"
+    },
+    {
+      "version": "20261004181419",
+      "name": "community_hidden_posts_null_limit_guard_v1",
+      "statements_md5": "6d4596ad1e528c2a6ef0908e1d7f1583"
+    },
+    {
+      "version": "20261004231206",
+      "name": "store_reconciliation_scheduler_v1",
+      "statements_md5": "eea1592aa80ac3e3597d5019d714cc28"
+    },
+    {
+      "version": "20261004232318",
+      "name": "store_reconciliation_scheduler_rls_v1",
+      "statements_md5": "d711157ba739b0d92b8c51c726a6cc02"
+    },
+    {
+      "version": "20261005074959",
+      "name": "community_post_receipts_and_earn_v1",
+      "statements_md5": "e0e0e8c4bd2d682ef7088fe51bae9997"
+    },
+    {
+      "version": "20261005081906",
+      "name": "community_post_push_resume_v1",
+      "statements_md5": "4439df238f3ab4916ad1ecc07780768d"
+    },
+    {
+      "version": "20261005085915",
+      "name": "community_review_queue_alignment_v1",
+      "statements_md5": "60090f60e79e75b953d5275918e0448a"
+    },
+    {
+      "version": "20261005090328",
+      "name": "community_reward_receipt_seen_sync_v1",
+      "statements_md5": "e8e853af85baa45ba7e3ab0995791388"
+    },
+    {
+      "version": "20261015224954",
+      "name": "bil08_community_profile_activity_v1",
+      "statements_md5": "b62fe383dfa15ec4de46e1662f423ed1"
+    },
+    {
+      "version": "20261015225026",
+      "name": "community_review_revision_v2",
+      "statements_md5": "65bd640c8c12bbeb90d9ee3857ce6c95"
+    },
+    {
+      "version": "20261015225102",
+      "name": "admin_authority_transaction_lock",
+      "statements_md5": "026cdfeec92eb3f13260d155d4f4fe53"
+    },
+    {
+      "version": "20261015225104",
+      "name": "cloud_nutrition_goals_restore_v2",
+      "statements_md5": "2f2984799cc7a840e781a23e1c3d0a90"
+    },
+    {
+      "version": "20261015225106",
+      "name": "admin_credit_authority_transaction_lock",
+      "statements_md5": "80ec4ed946d7b675ff19b4aa68851709"
+    },
+    {
+      "version": "20261015225109",
+      "name": "boost_refund_tombstone_service_read",
+      "statements_md5": "8ee364691ba675fda7d299c34400869d"
+    },
+    {
+      "version": "20261015225110",
+      "name": "community_message_delivery_v2",
+      "statements_md5": "a091cc4a8a916b84b0892086b131f471"
+    },
+    {
+      "version": "20261015225113",
+      "name": "community_safety_report_review_v1",
+      "statements_md5": "e1a1311c3be09cb27230d8de04905cf2"
+    },
+    {
+      "version": "20261015225114",
+      "name": "ai_coach_safety_reports_v1",
+      "statements_md5": "de528909ca2ab3fc2867a67633438f99"
+    },
+    {
+      "version": "20261015225118",
+      "name": "restore_single_owner_administrator",
+      "statements_md5": "11de029cd07280aec7dfa158b6430bf7"
+    },
+    {
+      "version": "20261015225121",
+      "name": "allow_authenticated_community_contact_guard",
+      "statements_md5": "f13a32bf356615e79c5c36fd67a900cb"
+    },
+    {
+      "version": "20261015231142",
+      "name": "restore_owner_approved_secondary_admin_identity_correction",
+      "statements_md5": "88caee760a736e62ec93bbeed540bab6"
+    },
+    {
+      "version": "20261015231707",
+      "name": "remove_legacy_store_reviewer_moderator_bootstrap",
+      "statements_md5": "0f0f89e5abc6e59d3fd565d12c98fffa"
+    },
+    {
+      "version": "20261015234009",
+      "name": "community_post_review_receipts_v2_compat",
+      "statements_md5": "ae1ac522936a0ce0179f86602b377a72"
+    },
+    {
+      "version": "20261017100059",
+      "name": "admin_web_readonly_grant_listing_volatility_fix_20261017",
+      "statements_md5": "3eb65c6231738151f81ffade186e63f3"
+    },
+    {
+      "version": "20261017102606",
+      "name": "bil_admin_web_readonly_audit_history_20261017",
+      "statements_md5": "2cd5cdd77ca9663dca8e6696d6069a0b"
+    },
+    {
+      "version": "20261017110131",
+      "name": "bil_admin_web_stepup_atomic_finance_20261017",
+      "statements_md5": "e7665901f2756271d217a7010f031715"
+    },
+    {
+      "version": "20261017111518",
+      "name": "bil_admin_web_readonly_receipt_reconciliation_20261017",
+      "statements_md5": "7d1f77b1ff04f23f831f11fea070a2d4"
+    },
+    {
+      "version": "20261018002935",
+      "name": "bil_admin_reporter_contacts_v1_20261018",
+      "statements_md5": "33f8de35591bb9fe205af2e734e98d7f"
+    },
+    {
+      "version": "20261018010609",
+      "name": "bil07_channels_privacy_reporting_rate_guard_20261018",
+      "statements_md5": "cef064588ec62d64dec5bf3a3f4aae00"
+    },
+    {
+      "version": "20261018013620",
+      "name": "ai_usage_actual_funding_allocation_20261018",
+      "statements_md5": "2c2d39c0a343aefd682db7be937fbbbd"
+    },
+    {
+      "version": "20261018022922",
+      "name": "bil_admin_owner_scoped_review_read_context_v1_20261018",
+      "statements_md5": "450fa52a6b465d7381aae6c28d4dc510"
+    },
+    {
+      "version": "20261018030056",
+      "name": "community_translation_quota_20261018",
+      "statements_md5": "6facab23b743a7d42bd6975e862bfa61"
+    },
+    {
+      "version": "20261018032918",
+      "name": "bil_admin_web_finance_audit_context_v2",
+      "statements_md5": "e9cc9ba004a5fffc93ee9fd528fb0622"
+    },
+    {
+      "version": "20261018140731",
+      "name": "vision_cache_replay_before_digest_reservation",
+      "statements_md5": "33532e0df01bde4acf0b40601a19a9a7"
+    },
+    {
+      "version": "20261019040842",
+      "name": "community_moderation_poll_batch_20261019",
+      "statements_md5": "be743730a4a9d07d7782da4e88d83e29"
+    },
+    {
+      "version": "20261019045605",
+      "name": "community_report_locked_manifest_20261019",
+      "statements_md5": "18a5bee2893d7c8f219a6e9e989ae70f"
+    },
+    {
+      "version": "20261019063912",
+      "name": "community_comment_report_contacts_20261019",
+      "statements_md5": "bbdec53971277e7d6b68eda02241cd80"
+    },
+    {
+      "version": "20261019071841",
+      "name": "community_circle_reviewed_management_v1",
+      "statements_md5": "261366a4c7177016601268bd665d00dd"
+    },
+    {
+      "version": "20261019073511",
+      "name": "community_circle_owner_deletion_cleanup_v1",
+      "statements_md5": "c06e50eceb9f7473a2f71cb8158e5529"
+    },
+    {
+      "version": "20261019075549",
+      "name": "community_circle_storage_preflight_contract_v1",
+      "statements_md5": "4acd320caed6cb1bd39e73439614398f"
+    },
+    {
+      "version": "20261019075856",
+      "name": "community_circle_multipart_preflight_contract_v1",
+      "statements_md5": "d132012e3176e9d59fec7388ed225839"
+    },
+    {
+      "version": "20261019083913",
+      "name": "community_profile_consent_guard_20261019",
+      "statements_md5": "175f6c1cfd7c38e6a5752d7eb5531faa"
+    }
+  ],
+  "verified_bugfix_migration": {
+    "local_file": "20261018143000_vision_cache_replay_before_digest_reservation.sql",
+    "deployed_version": "20261018140731",
+    "reason": "Reproduced duplicate-key error on exact image cache replay; actual PGlite constraint and live provider checks retained. Local comment correction documents current shared meter; executable function logic is unchanged."
+  },
+  "reviewed_additions_20261019": {
+    "migration_versions": [
+      "20261019040842",
+      "20261019045605",
+      "20261019063912",
+      "20261019071841",
+      "20261019073511",
+      "20261019075549",
+      "20261019075856",
+      "20261019083913"
+    ],
+    "source_match": "LF normalized body comparison; six app and two independent admin migrations",
+    "evidence_scope": "DDL and ledger only; historical source IDs above remain historical, not current uncommitted candidate certification"
+  }
+}

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import 'dart:async';
 
@@ -90,7 +91,7 @@ class _QuickAddMealCameraPageState
   Widget build(BuildContext context) => const Scaffold(
     body: Center(
       key: Key('quick-add-camera-launching'),
-      child: CircularProgressIndicator(),
+      child: BilFeatureWelcomeStatus(color: Color(0xFF697178)),
     ),
   );
 }

@@ -4,10 +4,9 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 
 const legalPublicationStatus =
-    'HISTORICAL_LIVE_MATCH_2026_10_04_CURRENT_LOCAL_ASSET_CHANGED_'
-    'REVERIFY_BEFORE_RELEASE_LEGAL_APPROVAL_NOT_CLAIMED';
+    'LIVE_HTTP_CONTENT_MATCH_2026_10_19_LEGAL_APPROVAL_NOT_CLAIMED';
 const legalPublicationEvidencePath =
-    'docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-10-04.json';
+    'docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-10-19.json';
 
 const _requiredContentAssertions = <String, String>{
   'privacy_en_adults_only': 'BIL is intended only for adults aged 18 or older',

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
@@ -92,6 +93,7 @@ class FoodLogPage extends ConsumerStatefulWidget {
 
 class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   final search = TextEditingController();
+  final _searchGuideIcon = GlobalKey();
   String mealType = 'breakfast';
   Timer? _searchDebounce;
   StreamSubscription<List<Food>>? _progressiveSearch;
@@ -322,7 +324,9 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         ),
       ),
       body: foods.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          child: BilFeatureWelcomeStatus(color: Color(0xFF697178)),
+        ),
         error: (_, _) => Center(
           child: FilledButton.icon(
             onPressed: () => ref.invalidate(foodsProvider),
@@ -338,7 +342,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircularProgressIndicator(),
+                    const BilFeatureWelcomeStatus(color: Color(0xFF697178)),
                     const SizedBox(height: 16),
                     Text(
                       '${_t(context, 'Analyze a meal photo')}…',
@@ -452,11 +456,16 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       children: [
         FirstUseTargetGuide(
           guide: searchGuide,
+          focusTarget: _searchGuideIcon,
           child: SearchBar(
             key: const Key('food-log-search'),
             controller: search,
             hintText: _t(context, _searchHintKey()),
-            leading: Icon(Icons.search_rounded, color: scheme.primary),
+            leading: Icon(
+              key: _searchGuideIcon,
+              Icons.search_rounded,
+              color: scheme.primary,
+            ),
             elevation: const WidgetStatePropertyAll(0),
             backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
             side: WidgetStatePropertyAll(
@@ -489,6 +498,9 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         ),
         const SizedBox(height: 10),
         FirstUseTargetGuide(
+          onTargetActivated: () {
+            if (_postSaveGuide) setState(() => _postSaveGuide = false);
+          },
           guide:
               _postSaveGuide &&
                   _postSaveOwner ==

@@ -1,3 +1,4 @@
+import '../../../shared/media/private_image_pixels.dart';
 import 'dart:convert';
 
 import 'package:file_selector/file_selector.dart';
@@ -47,7 +48,8 @@ Future<_PreparedProfilePhoto> _prepareProfilePhoto(
   Uint8List bytes, {
   required String contentType,
 }) async {
-  if (bytes.lengthInBytes <= profilePhotoCompressionTargetBytes) {
+  if (bytes.lengthInBytes <= profilePhotoCompressionTargetBytes &&
+      imageBytesAreMetadataFree(bytes)) {
     if (!await compute(isDecodableProfilePhoto, bytes)) {
       throw const ProfilePhotoCompressionException();
     }
@@ -62,9 +64,17 @@ Future<_PreparedProfilePhoto> _prepareProfilePhoto(
 /// the target is chosen. A valid but unusually detailed image still returns
 /// its smallest candidate rather than blocking the member from saving it.
 Uint8List _compressProfilePhoto(Uint8List source) {
-  final decoded = image.decodeImage(source);
+  image.Image? decoded;
+  try {
+    decoded = image.decodeImage(source);
+  } on Object {
+    throw const ProfilePhotoCompressionException();
+  }
   if (decoded == null) throw const ProfilePhotoCompressionException();
-  final normalized = image.bakeOrientation(decoded);
+  final normalized = privateImagePixels(
+    image.bakeOrientation(decoded),
+    flattenAlpha: true,
+  );
   final longest = normalized.width > normalized.height
       ? normalized.width
       : normalized.height;
@@ -286,6 +296,37 @@ class ProfilePhotoService {
     if (expectedAuthenticatedOwnerId == null) {
       return ProfilePhotoSaveResult(bytes: bytes, cloudSynced: false);
     }
+    if (!imageBytesAreMetadataFree(bytes)) {
+      final prepared = await _prepareProfilePhoto(
+        bytes,
+        contentType: _contentTypeForStoredBytes(bytes),
+      );
+      _requireActiveOwner(isCurrentOwner);
+      _requireUnchangedOwners(
+        expectedStorageOwnerId: expectedStorageOwnerId,
+        expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
+      );
+      bytes = prepared.bytes;
+      final retained = await _preferences.mutateIfUnchanged(
+        expected: {'profilePhoto': encoded},
+        set: {
+          'profilePhoto': base64Encode(bytes),
+          'profilePhotoPending': 'true',
+        },
+        remove: const ['profilePhotoPublicUrl'],
+        isCurrent: () =>
+            (isCurrentOwner?.call() ?? true) &&
+            _preferences.localOwnerId == expectedStorageOwnerId &&
+            _authenticatedOwnerId() == expectedAuthenticatedOwnerId,
+      );
+      // Compression yields. A newer selection must win, including its URL.
+      if (!retained) return null;
+      _requireActiveOwner(isCurrentOwner);
+      _requireUnchangedOwners(
+        expectedStorageOwnerId: expectedStorageOwnerId,
+        expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
+      );
+    }
     final cachedPublicUrl = (await _preferences.get(
       'profilePhotoPublicUrl',
     ))?.trim();
@@ -328,15 +369,24 @@ class ProfilePhotoService {
       throw const ProfilePhotoIdentityChangedException();
     }
     try {
+      final prepared = await _prepareProfilePhoto(
+        bytes,
+        contentType: contentType,
+      );
+      _requireActiveOwner(isCurrentOwner);
+      _requireUnchangedOwners(
+        expectedStorageOwnerId: expectedAuthenticatedOwnerId,
+        expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
+      );
       final path = '${user.id}/avatar';
       await client.storage
           .from('profile-avatars')
           .uploadBinary(
             path,
-            bytes,
+            prepared.bytes,
             fileOptions: FileOptions(
               upsert: true,
-              contentType: contentType,
+              contentType: prepared.contentType,
               cacheControl: '3600',
             ),
           );

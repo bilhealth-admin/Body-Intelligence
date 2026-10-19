@@ -400,9 +400,7 @@ void main() {
             findsNothing,
           );
           await capture(tester, '06-streak-$language');
-          await tester.tap(
-            find.byKey(const Key('dashboard-streak-guide-done')),
-          );
+          await tester.tap(find.byKey(const Key('daily-log-week-strip')));
           await tester.pumpAndSettle();
           expect(
             await preferences.get(firstMealStreakGuidePreferenceKey),

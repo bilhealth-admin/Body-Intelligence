@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/nutrition/services/food_presentation_localizer.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -58,6 +59,78 @@ final class _ControlledFoodSearchAuthority extends FoodRuntimeSearchAuthority {
 }
 
 void main() {
+  testWidgets('real FoodPage displays the badge beside an unknown cloud name', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final repository = FoodRepository(database);
+    await repository.addFood(
+      name: 'Synthetic specialty grain number 739',
+      category: 'grain',
+      servingSize: 100,
+      servingUnit: 'g',
+      calories: 100,
+      protein: 2,
+      carbs: 20,
+      fats: 1,
+    );
+    final food = (await repository.getFoods()).single.copyWith(
+      isCustom: false,
+      source: 'USDA FoodData Central — verified',
+    );
+    FoodPresentationLocalizer.registerTrustedRuntimeTranslation(
+      canonicalName: food.name,
+      localeTag: 'fr',
+      localizedName: 'Céréale spéciale 739',
+    );
+    addTearDown(
+      FoodPresentationLocalizer.clearTrustedRuntimeTranslationsForTesting,
+    );
+    final authority = _ControlledFoodSearchAuthority(repository);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          foodRepositoryProvider.overrideWithValue(repository),
+          foodRuntimeSearchAuthorityProvider.overrideWithValue(authority),
+          foodsProvider.overrideWith((ref) => Stream.value([food])),
+          favoriteFoodsProvider.overrideWith((ref) => Stream.value(const [])),
+          recentFoodsProvider.overrideWith((ref) => Stream.value(const [])),
+        ],
+        child: const MaterialApp(
+          locale: Locale('fr'),
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: FoodPage(embedded: true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(SearchBar), 'specialty');
+    await tester.pump(const Duration(milliseconds: 220));
+    authority.pending['specialty']!.complete(
+      FoodRuntimeSearchResult(
+        foods: [food],
+        source: FoodRuntimeSearchSource.localOnly,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Céréale spéciale 739'), findsOneWidget);
+    expect(
+      find.byKey(const Key('food-google-translation-attribution')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets(
     'embedded My foods is task-first and consolidates capture methods',
     (tester) async {

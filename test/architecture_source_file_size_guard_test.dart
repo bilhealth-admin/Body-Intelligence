@@ -46,7 +46,7 @@ void main() {
       // This admin-only surface owns one moderation lifecycle: visible/hidden
       // queues, reason capture, irreversible-removal confirmation, and restore.
       // Repository and localized copy remain in separate sources.
-      'lib/features/community/presentation/community_post_moderation_page.dart':
+      'test/support/legacy_mobile_admin/features/community/presentation/community_post_moderation_page.dart':
           725,
       // The repository mixin serializes profile search, relationship writes,
       // thread creation, and message delivery under the same owner/ABA guard;

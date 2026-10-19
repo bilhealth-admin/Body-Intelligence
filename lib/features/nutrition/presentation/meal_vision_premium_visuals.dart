@@ -367,7 +367,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                         minWidth: 28,
                         minHeight: 32,
                       ),
-                      suffixIcon: PopupMenuButton<String>(
+                      suffixIcon: bilPearlPopupMenuButton<String>(
                         tooltip: _word(context, 'Choose unit', 'اختيار الوحدة'),
                         onSelected: (unit) =>
                             _visualUpdate(() => _units[index].text = unit),

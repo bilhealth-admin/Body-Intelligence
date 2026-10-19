@@ -29,6 +29,8 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   List<CommunityMessage> _rows = const [];
   TextDirection? _composerDirection;
   bool _sending = false;
+  bool _safetyBusy = false;
+  bool _safetyBlocked = false;
   bool _confirmingReplacement = false;
   String? _sendRequestId, _sendRequestBody;
   bool _removedDelivery = false;

@@ -1,4 +1,5 @@
 import 'bil_locale_policy.dart';
+import 'runtime_copy_community_reporting.dart';
 
 /// Authored 25-locale copy for the human community-moderation workflow.
 ///
@@ -6,6 +7,8 @@ import 'bil_locale_policy.dart';
 /// missing locale or placeholder mismatch fail validation instead of silently
 /// exposing English in a shipped locale.
 abstract final class CommunityModerationRuntimeCopy {
+  static const reportingSources = CommunityReportingRuntimeCopy.sources;
+
   static const communityModeration = 'Community moderation';
   static const closeReport = 'Close report';
   static const couldNotResolveReport =
@@ -1027,6 +1030,11 @@ abstract final class CommunityModerationRuntimeCopy {
   };
 
   static String? resolve(String source, String localeTag) {
+    final reporting = CommunityReportingRuntimeCopy.resolve(
+      source,
+      _canonicalTag(localeTag),
+    );
+    if (reporting != null) return reporting;
     final supplementalIndex = supplementalSources.indexOf(source);
     if (supplementalIndex >= 0) {
       final tag = _canonicalTag(localeTag);
@@ -1051,6 +1059,7 @@ abstract final class CommunityModerationRuntimeCopy {
   }
 
   static bool get balanced =>
+      CommunityReportingRuntimeCopy.balanced &&
       supported.length == BilLocalePolicy.productionTags.length &&
       supported.containsAll(BilLocalePolicy.productionTags) &&
       BilLocalePolicy.productionTags.containsAll(supported) &&

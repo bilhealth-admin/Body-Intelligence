@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
+import 'package:body_intelligence_log/features/community/circle_management/circle_management.dart';
 import 'package:body_intelligence_log/features/community/domain/community_circles.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
@@ -37,6 +38,60 @@ void main() {
     repository = _CircleRepository(auth.client);
   });
   tearDown(() async => auth.client.dispose());
+
+  _circleTest(
+    'pending circle explains review and cannot compose, report, or load posts',
+    (tester) async {
+      var composed = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CommunityCirclePage(
+            repository: repository,
+            circle: ManagedCommunityCircle(
+              circle: _circle(
+                'pending-circle',
+                membership: CommunityCircleMembershipStatus.active,
+              ),
+              displayName: 'My pending circle',
+              description: 'Synthetic description',
+              reviewStatus: 'pending',
+            ),
+            onComposeCircle: (_) async {
+              composed++;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('community-circle-review-status')),
+        findsOneWidget,
+      );
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(find.byKey(const Key('community-circle-report')), findsNothing);
+      expect(repository.count('first'), 0);
+      expect(repository.count('counts'), 0);
+      expect(composed, 0);
+      expect(auth.requests, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  _circleTest(
+    'circle report cancellation does not submit and uses community copy',
+    (tester) async {
+      await _mountCircle(tester, repository);
+      await tester.tap(find.byKey(const Key('community-circle-report')));
+      await tester.pumpAndSettle();
+      expect(find.text('Report circle'), findsWidgets);
+      expect(find.textContaining('AI Coach'), findsNothing);
+      expect(auth.requests, isEmpty);
+      await tester.tap(find.byKey(const Key('community-report-cancel')));
+      await tester.pumpAndSettle();
+      expect(auth.requests, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   _circleTest('opening circles does not create membership or posting intent', (
     tester,

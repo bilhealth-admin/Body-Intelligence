@@ -42,7 +42,13 @@ extension _CommunityCachedFeedMethods on CommunityRepository {
     // Independent of optional enrichment. The visit owns the callback; an old
     // account or old filter can never replace this page on late completion.
     unawaited(
-      refresh()
+      CommunityOwnerOperation.runIndependentRead(
+            client: _client,
+            ownerId: owner,
+            readOwner: () => currentUserId,
+            isCurrentOwner: current,
+            action: (_) => refresh(),
+          )
           .then((page) {
             if (current()) onRefresh(page);
           })

@@ -36,6 +36,13 @@ class _ReferenceParityRepository extends CommunityRepository {
   int followCalls = 0;
   int unfollowCalls = 0;
   int viewCalls = 0;
+  final reports = <(String, String, String)>[];
+  @override
+  Future<void> report({
+    required String targetKind,
+    required String targetId,
+    required String reason,
+  }) async => reports.add((targetKind, targetId, reason));
 
   @override
   bool get useServerCommunityReferenceParity => true;
@@ -198,6 +205,54 @@ class _ReferenceParityRepository extends CommunityRepository {
 }
 
 void main() {
+  testWidgets(
+    'member profile has an explicit report bound to profile rather than its posts',
+    (tester) async {
+      final repository = _ReferenceParityRepository();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CommunityMemberProfilePage(
+            userId: _creatorId,
+            repository: repository,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-member-safety')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Report member'));
+      await tester.pumpAndSettle();
+      expect(repository.reports, isEmpty);
+      await tester.tap(
+        find.byKey(const Key('community-report-reason-tap-spam')),
+      );
+      await tester.pumpAndSettle();
+      final send = find.byKey(const Key('community-report-submit'));
+      await tester.ensureVisible(send);
+      await tester.pumpAndSettle();
+      await tester.tap(send);
+      await tester.pumpAndSettle();
+      expect(repository.reports, [('profile', _creatorId, 'spam')]);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets('own profile does not expose report or block against self', (
+    tester,
+  ) async {
+    final repository = _ReferenceParityRepository(selfProfile: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CommunityMemberProfilePage(
+          userId: _creatorId,
+          repository: repository,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('community-member-safety')), findsNothing);
+    expect(repository.reports, isEmpty);
+  });
+
   test('reference Community copy closes every production locale', () {
     expect(CommunityReferenceRuntimeCopy.sources, hasLength(88));
     expect(CommunityReferenceRuntimeCopy.supported, hasLength(23));

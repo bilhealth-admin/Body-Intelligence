@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -173,7 +174,7 @@ class LifeContextPage extends ConsumerWidget {
                                 ),
                         ].join('\n'),
                       ),
-                      trailing: PopupMenuButton<String>(
+                      trailing: bilPearlPopupMenuButton<String>(
                         onSelected: (value) async {
                           final repository = ref.read(
                             lifeContextRepositoryProvider,

@@ -218,11 +218,10 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
     return Container(
       key: const Key('premium-vision-sticky-action'),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      decoration: BoxDecoration(
-        color: _light(context)
-            ? const Color(0xFFF0FAF6)
-            : const Color(0xFF031C1D),
-        border: const Border(top: BorderSide(color: _outline, width: .8)),
+      decoration: BilPearlFinish.panel(
+        context,
+        radius: BorderRadius.zero,
+        shadow: false,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

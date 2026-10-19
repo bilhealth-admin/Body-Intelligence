@@ -1,3 +1,4 @@
+import '../../../app/theme/bil_feedback_theme.dart';
 import 'package:flutter/material.dart';
 import 'community_sapphire.dart';
 
@@ -228,12 +229,7 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
           selectionColor: scheme.primary.withValues(alpha: .24),
           selectionHandleColor: scheme.primary,
         ),
-        snackBarTheme: base.snackBarTheme.copyWith(
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
+        snackBarTheme: BilFeedbackTheme.resolve(scheme),
       ),
       child: ScrollConfiguration(
         behavior: const _CommunityScrollBehavior(),

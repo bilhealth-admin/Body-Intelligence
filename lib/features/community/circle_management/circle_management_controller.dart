@@ -1,3 +1,4 @@
+import '../../../shared/media/private_image_pixels.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';

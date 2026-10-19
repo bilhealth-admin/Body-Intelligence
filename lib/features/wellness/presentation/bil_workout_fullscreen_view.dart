@@ -185,6 +185,7 @@ extension _FullscreenWorkoutVideoView on _FullscreenWorkoutVideoPageState {
                 child: SizedBox.square(
                   dimension: 48,
                   child: IconButton.filledTonal(
+                    style: BilNavigationPressStyle.neutralBubble(context),
                     key: const ValueKey('workout-video-fullscreen-back'),
                     tooltip: MaterialLocalizations.of(
                       context,
@@ -297,7 +298,7 @@ extension _FullscreenWorkoutVideoView on _FullscreenWorkoutVideoPageState {
                     button: true,
                     label: _fullscreenVideoCopy(context, 'speed'),
                     value: _formatPlaybackSpeed(_playbackSpeed),
-                    child: PopupMenuButton<double>(
+                    child: bilPearlPopupMenuButton<double>(
                       key: const ValueKey('workout-video-control-speed'),
                       tooltip: _fullscreenVideoCopy(context, 'speed'),
                       initialValue: _playbackSpeed,

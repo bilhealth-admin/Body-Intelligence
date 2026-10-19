@@ -11,21 +11,24 @@ import 'package:image_picker/image_picker.dart';
 void main() {
   const preprocessor = DefaultMealVisionImagePreprocessor();
 
-  test('keeps a small bounded image byte-for-byte and records hash', () async {
-    final bytes = Uint8List.fromList(
-      img.encodePng(img.Image(width: 80, height: 60)),
-    );
-    final result = await preprocessor.prepare(
-      bytes: bytes,
-      mimeType: 'image/png',
-    );
-    expect(result.bytes, orderedEquals(bytes));
-    expect(result.mimeType, 'image/png');
-    expect(result.reencoded, isFalse);
-    expect(result.width, 80);
-    expect(result.height, 60);
-    expect(result.sha256, sha256.convert(bytes).toString());
-  });
+  test(
+    'reencodes small images to a bounded pixel-only payload and records its hash',
+    () async {
+      final bytes = Uint8List.fromList(
+        img.encodePng(img.Image(width: 80, height: 60)),
+      );
+      final result = await preprocessor.prepare(
+        bytes: bytes,
+        mimeType: 'image/png',
+      );
+      expect(result.bytes, isNot(orderedEquals(bytes)));
+      expect(result.mimeType, 'image/jpeg');
+      expect(result.reencoded, isTrue);
+      expect(result.width, 80);
+      expect(result.height, 60);
+      expect(result.sha256, sha256.convert(result.bytes).toString());
+    },
+  );
 
   test('bounds a large image and emits controlled JPEG', () async {
     final source = img.Image(width: 2400, height: 1200);

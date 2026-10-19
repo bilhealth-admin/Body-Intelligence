@@ -1,3 +1,4 @@
+import '../nutrition/presentation/food_translation_attribution.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/cupertino.dart';
@@ -144,6 +145,14 @@ class HelpCenterPage extends StatelessWidget {
             iconOverride: Icons.menu_book_outlined,
             appleIconOverride: CupertinoIcons.book,
             action: () => context.push('/health-information-sources'),
+          ),
+          (
+            id: 'translation-information',
+            title: 'Google Translate',
+            kind: BilSemanticIconKind.support,
+            iconOverride: Icons.translate_outlined,
+            appleIconOverride: CupertinoIcons.globe,
+            action: () => showFoodTranslationInformation(context),
           ),
           (
             id: 'contact-support',

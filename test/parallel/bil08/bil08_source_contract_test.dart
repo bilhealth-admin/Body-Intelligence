@@ -89,7 +89,7 @@ void main() {
       'lib/features/community/presentation/community_feed_tab.dart',
     );
     final moderation = _read(
-      'lib/features/community/presentation/community_post_moderation_page.dart',
+      'test/support/legacy_mobile_admin/features/community/presentation/community_post_moderation_page.dart',
     );
 
     expect(feed, isNot(contains('setState(() => _feed = refreshedFeed)')));

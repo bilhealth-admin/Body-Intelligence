@@ -70,7 +70,7 @@ class _RecipesTab extends ConsumerWidget {
               subtitle: Text(
                 '${savedRecipe.recipe.servings} ${_recipeListCopy(context, 'servings')} · ${savedRecipe.recipe.totalMinutes} ${nutritionEntryText(context, 'min', 'د')}',
               ),
-              trailing: PopupMenuButton<String>(
+              trailing: bilPearlPopupMenuButton<String>(
                 tooltip: _recipeListCopy(context, 'recipeActions'),
                 onSelected: (action) =>
                     _addToDiary(context, ref, savedRecipe, action),

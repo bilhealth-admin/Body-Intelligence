@@ -48,73 +48,80 @@ class _UnitToggleCard extends StatelessWidget {
       value: title,
       hint: imperial ? metricLabel : imperialLabel,
       child: Material(
-        color: scheme.primaryContainer,
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(22),
           side: BorderSide(color: scheme.primary, width: 1.4),
         ),
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          key: const Key('onboarding-unit-toggle'),
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 92),
-            child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(18, 15, 14, 15),
-              child: Row(
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: scheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(11),
-                      child: Icon(
-                        Icons.straighten_rounded,
-                        color: scheme.onPrimary,
+        child: Ink(
+          decoration: BilPearlFinish.panel(
+            context,
+            radius: BorderRadius.circular(22),
+            shadow: false,
+          ).copyWith(border: Border.all(color: Colors.transparent, width: 0)),
+          child: InkWell(
+            key: const Key('onboarding-unit-toggle'),
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 92),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(18, 15, 14, 15),
+                child: Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: scheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(11),
+                        child: Icon(
+                          Icons.straighten_rounded,
+                          color: scheme.onPrimary,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedSwitcher(
-                          duration: MediaQuery.disableAnimationsOf(context)
-                              ? Duration.zero
-                              : const Duration(milliseconds: 160),
-                          child: Text(
-                            title,
-                            key: ValueKey(title),
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  color: scheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.w800,
-                                ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: MediaQuery.disableAnimationsOf(context)
+                                ? Duration.zero
+                                : const Duration(milliseconds: 160),
+                            child: Text(
+                              title,
+                              key: ValueKey(title),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: scheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          subtitle,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: scheme.onPrimaryContainer),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ExcludeSemantics(
-                    child: IgnorePointer(
-                      child: Switch.adaptive(
-                        value: imperial,
-                        onChanged: (_) {},
+                          const SizedBox(height: 3),
+                          Text(
+                            subtitle,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: scheme.onPrimaryContainer),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    ExcludeSemantics(
+                      child: IgnorePointer(
+                        child: Switch.adaptive(
+                          value: imperial,
+                          onChanged: (_) {},
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -133,11 +140,10 @@ class _InfoBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        border: Border.all(color: scheme.outlineVariant),
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: BilPearlFinish.panel(
+        context,
+        radius: BorderRadius.circular(16),
+      ).copyWith(border: Border.all(color: scheme.outlineVariant)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
@@ -154,7 +160,7 @@ class _InfoBanner extends StatelessWidget {
 }
 
 /// Numeric ranges and SI/imperial symbols must retain their left-to-right
-/// order inside RTL sentences (for example `20–300 cm`, never `cm 300–20`).
+/// order inside RTL sentences (for example `20-300 cm`, never `cm 300-20`).
 class _UnitRangeHint extends StatelessWidget {
   const _UnitRangeHint(this.value);
 
@@ -215,13 +221,15 @@ class _PlanMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: prominent ? scheme.primaryContainer : scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: prominent ? scheme.primary : scheme.outlineVariant,
-        ),
-      ),
+      decoration:
+          BilPearlFinish.panel(
+            context,
+            radius: BorderRadius.circular(18),
+          ).copyWith(
+            border: Border.all(
+              color: prominent ? scheme.primary : scheme.outlineVariant,
+            ),
+          ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

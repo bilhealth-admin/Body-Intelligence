@@ -11,6 +11,8 @@ void main() {
     expect(source, contains("import 'package:flutter/foundation.dart';"));
     expect(source, contains('await compute(_prepareMealVisionImage'));
     expect(source, contains('img.decodeImage(original)'));
-    expect(source, contains('img.encodeJpg(resized'));
+    expect(source, contains('privateImagePixels(resized'));
+    expect(source, contains('img.encodeJpg(clean'));
+    expect(source, isNot(contains('img.encodeJpg(resized')));
   });
 }

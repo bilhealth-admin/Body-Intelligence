@@ -62,7 +62,10 @@ jobs:
             --minimum-deployment-target 15.0 \
             --compile "$RUNNER_TEMP/bil-launch-screen/LaunchScreen.storyboardc" \
             ios/Runner/Base.lproj/LaunchScreen.storyboard
-          flutter build ios --simulator --debug --no-codesign -v
+          IOS_BUILD_NUMBER="$(python3 -c "import json; print(json.load(open('tool/release/candidate_versions.json'))['ios_build_number'])")"
+          test "$IOS_BUILD_NUMBER" = 37
+          flutter build ios --simulator --debug --no-codesign --build-number "$IOS_BUILD_NUMBER" -v
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' build/ios/iphonesimulator/Runner.app/Info.plist)" = "$IOS_BUILD_NUMBER"
           test -d build/ios/iphonesimulator/Runner.app
           ditto -c -k --sequesterRsrc --keepParent \
             build/ios/iphonesimulator/Runner.app \

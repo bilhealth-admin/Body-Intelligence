@@ -265,7 +265,7 @@ function normalizedUsda(food: Record<string, unknown>) {
 /// authority and its stored food name is never replaced by an unreviewed
 /// translation. This keeps the search multilingual without pretending that a
 /// machine translation is a canonical food identity.
-async function translateWithGoogle(
+export async function translateWithGoogle(
   value: string,
   sourceLocale: string,
   targetLocale: string,
@@ -278,13 +278,12 @@ async function translateWithGoogle(
   const timer = setTimeout(() => controller.abort(), 2500);
   try {
     const response = await fetcher(
-      `https://translation.googleapis.com/language/translate/v2?key=${
-        encodeURIComponent(key)
-      }`,
+      "https://translation.googleapis.com/language/translate/v2",
       {
         method: "POST",
         signal: controller.signal,
-        headers: { "content-type": "application/json" },
+        redirect: "error",
+        headers: { "content-type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           q: [value],
           source: sourceLocale,
@@ -335,7 +334,7 @@ const secretApiKey = () => {
   return env("SUPABASE_SERVICE_ROLE_KEY");
 };
 
-async function translateManyWithGoogle(
+export async function translateManyWithGoogle(
   values: string[],
   targetLocale: string,
   fetcher: typeof fetch,
@@ -352,13 +351,12 @@ async function translateManyWithGoogle(
   const timer = setTimeout(() => controller.abort(), 3500);
   try {
     const response = await fetcher(
-      `https://translation.googleapis.com/language/translate/v2?key=${
-        encodeURIComponent(key)
-      }`,
+      "https://translation.googleapis.com/language/translate/v2",
       {
         method: "POST",
         signal: controller.signal,
-        headers: { "content-type": "application/json" },
+        redirect: "error",
+        headers: { "content-type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           q: unique,
           source: "en",

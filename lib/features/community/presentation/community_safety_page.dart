@@ -24,12 +24,14 @@ class CommunitySafetyPage extends StatefulWidget {
     this.repository,
     this.policyUrlLauncher,
     this.onDecline,
+    this.onAccepted,
     super.key,
   });
 
   final CommunityRepository? repository;
   final CommunityPolicyUrlLauncher? policyUrlLauncher;
   final VoidCallback? onDecline;
+  final VoidCallback? onAccepted;
 
   @override
   State<CommunitySafetyPage> createState() => _CommunitySafetyPageState();
@@ -171,6 +173,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
       setState(() {
         _policyState = Future.value(verifiedState);
       });
+      widget.onAccepted?.call();
     } on Object {
       if (!mounted ||
           !identical(_repository, repository) ||

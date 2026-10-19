@@ -1,3 +1,5 @@
+import '../../../app/theme/bil_navigation_press_style.dart';
+import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
@@ -163,6 +165,9 @@ class ModernOnboardingScaffold extends StatelessWidget {
                             final back = FocusTraversalOrder(
                               order: const NumericFocusOrder(2),
                               child: IconButton.filledTonal(
+                                style: BilNavigationPressStyle.neutralBubble(
+                                  context,
+                                ),
                                 key: const Key('onboarding-back'),
                                 tooltip: _copy(context, 'Back'),
                                 onPressed: busy ? null : onBack,
@@ -394,7 +399,7 @@ class OnboardingChoiceCard extends StatelessWidget {
       selected: selected,
       enabled: enabled,
       child: Material(
-        color: selected ? scheme.primaryContainer : scheme.surfaceContainerLow,
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(
@@ -403,60 +408,70 @@ class OnboardingChoiceCard extends StatelessWidget {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: enabled ? onTap : null,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (icon case final icon?) ...[
-                  BilGlassPressFeedback(
-                    child: Icon(
-                      icon,
-                      color: enabled
-                          ? (selected
-                                ? scheme.primary
-                                : scheme.onSurfaceVariant)
-                          : scheme.outline,
-                    ),
-                  ),
-                  const SizedBox(width: 13),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: enabled
-                                  ? scheme.onSurface
-                                  : scheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
-                            ),
+        child: Ink(
+          // The Material shape owns border padding and selected state.
+          decoration: BilPearlFinish.panel(
+            context,
+            radius: BorderRadius.circular(18),
+            shadow: false,
+          ).copyWith(border: Border.all(color: Colors.transparent, width: 0)),
+          child: InkWell(
+            onTap: enabled ? onTap : null,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (icon case final icon?) ...[
+                    BilGlassPressFeedback(
+                      child: Icon(
+                        icon,
+                        color: enabled
+                            ? (selected
+                                  ? scheme.primary
+                                  : scheme.onSurfaceVariant)
+                            : scheme.outline,
                       ),
-                      if (subtitle case final subtitle?) ...[
-                        const SizedBox(height: 4),
+                    ),
+                    const SizedBox(width: 13),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subtitle,
-                          style: Theme.of(context).textTheme.bodyMedium
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                                height: 1.35,
+                                color: enabled
+                                    ? scheme.onSurface
+                                    : scheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w700,
                               ),
                         ),
+                        if (subtitle case final subtitle?) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                  height: 1.35,
+                                ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Icon(
-                  selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                  color: selected ? scheme.primary : scheme.outline,
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                    color: selected ? scheme.primary : scheme.outline,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

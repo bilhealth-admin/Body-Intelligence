@@ -152,56 +152,6 @@ class _CommunityAuthorRelationshipActionState
   }
 }
 
-class _ExpandableCommunityPostBody extends StatefulWidget {
-  const _ExpandableCommunityPostBody({
-    required this.postId,
-    required this.body,
-  });
-
-  final String postId;
-  final String body;
-
-  @override
-  State<_ExpandableCommunityPostBody> createState() =>
-      _ExpandableCommunityPostBodyState();
-}
-
-class _ExpandableCommunityPostBodyState
-    extends State<_ExpandableCommunityPostBody> {
-  bool _expanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final canCollapse =
-        widget.body.length > 240 || '\n'.allMatches(widget.body).length >= 4;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SelectableText(
-          widget.body,
-          key: ValueKey('community-post-body-${widget.postId}'),
-          textDirection: BilWrittenLanguageResolver.directionFor(
-            widget.body,
-            fallback: Directionality.of(context),
-          ),
-          maxLines: canCollapse && !_expanded ? 4 : null,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        if (canCollapse)
-          TextButton(
-            key: ValueKey('community-post-expand-${widget.postId}'),
-            onPressed: () => setState(() => _expanded = !_expanded),
-            child: Text(
-              _expanded
-                  ? communityText(context, 'Show less', 'عرض أقل')
-                  : communityText(context, 'Show more', 'عرض المزيد'),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class _CommunityPostStatusChip extends StatelessWidget {
   const _CommunityPostStatusChip({required this.post});
 

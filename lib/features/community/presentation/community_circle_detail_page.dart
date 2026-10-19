@@ -43,6 +43,11 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
   int _loadGeneration = 0;
   CircleManagementController? _management;
   bool _openingManagement = false;
+  bool _reporting = false;
+
+  bool get _awaitingReview =>
+      _record is ManagedCommunityCircle &&
+      (_record as ManagedCommunityCircle).reviewStatus != 'approved';
 
   CommunityCircle get _record {
     final managed = _management?.managedCircle;
@@ -66,6 +71,12 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
         oldWidget.circle.membershipStatus != widget.circle.membershipStatus ||
         oldWidget.circle.joinPolicy != widget.circle.joinPolicy ||
         oldWidget.circle.access != widget.circle.access ||
+        (oldWidget.circle is ManagedCommunityCircle
+                ? (oldWidget.circle as ManagedCommunityCircle).reviewStatus
+                : null) !=
+            (widget.circle is ManagedCommunityCircle
+                ? (widget.circle as ManagedCommunityCircle).reviewStatus
+                : null) ||
         !identical(oldWidget.ownerIsCurrent, widget.ownerIsCurrent) ||
         !identical(oldWidget.ownerChanges, widget.ownerChanges) ||
         !identical(
@@ -87,6 +98,7 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
   }
 
   void _clearVisit() {
+    _reporting = false;
     _disposeManagement();
     _openingManagement = false;
     _loadGeneration++;
@@ -182,6 +194,12 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
   Future<void> _loadFirst() async {
     final visit = _owner.capture();
     if (visit == null) return;
+    if (_awaitingReview) {
+      _posts.clear();
+      _viewCounts.clear();
+      _hasMore = false;
+      return;
+    }
     final generation = ++_loadGeneration;
     _refreshing = true;
     try {
@@ -225,6 +243,54 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
       await future;
     } on Object {
       // FutureBuilder renders retry state.
+    }
+  }
+
+  Future<void> _reportCircle(_CommunityProfileVisit visit) async {
+    if (!visit.isCurrent() || _reporting) return;
+    setState(() => _reporting = true);
+    try {
+      final draft = await showCommunityReportSheet(
+        context,
+        target: CommunityReportTarget.circle,
+        guard: visit.guard,
+      );
+      if (!visit.isCurrent() || draft == null) return;
+      await visit.run(
+        () => visit.repository.reportCircle(
+          slug: visit.targetId,
+          reason: draft.reason,
+        ),
+      );
+      if (!mounted || !visit.isCurrent()) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Report sent for review.',
+              'تم إرسال البلاغ للمراجعة.',
+            ),
+          ),
+        ),
+      );
+    } on CommunityOwnerOperationCancelled {
+      // A report from an old account visit cannot affect the successor page.
+    } on Object {
+      if (!mounted || !visit.isCurrent()) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not send the report. Please try again.',
+              'تعذر إرسال البلاغ. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (visit.isCurrent()) setState(() => _reporting = false);
     }
   }
 
@@ -309,6 +375,17 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
         leading: const CommunityReturnButton(),
         title: Text(_circleRecordTitle(context, circle)),
         actions: [
+          if (!_awaitingReview)
+            IconButton(
+              key: const Key('community-circle-report'),
+              tooltip: communityText(
+                context,
+                'Report circle',
+                'الإبلاغ عن الدائرة',
+              ),
+              onPressed: _reporting ? null : () => _reportCircle(visit),
+              icon: const Icon(Icons.flag_outlined),
+            ),
           IconButton(
             key: const Key('bil06-manage-circle'),
             tooltip: circleManagementText(
@@ -321,7 +398,8 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
           ),
         ],
       ),
-      floatingActionButton: circle.activeMember && compose != null
+      floatingActionButton:
+          !_awaitingReview && circle.activeMember && compose != null
           ? FloatingActionButton.extended(
               onPressed: () =>
                   _composeFromCircle(context, visit, slug, compose),
@@ -362,6 +440,19 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (_awaitingReview && circle is ManagedCommunityCircle)
+                          Text(
+                            circleManagementText(
+                              context,
+                              circle.awaitingReview
+                                  ? 'This circle is awaiting review. It is visible only to you.'
+                                  : 'This circle was not approved and is visible only to you.',
+                              circle.awaitingReview
+                                  ? 'هذه الدائرة بانتظار المراجعة، وتظهر لك وحدك حاليًا.'
+                                  : 'لم تتم الموافقة على الدائرة، وتظهر لك وحدك حاليًا.',
+                            ),
+                            key: const Key('community-circle-review-status'),
+                          ),
                         if (circle is ManagedCommunityCircle) ...[
                           CircleVerifiedMedia(
                             key: const Key('bil06-circle-detail-cover'),

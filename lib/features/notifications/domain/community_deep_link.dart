@@ -78,6 +78,9 @@ class CommunityDeepLink {
   }
 
   static String? routeFor(Uri uri) {
+    if (uri.userInfo.isNotEmpty || uri.hasPort || uri.fragment.isNotEmpty) {
+      return null;
+    }
     // Only this verified public download-link shape can navigate to a member.
     // Never trust lookalike hosts, login/redirect URLs or extra query fields.
     if (uri.scheme.toLowerCase() == 'https') {

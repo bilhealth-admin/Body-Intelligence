@@ -46,7 +46,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   final Listenable? ownerChanges;
 
   @override
-  Widget build(BuildContext context) => BilPearlMaterialCard(
+  Widget build(BuildContext context) => CommunityPostSurface(
     margin: EdgeInsets.zero,
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -94,7 +94,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                         : communityText(context, 'Follow', 'متابعة'),
                   ),
                 ),
-              PopupMenuButton<String>(
+              bilPearlPopupMenuButton<String>(
                 key: const Key('community-post-detail-actions'),
                 enabled: !managingPost,
                 icon: const Icon(Icons.more_horiz_rounded),

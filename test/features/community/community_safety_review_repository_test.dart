@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
-import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
+import '../../support/legacy_mobile_admin/features/community/presentation/community_post_moderation_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_blocked_members_sheet.dart';
 import 'package:body_intelligence_log/features/community/services/community_owner_http_client.dart';
 import 'package:body_intelligence_log/features/community/services/community_owner_operation.dart';

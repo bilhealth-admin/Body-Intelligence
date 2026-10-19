@@ -34,6 +34,9 @@ final class _SocialV2Repository extends CommunityRepository {
   static const rootId = '44444444-4444-4444-8444-444444444444';
   static const replyId = '55555555-5555-4555-8555-555555555555';
 
+  String rootBody = 'Root comment can be selected';
+  String replyAuthorId = currentId;
+  final reportedCommentIds = <String>[];
   bool saved = false;
   bool postLiked = false;
   int postLikeCount = 2;
@@ -85,7 +88,7 @@ final class _SocialV2Repository extends CommunityRepository {
     CommunityComment(
       id: rootId,
       authorId: authorId,
-      body: 'Root comment can be selected',
+      body: rootBody,
       createdAt: DateTime.utc(2026, 9, 8, 10),
       likeCount: 1,
       liked: false,
@@ -94,7 +97,7 @@ final class _SocialV2Repository extends CommunityRepository {
     ),
     CommunityComment(
       id: replyId,
-      authorId: currentId,
+      authorId: replyAuthorId,
       parentId: rootId,
       body: 'One-level reply',
       createdAt: DateTime.utc(2026, 9, 8, 10, 1),
@@ -235,6 +238,7 @@ final class _SocialV2Repository extends CommunityRepository {
   @override
   Future<void> reportComment(String commentId, {required String reason}) async {
     commentReports++;
+    reportedCommentIds.add(commentId);
   }
 
   @override
@@ -684,6 +688,16 @@ void main() {
       await tester.pumpAndSettle();
       await tapCommunityControl(tester, find.text('Report'));
       await tester.pumpAndSettle();
+      expect(repository.commentReports, 0);
+      await tapCommunityControl(
+        tester,
+        find.byKey(const Key('community-report-reason-tap-harassment')),
+      );
+      await tapCommunityControl(
+        tester,
+        find.byKey(const Key('community-report-submit')),
+      );
+      await tester.pumpAndSettle();
       expect(repository.commentReports, 1);
 
       await tapCommunityControl(
@@ -696,6 +710,116 @@ void main() {
       await tapCommunityControl(tester, find.text('Block member'));
       await tester.pumpAndSettle();
       expect(repository.blocks, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'expanded real comment collapses on composer tap without losing input or sending a mutation',
+    (tester) async {
+      final repository = _SocialV2Repository()
+        ..rootBody = List.filled(30, 'Long community comment.').join(' ');
+      await tester.pumpWidget(_app(repository));
+      await tester.pumpAndSettle();
+      await tapCommunityControl(
+        tester,
+        find.byKey(
+          const Key('community-post-comments-${_SocialV2Repository.postId}'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final arrow = find.byKey(
+        const Key('community-comment-expand-${_SocialV2Repository.rootId}'),
+      );
+      await tapCommunityControl(tester, arrow);
+      await tester.pumpAndSettle();
+      final body = find.byKey(
+        const Key('community-comment-body-${_SocialV2Repository.rootId}'),
+      );
+      expect(tester.widget<SelectableText>(body).data, repository.rootBody);
+      final composer = find.byKey(const Key('community-comment-composer'));
+      await tester.tap(composer);
+      await tester.pump();
+      await tester.enterText(composer, 'Keep this draft');
+      expect(tester.widget<Text>(body).maxLines, 3);
+      expect(
+        tester.widget<TextField>(composer).controller!.text,
+        'Keep this draft',
+      );
+      expect(repository.submittedBodies, isEmpty);
+      expect(repository.commentLikeMutations, 0);
+      expect(repository.commentReports, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'expanded comment and reply report their own IDs only after the matching confirmation',
+    (tester) async {
+      final repository = _SocialV2Repository()
+        ..rootBody = List.filled(20, 'Long root comment text').join(' ')
+        ..replyAuthorId = _SocialV2Repository.authorId;
+      await tester.pumpWidget(_app(repository));
+      await tester.pumpAndSettle();
+      await tapCommunityControl(
+        tester,
+        find.byKey(
+          const Key('community-post-comments-${_SocialV2Repository.postId}'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tapCommunityControl(
+        tester,
+        find.byKey(
+          const Key('community-comment-expand-${_SocialV2Repository.rootId}'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final id in [
+        _SocialV2Repository.rootId,
+        _SocialV2Repository.replyId,
+      ]) {
+        if (id == _SocialV2Repository.replyId) {
+          await tapCommunityControl(
+            tester,
+            find.byKey(
+              const Key(
+                'community-comment-view-replies-${_SocialV2Repository.rootId}',
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+        await tapCommunityControl(
+          tester,
+          find.byKey(Key('community-comment-actions-$id')),
+        );
+        await tester.pumpAndSettle();
+        await tapCommunityControl(tester, find.text('Report'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text(
+            id == _SocialV2Repository.rootId
+                ? 'Report comment'
+                : 'Report reply',
+          ),
+          findsOneWidget,
+        );
+        expect(repository.reportedCommentIds.contains(id), isFalse);
+        await tapCommunityControl(
+          tester,
+          find.byKey(const Key('community-report-reason-tap-harassment')),
+        );
+        await tapCommunityControl(
+          tester,
+          find.byKey(const Key('community-report-submit')),
+        );
+        await tester.pumpAndSettle();
+      }
+      expect(repository.reportedCommentIds, [
+        _SocialV2Repository.rootId,
+        _SocialV2Repository.replyId,
+      ]);
+      expect(repository.commentReports, 2);
+      expect(repository.submittedBodies, isEmpty);
       expect(tester.takeException(), isNull);
     },
   );

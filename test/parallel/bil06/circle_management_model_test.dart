@@ -93,6 +93,45 @@ Map<String, dynamic> bil06ReceiptJson(
 };
 
 void main() {
+  test(
+    'pending review survives every metadata projection without publishing media',
+    () {
+      final circle = ManagedCommunityCircle.fromJson(
+        bil06CircleJson()..['review_status'] = 'pending',
+      );
+      expect(circle.awaitingReview, isTrue);
+      expect(
+        circle.withMedia(avatar: null, cover: null).awaitingReview,
+        isTrue,
+      );
+      expect(circle.copyWith(memberCount: 2).awaitingReview, isTrue);
+      expect(circle.onBaseCircle(bil06Circle()).awaitingReview, isTrue);
+      expect(
+        CircleMediaReservation.fromJson(
+          bil06MediaJson(status: 'pending'),
+        ).status,
+        'pending',
+      );
+      expect(
+        CircleMediaReservation.fromJson(
+          bil06MediaJson(status: 'rejected'),
+        ).status,
+        'rejected',
+      );
+      expect(
+        () => ManagedCommunityCircle.fromJson(
+          bil06CircleJson()..['avatar'] = bil06MediaJson(status: 'pending'),
+        ),
+        throwsFormatException,
+      );
+      expect(
+        () => ManagedCommunityCircle.fromJson(
+          bil06CircleJson()..['review_status'] = 'unverified',
+        ),
+        throwsFormatException,
+      );
+    },
+  );
   group('BIL-06 strict models', () {
     test(
       'native data retains base contract, real counts, and metadata on copy',

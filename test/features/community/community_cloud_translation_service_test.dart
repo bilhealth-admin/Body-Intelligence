@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:body_intelligence_log/features/community/services/community_translation_service.dart';
+import 'package:body_intelligence_log/features/community/services/community_owner_http_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -12,7 +13,7 @@ Future<SupabaseClient> clientFor(
   final client = SupabaseClient(
     'https://translation.invalid',
     'synthetic-publishable',
-    httpClient: MockClient(send),
+    httpClient: CommunityOwnerHttpClient(MockClient(send)),
   );
   final token = base64Url
       .encode(
@@ -40,6 +41,70 @@ Future<SupabaseClient> clientFor(
 }
 
 void main() {
+  test('a cancelled translation cannot enter the data transport', () async {
+    var calls = 0;
+    final client = await clientFor((_) async {
+      calls++;
+      return http.Response(
+        '{"texts":{"body":"translated"},"engine":"google"}',
+        200,
+      );
+    });
+    addTearDown(client.dispose);
+    final port = CloudCommunityTranslation(client: client);
+    final pending = port.translate(
+      requestId: 'cancel-before-send',
+      texts: {'body': 'Private source'},
+      targetTag: 'ar',
+    );
+    final rejected = expectLater(pending, throwsFormatException);
+    await port.cancel('cancel-before-send');
+    await rejected;
+    expect(calls, 0);
+  });
+
+  for (final roundTrip in [false, true]) {
+    test(
+      'an account transition before send cannot transmit source text; ABA=$roundTrip',
+      () async {
+        var calls = 0;
+        final client = await clientFor((_) async {
+          calls++;
+          return http.Response(
+            '{"texts":{"body":"translated"},"engine":"google"}',
+            200,
+          );
+        });
+        addTearDown(client.dispose);
+        final original = jsonEncode(client.auth.currentSession!.toJson());
+        final next = jsonDecode(original) as Map<String, dynamic>;
+        final payload = base64Url
+            .encode(
+              utf8.encode(jsonEncode({'sub': 'next-owner', 'exp': 4102444800})),
+            )
+            .replaceAll('=', '');
+        next['access_token'] = 'e30.$payload.synthetic';
+        (next['user'] as Map)['id'] = 'next-owner';
+        final port = CloudCommunityTranslation(client: client);
+        final pending = port.translate(
+          requestId: 'owner-before-send',
+          texts: {'body': 'Private source'},
+          targetTag: 'ar',
+        );
+        final rejected = expectLater(pending, throwsFormatException);
+        final changed = client.auth.recoverSession(jsonEncode(next));
+        if (roundTrip) {
+          final restored = client.auth.recoverSession(original);
+          await Future.wait([changed, restored]);
+        } else {
+          await changed;
+        }
+        await rejected;
+        expect(calls, 0);
+      },
+    );
+  }
+
   test(
     'cloud request sends selected fields only and never calls a native translation sheet',
     () async {

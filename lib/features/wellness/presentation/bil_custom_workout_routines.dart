@@ -245,7 +245,7 @@ class _CustomRoutineCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                PopupMenuButton<void>(
+                bilPearlPopupMenuButton<void>(
                   enabled: onDelete != null,
                   itemBuilder: (_) => [
                     PopupMenuItem<void>(

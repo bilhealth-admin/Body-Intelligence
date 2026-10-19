@@ -1,3 +1,5 @@
+import '../../../../app/theme/bil_pearl_finish.dart';
+import '../../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -7,11 +9,15 @@ import 'coach_food_card_models.dart';
 
 abstract final class CoachFoodCardPalette {
   static const white = Color(0xFFF7F9FF);
-  static const muted = Color(0xFFAFBBCB);
+  static Color muted(BuildContext context) =>
+      Theme.of(context).colorScheme.onSurfaceVariant;
   static const blue = Color(0xFF3298FF);
   static const green = Color(0xFF34C792);
   static const border = Color(0xFF334150);
-  static const inset = Color(0xFF0B1521);
+  static Color inset(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? BilPearlFinish.darkInset
+      : BilPearlFinish.lightInset;
 }
 
 class CoachFoodCardSurface extends StatelessWidget {
@@ -32,20 +38,15 @@ class CoachFoodCardSurface extends StatelessWidget {
     final surface = ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(17),
-          border: Border.all(color: CoachFoodCardPalette.border),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF172330), Color(0xFF101A26), Color(0xFF16212C)],
-          ),
+        decoration: BilPearlFinish.panel(
+          context,
+          radius: BorderRadius.circular(17),
         ),
         child: Material(
           color: Colors.transparent,
           child: DefaultTextStyle.merge(
-            style: const TextStyle(
-              color: CoachFoodCardPalette.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 13,
               height: 1.4,
             ),
@@ -94,7 +95,7 @@ class CoachFoodThumbnail extends StatelessWidget {
             child: Icon(
               Icons.restaurant_outlined,
               size: compact ? 18 : 26,
-              color: CoachFoodCardPalette.muted,
+              color: CoachFoodCardPalette.muted(context),
             ),
           ),
         ),
@@ -149,7 +150,7 @@ class CoachFoodEvidenceDetails extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: CoachFoodCardPalette.inset,
+        color: CoachFoodCardPalette.inset(context),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -163,12 +164,14 @@ class CoachFoodEvidenceDetails extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: '$label: ',
-                      style: const TextStyle(color: CoachFoodCardPalette.muted),
+                      style: TextStyle(
+                        color: CoachFoodCardPalette.muted(context),
+                      ),
                     ),
                     TextSpan(text: value),
                   ],
                 ),
-                style: const TextStyle(fontSize: 11, height: 1.45),
+                style: TextStyle(fontSize: 11, height: 1.45),
               ),
             ),
         ],
@@ -244,11 +247,11 @@ class CoachFoodNutrientStrip extends StatelessWidget {
     final labels = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(text, style: const TextStyle(fontSize: 11.5)),
+        Text(text, style: TextStyle(fontSize: 11.5)),
         Text(
           copy.nutrient(nutrient),
-          style: const TextStyle(
-            color: CoachFoodCardPalette.muted,
+          style: TextStyle(
+            color: CoachFoodCardPalette.muted(copy.context),
             fontSize: 10.5,
           ),
         ),
@@ -294,10 +297,7 @@ class CoachFoodStatusLine extends StatelessWidget {
             padding: EdgeInsetsDirectional.only(end: 8, top: 3),
             child: SizedBox.square(
               dimension: 15,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: CoachFoodCardPalette.blue,
-              ),
+              child: BilFeatureWelcomeStatus(color: CoachFoodCardPalette.blue),
             ),
           ),
         Expanded(child: Text(text)),

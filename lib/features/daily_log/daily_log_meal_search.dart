@@ -184,8 +184,12 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           textDirection: nameDirection,
           children: [
             Flexible(
-              child: Text(
-                displayName,
+              child: GoogleFoodNameText(
+                name: food.name,
+                arabicName: food.arabicName,
+                localeTag: languageCode,
+                isCustom: food.isCustom,
+                source: food.source,
                 textDirection: nameDirection,
                 maxLines: largeText ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
@@ -307,6 +311,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       localeTag: languageCode,
       isCustom: food.isCustom,
       source: food.source,
+      allowCloudTranslation: true,
     );
   }
 

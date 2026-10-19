@@ -1,3 +1,5 @@
+import 'community_report_sheet.dart';
+import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'community_attention_scope.dart';
@@ -33,6 +35,7 @@ import 'community_invite_copy.dart';
 
 part 'community_chat_page.dart';
 part 'community_chat_owner_scope.dart';
+part 'community_chat_safety.dart';
 part 'community_chat_rendering.dart';
 part 'community_people_widgets.dart';
 

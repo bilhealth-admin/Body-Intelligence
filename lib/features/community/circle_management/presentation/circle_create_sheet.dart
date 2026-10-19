@@ -390,8 +390,12 @@ class _CircleCreateFormState extends State<_CircleCreateForm> {
           onChanged: widget.onChanged,
           success: circleManagementText(
             context,
-            'Circle created and confirmed.',
-            'تم إنشاء الدائرة والتحقق منها.',
+            operation?.receipt?.circle?.awaitingReview == true
+                ? 'Circle submitted for review. It will appear to others after approval.'
+                : 'Circle created and confirmed.',
+            operation?.receipt?.circle?.awaitingReview == true
+                ? 'تم إرسال الدائرة للمراجعة. ستظهر للآخرين بعد الموافقة.'
+                : 'تم إنشاء الدائرة والتحقق منها.',
           ),
         ),
         if (succeeded) ...[

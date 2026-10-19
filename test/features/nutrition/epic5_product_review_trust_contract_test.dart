@@ -61,7 +61,7 @@ void main() {
       'supabase/migrations/202608030001_bil_product_review_trust.sql',
     );
     final reviewPage = source(
-      'lib/features/community/presentation/community_food_review_page.dart',
+      'test/support/legacy_mobile_admin/features/community/presentation/community_food_review_page.dart',
     );
 
     expect(migration, contains('bil_list_reviewable_products'));

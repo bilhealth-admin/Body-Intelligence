@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/app/theme/bil_pearl_finish.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,6 +60,58 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
+  }
+
+  for (final brightness in Brightness.values) {
+    testWidgets('photo review and selection keep pearl surfaces: $brightness', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(brightness: brightness),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () =>
+                    showPremiumVisionReviewDialog(context, analysis: sample()),
+                child: const Text('Open pearl'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open pearl'));
+      await tester.pumpAndSettle();
+      final shell = find.byKey(const Key('premium-vision-render-surface'));
+      final context = tester.element(shell);
+      final expected = BilPearlFinish.panel(context).gradient;
+      final decorations = find.descendant(
+        of: shell,
+        matching: find.byType(DecoratedBox),
+      );
+      final shellDecoration =
+          tester.widgetList<DecoratedBox>(decorations).first.decoration
+              as BoxDecoration;
+      expect(shellDecoration.gradient, BilPearlFinish.background(context));
+      final panels = find.descendant(
+        of: shell,
+        matching: find.byType(Container),
+      );
+      List<BoxDecoration> foodPanels() => tester
+          .widgetList<Container>(panels)
+          .map((item) => item.decoration)
+          .whereType<BoxDecoration>()
+          .where((item) => item.borderRadius == BorderRadius.circular(16))
+          .toList();
+      expect(foodPanels(), isNotEmpty);
+      expect(foodPanels().every((item) => item.gradient == expected), isTrue);
+      final select = find.byKey(const Key('premium-vision-select-0'));
+      await tester.ensureVisible(select);
+      await tester.tap(select);
+      await tester.pump();
+      expect(foodPanels().every((item) => item.gradient == expected), isTrue);
+      expect(tester.takeException(), isNull);
+    });
   }
 
   testWidgets('No selected food or inferred portion is auto-logged', (

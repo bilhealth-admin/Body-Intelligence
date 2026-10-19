@@ -2,6 +2,38 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'operator presentation exists only in test support, outside mobile lib',
+    () {
+      final admin = Directory('lib/features/admin/presentation');
+      expect(
+        admin.existsSync()
+            ? admin.listSync(recursive: true).whereType<File>()
+            : <File>[],
+        isEmpty,
+      );
+      for (final name in [
+        'community_post_moderation_page.dart',
+        'community_food_review_page.dart',
+        'community_moderation_queue_tabs.dart',
+        'community_report_content_review.dart',
+        'community_ai_coach_report_review.dart',
+        'community_post_reward_review.dart',
+      ]) {
+        expect(
+          File('lib/features/community/presentation/$name').existsSync(),
+          isFalse,
+        );
+      }
+      expect(
+        File(
+          'lib/features/safety_moderation/presentation/ai_coach_safety_report_queue_section.dart',
+        ).existsSync(),
+        isFalse,
+      );
+    },
+  );
+
   test('mobile app has no hidden admin route', () {
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     final more = File(
@@ -35,6 +67,10 @@ void main() {
                 path.substring('package:body_intelligence_log/'.length),
               )
             : current.resolve(path);
+        expect(
+          target.path,
+          isNot(contains('/test/support/legacy_mobile_admin/')),
+        );
         if (target.toString().startsWith(root.toString())) pending.add(target);
       }
     }
@@ -43,6 +79,7 @@ void main() {
       expect(path, isNot(contains('/features/admin/presentation/')));
       expect(path, isNot(endsWith('/community_post_moderation_page.dart')));
       expect(path, isNot(endsWith('/community_food_review_page.dart')));
+      expect(path, isNot(contains('/test/support/')));
     }
     // Removing mobile presentation must not delete its server-side services.
     expect(

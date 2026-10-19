@@ -1,3 +1,5 @@
+import 'package:image/image.dart' as img;
+import '../../support/meal_vision_image_fixtures.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -15,7 +17,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _ownerA = '11111111-1111-4111-8111-111111111111';
 const _ownerB = '22222222-2222-4222-8222-222222222222';
-final _photo = Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10]);
+final _photo = validMealVisionPngBytes();
 
 String _session(String owner, {bool expired = false}) {
   final payload = base64Url
@@ -49,6 +51,8 @@ class _PhotoCloud {
   final release = Completer<void>();
   int uploads = 0;
   int patches = 0;
+  bool allowSanitizedPhoto = false;
+  Uint8List? uploadedPhoto;
   String? savedUrl;
 
   Future<void> _pause(_Boundary current) async {
@@ -58,26 +62,27 @@ class _PhotoCloud {
   }
 
   Future<http.Response> handle(http.Request request) async {
-    expect(request.url.host, 'profile-photo-entry.invalid');
+    expectSync(request.url.host, 'profile-photo-entry.invalid');
     Object? response;
     if (request.url.path == '/auth/v1/token') {
-      expect(request.url.queryParameters['grant_type'], 'refresh_token');
+      expectSync(request.url.queryParameters['grant_type'], 'refresh_token');
       await _pause(_Boundary.refresh);
       response = jsonDecode(_session(_ownerA));
     } else if (request.url.path ==
         '/storage/v1/object/profile-avatars/$_ownerA/avatar') {
-      expect(request.method, 'POST');
-      expect(request.bodyBytes, _photo);
+      expectSync(request.method, 'POST');
+      if (!allowSanitizedPhoto) expectSync(request.bodyBytes, _photo);
+      uploadedPhoto = Uint8List.fromList(request.bodyBytes);
       uploads++;
       await _pause(_Boundary.upload);
       response = {'Key': 'profile-avatars/$_ownerA/avatar'};
     } else if (request.url.path == '/rest/v1/bil_public_profiles') {
-      expect(request.method, 'PATCH');
-      expect(request.url.queryParameters['user_id'], 'eq.$_ownerA');
-      expect(request.url.queryParameters['select'], 'avatar_url');
+      expectSync(request.method, 'PATCH');
+      expectSync(request.url.queryParameters['user_id'], 'eq.$_ownerA');
+      expectSync(request.url.queryParameters['select'], 'avatar_url');
       final body = jsonDecode(request.body) as Map<String, dynamic>;
       savedUrl = body['avatar_url'] as String;
-      expect(
+      expectSync(
         savedUrl,
         startsWith(
           'https://profile-photo-entry.invalid/storage/v1/object/public/'
@@ -175,6 +180,36 @@ class _DelayedCachePreferences extends PreferencesRepository {
   }
 }
 
+class _NewPhotoBeforeSanitization extends PreferencesRepository {
+  _NewPhotoBeforeSanitization(super.database);
+  bool replaceBeforeCompare = true;
+
+  @override
+  Future<bool> mutateIfUnchanged({
+    required Map<String, String?> expected,
+    Map<String, String> set = const {},
+    Iterable<String> remove = const [],
+    bool Function()? isCurrent,
+  }) async {
+    if (replaceBeforeCompare) {
+      replaceBeforeCompare = false;
+      await super.mutate(
+        set: {
+          'profilePhoto': base64Encode(_photo),
+          'profilePhotoPublicUrl':
+              'https://profile-photo-entry.invalid/new-avatar',
+        },
+      );
+    }
+    return super.mutateIfUnchanged(
+      expected: expected,
+      set: set,
+      remove: remove,
+      isCurrent: isCurrent,
+    );
+  }
+}
+
 Future<SupabaseClient> _initialize(_PhotoCloud cloud) async {
   SharedPreferences.setMockInitialValues({});
   await Supabase.initialize(
@@ -205,6 +240,72 @@ AppDatabase _database() {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'legacy avatar sync strips GPS and replaces stale cache exactly once',
+    () async {
+      final cloud = _PhotoCloud(null)..allowSanitizedPhoto = true;
+      final client = await _initialize(cloud);
+      final visit = _Visit(client);
+      addTearDown(visit.subscription.cancel);
+      final preferences = PreferencesRepository(_database());
+      final image = img.Image(width: 80, height: 60);
+      image.exif.gpsIfd.setGpsLocation(latitude: 12.34567, longitude: 45.6789);
+      final original = Uint8List.fromList(img.encodeJpg(image));
+      expect(img.decodeJpg(original)!.exif.gpsIfd.hasGPSLatitude, isTrue);
+      await preferences.mutate(
+        set: {
+          'profilePhoto': base64Encode(original),
+          'profilePhotoPublicUrl':
+              'https://profile-photo-entry.invalid/old-avatar',
+        },
+      );
+      final service = ProfilePhotoService(preferences);
+      final result = await CommunityRepository(client).runForCommunityOwner(
+        () => service.syncStoredPhotoToCommunity(
+          isCurrentOwner: () => visit.current,
+        ),
+        ownerId: _ownerA,
+        isCurrentOwner: () => visit.current,
+      );
+      expect(result?.cloudSynced, isTrue);
+      expect(cloud.uploadedPhoto, isNotNull);
+      expect(
+        img.decodeImage(cloud.uploadedPhoto!)!.exif.gpsIfd.hasGPSLatitude,
+        isFalse,
+      );
+      expect(cloud.uploadedPhoto, orderedEquals(result!.bytes));
+      expect(await preferences.get('profilePhoto'), base64Encode(result.bytes));
+      expect(await preferences.get('profilePhotoPublicUrl'), cloud.savedUrl);
+      await service.syncStoredPhotoToCommunity();
+      expect(
+        cloud.uploads,
+        1,
+        reason: 'A clean cached avatar must not re-upload or flicker.',
+      );
+      expect(cloud.patches, 1);
+    },
+  );
+
+  test('legacy sanitization cannot replace a newer same-owner photo', () async {
+    final cloud = _PhotoCloud(null);
+    await _initialize(cloud);
+    final preferences = _NewPhotoBeforeSanitization(_database());
+    final image = img.Image(width: 80, height: 60);
+    image.exif.gpsIfd.setGpsLocation(latitude: 12.34567, longitude: 45.6789);
+    await preferences.set('profilePhoto', base64Encode(img.encodeJpg(image)));
+    final result = await ProfilePhotoService(
+      preferences,
+    ).syncStoredPhotoToCommunity();
+    expect(result, isNull);
+    expect(await preferences.get('profilePhoto'), base64Encode(_photo));
+    expect(
+      await preferences.get('profilePhotoPublicUrl'),
+      'https://profile-photo-entry.invalid/new-avatar',
+    );
+    expect(cloud.uploads, 0);
+    expect(cloud.patches, 0);
+  });
 
   for (final boundary in _Boundary.values) {
     test('real photo sync rejects A-B-A during ${boundary.name}', () async {

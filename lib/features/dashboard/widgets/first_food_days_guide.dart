@@ -55,6 +55,7 @@ class _DaysGuideState extends ConsumerState<FirstFoodDaysGuide> {
     }
 
     return FirstUseTargetGuide(
+      onTargetActivated: finish,
       guide: status == 'ready' && !_dismissed
           ? FirstUseContextCoachmark(
               key: const Key('dashboard-first-food-streak-guide'),

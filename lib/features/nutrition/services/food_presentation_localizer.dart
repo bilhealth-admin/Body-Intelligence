@@ -50,6 +50,7 @@ abstract final class FoodPresentationLocalizer {
     String? arabicName,
     bool isCustom = false,
     String source = '',
+    bool allowCloudTranslation = false,
   }) {
     final locale = _canonicalLocaleTag(localeTag);
     final original = name.trim();
@@ -71,11 +72,16 @@ abstract final class FoodPresentationLocalizer {
       }
     }
     if (isCustom || _isBranded(source)) return original;
-    final trusted = _trustedRuntimeTranslation(original, locale);
-    if (trusted != null) return trusted;
     final normalized = _normalize(original);
     final concept = _reviewedFoodConcept(normalized);
-    return _localizedFoodName(concept, locale) ?? original;
+    final reviewed = _localizedFoodName(concept, locale);
+    if (reviewed != null) return reviewed;
+    // Cloud labels require a surface that displays Google attribution. Plain
+    // string/domain callers retain reviewed names and canonical identities.
+    return (allowCloudTranslation
+            ? _trustedRuntimeTranslation(original, locale)
+            : null) ??
+        original;
   }
 
   /// Registers a display-only label returned by BIL's authenticated food

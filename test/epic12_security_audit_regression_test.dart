@@ -3,6 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 import '../tool/epic12_security_audit.dart' as security_audit;
 
 void main() {
+  test(
+    'dependency documentation is distinct from shipped TLS configuration',
+    () {
+      expect(
+        security_audit.shouldAuditTlsSource(
+          'cloudflare/workout-runtime/node_modules/undici/docs/api/Client.md',
+        ),
+        isFalse,
+      );
+      for (final path in [
+        'lib/network.dart',
+        'docs/README.md',
+        'cloudflare/workout-runtime/node_modules/undici/lib/core/connect.js',
+      ]) {
+        expect(security_audit.shouldAuditTlsSource(path), isTrue);
+      }
+    },
+  );
   test('archive checksum verify flags are not classified as TLS bypasses', () {
     for (final source in const <String>[
       'Uint8List decodeBytes(List<int> data, {bool verify = false})',

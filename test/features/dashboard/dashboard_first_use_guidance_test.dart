@@ -167,9 +167,9 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byIcon(Icons.celebration_rounded),
+        find.text('🎉'),
         findsOneWidget,
-        reason: 'Vector celebration must render without emoji fonts.',
+        reason: 'The approved guide uses a native emoji.',
       );
       final guideBounds = tester.getRect(
         find.byKey(const Key('dashboard-food-guide-step-0')),

@@ -1,4 +1,5 @@
 import '../data/community_repository.dart';
+import 'package:uuid/uuid.dart';
 import '../domain/community_models.dart';
 import 'community_owner_operation.dart';
 
@@ -14,11 +15,21 @@ class CommunityEntryOwnerChanged implements Exception {
   const CommunityEntryOwnerChanged();
 }
 
+/// Profile readback succeeded; only the public-code stage needs retrying.
+/// Never convert owner cancellation into an apparent success for another user.
+class CommunityEntryCodeUnavailable extends StateError {
+  CommunityEntryCodeUnavailable() : super('Community public code unavailable');
+}
+
 /// Entry never edits an existing profile or rotates an existing public code.
 /// Every asynchronous boundary is tied to the original authenticated owner.
 class CommunityEntryCoordinator {
   CommunityEntryCoordinator(this.repository, {this.isCurrentOwner});
   final CommunityRepository repository;
+  // A display alias, never derived from email, legal name or account ID.
+  // Letters avoid phone/contact filters; display names need not be unique.
+  final String _suggestedName =
+      'Member ${const Uuid().v4().replaceAll('-', '').substring(0, 12).split('').map((character) => String.fromCharCode(97 + int.parse(character, radix: 16))).join()}';
   // A UI session epoch also invalidates A -> B -> A and disposal. The current
   // user ID alone cannot distinguish work from a previous visit by the owner.
   final bool Function()? isCurrentOwner;
@@ -39,7 +50,14 @@ class CommunityEntryCoordinator {
     if (profile.userId != owner || profile.displayName.trim().isEmpty) {
       throw const CommunityEntryOwnerChanged();
     }
-    final result = await repository.loadPublicCode();
+    late final CommunityPublicCode result;
+    try {
+      result = await repository.loadPublicCode();
+    } on Object {
+      _requireOwner(owner);
+      CommunityOwnerOperation.checkCurrent();
+      throw CommunityEntryCodeUnavailable();
+    }
     _requireOwner(owner);
     // Validate the actual wire contract, including the full non-auth code URI.
     final code = CommunityPublicCode.fromJson({
@@ -100,7 +118,8 @@ class CommunityEntryCoordinator {
     String displayName,
     String localeCode,
   ) async {
-    final name = displayName.trim();
+    final requestedName = displayName.trim();
+    final name = requestedName.isEmpty ? _suggestedName : requestedName;
     // Preserve the existing profile editor/repository contract. No new
     // username, photo, friendship, discoverability, or payment requirement.
     if (name.length < 2 || name.length > 60) {

@@ -5,6 +5,7 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_entry_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_entry_gate.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_entry_welcome.dart';
@@ -17,6 +18,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+CommunityPolicyState acceptedEntryPolicy() {
+  final policy = CommunityContentPolicy.fromJson({
+    'version': 'community-policy-v1',
+    'document_url': 'https://www.bilhealth.com/community-guidelines',
+    'locale_code': 'en',
+    'effective_at': '2026-09-08T00:00:00Z',
+  });
+  return CommunityPolicyState.accepted(policy, acceptedVersion: policy.version);
+}
 
 const ownerA = '11111111-1111-4111-8111-111111111111';
 const ownerB = '22222222-2222-4222-8222-222222222222';
@@ -72,6 +83,23 @@ CommunityProfile profile(String owner, {String name = 'Existing member'}) =>
 class EntryRepositoryFixture extends CommunityRepository {
   EntryRepositoryFixture(super.client, {this.owner = ownerA});
   String? owner;
+  CommunityPolicyState entryPolicy = acceptedEntryPolicy();
+  @override
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async => entryPolicy;
+  @override
+  Future<void> acceptContentPolicy(String version) async {
+    final policy = entryPolicy.policy!;
+    if (policy.version != version) {
+      throw StateError('Unexpected policy version');
+    }
+    entryPolicy = CommunityPolicyState.accepted(
+      policy,
+      acceptedVersion: version,
+    );
+  }
+
   final profiles = <String, CommunityProfile>{};
   final writes = <({String owner, String name, String locale})>[];
   int reads = 0, codeReads = 0;
@@ -388,7 +416,25 @@ void main() {
       throwsFormatException,
     );
   });
-  for (final invalid in ['', ' ', 'A', List.filled(61, 'a').join()]) {
+  test(
+    'blank name uses a stable retry alias without copying account data',
+    () async {
+      final r = _entryRepository()..failCode = true;
+      final coordinator = CommunityEntryCoordinator(r);
+      await expectLater(
+        coordinator.save(displayName: ' ', localeCode: 'en'),
+        throwsA(isA<CommunityEntryCodeUnavailable>()),
+      );
+      final savedName = r.writes.single.name;
+      expect(savedName, matches(RegExp(r'^Member [a-p]{12}$')));
+      expect(savedName, isNot(contains(ownerA)));
+      r.failCode = false;
+      final result = await coordinator.save(displayName: '', localeCode: 'en');
+      expect(result.profile.displayName, savedName);
+      expect(r.writes.length, 1);
+    },
+  );
+  for (final invalid in ['A', List.filled(61, 'a').join()]) {
     test(
       'invalid name is not sent to repository (${invalid.length})',
       () async {
@@ -416,6 +462,20 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  _entryTest('entry can continue without typing a personal name', (
+    tester,
+  ) async {
+    final f = await mountEntry(tester);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('community-entry-save')));
+    await tester.tap(find.byKey(const Key('community-entry-save')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Member destination'), findsOneWidget);
+    expect(
+      f.repository.writes.single.name,
+      matches(RegExp(r'^Member [a-p]{12}$')),
+    );
+  });
   _entryTest(
     'branded welcome precedes form and no member content loads behind it',
     (tester) async {
@@ -451,6 +511,48 @@ void main() {
     expect(find.textContaining('Member destination'), findsOneWidget);
     expect(r.writes, isEmpty);
   });
+  _entryTest('new member cannot upload a profile before accepting policy', (
+    tester,
+  ) async {
+    final r = _entryRepository();
+    r.entryPolicy = CommunityPolicyState.acceptanceRequired(
+      acceptedEntryPolicy().policy!,
+    );
+    await mountEntry(tester, repository: r);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('community-policy-notice-acceptance-required')),
+      findsOneWidget,
+    );
+    expect(find.byType(TextField), findsNothing);
+    expect(find.byKey(const Key('community-entry-save')), findsNothing);
+    expect(r.writes, isEmpty);
+    expect(r.codeReads, 0);
+  });
+  _entryTest('acceptance is explicit and returns to the pending entry', (
+    tester,
+  ) async {
+    final r = _entryRepository();
+    r.entryPolicy = CommunityPolicyState.acceptanceRequired(
+      acceptedEntryPolicy().policy!,
+    );
+    await mountEntry(tester, repository: r);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Review policy'));
+    await tester.pumpAndSettle();
+    expect(r.writes, isEmpty);
+    final confirmation = find.byKey(const Key('confirm-community-policy'));
+    await tester.ensureVisible(confirmation);
+    await tester.tap(confirmation);
+    await tester.pumpAndSettle();
+    final accept = find.byKey(const Key('accept-community-policy'));
+    await tester.ensureVisible(accept);
+    await tester.tap(accept);
+    await tester.pumpAndSettle();
+    expect(find.byType(CommunityEntryWelcome), findsOneWidget);
+    expect(r.entryPolicy.permitsCommunityPublishing, isTrue);
+    expect(r.writes, isEmpty);
+  });
   _entryTest('failed check offers retry and never a creation shortcut', (
     tester,
   ) async {
@@ -475,6 +577,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('community-entry-error')), findsOneWidget);
     expect(
+      find.text(
+        CommunityEntryCopy.resolve('en', CommunityEntryCopyKey.codePending),
+      ),
+      findsOneWidget,
+    );
+    expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'Alex',
     );
@@ -483,6 +591,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Member destination'), findsOneWidget);
     expect(r.writes.length, 1);
+  });
+  _entryTest('saved profile with unavailable code retries without creation', (
+    tester,
+  ) async {
+    final r = _entryRepository()
+      ..profiles[ownerA] = profile(ownerA)
+      ..failCode = true;
+    await mountEntry(tester, repository: r);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        CommunityEntryCopy.resolve('en', CommunityEntryCopyKey.codePending),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(TextField), findsNothing);
+    expect(find.textContaining('Member destination'), findsNothing);
+    expect(r.writes, isEmpty);
+    r.failCode = false;
+    await tester.tap(find.byKey(const Key('community-entry-retry')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Member destination'), findsOneWidget);
+    expect(r.writes, isEmpty);
   });
   _entryTest(
     'optional photo failure does not hold entry or delete the saved profile',

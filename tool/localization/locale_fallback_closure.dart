@@ -154,6 +154,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...PlatformConversationRuntimeCopy.sources,
     ...CommunityModerationRuntimeCopy.sources,
     ...CommunityModerationRuntimeCopy.supplementalSources,
+    ...CommunityModerationRuntimeCopy.reportingSources,
     ...AiSafetyReportRuntimeCopy.sources,
     ...CommunitySocialRuntimeCopy.sources,
     ...CommunityReferenceRuntimeCopy.sources,

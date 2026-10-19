@@ -53,7 +53,8 @@ void main() {
       expect(food, isNotNull);
       expect(food!.id, 'bil-food-1');
       expect(food.sourceLabel, 'bil-mobile-catalog');
-      expect(food.serving.grams, 240);
+      expect(food.serving.grams, 100);
+      expect(food.serving.unit, 'g');
       expect(food.knownValue(FoodNutrient.protein), 3.4);
       expect(food.knownValue(FoodNutrient.calories), 42);
       expect(food.knownValue(FoodNutrient.fat), 1);
@@ -63,6 +64,19 @@ void main() {
       expect(food.knownValue(FoodNutrient.potassium), 150);
     },
   );
+
+  test('per-serving nutrients cannot replace the per-100g basis', () async {
+    database.execute(
+      "INSERT INTO nutrient VALUES('bil-food-1','usda:1008',999,'KCAL','per_serving',0.99)",
+    );
+    database.execute(
+      "INSERT INTO nutrient VALUES('bil-food-1','usda:1090',17,'MG','per_serving',0.99)",
+    );
+    final food = (await repository.findById('bil-food-1'))!;
+    expect(food.knownValue(FoodNutrient.calories), 42);
+    expect(food.knownValue(FoodNutrient.magnesium), isNull);
+    expect(food.serving.grams, 100);
+  });
 
   test('offline search uses existing explainable search pipeline', () async {
     final hits = await repository.searchUnified('skimmed milk');

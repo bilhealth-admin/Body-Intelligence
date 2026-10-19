@@ -38,7 +38,6 @@ class _CommunityPostCard extends StatefulWidget {
 }
 
 class _CommunityPostCardState extends State<_CommunityPostCard> {
-  late Future<bool> _moderator = widget.repository.isCommunityModerator();
   late CommunityPostStats _stats = CommunityPostStats(
     postId: widget.post.id,
     likeCount: widget.post.likeCount,
@@ -59,9 +58,6 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   @override
   void didUpdateWidget(covariant _CommunityPostCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Parent/session refresh must replace even an already-completed role proof.
-    // The repository shares this lookup across cards for the current session.
-    _moderator = widget.repository.isCommunityModerator();
     if (oldWidget.post.id != widget.post.id ||
         oldWidget.post.likeCount != widget.post.likeCount ||
         oldWidget.post.liked != widget.post.liked ||
@@ -221,12 +217,8 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => CommunityPostSurface(
     margin: const EdgeInsets.symmetric(vertical: 5),
-    decoration: BilPearlFinish.panel(
-      context,
-      radius: BorderRadius.circular(16),
-    ),
     child: Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
       child: Column(
@@ -305,56 +297,34 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                   ],
                 ),
               ),
-              FutureBuilder<bool>(
-                future: _moderator,
-                builder: (context, snapshot) => PopupMenuButton<String>(
-                  key: Key('community-post-actions-${widget.post.id}'),
-                  icon: const Icon(Icons.more_horiz_rounded),
-                  enabled: widget.actionsEnabled,
-                  onSelected: (action) {
-                    if (widget.ownerIsCurrent?.call() ?? true) {
-                      widget.onAction(action);
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    if (widget.post.authorId == widget.currentUserId)
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text(communityText(context, 'Delete', 'حذف')),
-                      )
-                    else ...[
-                      PopupMenuItem(
-                        value: 'report',
-                        child: Text(communityText(context, 'Report', 'إبلاغ')),
+              bilPearlPopupMenuButton<String>(
+                key: Key('community-post-actions-${widget.post.id}'),
+                icon: const Icon(Icons.more_horiz_rounded),
+                enabled: widget.actionsEnabled,
+                onSelected: (action) {
+                  if (widget.ownerIsCurrent?.call() ?? true) {
+                    widget.onAction(action);
+                  }
+                },
+                itemBuilder: (_) => [
+                  if (widget.post.authorId == widget.currentUserId)
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text(communityText(context, 'Delete', 'حذف')),
+                    )
+                  else ...[
+                    PopupMenuItem(
+                      value: 'report',
+                      child: Text(communityText(context, 'Report', 'إبلاغ')),
+                    ),
+                    PopupMenuItem(
+                      value: 'block',
+                      child: Text(
+                        communityText(context, 'Block member', 'حظر العضو'),
                       ),
-                      PopupMenuItem(
-                        value: 'block',
-                        child: Text(
-                          communityText(context, 'Block member', 'حظر العضو'),
-                        ),
-                      ),
-                    ],
-                    if (snapshot.data == true &&
-                        widget.post.authorId != widget.currentUserId) ...[
-                      PopupMenuItem(
-                        value: 'moderate_hide',
-                        child: Text(
-                          communityText(context, 'Hide post', 'إخفاء المنشور'),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'moderate_remove',
-                        child: Text(
-                          communityText(
-                            context,
-                            'Remove post',
-                            'إزالة المنشور',
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ],
-                ),
+                ],
               ),
             ],
           ),
@@ -399,10 +369,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                   ),
                 ],
                 const SizedBox(height: 6),
-                _ExpandableCommunityPostBody(
-                  postId: widget.post.id,
-                  body: texts['body']!,
-                ),
+                CommunityPostBody(postId: widget.post.id, body: texts['body']!),
               ],
             ),
           ),

@@ -353,7 +353,16 @@ void main() {
             final production = AppRouter.router.configuration.routes
                 .whereType<GoRoute>()
                 .singleWhere((route) => route.path == '/nutrition-plans');
-            child = production.builder!(context, state);
+            // Production uses a NoTransitionPage so its real entry splash does
+            // not jump during navigation. Reuse that exact page composition.
+            final page = production.pageBuilder?.call(context, state);
+            if (page is NoTransitionPage) {
+              child = page.child;
+            } else if (production.builder != null) {
+              child = production.builder!(context, state);
+            } else {
+              throw StateError('Unsupported production diet page composition');
+            }
           } else if (kind == 'coach') {
             child = const IntelligenceCenterPage();
           } else if (kind == 'community') {

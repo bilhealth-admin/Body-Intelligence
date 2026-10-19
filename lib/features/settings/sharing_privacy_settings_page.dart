@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
@@ -435,30 +437,48 @@ class _MealVisionConsentTile extends StatefulWidget {
 }
 
 class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
+  late final SupabaseClient? _client = mealVisionConsentClient();
   bool _saving = false;
-  late Future<bool> _current = _load();
+  late Future<bool> _current = loadMealVisionConsent();
+  StreamSubscription<AuthState>? _auth;
+  int _ownerEpoch = 0;
 
-  Future<bool> _load() async {
-    final row = await Supabase.instance.client
-        .from('bil_consent_receipts')
-        .select('granted,policy_version')
-        .eq('purpose', mealVisionConsentPurpose)
-        .order('recorded_at', ascending: false)
-        .limit(1)
-        .maybeSingle();
-    return row?['granted'] == true &&
-        row?['policy_version']?.toString() == mealVisionConsentPolicyVersion;
+  @override
+  void initState() {
+    super.initState();
+    var deliveredOwner = _client?.auth.currentUser?.id;
+    _auth = _client?.auth.onAuthStateChange.listen((state) {
+      final nextOwner = state.session?.user.id;
+      if (nextOwner != deliveredOwner && mounted) {
+        setState(() {
+          _ownerEpoch++;
+          _saving = false;
+          _current = loadMealVisionConsent();
+        });
+      }
+      deliveredOwner = nextOwner;
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_auth?.cancel());
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => FutureBuilder<bool>(
+    key: ValueKey(_ownerEpoch),
     future: _current,
     builder: (context, snapshot) {
       return BilPremiumConsentToggle(
         controlKey: const Key('meal-vision-ai-consent'),
         icon: Icons.image_search_rounded,
         value: snapshot.data ?? false,
-        onChanged: snapshot.hasData && !_saving ? _setConsent : null,
+        onChanged:
+            snapshot.hasData && !_saving && _client?.auth.currentUser != null
+            ? _setConsent
+            : null,
         // Keep the initial async lookup static/disabled; reserve the
         // progress spinner for an actual user-initiated save.
         loading: _saving,
@@ -472,27 +492,27 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
   );
 
   Future<void> _setConsent(bool next) async {
+    final epoch = _ownerEpoch;
+    final owner = _client?.auth.currentUser?.id;
     setState(() => _saving = true);
-    var granted = next;
-    if (next) granted = await ensureMealVisionConsent(context);
-    if (!next) {
-      try {
-        await Supabase.instance.client.rpc(
-          'bil_record_consent',
-          params: const <String, Object?>{
-            'p_purpose': mealVisionConsentPurpose,
-            'p_policy_version': mealVisionConsentPolicyVersion,
-            'p_granted': false,
-          },
-        );
-      } on Object {
-        granted = true;
-      }
+    final saved = next
+        ? await ensureMealVisionConsent(context)
+        : await revokeMealVisionConsent();
+    if (!mounted ||
+        epoch != _ownerEpoch ||
+        owner != _client?.auth.currentUser?.id) {
+      return;
     }
-    if (!mounted) return;
     setState(() {
       _saving = false;
-      _current = Future<bool>.value(granted);
+      _current = loadMealVisionConsent();
     });
+    if (!next && !saved) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_privacyText(context, 'Could not save changes.')),
+        ),
+      );
+    }
   }
 }

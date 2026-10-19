@@ -12,6 +12,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'macro targets round their display without changing saved precision',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final repository = PreferencesRepository(database);
+      const saved = {
+        'goal.calories': '1000',
+        'goal.carbsPercent': '20',
+        'goal.proteinPercent': '48.55',
+        'goal.fatPercent': '31.45',
+        'goal.carbsGrams': '50',
+        'goal.proteinGrams': '121.375',
+        'goal.fatGrams': '34.94444444444444',
+      };
+      await repository.setMany(saved);
+      await _pumpGoals(tester, database, repository);
+      for (final (key, value) in [
+        ('goal.carbsPercent', '20%'),
+        ('goal.proteinPercent', '49%'),
+        ('goal.fatPercent', '31%'),
+        ('goal.proteinGrams', '121 g'),
+        ('goal.fatGrams', '35 g'),
+      ]) {
+        final tile = find.byKey(ValueKey('nutrition-goal-$key'));
+        await tester.ensureVisible(tile);
+        await tester.pump();
+        expect(
+          find.descendant(of: tile, matching: find.text(value)),
+          findsOneWidget,
+        );
+      }
+      for (final entry in saved.entries) {
+        expect(await repository.get(entry.key), entry.value);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 1));
+      await database.close();
+    },
+  );
+
   testWidgets('corrupt persisted nutrition goal fails closed', (tester) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     final repository = PreferencesRepository(database);

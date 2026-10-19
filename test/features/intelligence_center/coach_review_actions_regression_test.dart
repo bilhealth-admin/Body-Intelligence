@@ -483,6 +483,42 @@ void main() {
     },
   );
 
+  for (final nextDraft in ['', 'Keep the next message draft']) {
+    testWidgets('reply dismisses only the empty composer: $nextDraft', (
+      tester,
+    ) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final prefs = PreferencesRepository(db);
+      await seed(prefs);
+      final gateway = Gateway()..pending = Completer<LocalModelResult>();
+      await mount(tester, db, gateway: gateway);
+      await waitForCoachReady(tester);
+      final field = find.byKey(const Key('ai-coach-question-field'));
+      await tester.enterText(field, 'Explain how protein supports muscle.');
+      await tester.pump();
+      await waitForCoachReady(tester, send: true);
+      await tester.tap(find.byKey(const Key('ai-coach-send-button')));
+      for (var i = 0; i < 20 && gateway.questions.isEmpty; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(gateway.questions, hasLength(1));
+      await tester.enterText(field, nextDraft);
+      final focus = tester.widget<TextField>(field).focusNode!;
+      expect(focus.hasFocus, isTrue);
+      gateway.pending!.complete(
+        LocalModelResult.answer(
+          const LocalModelAnswer(text: 'Complete reply', action: null),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Complete reply', findRichText: true), findsOneWidget);
+      expect(focus.hasFocus, nextDraft.isNotEmpty);
+      expect(tester.widget<TextField>(field).controller!.text, nextDraft);
+      await unmount(tester);
+    });
+  }
+
   testWidgets('a late model reply cannot resurrect a deleted conversation', (
     tester,
   ) async {

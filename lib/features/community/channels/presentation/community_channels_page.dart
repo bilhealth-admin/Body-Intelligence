@@ -1,3 +1,4 @@
+import '../../presentation/community_report_sheet.dart';
 import '../../../../shared/widgets/bil_pearl_material.dart';
 import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
@@ -357,49 +358,13 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
     }
   }
 
-  Future<String?> _chooseChannelReportReason() {
-    String selected = 'spam';
-    const options = <String, CommunityChannelsCopyKey>{
-      'spam': CommunityChannelsCopyKey.reportSpam,
-      'harassment': CommunityChannelsCopyKey.reportHarassment,
-      'hate_speech': CommunityChannelsCopyKey.reportHate,
-      'other': CommunityChannelsCopyKey.reportOther,
-    };
-    return showDialog<String>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (dialogContext, update) => BilPearlAlertDialog(
-          title: Text(_copy(CommunityChannelsCopyKey.reportCategory)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final entry in options.entries)
-                ListTile(
-                  key: Key('bil07-report-reason-${entry.key}'),
-                  title: Text(_copy(entry.value)),
-                  leading: Icon(
-                    selected == entry.key
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_off_rounded,
-                  ),
-                  onTap: () => update(() => selected = entry.key),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(_copy(CommunityChannelsCopyKey.cancel)),
-            ),
-            FilledButton(
-              key: const Key('bil07-submit-report'),
-              onPressed: () => Navigator.pop(dialogContext, selected),
-              child: Text(_copy(CommunityChannelsCopyKey.reportMessage)),
-            ),
-          ],
-        ),
-      ),
+  Future<String?> _chooseChannelReportReason() async {
+    final draft = await showCommunityReportSheet(
+      context,
+      target: CommunityReportTarget.message,
+      allowNote: false,
     );
+    return draft?.category;
   }
 
   Future<void> _send(

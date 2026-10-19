@@ -21,7 +21,9 @@ void main() {
     expect(sql, contains("'moderator_remove'"));
     expect(sql, contains('deleted_at = pg_catalog.now()'));
     expect(repository, contains("'bil_remove_published_community_post'"));
-    expect(card, contains("value: 'moderate_remove'"));
-    expect(card, contains("'Remove post'"));
+    expect(card, isNot(contains("value: 'moderate_remove'")));
+    expect(card, isNot(contains("'Remove post'")));
+    expect(card, contains("value: 'report'"));
+    expect(card, contains("value: 'block'"));
   });
 }

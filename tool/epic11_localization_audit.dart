@@ -9,6 +9,7 @@ const _allowedDirectText = <String>{
   'Türkçe',
   'العربية',
   'Apple Health',
+  'Google Translate',
   '💬',
   '·',
   '1.0.0+1',

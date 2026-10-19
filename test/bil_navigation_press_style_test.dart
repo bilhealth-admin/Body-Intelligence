@@ -240,74 +240,76 @@ void main() {
       });
     }
   }
-  testWidgets('Flutter SDK Calendar arrow bubble stays on the pressed arrow', (
-    tester,
-  ) async {
-    var changes = 0;
-    await mount(
-      tester,
-      Column(
-        children: [
-          arrow(() {}),
-          CalendarDatePicker(
-            initialDate: DateTime(2026, 10, 12),
-            firstDate: DateTime(2025),
-            lastDate: DateTime(2027),
-            onDateChanged: (_) => changes++,
-          ),
-        ],
-      ),
-    );
-    final next = find.byTooltip('Next month');
-    expect(next, findsOneWidget);
-    final gesture = await tester.startGesture(tester.getCenter(next));
-    await tester.pump();
-    final sdkBubble = find.byKey(const Key('bil-sdk-arrow-glass-bubble'));
-    expect(sdkBubble, findsOneWidget);
-    expect(tester.getCenter(sdkBubble), tester.getCenter(next));
-    expect(bubble, findsNothing);
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(sdkBubble, findsNothing);
-    expect(find.text('November 2026'), findsOneWidget);
-    expect(changes, 0);
-    expect(tester.takeException(), isNull);
-  });
-  testWidgets('Flutter SDK dropdown arrow keeps feedback on its own control', (
-    tester,
-  ) async {
-    var value = 1;
-    await mount(
-      tester,
-      Column(
-        children: [
-          arrow(() {}),
-          DropdownButton<int>(
-            value: value,
-            items: const [
-              DropdownMenuItem(value: 1, child: Text('One')),
-              DropdownMenuItem(value: 2, child: Text('Two')),
-            ],
-            onChanged: (next) => value = next!,
-          ),
-        ],
-      ),
-    );
-    final dropdownArrow = find.byIcon(Icons.arrow_drop_down);
-    final gesture = await tester.startGesture(tester.getCenter(dropdownArrow));
-    await tester.pump();
-    final sdkBubble = find.byKey(const Key('bil-sdk-arrow-glass-bubble'));
-    expect(sdkBubble, findsOneWidget);
-    expect(tester.getCenter(sdkBubble), tester.getCenter(dropdownArrow));
-    expect(bubble, findsNothing);
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(sdkBubble, findsNothing);
-    await tester.tap(find.text('Two').last);
-    await tester.pumpAndSettle();
-    expect(value, 2);
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'Flutter SDK Calendar keeps native feedback without cloning its arrow',
+    (tester) async {
+      var changes = 0;
+      await mount(
+        tester,
+        Column(
+          children: [
+            arrow(() {}),
+            CalendarDatePicker(
+              initialDate: DateTime(2026, 10, 12),
+              firstDate: DateTime(2025),
+              lastDate: DateTime(2027),
+              onDateChanged: (_) => changes++,
+            ),
+          ],
+        ),
+      );
+      final next = find.byTooltip('Next month');
+      expect(next, findsOneWidget);
+      final gesture = await tester.startGesture(tester.getCenter(next));
+      await tester.pump();
+      final sdkBubble = find.byKey(const Key('bil-sdk-arrow-glass-bubble'));
+      expect(sdkBubble, findsNothing);
+      expect(bubble, findsNothing);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(sdkBubble, findsNothing);
+      expect(find.text('November 2026'), findsOneWidget);
+      expect(changes, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'Flutter SDK dropdown keeps native feedback without a root overlay',
+    (tester) async {
+      var value = 1;
+      await mount(
+        tester,
+        Column(
+          children: [
+            arrow(() {}),
+            DropdownButton<int>(
+              value: value,
+              items: const [
+                DropdownMenuItem(value: 1, child: Text('One')),
+                DropdownMenuItem(value: 2, child: Text('Two')),
+              ],
+              onChanged: (next) => value = next!,
+            ),
+          ],
+        ),
+      );
+      final dropdownArrow = find.byIcon(Icons.arrow_drop_down);
+      final gesture = await tester.startGesture(
+        tester.getCenter(dropdownArrow),
+      );
+      await tester.pump();
+      final sdkBubble = find.byKey(const Key('bil-sdk-arrow-glass-bubble'));
+      expect(sdkBubble, findsNothing);
+      expect(bubble, findsNothing);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(sdkBubble, findsNothing);
+      await tester.tap(find.text('Two').last);
+      await tester.pumpAndSettle();
+      expect(value, 2);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('disabled SDK dropdown never gives active arrow feedback', (
     tester,
   ) async {
@@ -335,7 +337,7 @@ void main() {
     expect(find.byType(DropdownMenuItem<int>), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-  testWidgets('SDK feedback chooses the arrow closest to the pressed point', (
+  testWidgets('native row arrows never create detached overlay copies', (
     tester,
   ) async {
     await mount(
@@ -363,22 +365,21 @@ void main() {
     final gesture = await tester.startGesture(tester.getCenter(rightArrow));
     await tester.pump();
     final sdkBubble = find.byKey(const Key('bil-sdk-arrow-glass-bubble'));
-    expect(sdkBubble, findsOneWidget);
-    expect(tester.getCenter(sdkBubble), tester.getCenter(rightArrow));
+    expect(sdkBubble, findsNothing);
     await gesture.up();
     await tester.pumpAndSettle();
     expect(sdkBubble, findsNothing);
     expect(tester.takeException(), isNull);
   });
   testWidgets(
-    'SDK feedback only appears when the pressed point hits the arrow glyph',
+    'native glyph and nearby presses retain actions without overlay copies',
     (tester) async {
       var parentTaps = 0;
       await mount(
         tester,
         Column(
           children: [
-            // Keeps the app-wide SDK fallback active, as it is in the app.
+            // Local app feedback remains mounted beside the native control.
             arrow(() {}),
             Center(
               child: SizedBox(
@@ -429,8 +430,7 @@ void main() {
       final arrowPress = await tester.startGesture(arrowRect.center);
       await tester.pump();
       final sdkBubble = find.byKey(const Key('bil-sdk-arrow-glass-bubble'));
-      expect(sdkBubble, findsOneWidget);
-      expect(tester.getCenter(sdkBubble), arrowRect.center);
+      expect(sdkBubble, findsNothing);
       await arrowPress.up();
       await tester.pumpAndSettle();
       expect(parentTaps, 2);

@@ -133,6 +133,12 @@ String _diaryText(BuildContext context, String key) {
 }
 
 const _diarySupplementalCopy = <String, Map<String, String>>{
+  'WHO · Dietary fibre': {
+    'ar': 'منظمة الصحة العالمية · الألياف الغذائية',
+    'fr': 'OMS · Fibres alimentaires',
+    'es': 'OMS · Fibra alimentaria',
+    'tr': 'DSÖ · Diyet lifi',
+  },
   'Diary sharing is not available yet. Your diary remains private.': {
     'ar': 'مشاركة اليوميات غير متاحة بعد. تظل يومياتك خاصة.',
     'fr':

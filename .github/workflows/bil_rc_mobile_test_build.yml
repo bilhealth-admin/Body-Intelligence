@@ -15,7 +15,7 @@ concurrency:
 env:
   FLUTTER_VERSION: 3.44.6
   BIL_APP_ID: com.bilhealth.bodyintelligencelog
-  BIL_TEST_BUILD_NUMBER: '8'
+  BIL_TEST_BUILD_NUMBER: '33'
 
 jobs:
   android-emulator-artifact:
@@ -102,16 +102,16 @@ jobs:
             adb devices
           script: BIL_ANDROID_EMULATOR_PHASE=crypto bash tool/release/rc_android_emulator_gate.sh
 
+      - name: Prepare disposable non-admin cloud accounts for native barcode and two-account RLS
+        shell: pwsh
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: ./tool/release_certification/native_cloud_fixture.ps1 -Mode create -StatePath "$env:RUNNER_TEMP/bil-native-fixture.json"
+
       - name: Run Android native UI and lifecycle on a fresh emulator
         env:
           SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
           SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
-          BIL_BARCODE_GATE_EMAIL: ${{ secrets.BIL_BARCODE_GATE_EMAIL }}
-          BIL_BARCODE_GATE_PASSWORD: ${{ secrets.BIL_BARCODE_GATE_PASSWORD }}
-          BIL_EPIC9_ACCOUNT_A_EMAIL: ${{ secrets.BIL_EPIC9_ACCOUNT_A_EMAIL }}
-          BIL_EPIC9_ACCOUNT_A_PASSWORD: ${{ secrets.BIL_EPIC9_ACCOUNT_A_PASSWORD }}
-          BIL_EPIC9_ACCOUNT_B_EMAIL: ${{ secrets.BIL_EPIC9_ACCOUNT_B_EMAIL }}
-          BIL_EPIC9_ACCOUNT_B_PASSWORD: ${{ secrets.BIL_EPIC9_ACCOUNT_B_PASSWORD }}
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
         with:
           api-level: 35
@@ -184,14 +184,30 @@ jobs:
             echo 'SIGNED_AAB_VERIFY=NOT_RUN_MISSING_SIGNING_SECRETS' >> "$EVIDENCE/signing-status.txt"
           fi
 
+      - name: Delete only the disposable native QA identities
+        if: always()
+        shell: pwsh
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: ./tool/release_certification/native_cloud_fixture.ps1 -Mode cleanup -StatePath "$env:RUNNER_TEMP/bil-native-fixture.json"
+
+      - name: Upload completed main-app Android test binaries
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: bil-rc-android-main-binaries-${{ github.sha }}
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload Android test artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: bil-rc-android-test-${{ github.sha }}
           path: |
-            build/app/outputs/flutter-apk/app-debug.apk
-            build/app/outputs/bundle/release/app-release.aab
             artifacts/release/rc_mobile_test/android
           if-no-files-found: warn
           retention-days: 14
@@ -205,6 +221,8 @@ jobs:
     name: iOS simulator + unsigned IPA evidence
     runs-on: macos-26
     timeout-minutes: 100
+    env:
+      BIL_TEST_BUILD_NUMBER: '37'
     steps:
       - name: Checkout exact RC
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -754,6 +772,14 @@ jobs:
             wait_marker "$udid" 'Email address' 30
             capture_verified "$udid" "$dir" '02-login-deep-link'
 
+            # Removed operator URLs must leave the ordinary login visible.
+            for forbidden in admin/ai-coach community/moderation community/food-review; do
+              stem="02-rejected-${forbidden//\//-}"
+              open_verified_link "$udid" "bil://$forbidden" "$dir" "$stem"
+              wait_marker "$udid" 'Email address' 30
+              capture_verified "$udid" "$dir" "$stem"
+            done
+
             open_verified_link "$udid" 'bil://connected-health' "$dir" '03-connected-health-deep-link'
             wait_marker "$udid" 'Apps & Devices' 30
             wait_marker "$udid" 'Health Hub' 30
@@ -881,3 +907,42 @@ jobs:
             xcrun simctl delete "$UDID"
           done
           rm -rf Payload
+
+  android-notification-sdk:
+    name: Android API ${{ matrix.api }} local notification permission states
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [33, 36]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve the exact candidate dependencies
+        run: flutter pub get
+      - name: Require accelerated disposable emulator
+        run: bash .github/scripts/bil_prepare_android_kvm.sh
+      - name: Verify denied and granted native local notifications without cloud or push
+        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 900
+          script: bash .github/scripts/bil_android_notification_sdk_qa.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-notification-sdk-api${{ matrix.api }}-${{ github.sha }}
+          path: artifacts/qa/notification-sdk-api${{ matrix.api }}/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,45 +1,101 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'first_use_spotlight.dart';
+export 'first_use_spotlight.dart' show FirstUseGuidePlacement;
 
-/// An optional guide follows the real control without changing its layout.
-/// The overlay occupies only the bubble; its target remains directly usable.
+/// Tracks the actual target, including keyboard changes and parent scrolling.
 class FirstUseTargetGuide extends StatefulWidget {
   const FirstUseTargetGuide({
     super.key,
     required this.child,
     this.guide,
     this.preferBelow = true,
+    this.focusTarget,
+    this.onTargetActivated,
   });
-
   final Widget child;
   final Widget? guide;
   final bool preferBelow;
-
+  final GlobalKey? focusTarget;
+  final VoidCallback? onTargetActivated;
   @override
   State<FirstUseTargetGuide> createState() => _FirstUseTargetGuideState();
 }
 
-class _FirstUseTargetGuideState extends State<FirstUseTargetGuide> {
+class _FirstUseTargetGuideState extends State<FirstUseTargetGuide>
+    with WidgetsBindingObserver {
   final _target = GlobalKey();
-  final _link = LayerLink();
   final _portal = OverlayPortalController();
+  ScrollPosition? _scroll;
+  Animation<double>? _routeAnimation;
+  bool _scheduled = false;
+  bool _tracking = false;
+  Rect? _lastTarget;
 
-  void _sync() => WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (!mounted) return;
-    if (widget.guide == null) {
-      _portal.hide();
-    } else {
-      _portal.show();
+  void _trackPosition(Duration timeStamp) {
+    if (!mounted || widget.guide == null) {
+      _tracking = false;
+      return;
     }
-  });
+    final box = (widget.focusTarget ?? _target).currentContext
+        ?.findRenderObject();
+    if (box is RenderBox && box.attached && box.hasSize) {
+      final rect = box.localToGlobal(Offset.zero) & box.size;
+      if (rect != _lastTarget) {
+        _lastTarget = rect;
+        setState(() {});
+      }
+    }
+    // Observe frames scheduled by scrolling, route or keyboard animations.
+    // Do not schedule animation frames of our own when the target is stationary.
+    WidgetsBinding.instance.addPostFrameCallback(_trackPosition);
+  }
+
+  void _sync() {
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
+      if (!mounted) return;
+      if (widget.guide == null) {
+        _portal.hide();
+      } else {
+        _portal.show();
+        setState(() {});
+        if (!_tracking) {
+          _tracking = true;
+          WidgetsBinding.instance.addPostFrameCallback(_trackPosition);
+        }
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _sync();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animation = ModalRoute.of(context)?.animation;
+    if (animation != _routeAnimation) {
+      _routeAnimation?.removeListener(_sync);
+      _routeAnimation = animation;
+      _routeAnimation?.addListener(_sync);
+    }
+    final scroll = Scrollable.maybeOf(context)?.position;
+    if (scroll != _scroll) {
+      _scroll?.removeListener(_sync);
+      _scroll = scroll;
+      _scroll?.addListener(_sync);
+    }
+    _sync();
+  }
+
+  @override
+  void didChangeMetrics() => _sync();
   @override
   void didUpdateWidget(FirstUseTargetGuide oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -47,85 +103,25 @@ class _FirstUseTargetGuideState extends State<FirstUseTargetGuide> {
   }
 
   @override
-  Widget build(BuildContext context) => OverlayPortal(
-    controller: _portal,
-    overlayChildBuilder: (overlayContext) {
-      final box = _target.currentContext?.findRenderObject();
-      if (box is! RenderBox || !box.hasSize || widget.guide == null) {
-        return const SizedBox.shrink();
-      }
-      final media = MediaQuery.of(overlayContext);
-      final overlay = Overlay.of(overlayContext).context.findRenderObject();
-      final position = box.localToGlobal(Offset.zero, ancestor: overlay);
-      final width = math.min(340.0, media.size.width - 24);
-      final top = media.padding.top + 8;
-      final bottom = media.size.height - media.viewInsets.bottom - 8;
-      final above = math.max(0.0, position.dy - top - 8);
-      final below = math.max(0.0, bottom - position.dy - box.size.height - 8);
-      final useBelow = widget.preferBelow
-          ? below >= 180 || below >= above
-          : above < 180 && below > above;
-      final left = (position.dx + box.size.width / 2 - width / 2).clamp(
-        12.0,
-        math.max(12.0, media.size.width - width - 12),
-      );
-      final height = math.max(48.0, useBelow ? below : above);
-      return Positioned(
-        left: 0,
-        top: 0,
-        width: width,
-        child: CompositedTransformFollower(
-          link: _link,
-          showWhenUnlinked: false,
-          targetAnchor: useBelow ? Alignment.bottomLeft : Alignment.topLeft,
-          followerAnchor: useBelow ? Alignment.topLeft : Alignment.bottomLeft,
-          offset: Offset(left - position.dx, useBelow ? 8 : -8),
-          child: Material(
-            type: MaterialType.transparency,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: height),
-              child: SingleChildScrollView(
-                child: FirstUseGuidePlacement(
-                  below: useBelow,
-                  pointerAlignment: Alignment(
-                    ((position.dx + box.size.width / 2 - left) / width * 2 - 1)
-                        .clamp(-.88, .88),
-                    0,
-                  ),
-                  child: widget.guide!,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-    child: CompositedTransformTarget(
-      key: _target,
-      link: _link,
-      child: widget.child,
-    ),
-  );
-}
+  void dispose() {
+    _scroll?.removeListener(_sync);
+    _routeAnimation?.removeListener(_sync);
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
-class FirstUseGuidePlacement extends InheritedWidget {
-  const FirstUseGuidePlacement({
-    super.key,
-    required this.below,
-    required this.pointerAlignment,
-    required super.child,
-  });
-  final bool below;
-  final Alignment pointerAlignment;
-  static FirstUseGuidePlacement? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<FirstUseGuidePlacement>();
-  static bool belowOf(BuildContext context) =>
-      context
-          .dependOnInheritedWidgetOfExactType<FirstUseGuidePlacement>()
-          ?.below ??
-      false;
   @override
-  bool updateShouldNotify(FirstUseGuidePlacement oldWidget) =>
-      below != oldWidget.below ||
-      pointerAlignment != oldWidget.pointerAlignment;
+  Widget build(BuildContext context) => OverlayPortal(
+    overlayLocation: OverlayChildLocation.rootOverlay,
+    controller: _portal,
+    overlayChildBuilder: (_) => widget.guide == null
+        ? const SizedBox.shrink()
+        : FirstUseSpotlight(
+            target: widget.focusTarget ?? _target,
+            guide: widget.guide!,
+            preferBelow: widget.preferBelow,
+            onTargetActivated: widget.onTargetActivated,
+          ),
+    child: SizedBox(key: _target, child: widget.child),
+  );
 }

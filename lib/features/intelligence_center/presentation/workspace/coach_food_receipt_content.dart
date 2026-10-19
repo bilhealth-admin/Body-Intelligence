@@ -79,7 +79,7 @@ class CoachFoodReceiptContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: CoachFoodCardPalette.inset,
+            color: CoachFoodCardPalette.inset(context),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -124,9 +124,9 @@ class CoachFoodReceiptContent extends StatelessWidget {
           const SizedBox(height: 7),
           Text(
             '${copy.sources}: ${_sources(copy)}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: CoachFoodCardPalette.muted,
+              color: CoachFoodCardPalette.muted(context),
             ),
           ),
         ],
@@ -173,15 +173,15 @@ class CoachFoodReceiptContent extends StatelessWidget {
             Text(
               name,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11.5, height: 1.3),
+              style: TextStyle(fontSize: 11.5, height: 1.3),
             ),
             const SizedBox(height: 2),
             Text(
               amount,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10.5,
-                color: CoachFoodCardPalette.muted,
+                color: CoachFoodCardPalette.muted(context),
               ),
             ),
           ],
@@ -199,7 +199,7 @@ class CoachFoodReceiptContent extends StatelessWidget {
       label: Text(copy.edit),
       style: TextButton.styleFrom(
         foregroundColor: CoachFoodCardPalette.blue,
-        disabledForegroundColor: CoachFoodCardPalette.muted,
+        disabledForegroundColor: CoachFoodCardPalette.muted(copy.context),
         textStyle: Theme.of(
           copy.context,
         ).textTheme.labelLarge?.copyWith(fontSize: 12),
@@ -234,7 +234,7 @@ class CoachFoodNutritionDetails extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: CoachFoodCardPalette.inset,
+        color: CoachFoodCardPalette.inset(context),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -242,7 +242,7 @@ class CoachFoodNutritionDetails extends StatelessWidget {
         children: [
           Text(
             copy.nutritionDetails,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 5),
           for (final nutrient in FoodNutrient.values)
@@ -250,7 +250,7 @@ class CoachFoodNutritionDetails extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 3),
               child: Text(
                 '${copy.nutrient(nutrient)}: ${value(nutrient) == null ? copy.unknown : '${copy.number(value(nutrient)!)} ${CoachFoodNutrients.units[nutrient]}'}',
-                style: const TextStyle(fontSize: 12),
+                style: TextStyle(fontSize: 12),
               ),
             ),
         ],

@@ -24,6 +24,7 @@ void main() {
   late CommunityRepository repository;
   late List<({String method, Map<String, dynamic> body})> sent;
   var snapshots = 0, missing = false, changed = false, forged = false;
+  String? pollFailureCode;
   Completer<void>? release, entered;
   Map<String, dynamic> row() => {
     'post': {
@@ -39,6 +40,7 @@ void main() {
   };
   setUp(() async {
     sent = [];
+    pollFailureCode = null;
     snapshots = 0;
     missing = changed = forged = false;
     release = entered = null;
@@ -74,6 +76,16 @@ void main() {
               await release?.future;
               data = [];
             case 'bil_community_moderation_polls_v1':
+              if (pollFailureCode != null) {
+                return http.Response(
+                  jsonEncode({
+                    'code': pollFailureCode,
+                    'message': 'bil_community_moderation_polls_v1 unavailable',
+                  }),
+                  pollFailureCode == '42501' ? 403 : 404,
+                  request: request,
+                );
+              }
               data = [];
             case 'bil_moderate_community_post_v2':
               data = {
@@ -236,6 +248,22 @@ void main() {
       expect(snapshots, 1);
     },
   );
+  for (final code in ['PGRST202', '42501']) {
+    test('incomplete poll review fails closed for $code', () async {
+      pollFailureCode = code;
+      await expectLater(
+        repository.loadReviewedPosts([queued]),
+        throwsA(isA<PostgrestException>().having((e) => e.code, 'code', code)),
+      );
+      expect(snapshots, 1);
+      expect(
+        sent.any(
+          (request) => request.method == 'bil_moderate_community_post_v2',
+        ),
+        isFalse,
+      );
+    });
+  }
   final ownRejected = CommunityPost(
     id: postId,
     authorId: rewardsOwnerA,

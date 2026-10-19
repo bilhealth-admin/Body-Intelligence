@@ -1,3 +1,4 @@
+import 'bil_navigation_focus_observer.dart';
 import '../../features/commerce/presentation/app_purchase_presentation_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -126,7 +127,10 @@ class AppRouter {
 
   static final router = GoRouter(
     navigatorKey: bilAppNavigatorKey,
-    observers: [bilStorePresentationRouteObserver],
+    observers: [
+      bilStorePresentationRouteObserver,
+      bilRootNavigationFocusObserver,
+    ],
     initialLocation: '/startup',
     errorBuilder: (_, _) => const InvalidRoutePage(),
     onEnter: (_, currentState, nextState, _) {
@@ -510,6 +514,7 @@ class AppRouter {
         },
       ),
       ShellRoute(
+        observers: [bilShellNavigationFocusObserver],
         // Startup is a full-screen gate. Entering the product must replace it
         // atomically; a platform page transition would expose the blue splash
         // beside the dashboard for a frame, especially in RTL on iOS.

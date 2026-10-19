@@ -348,8 +348,8 @@ class _MessageBubble extends StatelessWidget {
                         icon: undoInProgress
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                                child: BilFeatureWelcomeStatus(
+                                  color: Color(0xFF697178),
                                 ),
                               )
                             : const BilGlassPressFeedback(
@@ -445,7 +445,7 @@ class _CoachMessageActionControl extends StatelessWidget {
             avatar: running
                 ? const SizedBox.square(
                     dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: BilFeatureWelcomeStatus(color: Color(0xFF697178)),
                   )
                 : BilGlassPressFeedback(
                     child: Icon(_iconForAction(action.type), size: 18),

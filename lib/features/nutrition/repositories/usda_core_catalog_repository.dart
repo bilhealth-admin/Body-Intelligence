@@ -254,16 +254,9 @@ class UsdaCoreCatalogRepository implements UnifiedFoodRepository {
       <Object?>[fdcId],
     ).single;
 
-    final portionRows = _database.select(
-      'SELECT amount, unit, portion_description, modifier, gram_weight '
-      'FROM portions WHERE fdc_id = ? '
-      'ORDER BY sequence_number, id LIMIT 1',
-      <Object?>[fdcId],
-    );
-
-    final serving = portionRows.isEmpty
-        ? const FoodServing(amount: 100, unit: 'g', grams: 100)
-        : _servingFrom(portionRows.single);
+    // USDA nutrient columns are per 100 g. Household portion metadata must
+    // never become their denominator without rescaling every nutrient.
+    const serving = FoodServing(amount: 100, unit: 'g', grams: 100);
 
     final sourceDataset = row['source_dataset'] as String;
     final source = switch (sourceDataset) {
@@ -284,6 +277,11 @@ class UsdaCoreCatalogRepository implements UnifiedFoodRepository {
     _put(nutrients, FoodNutrient.sodium, row['sodium_mg']);
     _put(nutrients, FoodNutrient.potassium, row['potassium_mg']);
     _put(nutrients, FoodNutrient.calcium, row['calcium_mg']);
+    _put(
+      nutrients,
+      FoodNutrient.magnesium,
+      row.keys.contains('magnesium_mg') ? row['magnesium_mg'] : null,
+    );
     _put(nutrients, FoodNutrient.iron, row['iron_mg']);
     final hasDiaryCoreEvidence = const <FoodNutrient>[
       FoodNutrient.calories,
@@ -314,17 +312,6 @@ class UsdaCoreCatalogRepository implements UnifiedFoodRepository {
       verified: sourceDataset != 'branded' && hasDiaryCoreEvidence,
       isCustom: false,
       updatedAt: DateTime.tryParse(row['publication_date'] as String? ?? ''),
-    );
-  }
-
-  FoodServing _servingFrom(Row row) {
-    final grams = (row['gram_weight'] as num?)?.toDouble();
-    final amount = (row['amount'] as num?)?.toDouble();
-    final unit = (row['unit'] as String?)?.trim();
-    return FoodServing(
-      amount: amount != null && amount > 0 ? amount : 100,
-      unit: unit?.isNotEmpty == true ? unit! : 'g',
-      grams: grams != null && grams > 0 ? grams : 100,
     );
   }
 

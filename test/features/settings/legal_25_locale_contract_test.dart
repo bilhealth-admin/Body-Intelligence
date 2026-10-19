@@ -1,11 +1,92 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_translation_copy.dart';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
 import 'package:body_intelligence_log/features/settings/legal_document_page.dart';
+import 'package:body_intelligence_log/features/settings/food_search_privacy_disclosure.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'food-search processor disclosure covers every supported locale',
+    (tester) async {
+      String? english;
+      for (final tag in RuntimeCopy.supported) {
+        final parts = tag.split('-');
+        final locale = Locale.fromSubtags(
+          languageCode: parts.first,
+          scriptCode: parts.length > 1 && parts[1].length == 4
+              ? parts[1]
+              : null,
+          countryCode: parts.length > 1 && parts[1].length == 2
+              ? parts[1]
+              : null,
+        );
+        String? text;
+        await tester.pumpWidget(
+          Localizations(
+            locale: locale,
+            delegates: GlobalMaterialLocalizations.delegates,
+            child: Builder(
+              builder: (context) {
+                text = foodSearchPrivacyDisclosure(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(text, contains('USDA'), reason: tag);
+        expect(text, contains('Google Cloud Translation'), reason: tag);
+        if (tag == 'en') english = text;
+        if (tag != 'en' && english != null) {
+          expect(text, isNot(english), reason: tag);
+        }
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      'privacy renders translation provider disclosure in $language',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: Locale(language),
+            supportedLocales: const [Locale('en'), Locale('ar')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: const LegalDocumentPage(document: BilLegalDocument.privacy),
+          ),
+        );
+        final context = tester.element(find.byType(LegalDocumentPage));
+        final disclosure = cloudTranslationDisclosure(context);
+        expect(
+          disclosure,
+          contains(
+            language == 'ar'
+                ? 'ترجمة Google السحابية'
+                : 'Google Cloud Translation',
+          ),
+        );
+        await tester.scrollUntilVisible(
+          find.text(disclosure),
+          600,
+          maxScrolls: 60,
+        );
+        expect(find.text(disclosure), findsOneWidget);
+        final foodDisclosure = foodSearchPrivacyDisclosure(context);
+        await tester.scrollUntilVisible(find.text(foodDisclosure), 400);
+        expect(find.text(foodDisclosure), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
   test('legal and trust copy has direct extended locale entries', () {
     final legal = File(
       'lib/features/settings/legal_document_page.dart',
@@ -61,7 +142,7 @@ void main() {
 
   test('all legal documents share one auditable policy revision', () {
     expect(bilLegalPolicyId, 'BIL-LEGAL');
-    expect(bilLegalPolicyRevision, '2026-09-05');
+    expect(bilLegalPolicyRevision, '2026-10-19');
     expect(bilLegalPublicationStatus, 'PUBLISHED');
     expect(BilLegalDocument.values, hasLength(3));
   });

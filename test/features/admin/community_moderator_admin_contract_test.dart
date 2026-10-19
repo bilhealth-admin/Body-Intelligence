@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
-import 'package:body_intelligence_log/features/admin/presentation/community_moderator_admin_panel.dart';
+import '../../support/legacy_mobile_admin/features/admin/presentation/community_moderator_admin_panel.dart';
 import 'package:body_intelligence_log/features/admin/services/community_moderator_admin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

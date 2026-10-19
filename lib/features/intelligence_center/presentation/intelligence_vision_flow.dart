@@ -158,6 +158,8 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     if (!identical(foodMediaRequest, request)) return;
     foodMediaRequest = null;
     if (!mounted) return;
+    ref.read(aiCoachUsageRefreshProvider.notifier).requestAuthoritativeReload();
+    ref.invalidate(aiVisionCreditStateProvider);
     _updateState(() {
       analyzingFoodImage = false;
       foodImageFlowOpening = false;
@@ -256,6 +258,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
       queuedMediaBarcode = rawBarcode;
       return;
     }
+    questionFocus.unfocus();
     final request = _newCoachMediaRequest();
     foodMediaRequest = request;
     _updateState(() => foodImageFlowOpening = true);
@@ -291,6 +294,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     if (!mounted || !conversationReady || foodImageFlowOpening || sending) {
       return;
     }
+    questionFocus.unfocus();
     final request = _newCoachMediaRequest();
     foodMediaRequest = request;
     _updateState(() => foodImageFlowOpening = true);

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
@@ -300,7 +301,7 @@ class _DiaryMealCard extends StatelessWidget {
         ),
       ),
     );
-    Widget plannerAction() => PopupMenuButton<String>(
+    Widget plannerAction() => bilPearlPopupMenuButton<String>(
       key: Key('daily-meal-planner-$type'),
       tooltip: _mealListText(context, 'logFood'),
       icon: const Icon(Icons.more_horiz_rounded),

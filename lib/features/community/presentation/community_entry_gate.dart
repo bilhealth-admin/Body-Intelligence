@@ -9,9 +9,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
-import '../../profile/services/profile_photo_service.dart';
 import '../data/community_repository.dart';
 import '../domain/community_text_policy.dart';
+import '../domain/community_content_policy.dart';
 import '../services/community_entry_coordinator.dart';
 import 'community_copy.dart';
 import 'community_entry_copy.dart';
@@ -19,6 +19,8 @@ import 'community_entry_welcome.dart';
 import 'community_return_button.dart';
 import 'community_surface.dart';
 import 'community_welcome.dart';
+import 'community_policy_notice.dart';
+import 'community_safety_page.dart';
 
 /// Defers constructing a social destination until its owner has a saved profile
 /// and a valid server code. Premium and moderator authorization stay outside.
@@ -36,7 +38,8 @@ class CommunityEntryGate extends ConsumerStatefulWidget {
   final bool showWelcome;
   final Duration welcomeDuration;
 
-  /// An injectable, owner-aware seam; false means the optional photo is pending.
+  /// Explicit opt-in only. Entry never copies a private/account avatar into
+  /// the social profile by default. False means the requested sync is pending.
   final Future<bool> Function()? syncPhoto;
 
   @override
@@ -48,12 +51,14 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
   CommunityRepository? _repository;
   CommunityEntryCoordinator? _coordinator;
   CommunityEntryReceipt? _receipt;
+  CommunityPolicyState? _entryPolicy;
   StreamSubscription<AuthState>? _auth;
   Timer? _welcomeTimer;
   String? _owner;
   bool _checking = true;
   bool _saving = false;
   bool _failedCheck = false;
+  bool _codePending = false;
   bool _welcomePending = false;
   String? _saveError;
   int _generation = 0;
@@ -158,6 +163,7 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
       }
       _generation++;
       _receipt = null;
+      _entryPolicy = null;
       _saveError = null;
       _saving = false;
       _name.clear();
@@ -178,16 +184,36 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
     setState(() {
       _checking = true;
       _failedCheck = false;
+      _codePending = false;
       _receipt = null;
     });
     try {
       final receipt = owner == null
           ? null
           : await coordinator?.check().timeout(const Duration(seconds: 20));
-      if (_sameOperation(generation, owner)) setState(() => _receipt = receipt);
-    } on Object {
+      if (!_sameOperation(generation, owner)) return;
+      if (!mounted) return;
+      final policy = owner != null && receipt == null
+          ? await _repository!
+                .loadCommunityPolicyState(
+                  localeCode: BilLocalePolicy.canonicalTag(
+                    Localizations.localeOf(context),
+                  ),
+                )
+                .timeout(const Duration(seconds: 20))
+          : null;
       if (_sameOperation(generation, owner)) {
-        setState(() => _failedCheck = true);
+        setState(() {
+          _receipt = receipt;
+          _entryPolicy = policy;
+        });
+      }
+    } on Object catch (error) {
+      if (_sameOperation(generation, owner)) {
+        setState(() {
+          _failedCheck = true;
+          _codePending = error is CommunityEntryCodeUnavailable;
+        });
       }
     } finally {
       if (_sameOperation(generation, owner)) setState(() => _checking = false);
@@ -200,7 +226,7 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
     if (coordinator == null || owner == null || _saving || _checking) return;
     final generation = _generation;
     final name = _name.text.trim();
-    if (name.length < 2 || name.length > 60) {
+    if (name.isNotEmpty && (name.length < 2 || name.length > 60)) {
       setState(
         () => _saveError = CommunityEntryCopy.text(
           context,
@@ -228,6 +254,15 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
       // Optional photo never holds the member behind a spinner. Its separate
       // owner scope also fences upload requests after SDK token refresh.
       unawaited(_syncOptionalPhoto(generation, owner));
+    } on CommunityEntryCodeUnavailable {
+      if (_sameOperation(generation, owner)) {
+        setState(
+          () => _saveError = CommunityEntryCopy.text(
+            context,
+            CommunityEntryCopyKey.codePending,
+          ),
+        );
+      }
     } on CommunityTextPolicyException catch (error) {
       if (_sameOperation(generation, owner)) {
         setState(
@@ -250,22 +285,41 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
     }
   }
 
+  Future<void> _reviewEntryPolicy() async {
+    final owner = _owner;
+    final generation = _generation;
+    final repository = _repository;
+    if (owner == null || repository == null) return;
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (pageContext) => CommunitySafetyPage(
+          repository: repository,
+          onAccepted: () {
+            if (_sameOperation(generation, owner)) {
+              Navigator.of(pageContext).pop(true);
+            }
+          },
+        ),
+      ),
+    );
+    if (_sameOperation(generation, owner)) await _check();
+  }
+
   Future<void> _syncOptionalPhoto(int generation, String owner) async {
     final repository = _repository;
-    if (repository == null || !_sameOperation(generation, owner)) return;
+    final synchronize = widget.syncPhoto;
+    if (repository == null ||
+        synchronize == null ||
+        !_sameOperation(generation, owner)) {
+      return;
+    }
     bool isCurrentOwner() =>
         identical(repository, _repository) && _sameOperation(generation, owner);
     var synced = true;
     try {
       synced = await repository.runForCommunityOwner(
         () async {
-          final override = widget.syncPhoto;
-          if (override != null) return override();
-          if (widget.repository != null) return true;
-          final result = await ref
-              .read(profilePhotoServiceProvider)
-              .syncStoredPhotoToCommunity(isCurrentOwner: isCurrentOwner);
-          return result == null || result.cloudSynced;
+          return synchronize();
         },
         ownerId: owner,
         isCurrentOwner: isCurrentOwner,
@@ -338,11 +392,16 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
                       const Icon(Icons.cloud_off_outlined, size: 42),
                       const SizedBox(height: 16),
                       Text(
-                        communityText(
-                          context,
-                          'Could not load your community profile safely.',
-                          'تعذر تحميل ملف المجتمع بأمان.',
-                        ),
+                        _codePending
+                            ? CommunityEntryCopy.text(
+                                context,
+                                CommunityEntryCopyKey.codePending,
+                              )
+                            : communityText(
+                                context,
+                                'Could not load your community profile safely.',
+                                'تعذر تحميل ملف المجتمع بأمان.',
+                              ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
@@ -359,6 +418,14 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
                     ],
                   ),
                 ),
+              )
+            : _entryPolicy?.permitsCommunityPublishing != true
+            ? CommunityPolicyNotice(
+                state: Future.value(
+                  _entryPolicy ?? const CommunityPolicyState.unavailable(),
+                ),
+                onReview: _reviewEntryPolicy,
+                onRetry: _check,
               )
             : CommunityEntryWelcome(
                 name: _name,

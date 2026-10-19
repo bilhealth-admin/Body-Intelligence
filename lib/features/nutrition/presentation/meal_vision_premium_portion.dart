@@ -35,8 +35,8 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
                             frameBuilder: (context, child, frame, synchronous) {
                               if (synchronous || frame != null) return child;
                               return const Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
+                                child: BilFeatureWelcomeStatus(
+                                  color: Color(0xFF697178),
                                 ),
                               );
                             },
@@ -141,7 +141,7 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
           style: TextStyle(color: _foreground(context)),
           decoration: InputDecoration(
             labelText: _word(context, 'Unit', 'الوحدة'),
-            suffixIcon: PopupMenuButton<String>(
+            suffixIcon: bilPearlPopupMenuButton<String>(
               key: const Key('premium-vision-final-unit-menu'),
               onSelected: (unit) => _portionUpdate(() => _unit.text = unit),
               itemBuilder: (_) => [

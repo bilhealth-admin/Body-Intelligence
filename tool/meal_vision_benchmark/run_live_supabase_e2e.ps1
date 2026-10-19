@@ -16,7 +16,7 @@ function Invoke-DbQuery([string]$Sql) {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-      $raw = (& npx --yes supabase@latest db query --linked $Sql 2>$null) -join "`n"
+      $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef 2>$null) -join "`n"
       $exitCode = $LASTEXITCODE
     } finally {
       $ErrorActionPreference = $previousErrorActionPreference
@@ -168,6 +168,8 @@ try {
   $duplicateStatus = $null
   $duplicateCacheHit = $false
   $duplicateCharged = $null
+  $duplicateErrorCode = $null
+  $duplicateReplayStable = $false
   try {
     $duplicateHeaders = @{
       apikey = $publishableKey
@@ -179,9 +181,12 @@ try {
     $duplicateStatus = 200
     $duplicateCacheHit = $duplicateResponse.cache.hit -eq $true
     $duplicateCharged = $duplicateResponse.cache.charged -eq $true
+    $duplicateReplay = Invoke-RestMethod -Method Post -Uri $endpoint -Headers $duplicateHeaders -ContentType 'application/json' -Body $payload -TimeoutSec 75
+    $duplicateReplayStable = ($duplicateReplay.cache.hit -eq $true -and $duplicateReplay.cache.charged -eq $false -and (($duplicateReplay.candidates | ConvertTo-Json -Depth 15 -Compress) -eq ($duplicateResponse.candidates | ConvertTo-Json -Depth 15 -Compress)))
   } catch {
     $duplicateStatus = [int]$_.Exception.Response.StatusCode
     $duplicateRejected = $duplicateStatus -eq 409
+    try { $duplicateErrorCode = [string](($_.ErrorDetails.Message | ConvertFrom-Json).error) } catch {}
   }
 
   $receiptQuery = Invoke-DbQuery "select state,provider,model,latency_ms,input_tokens,output_tokens,cost_usd,provider_attempts,cost_source from public.bil_ai_usage_events where owner_id='$userId' and capability='vision' and request_id='$requestId'"
@@ -197,7 +202,8 @@ try {
     $receipt.state -eq 'succeeded' -and
     [int]$usage.used -gt 0 -and
     [int]$usage.reserved -eq 0 -and
-    $replaySameRequest
+    $replaySameRequest -and
+    ($duplicateCacheHit -and -not $duplicateCharged -and $duplicateReplayStable)
   )
 
   [pscustomobject]@{
@@ -224,13 +230,15 @@ try {
     exact_duplicate_charged = $duplicateCharged
     duplicate_image_rejected = $duplicateRejected
     duplicate_status = $duplicateStatus
+    duplicate_error_code = $duplicateErrorCode
+    cached_request_replay_stable = $duplicateReplayStable
     requires_review = $true
     auto_logged = $false
   } | ConvertTo-Json -Depth 5
 } finally {
   if ($userId) {
-    try { Invoke-RestMethod -Method Delete -Uri "$baseUrl/auth/v1/admin/users/$userId" -Headers $adminHeaders -UserAgent 'BIL-Server-Validation/1.0' | Out-Null } catch {}
+    Invoke-RestMethod -Method Delete -Uri "$baseUrl/auth/v1/admin/users/$userId" -Headers $adminHeaders -UserAgent 'BIL-Server-Validation/1.0' | Out-Null
   }
-  try { [void](Invoke-DbQuery "delete from public.bil_store_product_registry where product_id='$productId'") } catch {}
+  [void](Invoke-DbQuery "delete from public.bil_store_product_registry where product_id='$productId'")
   Remove-Variable serverKey,publishableKey,accessToken,password,keysRaw -ErrorAction SilentlyContinue
 }

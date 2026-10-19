@@ -1,3 +1,4 @@
+import '../nutrition/presentation/food_translation_attribution.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';

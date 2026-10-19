@@ -1,3 +1,4 @@
+import '../../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -200,9 +201,9 @@ class _CoachFoodReceiptCardState extends State<CoachFoodReceiptCard> {
                       context,
                     ),
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10.5,
-                    color: CoachFoodCardPalette.muted,
+                    color: CoachFoodCardPalette.muted(context),
                   ),
                 ),
                 _menu(copy),
@@ -240,7 +241,7 @@ class _CoachFoodReceiptCardState extends State<CoachFoodReceiptCard> {
                   : () => _run(widget.onViewDailyLog, mutation: false),
               style: TextButton.styleFrom(
                 foregroundColor: CoachFoodCardPalette.blue,
-                disabledForegroundColor: CoachFoodCardPalette.muted,
+                disabledForegroundColor: CoachFoodCardPalette.muted(context),
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(0, 42),
                 textStyle: Theme.of(copy.context).textTheme.labelLarge
@@ -263,15 +264,17 @@ class _CoachFoodReceiptCardState extends State<CoachFoodReceiptCard> {
     );
   }
 
-  Widget _menu(CoachFoodCardCopy copy) => PopupMenuButton<_ReceiptMenuAction>(
+  Widget _menu(
+    CoachFoodCardCopy copy,
+  ) => bilPearlPopupMenuButton<_ReceiptMenuAction>(
     key: CoachFoodCardKeys.menu(widget.commit.operationId),
     tooltip: copy.receiptActions,
     enabled: !_busy,
-    color: const Color(0xFF203043),
-    icon: const Icon(
+    color: Theme.of(context).colorScheme.surface,
+    icon: Icon(
       Icons.more_vert,
       size: 20,
-      color: CoachFoodCardPalette.white,
+      color: Theme.of(context).colorScheme.onSurface,
     ),
     padding: EdgeInsets.zero,
     constraints: const BoxConstraints(minWidth: 180),
@@ -310,14 +313,14 @@ class _CoachFoodReceiptCardState extends State<CoachFoodReceiptCard> {
         enabled: _canUndo,
         child: Text(
           copy.undo,
-          style: const TextStyle(color: CoachFoodCardPalette.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       ),
       PopupMenuItem(
         value: _ReceiptMenuAction.nutrition,
         child: Text(
           copy.nutritionDetails,
-          style: const TextStyle(color: CoachFoodCardPalette.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       ),
     ],

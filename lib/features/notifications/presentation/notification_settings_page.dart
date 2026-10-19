@@ -264,9 +264,6 @@ class _NotificationSettingsPageState
                     ),
                     const SizedBox(height: 16),
                     BilPearlMaterialCard(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withValues(alpha: 0.7),
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
                         child: Column(

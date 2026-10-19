@@ -11,7 +11,7 @@ void main() {
       'lib/features/community/presentation/community_connections_page.dart': 1,
       'lib/features/community/presentation/community_people_page.dart': 1,
       'lib/features/community/presentation/community_profile_page.dart': 1,
-      'lib/features/community/presentation/community_post_moderation_page.dart':
+      'test/support/legacy_mobile_admin/features/community/presentation/community_post_moderation_page.dart':
           1,
       'lib/features/community/presentation/community_notifications_rendering.dart':
           1,
@@ -30,7 +30,8 @@ void main() {
       'lib/features/community/presentation/community_invite_landing_page.dart':
           1,
       'lib/features/community/presentation/community_bil_code_page.dart': 3,
-      'lib/features/community/presentation/community_food_review_page.dart': 1,
+      'test/support/legacy_mobile_admin/features/community/presentation/community_food_review_page.dart':
+          1,
       'lib/features/community/presentation/community_post_gallery_page.dart': 1,
       'lib/features/community/presentation/community_saved_posts_page.dart': 1,
       'lib/features/community/presentation/community_my_posts_page.dart': 1,
@@ -91,7 +92,13 @@ void main() {
     ).readAsStringSync();
     // The five-tab Community root must not grow a decorative Back arrow, but
     // a pushed Community route must expose its actual previous page.
-    expect(source, contains('leading: Navigator.of(context).canPop()'));
+    expect(source, contains('Navigator.of(context).canPop()'));
+    expect(
+      source,
+      contains('leading: _section == _CommunityHubSection.circles'),
+    );
+    expect(source, contains("key: const Key('community-safe-return')"));
+    expect(source, contains('_showFeedMode(_feedMode)'));
     expect(source, contains('automaticallyImplyLeading: false'));
     expect(RegExp(r'AppBar\(').allMatches(source).length, 3);
     expect(

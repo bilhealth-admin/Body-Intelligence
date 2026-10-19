@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import 'food_search_privacy_disclosure.dart';
+import '../community/presentation/community_translation_copy.dart'
+    show cloudTranslationDisclosure, translationCopy;
 import '../../app/router/bil_safe_return_button.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
@@ -14,7 +17,7 @@ const _combinedAiPrivacyDisclosure =
 enum BilLegalDocument { terms, privacy, healthDisclaimer }
 
 const bilLegalPolicyId = 'BIL-LEGAL';
-const bilLegalPolicyRevision = '2026-09-05';
+const bilLegalPolicyRevision = '2026-10-19';
 const bilLegalEntity = 'BIL Health';
 const bilLegalPublicationStatus = 'PUBLISHED';
 
@@ -35,6 +38,13 @@ class LegalDocumentPage extends StatelessWidget {
       ...copy.sections[document]!,
       if (document == BilLegalDocument.privacy)
         _facebookLoginPrivacySection(locale),
+      if (document == BilLegalDocument.privacy)
+        (translationCopy(context, 6), cloudTranslationDisclosure(context)),
+      if (document == BilLegalDocument.privacy)
+        (
+          'USDA · Google Cloud Translation',
+          foodSearchPrivacyDisclosure(context),
+        ),
     ];
     // The legal entity is rendered from the immutable metadata line below.
     // Translation services must never localize or rename it.
@@ -578,7 +588,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySections,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSections,
     },
-    effective: 'Last updated: 5 September 2026 • BIL Health',
+    effective: 'Last updated: 2026-10-19 • BIL Health',
     contact:
         'Questions: privacy@bilhealth.com • Support: support@bilhealth.com',
   ),
@@ -598,7 +608,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsAr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsAr,
     },
-    effective: 'آخر تحديث: 5 سبتمبر 2026 • BIL Health',
+    effective: 'آخر تحديث: 2026-10-19 • BIL Health',
     contact: 'الخصوصية: privacy@bilhealth.com • الدعم: support@bilhealth.com',
   ),
   'fr': _LegalPageCopy(
@@ -617,7 +627,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsFr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsFr,
     },
-    effective: 'Dernière mise à jour : 5 septembre 2026 • BIL Health',
+    effective: 'Dernière mise à jour : 2026-10-19 • BIL Health',
     contact:
         'Confidentialité : privacy@bilhealth.com • Assistance : support@bilhealth.com',
   ),
@@ -637,7 +647,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsEs,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsEs,
     },
-    effective: 'Última actualización: 5 de septiembre de 2026 • BIL Health',
+    effective: 'Última actualización: 2026-10-19 • BIL Health',
     contact:
         'Privacidad: privacy@bilhealth.com • Soporte: support@bilhealth.com',
   ),
@@ -657,7 +667,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsTr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsTr,
     },
-    effective: 'Son güncelleme: 5 Eylül 2026 • BIL Health',
+    effective: 'Son güncelleme: 2026-10-19 • BIL Health',
     contact: 'Gizlilik: privacy@bilhealth.com • Destek: support@bilhealth.com',
   ),
 };

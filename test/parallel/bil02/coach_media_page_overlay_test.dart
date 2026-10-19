@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 // Integration-proposal dependency: run only on the declared BIL-02 validation
 // overlay containing intelligence_media_confirmation.dart and page wiring.
 // These are real Flutter page + isolated Drift tests with synthetic catalog and
@@ -792,7 +793,11 @@ void main() {
           analysis: (_) => pending,
         );
         final pageState = tester.state(find.byType(IntelligenceCenterPage));
+        final composer = find.byKey(const Key('ai-coach-question-field'));
+        await tester.enterText(composer, 'Keep this photo draft');
+        expect(tester.widget<TextField>(composer).focusNode!.hasFocus, isTrue);
         await tester.tap(find.byKey(const Key('ai-coach-food-image-button')));
+        expect(tester.widget<TextField>(composer).focusNode!.hasFocus, isFalse);
         await _drain(tester);
         await tester.tap(
           find.byKey(const Key('ai-coach-image-source-gallery')),
@@ -805,7 +810,10 @@ void main() {
           );
           await tester.pump();
         }
+        await tester.pump();
         expect(pending.calls, 1);
+        expect(find.byType(BilFeatureWelcomeStatus), findsWidgets);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(pending.result.isCompleted, isFalse);
         await _expectNoMeal(tester, fixture);
 
@@ -844,8 +852,11 @@ void main() {
         expect(find.byType(CoachFoodReviewCard), findsNothing);
         expect(find.byType(CoachFoodReceiptCard), findsNothing);
         expect(tester.widget<TextField>(field).controller!.text, nextDraft);
+        expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
         expect(fixture.gateway.questions, [newerQuery]);
         expect(pending.calls, 1);
+        expect(find.byType(BilFeatureWelcomeStatus), findsNothing);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
         await tester.runAsync(() async {
           expect(
             await fixture.database.select(fixture.database.mealItems).get(),

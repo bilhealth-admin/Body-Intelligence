@@ -6,6 +6,26 @@
     "directory": "./public_site",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/.well-known/*"]
+    "run_worker_first": [
+      "/.well-known/*",
+      "/privacy",
+      "/privacy/",
+      "/terms",
+      "/terms/",
+      "/subscription-terms",
+      "/subscription-terms/",
+      "/health-disclaimer",
+      "/health-disclaimer/",
+      "/account-deletion",
+      "/account-deletion/",
+      "/data-deletion",
+      "/data-deletion/",
+      "/support",
+      "/support/",
+      "/community-guidelines",
+      "/community-guidelines/",
+      "/contact",
+      "/contact/"
+    ]
   }
 }

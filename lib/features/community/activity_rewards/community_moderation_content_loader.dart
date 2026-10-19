@@ -117,21 +117,10 @@ class CommunityModerationContentLoader {
     List<String> postIds,
     Map<String, CommunityPoll> output,
   ) async {
-    Object? response;
-    try {
-      response = await client.rpc(
-        'bil_community_moderation_polls_v1',
-        params: {'p_post_ids': postIds},
-      );
-    } on PostgrestException catch (error) {
-      // owned.patch remains safe on BASE before BIL-00 applies the forward SQL
-      // overlay. Any real authorization/data failure is still fail-closed.
-      if (error.code == 'PGRST202' ||
-          error.message.contains('bil_community_moderation_polls_v1')) {
-        return;
-      }
-      rethrow;
-    }
+    final response = await client.rpc(
+      'bil_community_moderation_polls_v1',
+      params: {'p_post_ids': postIds},
+    );
     if (response is! List) {
       throw const FormatException('Invalid moderation poll batch');
     }

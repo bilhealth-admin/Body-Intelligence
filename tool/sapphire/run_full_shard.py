@@ -26,7 +26,10 @@ dart=flutter.parent/'cache/dart-sdk/bin'/('dart.exe' if os.name=='nt' else 'dart
 snapshot=flutter.parent/'cache/flutter_tools.snapshot'
 assert dart.is_file() and snapshot.is_file()
 # Direct Dart invocation avoids cmd.exe's 8K batch limit and regex quoting.
-command=[str(dart),str(snapshot),'test','--no-pub','--concurrency','1','--timeout','90s','--reporter','json',*assigned]
+command=[str(dart),str(snapshot),'test','--no-pub','--concurrency','1','--timeout','90s',
+         '--dart-define=BIL_PAYMENTS_ENABLED=true',
+         '--dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true',
+         '--reporter','json',*assigned]
 plan={'source':source,'platform':platform.platform(),'all_files':all_files,'shard':shard,'assigned':assigned,
  'prerequisite_files':[performance],'excluded_files':[],'name_filters':[],
  'command':command,'autocrlf':subprocess.check_output(['git','config','--get','core.autocrlf']).decode().strip()}

@@ -48,6 +48,7 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
   String? evidenceOwnerKey,
 }) {
   if (foods.isEmpty) return Future<Food?>.value(null);
+  FocusScope.of(context).unfocus();
   if (MediaQuery.sizeOf(context).width >= 320) {
     return showPremiumTrustedVisionFoodMatchDialog(
       context,
@@ -124,6 +125,7 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   String? mealType,
   DateTime? photographedAt,
 }) {
+  FocusScope.of(context).unfocus();
   if (MediaQuery.sizeOf(context).width >= 320) {
     return showPremiumVisionReviewDialog(
       context,
@@ -279,7 +281,6 @@ class _CandidateReviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final low = candidate.confidence < 0.55;
     return BilPearlMaterialCard(
-      color: low ? Theme.of(context).colorScheme.errorContainer : null,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

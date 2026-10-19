@@ -1,3 +1,8 @@
+import 'community_post_surface.dart';
+import 'community_post_body.dart';
+import 'community_report_sheet.dart';
+import 'community_comment_card.dart';
+import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import 'package:flutter/foundation.dart' show SynchronousFuture;
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
@@ -68,7 +73,6 @@ import 'community_welcome.dart';
 import 'community_sapphire.dart';
 import 'community_feed_refresh_notice.dart';
 import 'community_post_review_reason.dart';
-import '../../../app/theme/bil_pearl_finish.dart';
 
 part '../home_profile/community_home_owner_scope.dart';
 part '../home_profile/community_feed_owner_scope.dart';
@@ -81,12 +85,14 @@ part 'community_hub_top_tabs.dart';
 part 'community_feed_copy.dart';
 part 'community_feed_reference_suggestions.dart';
 part 'community_feed_reference_header.dart';
+part 'community_inline_topic_feed.dart';
 part 'community_feed_mode_control.dart';
 
 part 'community_post_card.dart';
 part 'community_post_owner_scope.dart';
 part 'community_poll_panel.dart';
 part 'community_feed_pagination.dart';
+part 'community_feed_author_identity.dart';
 part 'community_feed_mode_continuity.dart';
 part 'community_post_composer_page.dart';
 part 'community_compose_entry_page.dart';
@@ -325,162 +331,185 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       ),
     ].map((action) => SizedBox(width: 48, height: 48, child: action)).toList();
     final topTabsHeight = _communityHubTopTabsHeight(context, width);
-    return Scaffold(
-      bottomNavigationBar: visit == null
-          ? null
-          : BilReferenceBottomBar(
-              selected: 3,
-              dark: Theme.of(context).brightness == Brightness.dark,
-              onSelected: (index) {
-                if (!visit.isCurrent()) return;
-                if (index == 2) {
-                  unawaited(showBilQuickAdd(context, originPath: '/community'));
-                } else if (index != 3) {
-                  context.go(BilReferenceBottomBar.routes[index]);
-                }
-              },
-            ),
-      appBar: AppBar(
-        // Community is normally a bottom tab (no Back). If a notification
-        // pushed it above an existing screen, expose the real previous route.
-        automaticallyImplyLeading: false,
-        leading: Navigator.of(context).canPop()
-            ? const CommunityReturnButton()
-            : null,
-        centerTitle: false,
-        titleSpacing: 16,
-        toolbarHeight: stackedTitle ? titleHeight + 64 : 56,
-        title: stackedTitle
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    key: const Key('community-full-title'),
-                    maxLines: 10,
-                    softWrap: true,
-                    style: titleStyle,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: actions,
-                  ),
-                ],
-              )
-            : Text(
-                title,
-                key: const Key('community-full-title'),
-                maxLines: 10,
-                softWrap: true,
-                style: titleStyle,
-              ),
-        actions: stackedTitle ? const [] : actions,
-        bottom: visit == null
+    return PopScope<Object?>(
+      canPop: _section != _CommunityHubSection.circles,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop &&
+            _section == _CommunityHubSection.circles &&
+            visit != null &&
+            visit.isCurrent()) {
+          _showFeedMode(_feedMode);
+        }
+      },
+      child: Scaffold(
+        bottomNavigationBar: visit == null
             ? null
-            : PreferredSize(
-                preferredSize: Size.fromHeight(topTabsHeight),
-                child: SizedBox(
-                  height: topTabsHeight,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _CommunityHubTopTab(
-                          key: const Key('community-hub-explore-tab'),
-                          label: communityText(context, 'Explore', 'استكشاف'),
-                          selected:
-                              _section == _CommunityHubSection.explore &&
-                              _feedMode == CommunityFeedMode.explore,
-                          onTap: () {
-                            if (visit.isCurrent()) {
-                              _showFeedMode(CommunityFeedMode.explore);
-                            }
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: _CommunityHubTopTab(
-                          key: const Key('community-hub-following-tab'),
-                          label: communityText(
-                            context,
-                            'Following',
-                            'المتابَعون',
+            : BilReferenceBottomBar(
+                selected: 3,
+                dark: Theme.of(context).brightness == Brightness.dark,
+                onSelected: (index) {
+                  if (!visit.isCurrent()) return;
+                  if (index == 2) {
+                    unawaited(
+                      showBilQuickAdd(context, originPath: '/community'),
+                    );
+                  } else if (index != 3) {
+                    context.go(BilReferenceBottomBar.routes[index]);
+                  }
+                },
+              ),
+        appBar: AppBar(
+          // Community is normally a bottom tab (no Back). If a notification
+          // pushed it above an existing screen, expose the real previous route.
+          automaticallyImplyLeading: false,
+          leading: _section == _CommunityHubSection.circles
+              ? BackButton(
+                  key: const Key('community-safe-return'),
+                  onPressed: () {
+                    if (visit != null && visit.isCurrent()) {
+                      _showFeedMode(_feedMode);
+                    }
+                  },
+                )
+              : Navigator.of(context).canPop()
+              ? const CommunityReturnButton()
+              : null,
+          centerTitle: false,
+          titleSpacing: 16,
+          toolbarHeight: stackedTitle ? titleHeight + 64 : 56,
+          title: stackedTitle
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      key: const Key('community-full-title'),
+                      maxLines: 10,
+                      softWrap: true,
+                      style: titleStyle,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: actions,
+                    ),
+                  ],
+                )
+              : Text(
+                  title,
+                  key: const Key('community-full-title'),
+                  maxLines: 10,
+                  softWrap: true,
+                  style: titleStyle,
+                ),
+          actions: stackedTitle ? const [] : actions,
+          bottom: visit == null
+              ? null
+              : PreferredSize(
+                  preferredSize: Size.fromHeight(topTabsHeight),
+                  child: SizedBox(
+                    height: topTabsHeight,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _CommunityHubTopTab(
+                            key: const Key('community-hub-explore-tab'),
+                            label: communityText(context, 'Explore', 'استكشاف'),
+                            selected:
+                                _section == _CommunityHubSection.explore &&
+                                _feedMode == CommunityFeedMode.explore,
+                            onTap: () {
+                              if (visit.isCurrent()) {
+                                _showFeedMode(CommunityFeedMode.explore);
+                              }
+                            },
                           ),
-                          selected: _section == _CommunityHubSection.following,
-                          onTap: () {
-                            if (visit.isCurrent()) {
-                              _showFeedMode(CommunityFeedMode.following);
-                            }
-                          },
                         ),
-                      ),
-                      Expanded(
-                        child: _CommunityHubTopTab(
-                          key: const Key('community-hub-circles-tab'),
-                          label: communityText(context, 'Circles', 'الدوائر'),
-                          selected: _section == _CommunityHubSection.circles,
-                          onTap: () {
-                            if (visit.isCurrent()) {
-                              setState(() {
-                                _feedPreview?.refreshIfExpired();
-                                _section = _CommunityHubSection.circles;
-                              });
-                            }
-                          },
+                        Expanded(
+                          child: _CommunityHubTopTab(
+                            key: const Key('community-hub-following-tab'),
+                            label: communityText(
+                              context,
+                              'Following',
+                              'المتابَعون',
+                            ),
+                            selected:
+                                _section == _CommunityHubSection.following,
+                            onTap: () {
+                              if (visit.isCurrent()) {
+                                _showFeedMode(CommunityFeedMode.following);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: _CommunityHubTopTab(
+                            key: const Key('community-hub-circles-tab'),
+                            label: communityText(context, 'Circles', 'الدوائر'),
+                            selected: _section == _CommunityHubSection.circles,
+                            onTap: () {
+                              if (visit.isCurrent()) {
+                                setState(() {
+                                  _feedPreview?.refreshIfExpired();
+                                  _section = _CommunityHubSection.circles;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+        ),
+        body: repository == null
+            ? const _SignInRequired()
+            : visit == null
+            ? const _CommunityProfileOwnerChangedBody()
+            : switch (_section) {
+                _CommunityHubSection.explore => _FeedTab(
+                  key: _feedKey,
+                  repository: repository,
+                  imagePicker:
+                      widget.postImagePicker ?? CommunityPostImagePicker(),
+                  initialMode: _feedMode,
+                  entryWelcomeHandled: widget.entryWelcomeHandled,
+                  suspendAfterOwnerChange: _suspendReboundFeed,
+                  ownerIsCurrent: visit.isCurrent,
+                  ownerChanges: visit.changes,
+                  preview: _feedPreview!,
+                  onOpenCircles: () {
+                    if (visit.isCurrent()) {
+                      setState(() => _section = _CommunityHubSection.circles);
+                    }
+                  },
+                ),
+                _CommunityHubSection.following => _FeedTab(
+                  key: _feedKey,
+                  repository: repository,
+                  imagePicker:
+                      widget.postImagePicker ?? CommunityPostImagePicker(),
+                  initialMode: _feedMode,
+                  entryWelcomeHandled: widget.entryWelcomeHandled,
+                  suspendAfterOwnerChange: _suspendReboundFeed,
+                  ownerIsCurrent: visit.isCurrent,
+                  ownerChanges: visit.changes,
+                  preview: _feedPreview!,
+                  onOpenCircles: () {
+                    if (visit.isCurrent()) {
+                      setState(() => _section = _CommunityHubSection.circles);
+                    }
+                  },
+                ),
+                _CommunityHubSection.circles => CommunityCirclesPage(
+                  repository: repository,
+                  embedded: true,
+                  onComposeCircle: (slug) async {
+                    if (!visit.isCurrent()) return;
+                    await _composeCircleFromHub(slug);
+                  },
+                ),
+              },
       ),
-      body: repository == null
-          ? const _SignInRequired()
-          : visit == null
-          ? const _CommunityProfileOwnerChangedBody()
-          : switch (_section) {
-              _CommunityHubSection.explore => _FeedTab(
-                key: _feedKey,
-                repository: repository,
-                imagePicker:
-                    widget.postImagePicker ?? CommunityPostImagePicker(),
-                initialMode: _feedMode,
-                entryWelcomeHandled: widget.entryWelcomeHandled,
-                suspendAfterOwnerChange: _suspendReboundFeed,
-                ownerIsCurrent: visit.isCurrent,
-                ownerChanges: visit.changes,
-                preview: _feedPreview!,
-                onOpenCircles: () {
-                  if (visit.isCurrent()) {
-                    setState(() => _section = _CommunityHubSection.circles);
-                  }
-                },
-              ),
-              _CommunityHubSection.following => _FeedTab(
-                key: _feedKey,
-                repository: repository,
-                imagePicker:
-                    widget.postImagePicker ?? CommunityPostImagePicker(),
-                initialMode: _feedMode,
-                entryWelcomeHandled: widget.entryWelcomeHandled,
-                suspendAfterOwnerChange: _suspendReboundFeed,
-                ownerIsCurrent: visit.isCurrent,
-                ownerChanges: visit.changes,
-                preview: _feedPreview!,
-                onOpenCircles: () {
-                  if (visit.isCurrent()) {
-                    setState(() => _section = _CommunityHubSection.circles);
-                  }
-                },
-              ),
-              _CommunityHubSection.circles => CommunityCirclesPage(
-                repository: repository,
-                embedded: true,
-                onComposeCircle: (slug) async {
-                  if (!visit.isCurrent()) return;
-                  await _composeCircleFromHub(slug);
-                },
-              ),
-            },
     );
   }
 

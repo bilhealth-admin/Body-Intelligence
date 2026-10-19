@@ -10,7 +10,8 @@ class _CommunityFeedReferenceHeader extends StatefulWidget {
     required this.topics,
     required this.enabled,
     required this.onCompose,
-    required this.onOpenTopic,
+    required this.onSelectTopic,
+    this.selectedTopic,
     this.onOpenCircles,
     this.ownerIsCurrent,
   });
@@ -23,7 +24,8 @@ class _CommunityFeedReferenceHeader extends StatefulWidget {
   final Future<List<CommunityTopic>> topics;
   final bool enabled;
   final Future<void> Function({String? tag, String? circle}) onCompose;
-  final ValueChanged<CommunityTopic> onOpenTopic;
+  final ValueChanged<CommunityTopic?> onSelectTopic;
+  final String? selectedTopic;
   final VoidCallback? onOpenCircles;
   final ValueGetter<bool>? ownerIsCurrent;
 
@@ -175,51 +177,6 @@ class _CommunityFeedReferenceHeaderState
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(14, 3, 14, 1),
-          child: Row(
-            children: [
-              Expanded(
-                child: _CommunityComposeAction(
-                  key: const Key('community-compose-photo'),
-                  icon: Icons.photo_camera_outlined,
-                  label: communityText(context, 'Photo', 'صورة'),
-                  onTap: widget.enabled ? () => widget.onCompose() : null,
-                ),
-              ),
-              Expanded(
-                child: _CommunityComposeAction(
-                  key: const Key('community-compose-poll'),
-                  icon: Icons.poll_outlined,
-                  label: communityText(context, 'Poll', 'استطلاع'),
-                  onTap: widget.enabled ? () => widget.onCompose() : null,
-                ),
-              ),
-              Expanded(
-                child: _CommunityComposeAction(
-                  key: const Key('community-compose-circles'),
-                  icon: Icons.groups_outlined,
-                  label: communityText(context, 'Circles', 'الدوائر'),
-                  onTap: widget.enabled ? widget.onOpenCircles : null,
-                ),
-              ),
-              Expanded(
-                child: _CommunityComposeAction(
-                  key: const Key('community-compose-coach'),
-                  icon: Icons.auto_awesome_outlined,
-                  label: communityText(context, 'AI Help', 'مساعدة AI'),
-                  onTap: widget.enabled && _ownerCurrent
-                      ? () {
-                          if (_ownerCurrent) {
-                            context.push('/intelligence-center');
-                          }
-                        }
-                      : null,
-                ),
-              ),
-            ],
-          ),
-        ),
         FutureBuilder<List<CommunityTopic>>(
           future: widget.topics,
           initialData: widget.initialTopics,
@@ -248,26 +205,27 @@ class _CommunityFeedReferenceHeaderState
                 visible.add(topic);
               }
             }
-            return SizedBox(
-              height:
-                  42 +
-                  (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(
-                    0,
-                    36,
-                  ),
-              child: ListView(
-                key: const Key('community-reference-topic-chips'),
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 3, 16, 4),
+            return SingleChildScrollView(
+              key: const Key('community-reference-topic-chips'),
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 3, 16, 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _CommunityReferenceChip(
+                  _CommunityReferenceTab(
+                    key: const Key('community-category-all'),
                     label: communityText(context, 'All', 'الكل'),
-                    selected: true,
-                    onTap: null,
+                    selected: widget.selectedTopic == null,
+                    onTap: widget.enabled && _ownerCurrent
+                        ? () => widget.onSelectTopic(null)
+                        : null,
                   ),
                   for (final topic in visible.take(4)) ...[
                     const SizedBox(width: 7),
-                    _CommunityReferenceChip(
+                    _CommunityReferenceTab(
+                      key: ValueKey('community-category-${topic.slug}'),
+                      selected: widget.selectedTopic == topic.slug,
                       label: switch (topic.slug) {
                         'nutrition' => communityText(
                           context,
@@ -293,8 +251,8 @@ class _CommunityFeedReferenceHeaderState
                           topic.slug,
                         ),
                       },
-                      onTap: widget.enabled
-                          ? () => widget.onOpenTopic(topic)
+                      onTap: widget.enabled && _ownerCurrent
+                          ? () => widget.onSelectTopic(topic)
                           : null,
                     ),
                   ],
@@ -390,58 +348,12 @@ class _CommunityStoryBubble extends StatelessWidget {
   }
 }
 
-class _CommunityComposeAction extends StatelessWidget {
-  const _CommunityComposeAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    super.key,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(12),
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 48),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            BilGlassPressFeedback(
-              child: Icon(
-                icon,
-                size: 19,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Flexible(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-class _CommunityReferenceChip extends StatelessWidget {
-  const _CommunityReferenceChip({
+class _CommunityReferenceTab extends StatelessWidget {
+  const _CommunityReferenceTab({
     required this.label,
     this.selected = false,
     this.onTap,
+    super.key,
   });
 
   final String label;
@@ -449,27 +361,16 @@ class _CommunityReferenceChip extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: selected
-          ? scheme.primary
-          : scheme.surfaceContainerHighest.withValues(alpha: .55),
-      shape: const StadiumBorder(),
-      child: InkWell(
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: _CommunityHubTopTab(
+        label: label,
+        selected: selected,
         onTap: onTap,
-        customBorder: const StadiumBorder(),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: selected ? scheme.onPrimary : scheme.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
+        singleLine: true,
       ),
-    );
-  }
+    ),
+  );
 }

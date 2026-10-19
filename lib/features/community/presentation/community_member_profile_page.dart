@@ -71,6 +71,7 @@ class _CommunityMemberProfilePageState
   bool _refreshing = false;
   bool _gridMode = false;
   bool _relationshipBusy = false;
+  bool _memberSafetyBusy = false;
   bool _followBusy = false;
   bool _managingPost = false;
   _CommunityProfileContentTab _contentTab = _CommunityProfileContentTab.moments;
@@ -407,6 +408,36 @@ class _CommunityMemberProfilePageState
       leading: const CommunityReturnButton(),
       toolbarHeight: 48,
       actions: [
+        FutureBuilder<void>(
+          future: _loading,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done ||
+                snapshot.hasError ||
+                _profile?.isSelf != false ||
+                _profileOwnerCancelled) {
+              return const SizedBox.shrink();
+            }
+            return bilPearlPopupMenuButton<String>(
+              key: const Key('community-member-safety'),
+              enabled: !_relationshipBusy && !_memberSafetyBusy,
+              onSelected: _manageMemberSafety,
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'report',
+                  child: Text(
+                    communityText(context, 'Report member', 'الإبلاغ عن العضو'),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'block',
+                  child: Text(
+                    communityText(context, 'Block member', 'حظر العضو'),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
         IconButton(
           tooltip: _gridMode
               ? communityText(context, 'List view', 'عرض القائمة')

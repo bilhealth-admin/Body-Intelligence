@@ -14,9 +14,16 @@ String _communityRepositorySource() => [
 
 void main() {
   test('connections surface is Supabase-backed and fail-safe', () {
-    final source = File(
+    final page = File(
       'lib/features/community/presentation/community_connections_page.dart',
     ).readAsStringSync();
+    expect(page, contains("part 'community_connections_states.dart'"));
+    final source = [
+      page,
+      File(
+        'lib/features/community/presentation/community_connections_states.dart',
+      ).readAsStringSync(),
+    ].join('\n');
     expect(source, contains('loadFriendshipsWithProfiles'));
     expect(source, contains("context.push('/community/people')"));
     expect(source, contains("context.push('/login')"));

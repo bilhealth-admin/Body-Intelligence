@@ -7,7 +7,7 @@ import 'package:body_intelligence_log/features/community/domain/community_models
 import 'package:body_intelligence_log/features/community/domain/community_review_snapshot.dart';
 import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
-import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
+import '../../support/legacy_mobile_admin/features/community/presentation/community_post_moderation_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/safety_moderation/domain/ai_coach_safety_report.dart';
 import 'package:flutter/material.dart';
@@ -511,11 +511,9 @@ void main() {
       await repository.communitySocialClient.dispose();
     });
 
-    for (final action in ['remove', 'hide']) {
-      testWidgets('feed $action succeeds and renders its refreshed result', (
-        tester,
-      ) async {
-        final readback = Completer<List<CommunityPost>>();
+    testWidgets(
+      'privileged mobile member sees reporting and blocking but no operator controls',
+      (tester) async {
         try {
           await tester.pumpWidget(
             MaterialApp(
@@ -526,9 +524,8 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          expect(repository.feedLoads, 1);
-
-          repository.feedReadback = readback;
+          // This fixture's server role resolves to true. It must not expose web operations.
+          expect(await repository.isCommunityModerator(), isTrue);
           final actions = find.byKey(
             const Key(
               'community-post-actions-33333333-3333-4333-8333-333333333333',
@@ -536,61 +533,18 @@ void main() {
           );
           await tapCommunityControl(tester, actions);
           await tester.pumpAndSettle();
-
-          await tester.tap(
-            find.text(action == 'remove' ? 'Remove post' : 'Hide post'),
-          );
-          await tester.pumpAndSettle();
+          expect(find.text('Hide post'), findsNothing);
+          expect(find.text('Remove post'), findsNothing);
+          expect(find.text('Report'), findsOneWidget);
+          expect(find.text('Block member'), findsOneWidget);
           expect(repository.mutations, isEmpty);
-
-          await tester.tap(find.widgetWithText(SimpleDialogOption, 'spam'));
-          await tester.pump();
-          await tester.pump(const Duration(milliseconds: 300));
-
-          expect(repository.mutations, [
-            (action, _ModerationRepository.postId, 'spam'),
-          ]);
-          expect(repository.feedLoads, 2);
-
-          readback.complete([repository.nextFeedPost]);
-          await tester.pumpAndSettle();
-
-          await revealCommunityControl(
-            tester,
-            find.byKey(
-              const Key(
-                'community-post-actions-55555555-5555-4555-8555-555555555555',
-              ),
-            ),
-          );
-          expect(find.text('Next server post'), findsOneWidget);
-          expect(actions, findsNothing);
-          expect(repository.feedLoads, 2);
-          expect(repository.mutations, hasLength(1));
-          // Feed catches the framework error. No uncaught exception alone
-          // would miss the false failure message after a successful mutation.
-          expect(
-            find.text(
-              action == 'remove'
-                  ? 'Post removed by moderation.'
-                  : 'Post hidden by moderation.',
-            ),
-            findsOneWidget,
-          );
-          expect(
-            find.text('Could not complete that action safely. Try again.'),
-            findsNothing,
-          );
           expect(tester.takeException(), isNull);
         } finally {
-          if (!readback.isCompleted) {
-            readback.complete(const []);
-          }
           await tester.pumpWidget(const SizedBox.shrink());
           await tester.pump();
         }
-      });
-    }
+      },
+    );
 
     testWidgets('queue refresh renders the completed replacement future', (
       tester,

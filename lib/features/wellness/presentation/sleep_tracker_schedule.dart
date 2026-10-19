@@ -75,7 +75,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
             subtitle: Text(
               '${goalHours.toStringAsFixed(goalHours % 1 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
             ),
-            trailing: PopupMenuButton<int>(
+            trailing: bilPearlPopupMenuButton<int>(
               enabled: !scheduleLoading && !scheduleSaving,
               tooltip: tr('Goal', 'الهدف'),
               onSelected: (minutes) => _saveSleepSchedule(
@@ -104,7 +104,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
                 '${sleepSchedule.windDownMinutes} د',
               ),
             ),
-            trailing: PopupMenuButton<int>(
+            trailing: bilPearlPopupMenuButton<int>(
               enabled: !scheduleLoading && !scheduleSaving,
               tooltip: tr('Time', 'الوقت'),
               onSelected: (minutes) => _saveSleepSchedule(

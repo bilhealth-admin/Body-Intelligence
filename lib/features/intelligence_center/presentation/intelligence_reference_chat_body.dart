@@ -70,6 +70,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                             key: const ValueKey('ai-coach-hero'),
                             interactionEnabled: conversationReady,
                             onBack: () {
+                              questionFocus.unfocus();
                               if (context.canPop()) {
                                 context.pop();
                               } else {
@@ -181,6 +182,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                               'ai-coach-question-field',
                                             ),
                                             controller: question,
+                                            focusNode: questionFocus,
                                             enabled: conversationReady,
                                             minLines: 1,
                                             maxLines:
@@ -311,8 +313,8 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                     icon: analyzingFoodImage
                                         ? SizedBox.square(
                                             dimension: 19,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
+                                            child: BilFeatureWelcomeStatus(
+                                              color: scheme.onSurfaceVariant,
                                             ),
                                           )
                                         : const Icon(

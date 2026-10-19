@@ -844,7 +844,6 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: scheme.surfaceContainerHighest,
           content: Row(
             children: [
               Icon(Icons.check_circle_rounded, color: scheme.primary, size: 22),

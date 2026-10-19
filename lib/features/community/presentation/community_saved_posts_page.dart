@@ -94,10 +94,24 @@ class _CommunitySavedPostsPageState extends State<CommunitySavedPostsPage> {
       if (action == 'delete') {
         await widget.repository.deletePost(post.id);
       } else if (action == 'report') {
-        await widget.repository.report(
-          targetKind: 'post',
-          targetId: post.id,
-          reason: 'user_reported_from_saved_posts',
+        final owner = widget.repository.currentUserId;
+        await widget.repository.runForCommunityOwner(
+          () async {
+            final draft = await showCommunityReportSheet(
+              context,
+              target: CommunityReportTarget.post,
+            );
+            CommunityOwnerOperation.checkCurrent();
+            if (draft == null || !mounted) return;
+            await widget.repository.report(
+              targetKind: 'post',
+              targetId: post.id,
+              reason: draft.reason,
+            );
+          },
+          ownerId: owner,
+          isCurrentOwner: () =>
+              mounted && widget.repository.currentUserId == owner,
         );
       } else if (action == 'block') {
         await widget.repository.blockMember(post.authorId);

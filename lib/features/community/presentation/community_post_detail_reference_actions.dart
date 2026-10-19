@@ -5,6 +5,16 @@ extension _CommunityPostDetailReferenceActions
   Future<void> _managePostAction(String action) => _runDetailOwner(() async {
     if (_managingPost) return;
 
+    CommunityReportDraft? reportDraft;
+    if (action == 'report') {
+      reportDraft = await showCommunityReportSheet(
+        context,
+        target: CommunityReportTarget.post,
+        guard: _detailOwnerScope.guard,
+      );
+      _detailOwnerScope.check();
+      if (reportDraft == null || !mounted || !_detailOwnerIsCurrent) return;
+    }
     if (action == 'delete' || action == 'block') {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -70,7 +80,7 @@ extension _CommunityPostDetailReferenceActions
         await widget.repository.report(
           targetKind: 'post',
           targetId: widget.post.id,
-          reason: 'user_reported_from_post_detail',
+          reason: reportDraft!.reason,
         );
         _detailOwnerScope.check();
         if (mounted && _detailOwnerIsCurrent) {

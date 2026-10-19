@@ -342,7 +342,7 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
                           Icons.delete_outline,
                           semanticLabel: tr('Delete', 'حذف'),
                         )
-                      : PopupMenuButton<String>(
+                      : bilPearlPopupMenuButton<String>(
                           key: Key(
                             'ai-coach-conversation-actions-${entry['id']}',
                           ),

@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 
@@ -23,10 +22,8 @@ class BilGlassPressFeedback extends StatefulWidget {
 }
 
 class _GlassPressState extends State<BilGlassPressFeedback> {
-  static const double _sdkArrowHitTolerance = 1;
   static final _visible = <_GlassPressState>{};
   static final _lifecycle = _GlassPressLifecycle();
-  static OverlayEntry? _sdkBubble;
   static int? _pointer;
   static Offset? _origin;
   bool _pressed = false;
@@ -46,18 +43,8 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
       }
       _pointer = event.pointer;
       _origin = event.position;
-      final hit = HitTestResult();
-      GestureBinding.instance.hitTestInView(hit, event.position, event.viewId);
-      final targets = hit.path.map((entry) => entry.target).toSet();
-
-      // Locally wrapped app controls render their own bubble. The global path
-      // is only a fallback for framework-owned arrows such as calendar and
-      // dropdown controls, which cannot be wrapped without replacing behavior.
-      final hasLocalFeedback = _visible.any((state) {
-        final render = state.context.findRenderObject();
-        return render != null && render.attached && targets.contains(render);
-      });
-      if (!hasLocalFeedback) _decorateSdkArrow(hit, event.position);
+      // Feedback belongs to the pressed widget. Never search a page's render
+      // subtree for another arrow or clone a glyph into the root overlay.
     } else if (event.pointer == _pointer &&
         (event is PointerUpEvent ||
             event is PointerCancelEvent ||
@@ -70,168 +57,11 @@ class _GlassPressState extends State<BilGlassPressFeedback> {
   static void _clear() {
     _pointer = null;
     _origin = null;
-    _sdkBubble?.remove();
-    _sdkBubble?.dispose();
-    _sdkBubble = null;
     for (final state in _visible.toList()) {
       state._activePointer = null;
       state._pressOrigin = null;
       state._show(false);
     }
-  }
-
-  static void _decorateSdkArrow(HitTestResult hit, Offset globalPosition) {
-    final controls =
-        hit.path
-            .map((entry) => entry.target)
-            .whereType<RenderObject>()
-            .where(
-              (control) =>
-                  control is RenderSemanticsGestureHandler &&
-                      control.onTap != null ||
-                  control is RenderSemanticsAnnotations &&
-                      (control.properties.onTap != null ||
-                          control.properties.button == true &&
-                              control.properties.enabled == true),
-            )
-            .where((control) => control.attached && control is RenderBox)
-            .toList()
-          ..sort((left, right) {
-            final leftBox = left as RenderBox;
-            final rightBox = right as RenderBox;
-            return (leftBox.size.width * leftBox.size.height).compareTo(
-              rightBox.size.width * rightBox.size.height,
-            );
-          });
-
-    RenderParagraph? paragraph;
-    for (final control in controls) {
-      final candidates = <RenderParagraph>[];
-      void findArrows(RenderObject render) {
-        if (render is RenderParagraph) {
-          final span = render.text;
-          final glyph = span.toPlainText();
-          final family = span.style?.fontFamily ?? '';
-          if (glyph.runes.length == 1 &&
-              (family.contains('MaterialIcons') ||
-                  family.contains('CupertinoIcons')) &&
-              BilArrowGlyph.containsCodePoint(glyph.runes.single, family)) {
-            candidates.add(render);
-          }
-        }
-        render.visitChildren(findArrows);
-      }
-
-      findArrows(control);
-      if (candidates.isEmpty) continue;
-      double distanceTo(RenderParagraph candidate) {
-        final rect = MatrixUtils.transformRect(
-          candidate.getTransformTo(null),
-          Offset.zero & candidate.size,
-        );
-        final dx = globalPosition.dx < rect.left
-            ? rect.left - globalPosition.dx
-            : globalPosition.dx > rect.right
-            ? globalPosition.dx - rect.right
-            : 0.0;
-        final dy = globalPosition.dy < rect.top
-            ? rect.top - globalPosition.dy
-            : globalPosition.dy > rect.bottom
-            ? globalPosition.dy - rect.bottom
-            : 0.0;
-        return dx * dx + dy * dy;
-      }
-
-      candidates.sort(
-        (left, right) => distanceTo(left).compareTo(distanceTo(right)),
-      );
-      // SDK fallback feedback is for a press on the visible arrow glyph,
-      // not any nearby point inside a larger row or card hit target.
-      if (distanceTo(candidates.first) >
-          _sdkArrowHitTolerance * _sdkArrowHitTolerance) {
-        continue;
-      }
-      paragraph = candidates.first;
-      break;
-    }
-
-    final arrowParagraph = paragraph;
-    if (arrowParagraph == null || _visible.isEmpty) return;
-    final context = _visible.first.context;
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
-    if (overlay == null) return;
-    final overlayBox = overlay.context.findRenderObject();
-    if (overlayBox is! RenderBox || !overlayBox.hasSize) return;
-    final matrix = arrowParagraph.getTransformTo(overlayBox);
-    final overlayRect = MatrixUtils.transformRect(
-      matrix,
-      Offset.zero & arrowParagraph.size,
-    );
-    final scheme = Theme.of(context).colorScheme;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final media = MediaQuery.maybeOf(context);
-    final solid =
-        media?.highContrast == true || media?.accessibleNavigation == true;
-    _sdkBubble = OverlayEntry(
-      builder: (_) => Positioned(
-        left: overlayRect.center.dx - 24,
-        top: overlayRect.center.dy - 24,
-        width: 48,
-        height: 48,
-        child: IgnorePointer(
-          child: ExcludeSemantics(
-            child: DecoratedBox(
-              key: const Key('bil-sdk-arrow-glass-bubble'),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: scheme.shadow.withValues(alpha: .09),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(
-                    sigmaX: solid ? 0 : 8,
-                    sigmaY: solid ? 0 : 8,
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: dark
-                            ? [const Color(0xFF243A50), const Color(0xFF15283C)]
-                            : [Colors.white, const Color(0xFFE4F2FC)],
-                      ),
-                      border: Border.all(
-                        color: dark ? Colors.white24 : Colors.white,
-                        width: .9,
-                      ),
-                    ),
-                    child: Center(
-                      child: Transform.flip(
-                        flipX: matrix.storage[0] < 0,
-                        child: RichText(
-                          text: arrowParagraph.text,
-                          textDirection: arrowParagraph.textDirection,
-                          textScaler: arrowParagraph.textScaler,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    overlay.insert(_sdkBubble!);
   }
 
   void _onPointerDown(PointerDownEvent event) {

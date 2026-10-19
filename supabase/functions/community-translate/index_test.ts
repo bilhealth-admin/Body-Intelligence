@@ -11,6 +11,15 @@ function setup(
     key: () => "synthetic-server-key",
     authorize: async () => access,
     fetch: ((url: string, options: RequestInit) => {
+      assertEquals(
+        url,
+        "https://translation.googleapis.com/language/translate/v2",
+      );
+      assertEquals(options.redirect, "error");
+      assertEquals(
+        new Headers(options.headers).get("x-goog-api-key"),
+        "synthetic-server-key",
+      );
       calls.push({ url, body: JSON.parse(options.body as string) });
       return Promise.resolve(
         new Response(JSON.stringify({

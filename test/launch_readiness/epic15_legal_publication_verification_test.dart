@@ -26,7 +26,7 @@ void main() {
     proof = _readJson(legalPublicationEvidencePath);
   });
 
-  test('changed local legal asset blocks reuse of historical live proof', () {
+  test('current source matches the newly observed live publication proof', () {
     final legal = metadata['legal_and_support'] as Map<String, Object?>;
     expect(legal['status'], legalPublicationStatus);
     expect(
@@ -34,9 +34,25 @@ void main() {
         metadata: metadata,
         proof: proof,
       ),
-      throwsA(_invalidWith('checked-in local asset byte count mismatch')),
+      returnsNormally,
     );
   });
+
+  test(
+    'changed local legal asset still blocks reuse of historical live proof',
+    () {
+      final historical = _readJson(
+        'docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-10-04.json',
+      );
+      expect(
+        () => validateLegalPublicationVerification(
+          metadata: metadata,
+          proof: historical,
+        ),
+        throwsA(_invalidWith('checked-in local asset byte count mismatch')),
+      );
+    },
+  );
 
   test('verification never substitutes for owner legal approval', () {
     final changedMetadata = _copy(metadata);

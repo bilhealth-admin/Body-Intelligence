@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/theme/bil_pearl_finish.dart';
+import '../../app/theme/bil_feedback_theme.dart';
 
 /// BIL's 2026 editorial treatment for secondary, non-protected journeys.
 ///
@@ -99,6 +100,7 @@ class BilCalmVisualScope extends StatelessWidget {
     );
     return parent.copyWith(
       colorScheme: scheme,
+      snackBarTheme: BilFeedbackTheme.resolve(scheme),
       // The page-owned opaque backdrop paints this canvas. Transparency here
       // reveals that gradient, never a previous route's text or account data.
       scaffoldBackgroundColor: Colors.transparent,

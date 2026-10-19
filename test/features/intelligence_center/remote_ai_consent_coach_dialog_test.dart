@@ -215,6 +215,12 @@ class _ConsentDialogBoundary {
           result = {'answer': 'Synthetic verified answer'};
         // These are read-only scene startup contracts, if the configured app
         // environment enables their normal widgets. Never fabricate a grant.
+        case '/rest/v1/rpc/bil_get_ai_usage_status':
+          expectSync(request.method, 'POST');
+          expectSync(jsonDecode(request.body), isNull);
+          result = {
+            'credits': {'total_remaining': 0},
+          };
         case '/rest/v1/rpc/bil_gold_balance_v1':
           result = {'balance': 0};
         case '/rest/v1/bil_coach_memories':

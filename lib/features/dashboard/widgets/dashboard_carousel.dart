@@ -1,3 +1,4 @@
+import '../../../app/theme/bil_navigation_press_style.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:math' as math;
 
@@ -360,11 +361,7 @@ class _CarouselArrow extends StatelessWidget {
           width: dimension,
           height: dimension,
         ),
-        style: IconButton.styleFrom(
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.surface.withValues(alpha: .72),
-        ),
+        style: BilNavigationPressStyle.neutralBubble(context),
       ),
     );
   }

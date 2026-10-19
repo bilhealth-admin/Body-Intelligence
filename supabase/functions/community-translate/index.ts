@@ -125,13 +125,15 @@ export async function handleTranslation(
     const timer = setTimeout(() => controller.abort(), 12000);
     try {
       const response = await deps.fetch(
-        `https://translation.googleapis.com/language/translate/v2?key=${
-          encodeURIComponent(key)
-        }`,
+        "https://translation.googleapis.com/language/translate/v2",
         {
           method: "POST",
+          redirect: "error",
           signal: controller.signal,
-          headers: { "content-type": "application/json" },
+          headers: {
+            "content-type": "application/json",
+            "x-goog-api-key": key,
+          },
           body: JSON.stringify({
             q: active.map(([, v]) => v),
             target,

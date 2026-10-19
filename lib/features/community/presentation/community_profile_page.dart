@@ -18,12 +18,15 @@ import '../data/community_repository.dart';
 import '../domain/community_identity_projection.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
+import '../domain/community_content_policy.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_copy.dart';
 import 'community_return_button.dart';
+import 'community_safety_page.dart';
 
 part 'community_profile_copy.dart';
 part 'community_profile_cover_editor.dart';
+part 'community_profile_unavailable.dart';
 
 class CommunityProfilePage extends ConsumerStatefulWidget {
   const CommunityProfilePage({this.repository, super.key});
@@ -192,12 +195,8 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
             .read(preferencesRepositoryProvider)
             .setMany(DisplayNameSync.localEdit(_name.text));
         unawaited(ref.read(displayNameSyncProvider).synchronize());
-        final photoResult = await ref
-            .read(profilePhotoServiceProvider)
-            .syncStoredPhotoToCommunity();
-        if (photoResult?.publicUrl != null) {
-          _avatarUrl = photoResult!.publicUrl;
-        }
+        // Saving text/privacy is not consent to publish the account photo.
+        // pickAvatar owns the explicit selection and image-review flow.
       }
       if (!mounted) return false;
       setState(() {
@@ -209,6 +208,18 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
         context,
       ).showSnackBar(SnackBar(content: Text(copy.saved)));
       saved = true;
+    } on CommunityPolicyAccessException {
+      if (mounted) await _reviewProfilePolicy();
+    } on PostgrestException catch (error) {
+      if (!mounted) return false;
+      if (error.message == 'community_policy_acceptance_required' ||
+          error.message == 'community_policy_unavailable') {
+        await _reviewProfilePolicy();
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(copy.saveFailed)));
+      }
     } on CommunityTextPolicyException catch (error) {
       if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -229,6 +240,20 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
       if (mounted) setState(() => _saving = false);
     }
     return saved;
+  }
+
+  Future<void> _reviewProfilePolicy() async {
+    final repository = _repository;
+    if (repository == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (pageContext) => CommunitySafetyPage(
+          repository: repository,
+          onAccepted: () => Navigator.of(pageContext).pop(),
+        ),
+      ),
+    );
+    // Preserve the unsaved form. Accepting terms never submits it implicitly.
   }
 
   Future<void> _saveAndOpenBilCode() async {
@@ -655,40 +680,4 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
       if (mounted) setState(() => _saving = false);
     }
   }
-}
-
-class _CommunityProfileUnavailable extends StatelessWidget {
-  const _CommunityProfileUnavailable({required this.copy});
-
-  final _CommunityProfileCopy copy;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: BilPearlMaterialCard(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.lock_person_outlined, size: 52),
-              const SizedBox(height: 16),
-              Text(
-                copy.signInRequired,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                copy.privacy,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
 }

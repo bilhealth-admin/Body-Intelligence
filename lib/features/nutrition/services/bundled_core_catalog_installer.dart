@@ -11,10 +11,10 @@ class BundledCoreCatalogInstaller {
 
   final AssetBundle? bundle;
   static const assetPath = 'assets/catalogs/bil_food_core.sqlite';
-  static const catalogVersion = 'usda-core-2026-04-v1';
-  static const expectedSizeBytes = 31059968;
+  static const catalogVersion = 'usda-core-2026-04-v2-magnesium';
+  static const expectedSizeBytes = 32010240;
   static const expectedSha256 =
-      '9E6AB0C9BE242A5EDCF35D4E1F0391A321585636190628F9138A0845918A1D85';
+      '2801A24BC8E53BC5724BA9A73A1A9262410C71A1E4128C7F59902D8E4D4EBA83';
 
   Future<File> ensureInstalled(Directory root) async {
     final catalog = await safeCatalogFile(root, [

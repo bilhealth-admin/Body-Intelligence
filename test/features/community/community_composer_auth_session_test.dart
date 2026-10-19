@@ -20,6 +20,7 @@ import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'community_composer_auth_session_feed.dart';
+part 'community_inline_topic_auth_cases.dart';
 
 const _ownerA = '11111111-1111-4111-8111-111111111111';
 const _ownerB = '22222222-2222-4222-8222-222222222222';
@@ -119,6 +120,22 @@ CommunityPersistentDraft _draft(String owner) => CommunityPersistentDraft(
 
 class _ComposerRepository extends CommunityRepository {
   _ComposerRepository(super.client);
+
+  // These composer scenarios begin after explicit policy acceptance.
+  // The entry-flow suite separately exercises the pre-consent gate.
+  @override
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async {
+    final policy = CommunityContentPolicy.fromJson({
+      'version': 'community-policy-v1',
+      'document_url': 'https://www.bilhealth.com/community-guidelines',
+    });
+    return CommunityPolicyState.accepted(
+      policy,
+      acceptedVersion: policy.version,
+    );
+  }
 
   final profiles = <String, CommunityProfile>{};
   final trace = <String>[];
@@ -350,6 +367,7 @@ void main() {
   });
 
   _feedComposerOwnerTests(() => auth);
+  _inlineTopicOwnerTests(() => auth);
 
   _composerTest(
     'private draft updates do not require or create public identity',

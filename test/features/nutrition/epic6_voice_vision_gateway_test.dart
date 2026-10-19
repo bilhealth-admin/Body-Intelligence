@@ -1,6 +1,6 @@
+import '../../support/meal_vision_image_fixtures.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:body_intelligence_log/features/nutrition/services/meal_image_analysis_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +27,7 @@ void main() {
       );
       final result = await service.analyze(
         XFile.fromData(
-          Uint8List.fromList([0xff, 0xd8, 0xff, 0x00]),
+          validMealVisionJpegBytes(),
           mimeType: 'image/jpeg',
           name: 'meal.jpg',
         ),
@@ -57,10 +57,7 @@ void main() {
         );
         await expectLater(
           service.analyze(
-            XFile.fromData(
-              Uint8List.fromList([0xff, 0xd8, 0xff]),
-              mimeType: 'image/jpeg',
-            ),
+            XFile.fromData(validMealVisionJpegBytes(), mimeType: 'image/jpeg'),
           ),
           throwsA(
             isA<MealImageAnalysisException>().having(
@@ -92,10 +89,7 @@ void main() {
         },
       );
       await service.analyze(
-        XFile.fromData(
-          Uint8List.fromList([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-          mimeType: 'image/png',
-        ),
+        XFile.fromData(validMealVisionPngBytes(), mimeType: 'image/png'),
       );
       expect(calls, 2);
       expect(keys.toSet(), hasLength(1));
@@ -129,19 +123,7 @@ void main() {
         );
 
         await service.analyze(
-          XFile.fromData(
-            Uint8List.fromList([
-              0x89,
-              0x50,
-              0x4e,
-              0x47,
-              0x0d,
-              0x0a,
-              0x1a,
-              0x0a,
-            ]),
-            mimeType: 'image/png',
-          ),
+          XFile.fromData(validMealVisionPngBytes(), mimeType: 'image/png'),
         );
 
         expect(calls, 3);
@@ -162,10 +144,7 @@ void main() {
       );
       await expectLater(
         service.analyze(
-          XFile.fromData(
-            Uint8List.fromList([0xff, 0xd8, 0xff, 0x00]),
-            mimeType: 'image/jpeg',
-          ),
+          XFile.fromData(validMealVisionJpegBytes(), mimeType: 'image/jpeg'),
         ),
         throwsA(
           isA<MealImageAnalysisException>().having(

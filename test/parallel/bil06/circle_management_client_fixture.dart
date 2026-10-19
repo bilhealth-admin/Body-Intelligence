@@ -126,6 +126,8 @@ class Bil06FakeGateway extends CircleManagementGateway {
   int actionCalls = 0;
   int readbackCalls = 0;
   int prepareCalls = 0;
+  CommunityPostImageDraft? preparedImage;
+  CommunityPostImageDraft? uploadedImage;
   int uploadCalls = 0;
   int finishCalls = 0;
   int cancelCalls = 0;
@@ -317,6 +319,7 @@ class Bil06FakeGateway extends CircleManagementGateway {
     check();
     if (!capabilities.canManageMedia) throw const CirclePermissionDenied();
     prepareCalls++;
+    preparedImage = image;
     reservation = CircleMediaReservation(
       id: bil06MediaId,
       ownerId: ownerId,
@@ -343,6 +346,7 @@ class Bil06FakeGateway extends CircleManagementGateway {
   ) async {
     check();
     uploadCalls++;
+    uploadedImage = image;
     if (onUpload != null) await onUpload!();
     if (uploadFailure != null) throw uploadFailure!;
   }

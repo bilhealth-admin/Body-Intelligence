@@ -264,15 +264,13 @@ jobs:
           mkdir -p "$OUT"
           : > "$OUT/live-cloud.log"
 
-          if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" && -n "${SUPABASE_DB_PASSWORD:-}" ]]; then
-            CLI=(npx --yes supabase@2.117.0)
+          if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
+            CLI=(npx --yes supabase@2.121.0)
             WORK="$RUNNER_TEMP/bil-supabase-cli"
             mkdir -p "$WORK"
             pushd "$WORK" >/dev/null
-            "${CLI[@]}" init --force
-            "${CLI[@]}" link --project-ref "$BIL_SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
             SQL="$(cat "$GITHUB_WORKSPACE/tool/release_certification/pre_final_cloud_transaction.sql")"
-            "${CLI[@]}" db query --linked "$SQL" 2>&1 | tee "$OUT/live-cloud.log"
+            "${CLI[@]}" db query --linked --project-ref "$BIL_SUPABASE_PROJECT_REF" "$SQL" 2>&1 | tee "$OUT/live-cloud.log"
             popd >/dev/null
             EVIDENCE_MODE='GITHUB_SUPABASE_CREDENTIALS'
           else

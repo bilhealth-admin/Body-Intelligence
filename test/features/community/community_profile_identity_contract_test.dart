@@ -2,7 +2,9 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_identity_projection.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_profile_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_safety_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +23,18 @@ final class _MissingCommunityProfileRepository extends CommunityRepository {
 
   int loads = 0;
   int saves = 0;
+  bool requireConsent = false;
+
+  @override
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async => CommunityPolicyState.acceptanceRequired(
+    CommunityContentPolicy.fromJson({
+      'version': 'community-policy-v1',
+      'document_url': 'https://www.bilhealth.com/community-guidelines',
+      'effective_at': '2026-09-08T00:00:00Z',
+    }),
+  );
 
   @override
   Future<CommunityProfile?> loadMyProfile() async {
@@ -41,10 +55,67 @@ final class _MissingCommunityProfileRepository extends CommunityRepository {
         CommunityMessagePermission.friends,
   }) async {
     saves++;
+    if (requireConsent) {
+      throw const PostgrestException(
+        message: 'community_policy_acceptance_required',
+        code: '42501',
+      );
+    }
   }
 }
 
 void main() {
+  testWidgets(
+    'profile editor opens policy recovery without losing unsaved name',
+    (tester) async {
+      final repository = _MissingCommunityProfileRepository()
+        ..requireConsent = true;
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            locale: const Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: CommunityProfilePage(repository: repository),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final field = find.byType(TextField).first;
+      await tester.enterText(field, 'Unsubmitted alias');
+      final save = find.byKey(const Key('community-profile-save'));
+      await tester.scrollUntilVisible(
+        save,
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(find.byType(CommunitySafetyPage), findsOneWidget);
+      expect(repository.saves, 1);
+      await tester.tap(find.byKey(const Key('community-safe-return')));
+      await tester.pumpAndSettle();
+      expect(find.byType(CommunitySafetyPage), findsNothing);
+      final nameField = find.byWidgetPredicate(
+        (widget) => widget is TextField && widget.maxLength == 60,
+      );
+      await tester.scrollUntilVisible(
+        nameField,
+        -400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(
+        tester.widget<TextField>(nameField).controller!.text,
+        'Unsubmitted alias',
+      );
+      expect(repository.saves, 1);
+    },
+  );
   test('Community identity projection preserves privacy-safe precedence', () {
     expect(
       CommunityIdentityProjection.resolveDisplayName(

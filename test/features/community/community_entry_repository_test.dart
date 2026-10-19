@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/services/community_entry_coordinator.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -17,6 +18,7 @@ class _Transport {
   final requests = <http.Request>[];
   bool insertConcurrent = false;
   bool failCode = false;
+  bool acceptedPolicy = true;
   String owner = _owner;
   late final SupabaseClient client = SupabaseClient(
     'https://entry-rpc.invalid',
@@ -79,6 +81,19 @@ class _Transport {
           expect(request.url.queryParameters['user_id'], 'eq.$owner');
           body = profile == null ? [] : [profile];
         }
+      } else if (request.url.path.endsWith(
+        '/rpc/bil_current_community_policy_status',
+      )) {
+        body = {
+          'server_now': '2026-10-19T00:00:00Z',
+          'status': acceptedPolicy ? 'accepted' : 'acceptance_required',
+          'accepted': acceptedPolicy,
+          'accepted_at': acceptedPolicy ? '2026-10-18T00:00:00Z' : null,
+          'version': 'community-policy-v1',
+          'document_url': 'https://www.bilhealth.com/community-guidelines',
+          'locale_code': 'en',
+          'effective_at': '2026-09-08T00:00:00Z',
+        };
       } else if (request.url.path.endsWith('/rpc/bil_social_public_code_v2')) {
         if (failCode) {
           body = {'code': 'P0001', 'message': 'synthetic_code_unavailable'};
@@ -113,6 +128,36 @@ class _Transport {
 
 void main() {
   test(
+    'profile creation refuses missing current consent before upload',
+    () async {
+      final transport = _Transport()..acceptedPolicy = false;
+      addTearDown(transport.client.dispose);
+      await transport.signIn();
+      await expectLater(
+        CommunityRepository(transport.client).createMyCommunityEntryProfile(
+          displayName: 'Member alias',
+          localeCode: 'en',
+          expectedOwnerId: _owner,
+        ),
+        throwsA(
+          isA<CommunityPolicyAccessException>().having(
+            (error) => error.failure,
+            'failure',
+            CommunityPolicyAccessFailure.acceptanceRequired,
+          ),
+        ),
+      );
+      expect(transport.profile, isNull);
+      expect(
+        transport.requests.where(
+          (r) =>
+              r.method == 'POST' && r.url.path.endsWith('/bil_public_profiles'),
+        ),
+        isEmpty,
+      );
+    },
+  );
+  test(
     'real transport is create-only, owner-bound and privacy-safe; code is server-issued',
     () async {
       final t = _Transport();
@@ -133,6 +178,7 @@ void main() {
             .map((r) => '${r.method} ${r.url.path}'),
         [
           'GET /rest/v1/bil_public_profiles',
+          'POST /rest/v1/rpc/bil_current_community_policy_status',
           'POST /rest/v1/bil_public_profiles',
           'GET /rest/v1/bil_public_profiles',
           'POST /rest/v1/rpc/bil_social_public_code_v2',

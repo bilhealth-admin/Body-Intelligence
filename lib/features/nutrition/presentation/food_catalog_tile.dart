@@ -184,6 +184,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
       localeTag: localeTag,
       isCustom: food.isCustom,
       source: food.source,
+      allowCloudTranslation: true,
     );
     final arabic = localeTag == 'ar';
     final servingText = FoodPresentationLocalizer.browseServingText(
@@ -216,8 +217,12 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      displayName,
+                    GoogleFoodNameText(
+                      name: food.name,
+                      arabicName: food.arabicName,
+                      localeTag: localeTag,
+                      isCustom: food.isCustom,
+                      source: food.source,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     if (displayName != food.name && !arabic) Text(food.name),
@@ -311,8 +316,12 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
             ),
           ),
         ),
-        title: Text(
-          displayName,
+        title: GoogleFoodNameText(
+          name: food.name,
+          arabicName: food.arabicName,
+          localeTag: localeTag,
+          isCustom: food.isCustom,
+          source: food.source,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700),

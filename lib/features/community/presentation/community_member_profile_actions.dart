@@ -1,6 +1,98 @@
 part of 'community_hub_page.dart';
 
 extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
+  Future<void> _manageMemberSafety(String action) async {
+    final visit = _captureProfileVisit();
+    final profile = _profile;
+    if (visit == null ||
+        profile == null ||
+        profile.isSelf ||
+        (_relationshipBusy || _memberSafetyBusy) ||
+        !const {'report', 'block'}.contains(action)) {
+      return;
+    }
+    _setProfileState(() => _memberSafetyBusy = true);
+    try {
+      await visit.run(() async {
+        if (action == 'report') {
+          final draft = await showCommunityReportSheet(
+            context,
+            target: CommunityReportTarget.profile,
+            guard: visit.guard,
+          );
+          visit.check();
+          if (draft == null) return;
+          await visit.repository.report(
+            targetKind: 'profile',
+            targetId: profile.userId,
+            reason: draft.reason,
+          );
+          visit.check();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  communityText(
+                    context,
+                    'Report sent for review.',
+                    'تم إرسال البلاغ للمراجعة.',
+                  ),
+                ),
+              ),
+            );
+          }
+        } else {
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (dialogContext) => visit.guard(
+              BilPearlMaterialAlertDialog(
+                title: Text(
+                  communityText(
+                    context,
+                    'Block this member?',
+                    'حظر هذا العضو؟',
+                  ),
+                ),
+                content: Text(
+                  communityText(
+                    context,
+                    'You will no longer see each other in Community or messages.',
+                    'لن يتمكن أي منكما من رؤية الآخر في المجتمع أو الرسائل.',
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: Text(communityText(context, 'Cancel', 'إلغاء')),
+                  ),
+                  FilledButton(
+                    key: const Key('community-member-confirm-block'),
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    child: Text(communityText(context, 'Block', 'حظر')),
+                  ),
+                ],
+              ),
+            ),
+          );
+          visit.check();
+          if (confirmed != true) return;
+          await visit.repository.blockMember(profile.userId);
+          visit.check();
+          if (mounted) {
+            _setProfileState(() => _profile = null);
+            await Navigator.of(context).maybePop();
+          }
+        }
+      });
+    } on CommunityOwnerOperationCancelled {
+      // The original profile visit alone owns the action.
+    } catch (_) {
+      if (visit.isCurrent()) _showFailure();
+    } finally {
+      if (visit.isCurrent()) _setProfileState(() => _memberSafetyBusy = false);
+    }
+  }
+
   Future<void> _requestFriend() async {
     final visit = _captureProfileVisit();
     final repository = visit?.repository;
@@ -92,44 +184,23 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
   }
 
   Future<void> _managePost(CommunityPost post, String action) async {
+    if (!const {'report', 'delete', 'block'}.contains(action)) return;
     final visit = _captureProfileVisit();
     if (visit == null || _managingPost) return;
     final repository = visit.repository;
     try {
       await visit.run(() async {
-        String? moderationReason;
-        if (action == 'moderate_remove' || action == 'moderate_hide') {
-          moderationReason = await showDialog<String>(
-            context: context,
-            builder: (dialogContext) => visit.guard(
-              BilPearlMaterialSimpleDialog(
-                title: Text(
-                  action == 'moderate_hide'
-                      ? communityText(context, 'Hide post', 'إخفاء المنشور')
-                      : communityText(context, 'Remove post', 'إزالة المنشور'),
-                ),
-                children: [
-                  for (final reason in const [
-                    'spam',
-                    'abuse',
-                    'misleading',
-                    'privacy',
-                    'unsafe_or_inappropriate',
-                    'other',
-                  ])
-                    SimpleDialogOption(
-                      onPressed: () => Navigator.pop(dialogContext, reason),
-                      child: Text(reason),
-                    ),
-                ],
-              ),
-            ),
+        if (!mounted || !visit.isCurrent()) return;
+        CommunityReportDraft? reportDraft;
+        if (action == 'report') {
+          reportDraft = await showCommunityReportSheet(
+            context,
+            target: CommunityReportTarget.post,
+            guard: visit.guard,
           );
           visit.check();
-          if (moderationReason == null) return;
+          if (reportDraft == null || !mounted) return;
         }
-
-        if (!mounted || !visit.isCurrent()) return;
         if (action == 'delete' || action == 'block') {
           final confirmed = await showDialog<bool>(
             context: context,
@@ -185,7 +256,7 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
             await repository.report(
               targetKind: 'post',
               targetId: post.id,
-              reason: 'user_reported_from_profile',
+              reason: reportDraft!.reason,
             );
             visit.check();
           } else if (action == 'delete') {
@@ -200,28 +271,6 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
             await repository.blockMember(post.authorId);
             visit.check();
             if (mounted && visit.isCurrent()) context.pop();
-          } else if (action == 'moderate_remove') {
-            await repository.removePublishedPostAsModerator(
-              postId: post.id,
-              reason: moderationReason!,
-            );
-            visit.check();
-            if (visit.isCurrent()) {
-              _setProfileState(
-                () => _posts.removeWhere((item) => item.id == post.id),
-              );
-            }
-          } else if (action == 'moderate_hide') {
-            await repository.hidePublishedPostAsModerator(
-              postId: post.id,
-              reason: moderationReason!,
-            );
-            visit.check();
-            if (visit.isCurrent()) {
-              _setProfileState(
-                () => _posts.removeWhere((item) => item.id == post.id),
-              );
-            }
           }
           if (mounted && visit.isCurrent() && action == 'report') {
             ScaffoldMessenger.of(context).showSnackBar(

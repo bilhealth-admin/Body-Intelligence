@@ -148,8 +148,8 @@ class _CircleMediaFormState extends State<_CircleMediaForm> {
         Text(
           circleManagementText(
             context,
-            'Choose an image you have permission to share. A selected preview stays on your device until you choose Upload. Images follow this circle’s access rules.',
-            'اختر صورة تملك حق مشاركتها. تبقى معاينة الصورة المختارة على جهازك حتى تضغط رفع. تتبع الصور صلاحيات الوصول إلى هذه الدائرة.',
+            'Choose an image you have permission to share. It stays on your device until Upload. New images appear to others after review; an approved image stays visible while its replacement is reviewed.',
+            'اختر صورة تملك حق مشاركتها. تبقى على جهازك حتى تضغط رفع. تظهر الصور الجديدة للآخرين بعد المراجعة، وتبقى الصورة المعتمدة ظاهرة أثناء مراجعة بديلتها.',
           ),
         ),
         if (!permitted)
@@ -356,8 +356,12 @@ class _CircleMediaFormState extends State<_CircleMediaForm> {
           },
           success: circleManagementText(
             context,
-            'Image saved and confirmed.',
-            'تم حفظ الصورة والتحقق منها.',
+            controller.operation(key)?.receipt?.media?.status == 'pending'
+                ? 'Image submitted for review. It will appear to others after approval.'
+                : 'Image saved and confirmed.',
+            controller.operation(key)?.receipt?.media?.status == 'pending'
+                ? 'تم إرسال الصورة للمراجعة. ستظهر للآخرين بعد الموافقة.'
+                : 'تم حفظ الصورة والتحقق منها.',
           ),
         ),
       ],

@@ -38,31 +38,10 @@ class BilPremiumTrustSurface extends StatelessWidget {
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
-              colors: dark
-                  ? const <Color>[
-                      BilPearlFinish.darkInset,
-                      BilPearlFinish.darkSurface,
-                    ]
-                  : const <Color>[Color(0xFFFFFFFF), Color(0xFFF3F7FF)],
-            ),
+          decoration: BilPearlFinish.panel(context, radius: radius).copyWith(
             border: Border.all(
-              color: dark
-                  ? const Color(0xFF2A3140)
-                  : scheme.primary.withValues(alpha: .14),
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? .28 : .08),
-                blurRadius: 28,
-                spreadRadius: -12,
-                offset: const Offset(0, 14),
-              ),
-            ],
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
@@ -201,26 +180,16 @@ class BilPremiumConsentToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final dark = theme.brightness == Brightness.dark;
     final radius = BorderRadius.circular(22);
     return Material(
       color: Colors.transparent,
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: dark
-                ? const <Color>[
-                    BilPearlFinish.darkInset,
-                    BilPearlFinish.darkSurface,
-                  ]
-                : const <Color>[Color(0xFFFFFFFF), Color(0xFFF4F7FF)],
+        decoration: BilPearlFinish.panel(context, radius: radius).copyWith(
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
           ),
-          border: Border.all(color: scheme.outlineVariant),
         ),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(14, 8, 12, 8),
@@ -366,32 +335,14 @@ class _BilPremiumAiConsentSheet extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 620),
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [_splashCyan, _splashViolet],
-              ),
-              borderRadius: BorderRadius.circular(34),
-              boxShadow: [
-                BoxShadow(
-                  color: _splashCyan.withValues(alpha: .18),
-                  blurRadius: 34,
-                  spreadRadius: -10,
-                  offset: const Offset(0, -4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: .32),
-                  blurRadius: 36,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 18),
-                ),
-              ],
+            decoration: BilPearlFinish.panel(
+              context,
+              radius: BorderRadius.circular(34),
             ),
             child: Padding(
               padding: const EdgeInsets.all(1.4),
               child: Material(
-                color: dark ? const Color(0xFF080B10) : scheme.surface,
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(32.6),
                 clipBehavior: Clip.antiAlias,
                 child: SingleChildScrollView(
@@ -542,17 +493,10 @@ class _BilPremiumAiConsentRow extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: dark
-            ? Colors.white.withValues(alpha: .055)
-            : scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: dark
-              ? const Color(0xFF64D8FF).withValues(alpha: .16)
-              : scheme.outlineVariant.withValues(alpha: .72),
-        ),
-      ),
+      decoration: BilPearlFinish.panel(
+        context,
+        shadow: false,
+      ).copyWith(border: Border.all(color: scheme.outlineVariant)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

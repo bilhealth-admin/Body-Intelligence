@@ -254,7 +254,7 @@ class _CommunityAccountMenu extends StatelessWidget {
   final VoidCallback onProfileChanged;
 
   @override
-  Widget build(BuildContext context) => PopupMenuButton<String>(
+  Widget build(BuildContext context) => bilPearlPopupMenuButton<String>(
     tooltip: communityText(context, 'Community actions', 'إجراءات المجتمع'),
     position: PopupMenuPosition.under,
     icon: const Icon(Icons.tune_rounded),

@@ -35,7 +35,6 @@ class DecisionMemoryPage extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           BilPearlMaterialCard(
-            color: Theme.of(context).colorScheme.primaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Column(

@@ -64,6 +64,26 @@ class CommunityOwnerOperation {
     }
   }
 
+  /// A cache refresh may outlive the initial cached read. Give that read its
+  /// own auth observer while retaining the captured owner and current visit.
+  /// Other zone values remain intact; this never changes SDK authorization.
+  static Future<T> runIndependentRead<T>({
+    required SupabaseClient client,
+    required String ownerId,
+    required String? Function() readOwner,
+    required bool Function() isCurrentOwner,
+    required Future<T> Function(CommunityOwnerOperation operation) action,
+  }) => runZoned(
+    () => run(
+      client: client,
+      ownerId: ownerId,
+      readOwner: readOwner,
+      isCurrentOwner: isCurrentOwner,
+      action: action,
+    ),
+    zoneValues: {_zoneKey: null},
+  );
+
   static void checkCurrent() {
     (Zone.current[_zoneKey] as CommunityOwnerOperation?)?.check();
   }

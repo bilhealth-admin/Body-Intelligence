@@ -31,43 +31,50 @@ class _CommunityHubTopTab extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.singleLine = false,
     super.key,
   });
 
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool singleLine;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        const SizedBox(height: 9),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+  Widget build(BuildContext context) => Semantics(
+    selected: selected,
+    button: true,
+    child: InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          const SizedBox(height: 9),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            softWrap: !singleLine,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
+              color: selected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          height: 3,
-          width: 56,
-          decoration: BoxDecoration(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(999),
+          const SizedBox(height: 8),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            height: 3,
+            width: 56,
+            decoration: BoxDecoration(
+              color: selected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(999),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }

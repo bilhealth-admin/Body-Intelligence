@@ -416,14 +416,32 @@ Future<void> _waitUntil(
   bool Function() ready,
   String stage,
 ) async {
-  final elapsed = Stopwatch()..start();
-  while (!ready() && elapsed.elapsedMilliseconds < 5000) {
+  // Route transitions run on the binding's fake clock. A busy host can spend
+  // five real seconds rendering less than one simulated transition; treating
+  // that as a navigation failure makes this fail only in the full suite.
+  // Keep a bounded host watchdog for genuine I/O, independently of the same
+  // five-second animation budget. Neither deadline grants or mocks access.
+  final animationDeadline = tester.binding.clock.fromNowBy(
+    const Duration(seconds: 5),
+  );
+  final hostElapsed = Stopwatch()..start();
+  var frames = 0;
+  while (!ready() &&
+      tester.binding.clock.now().isBefore(animationDeadline) &&
+      hostElapsed.elapsed < const Duration(seconds: 30)) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 5)),
     );
     await tester.pump(const Duration(milliseconds: 16));
+    frames++;
   }
-  expect(ready(), isTrue, reason: 'Genuine route stage did not finish: $stage');
+  expect(
+    ready(),
+    isTrue,
+    reason:
+        'Genuine route stage did not finish: $stage '
+        '(frames=$frames, host=${hostElapsed.elapsedMilliseconds}ms)',
+  );
 }
 
 Future<void> _finishHost(

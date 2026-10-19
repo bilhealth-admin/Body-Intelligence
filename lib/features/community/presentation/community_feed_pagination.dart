@@ -30,7 +30,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     CommunityFeedMode mode,
   );
 
-  Future<List<CommunityPost>> _loadFirst() async {
+  Future<List<CommunityPost>> _loadFirst({
+    bool keepRefreshNotice = false,
+  }) async {
     // Do not fetch cached old-session content after an injected repository's
     // owner scope was retired by a queued A -> B -> A auth transition.
     if (widget.suspendAfterOwnerChange) return const <CommunityPost>[];
@@ -46,7 +48,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     final locale = Localizations.localeOf(context).toLanguageTag();
     _feedRefreshing = true;
     _cacheRefreshing = false;
-    _cacheRefreshFailed = false;
+    if (!keepRefreshNotice) _cacheRefreshFailed = false;
     _loadingMore = false;
     _feedCursorPriority = null;
     _feedCursorCreatedAt = null;
@@ -112,12 +114,16 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
                   )
                   .timeout(const Duration(seconds: 15));
         visit.check();
+        // A direct successful network read has no cached-refresh callback.
+        if (keepRefreshNotice && !_cacheRefreshing) _cacheRefreshFailed = false;
         visit.check();
         if (generation != _feedGeneration) return;
         _referenceByPost.clear();
         _viewCountByPost.clear();
         _commentPreviewByPost.clear();
         _membershipTierByAuthor.clear();
+        (this as _FeedTabState)._authorIdentities.clear();
+        (this as _FeedTabState)._authorIdentityReads.clear();
         unawaited(
           presentationZone.run(
             () => _loadFeedExtras(visit, generation, page.posts),
@@ -173,6 +179,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     }
 
     await Future.wait([
+      (this as _FeedTabState)._loadAuthorIdentities(visit, generation, posts),
       apply(
         () => repository.loadCommunityPostReferenceMetadata(ids),
         (values) => _referenceByPost.addEntries(

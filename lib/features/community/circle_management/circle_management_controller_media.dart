@@ -12,15 +12,25 @@ extension CircleManagementControllerMedia on CircleManagementController {
     final key = CircleOperationKeys.media(circleSlug, kind);
     final running = _inFlight[key];
     if (running != null) return running;
-    // Keep an immutable byte snapshot matching the reviewed image through all
-    // async phases; a caller cannot replace bytes after the permission check.
-    final snapshot = CommunityPostImageDraft(
-      bytes: Uint8List.fromList(image.bytes),
-      mimeType: image.mimeType,
-      extension: image.extension,
-      width: image.width,
-      height: image.height,
-    );
+    // Normalize hidden metadata before reserving or deriving a retry identity.
+    // Already-clean picker output keeps its exact bytes and established timing.
+    final CommunityPostImageDraft snapshot;
+    if (imageBytesAreMetadataFree(image.bytes)) {
+      snapshot = CommunityPostImageDraft(
+        bytes: Uint8List.fromList(image.bytes),
+        mimeType: image.mimeType,
+        extension: image.extension,
+        width: image.width,
+        height: image.height,
+      );
+    } else {
+      snapshot = await validateCommunityPostImageAsync(
+        Uint8List.fromList(image.bytes),
+      );
+      _check();
+      final dispatchedWhileNormalizing = _inFlight[key];
+      if (dispatchedWhileNormalizing != null) return dispatchedWhileNormalizing;
+    }
     final candidate = _CircleCommand(
       key: key,
       requestId: _requestIdFactory(),
@@ -30,10 +40,10 @@ extension CircleManagementControllerMedia on CircleManagementController {
       fingerprint: circleOperationDigest([
         circleSlug,
         kind.name,
-        image.mimeType,
-        image.byteLength,
-        image.width,
-        image.height,
+        snapshot.mimeType,
+        snapshot.byteLength,
+        snapshot.width,
+        snapshot.height,
         circleOperationBytesDigest(snapshot.bytes),
       ]),
       send: (id) => gateway.prepareMedia(

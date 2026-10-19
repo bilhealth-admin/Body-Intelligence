@@ -4,6 +4,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
+import '../../../app/router/bil_navigation_focus_observer.dart';
+import '../../community/domain/community_attention.dart';
+import '../../community/presentation/community_attention_scope.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -60,7 +63,7 @@ class AiCoachSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   late final AiBoostPurchaseService boost;
   Future<Map<String, Object?>>? usage;
   bool changingConsent = false;
@@ -74,6 +77,54 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   int _ownerEpoch = 0;
   String? _sessionOwner;
   StreamSubscription<AuthState>? _ownerSubscription;
+  ModalRoute<dynamic>? _usageRoute;
+  CommunityAttentionController? _attention;
+  (String?, int)? _rewardStamp;
+
+  void _rewardChanged() {
+    final next = (
+      _attention?.owner,
+      _attention?.value.activityUnseenByKind['reward_earned'] ?? 0,
+    );
+    final previous = _rewardStamp;
+    _rewardStamp = next;
+    if (previous == null || previous == next || previous.$1 != next.$1) return;
+    // Activity only requests fresh server truth; never derive credits from it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && next.$1 != null && next.$1 == _sessionOwner) {
+        ref
+            .read(aiCoachUsageRefreshProvider.notifier)
+            .requestAuthoritativeReload();
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final attention = CommunityAttentionScope.controllerOf(context);
+    if (!identical(attention, _attention)) {
+      _attention?.removeListener(_rewardChanged);
+      _attention = attention;
+      _rewardStamp = null;
+      _attention?.addListener(_rewardChanged);
+      _rewardChanged();
+    }
+    final route = ModalRoute.of(context);
+    if (identical(route, _usageRoute)) return;
+    bilRootNavigationFocusObserver.unsubscribe(this);
+    bilShellNavigationFocusObserver.unsubscribe(this);
+    _usageRoute = route;
+    if (route != null) {
+      bilRootNavigationFocusObserver.subscribe(this, route);
+      bilShellNavigationFocusObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    if (mounted) setState(() => usage = _startUsageLoad());
+  }
 
   @override
   void initState() {
@@ -576,6 +627,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _attention?.removeListener(_rewardChanged);
+    bilRootNavigationFocusObserver.unsubscribe(this);
+    bilShellNavigationFocusObserver.unsubscribe(this);
     unawaited(_ownerSubscription?.cancel());
     boost.removeListener(_boostChanged);
     super.dispose();

@@ -254,8 +254,16 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
         ?.goals[widget.keyName];
     final displayed = resolved?.raw ?? resolved?.value?.toString();
     final displayNumber = resolved?.value;
+    // Round only the visible calorie/macro targets. Editors and persistence
+    // retain the exact values used by the nutrition calculations.
+    final wholeNumberDisplay =
+        widget.keyName == 'goal.calories' ||
+        widget.suffix == '%' ||
+        widget.suffix == 'g';
     final displayText = displayNumber == null
         ? null
+        : wholeNumberDisplay
+        ? displayNumber.round().toString()
         : _formatNumber(displayNumber);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final lock = (_isMacroPercent || _isMacroGrams)

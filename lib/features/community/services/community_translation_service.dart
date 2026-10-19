@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'community_owner_operation.dart';
+
 final communityTranslationProvider = Provider<CommunityTranslationPort>(
   (ref) => CloudCommunityTranslation(),
 );
@@ -123,36 +125,45 @@ class CloudCommunityTranslation implements CommunityTranslationPort {
     }
     _active.add(requestId);
     try {
-      final response = await client.functions
-          .invoke(
-            'community-translate',
-            body: {'texts': texts, 'targetTag': targetTag},
-          )
-          .timeout(const Duration(seconds: 18));
-      if (!_active.contains(requestId) ||
-          client.auth.currentUser?.id != owner) {
-        throw const FormatException('translation_cancelled');
-      }
-      final data = response.data;
-      final output = data is Map ? data['texts'] : null;
-      if (response.status != 200 ||
-          data is! Map ||
-          data['engine'] != 'google' ||
-          output is! Map ||
-          output.length != texts.length ||
-          texts.keys.any(
-            (key) =>
-                output[key] is! String ||
-                (texts[key]!.trim().isNotEmpty &&
-                    (output[key] as String).trim().isEmpty),
-          )) {
-        throw const FormatException('invalid_translation_result');
-      }
-      return CommunityTranslationResult(
-        {for (final key in texts.keys) key: output[key] as String},
-        'google',
-        sameLanguage: data['sameLanguage'] == true,
+      return await CommunityOwnerOperation.run(
+        client: client,
+        ownerId: owner,
+        isCurrentOwner: () => _active.contains(requestId),
+        action: (operation) async {
+          final response = await client.functions
+              .invoke(
+                'community-translate',
+                body: {'texts': texts, 'targetTag': targetTag},
+              )
+              .timeout(const Duration(seconds: 18));
+          if (!_active.contains(requestId) ||
+              client.auth.currentUser?.id != owner) {
+            throw const FormatException('translation_cancelled');
+          }
+          final data = response.data;
+          final output = data is Map ? data['texts'] : null;
+          if (response.status != 200 ||
+              data is! Map ||
+              data['engine'] != 'google' ||
+              output is! Map ||
+              output.length != texts.length ||
+              texts.keys.any(
+                (key) =>
+                    output[key] is! String ||
+                    (texts[key]!.trim().isNotEmpty &&
+                        (output[key] as String).trim().isEmpty),
+              )) {
+            throw const FormatException('invalid_translation_result');
+          }
+          return CommunityTranslationResult(
+            {for (final key in texts.keys) key: output[key] as String},
+            'google',
+            sameLanguage: data['sameLanguage'] == true,
+          );
+        },
       );
+    } on CommunityOwnerOperationCancelled {
+      throw const FormatException('translation_cancelled');
     } finally {
       _active.remove(requestId);
     }

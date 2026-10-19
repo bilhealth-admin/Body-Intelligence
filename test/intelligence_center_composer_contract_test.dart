@@ -16,6 +16,7 @@ void main() {
             'intelligence_reference_workspace_flow.dart',
             'intelligence_coach_menu.dart',
             'intelligence_center_message_widgets.dart',
+            'intelligence_feedback_reaction.dart',
             'ai_coach_report_confirmation_sheet.dart',
             'intelligence_center_voice_widgets.dart',
             'intelligence_conversation_persistence.dart',
@@ -225,7 +226,7 @@ void main() {
     expect(page, contains('_QuickFeedbackBar'));
     expect(page, contains('_FeedbackReaction'));
     expect(page, contains('messageFeedback[message.id] = helpful'));
-    expect(page, contains('selected: selected'));
+    expect(page, contains('isSelected: selected'));
     expect(page, contains('HapticFeedback.selectionClick()'));
   });
 

@@ -19,8 +19,8 @@ void main() {
     'lib/features/community/presentation/community_post_card.dart',
   ).readAsStringSync();
   final queue = [
-    'lib/features/community/presentation/community_post_moderation_page.dart',
-    'lib/features/community/presentation/community_post_moderation_load.dart',
+    'test/support/legacy_mobile_admin/features/community/presentation/community_post_moderation_page.dart',
+    'test/support/legacy_mobile_admin/features/community/presentation/community_post_moderation_load.dart',
   ].map((path) => File(path).readAsStringSync()).join('\n');
 
   test('admin and moderator authority is server-resolved', () {
@@ -71,14 +71,19 @@ void main() {
     );
   });
 
-  test('Flutter exposes localized hide remove and restore actions', () {
-    expect(repository, contains('hidePublishedPostAsModerator'));
-    expect(repository, contains('restoreHiddenPostAsModerator'));
-    expect(card, contains("value: 'moderate_hide'"));
-    expect(card, contains("'Hide post', 'إخفاء المنشور'"));
-    expect(card, contains("'Remove post'"));
-    expect(card, contains("'إزالة المنشور'"));
-    expect(queue, contains("'Restore post', 'استعادة المنشور'"));
-    expect(queue, contains('loadHiddenPostsForModeration'));
-  });
+  test(
+    'mobile keeps user safeguards while operator controls stay outside lib',
+    () {
+      expect(repository, contains('hidePublishedPostAsModerator'));
+      expect(repository, contains('restoreHiddenPostAsModerator'));
+      expect(card, isNot(contains("value: 'moderate_hide'")));
+      expect(card, isNot(contains("'Hide post', 'إخفاء المنشور'")));
+      expect(card, isNot(contains("'Remove post'")));
+      expect(card, isNot(contains("'إزالة المنشور'")));
+      expect(queue, contains("'Restore post', 'استعادة المنشور'"));
+      expect(queue, contains('loadHiddenPostsForModeration'));
+      expect(card, contains("value: 'report'"));
+      expect(card, contains("value: 'block'"));
+    },
+  );
 }

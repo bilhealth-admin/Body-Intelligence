@@ -58,6 +58,37 @@ class _NotificationRepository extends CommunityRepository {
   }
 }
 
+class _LegacyRewardRepository extends _NotificationRepository {
+  @override
+  Future<List<CommunityNotification>> loadCommunityNotifications({
+    DateTime? before,
+    String? beforeId,
+    List<CommunityNotificationKind>? kinds,
+    int limit = 30,
+  }) async => [
+    CommunityNotification(
+      id: '99999999-9999-4999-8999-999999999999',
+      kind: CommunityNotificationKind.rewardEarned,
+      actorId: null,
+      createdAt: DateTime.utc(2026, 10, 5),
+      entityKind: 'post',
+      entityId: '33333333-3333-4333-8333-333333333333',
+      copyKey: 'community_post_ai_reward_v1',
+      deepLinkPath: '/community/post/33333333-3333-4333-8333-333333333333',
+      metadata: const {
+        'currency': 'ai_tokens',
+        'tokens': 5,
+        'decision': 'approved',
+        'receipt_id': '22222222-2222-4222-8222-222222222222',
+      },
+    ),
+  ];
+
+  @override
+  Future<int> markCommunityNotificationsSeen(List<String> ids) async =>
+      ids.length;
+}
+
 Future<GoRouter> _pumpNotifications(
   WidgetTester tester,
   _NotificationRepository repository, {
@@ -112,6 +143,26 @@ Finder _acceptanceRow(String language) => find.widgetWithText(
 );
 
 void main() {
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      'historical AI reward is identified separately from Gold in $language',
+      (tester) async {
+        final repository = _LegacyRewardRepository();
+        await _pumpNotifications(tester, repository, language: language);
+        expect(
+          find.text(language == 'ar' ? 'مكافأة توكنات AI' : 'AI token reward'),
+          findsOneWidget,
+        );
+        expect(find.textContaining('BIL Gold'), findsNothing);
+        expect(
+          find.textContaining('confirmed by the server receipt'),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final language in ['en', 'ar']) {
     testWidgets('seen failure is handled and retry succeeds in $language', (
       tester,

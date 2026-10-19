@@ -479,6 +479,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Report member'));
     await tester.pumpAndSettle();
+    expect(repository.reportCalls, 0);
+    await tester.tap(find.byKey(const Key('community-report-reason-tap-spam')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('community-report-submit')),
+    );
+    await tester.tap(find.byKey(const Key('community-report-submit')));
+    await tester.pumpAndSettle();
     expect(repository.reportCalls, 1);
     expect(repository.reportedTargetKind, 'profile');
     expect(

@@ -245,11 +245,8 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
       <Object?>[id],
     );
     final nutrients = _database.select(
-      'SELECT bil_nutrient_id, amount FROM nutrient WHERE bil_food_id = ?',
-      <Object?>[id],
-    );
-    final portions = _database.select(
-      'SELECT amount, unit_code, gram_weight FROM portion WHERE bil_food_id = ? ORDER BY portion_id LIMIT 1',
+      "SELECT bil_nutrient_id, amount FROM nutrient "
+      "WHERE bil_food_id = ? AND basis = 'per_100g'",
       <Object?>[id],
     );
     final barcodes = _database.select(
@@ -265,13 +262,9 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
     final resolvedName = (nameEn?.trim().isNotEmpty ?? false)
         ? nameEn!.trim()
         : (fallbackAlias?['name'] as String? ?? id);
-    final serving = portions.isEmpty
-        ? const FoodServing(amount: 100, unit: 'g', grams: 100)
-        : FoodServing(
-            amount: (portions.single['amount'] as num).toDouble(),
-            unit: portions.single['unit_code'] as String,
-            grams: ((portions.single['gram_weight'] as num?) ?? 100).toDouble(),
-          );
+    // The selected nutrient evidence is per 100 g, independent of optional
+    // cup/count metadata. Unknown per-serving evidence is never mixed into it.
+    const serving = FoodServing(amount: 100, unit: 'g', grams: 100);
     final nutrientMap = <FoodNutrient, NutrientAmount>{};
     for (final row in nutrients) {
       final nutrient = _mapNutrient(row['bil_nutrient_id'] as String);

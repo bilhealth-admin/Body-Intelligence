@@ -10,6 +10,8 @@ mixin _CommunityProfileModerationRepositoryMixin {
 
   User get _user;
 
+  Future<void> requireAcceptedCommunityPolicy();
+
   CommunityPostStoreContract get _posts;
 
   Future<CommunityProfile?> loadMyProfile() async {
@@ -196,6 +198,12 @@ mixin _CommunityProfileModerationRepositoryMixin {
       name,
       surface: CommunityTextSurface.profileDisplayName,
     );
+    // A display profile is user-generated content too. Consent must precede
+    // its first upload; the entry UI provides the recovery path.
+    await requireAcceptedCommunityPolicy();
+    if (_user.id != expectedOwnerId) {
+      throw const AuthException('Community entry owner changed');
+    }
     await _client
         .from('bil_public_profiles')
         .upsert(

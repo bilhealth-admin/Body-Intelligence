@@ -37,6 +37,8 @@ part 'community_repository_profile_moderation_mixin.dart';
 part 'community_repository_reference_parity_mixin.dart';
 part 'community_repository_publishing_mixin.dart';
 part 'community_repository_cached_feed.dart';
+part 'community_repository_author_identity.dart';
+part 'community_repository_circle_reports.dart';
 part 'community_repository_review_v2.dart';
 part 'community_repository_safety_review.dart';
 
@@ -451,16 +453,33 @@ class CommunityRepository
         .order('created_at', ascending: false);
   }
 
+  Future<List<CommunityPostAuthorIdentity>> loadPostAuthorIdentities(
+    List<String> userIds,
+  ) => _readPostAuthorIdentities(userIds);
+
+  Future<void> reportCircle({required String slug, required String reason}) =>
+      _sendCircleReport(slug: slug, reason: reason);
+
   Future<void> report({
     required String targetKind,
     required String targetId,
     required String reason,
-  }) async {
+  }) => _runCommunityOwnerOperation((operation) async {
+    final trimmed = reason.trim();
+    if (!const {'post', 'profile', 'message', 'food'}.contains(targetKind) ||
+        !_uuid.hasMatch(targetId) ||
+        trimmed.runes.length < 3 ||
+        trimmed.runes.length > 500 ||
+        _unsafeText.hasMatch(trimmed)) {
+      throw ArgumentError('Invalid Community report');
+    }
+    operation.check();
     await _client.from('bil_community_reports').insert({
-      'reporter_id': _user.id,
+      'reporter_id': operation.ownerId,
       'target_kind': targetKind,
       'target_id': targetId,
-      'reason': reason.trim(),
+      'reason': trimmed,
     });
-  }
+    operation.check();
+  });
 }

@@ -285,7 +285,7 @@ extension _CommunityPostComposerReferenceSections
   }
 
   Widget _buildComposerMore(BuildContext context, bool busy) =>
-      PopupMenuButton<String>(
+      bilPearlPopupMenuButton<String>(
         key: const Key('community-composer-action-more'),
         enabled: !busy,
         tooltip: communityText(context, 'More', 'المزيد'),

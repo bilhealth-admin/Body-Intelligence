@@ -131,7 +131,7 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                                               _toggleSelected(summary.draftId),
                                   )
                                 else
-                                  PopupMenuButton<String>(
+                                  bilPearlPopupMenuButton<String>(
                                     key: Key(
                                       'community-draft-actions-${summary.draftId}',
                                     ),

@@ -1,3 +1,4 @@
+import 'bil_feedback_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
@@ -474,16 +475,7 @@ abstract final class BilFlagshipTheme {
         ),
         textStyle: textTheme.bodySmall?.copyWith(color: Colors.white),
       ),
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: dark
-            ? BilFlagshipTokens.surfaceMutedDark
-            : BilFlagshipTokens.navy900,
-        contentTextStyle: const TextStyle(color: Colors.white),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(BilFlagshipTokens.radiusMd),
-        ),
-      ),
+      snackBarTheme: BilFeedbackTheme.resolve(scheme),
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant,
         thickness: 1,

@@ -82,8 +82,13 @@ fi
 TWO_ACCOUNT_GATE='NOT_RUN_MISSING_QA_CREDENTIALS'
 if [[ -n "${BIL_EPIC9_ACCOUNT_A_EMAIL:-}" && -n "${BIL_EPIC9_ACCOUNT_A_PASSWORD:-}" && \
       -n "${BIL_EPIC9_ACCOUNT_B_EMAIL:-}" && -n "${BIL_EPIC9_ACCOUNT_B_PASSWORD:-}" ]]; then
+  # Execute the exact existing pure cloud test on the host, without baking
+  # either disposable password into an emulator application binary.
+  mkdir -p build/qa/native-cloud
+  cp integration_test/epic9_two_account_cloud_test.dart build/qa/native-cloud/epic9_two_account_cloud_test.dart
+  cmp integration_test/epic9_two_account_cloud_test.dart build/qa/native-cloud/epic9_two_account_cloud_test.dart
   flutter test --no-pub \
-    integration_test/epic9_two_account_cloud_test.dart \
+    build/qa/native-cloud/epic9_two_account_cloud_test.dart \
     --timeout 12m \
     --dart-define=BIL_RUN_EPIC9_CLOUD_INTEGRATION=true \
     --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
@@ -95,6 +100,14 @@ if [[ -n "${BIL_EPIC9_ACCOUNT_A_EMAIL:-}" && -n "${BIL_EPIC9_ACCOUNT_A_PASSWORD:
   TWO_ACCOUNT_GATE='PASS'
 fi
 
+# Integration tests replace Runner with their harness. Rebuild lib/main.dart
+# without fixture credentials before lifecycle checks or artifact preservation.
+flutter build apk --debug --no-pub --target lib/main.dart \
+  --build-number "${BIL_TEST_BUILD_NUMBER:?current Android candidate required}" \
+  --dart-define=BIL_ENVIRONMENT=qa \
+  --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
+  --dart-define=BIL_PAYMENTS_ENABLED=false \
+  --dart-define=BIL_ADS_ENABLED=false
 APK=build/app/outputs/flutter-apk/app-debug.apk
 test -s "$APK"
 adb install -r "$APK"
@@ -109,6 +122,7 @@ adb pull /sdcard/bil-ui.xml "$EVIDENCE/01-cold-launch.xml" >/dev/null
 adb shell am start -W -a android.intent.action.VIEW -d "bil://login"
 sleep 3
 adb exec-out screencap -p > "$EVIDENCE/02-login-deep-link.png"
+python3 tool/release/verify_android_deep_link_ui.py --output "$EVIDENCE/deep-link-ui"
 
 adb shell input keyevent 3
 sleep 2

@@ -152,7 +152,11 @@ void main() {
         expect(tile, isNot(contains('food.protein')));
         expect(tile, isNot(contains('food.carbs')));
         expect(tile, isNot(contains('food.fats')));
-        expect(tile, isNot(contains('food.source')));
+        // Source provenance is input to the required translation badge,
+        // never an extra visible nutrition field in the compact result.
+        expect(tile, contains('GoogleFoodNameText('));
+        expect(tile, contains('source: food.source'));
+        expect(tile, isNot(contains('Text(food.source')));
         expect(tile, isNot(contains('verifiedSource')));
       },
     );

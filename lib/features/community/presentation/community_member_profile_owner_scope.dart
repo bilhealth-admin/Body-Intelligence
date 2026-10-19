@@ -118,6 +118,7 @@ extension _CommunityMemberProfileOwnerScope
     _loadingMoreReviews = false;
     _refreshing = false;
     _relationshipBusy = false;
+    _memberSafetyBusy = false;
     _followBusy = false;
     _managingPost = false;
     _notifyProfileVisitChanged(dispose: dispose);

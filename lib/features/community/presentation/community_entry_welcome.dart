@@ -4,7 +4,7 @@ import 'community_copy.dart';
 import 'community_entry_copy.dart';
 import 'community_welcome.dart';
 
-/// Name-only entry. Optional identity controls belong in the existing editor,
+/// Optional display alias. Identity controls belong in the existing editor,
 /// not a crowded form or an implicit discoverability consent on first entry.
 class CommunityEntryWelcome extends StatelessWidget {
   const CommunityEntryWelcome({
@@ -149,8 +149,8 @@ class CommunityEntryWelcome extends StatelessWidget {
                     decoration: InputDecoration(
                       labelText: communityText(
                         context,
-                        'Display name',
-                        'الاسم الظاهر',
+                        'Display name (optional)',
+                        'الاسم الظاهر (اختياري)',
                       ),
                       prefixIcon: const Icon(Icons.person_outline_rounded),
                       filled: true,
