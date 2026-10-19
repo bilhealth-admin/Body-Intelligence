@@ -10,7 +10,8 @@ permissions:
 
 concurrency:
   group: bil-final-release-certification-${{ github.ref }}
-  cancel-in-progress: true
+  # Keep an active certification intact; reruns for a newer SHA queue behind it.
+  cancel-in-progress: false
 
 env:
   BIL_RC_BRANCH: ${{ github.ref_name }}
