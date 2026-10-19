@@ -39,6 +39,15 @@ class VisionDeployReadinessStaticContract(unittest.TestCase):
             self.assertIn("http_failure_body.ps1", runner)
             self.assertIn("Get-HttpFailureBody $_", runner)
 
+    def test_android_connected_health_deep_link_uses_android_page_title(self):
+        page = (ROOT / "lib/features/connected_health/connected_health_page.dart").read_text(encoding="utf-8")
+        verifier = (ROOT / "tool/release/verify_android_deep_link_ui.py").read_text(encoding="utf-8")
+        self.assertIn("defaultTargetPlatform == TargetPlatform.android", page)
+        self.assertIn("tr('Health Connect', 'Health Connect')", page)
+        self.assertIn("tr('Health Hub', 'المركز الصحي')", page)
+        self.assertIn("'warm-health', 'bil://connected-health'", verifier)
+        self.assertIn("['Health Connect', 'Health Hub']", verifier)
+
     def test_versioned_pro_pricing_migration_is_additive(self):
         migration = (ROOT / "supabase/migrations/202608110003_bil_gemini_25_pro_pricing.sql").read_text(encoding="utf-8")
         self.assertIn("gemini-2.5-pro", migration)

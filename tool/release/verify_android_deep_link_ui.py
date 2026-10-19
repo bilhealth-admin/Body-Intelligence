@@ -27,7 +27,9 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     cases = [
         ('cold-login', 'bil://login', True, ['Email address', 'Store reviewer access']),
-        ('warm-health', 'bil://connected-health', False, ['Apps & Devices', 'Health Hub']),
+        # Android intentionally names this page "Health Connect"; iOS uses
+        # "Apps & Devices". Both platforms show the shared Health Hub section.
+        ('warm-health', 'bil://connected-health', False, ['Health Connect', 'Health Hub']),
         ('warm-login-path', 'bil:/login', False, ['Email address', 'Store reviewer access']),
         ('removed-admin-rejected', 'bil://admin/ai-coach', False, ['Email address', 'Store reviewer access']),
         ('removed-review-rejected', 'bil://community/moderation', False, ['Email address', 'Store reviewer access']),
