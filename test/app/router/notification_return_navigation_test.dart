@@ -30,6 +30,17 @@ Future<GoRouter> _mount(WidgetTester tester, String initial) async {
             const Scaffold(body: Text('Settings', key: Key('settings'))),
       ),
       GoRoute(
+        path: '/login',
+        builder: (_, _) =>
+            const Scaffold(body: Text('Sign in', key: Key('login'))),
+      ),
+      GoRoute(
+        path: '/connected-health',
+        builder: (_, _) => const Scaffold(
+          body: Text('Health Connect', key: Key('connected-health')),
+        ),
+      ),
+      GoRoute(
         path: '/community',
         builder: (_, _) =>
             const Scaffold(body: Text('Community', key: Key('community'))),
@@ -146,6 +157,39 @@ void main() {
     await tester.tap(find.byKey(const Key('community-safe-return')));
     await tester.pumpAndSettle();
     expect(router.routeInformationProvider.value.uri.path, '/settings');
+  });
+
+  testWidgets('warm links open an underlying declarative route again', (
+    tester,
+  ) async {
+    final router = await _mount(tester, '/settings');
+    BilExternalRouteNavigator(router).open('/community/connections');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('destination')), findsOneWidget);
+
+    // The route-information URI remains /settings after this imperative push.
+    expect(router.routeInformationProvider.value.uri.path, '/settings');
+    BilExternalRouteNavigator(router).open('/settings');
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('settings')), findsOneWidget);
+  });
+
+  testWidgets('warm auth links replace an imperative route over login', (
+    tester,
+  ) async {
+    final router = await _mount(tester, '/login');
+    BilExternalRouteNavigator(router).open('/connected-health');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('connected-health')), findsOneWidget);
+
+    // The app is visibly on Health Connect, but the declarative URI is /login.
+    expect(router.routeInformationProvider.value.uri.path, '/login');
+    BilExternalRouteNavigator(router).open('/login');
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('login')), findsOneWidget);
+    expect(find.byKey(const Key('connected-health')), findsNothing);
   });
 
   testWidgets('warm private message returns to Community updates', (

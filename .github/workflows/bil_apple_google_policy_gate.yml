@@ -143,6 +143,7 @@ jobs:
           python3 -m unittest discover -s tools/qa -p 'test_android_relro_policy.py' -v 2>&1 | tee "$POLICY_OUT/relro-unit.log"
           python3 -m unittest discover -s tool/release -p 'test_prepare_android_policy_plugin_overrides.py' -v 2>&1 | tee "$POLICY_OUT/plugin-overlay-unit.log"
           python3 -m unittest discover -s tool/release -p 'test_verify_android_startup_frame.py' -v 2>&1 | tee "$POLICY_OUT/android-startup-health-unit.log"
+          python3 -m unittest discover -s tool/release -p 'test_sqlite_asset_build_retry.py' -v 2>&1 | tee "$POLICY_OUT/sqlite-build-retry-unit.log"
           python3 -m unittest discover -s .github/scripts -p 'test_bil_native_bounded_command.py' -v 2>&1 | tee "$POLICY_OUT/native-supervisor-unit.log"
           python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_simulator_adhoc_sign.py' -v 2>&1 | tee "$POLICY_OUT/ios-simulator-signing-host-unit.log"
           python3 -m unittest tool.meal_vision_benchmark.test_deploy_readiness_static_contract -v 2>&1 | tee "$POLICY_OUT/live-release-regression-unit.log"

@@ -258,14 +258,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          flutter build ios --simulator --debug --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
+          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --simulator --debug --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
           test -d build/ios/iphonesimulator/Runner.app
 
       - name: Build unsigned production-shaped iOS device application
         shell: bash
         run: |
           set -euo pipefail
-          flutter build ios --release --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --release --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
           test -d build/ios/iphoneos/Runner.app
           rm -rf Payload BIL-unsigned-RC.ipa
           mkdir -p Payload
@@ -381,7 +381,7 @@ jobs:
           # flutter test integration_test may replace the simulator Runner.app
           # with a test-harness build. Rebuild the real QA app before lifecycle
           # evidence so startup/navigation is measured on the intended bundle.
-          flutter build ios --simulator --debug --no-codesign --no-pub \
+          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --simulator --debug --no-codesign --no-pub \
             --build-number "$BIL_TEST_BUILD_NUMBER" \
             --dart-define=BIL_ENVIRONMENT=qa \
             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \

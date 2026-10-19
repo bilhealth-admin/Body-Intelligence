@@ -19,7 +19,14 @@ final class BilExternalRouteNavigator {
       return;
     }
 
-    final current = router.routeInformationProvider.value.uri;
+    final configuration = router.routerDelegate.currentConfiguration;
+    // GoRouter keeps the declarative location in RouteInformationProvider
+    // while a pushed route is visible. Compare against that imperative match
+    // first, or links to the underlying route can be incorrectly discarded.
+    final currentMatch = configuration.lastOrNull;
+    final current = currentMatch is ImperativeRouteMatch
+        ? currentMatch.matches.uri
+        : configuration.uri;
     if (current.toString() == target.toString()) return;
 
     // Authentication callbacks and their security-bound state transitions are
