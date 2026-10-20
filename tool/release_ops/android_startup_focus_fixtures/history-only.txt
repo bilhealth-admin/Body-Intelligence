@@ -1,0 +1,5 @@
+WINDOW MANAGER LAST ANR (dumpsys window lastanr)
+Last ANR continued
+WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)
+  Display: mDisplayId=0
+  mCurrentFocus=Window{old u0 com.bilhealth.bodyintelligencelog/.MainActivity}

@@ -1,0 +1,8 @@
+WINDOW MANAGER LAST ANR (dumpsys window lastanr)
+WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)
+  Display: mDisplayId=0
+  mCurrentFocus=Window{old u0 Application Not Responding: com.android.systemui}
+WINDOW MANAGER POLICY STATE (dumpsys window policy)
+WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)
+  Display: mDisplayId=0
+  mCurrentFocus=Window{now u0 com.bilhealth.bodyintelligencelog/.MainActivity}

@@ -1,0 +1,5 @@
+WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)
+  Display: mDisplayId=0
+  mCurrentFocus=Window{primary u0 Application Not Responding: com.google.android.apps.nexuslauncher}
+  Display: mDisplayId=1
+  mCurrentFocus=Window{secondary u0 com.bilhealth.bodyintelligencelog/.MainActivity}
