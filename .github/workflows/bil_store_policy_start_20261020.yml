@@ -1,0 +1,307 @@
+name: BIL Apple Google complete audit start 20261020
+run-name: BIL audit start — frozen c3c167ac — stop before release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/store-policy-start-20261020]
+    paths: [.github/workflows/bil_store_policy_start_20261020.yml]
+
+permissions:
+  contents: read
+
+env:
+  SOURCE_SHA: c3c167ace644ec8a189c030d767b5a59d0aa62f4
+  BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
+
+jobs:
+  apple-metadata:
+    name: Apple version, products and reviewer presence GET-only
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: c3c167ace644ec8a189c030d767b5a59d0aa62f4
+          persist-credentials: false
+      - name: Audit fixed app identity and preserve Apple result independently
+        shell: pwsh
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $out=Join-Path $env:RUNNER_TEMP 'bil-apple-metadata'
+          New-Item -ItemType Directory -Force $out | Out-Null
+          if((git rev-parse HEAD) -ne $env:SOURCE_SHA){throw 'SOURCE_IDENTITY_MISMATCH'}
+          $required=@('APP_STORE_CONNECT_KEY_ID','APP_STORE_CONNECT_ISSUER_ID','APP_STORE_CONNECT_PRIVATE_KEY_BASE64')
+          $missing=@($required | Where-Object {[string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_))})
+          if($missing.Count -gt 0){
+            '{"status":"BLOCKED_MISSING_APPLE_CREDENTIALS","storeMutationPerformed":false}' | Set-Content (Join-Path $out 'status.json')
+            throw 'BLOCKED_MISSING_APPLE_CREDENTIALS'
+          }
+          $driveRoot=Join-Path $env:RUNNER_TEMP 'bil-apple-isolated-drive'
+          New-Item -ItemType Directory -Force $driveRoot | Out-Null
+          subst G: $driveRoot
+          if($LASTEXITCODE -ne 0){throw 'ISOLATED_DRIVE_SETUP_FAILED'}
+          $auditCode=1
+          try {
+            New-Item -ItemType Directory -Force 'G:\secret','G:\evidence' | Out-Null
+            [IO.File]::WriteAllBytes('G:\secret\asc.p8',[Convert]::FromBase64String($env:APP_STORE_CONNECT_PRIVATE_KEY_BASE64))
+            $env:ASC_KEY_ID=$env:APP_STORE_CONNECT_KEY_ID
+            $env:ASC_ISSUER_ID=$env:APP_STORE_CONNECT_ISSUER_ID
+            $env:ASC_PRIVATE_KEY_PATH='G:\secret\asc.p8'
+            node tool/apple_store_connect/asc_v1_final_audit.mjs --output 'G:\evidence\apple-v1.json'
+            $auditCode=$LASTEXITCODE
+            if($auditCode -eq 0){
+              $parsed=Get-Content 'G:\evidence\apple-v1.json' -Raw | ConvertFrom-Json
+              if($parsed.app.id -ne '6805349703' -or $parsed.app.attributes.bundleId -ne 'com.bilhealth.bodyintelligencelog'){throw 'APPLE_APP_IDENTITY_MISMATCH'}
+              @{status='APPLE_READ_COMPLETED_NOT_CERTIFICATION'; source=$env:SOURCE_SHA; storeMutationPerformed=$false; versionState=$parsed.version.attributes.appStoreState} | ConvertTo-Json | Set-Content 'G:\evidence\status.json'
+            } else {
+              '{"status":"APPLE_READ_FAILED","storeMutationPerformed":false}' | Set-Content 'G:\evidence\status.json'
+            }
+          } finally {
+            if(Test-Path 'G:\evidence'){Copy-Item 'G:\evidence\*' $out -Force -ErrorAction SilentlyContinue}
+            Remove-Item -LiteralPath 'G:\secret' -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item Env:ASC_PRIVATE_KEY_PATH -ErrorAction SilentlyContinue
+            subst G: /D | Out-Null
+          }
+          if($auditCode -ne 0){throw 'APPLE_READ_FAILED'}
+          'Apple GET-only metadata collection completed. This is not signed-artifact, ATT runtime, purchase, reviewer-route or App Review acceptance evidence.' >> $env:GITHUB_STEP_SUMMARY
+      - name: Preserve Apple evidence even when another platform is blocked
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-independent-apple-metadata-c3c167ac-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-apple-metadata/
+          if-no-files-found: error
+          retention-days: 30
+
+  independent-live-services:
+    name: Disposable live service — ${{ matrix.service }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        service: [coach-text, voice-metering, meal-vision, barcode, account-deletion, community-translation]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: c3c167ace644ec8a189c030d767b5a59d0aa62f4
+          persist-credentials: false
+      - name: Run only the existing disposable fixture and require real success
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          BIL_LIVE_SERVICE: ${{ matrix.service }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/bil-independent-live-$BIL_LIVE_SERVICE"
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, sys
+          service=os.environ['BIL_LIVE_SERVICE']
+          project=os.environ['BIL_SUPABASE_PROJECT_REF']
+          specs={
+            'coach-text':('tool/ai_coach/run_live_text_e2e.ps1',['-ProjectRef',project]),
+            'voice-metering':('tool/ai_coach/run_live_voice_metering_db.ps1',['-ProjectRef',project]),
+            'meal-vision':('tool/meal_vision_benchmark/run_live_supabase_e2e.ps1',['-ProjectRef',project]),
+            'barcode':('tool/nutrition/run_live_barcode_gate_e2e.ps1',['-ProjectRef',project]),
+            'account-deletion':('tool/account_deletion/run_live_disposable_e2e.ps1',['-ProjectRef',project,'-OwnerEmail','release-certification@bilhealth.invalid']),
+            'community-translation':('tool/community_translation/run_live_synthetic_e2e.ps1',[]),
+          }
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/('bil-independent-live-'+service)
+          report={'source':os.environ['SOURCE_SHA'],'service':service,'status':'BLOCKED','realServiceInvoked':False,'schemaDeployed':False,'testFixtureScope':'Existing disposable script only; no real user identity','cleanupReadback':'NOT_PROVEN'}
+          tmp=None;temp_created=False;code=1
+          try:
+            if not os.environ.get('SUPABASE_ACCESS_TOKEN'):
+              report['failure']='MISSING_SUPABASE_TEST_CREDENTIAL';raise RuntimeError('missing')
+            source,args=specs[service]
+            source=pathlib.Path(source)
+            text=source.read_text(encoding='utf-8-sig')
+            if 'supabase@latest' not in text:
+              report['failure']='EXPECTED_EXISTING_CLI_MARKER_MISSING';raise RuntimeError('marker')
+            tmp=source.parent/('.ci-independent-'+source.name)
+            if tmp.exists():
+              report['failure']='TEMPORARY_SCRIPT_ALREADY_EXISTS';raise RuntimeError('exists')
+            tmp.write_text(text.replace('supabase@latest','supabase@2.121.0'),encoding='utf-8')
+            temp_created=True
+            state=pathlib.Path('supabase/.temp')
+            state.mkdir(parents=True,exist_ok=True)
+            (state/'project-ref').write_text(project,encoding='utf-8')
+            report['realServiceInvoked']=True
+            result=subprocess.run(['pwsh','-NoProfile','-File',str(tmp),*args],text=True,encoding='utf-8',errors='replace',capture_output=True)
+            report['exitCode']=result.returncode
+            try: actual=json.loads(result.stdout.lstrip('\ufeff').strip())
+            except (ValueError,TypeError): actual=None
+            if isinstance(actual,dict):
+              allowed={'success','translated','cleanup','user_deleted','session_revoked','cascade_clean','auth_user_deleted','request_status','removed_storage_objects','owned_profile_rows_remaining','deletion_request_rows_remaining','consent_denied_status','consent_denied_error','consent_denied_provider_events','candidate_count','provider','model','latency_ms','input_tokens','output_tokens','cost_usd','cost_source','provider_attempts','receipt_state','quota_used','quota_reserved','replay_same_request','exact_duplicate_handled','exact_duplicate_cache_hit','exact_duplicate_charged','duplicate_image_rejected','duplicate_status','duplicate_error_code','cached_request_replay_stable','requires_review','auto_logged','free_status','free_error_code','premium_status','premium_error_code','premium_gate_opened'}
+              report['result']={k:v for k,v in actual.items() if k in allowed and isinstance(v,(str,int,float,bool,type(None)))}
+              passed=actual.get('success',actual.get('translated')) is True
+              cleanup=all(actual.get(k) is True for k in ('cleanup','user_deleted','session_revoked','cascade_clean') if k in actual)
+              if result.returncode==0 and passed and cleanup:
+                report['status']='PASS_EXISTING_LIVE_SCRIPT_NOT_NATIVE_ACCEPTANCE';code=0
+                report['cleanupReadback']='EXISTING_SCRIPT_COMPLETED_FINALLY; see per-script booleans where provided'
+              else: report['failure']='LIVE_ASSERTION_OR_CLEANUP_FAILED'
+            else:
+              report['failure']='LIVE_SCRIPT_FAILED_OR_NO_JSON_RESULT'
+            if 'AI token settlement did not reach' in result.stderr:
+              report['failure']='AI_TOKEN_SETTLEMENT_EXPECTED_SUCCEEDED_USED_POSITIVE_RESERVED_ZERO_NOT_OBSERVED'
+            # Raw subprocess streams can contain remote error bodies. Never upload or print them.
+          except Exception:
+            report.setdefault('failure','LIVE_CONTROLLER_FAILED')
+          finally:
+            if temp_created and tmp is not None and tmp.exists():tmp.unlink()
+            (out/'result.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'service':service,'status':report['status'],'failure':report.get('failure')}))
+          sys.exit(code)
+          PY
+      - name: Preserve sanitized result independently of other service failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-independent-live-${{ matrix.service }}-c3c167ac-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-independent-live-${{ matrix.service }}/
+          if-no-files-found: error
+          retention-days: 30
+
+  google-catalog:
+    name: Google product catalog GET-only; no transient edit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: c3c167ace644ec8a189c030d767b5a59d0aa62f4
+          persist-credentials: false
+      - name: Read catalog with fixed identity and no application mutation
+        shell: bash
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/bil-google-metadata"
+          node --input-type=module <<'JS'
+          import crypto from 'node:crypto';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const target=path.join(process.env.RUNNER_TEMP,'bil-google-metadata','google-catalog.json');
+          const report={checkedAt:new Date().toISOString(),source:process.env.SOURCE_SHA,packageName:'com.bilhealth.bodyintelligencelog',mode:'GET_CATALOG_ONLY_NO_EDIT',storeMutationPerformed:false,transientEditCreated:false,listingTracksPrivacyAppAccessVerified:false,status:'BLOCKED'};
+          const save=()=>fs.writeFileSync(target,JSON.stringify(report,null,2)+'\n');
+          try {
+            const raw=process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64;
+            if(!raw)throw new Error('MISSING_GOOGLE_CREDENTIALS');
+            const credentials=JSON.parse(Buffer.from(raw,'base64').toString('utf8'));
+            if(credentials.type!=='service_account'||!credentials.client_email||!credentials.private_key)throw new Error('INVALID_GOOGLE_CREDENTIAL_SHAPE');
+            const uri=credentials.token_uri??'https://oauth2.googleapis.com/token';
+            if(uri!=='https://oauth2.googleapis.com/token')throw new Error('UNTRUSTED_TOKEN_ORIGIN');
+            const now=Math.floor(Date.now()/1000);
+            const part=v=>Buffer.from(JSON.stringify(v)).toString('base64url');
+            const input=part({alg:'RS256',typ:'JWT'})+'.'+part({iss:credentials.client_email,scope:'https://www.googleapis.com/auth/androidpublisher',aud:uri,iat:now-5,exp:now+600});
+            const signed=input+'.'+crypto.sign('RSA-SHA256',Buffer.from(input),credentials.private_key).toString('base64url');
+            const auth=await fetch(uri,{method:'POST',redirect:'error',signal:AbortSignal.timeout(20000),headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion:signed})});
+            const session=await auth.json().catch(()=>null);
+            report.oauthHttpStatus=auth.status;
+            if(!auth.ok||!session?.access_token)throw new Error('GOOGLE_OAUTH_FAILED');
+            const root='https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.bilhealth.bodyintelligencelog/';
+            report.resources=[];
+            for(const resource of ['subscriptions','inappproducts']){
+              let token=''; const pages=[];let complete=false;
+              for(let page=0;page<20;page++){
+                const url=new URL(root+resource);
+                url.searchParams.set(resource==='subscriptions'?'pageSize':'maxResults','100');
+                if(token)url.searchParams.set(resource==='subscriptions'?'pageToken':'token',token);
+                const response=await fetch(url,{method:'GET',redirect:'error',signal:AbortSignal.timeout(20000),headers:{Authorization:'Bearer '+session.access_token,Accept:'application/json'}});
+                const data=await response.json().catch(()=>null);
+                if(!response.ok){pages.push({httpStatus:response.status,errorCode:data?.error?.status??'UNKNOWN'});break;}
+                const items=data?.subscriptions??data?.inappproduct??[];
+                pages.push({httpStatus:response.status,productIds:items.map(x=>x.productId??x.sku),count:items.length});
+                token=data?.nextPageToken??data?.tokenPagination?.nextPageToken??'';
+                if(!token){complete=true;break;}
+              }
+              report.resources.push({resource,pages,complete});
+            }
+            report.status=report.resources.every(x=>x.complete)?'GOOGLE_CATALOG_READ_COMPLETED_NOT_CERTIFICATION':'BLOCKED_GOOGLE_CATALOG_PERMISSION_OR_HTTP';
+            if(report.status.startsWith('BLOCKED'))process.exitCode=1;
+          } catch(error){
+            const safe=new Set(['MISSING_GOOGLE_CREDENTIALS','INVALID_GOOGLE_CREDENTIAL_SHAPE','UNTRUSTED_TOKEN_ORIGIN','GOOGLE_OAUTH_FAILED']);
+            report.failure=safe.has(error.message)?error.message:'GOOGLE_CATALOG_READ_FAILED';
+            process.exitCode=1;
+          } finally {save();}
+          console.log(JSON.stringify({status:report.status,storeMutationPerformed:false,transientEditCreated:false}));
+          JS
+      - name: Preserve Google permission or catalog outcome
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-independent-google-metadata-c3c167ac-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-google-metadata/
+          if-no-files-found: error
+          retention-days: 30
+
+  start-requested-checks:
+    name: Start exact candidate audits and stop
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET_BRANCH: integration/bil-qa-media-policy-20261011
+    steps:
+      - name: Start all scoped test workflows without release signing or submission
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, time
+          repo=os.environ['GITHUB_REPOSITORY']
+          branch=os.environ['TARGET_BRANCH']
+          expected=os.environ['SOURCE_SHA']
+          specifications=[
+            ('full-analysis-and-10196-root-tests','bil_owner_comprehensive_validation.yml',{}),
+            ('apple-google-policy-and-full-lint','bil_apple_google_policy_gate.yml',{'evidence_scope':'full-with-android-lint','certify_release':True}),
+            ('source-codeql-semgrep','bil_codeql_security_extended.yml',{'source_audit_only':True}),
+            ('android-java-and-apple-swift-native','bil_codeql_security_extended.yml',{'android_only':True,'ios_only':True}),
+            ('isolated-auth-rls-storage-realtime-and-all-deno','bil_codeql_security_extended.yml',{'supabase_only':True}),
+            ('apple-healthkit-native-permission','bil_healthkit_cloud_simulator.yml',{}),
+            ('android-six-api-startup-matrix','bil_android_isolated_emulator_smoke.yml',{}),
+            ('apple-reviewer-login-and-credits','bil_reviewer_access_preflight.yml',{}),
+            ('unsigned-test-artifacts-and-notification-permissions','bil_rc_mobile_test_build.yml',{}),
+            ('offline-mobsf-existing-candidate-apk','bil_codeql_security_extended.yml',{'mobsf_only':True,'android_artifact_run':'39338645065'}),
+          ]
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-started-audits'
+          out.mkdir(parents=True,exist_ok=True)
+          records=[]
+          for role,workflow,inputs in specifications:
+            identity=subprocess.run(['gh','api',f'repos/{repo}/git/ref/heads/{branch}'],text=True,capture_output=True)
+            if identity.returncode or json.loads(identity.stdout)['object']['sha']!=expected:
+              records.append({'role':role,'status':'BLOCKED_SOURCE_MOVED'});break
+            payload={'ref':branch,'inputs':inputs}
+            result=subprocess.run(['gh','api','--method','POST',f'repos/{repo}/actions/workflows/{workflow}/dispatches','--input','-'],input=json.dumps(payload),text=True,capture_output=True)
+            # Never print credentials or a raw failure body.
+            records.append({'role':role,'workflow':workflow,'inputs':inputs,'source_sha':expected,'status':'DISPATCH_ACCEPTED_NOT_PASS' if result.returncode==0 else 'DISPATCH_FAILED'})
+            (out/'dispatch-receipts.json').write_text(json.dumps(records,indent=2)+'\n')
+          runs=subprocess.run(['gh','api',f'repos/{repo}/actions/runs?head_sha={expected}&event=workflow_dispatch&per_page=100'],text=True,capture_output=True)
+          if runs.returncode==0:
+            safe=[{k:r.get(k) for k in ('id','name','head_sha','head_branch','status','conclusion','html_url','created_at','path')} for r in json.loads(runs.stdout).get('workflow_runs',[])]
+            (out/'observed-runs.json').write_text(json.dumps(safe,indent=2)+'\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as stream:
+            stream.write('## Requested checks started; no release action\n\n')
+            stream.write(f'Frozen app source: `{expected}`. This controller only dispatches tests. No release signing, upload, rollout, store submission or email send.\n\n')
+            for record in records:stream.write(f"- {record['role']}: **{record['status']}**\n")
+            stream.write('\nThe owner will inspect results before authorizing the next operation. A green dispatch is not a passed test or store approval.\n')
+          if len(records)!=len(specifications) or any(r['status']!='DISPATCH_ACCEPTED_NOT_PASS' for r in records):raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: bil-audit-start-receipts-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-started-audits/
+          if-no-files-found: error
+          retention-days: 30
