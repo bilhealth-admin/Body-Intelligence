@@ -1,0 +1,102 @@
+name: BIL guarded association recovery 20261020
+
+on:
+  push:
+    branches: [ops/site-association-recovery-20261020]
+    paths: [.github/workflows/bil_site_association_recovery_20261020.yml]
+  workflow_dispatch:
+    inputs:
+      execute_recovery:
+        description: Reapply reviewed visible6bf asset config and exact restoration after every gate; false is read-only preflight
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: bil-public-site-production
+  cancel-in-progress: false
+
+jobs:
+  guarded-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+          sparse-checkout: tool/release_ops
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+          path: candidate
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /public_site/
+            /tool/release/
+            /wrangler.site.jsonc
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verify controller negative controls without network
+        working-directory: controller/tool/release_ops
+        run: python3 -m unittest -v test_public_site_diagnosis.py test_site_recovery_20261020.py
+      - name: Preserve current version and compare every proposed reachable asset before any mutation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 controller/tool/release_ops/site_recovery_20261020.py prepare candidate recovery-evidence
+      - name: Install pinned Wrangler and its official exported asset collector without lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/bil-site-toolchain" --no-save --ignore-scripts wrangler@4.125.0 @cloudflare/deploy-helpers@0.8.0
+      - name: Run complete existing Worker, merge, public policy and generator tests on frozen source
+        working-directory: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/generate_app_link_associations.py --self-test
+          node --test tool/release/bilhealth_site_worker.test.mjs tool/release/merge_site_associations.test.mjs tool/release/public_policy_pages.test.mjs
+          node ../controller/tool/release_ops/validate_recovered_site.mjs . ../recovery-evidence
+      - name: Verify pinned Wrangler dry-run with both restored association files in the local upload inventory
+        working-directory: candidate
+        shell: bash
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          set -euo pipefail
+          node "$RUNNER_TEMP/bil-site-toolchain/node_modules/wrangler/bin/wrangler.js" deploy --config wrangler.site.jsonc --no-bundle --keep-vars --dry-run --outdir ../recovery-evidence/wrangler-dry-run > ../recovery-evidence/wrangler-dry-run.log 2>&1
+          node ../controller/tool/release_ops/verify_official_site_inventory.mjs . ../recovery-evidence "$RUNNER_TEMP/bil-site-toolchain"
+      - name: Upload immutable prechange backup before deployment is possible
+        id: backup
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-site-recovery-backup-${{ github.run_id }}
+          path: recovery-evidence/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Recheck current actor/source/public state and deploy only exact frozen restoration
+        if: ${{ success() && inputs.execute_recovery == true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 992830d7894ba09161ff0a411fe4154b
+          BIL_BACKUP_ARTIFACT_ID: ${{ steps.backup.outputs.artifact-id }}
+          BIL_BACKUP_ARTIFACT_DIGEST: ${{ steps.backup.outputs.artifact-digest }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: python3 controller/tool/release_ops/site_recovery_20261020.py deploy candidate recovery-evidence
+      - name: Preserve final evidence and any actual failed postchecks
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-site-recovery-result-${{ github.run_id }}
+          path: recovery-evidence/
+          if-no-files-found: error
+          retention-days: 30
