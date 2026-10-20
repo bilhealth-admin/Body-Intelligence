@@ -6,6 +6,8 @@ on:
     branches: [audit/apple-workout-capture-5775-20261020]
     paths:
       - .github/workflows/bil_apple_workout_native_capture_20261020.yml
+      - .github/scripts/test_install_isolated_cocoapods.py
+      - .github/scripts/install_isolated_cocoapods.py
 
 permissions:
   contents: read

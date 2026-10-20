@@ -55,7 +55,7 @@ class IsolatedCocoaPodsTests(unittest.TestCase):
         self.assertIn("--clear-sources", args)
         self.assertIn("https://rubygems.org", args)
         self.assertEqual(options["timeout"], 600)
-        self.assertTrue(Path(options["env"]["GEM_HOME"]).is_relative_to(self.root))
+        self.assertTrue(Path(options["env"]["GEM_HOME"]).resolve().is_relative_to(self.root.resolve()))
         self.assertEqual(options["env"]["GEM_HOME"], options["env"]["GEM_PATH"])
         self.assertNotIn("/existing/global", options["env"]["GEM_PATH"])
         shim = next(self.root.glob("bil-cocoapods-*/bin/pod"))
@@ -64,6 +64,19 @@ class IsolatedCocoaPodsTests(unittest.TestCase):
         self.assertEqual(receipt["xcodeproj_version"], "1.28.1")
         self.assertFalse(receipt["global_gem_directories_modified"])
         self.assertIn("GEM_PATH=", (self.root / "env").read_text())
+
+    def test_runner_temp_directory_alias_keeps_canonical_isolation(self):
+        real = self.root / "real-runner-temp"
+        real.mkdir()
+        alias = self.root / "runner-temp-alias"
+        alias.symlink_to(real, target_is_directory=True)
+        self.env["RUNNER_TEMP"] = str(alias)
+        self.install()
+        home = Path(self.calls[0][1]["env"]["GEM_HOME"])
+        self.assertTrue(home.is_relative_to(real.resolve()))
+        self.assertFalse(home.is_relative_to(alias))
+        self.assertTrue(home.resolve().is_relative_to(alias.resolve()))
+        self.assertIn(str(home), (self.root / "env").read_text())
 
     def test_observed_runner_pod117_remains_rejected(self):
         self.probe_version = "1.17.0"
@@ -82,6 +95,21 @@ class IsolatedCocoaPodsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "escaped"):
             self.install()
         self.assertFalse((self.root / "env").exists())
+
+    def test_dependency_symlink_outside_isolated_gem_home_is_rejected(self):
+        isolated = self.root / "isolated-home"
+        (isolated / "gems").mkdir(parents=True)
+        outside = self.root / "outside-global-gem"
+        outside.mkdir()
+        link = isolated / "gems" / "linked-xcodeproj"
+        link.symlink_to(outside, target_is_directory=True)
+        probe = {"cocoapods_version": "1.16.2", "xcodeproj_version": "1.28.1",
+                 "cocoapods_gem_path": str(isolated / "gems" / "cocoapods-1.16.2"),
+                 "xcodeproj_gem_path": str(link),
+                 "resolved_gems": [{"name": "cocoapods", "version": "1.16.2"}]}
+        self.assertTrue(link.is_relative_to(isolated / "gems"))
+        with self.assertRaisesRegex(ValueError, "escaped"):
+            module.validate_probe(probe, isolated)
 
     def test_install_failure_does_not_export_selection(self):
         self.fail_install = True
