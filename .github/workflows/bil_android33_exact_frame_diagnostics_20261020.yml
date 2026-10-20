@@ -1,0 +1,35 @@
+name: Read-only exact Android33 frame timing diagnostics
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/android33-exact-frame-diagnostics-20261020]
+    paths:
+      - .github/workflows/bil_android33_exact_frame_diagnostics_20261020.yml
+      - tool/release_ops/extract_android33_frame_diagnostics.py
+      - tool/release_ops/test_extract_android33_frame_diagnostics.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Exercise metadata and ZIP negative controls without network
+        run: python3 tool/release_ops/test_extract_android33_frame_diagnostics.py
+      - name: Verify the exact historical artifact and export bounded diagnostics
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tool/release_ops/extract_android33_frame_diagnostics.py --output "$RUNNER_TEMP/android33-frame-diagnostics"
+      - name: Upload only diagnostic text and verified provenance below32MiB
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-android33-frame-diagnostics-${{ github.run_id }}
+          path: ${{ runner.temp }}/android33-frame-diagnostics
+          if-no-files-found: warn
+          retention-days: 14
