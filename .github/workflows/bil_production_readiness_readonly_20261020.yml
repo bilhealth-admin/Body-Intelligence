@@ -1,0 +1,78 @@
+name: BIL bounded production readiness read only 20261020
+on:
+  push:
+    branches: [audit/production-readiness-5775-20261020]
+    paths:
+      - .github/workflows/bil_production_readiness_readonly_20261020.yml
+      - tool/release_certification/production_readiness_readonly.py
+      - tool/release_certification/google_reviewer_readonly.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-production-readiness-readonly-20261020
+  cancel-in-progress: false
+env:
+  APP_SOURCE_SHA: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+jobs:
+  backend-metadata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          path: controller
+          ref: ${{ github.sha }}
+      - name: Checkout the immutable application source separately
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+          persist-credentials: false
+          path: app
+      - name: Bounded Management API metadata and read-only SQL booleans
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          READINESS_OUT: ${{ runner.temp }}/production-readiness/backend
+          APP_CHECKOUT: ${{ github.workspace }}/app
+        run: python3 controller/tool/release_certification/production_readiness_readonly.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: production-readiness-backend-5775d08
+          path: ${{ runner.temp }}/production-readiness/backend/*.json
+          if-no-files-found: error
+          retention-days: 14
+  dedicated-google-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          path: controller
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+          persist-credentials: false
+          path: app
+      - name: Dedicated Google ordinary login and own access only
+        env:
+          BIL_GOOGLE_REVIEWER_EMAIL: ${{ secrets.BIL_GOOGLE_REVIEWER_EMAIL }}
+          BIL_GOOGLE_REVIEWER_PASSWORD: ${{ secrets.BIL_GOOGLE_REVIEWER_PASSWORD }}
+          BIL_GOOGLE_REVIEWER_EXPECTED_OWNER_ID: ${{ secrets.BIL_GOOGLE_REVIEWER_EXPECTED_OWNER_ID }}
+          BIL_GOOGLE_REVIEW_MINIMUM_AI_CREDITS: ${{ vars.BIL_GOOGLE_REVIEW_MINIMUM_AI_CREDITS }}
+          BIL_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.BIL_SUPABASE_PUBLISHABLE_KEY }}
+          APP_CHECKOUT: ${{ github.workspace }}/app
+          READINESS_OUT: ${{ runner.temp }}/production-readiness/google
+        run: node controller/tool/release_certification/google_reviewer_readonly.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: production-readiness-google-5775d08
+          path: ${{ runner.temp }}/production-readiness/google/*.json
+          if-no-files-found: error
+          retention-days: 14
+
