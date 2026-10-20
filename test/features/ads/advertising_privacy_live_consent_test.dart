@@ -17,7 +17,10 @@ void main() {
     expect(english, contains('your recorded health'));
     expect(english, contains('in ad requests'));
     expect(english, contains('Google’s ad SDK may process'));
-    expect(english, contains('approximate location inferred from your IP address'));
+    expect(
+      english,
+      contains('approximate location inferred from your IP address'),
+    );
     expect(english, isNot(contains('never uses')));
     expect(arabic, contains('بياناتك المسجلة'));
     expect(arabic, contains('ضمن طلبات الإعلانات'));
@@ -37,10 +40,7 @@ void main() {
       expect(actual, contains('IP'));
       if (locale != 'en') expect(actual, isNot(english));
     }
-    expect(
-      advertisingPrivacySurfaceCopy('pt_BR')[1],
-      translations['pt-BR'],
-    );
+    expect(advertisingPrivacySurfaceCopy('pt_BR')[1], translations['pt-BR']);
     expect(
       advertisingPrivacySurfaceCopy('zh_Hant')[1],
       translations['zh-Hant'],
