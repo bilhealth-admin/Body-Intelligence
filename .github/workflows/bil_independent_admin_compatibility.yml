@@ -1,0 +1,51 @@
+name: BIL independent admin contracts at approved web source
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-web-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only-ephemeral
+          POSTGRES_DB: bil_finance_synthetic
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bil_finance_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 097dda710b2c8f3a98a413052b5d078863aac90c
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verify exact independent admin source and all owner service contracts
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 097dda710b2c8f3a98a413052b5d078863aac90c
+          mkdir -p "$RUNNER_TEMP/admin-compatibility"
+          node --test cloudflare/admin_site/tests/*.test.mjs tool/admin_web/ops_v1/ops_server.test.mjs tool/admin_web/review_v1/*.test.mjs tool/admin_web/backend_v4/audit_context_v2.test.mjs 2>&1 | tee "$RUNNER_TEMP/admin-compatibility/node.log"
+      - name: Exact finance rollback ACL MFA grants revocations and receipt recovery in ephemeral PostgreSQL
+        env:
+          PGPASSWORD: test-only-ephemeral
+        run: |
+          set -euo pipefail
+          command -v psql
+          for file in bootstrap stepup finance_test reconcile reconcile_test; do
+            psql -h 127.0.0.1 -p 5432 -U postgres -d bil_finance_synthetic -v ON_ERROR_STOP=1 -f "tool/admin_web/pg_it/$file.sql" 2>&1 | tee "$RUNNER_TEMP/admin-compatibility/$file.log"
+          done
+          git diff --exit-code
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-independent-admin-097dda71-${{ github.run_id }}
+          path: ${{ runner.temp }}/admin-compatibility/
+          if-no-files-found: error
+          retention-days: 14
