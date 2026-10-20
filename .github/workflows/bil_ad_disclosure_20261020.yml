@@ -1,4 +1,5 @@
 name: BIL exact advertising disclosure verification
+run-name: BIL disclosure with canonical and regional locale coverage
 on:
   workflow_dispatch:
   push:

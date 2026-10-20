@@ -13,7 +13,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 void main() {
   test('ad disclosure separates recorded BIL data from Google SDK data', () {
     final english = advertisingPrivacySurfaceCopy('en')[1];
-    final arabic = advertisingPrivacySurfaceCopy('ar-EG')[1];
+    final arabic = advertisingPrivacySurfaceCopy('ar')[1];
     expect(english, contains('your recorded health'));
     expect(english, contains('in ad requests'));
     expect(english, contains('Google’s ad SDK may process'));
@@ -44,6 +44,10 @@ void main() {
     expect(
       advertisingPrivacySurfaceCopy('zh_Hant')[1],
       translations['zh-Hant'],
+    );
+    expect(
+      AdvertisingDisclosureRuntimeCopy.forLocale('ar-EG'),
+      translations['ar'],
     );
     expect(
       AdvertisingDisclosureRuntimeCopy.forLocale('ar_SA'),

@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: bil-owner-comprehensive-${{ github.ref }}
+  group: bil-owner-comprehensive-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
