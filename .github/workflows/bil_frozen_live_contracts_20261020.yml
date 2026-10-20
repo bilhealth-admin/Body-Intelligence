@@ -1,0 +1,58 @@
+name: BIL frozen source complete live service contracts
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/final-live-contracts-20261020]
+    paths: [.github/workflows/bil_frozen_live_contracts_20261020.yml]
+permissions:
+  contents: read
+jobs:
+  live-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
+      BIL_SOURCE_SHA: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+          persist-credentials: false
+      - name: Record actual checked-out source and separate controller
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/bil-cert-live-1"
+          python3 - <<'PYCODE'
+          import json,os,pathlib,subprocess
+          receipt={'application_source_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'controller_sha':os.environ['GITHUB_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'workflow_path':'.github/workflows/bil_frozen_live_contracts_20261020.yml','source_claim':'actual_checkout_before_test_not_test_result'}
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-cert-live-1'/'source-receipt.json';p.write_text(json.dumps(receipt,indent=2)+'\n')
+          PYCODE
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Verify ledger guard detects source and deployment drift
+        run: python3 -m unittest discover -s tool/release_certification -p test_check_cloud_deployment_ledger.py -v
+      - name: Real PostgreSQL cache reservation and refund ordering regression
+        run: |
+          npm ci --prefix supabase/tests --ignore-scripts
+          node supabase/tests/vision_cache_reservation_test.mjs
+      - name: Actual deployed service roundtrips with disposable fixtures and cleanup
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          GITHUB_SHA="$BIL_SOURCE_SHA" bash tool/release_certification/run_live_gate.sh 1
+          grep -Fx 'LIVE_BACKEND_CORE=PASS' "$RUNNER_TEMP/bil-cert-live-1/status.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-frozen-live-service-contracts-6bf23994-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-cert-live-1/
+          if-no-files-found: error
+          retention-days: 14
