@@ -129,3 +129,22 @@ jobs:
           path: ${{ runner.temp }}/bil-signing-inputs/
           if-no-files-found: error
           retention-days: 30
+
+  start-exact-source-live-contracts:
+    name: Start final exact-source cloud contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Require exact audited branch and start existing live contracts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OBSERVED="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/integration/bil-qa-media-policy-20261011" --jq .object.sha)"
+          test "$OBSERVED" = "$SOURCE_SHA"
+          gh workflow run bil_live_service_contracts.yml --repo "$GITHUB_REPOSITORY" --ref integration/bil-qa-media-policy-20261011
+          echo 'LIVE_CONTRACTS_DISPATCH_ACCEPTED_NOT_PASS' >> "$GITHUB_STEP_SUMMARY"
