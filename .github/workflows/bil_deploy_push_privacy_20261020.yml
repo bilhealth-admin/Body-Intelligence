@@ -1,0 +1,167 @@
+name: BIL deploy tested private-push title repair only
+run-name: Deploy only community-push-dispatch from tested6bf23994
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ops/push-privacy-20261020]
+    paths: [.github/workflows/bil_deploy_push_privacy_20261020.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-single-function-push-privacy-tgmanzhqulksykhslrzb
+  cancel-in-progress: false
+
+env:
+  BIL_SOURCE_SHA: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+  BIL_PROJECT: tgmanzhqulksykhslrzb
+  BIL_FUNCTION: community-push-dispatch
+
+jobs:
+  deploy-single-tested-function:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout this reviewed deployment controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+      - name: Checkout the immutable tested application source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+          path: candidate
+          persist-credentials: false
+      - name: Verify controller guards and exact candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C candidate rev-parse HEAD)" = "$BIL_SOURCE_SHA"
+          python3 -m unittest discover -s controller/tool/release_ops -p test_push_privacy_deployment.py -v
+          OUT="$RUNNER_TEMP/bil-push-privacy-evidence"
+          mkdir -p "$OUT"
+          echo "OUT=$OUT" >> "$GITHUB_ENV"
+          echo "HELPER=$GITHUB_WORKSPACE/controller/tool/release_ops/push_privacy_deployment.py" >> "$GITHUB_ENV"
+          python3 controller/tool/release_ops/push_privacy_deployment.py expected-source "$OUT" candidate/supabase/functions/community-push-dispatch
+          git -C candidate rev-parse HEAD > "$OUT/tested-application-source.txt"
+          git -C controller rev-parse HEAD > "$OUT/deployment-controller-source.txt"
+      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282
+        with:
+          deno-version: v2.9.7
+      - name: Test the exact dispatch and APNs/FCM gateway source before credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          test -z "${BIL_INTERNAL_DISPATCH_SECRET:-}"
+          cd candidate/supabase/functions
+          deno test --allow-env --allow-read --frozen --lock=deno.lock \
+            community-push-dispatch/server_test.ts \
+            push-provider-gateway/server_test.ts \
+            push-provider-gateway/badge_test.ts \
+            2>&1 | tee "$OUT/exact-source-deno-tests.log"
+          git diff --exit-code
+      - name: Discover and verify the pinned API-only CLI options
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.121.0 --version | tee "$OUT/cli-version.txt"
+          npx --yes supabase@2.121.0 functions deploy --help > "$OUT/deploy-help.txt"
+          npx --yes supabase@2.121.0 functions download --help > "$OUT/download-help.txt"
+          npx --yes supabase@2.121.0 init --help > "$OUT/init-help.txt"
+          python3 - "$OUT" <<'PY'
+          from pathlib import Path
+          import sys
+          out=Path(sys.argv[1])
+          assert '2.121.0' in (out/'cli-version.txt').read_text()
+          for filename, flags in [('deploy-help.txt', ('--project-ref','--no-verify-jwt','--use-api')), ('download-help.txt', ('--project-ref','--use-api'))]:
+              text=(out/filename).read_text()
+              assert all(flag in text for flag in flags), 'Required pinned CLI option missing'
+          PY
+      - name: Snapshot original56 metadata, raw bundle and rollback source without dispatch
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 "$HELPER" preflight "$OUT"
+          ROLLBACK="$RUNNER_TEMP/bil-push-privacy-rollback"
+          mkdir -p "$ROLLBACK"
+          cd "$ROLLBACK"
+          npx --yes supabase@2.121.0 init
+          npx --yes supabase@2.121.0 functions download community-push-dispatch \
+            --project-ref tgmanzhqulksykhslrzb --use-api \
+            > "$OUT/before-source-download.log" 2>&1
+          python3 "$HELPER" snapshot-source "$OUT" "$ROLLBACK/supabase/functions/community-push-dispatch"
+          tar -czf "$OUT/rollback-source56.tar.gz" supabase/config.toml supabase/functions/community-push-dispatch
+          sha256sum "$OUT/rollback-source56.tar.gz" > "$OUT/rollback-source56.tar.gz.sha256"
+          cat > "$OUT/ROLLBACK.md" <<'TEXT'
+          Original function56 snapshot; not an automatic rollback.
+          Restore only community-push-dispatch from rollback-source56.tar.gz in a new empty directory.
+          First verify the archive SHA256 and previous-source.json module hashes.
+          Inspect current remote metadata and stop if another actor changed the function.
+          With the existing authorized SUPABASE_ACCESS_TOKEN, run from that extracted directory:
+          npx --yes supabase@2.121.0 functions deploy community-push-dispatch --project-ref tgmanzhqulksykhslrzb --no-verify-jwt --use-api
+          Recheck verify_jwt=false, source hashes and the two unauthorized401 probes.
+          Restoring old source creates a NEW function version; it does not reset the deployment ledger to56.
+          Never roll back database data, schema, secrets or any other function.
+          TEXT
+      - name: Persist the recoverable original BEFORE any mutation
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-push-privacy-before56-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-push-privacy-evidence/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Recheck56 and deploy only the tested dispatcher with existing JWT mode
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 "$HELPER" recheck "$OUT"
+          test "$(git -C candidate rev-parse HEAD)" = "$BIL_SOURCE_SHA"
+          DEPLOY="$RUNNER_TEMP/bil-push-privacy-single-function"
+          mkdir -p "$DEPLOY"
+          cd "$DEPLOY"
+          # Local generated config only; no link, database or config API call.
+          npx --yes supabase@2.121.0 init
+          mkdir -p supabase/functions/community-push-dispatch
+          cp "$GITHUB_WORKSPACE/candidate/supabase/functions/community-push-dispatch/index.ts" supabase/functions/community-push-dispatch/index.ts
+          cp "$GITHUB_WORKSPACE/candidate/supabase/functions/community-push-dispatch/server.ts" supabase/functions/community-push-dispatch/server.ts
+          cp "$GITHUB_WORKSPACE/candidate/supabase/functions/deno.lock" supabase/functions/deno.lock
+          python3 "$HELPER" staged-source "$OUT" "$DEPLOY/supabase/functions/community-push-dispatch"
+          npx --yes supabase@2.121.0 functions deploy community-push-dispatch \
+            --project-ref tgmanzhqulksykhslrzb --no-verify-jwt --use-api \
+            2>&1 | tee "$OUT/single-function-deploy.log"
+          git -C "$GITHUB_WORKSPACE/candidate" diff --exit-code
+      - name: Read back exact deployed source and prove unauthenticated requests stay rejected
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          READBACK="$RUNNER_TEMP/bil-push-privacy-readback"
+          mkdir -p "$READBACK"
+          cd "$READBACK"
+          npx --yes supabase@2.121.0 init
+          npx --yes supabase@2.121.0 functions download community-push-dispatch \
+            --project-ref tgmanzhqulksykhslrzb --use-api \
+            > "$OUT/after-source-download.log" 2>&1
+          python3 "$HELPER" post-source "$OUT" "$READBACK/supabase/functions/community-push-dispatch"
+          python3 "$HELPER" postverify "$OUT"
+          cat "$OUT/deployment-result.json" >> "$GITHUB_STEP_SUMMARY"
+          printf '\nOnly private push title/body handling was deployed. No valid dispatch was invoked, no push was sent by verification, and native delivery acceptance remains separate.\n' >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve every actual outcome and recovery evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-push-privacy-final-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-push-privacy-evidence/
+          if-no-files-found: error
+          retention-days: 30
