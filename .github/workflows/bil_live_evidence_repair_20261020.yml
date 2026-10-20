@@ -1,0 +1,127 @@
+name: BIL strict live evidence adapter repair
+run-name: BIL real-service verification with strict query readback
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/store-live-evidence-20261020]
+    paths: [.github/workflows/bil_live_evidence_repair_20261020.yml]
+permissions:
+  contents: read
+env:
+  SOURCE_SHA: ${{ github.sha }}
+  BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
+jobs:
+  offline-adapter-contracts:
+    name: Strict CLI response and cleanup readback contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Run all strict result-shape cases before touching live fixtures
+        run: pwsh -NoProfile -File tool/release/test_supabase_query_result.ps1
+      - name: Parse each changed PowerShell fixture without credentials
+        shell: pwsh
+        run: |
+          $paths=@('tool/ai_coach/run_live_text_e2e.ps1','tool/ai_coach/run_live_voice_metering_db.ps1','tool/meal_vision_benchmark/run_live_supabase_e2e.ps1','tool/account_deletion/run_live_disposable_e2e.ps1','tool/nutrition/run_live_barcode_gate_e2e.ps1','tool/community_translation/run_live_synthetic_e2e.ps1')
+          foreach($path in $paths){
+            $tokens=$null;$errors=$null
+            [void][Management.Automation.Language.Parser]::ParseFile((Join-Path (Get-Location) $path),[ref]$tokens,[ref]$errors)
+            if($errors.Count -ne 0){throw ('POWERSHELL_PARSE_FAILED: '+$path)}
+          }
+          'SCRIPT_PARSE_PASS=6' >> $env:GITHUB_STEP_SUMMARY
+  independent-live-services:
+    name: Disposable live service — ${{ matrix.service }}
+    runs-on: ubuntu-24.04
+    needs: offline-adapter-contracts
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        service: [coach-text, voice-metering, meal-vision, barcode, account-deletion, community-translation]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Run only the existing disposable fixture and require real success
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          BIL_LIVE_SERVICE: ${{ matrix.service }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/bil-independent-live-$BIL_LIVE_SERVICE"
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, sys
+          service=os.environ['BIL_LIVE_SERVICE']
+          project=os.environ['BIL_SUPABASE_PROJECT_REF']
+          specs={
+            'coach-text':('tool/ai_coach/run_live_text_e2e.ps1',['-ProjectRef',project]),
+            'voice-metering':('tool/ai_coach/run_live_voice_metering_db.ps1',['-ProjectRef',project]),
+            'meal-vision':('tool/meal_vision_benchmark/run_live_supabase_e2e.ps1',['-ProjectRef',project]),
+            'barcode':('tool/nutrition/run_live_barcode_gate_e2e.ps1',['-ProjectRef',project]),
+            'account-deletion':('tool/account_deletion/run_live_disposable_e2e.ps1',['-ProjectRef',project,'-OwnerEmail','release-certification@bilhealth.invalid']),
+            'community-translation':('tool/community_translation/run_live_synthetic_e2e.ps1',[]),
+          }
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/('bil-independent-live-'+service)
+          report={'source':os.environ['SOURCE_SHA'],'service':service,'status':'BLOCKED','realServiceInvoked':False,'schemaDeployed':False,'testFixtureScope':'Existing disposable script only; no real user identity','cleanupReadback':'NOT_PROVEN'}
+          tmp=None;temp_created=False;code=1
+          try:
+            if not os.environ.get('SUPABASE_ACCESS_TOKEN'):
+              report['failure']='MISSING_SUPABASE_TEST_CREDENTIAL';raise RuntimeError('missing')
+            source,args=specs[service]
+            source=pathlib.Path(source)
+            text=source.read_text(encoding='utf-8-sig')
+            if 'supabase@latest' not in text:
+              report['failure']='EXPECTED_EXISTING_CLI_MARKER_MISSING';raise RuntimeError('marker')
+            tmp=source.parent/('.ci-independent-'+source.name)
+            if tmp.exists():
+              report['failure']='TEMPORARY_SCRIPT_ALREADY_EXISTS';raise RuntimeError('exists')
+            tmp.write_text(text.replace('supabase@latest','supabase@2.121.0'),encoding='utf-8')
+            temp_created=True
+            state=pathlib.Path('supabase/.temp')
+            state.mkdir(parents=True,exist_ok=True)
+            (state/'project-ref').write_text(project,encoding='utf-8')
+            report['realServiceInvoked']=True
+            result=subprocess.run(['pwsh','-NoProfile','-File',str(tmp),*args],text=True,encoding='utf-8',errors='replace',capture_output=True)
+            report['exitCode']=result.returncode
+            try: actual=json.loads(result.stdout.lstrip('\ufeff').strip())
+            except (ValueError,TypeError): actual=None
+            if isinstance(actual,dict):
+              allowed={'success','translated','cleanup','user_deleted','session_revoked','cascade_clean','auth_user_deleted','request_status','removed_storage_objects','owned_profile_rows_remaining','deletion_request_rows_remaining','consent_denied_status','consent_denied_error','consent_denied_provider_events','candidate_count','provider','model','latency_ms','input_tokens','output_tokens','cost_usd','cost_source','provider_attempts','receipt_state','quota_used','quota_reserved','replay_same_request','exact_duplicate_handled','exact_duplicate_cache_hit','exact_duplicate_charged','duplicate_image_rejected','duplicate_status','duplicate_error_code','cached_request_replay_stable','requires_review','auto_logged','free_status','free_error_code','premium_status','premium_error_code','premium_gate_opened'}
+              report['result']={k:v for k,v in actual.items() if k in allowed and isinstance(v,(str,int,float,bool,type(None)))}
+              passed=actual.get('success',actual.get('translated')) is True
+              cleanup=all(actual.get(k) is True for k in ('cleanup','user_deleted','session_revoked','cascade_clean') if k in actual)
+              if result.returncode==0 and passed and cleanup:
+                report['status']='PASS_EXISTING_LIVE_SCRIPT_NOT_NATIVE_ACCEPTANCE';code=0
+                report['cleanupReadback']='EXISTING_SCRIPT_COMPLETED_FINALLY; see per-script booleans where provided'
+              else: report['failure']='LIVE_ASSERTION_OR_CLEANUP_FAILED'
+            else:
+              report['failure']='LIVE_SCRIPT_FAILED_OR_NO_JSON_RESULT'
+            if 'AI token settlement did not reach' in result.stderr:
+              report['failure']='AI_TOKEN_SETTLEMENT_EXPECTED_SUCCEEDED_USED_POSITIVE_RESERVED_ZERO_NOT_OBSERVED'
+            for error in ('SUPABASE_QUERY_INVALID_JSON','SUPABASE_QUERY_UNSUPPORTED_JSON_SHAPE','SUPABASE_QUERY_ROW_NOT_OBJECT','SUPABASE_QUERY_EXPECTED_ONE_ROW','SUPABASE_QUERY_REQUIRED_VALUE_MISSING','SUPABASE_QUERY_NUMERIC_VALUE_INVALID'):
+              if error in result.stderr:report['failure']=error;break
+            # Raw subprocess streams can contain remote error bodies. Never upload or print them.
+          except Exception:
+            report.setdefault('failure','LIVE_CONTROLLER_FAILED')
+          finally:
+            if temp_created and tmp is not None and tmp.exists():tmp.unlink()
+            (out/'result.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'service':service,'status':report['status'],'failure':report.get('failure')}))
+          sys.exit(code)
+          PY
+      - name: Preserve sanitized result independently of other service failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-independent-live-${{ matrix.service }}-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-independent-live-${{ matrix.service }}/
+          if-no-files-found: error
+          retention-days: 30
+

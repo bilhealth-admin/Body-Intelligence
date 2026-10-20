@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '..\release\supabase_query_result.ps1')
 # This intentionally uses a plus-address alias owned by the supplied mailbox.
 # It never reads or sends mailbox contents and prints no credential or API key.
 $baseUrl = "https://$ProjectRef.supabase.co"
@@ -16,7 +17,7 @@ $password = "Bil!$([guid]::NewGuid().ToString('N'))a9"
 function Invoke-DbQuery([string]$Sql) {
   $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef --output-format json 2>$null) -join "`n"
   if ($LASTEXITCODE -ne 0) { throw 'Supabase database query failed.' }
-  return $raw | ConvertFrom-Json
+  return (ConvertFrom-BilSupabaseQueryJson -Json $raw)
 }
 
 try {
@@ -69,8 +70,8 @@ try {
   $authDeleted = $false
   try { [void](Invoke-RestMethod -Method Get -Uri "$baseUrl/auth/v1/admin/users/$userId" -Headers $adminHeaders) }
   catch { $authDeleted = [int]$_.Exception.Response.StatusCode -eq 404 }
-  $profileCount = ((Invoke-DbQuery "select count(*)::int as count from public.bil_public_profiles where user_id='$userId'").rows | Select-Object -First 1).count
-  $requestCount = ((Invoke-DbQuery "select count(*)::int as count from public.bil_account_deletion_requests where id='$requestId'").rows | Select-Object -First 1).count
+  $profileCount = (Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select count(*)::int as count from public.bil_public_profiles where user_id='$userId'") -RequiredColumns @('count') -NumericColumns @('count')).count
+  $requestCount = (Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select count(*)::int as count from public.bil_account_deletion_requests where id='$requestId'") -RequiredColumns @('count') -NumericColumns @('count')).count
 
   [pscustomobject]@{
     success = ($authDeleted -and [int]$profileCount -eq 0 -and [int]$requestCount -eq 0)
@@ -92,3 +93,4 @@ try {
   }
   $password = $null
 }
+

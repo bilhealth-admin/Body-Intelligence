@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '..\release\supabase_query_result.ps1')
 . (Join-Path $PSScriptRoot '..\release\http_failure_body.ps1')
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $resolvedImage = (Resolve-Path (Join-Path $root $ImagePath)).Path
@@ -22,7 +23,7 @@ function Invoke-DbQuery([string]$Sql) {
     } finally {
       $ErrorActionPreference = $previousErrorActionPreference
     }
-    if ($exitCode -eq 0) { return $raw | ConvertFrom-Json }
+    if ($exitCode -eq 0) { return (ConvertFrom-BilSupabaseQueryJson -Json $raw) }
     if ($attempt -lt 3) { Start-Sleep -Seconds 2 }
   }
   throw 'Supabase database query failed after three attempts.'
@@ -102,7 +103,7 @@ try {
   if ($consentDeniedStatus -ne 403 -or $consentDeniedError -ne 'meal_vision_ai_consent_required') {
     throw "Meal vision did not fail closed before explicit current consent (status=$consentDeniedStatus error=$consentDeniedError)."
   }
-  $deniedUsage = (Invoke-DbQuery "select count(*) as count from public.bil_ai_usage_events where owner_id='$userId' and request_id='$consentDeniedRequestId'").rows | Select-Object -First 1
+  $deniedUsage = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select count(*) as count from public.bil_ai_usage_events where owner_id='$userId' and request_id='$consentDeniedRequestId'") -RequiredColumns @('count') -NumericColumns @('count')
   if ([int]$deniedUsage.count -ne 0) {
     throw 'Consent-denied meal vision request reached metering/provider work.'
   }
@@ -182,9 +183,9 @@ try {
   }
 
   $receiptQuery = Invoke-DbQuery "select state,provider,model,latency_ms,input_tokens,output_tokens,cost_usd,provider_attempts,cost_source from public.bil_ai_usage_events where owner_id='$userId' and capability='vision' and request_id='$requestId'"
-  $receipt = $receiptQuery.rows | Select-Object -First 1
+  $receipt = Get-BilSupabaseQueryRow -Result $receiptQuery -RequiredColumns @('state')
   $usageQuery = Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$userId' order by week_start desc limit 1"
-  $usage = $usageQuery.rows | Select-Object -First 1
+  $usage = Get-BilSupabaseQueryRow -Result $usageQuery -RequiredColumns @('used','reserved') -NumericColumns @('used','reserved')
 
   $success = (
     $consentDeniedStatus -eq 403 -and
@@ -228,9 +229,26 @@ try {
     auto_logged = $false
   } | ConvertTo-Json -Depth 5
 } finally {
+  $cleanupSucceeded=$true
   if ($userId) {
-    Invoke-RestMethod -Method Delete -Uri "$baseUrl/auth/v1/admin/users/$userId" -Headers $adminHeaders -UserAgent 'BIL-Server-Validation/1.0' | Out-Null
+    if ($accessToken) {
+      try {
+        Invoke-RestMethod -Method Post -Uri "$baseUrl/auth/v1/logout?scope=global" -Headers @{ apikey=$publishableKey; Authorization="Bearer $accessToken" } | Out-Null
+      } catch { $cleanupSucceeded=$false }
+    }
+    try {
+      Invoke-RestMethod -Method Delete -Uri "$baseUrl/auth/v1/admin/users/$userId" -Headers $adminHeaders -UserAgent 'BIL-Server-Validation/1.0' | Out-Null
+    } catch { $cleanupSucceeded=$false }
   }
-  [void](Invoke-DbQuery "delete from public.bil_store_product_registry where product_id='$productId'")
+  try {
+    [void](Invoke-DbQuery "delete from public.bil_store_product_registry where product_id='$productId'")
+  } catch { $cleanupSucceeded=$false }
+  if ($userId) {
+    try {
+      $cleanup = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select (select count(*) from auth.users where id='$userId') as auth_users,(select count(*) from auth.sessions where user_id='$userId') as sessions,(select count(*) from public.bil_ai_usage_events where owner_id='$userId') as events,(select count(*) from public.bil_ai_credit_weekly_usage where owner_id='$userId') as weekly,(select count(*) from public.bil_store_product_registry where product_id='$productId') as products") -RequiredColumns @('auth_users','sessions','events','weekly','products') -NumericColumns @('auth_users','sessions','events','weekly','products')
+      if ($cleanup.auth_users -ne 0 -or $cleanup.sessions -ne 0 -or $cleanup.events -ne 0 -or $cleanup.weekly -ne 0 -or $cleanup.products -ne 0) { $cleanupSucceeded=$false }
+    } catch { $cleanupSucceeded=$false }
+  }
   Remove-Variable serverKey,publishableKey,accessToken,password,keysRaw -ErrorAction SilentlyContinue
+  if (-not $cleanupSucceeded) { throw 'Meal Vision disposable fixture cleanup readback failed.' }
 }

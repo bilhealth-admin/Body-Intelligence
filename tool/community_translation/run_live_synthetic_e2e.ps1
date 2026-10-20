@@ -48,4 +48,5 @@ finally {
   }
 }
 $report | ConvertTo-Json -Depth 5
-if (-not $report.translated -or -not $report.user_deleted) { exit 1 }
+if (-not $report.translated -or -not $report.user_deleted -or -not $report.session_revoked) { exit 1 }
+

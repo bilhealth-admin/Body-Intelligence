@@ -1,4 +1,5 @@
 param([string]$ProjectRef = 'tgmanzhqulksykhslrzb')
+. (Join-Path $PSScriptRoot '..\release\supabase_query_result.ps1')
 $ErrorActionPreference = 'Stop'
 $base = "https://$ProjectRef.supabase.co"
 $uid = $null
@@ -9,7 +10,7 @@ function Invoke-DbQuery([string]$Sql) {
   try { $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef --output-format json 2>$null) -join "`n"; $code = $LASTEXITCODE }
   finally { $ErrorActionPreference = $old }
   if ($code -ne 0) { throw 'Voice metering database query failed' }
-  $raw | ConvertFrom-Json
+  ConvertFrom-BilSupabaseQueryJson -Json $raw
 }
 try {
   $keys = ((& npx --yes supabase@latest projects api-keys --project-ref $ProjectRef --reveal --output json 2>$null) -join "`n") | ConvertFrom-Json
@@ -28,9 +29,9 @@ try {
   $body = @{p_owner_id=$uid;p_request_id=$rid;p_succeeded=$true;p_actual_seconds=37;p_provider='gemini';p_model='voice-meter-contract';p_input_tokens=10;p_output_tokens=5;p_latency_ms=1234;p_cost_usd=0.001} | ConvertTo-Json
   $settle = Invoke-RestMethod -Method Post -Uri "$base/rest/v1/rpc/bil_settle_ai_voice" -Headers $headers -ContentType application/json -Body $body
   $duplicate = Invoke-RestMethod -Method Post -Uri "$base/rest/v1/rpc/bil_settle_ai_voice" -Headers $headers -ContentType application/json -Body $body
-  $event = (Invoke-DbQuery "select state,reserved_seconds,actual_seconds,credit_actual,credit_paid_debit from public.bil_ai_usage_events where owner_id='$uid' and request_id='$rid'").rows[0]
-  $week = (Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$uid' order by week_start desc limit 1").rows[0]
-  $month = (Invoke-DbQuery "select used,reserved from public.bil_ai_credit_monthly_usage where owner_id='$uid' order by month_start desc limit 1").rows[0]
+  $event = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select state,reserved_seconds,actual_seconds,credit_actual,credit_paid_debit from public.bil_ai_usage_events where owner_id='$uid' and request_id='$rid'") -RequiredColumns @('state','actual_seconds','credit_actual','credit_paid_debit') -NumericColumns @('actual_seconds','credit_actual','credit_paid_debit')
+  $week = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$uid' order by week_start desc limit 1") -RequiredColumns @('used','reserved') -NumericColumns @('used','reserved')
+  $month = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select used,reserved from public.bil_ai_credit_monthly_usage where owner_id='$uid' order by month_start desc limit 1") -RequiredColumns @('used','reserved') -NumericColumns @('used','reserved')
   $result = [pscustomobject]@{
     success=($settle.state -eq 'succeeded' -and $duplicate.duplicate -eq $true -and [int]$event.actual_seconds -eq 37 -and [int]$event.credit_actual -eq 10 -and [int]$week.used -eq 10 -and [int]$month.used -eq 10 -and [int]$week.reserved -eq 0 -and [int]$month.reserved -eq 0 -and [int]$event.credit_paid_debit -eq 0)
     scope='Live voice metering DB contract; synthetic provider telemetry, no microphone or provider audio request'
@@ -38,9 +39,16 @@ try {
     weekly_bil_tokens=[int]$week.used;monthly_bil_tokens=[int]$month.used;duplicate_no_second_debit=($duplicate.duplicate -eq $true)
   }
 } finally {
-  if ($uid) { try { [void](Invoke-RestMethod -Method Delete -Uri "$base/auth/v1/admin/users/$uid" -Headers $headers); $cleaned=$true } catch {} }
+  if ($uid) {
+    try {
+      [void](Invoke-RestMethod -Method Delete -Uri "$base/auth/v1/admin/users/$uid" -Headers $headers)
+      $cleanup = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select (select count(*) from auth.users where id='$uid') as auth_users,(select count(*) from public.bil_ai_usage_events where owner_id='$uid') as events,(select count(*) from public.bil_ai_credit_weekly_usage where owner_id='$uid') as weekly,(select count(*) from public.bil_ai_credit_monthly_usage where owner_id='$uid') as monthly,(select count(*) from public.bil_ai_closed_test_grants where owner_id='$uid') as grants") -RequiredColumns @('auth_users','events','weekly','monthly','grants') -NumericColumns @('auth_users','events','weekly','monthly','grants')
+      $cleaned = ($cleanup.auth_users -eq 0 -and $cleanup.events -eq 0 -and $cleanup.weekly -eq 0 -and $cleanup.monthly -eq 0 -and $cleanup.grants -eq 0)
+    } catch { $cleaned=$false }
+  }
   Remove-Variable service,keys,password -ErrorAction SilentlyContinue
 }
 $result | Add-Member -NotePropertyName cleanup -NotePropertyValue $cleaned
 $result | ConvertTo-Json
 if (-not $result.success -or -not $cleaned) { throw 'Voice metering or disposable-user cleanup failed.' }
+

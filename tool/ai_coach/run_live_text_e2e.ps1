@@ -3,6 +3,7 @@ param([string]$ProjectRef = 'tgmanzhqulksykhslrzb')
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot '..\release\http_failure_body.ps1')
 . (Join-Path $PSScriptRoot '..\release_certification\auth_admin_user_create.ps1')
+. (Join-Path $PSScriptRoot '..\release\supabase_query_result.ps1')
 $baseUrl = "https://$ProjectRef.supabase.co"
 $userId = $null
 $authToken = $null
@@ -26,7 +27,7 @@ function Invoke-DbQuery([string]$Sql) {
     $ErrorActionPreference = $old
   }
   if ($code -ne 0) { throw 'Supabase database query failed.' }
-  $raw | ConvertFrom-Json
+  ConvertFrom-BilSupabaseQueryJson -Json $raw
 }
 
 try {
@@ -145,14 +146,14 @@ try {
   catch {
     $duplicateStatus = [int]$_.Exception.Response.StatusCode
   }
-  $event = (Invoke-DbQuery "select state,provider,model,input_tokens,output_tokens,latency_ms,cost_usd,credit_actual,credit_reserved from public.bil_ai_usage_events where owner_id='$userId' and request_id='$requestId'").rows | Select-Object -First 1
-  $usage = (Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$userId'").rows | Select-Object -First 1
-  $feedback = (Invoke-DbQuery "select feedback_id,helpful,runtime from public.bil_ai_coach_feedback where owner_id='$userId' and response_id='$requestId'").rows | Select-Object -First 1
+  $event = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select state,provider,model,input_tokens,output_tokens,latency_ms,cost_usd,credit_actual,credit_reserved from public.bil_ai_usage_events where owner_id='$userId' and request_id='$requestId'") -RequiredColumns @('state','credit_actual') -NumericColumns @('credit_actual')
+  $usage = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$userId' order by week_start desc limit 1") -RequiredColumns @('used','reserved') -NumericColumns @('used','reserved')
+  $feedback = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select feedback_id,helpful,runtime from public.bil_ai_coach_feedback where owner_id='$userId' and response_id='$requestId'") -RequiredColumns @('feedback_id','helpful','runtime')
   if ($event.state -ne 'succeeded' -or [decimal]$event.credit_actual -le 0 -or [decimal]$usage.used -le 0 -or [decimal]$usage.reserved -ne 0) {
     throw 'AI token settlement did not reach the expected succeeded/used>0/reserved=0 state.'
   }
   if ($duplicateStatus -ne 409) { throw 'Duplicate request was not rejected with HTTP 409.' }
-  if (-not $feedback -or -not $feedback.helpful -or $feedback.runtime -ne 'cloud_personalized') {
+  if (-not $feedback -or $feedback.helpful -isnot [bool] -or -not $feedback.helpful -or $feedback.runtime -ne 'cloud_personalized') {
     throw 'Feedback was not correlated to the successful cloud response.'
   }
 
@@ -209,7 +210,7 @@ finally {
     catch { $userDeleted = $false }
     if ($userDeleted) {
       try {
-        $cleanup = (Invoke-DbQuery "select (select count(*) from auth.users where id='$userId') as auth_users,(select count(*) from public.bil_ai_closed_test_grants where owner_id='$userId') as grants,(select count(*) from public.bil_ai_coach_subscriptions where owner_id='$userId') as subscriptions,(select count(*) from public.bil_ai_usage_events where owner_id='$userId') as events,(select count(*) from public.bil_ai_weekly_usage where owner_id='$userId') as usage,(select count(*) from public.bil_ai_credit_weekly_usage where owner_id='$userId') as credit_weekly_usage,(select count(*) from public.bil_ai_credit_monthly_usage where owner_id='$userId') as credit_monthly_usage,(select count(*) from public.bil_ai_credit_balances where owner_id='$userId') as credit_balances,(select count(*) from public.bil_ai_coach_feedback where owner_id='$userId') as feedback,(select count(*) from public.bil_consent_receipts where user_id='$userId') as consents").rows | Select-Object -First 1
+        $cleanup = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select (select count(*) from auth.users where id='$userId') as auth_users,(select count(*) from public.bil_ai_closed_test_grants where owner_id='$userId') as grants,(select count(*) from public.bil_ai_coach_subscriptions where owner_id='$userId') as subscriptions,(select count(*) from public.bil_ai_usage_events where owner_id='$userId') as events,(select count(*) from public.bil_ai_weekly_usage where owner_id='$userId') as usage,(select count(*) from public.bil_ai_credit_weekly_usage where owner_id='$userId') as credit_weekly_usage,(select count(*) from public.bil_ai_credit_monthly_usage where owner_id='$userId') as credit_monthly_usage,(select count(*) from public.bil_ai_credit_balances where owner_id='$userId') as credit_balances,(select count(*) from public.bil_ai_coach_feedback where owner_id='$userId') as feedback,(select count(*) from public.bil_consent_receipts where user_id='$userId') as consents") -RequiredColumns @('auth_users','grants','subscriptions','events','usage','credit_weekly_usage','credit_monthly_usage','credit_balances','feedback','consents') -NumericColumns @('auth_users','grants','subscriptions','events','usage','credit_weekly_usage','credit_monthly_usage','credit_balances','feedback','consents')
         $cascadeClean = ([decimal]$cleanup.auth_users -eq 0) -and
           ([decimal]$cleanup.grants -eq 0) -and
           ([decimal]$cleanup.subscriptions -eq 0) -and
@@ -235,3 +236,4 @@ if (-not $sessionRevoked -or -not $userDeleted -or -not $cascadeClean) {
   throw 'AI Coach E2E succeeded, but ephemeral-user cleanup verification failed.'
 }
 $result | ConvertTo-Json -Depth 8
+
