@@ -1,5 +1,6 @@
 param([Parameter(Mandatory=$true)][string]$OutputDir)
 $ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'store_readonly_evidence.ps1')
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 $required=@('APP_STORE_CONNECT_KEY_ID','APP_STORE_CONNECT_ISSUER_ID','APP_STORE_CONNECT_PRIVATE_KEY_BASE64','GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64')
 $missing=@($required | Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) })
@@ -8,10 +9,8 @@ if($missing.Count -gt 0){
   "Missing: $($missing -join ', ')" | Set-Content (Join-Path $OutputDir 'not-run.txt')
   exit 0
 }
-$driveRoot=Join-Path $env:RUNNER_TEMP 'bil-store-drive'
-New-Item -ItemType Directory -Force -Path $driveRoot | Out-Null
-subst G: $driveRoot
-try {
+'STORE_READONLY=FAIL' | Set-Content (Join-Path $OutputDir 'status.txt')
+Invoke-StoreReadonlyDrive -RunnerTemp $env:RUNNER_TEMP -OutputDir $OutputDir -Audit {
   New-Item -ItemType Directory -Force -Path 'G:\\secret','G:\\evidence' | Out-Null
   [IO.File]::WriteAllBytes('G:\\secret\\asc.p8',[Convert]::FromBase64String($env:APP_STORE_CONNECT_PRIVATE_KEY_BASE64))
   [IO.File]::WriteAllBytes('G:\\secret\\google.json',[Convert]::FromBase64String($env:GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64))
@@ -22,10 +21,4 @@ try {
   if($LASTEXITCODE -ne 0){ throw 'Apple read-only audit failed' }
   node tool/google_play/google_play_release_surface_readonly_audit.mjs --credentials 'G:\\secret\\google.json' --output 'G:\\evidence\\google-release.json'
   if($LASTEXITCODE -ne 0){ throw 'Google read-only audit failed' }
-  Remove-Item -LiteralPath 'G:\\secret' -Recurse -Force
-  Copy-Item -Path 'G:\\evidence\\*' -Destination $OutputDir -Force
-  'STORE_READONLY=PASS' | Set-Content (Join-Path $OutputDir 'status.txt')
-} finally {
-  Remove-Item -LiteralPath 'G:\\secret' -Recurse -Force -ErrorAction SilentlyContinue
-  subst G: /D | Out-Null
 }

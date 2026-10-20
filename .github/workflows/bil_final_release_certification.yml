@@ -195,6 +195,13 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Verify offline store audit evidence and safe diagnostics
+        shell: pwsh
+        run: |
+          node --test tool/google_play/google_play_release_surface_readonly_audit.test.mjs tool/google_play/google_oauth.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pwsh -NoProfile -File tool/release_certification/test_store_readonly_evidence.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - id: audit
         shell: pwsh
         env:

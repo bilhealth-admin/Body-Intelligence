@@ -1342,7 +1342,7 @@ export async function handler(
     const latency = now() - started;
     const cost = estimateCost(servedModel, inputTokens, billedOutputTokens);
     failureStage = "credit_settlement";
-    const { error: settleError } = await adminClient.rpc(
+    const { data: settlement, error: settleError } = await adminClient.rpc(
       "bil_settle_ai_usage",
       {
         p_owner_id: ownerId,
@@ -1357,7 +1357,10 @@ export async function handler(
         p_cost_usd: cost,
       },
     );
-    if (settleError) throw new Error("settlement_failed");
+    if (
+      settleError ||
+      (settlement as Record<string, unknown> | null)?.state !== "succeeded"
+    ) throw new Error("settlement_failed");
     return json({
       ...result,
       response_id: requestId,

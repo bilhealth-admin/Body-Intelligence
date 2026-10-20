@@ -13,6 +13,7 @@ if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
 fi
 pwsh -NoProfile -File tool/release/test_http_failure_body.ps1
 pwsh -NoProfile -File tool/release_certification/test_auth_admin_user_create.ps1
+pwsh -NoProfile -File tool/ai_coach/test_live_text_e2e_diagnostics.ps1
 test "$(git rev-parse HEAD)" = "${GITHUB_SHA:?GITHUB_SHA required}"
 CLI=(npx --yes supabase@2.121.0)
 "${CLI[@]}" --version | tee "$OUT/supabase-cli-version.txt"
