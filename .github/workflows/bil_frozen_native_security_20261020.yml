@@ -6,6 +6,8 @@ name: BIL frozen exact source Java Swift and all native journeys
     - audit/final-swift-derived-proof-5775-20261020
     paths:
     - .github/workflows/bil_frozen_native_security_20261020.yml
+    - .github/scripts/test_install_isolated_cocoapods.py
+    - .github/scripts/install_isolated_cocoapods.py
 permissions:
   actions: read
   contents: read
