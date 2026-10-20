@@ -1,0 +1,64 @@
+name: BIL reviewed privacy fixture verification
+on:
+  push:
+    branches: [audit/privacy-fixture-verification-20261020]
+    paths: [.github/workflows/bil_privacy_fixture_verification_20261020.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  focused:
+    name: Exact notification contract and both reviewed privacy goldens
+    runs-on: windows-2025
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: app
+    steps:
+      - name: Preserve committed source newlines
+        working-directory: ${{ github.workspace }}
+        run: git config --global core.autocrlf false
+      - name: Check out exact reviewed test repairs
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+          path: app
+          persist-credentials: false
+      - name: Install identical Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Verify immutable source and reviewed image blobs
+        run: |
+          if ((git rev-parse HEAD).Trim() -ne '5775d082a1b4c7a29e4ed4d6e01693b31923dc31') { throw 'Wrong test source' }
+          if ((git rev-parse HEAD:test/features/onboarding/goldens/onboarding_2026/ai_430x932_ar_light_100.png).Trim() -ne '5cfc0c2ce83cd561bd65f74e19b722cbaff7b934') { throw 'Wrong reviewed Arabic image' }
+          if ((git rev-parse HEAD:test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png).Trim() -ne 'c4684be71ed02776596407f22f78326acb9bd8e5') { throw 'Wrong reviewed ad image' }
+          New-Item -ItemType Directory -Force evidence | Out-Null
+          @{ applicationSource='5775d082a1b4c7a29e4ed4d6e01693b31923dc31'; controllerSource=$env:GITHUB_SHA; goldenUpdatesAllowed=$false; fullRootAcceptanceClaimed=$false } | ConvertTo-Json | Set-Content -Encoding utf8 evidence/source-receipt.json
+      - name: Resolve locked dependencies
+        run: flutter pub get
+      - name: Require source formatting and complete analysis
+        run: |
+          dart format --output=none --set-exit-if-changed test/epic9_cloud_completion_contract_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter analyze --no-pub 2>&1 | Tee-Object -FilePath evidence/analyze.log
+          exit $LASTEXITCODE
+      - name: Recheck the original failing files with zero golden tolerance
+        run: |
+          flutter test --no-pub --concurrency=2 --reporter=json --dart-define=BIL_PAYMENTS_ENABLED=true --dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true test/epic9_cloud_completion_contract_test.dart test/features/onboarding/onboarding_visual_golden_test.dart test/visual_closure/actual_production_pages_golden_test.dart 2>&1 | Tee-Object -FilePath evidence/flutter.jsonl
+          exit $LASTEXITCODE
+      - name: Verify application and test inputs did not change
+        if: always()
+        run: git diff --exit-code HEAD -- lib test assets pubspec.yaml pubspec.lock
+      - name: Preserve actual results and every failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-privacy-fixture-verification-${{ github.run_id }}
+          path: |
+            app/evidence/
+            app/test/**/failures/
+          if-no-files-found: error
+          retention-days: 30
