@@ -203,6 +203,22 @@ class WorkflowNativeScopeTests(unittest.TestCase):
         self.assertIn("- name: Build iOS plugin sources for CodeQL", analyze)
         self.assertIn("uses: github/codeql-action/analyze@", analyze)
 
+    def test_direct_xctest_requires_flutter_native_configuration_first(self):
+        script = (ROOT / ".github/scripts/bil_ios37_native_integration.sh").read_text(encoding="utf-8")
+        warmup = script.index("python3 .github/scripts/bil_ios_native_preflight.py")
+        configuration = script.index('stage flutter-native-config 900 "$OUT/flutter-native-config.log"')
+        xctest = script.index("python3 .github/scripts/bil_ios_runner_tests.py")
+        self.assertLess(warmup, configuration)
+        self.assertLess(configuration, xctest)
+        command = script[configuration:xctest]
+        self.assertIn("flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub", command)
+        self.assertIn('--build-number 37 --target lib/main.dart "${DEFINES[@]}"', command)
+        self.assertNotIn("|| true", command)
+        dependencies = self.job.split("- name: Resolve existing dependencies and native pods", 1)[1].split("- name: Drive each actual", 1)[0]
+        sanitizer = "dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins"
+        self.assertLess(dependencies.index("flutter pub get"), dependencies.index(sanitizer))
+        self.assertLess(dependencies.index(sanitizer), dependencies.index("pod install"))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -832,6 +832,7 @@ jobs:
         run: |
           set -euo pipefail
           flutter pub get
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
           pod install --project-directory=ios
       - name: Drive each actual test entrypoint on iPhone and iPad
         env:

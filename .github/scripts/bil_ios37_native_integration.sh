@@ -127,6 +127,13 @@ esac
 # settings-query deadline. This is preparation, never native-test evidence.
 python3 .github/scripts/bil_ios_native_preflight.py \
   --workspace "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/$OUT"
+# Direct Xcode tests do not run Flutter's dependency preparation. In particular,
+# pub get + pod install can leave a plugin in both Pods and the Swift package
+# graph. Let Flutter reconcile the generated native configuration before XCTest;
+# config-only does not compile the app or count as a successful native test.
+stage flutter-native-config 900 "$OUT/flutter-native-config.log" \
+  flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub \
+  --build-number 37 --target lib/main.dart "${DEFINES[@]}"
 # Exercise the existing native XCTest target, separately from Flutter drivers.
 # Its in-memory App Attest key-store tests are not hardware-attestation proof.
 ACTIVE_DEVICE="$IPHONE_UDID"
