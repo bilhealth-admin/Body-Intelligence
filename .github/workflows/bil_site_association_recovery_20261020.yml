@@ -45,7 +45,7 @@ jobs:
           node-version: '22'
       - name: Verify controller negative controls without network
         working-directory: controller/tool/release_ops
-        run: python3 -m unittest -v test_public_site_diagnosis.py test_site_recovery_20261020.py
+        run: python3 -m unittest -v test_public_site_diagnosis.py test_site_recovery_20261020.py test_bootstrap_site_npm_11.py
       - name: Preserve current version and compare every proposed reachable asset before any mutation
         env:
           GH_TOKEN: ${{ github.token }}
@@ -63,11 +63,13 @@ jobs:
           touch "$toolchain/npm-user-config" "$toolchain/npm-global-config"
           node --version > "$evidence/node-version.txt"
           npm --version > "$evidence/npm-version.txt"
+          python3 controller/tool/release_ops/bootstrap_site_npm_11.py "$RUNNER_TEMP/bil-site-npm11" "$evidence/npm11-bootstrap"
+          node "$RUNNER_TEMP/bil-site-npm11/package/bin/npm-cli.js" --version > "$evidence/active-npm-version.txt"
           npm_status=0
           (
             cd "$toolchain"
             NPM_CONFIG_USERCONFIG="$toolchain/npm-user-config" NPM_CONFIG_GLOBALCONFIG="$toolchain/npm-global-config" \
-              npm install --ignore-scripts --workspaces=false --no-audit --no-fund \
+              node "$RUNNER_TEMP/bil-site-npm11/package/bin/npm-cli.js" install --ignore-scripts --workspaces=false --no-audit --no-fund \
               --registry=https://registry.npmjs.org/ --cache "$RUNNER_TEMP/bil-site-npm-cache"
           ) > "$evidence/install.log" 2>&1 || npm_status=$?
           if test -f "$toolchain/package-lock.json"; then
@@ -140,4 +142,5 @@ jobs:
           path: recovery-evidence/
           if-no-files-found: error
           retention-days: 30
+
 
