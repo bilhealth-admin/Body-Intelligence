@@ -1,5 +1,5 @@
 name: BIL final source verification and Apple preparation
-run-name: Save source-aligned Apple preparation text only
+run-name: Read Apple state after rejected preparation save
 on:
   workflow_dispatch:
   push:
@@ -73,14 +73,12 @@ jobs:
           persist-credentials: false
       - name: Verify all writer safety and exact readback cases offline
         run: node tool/release_ops/align_apple_metadata.test.mjs
-      - name: Save only review preparation notes and accurate description with guarded readback
+      - name: Read exact preparation text hashes after API403 without retrying the write
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
           BIL_APPLE_EXPECTED_SOURCE: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
-          BIL_APPLE_METADATA_APPLY: SAVE_REVIEW_PREPARATION_ONLY
-          BIL_EXPECTED_NOTE_SHA256: b275bbdb28f4a7174d1ff0dae4ee23c661ec0a31261f043184907d35544bcddd
         run: node tool/release_ops/align_apple_metadata.mjs tool/release_ops/apple-metadata-plan.json "$RUNNER_TEMP/bil-apple-alignment"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: always()
@@ -131,6 +129,7 @@ jobs:
           retention-days: 30
 
   start-exact-source-live-contracts:
+    if: false
     name: Start final exact-source cloud contracts
     runs-on: ubuntu-24.04
     timeout-minutes: 5
