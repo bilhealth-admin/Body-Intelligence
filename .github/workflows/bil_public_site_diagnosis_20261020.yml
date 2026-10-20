@@ -1,0 +1,70 @@
+name: BIL public site read-only diagnosis 20261020
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/public-site-503-20261020]
+    paths: [.github/workflows/bil_public_site_diagnosis_20261020.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  public-endpoints:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+          sparse-checkout: tool/release_ops
+      - name: Test read-only evidence collector without network
+        working-directory: controller/tool/release_ops
+        run: python3 -m unittest -v test_public_site_diagnosis.py
+      - name: Collect all endpoint outcomes and later diagnostic AASA sample
+        run: python3 controller/tool/release_ops/public_site_diagnosis.py public public-evidence
+      - name: Preserve evidence even when initial public endpoint transport fails
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: public-endpoint-diagnosis-${{ github.run_id }}
+          path: public-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
+  cloudflare-read-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+          sparse-checkout: tool/release_ops
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+          path: candidate
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /tool/release/bilhealth_site_worker.mjs
+            /wrangler.site.jsonc
+      - name: Test collector before loading existing Cloudflare token
+        working-directory: controller/tool/release_ops
+        run: python3 -m unittest -v test_public_site_diagnosis.py
+      - name: Read existing Cloudflare configuration, routing and worker source fingerprints
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 controller/tool/release_ops/public_site_diagnosis.py cloudflare cloudflare-evidence candidate
+      - name: Preserve read results and explicit token permission limits
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: cloudflare-read-only-diagnosis-${{ github.run_id }}
+          path: cloudflare-evidence/
+          if-no-files-found: error
+          retention-days: 14
