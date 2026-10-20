@@ -1,0 +1,36 @@
+name: BIL association recovery sources read-only 20261020
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/association-recovery-20261020]
+    paths: [.github/workflows/bil_association_recovery_readonly_20261020.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  recover-public-candidates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: tool/release_ops
+      - name: Verify read-only recovery and secret redaction without network
+        working-directory: tool/release_ops
+        run: python3 -m unittest -v test_public_site_diagnosis.py test_recover_public_associations.py
+      - name: Read public caches and already-enabled known version URLs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python3 tool/release_ops/recover_public_associations.py association-recovery-evidence
+      - name: Preserve original public candidate bytes and source provenance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: association-recovery-candidates-${{ github.run_id }}
+          path: association-recovery-evidence/
+          if-no-files-found: error
+          retention-days: 14

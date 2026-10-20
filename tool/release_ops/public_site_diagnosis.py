@@ -206,7 +206,18 @@ def worker_code_summary(raw, expected_hash, content_type=""):
 
 def settings_summary(value):
     result = {"configuration": {key: value.get(key) for key in
-            ("compatibility_date", "compatibility_flags", "usage_model", "assets", "limits")}}
+            ("compatibility_date", "compatibility_flags", "usage_model", "limits")}}
+    assets = value.get("assets")
+    result["assets_shape"] = shape(assets)
+    if isinstance(assets, dict):
+        config = assets.get("config", assets)
+        result["assets_config_shape"] = shape(config)
+        if isinstance(config, dict):
+            result["configuration"]["assets_routing_only"] = {key: config.get(key) for key in
+                ("base_path", "html_handling", "not_found_handling", "run_worker_first")}
+            for key in ("_headers", "_redirects"):
+                if isinstance(config.get(key), str):
+                    result["configuration"]["assets_routing_only"][key + "_sha256"] = sha(config[key].encode())
     result["binding_names_and_types_only"] = [{"name": item.get("name"), "type": item.get("type")}
             for item in object_rows(value.get("bindings"), "bindings", result)]
     return result
@@ -250,7 +261,12 @@ def cloudflare(output, candidate_root):
     result["resources"]["worker_script"] = script
     deployments, value, _ = read_resource("worker_deployments", f"/accounts/{account}/workers/scripts/bilhealth/deployments")
     if isinstance(value, dict):
-        deployments["deployments"] = [{key: row.get(key) for key in ("id", "strategy", "created_on", "versions")} for row in object_rows(value.get("deployments"), "deployments", deployments)]
+        deployments["deployments"] = []
+        for row in object_rows(value.get("deployments"), "deployments", deployments):
+            item = {key: row.get(key) for key in ("id", "strategy", "created_on")}
+            item["versions"] = [{key: version.get(key) for key in ("version_id", "percentage")}
+                for version in object_rows(row.get("versions"), "versions", item)]
+            deployments["deployments"].append(item)
     result["resources"]["worker_deployments"] = deployments
     domains, value, _ = read_resource("worker_domains", f"/accounts/{account}/workers/domains")
     domains["matching_public_domains"] = [{key: row.get(key) for key in ("hostname", "service", "environment", "zone_id")} for row in object_rows(value, "domains", domains) if row.get("hostname") in ("bilhealth.com", "www.bilhealth.com", "workouts.bilhealth.com")]

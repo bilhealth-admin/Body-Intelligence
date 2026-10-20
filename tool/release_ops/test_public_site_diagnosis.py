@@ -51,6 +51,15 @@ class DiagnosisTest(unittest.TestCase):
         self.assertNotIn("secret-value", json.dumps(result))
         self.assertEqual(result["binding_names_and_types_only"][1], {"name": "ASSETS", "type": "assets"})
 
+    def test_asset_jwt_unknown_fields_and_header_values_are_excluded(self):
+        result = diagnosis.settings_summary({"assets": {"jwt": "secret-jwt", "unknown": "secret-value",
+            "config": {"not_found_handling": "single-page-application", "_headers": "Secret: secret-header", "unknown": "secret-config"}}})
+        text = json.dumps(result)
+        for secret in ("secret-jwt", "secret-value", "secret-header", "secret-config"):
+            self.assertNotIn(secret, text)
+        self.assertEqual(result["configuration"]["assets_routing_only"]["not_found_handling"], "single-page-application")
+        self.assertIn("_headers_sha256", result["configuration"]["assets_routing_only"])
+
     def test_multipart_hashes_javascript_without_metadata_or_source(self):
         code = b"export default {fetch(){return new Response('okay')}};"
         body = b'--sample\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n{"secret":"secret-value"}\r\n--sample\r\nContent-Disposition: form-data; name="worker.mjs"; filename="worker.mjs"\r\nContent-Type: application/javascript\r\n\r\n' + code + b'\r\n--sample--\r\n'
