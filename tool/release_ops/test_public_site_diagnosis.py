@@ -1,6 +1,7 @@
 """Controller regression tests: all HTTP operations are mocked."""
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -65,6 +66,67 @@ class DiagnosisTest(unittest.TestCase):
     def test_invalid_api_identifier_is_rejected(self):
         with self.assertRaises(ValueError):
             diagnosis.valid_id("../other-resource")
+
+    def test_cf_success_errors_null_is_supported(self):
+        raw = b'{"success":true,"errors":null,"result":{"bindings":null}}'
+        response = {"http_status": 200, "headers": {"content-type": "application/json"}, "body_sha256": diagnosis.sha(raw)}
+        with patch.dict(os.environ, {"CLOUDFLARE_API_TOKEN": "test-placeholder"}), patch.object(diagnosis, "fetch", return_value=(response, raw)):
+            safe, value, _ = diagnosis.cf_get("/fixed-test-resource")
+        self.assertTrue(safe["success"])
+        self.assertEqual(safe["errors_shape"], "null")
+        self.assertEqual(safe["error_codes"], [])
+        settings = diagnosis.settings_summary(value)
+        self.assertEqual(settings["binding_names_and_types_only"], [])
+        self.assertEqual(settings["bindings_shape"], "null")
+
+    def test_unexpected_list_shapes_are_reported_without_secret_values(self):
+        for value in ({"secret": "secret-value"}, "secret-value", 8):
+            report = {}
+            self.assertEqual(diagnosis.object_rows(value, "collection", report), [])
+            self.assertEqual(report["shape_warnings"], ["collection:EXPECTED_LIST_OR_NULL"])
+            self.assertNotIn("secret-value", json.dumps(report))
+
+    def test_cloudflare_null_collections_do_not_abort_later_reads(self):
+        def fake_get(resource):
+            value = None
+            if resource.startswith("/accounts?"):
+                value = [{"id": "a" * 32}]
+            elif resource.endswith("/settings"):
+                value = {"bindings": None}
+            elif resource.endswith("/deployments"):
+                value = {"deployments": None}
+            elif resource.startswith("/zones?"):
+                value = [{"id": "b" * 32}]
+            return {"success": True, "http_status": 200, "content_type": "application/javascript"}, value, b"export default {}"
+        with tempfile.TemporaryDirectory() as directory, patch.object(diagnosis, "cf_get", side_effect=fake_get), patch("sys.stdout", new=io.StringIO()):
+            root = Path(directory)
+            worker = root / "tool/release/bilhealth_site_worker.mjs"
+            worker.parent.mkdir(parents=True)
+            worker.write_bytes(b"export default {}")
+            self.assertTrue(diagnosis.cloudflare(root / "out", root))
+            result = json.loads((root / "out/cloudflare-diagnosis.json").read_text())
+            self.assertIn("dns_workouts.bilhealth.com", result["resources"])
+            self.assertEqual(result["resources"]["worker_deployments"]["deployments_shape"], "null")
+
+    def test_partial_report_preserves_safe_phase_if_later_read_raises(self):
+        def fake_get(resource):
+            if resource.startswith("/accounts?"):
+                return {"success": True}, [{"id": "a" * 32}], b""
+            if resource.endswith("/settings"):
+                return {"success": True}, {"bindings": None}, b""
+            raise TypeError("Exception details must never be persisted")
+        with tempfile.TemporaryDirectory() as directory, patch.object(diagnosis, "cf_get", side_effect=fake_get):
+            root = Path(directory)
+            worker = root / "tool/release/bilhealth_site_worker.mjs"
+            worker.parent.mkdir(parents=True)
+            worker.write_bytes(b"export default {}")
+            with self.assertRaises(TypeError):
+                diagnosis.cloudflare(root / "out", root)
+            text = (root / "out/cloudflare-diagnosis.json").read_text()
+            result = json.loads(text)
+            self.assertEqual(result["phase"], "worker_script")
+            self.assertIn("worker_settings", result["resources"])
+            self.assertNotIn("Exception details", text)
 
 
 if __name__ == "__main__":

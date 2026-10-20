@@ -1,16 +1,22 @@
 name: BIL public site read-only diagnosis 20261020
 
 on:
-  workflow_dispatch:
   push:
     branches: [audit/public-site-503-20261020]
     paths: [.github/workflows/bil_public_site_diagnosis_20261020.yml]
+  workflow_dispatch:
+    inputs:
+      collect_public:
+        description: Collect public endpoints again; false runs only Cloudflare reads
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
   public-endpoints:
+    if: ${{ inputs.collect_public == true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:

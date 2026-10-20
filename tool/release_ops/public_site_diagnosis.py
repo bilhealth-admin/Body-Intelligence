@@ -26,6 +26,24 @@ MARKERS = {"Association document is invalid.": "BIL_WORKER_ASSOCIATION_CONTRACT_
            "DNS resolution error": "DNS_ERROR_PAGE"}
 POLICIES = ("/privacy", "/terms", "/subscription-terms", "/health-disclaimer",
             "/account-deletion", "/data-deletion", "/support", "/community-guidelines", "/contact")
+PHASE = "NOT_STARTED"
+
+
+def shape(value):
+    return "null" if value is None else type(value).__name__
+
+
+def object_rows(value, field, report):
+    """Null collections are empty; unexpected shapes are explicit, never fatal."""
+    report[field + "_shape"] = shape(value)
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        report.setdefault("shape_warnings", []).append(field + ":EXPECTED_LIST_OR_NULL")
+        return []
+    if any(not isinstance(row, dict) for row in value):
+        report.setdefault("shape_warnings", []).append(field + ":NON_OBJECT_ROWS")
+    return [row for row in value if isinstance(row, dict)]
 
 
 class NoRedirect(request.HTTPRedirectHandler):
@@ -141,10 +159,16 @@ def cf_get(resource):
             "body_truncated": record.get("body_truncated", False)}
     try:
         value = json.loads(raw)
-        safe["success"] = value.get("success") is True and not safe["body_truncated"]
-        safe["error_codes"] = [item.get("code") for item in value.get("errors", []) if isinstance(item, dict)]
+        safe["envelope_shape"] = shape(value)
+        if not isinstance(value, dict):
+            safe.update(success=False, error_codes=[], shape_warnings=["API_ENVELOPE_EXPECTED_OBJECT"])
+            return safe, None, raw
+        safe["success"] = value.get("success") is True and record.get("http_status") == 200 and not safe["body_truncated"]
+        safe["error_codes"] = [item.get("code") for item in object_rows(value.get("errors"), "errors", safe)]
+        safe["result_shape"] = shape(value.get("result"))
         return safe, value.get("result"), raw
-    except (ValueError, AttributeError):
+    except ValueError:
+        safe["envelope_shape"] = "non_json"
         safe.update(success=record.get("http_status") == 200 and not safe["body_truncated"])
         return safe, None, raw
 
@@ -181,57 +205,70 @@ def worker_code_summary(raw, expected_hash, content_type=""):
 
 
 def settings_summary(value):
-    return {"configuration": {key: value.get(key) for key in
-            ("compatibility_date", "compatibility_flags", "usage_model", "assets", "limits")},
-            "binding_names_and_types_only": [{"name": item.get("name"), "type": item.get("type")}
-            for item in value.get("bindings", []) if isinstance(item, dict)]}
+    result = {"configuration": {key: value.get(key) for key in
+            ("compatibility_date", "compatibility_flags", "usage_model", "assets", "limits")}}
+    result["binding_names_and_types_only"] = [{"name": item.get("name"), "type": item.get("type")}
+            for item in object_rows(value.get("bindings"), "bindings", result)]
+    return result
 
 
 def cloudflare(output, candidate_root):
+    global PHASE
     result = {"mode": "CLOUDFLARE_GET_ONLY_NO_MUTATION", "requests_are_get_only": True, "resources": {}}
-    safe, accounts, _ = cf_get("/accounts?page=1&per_page=50")
-    result["resources"]["accounts"] = safe
+
+    def read_resource(label, resource):
+        global PHASE
+        PHASE = label  # Fixed internal labels, never URL/token/exception text.
+        result.update(status="READS_IN_PROGRESS", phase=label)
+        json_write(output / "cloudflare-diagnosis.json", result)
+        safe, value, raw = cf_get(resource)
+        result["resources"][label] = safe
+        json_write(output / "cloudflare-diagnosis.json", result)
+        return safe, value, raw
+
+    safe, accounts, _ = read_resource("accounts", "/accounts?page=1&per_page=50")
     if not safe["success"] or not isinstance(accounts, list) or len(accounts) != 1:
         result["status"] = "BLOCKED_ACCOUNT_RESOLUTION"
         json_write(output / "cloudflare-diagnosis.json", result)
         return False
-    account = valid_id(accounts[0].get("id"))
+    require_account = accounts[0]
+    if not isinstance(require_account, dict):
+        result["status"] = "BLOCKED_ACCOUNT_SHAPE"
+        json_write(output / "cloudflare-diagnosis.json", result)
+        return False
+    account = valid_id(require_account.get("id"))
     result["account_id"] = account
     expected = sha((candidate_root / "tool/release/bilhealth_site_worker.mjs").read_bytes())
     result["candidate_worker_sha256"] = expected
-    settings, value, _ = cf_get(f"/accounts/{account}/workers/scripts/bilhealth/settings")
+    settings, value, _ = read_resource("worker_settings", f"/accounts/{account}/workers/scripts/bilhealth/settings")
     if isinstance(value, dict):
         settings.update(settings_summary(value))
     result["resources"]["worker_settings"] = settings
-    script, _, raw = cf_get(f"/accounts/{account}/workers/scripts/bilhealth")
+    script, _, raw = read_resource("worker_script", f"/accounts/{account}/workers/scripts/bilhealth")
     if script["success"]:
         script["source_fingerprints"] = worker_code_summary(raw, expected, script.get("content_type"))
     result["resources"]["worker_script"] = script
-    deployments, value, _ = cf_get(f"/accounts/{account}/workers/scripts/bilhealth/deployments")
+    deployments, value, _ = read_resource("worker_deployments", f"/accounts/{account}/workers/scripts/bilhealth/deployments")
     if isinstance(value, dict):
-        deployments["deployments"] = [{key: row.get(key) for key in ("id", "strategy", "created_on", "versions")} for row in value.get("deployments", [])]
+        deployments["deployments"] = [{key: row.get(key) for key in ("id", "strategy", "created_on", "versions")} for row in object_rows(value.get("deployments"), "deployments", deployments)]
     result["resources"]["worker_deployments"] = deployments
-    domains, value, _ = cf_get(f"/accounts/{account}/workers/domains")
-    if isinstance(value, list):
-        domains["matching_public_domains"] = [{key: row.get(key) for key in ("hostname", "service", "environment", "zone_id")} for row in value if row.get("hostname") in ("bilhealth.com", "www.bilhealth.com", "workouts.bilhealth.com")]
+    domains, value, _ = read_resource("worker_domains", f"/accounts/{account}/workers/domains")
+    domains["matching_public_domains"] = [{key: row.get(key) for key in ("hostname", "service", "environment", "zone_id")} for row in object_rows(value, "domains", domains) if row.get("hostname") in ("bilhealth.com", "www.bilhealth.com", "workouts.bilhealth.com")]
     result["resources"]["worker_domains"] = domains
-    zone, zones, _ = cf_get("/zones?name=bilhealth.com&per_page=50")
+    zone, zones, _ = read_resource("zone_lookup", "/zones?name=bilhealth.com&per_page=50")
     result["resources"]["zone_lookup"] = zone
-    if zone["success"] and isinstance(zones, list) and len(zones) == 1:
+    if zone["success"] and isinstance(zones, list) and len(zones) == 1 and isinstance(zones[0], dict):
         zone_id = valid_id(zones[0].get("id"))
         result["zone"] = {"id": zone_id, "name": zones[0].get("name"), "status": zones[0].get("status")}
-        routes, value, _ = cf_get(f"/zones/{zone_id}/workers/routes")
-        if isinstance(value, list):
-            routes["routes"] = [{key: row.get(key) for key in ("id", "pattern", "script")} for row in value]
+        routes, value, _ = read_resource("worker_routes", f"/zones/{zone_id}/workers/routes")
+        routes["routes"] = [{key: row.get(key) for key in ("id", "pattern", "script")} for row in object_rows(value, "routes", routes)]
         result["resources"]["worker_routes"] = routes
-        rulesets, value, _ = cf_get(f"/zones/{zone_id}/rulesets")
-        if isinstance(value, list):
-            rulesets["ruleset_phases"] = [{key: row.get(key) for key in ("id", "kind", "phase", "version", "last_updated")} for row in value if isinstance(row, dict)]
+        rulesets, value, _ = read_resource("zone_ruleset_inventory", f"/zones/{zone_id}/rulesets")
+        rulesets["ruleset_phases"] = [{key: row.get(key) for key in ("id", "kind", "phase", "version", "last_updated")} for row in object_rows(value, "rulesets", rulesets)]
         result["resources"]["zone_ruleset_inventory"] = rulesets
         for hostname in ("bilhealth.com", "www.bilhealth.com", "workouts.bilhealth.com"):
-            dns, value, _ = cf_get(f"/zones/{zone_id}/dns_records?name={hostname}&per_page=50")
-            if isinstance(value, list):
-                dns["public_records"] = [{key: row.get(key) for key in ("type", "name", "content", "proxied", "ttl")} for row in value]
+            dns, value, _ = read_resource("dns_" + hostname, f"/zones/{zone_id}/dns_records?name={hostname}&per_page=50")
+            dns["public_records"] = [{key: row.get(key) for key in ("type", "name", "content", "proxied", "ttl")} for row in object_rows(value, "dns_records", dns)]
             result["resources"]["dns_" + hostname] = dns
     result["status"] = "READS_COMPLETE_WITH_EXPLICIT_PERMISSION_LIMITS"
     json_write(output / "cloudflare-diagnosis.json", result)
@@ -248,5 +285,5 @@ if __name__ == "__main__":
     except SystemExit:
         raise
     except Exception as exception:
-        json_write(output / "diagnostic-failure.json", {"status": "DIAGNOSTIC_FAILED", "error_type": type(exception).__name__, "mutations": 0})
+        json_write(output / "diagnostic-failure.json", {"status": "DIAGNOSTIC_FAILED", "phase": PHASE, "error_type": type(exception).__name__, "mutations": 0})
         raise SystemExit(1)
