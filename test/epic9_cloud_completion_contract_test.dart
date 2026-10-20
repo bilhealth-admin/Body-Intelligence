@@ -240,14 +240,16 @@ void main() {
         ),
       );
       final resumeSteps = <String>[
-        'if (!isAvailable) return;',
-        'if (user == null) return;',
-        'if (await _registrationPolicyStore.isExplicitlyDisabled(user.id)) return;',
+        'if (!_availability() || _client.auth.currentUser == null) return;',
+        'await _forOwner<void>((operation) async {',
+        'final disabled = await _registrationPolicyStore.isExplicitlyDisabled(',
+        'operation.ownerId!,',
+        'if (disabled) return;',
         'final capability = await _tokenProvider.capability();',
         'if (!capability.ready || !capability.permissionGranted) return;',
         'final token = await _tokenProvider.existingPermissionToken();',
         'if (token == null || token.isEmpty) return;',
-        'await _registerToken(token, deliveryPreferences);',
+        'await _registerToken(token, deliveryPreferences, operation);',
       ];
       var previousStep = -1;
       for (final step in resumeSteps) {
