@@ -1,0 +1,92 @@
+name: BIL frozen final candidate selected checks
+run-name: BIL final 5775d082 policy backend reviewer and HealthKit
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/final-candidate-5775-20261020]
+    paths: [.github/workflows/bil_final_candidate_checks_20261020.yml]
+permissions:
+  contents: read
+env:
+  SOURCE_SHA: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+jobs:
+  start-requested-checks:
+    name: Start remaining exact-source audits
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET_BRANCH: integration/bil-qa-media-policy-20261011
+    steps:
+      - name: Start all scoped test workflows without release signing or submission
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, time
+          repo=os.environ['GITHUB_REPOSITORY']
+          branch=os.environ['TARGET_BRANCH']
+          expected=os.environ['SOURCE_SHA']
+          specifications=[('complete-analysis-and-unsharded-root-suite', 'bil_owner_comprehensive_validation.yml', {}), ('full-policy-and-android-lint', 'bil_apple_google_policy_gate.yml', {'evidence_scope': 'full-with-android-lint', 'certify_release': False}), ('isolated-full-auth-rls-storage-realtime-and-deno', 'bil_codeql_security_extended.yml', {'supabase_only': True}), ('reviewer-login-and-credits', 'bil_reviewer_access_preflight.yml', {}), ('healthkit-native-permission-sheet', 'bil_healthkit_cloud_simulator.yml', {})]
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-started-audits'
+          out.mkdir(parents=True,exist_ok=True)
+          records=[]
+          for role,workflow,inputs in specifications:
+            identity=subprocess.run(['gh','api',f'repos/{repo}/git/ref/heads/{branch}'],text=True,capture_output=True)
+            if identity.returncode or json.loads(identity.stdout)['object']['sha']!=expected:
+              records.append({'role':role,'status':'BLOCKED_SOURCE_MOVED'});break
+            payload={'ref':branch,'inputs':inputs}
+            result=subprocess.run(['gh','api','--method','POST',f'repos/{repo}/actions/workflows/{workflow}/dispatches','--input','-'],input=json.dumps(payload),text=True,capture_output=True)
+            # Never print credentials or a raw failure body.
+            records.append({'role':role,'workflow':workflow,'inputs':inputs,'source_sha':expected,'status':'DISPATCH_ACCEPTED_NOT_PASS' if result.returncode==0 else 'DISPATCH_FAILED'})
+            (out/'dispatch-receipts.json').write_text(json.dumps(records,indent=2)+'\n')
+          runs=subprocess.run(['gh','api',f'repos/{repo}/actions/runs?head_sha={expected}&event=workflow_dispatch&per_page=100'],text=True,capture_output=True)
+          if runs.returncode==0:
+            safe=[{k:r.get(k) for k in ('id','name','head_sha','head_branch','status','conclusion','html_url','created_at','path')} for r in json.loads(runs.stdout).get('workflow_runs',[])]
+            (out/'observed-runs.json').write_text(json.dumps(safe,indent=2)+'\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as stream:
+            stream.write('## Requested checks started; no release action\n\n')
+            stream.write(f'Frozen app source: `{expected}`. This controller only dispatches tests. No release signing, upload, rollout, store submission or email send.\n\n')
+            for record in records:stream.write(f"- {record['role']}: **{record['status']}**\n")
+            stream.write('\nEach dispatched run retains its actual result. A green dispatch is not a passed test or store approval.\n')
+          if len(records)!=len(specifications) or any(r['status']!='DISPATCH_ACCEPTED_NOT_PASS' for r in records):raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: bil-audit-start-receipts-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-started-audits/
+          if-no-files-found: error
+          retention-days: 30
+  static-dependency-release-audits:
+    name: Existing full static, dependency, repository and release audit gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Run the existing unchanged static gate on the exact application source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf 'Controller=%s\nAppSource=%s\n' "$GITHUB_SHA" "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          GITHUB_SHA="$SOURCE_SHA" bash tool/release_certification/run_static_gate.sh 1
+      - name: Preserve every actual audit and failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-remaining-static-5775d082-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-cert-static-1/
+          if-no-files-found: error
+          retention-days: 30
+
