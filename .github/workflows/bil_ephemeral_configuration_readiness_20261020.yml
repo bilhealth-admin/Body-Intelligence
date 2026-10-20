@@ -1,13 +1,9 @@
-name: BIL optional ephemeral configuration boolean audit 20261020
+name: BIL reviewed ephemeral configuration boolean audit 20261020
 on:
   push:
-    branches: [audit/production-readiness-5775-20261020]
+    branches: [ops/ephemeral-config-readiness-5775-20261020]
     paths:
       - .github/workflows/bil_ephemeral_configuration_readiness_20261020.yml
-      - tool/release_certification/ephemeral_readiness/index.ts
-      - tool/release_certification/ephemeral_readiness/offline_test.mjs
-      - tool/release_certification/ephemeral_readiness/lifecycle.py
-      - tool/release_certification/ephemeral_readiness/test_lifecycle.py
   workflow_dispatch:
     inputs:
       execute_reviewed_helper:
@@ -20,37 +16,99 @@ permissions:
 concurrency:
   group: bil-ephemeral-config-readiness-20261020
   cancel-in-progress: false
+env:
+  APP_SOURCE_SHA: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+  APP_SOURCE_TREE: 7ea15defb433ad134ee5066f538d8e790c45f809
+  REVIEWED_HELPER_SHA: f0d82dd4869c1713ca535577a9af1966494b7525
+  REVIEWED_HELPER_TREE: 59a280a3309188990acb4b7424fb8701f80e826b
+  READINESS_OUT: ${{ runner.temp }}/ephemeral-config-readiness
 jobs:
   reviewed-ephemeral-config:
-    if: github.event_name == 'workflow_dispatch' && inputs.execute_reviewed_helper
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/ops/ephemeral-config-readiness-5775-20261020') || (github.event_name == 'workflow_dispatch' && inputs.execute_reviewed_helper)
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Checkout the exact operations controller separately
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+      - name: Checkout the immutable independently reviewed helper
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: f0d82dd4869c1713ca535577a9af1966494b7525
+          path: helper
           persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: '24'
-      - name: Offline authorization and parser controls
+      - name: Verify immutable helper bytes and record separate controller and reviewed source
+        shell: bash
         run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast, hashlib, json, os, subprocess
+          from pathlib import Path
+          def git(folder, *args):
+              return subprocess.check_output(['git', '-C', folder, *args], text=True, timeout=10).strip()
+          controller = git('controller', 'rev-parse', 'HEAD')
+          helper = git('helper', 'rev-parse', 'HEAD')
+          helper_tree = git('helper', 'rev-parse', 'HEAD^{tree}')
+          if controller != os.environ['GITHUB_SHA'] or helper != os.environ['REVIEWED_HELPER_SHA'] or helper_tree != os.environ['REVIEWED_HELPER_TREE']:
+              raise SystemExit('Controller or reviewed helper identity mismatch')
+          if git('controller', 'status', '--porcelain', '--untracked-files=no') or git('helper', 'status', '--porcelain', '--untracked-files=no'):
+              raise SystemExit('Tracked controller or helper input changed before execution')
+          folder = Path('helper/tool/release_certification/ephemeral_readiness')
+          expected = {
+              'index.ts': 'e10a641ea552ee38e2f5a8ed7bb9aa4dbe3e7782b09ba8e63dad2814cf1285ef',
+              'lifecycle.py': '0519ba32dd8075a37ce1ce0da6f4428a5cf91ad5d63024e5a454bbdc8e170d2b',
+              'offline_test.mjs': '368ef20b43eaa8e02f69c354b8abf6e025d4bcb63e09127fae657210b34e637d',
+              'test_lifecycle.py': '12a5152c8a027f190fd7500a109e6da5cc15449dfd2f461cc957d1cd049929a1',
+          }
+          actual = {name: hashlib.sha256((folder / name).read_bytes()).hexdigest() for name in expected}
+          if actual != expected:
+              raise SystemExit('Reviewed helper bytes changed')
+          source = next(ast.literal_eval(node.value) for node in ast.parse((folder / 'lifecycle.py').read_text()).body if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == 'SOURCE' for target in node.targets))
+          if source != os.environ['APP_SOURCE_SHA']:
+              raise SystemExit('Reviewed helper application source association changed')
+          out = Path(os.environ['READINESS_OUT'])
+          out.mkdir(parents=True, exist_ok=True)
+          receipt = {
+              'controllerSource': controller,
+              'controllerTree': git('controller', 'rev-parse', 'HEAD^{tree}'),
+              'reviewedHelperSource': helper,
+              'reviewedHelperTree': helper_tree,
+              'reviewedHelperFileSha256': actual,
+              'reviewedApplicationSource': source,
+              'reviewedApplicationTree': os.environ['APP_SOURCE_TREE'],
+              'applicationCheckoutVerifiedByPriorReadOnlyRun': 39431807579,
+              'scope': 'Boolean configuration audit; not an application runtime or signed artifact test',
+              'runId': os.environ['GITHUB_RUN_ID'],
+              'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'],
+          }
+          (out / 'source-controller-receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+      - name: Offline authorization and parser controls
+        working-directory: helper
+        shell: bash
+        run: |
+          set -euo pipefail
           python3 -m py_compile tool/release_certification/ephemeral_readiness/lifecycle.py
           python3 tool/release_certification/ephemeral_readiness/test_lifecycle.py
           node --experimental-strip-types tool/release_certification/ephemeral_readiness/offline_test.mjs
       - name: Reviewed unique create read exact cleanup lifecycle
+        working-directory: helper
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           BIL_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.BIL_SUPABASE_SERVICE_ROLE_KEY }}
           BIL_SUPABASE_ANON_KEY: ${{ secrets.BIL_SUPABASE_ANON_KEY }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          READINESS_OUT: ${{ runner.temp }}/ephemeral-config-readiness
         run: python3 tool/release_certification/ephemeral_readiness/lifecycle.py --execute
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: ephemeral-config-5775-readiness-booleans
+          name: ephemeral-config-5775-readiness-booleans-${{ github.run_id }}
           path: ${{ runner.temp }}/ephemeral-config-readiness/*.json
           if-no-files-found: error
           retention-days: 14
-
