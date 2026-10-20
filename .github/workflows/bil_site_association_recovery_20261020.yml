@@ -55,7 +55,47 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/bil-site-toolchain" --no-save --ignore-scripts wrangler@4.125.0 @cloudflare/deploy-helpers@0.8.0
+          toolchain="$RUNNER_TEMP/bil-site-toolchain"
+          evidence="$GITHUB_WORKSPACE/recovery-evidence/npm-toolchain"
+          mkdir -p "$toolchain" "$evidence"
+          cp controller/tool/release_ops/site-recovery-toolchain-package.json "$toolchain/package.json"
+          cp "$toolchain/package.json" "$evidence/package.json"
+          touch "$toolchain/npm-user-config" "$toolchain/npm-global-config"
+          node --version > "$evidence/node-version.txt"
+          npm --version > "$evidence/npm-version.txt"
+          npm_status=0
+          (
+            cd "$toolchain"
+            NPM_CONFIG_USERCONFIG="$toolchain/npm-user-config" NPM_CONFIG_GLOBALCONFIG="$toolchain/npm-global-config" \
+              npm install --ignore-scripts --workspaces=false --no-audit --no-fund \
+              --registry=https://registry.npmjs.org/ --cache "$RUNNER_TEMP/bil-site-npm-cache"
+          ) > "$evidence/install.log" 2>&1 || npm_status=$?
+          if test -f "$toolchain/package-lock.json"; then
+            cp "$toolchain/package-lock.json" "$evidence/package-lock.json"
+          fi
+          python3 - "$RUNNER_TEMP/bil-site-npm-cache/_logs" "$evidence/npm-diagnostic.json" "$npm_status" <<'PY'
+          import json, pathlib, re, sys
+          logs = pathlib.Path(sys.argv[1])
+          reports = []
+          for path in sorted(logs.glob("*-debug-*.log")) if logs.is_dir() else []:
+              value = path.read_text(encoding="utf-8", errors="replace")
+              frames = []
+              for line in value.splitlines():
+                  if "verbose stack" not in line:
+                      continue
+                  match = re.search(r"\bat ([A-Za-z0-9_.$<>#]+).*?[/\\]([A-Za-z0-9_.-]+\.js):(\d+):(\d+)", line)
+                  if match:
+                      frames.append({"function": match[1], "file": match[2], "line": int(match[3]), "column": int(match[4])})
+              reports.append({"log_name": path.name, "null_edges_out": "Cannot read properties of null (reading 'edgesOut')" in value,
+                  "error_codes": sorted(set(re.findall(r"^\d+ error code ([A-Z0-9_-]+)$", value, flags=re.M))),
+                  "stack_frames": frames[:30]})
+          pathlib.Path(sys.argv[2]).write_text(json.dumps({"npm_exit_code": int(sys.argv[3]), "debug_summaries": reports,
+              "raw_debug_logs_retained": False, "secret_or_environment_values_included": False}, indent=2) + "\n")
+          PY
+          if test "$npm_status" -ne 0; then
+            cat "$evidence/install.log"
+            exit "$npm_status"
+          fi
       - name: Run complete existing Worker, merge, public policy and generator tests on frozen source
         working-directory: candidate
         shell: bash
@@ -100,3 +140,4 @@ jobs:
           path: recovery-evidence/
           if-no-files-found: error
           retention-days: 30
+
