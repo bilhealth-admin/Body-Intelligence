@@ -1,12 +1,87 @@
 import 'dart:async';
 
+import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_advertising_disclosure.dart';
+
 import 'package:body_intelligence_log/features/ads/advertising_privacy_page.dart';
 import 'package:body_intelligence_log/features/ads/services/admob_ump_consent_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
+  test('ad disclosure separates recorded BIL data from Google SDK data', () {
+    final english = advertisingPrivacySurfaceCopy('en')[1];
+    final arabic = advertisingPrivacySurfaceCopy('ar-EG')[1];
+    expect(english, contains('your recorded health'));
+    expect(english, contains('in ad requests'));
+    expect(english, contains('Google’s ad SDK may process'));
+    expect(english, contains('approximate location inferred from your IP address'));
+    expect(english, isNot(contains('never uses')));
+    expect(arabic, contains('بياناتك المسجلة'));
+    expect(arabic, contains('ضمن طلبات الإعلانات'));
+    expect(arabic, contains('قد تعالج حزمة إعلانات Google'));
+    expect(arabic, contains('موقع تقريبي يُستنتج من عنوان IP'));
+  });
+
+  test('every production locale reaches its advertising disclosure', () {
+    final translations = AdvertisingDisclosureRuntimeCopy.values;
+    expect(translations.keys.toSet(), RuntimeCopy.supported);
+    final english = translations['en']!;
+    for (final locale in RuntimeCopy.supported) {
+      final actual = advertisingPrivacySurfaceCopy(locale)[1];
+      expect(actual, translations[locale], reason: 'Disclosure for $locale');
+      expect(actual.trim(), isNotEmpty);
+      expect(actual, contains('Google'));
+      expect(actual, contains('IP'));
+      if (locale != 'en') expect(actual, isNot(english));
+    }
+    expect(
+      advertisingPrivacySurfaceCopy('pt_BR')[1],
+      translations['pt-BR'],
+    );
+    expect(
+      advertisingPrivacySurfaceCopy('zh_Hant')[1],
+      translations['zh-Hant'],
+    );
+    expect(
+      AdvertisingDisclosureRuntimeCopy.forLocale('ar_SA'),
+      translations['ar'],
+    );
+  });
+
+  testWidgets('English and Arabic pages display the scoped SDK disclosure', (
+    tester,
+  ) async {
+    const ready = UmpConsentSnapshot(
+      phase: UmpConsentPhase.ready,
+      canRequestAds: false,
+      privacyOptionsRequirement: UmpPrivacyOptionsRequirement.notRequired,
+    );
+    for (final locale in const [Locale('en'), Locale('ar', 'EG')]) {
+      final coordinator = _ControllableCoordinator(ready);
+      final expected = AdvertisingDisclosureRuntimeCopy.forLocale(
+        locale.toLanguageTag(),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            locale: locale,
+            supportedLocales: [locale],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: AdvertisingPrivacyPage(umpConsentCoordinator: coordinator),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(expected), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      coordinator.dispose();
+    }
+  });
+
   testWidgets(
     'privacy options appear when an in-flight startup refresh becomes ready',
     (tester) async {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/localization/runtime_copy_advertising_disclosure.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import 'domain/ad_policy.dart';
 import 'providers/ad_providers.dart';
@@ -37,7 +38,7 @@ List<String> advertisingPrivacySurfaceCopy(String locale) {
   final detail = _eligibilityDetailCopyFor(locale);
   return <String>[
     copy.title,
-    copy.boundary,
+    AdvertisingDisclosureRuntimeCopy.forLocale(locale),
     copy.unavailableTitle,
     copy.unavailableBody,
     copy.contextualTitle,
@@ -448,7 +449,10 @@ class _AdvertisingPrivacyPageState
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text(copy.boundary, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            AdvertisingDisclosureRuntimeCopy.forLocale(locale),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 12),
           BilPearlMaterialCard(
             child: ListTile(
@@ -534,7 +538,6 @@ final class _AdPrivacyCopy {
   const _AdPrivacyCopy({
     required this.title,
     required this.intro,
-    required this.boundary,
     required this.unavailableTitle,
     required this.unavailableBody,
     required this.declineTitle,
@@ -550,7 +553,6 @@ final class _AdPrivacyCopy {
   });
   final String title;
   final String intro;
-  final String boundary;
   final String unavailableTitle;
   final String unavailableBody;
   final String declineTitle;
@@ -570,7 +572,6 @@ final class _AdPrivacyCopy {
     return _AdPrivacyCopy(
       title: _adDirect(locale, en.title),
       intro: _adDirect(locale, en.intro),
-      boundary: _adDirect(locale, en.boundary),
       unavailableTitle: _adDirect(locale, en.unavailableTitle),
       unavailableBody: _adDirect(locale, en.unavailableBody),
       declineTitle: _adDirect(locale, en.declineTitle),
@@ -594,8 +595,6 @@ const _copy = <String, _AdPrivacyCopy>{
   'en': _AdPrivacyCopy(
     title: 'Advertising privacy',
     intro: 'You control whether the Free plan may show contextual ads.',
-    boundary:
-        'BIL never uses health, nutrition, weight, location, profile, or private community data for advertising. Premium is always ad-free.',
     unavailableTitle: 'Advertising is not active',
     unavailableBody:
         'No ad request is made until a reviewed production provider is configured.',
@@ -614,8 +613,6 @@ const _copy = <String, _AdPrivacyCopy>{
   'ar': _AdPrivacyCopy(
     title: 'خصوصية الإعلانات',
     intro: 'أنت تتحكم في السماح للخطة المجانية بعرض إعلانات سياقية.',
-    boundary:
-        'لا يستخدم BIL بيانات الصحة أو الغذاء أو الوزن أو الموقع أو الملف أو المجتمع الخاص للإعلانات. عضوية بريميوم بلا إعلانات دائمًا.',
     unavailableTitle: 'الإعلانات غير مفعلة',
     unavailableBody: 'لن يُرسل أي طلب إعلان حتى تهيئة مزود إنتاج تمت مراجعته.',
     declineTitle: 'عدم عرض الإعلانات',
@@ -633,8 +630,6 @@ const _copy = <String, _AdPrivacyCopy>{
   'fr': _AdPrivacyCopy(
     title: 'Confidentialité publicitaire',
     intro: 'Vous contrôlez les publicités contextuelles du forfait Gratuit.',
-    boundary:
-        'BIL n’utilise jamais les données de santé, nutrition, poids, localisation, profil ou communauté privée pour la publicité. Premium reste sans publicité.',
     unavailableTitle: 'Publicité inactive',
     unavailableBody:
         'Aucune requête n’est envoyée avant la configuration d’un fournisseur de production approuvé.',
@@ -654,8 +649,6 @@ const _copy = <String, _AdPrivacyCopy>{
   'es': _AdPrivacyCopy(
     title: 'Privacidad publicitaria',
     intro: 'Tú controlas los anuncios contextuales del plan Gratis.',
-    boundary:
-        'BIL nunca usa datos de salud, nutrición, peso, ubicación, perfil o comunidad privada para publicidad. Premium no muestra anuncios.',
     unavailableTitle: 'La publicidad no está activa',
     unavailableBody:
         'No se solicita ningún anuncio hasta configurar un proveedor de producción revisado.',
@@ -674,8 +667,6 @@ const _copy = <String, _AdPrivacyCopy>{
   'tr': _AdPrivacyCopy(
     title: 'Reklam gizliliği',
     intro: 'Ücretsiz plandaki bağlamsal reklamları siz kontrol edersiniz.',
-    boundary:
-        'BIL sağlık, beslenme, kilo, konum, profil veya özel topluluk verilerini reklam için kullanmaz. Premium her zaman reklamsızdır.',
     unavailableTitle: 'Reklamlar etkin değil',
     unavailableBody:
         'İncelenmiş üretim sağlayıcısı yapılandırılmadan reklam isteği gönderilmez.',
