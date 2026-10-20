@@ -1,0 +1,75 @@
+name: BIL final5775 complete live service contracts
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/final-5775-live-contracts-20261020]
+    paths: [.github/workflows/bil_frozen_live_contracts_20261020.yml]
+permissions:
+  contents: read
+concurrency:
+  group: bil-final-5775-live-contracts-20261020
+  cancel-in-progress: false
+jobs:
+  live-contracts:
+    if: ${{ github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/audit/final-5775-live-contracts-20261020' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
+      BIL_SOURCE_SHA: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+          persist-credentials: false
+      - name: Record actual checked-out source and separate controller
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_SOURCE_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "7ea15defb433ad134ee5066f538d8e790c45f809"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          mkdir -p "$RUNNER_TEMP/bil-cert-live-1"
+          python3 - <<'PYCODE'
+          import json,os,pathlib,re,subprocess
+          source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          tree=subprocess.check_output(['git','rev-parse','HEAD^{tree}'],text=True).strip()
+          controller=os.environ['GITHUB_SHA']
+          if source != os.environ['BIL_SOURCE_SHA'] or tree != '7ea15defb433ad134ee5066f538d8e790c45f809' or not re.fullmatch('[0-9a-f]{40}',controller):
+              raise SystemExit('ACTUAL_SOURCE_OR_CONTROLLER_IDENTITY_MISMATCH')
+          receipt={'application_source_sha':source,'application_source_tree_sha':tree,
+              'controller_sha':controller,'controller_workflow_ref':os.environ['GITHUB_WORKFLOW_REF'],
+              'run_id':os.environ['GITHUB_RUN_ID'],'run_attempt':os.environ['GITHUB_RUN_ATTEMPT'],
+              'workflow_path':'.github/workflows/bil_frozen_live_contracts_20261020.yml',
+              'source_claim':'actual_checkout_before_test_not_test_result',
+              'strict_gate_git_blob_sha':subprocess.check_output(['git','rev-parse','HEAD:tool/release_certification/run_live_gate.sh'],text=True).strip()}
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-cert-live-1'/'source-receipt.json';p.write_text(json.dumps(receipt,indent=2)+'\n')
+          PYCODE
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Verify ledger guard detects source and deployment drift
+        run: python3 -m unittest discover -s tool/release_certification -p test_check_cloud_deployment_ledger.py -v
+      - name: Real PostgreSQL cache reservation and refund ordering regression
+        run: |
+          npm ci --prefix supabase/tests --ignore-scripts
+          node supabase/tests/vision_cache_reservation_test.mjs
+      - name: Actual deployed service roundtrips with disposable fixtures and cleanup
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          GITHUB_SHA="$BIL_SOURCE_SHA" bash tool/release_certification/run_live_gate.sh 1
+          grep -Fx 'LIVE_BACKEND_CORE=PASS' "$RUNNER_TEMP/bil-cert-live-1/status.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-frozen-live-service-contracts-5775d082-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-cert-live-1/
+          if-no-files-found: error
+          retention-days: 14
+
