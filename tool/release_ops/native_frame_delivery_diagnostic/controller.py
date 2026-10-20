@@ -121,7 +121,7 @@ def snapshot_environment(app, output):
         'host-load': ['cat', '/proc/loadavg'],
         'host-memory': ['cat', '/proc/meminfo'],
         'host-cpu': ['lscpu'],
-        'emulator-version': [str(Path(os.environ['ANDROID_HOME']) / 'emulator/emulator'), '-version'],
+        'emulator-version': [str(Path(os.environ['ANDROID_HOME']) / 'emulator/emulator'), '-no-window', '-version'],
     }
     receipt = {}
     for name, args in captures.items():

@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -138,6 +139,63 @@ class ControllerTests(unittest.TestCase):
             file.truncate(11 * 1024 * 1024)
         with self.assertRaises(ValueError):
             controller.bundle(self.app, output)
+
+    def snapshot_fixture(self):
+        home = Path(self.temp.name) / 'fixture-home'
+        config = home / '.android/avd/test.avd/config.ini'
+        config.parent.mkdir(parents=True)
+        config.write_text('hw.ramSize=1536M\nhw.cpu.ncore=2\n')
+        sdk = Path(self.temp.name) / 'sdk'
+        properties = sdk / 'system-images/android-33/google_apis/x86_64/source.properties'
+        properties.parent.mkdir(parents=True)
+        properties.write_text('AndroidVersion.ApiLevel=33\n')
+        output = Path(self.temp.name) / 'snapshot'
+        output.mkdir()
+        return home, sdk, output
+
+    def test_headless_version_probe_avoids_exact_observed_gui_loader_failure(self):
+        home, sdk, output = self.snapshot_fixture()
+        seen = []
+        expected = [str(sdk / 'emulator/emulator'), '-no-window', '-version']
+
+        def fake_command(args, **kwargs):
+            seen.append(args)
+            if args[0] == expected[0]:
+                if args != expected:
+                    return SimpleNamespace(returncode=127, stdout='', stderr='libpulse.so.0 missing')
+                return SimpleNamespace(returncode=0, stdout='Android emulator version37.2.12.0 build_id16428233', stderr='')
+            if args[-1] == 'ro.build.version.sdk':
+                value = '33\n'
+            elif args[-1] == 'ro.boot.vbmeta.digest':
+                value = controller.EXPECTED_IMAGE_VBMETA + '\n'
+            else:
+                value = 'fixture snapshot\n'
+            return SimpleNamespace(returncode=0, stdout=value, stderr='')
+
+        with patch.object(Path, 'home', return_value=home), \
+             patch.dict(os.environ, {'ANDROID_HOME': str(sdk)}), \
+             patch.object(controller, 'command', side_effect=fake_command):
+            controller.snapshot_environment(self.app, output)
+        self.assertIn(expected, seen)
+        self.assertNotIn([expected[0], '-version'], seen)
+        self.assertIn('16428233', (output / 'emulator-version.log').read_text())
+        receipt = json.loads((output / 'environment-snapshots.json').read_text())
+        self.assertEqual(receipt['system_image_vbmeta_digest'], controller.EXPECTED_IMAGE_VBMETA)
+
+    def test_headless_probe_failure_remains_blocking_without_fallback(self):
+        home, sdk, output = self.snapshot_fixture()
+
+        def fake_command(args, **kwargs):
+            if args[0] == str(sdk / 'emulator/emulator'):
+                return SimpleNamespace(returncode=127, stdout='', stderr='libpulse.so.0 missing')
+            return SimpleNamespace(returncode=0, stdout='snapshot', stderr='')
+
+        with patch.object(Path, 'home', return_value=home), \
+             patch.dict(os.environ, {'ANDROID_HOME': str(sdk)}), \
+             patch.object(controller, 'command', side_effect=fake_command):
+            with self.assertRaisesRegex(ValueError, 'Cannot record emulator'):
+                controller.snapshot_environment(self.app, output)
+        self.assertIn('libpulse.so.0', (output / 'emulator-version.log').read_text())
 
 
 if __name__ == '__main__':
