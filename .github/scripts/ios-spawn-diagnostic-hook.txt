@@ -1,0 +1,21 @@
+  # Preserve the original suite failure. This is evidence collection only.
+  if [ "$original_status" -ne 0 ] && [ -n "$ACTIVE_DEVICE" ] &&
+      [ -n "${KIND:-}" ] && [ -f "$OUT/$KIND-binary.sha256" ]; then
+    local diagnostic_main_sha diagnostic_binary_path diagnostic_device_type diagnostic_device_label
+    if [ "$ACTIVE_DEVICE" = "$IPAD_UDID" ]; then
+      diagnostic_device_type="$IPAD_TYPE"
+      diagnostic_device_label=ipad
+    else
+      diagnostic_device_type="$IPHONE_TYPE"
+      diagnostic_device_label=iphone
+    fi
+    read -r diagnostic_main_sha diagnostic_binary_path < "$OUT/$KIND-binary.sha256"
+    stage first-failed-ios-bootstrap-diagnostic 660 "$OUT/spawn-diagnostic-supervisor.log" \
+      python3 "${BIL_IOS_SPAWN_DIAGNOSTIC_HELPER:-.github/scripts/bil_ios_simulator_spawn_diagnostic.py}" \
+      --qa-simulator-only --retain-exact-bundle \
+      --workspace "$GITHUB_WORKSPACE" --app "$GITHUB_WORKSPACE/build/ios/iphonesimulator/Runner.app" \
+      --output "$GITHUB_WORKSPACE/$OUT/first-failed-bootstrap-diagnostic" \
+      --source-head "$SOURCE_HEAD" --expected-main-sha256 "$diagnostic_main_sha" \
+      --device "$ACTIVE_DEVICE" --runtime "$RUNTIME" --device-type "$diagnostic_device_type" \
+      --device-label "$diagnostic_device_label" --entrypoint-kind "$KIND"
+  fi
