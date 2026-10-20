@@ -1,6 +1,6 @@
 // GENERATED FILE. Regenerate with:
 // dart run tool/localization/generate_apple_ai_privacy_copy.dart
-// Machine-translated; do not describe as native-reviewed.
+// Machine-translated except authored Arabic consent corrections; other translations are not native-reviewed.
 abstract final class AppleAiPrivacyRuntimeCopy {
   static const supported = <String>{
     'en',
@@ -61,7 +61,7 @@ abstract final class AppleAiPrivacyRuntimeCopy {
       'en':
           'If you agree, BIL sends your question and only the context you selected—such as weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Raw microphone audio is not sent to BIL or Google Gemini. You can decline and keep using BIL’s local features, and withdraw consent later in AI Coach settings.',
       'ar':
-          'إذا وافقت، فسيرسل BIL سؤالك والسياق الذي حددته فقط - مثل الوزن والأهداف والقياسات؛ الوجبات والتغذية والمياه والتفضيلات؛ النشاط والتدريب. النوم والعادات. بالإضافة إلى ما يصل إلى 12 محادثة حديثة - إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، لإنشاء إجابتك المطلوبة. لا يتم إرسال صوت الميكروفون الأولي إلى BIL أو Google Gemini. يمكنك رفض ميزات BIL المحلية والاستمرار في استخدامها، وسحب الموافقة لاحقًا في إعدادات AI Coach.',
+          'إذا وافقت، يرسل BIL سؤالك والسياق الذي تختاره فقط، مثل الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 دورًا من المحادثة، إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، لإنشاء الإجابة التي تطلبها. لا يرسل BIL صوت الميكروفون الخام إلى خادمه أو إلى Google Gemini. يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية، وسحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
       'fr':
           'Si vous êtes d\'accord, BIL envoie votre question et uniquement le contexte que vous avez sélectionné, comme le poids, les objectifs et les mesures ; repas, nutrition, eau et préférences ; activité et formation; sommeil et habitudes; plus jusqu\'à 12 tours de conversation récents : vers Google Gemini, un service d\'IA tiers exploité par Google, pour générer la réponse demandée. L’audio brut du microphone n’est pas envoyé à BIL ou Google Gemini. Vous pouvez refuser et continuer à utiliser les fonctionnalités locales de BIL, et retirer votre consentement ultérieurement dans les paramètres de AI Coach.',
       'es':
@@ -113,7 +113,7 @@ abstract final class AppleAiPrivacyRuntimeCopy {
       'en':
           'AI Coach is optional. With consent, selected personal context is sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. You may decline and keep local features.',
       'ar':
-          'AI Coach اختياري. بعد الموافقة، يتم إرسال السياق الشخصي المحدد إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، فقط للرد على طلبك. يمكنك رفض الميزات المحلية والاحتفاظ بها.',
+          'AI Coach اختياري. لا يُرسل السياق الشخصي الذي تختاره إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، إلا بعد موافقتك وللإجابة عن طلبك فقط. يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية.',
       'fr':
           'AI Coach est facultatif. Avec votre consentement, le contexte personnel sélectionné est envoyé à Google Gemini, un service d\'IA tiers exploité par Google, uniquement pour répondre à votre demande. Vous pouvez refuser et conserver les fonctionnalités locales.',
       'es':
@@ -165,7 +165,7 @@ abstract final class AppleAiPrivacyRuntimeCopy {
       'en':
           'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.',
       'ar':
-          'يرسل BIL أسئلتك والفئات التي تحددها فقط - الوزن والأهداف والقياسات؛ الوجبات والتغذية والمياه والتفضيلات؛ النشاط والتدريب. النوم والعادات. بالإضافة إلى ما يصل إلى 12 محادثة حديثة - إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، لإنشاء الإجابات المطلوبة. لا يتم إرسال صوت الميكروفون الخام. يمكنك رفض الميزات المحلية والاستمرار في استخدامها، أو الانسحاب لاحقًا في إعدادات AI Coach.',
+          'يرسل BIL أسئلتك والفئات التي تختارها فقط، مثل الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 دورًا من المحادثة، إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، لإنشاء الإجابات التي تطلبها. لا يُرسل صوت الميكروفون الخام. يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية، وسحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
       'fr':
           'BIL envoie vos questions et uniquement les catégories que vous sélectionnez : poids, objectifs et mesures ; repas, nutrition, eau et préférences ; activité et formation; sommeil et habitudes; plus jusqu\'à 12 tours de conversation récents : vers Google Gemini, un service d\'IA tiers exploité par Google, pour générer les réponses demandées. L’audio brut du microphone n’est pas envoyé. Vous pouvez refuser et continuer à utiliser les fonctionnalités locales, ou vous retirer plus tard dans les paramètres AI Coach.',
       'es':
@@ -557,3 +557,4 @@ abstract final class AppleAiPrivacyRuntimeCopy {
     return null;
   }
 }
+

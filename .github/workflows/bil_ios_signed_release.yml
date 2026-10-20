@@ -531,6 +531,13 @@ jobs:
             --embedded-profile BIL-ios-embedded-profile.plist \
             --team-id "$APPLE_TEAM_ID" \
             --bundle-id com.bilhealth.bodyintelligencelog
+          python3 -m unittest discover -s tool/release \
+            -p test_verify_final_artifact_identity.py -v
+          python3 tool/release/verify_final_artifact_identity.py \
+            --ipa "$IPA" \
+            --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build "$BUILD_NUMBER" \
+            --output BIL-ios-final-artifact-inventory.json
           shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
           stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
           git rev-parse HEAD | tee BIL-source-head.txt
@@ -626,6 +633,7 @@ jobs:
             BIL-ios-codesign.txt
             BIL-ios-codesign-verify.txt
             BIL-ios-entitlements.plist
+            BIL-ios-final-artifact-inventory.json
             BIL-ios-embedded-profile.plist
             BIL-ios-ipa.sha256
             BIL-ios-ipa.size

@@ -185,7 +185,11 @@ export async function handler(
               body: JSON.stringify({
                 token: token.provider_token,
                 ...(badgeCount === undefined ? {} : { badge_count: badgeCount }),
-                title: event.title ?? "BIL",
+                // Both visible fields must honor the same preview consent.
+                // The claim RPC has no trusted recipient locale. Keep the
+                // generic English fallback; never infer locale or safe copy
+                // from sender-controlled event payload metadata.
+                title: showFullBody ? event.title ?? "BIL" : "BIL",
                 body: showFullBody
                   ? event.body
                   : "You have a new private update.",
@@ -249,3 +253,4 @@ export async function handler(
     failed,
   });
 }
+

@@ -44,6 +44,17 @@ const sources = <String>[
   'Only when enabled, a selected photo, app language, and technical request metadata may be sent to Google’s third-party AI service to suggest food. Turn it off to stop new uploads.',
 ];
 
+// Keep the refusal object explicit: refusing data transfer leaves local features available.
+// These authored corrections must survive future machine-translation regeneration.
+const authoredArabicTranslations = <String, String>{
+  'If you agree, BIL sends your question and only the context you selected—such as weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Raw microphone audio is not sent to BIL or Google Gemini. You can decline and keep using BIL’s local features, and withdraw consent later in AI Coach settings.':
+      'إذا وافقت، يرسل BIL سؤالك والسياق الذي تختاره فقط، مثل الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 دورًا من المحادثة، إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، لإنشاء الإجابة التي تطلبها. لا يرسل BIL صوت الميكروفون الخام إلى خادمه أو إلى Google Gemini. يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية، وسحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
+  'AI Coach is optional. With consent, selected personal context is sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. You may decline and keep local features.':
+      'AI Coach اختياري. لا يُرسل السياق الشخصي الذي تختاره إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، إلا بعد موافقتك وللإجابة عن طلبك فقط. يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية.',
+  'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.':
+      'يرسل BIL أسئلتك والفئات التي تختارها فقط، مثل الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 دورًا من المحادثة، إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية تديرها Google، لإنشاء الإجابات التي تطلبها. لا يُرسل صوت الميكروفون الخام. يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية، وسحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
+};
+
 const protected = <String, String>{
   'Google Gemini': 'ZXQPGOOGLEGEMINI9X7ZXQP',
   'AI Coach': 'ZXQPAICOACH9X7ZXQP',
@@ -72,7 +83,7 @@ Future<void> main() async {
     ..writeln(
       '// dart run tool/localization/generate_apple_ai_privacy_copy.dart',
     )
-    ..writeln('// Machine-translated; do not describe as native-reviewed.')
+    ..writeln('// Machine-translated except authored Arabic consent corrections; other translations are not native-reviewed.')
     ..writeln('abstract final class AppleAiPrivacyRuntimeCopy {')
     ..writeln('  static const supported = <String>{');
   for (final tag in <String>['en', ...targets.keys]) {
@@ -115,6 +126,11 @@ Future<void> main() async {
 Future<List<String>> _translate(String target) async {
   final chunks = <String>[];
   for (final source in sources) {
+    final authored = target == 'ar' ? authoredArabicTranslations[source] : null;
+    if (authored != null) {
+      chunks.add(authored);
+      continue;
+    }
     final batch = _protect(source);
     final client = HttpClient();
     try {
@@ -177,3 +193,4 @@ String _escape(String value) => value
     .replaceAll("'", r"\'")
     .replaceAll('\r', '')
     .replaceAll('\n', r'\n');
+

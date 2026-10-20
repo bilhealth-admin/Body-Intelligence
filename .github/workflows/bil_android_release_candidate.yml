@@ -347,6 +347,13 @@ jobs:
           }
           printf '%s\n' 'ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH' \
             > BIL-android-upload-certificate.txt
+          python3 -m unittest discover -s tool/release \
+            -p test_verify_final_artifact_identity.py -v
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build "$BUILD_NUMBER" \
+            --output BIL-android-final-artifact-identity.json
           sha256sum "$AAB" | tee BIL-android-aab.sha256
           stat --printf='%s\n' "$AAB" | tee BIL-android-aab.size
           git rev-parse HEAD | tee BIL-source-head.txt
@@ -409,6 +416,7 @@ jobs:
             BIL-android-aab.size
             BIL-android-crypto-scan.txt
             BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
             BIL-android-production-admob-source.txt
             BIL-android-gate-status.txt
             BIL-build-number.txt

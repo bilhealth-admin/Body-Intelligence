@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../community/services/community_owner_operation.dart';
 import '../domain/community_push_preferences.dart';
 import '../domain/community_push_delivery_categories.dart';
 import '../domain/notification_delivery_preferences.dart';
@@ -104,14 +105,31 @@ class CommunityPushService {
     this._client, {
     PushTokenProvider? tokenProvider,
     CommunityPushRegistrationPolicyStore? registrationPolicyStore,
+    bool Function()? availability,
+    Future<String> Function()? timeZoneIdentifier,
   }) : _tokenProvider = tokenProvider ?? const NativePushTokenProvider(),
        _registrationPolicyStore =
            registrationPolicyStore ??
-           const CommunityPushRegistrationPolicyStore();
+           const CommunityPushRegistrationPolicyStore(),
+       _availability = availability ?? (() => isAvailable),
+       _timeZoneIdentifier = timeZoneIdentifier ?? _deviceTimeZoneIdentifier;
 
   final SupabaseClient _client;
   final PushTokenProvider _tokenProvider;
   final CommunityPushRegistrationPolicyStore _registrationPolicyStore;
+  final bool Function() _availability;
+  final Future<String> Function() _timeZoneIdentifier;
+
+  static Future<String> _deviceTimeZoneIdentifier() async =>
+      (await FlutterTimezone.getLocalTimezone()).identifier;
+
+  Future<T> _forOwner<T>(
+    Future<T> Function(CommunityOwnerOperation operation) action,
+  ) => CommunityOwnerOperation.run(
+    client: _client,
+    ownerId: _categoryOwner(),
+    action: action,
+  );
 
   static bool get isAvailable =>
       AppEnvironment.pushConfigured && (Platform.isAndroid || Platform.isIOS);
@@ -120,29 +138,34 @@ class CommunityPushService {
     bool enabled, {
     required NotificationDeliveryPreferences deliveryPreferences,
   }) async {
-    if (!isAvailable) throw StateError('Push is not configured');
-    final user = _client.auth.currentUser;
-    if (user == null) throw const AuthException('Sign-in required');
-    if (!enabled) {
-      await _registrationPolicyStore.setExplicitlyDisabled(user.id, true);
-      try {
-        await _client.rpc('bil_disable_push_tokens');
-      } on Object {
-        await _registrationPolicyStore.setExplicitlyDisabled(user.id, false);
-        rethrow;
+    if (!_availability()) throw StateError('Push is not configured');
+    await _forOwner<void>((operation) async {
+      final owner = operation.ownerId!;
+      if (!enabled) {
+        try {
+          await _registrationPolicyStore.setExplicitlyDisabled(owner, true);
+          operation.check();
+          await _client.rpc('bil_disable_push_tokens');
+        } on Object {
+          await _registrationPolicyStore.setExplicitlyDisabled(owner, false);
+          rethrow;
+        }
+        operation.check();
+        try {
+          await _tokenProvider.deleteToken();
+        } on Object {
+          // Cloud delivery is already disabled and the durable opt-out prevents
+          // a later resume from silently registering a replacement token.
+        }
+        return;
       }
-      try {
-        await _tokenProvider.deleteToken();
-      } on Object {
-        // Cloud delivery is already disabled and the durable opt-out prevents
-        // a later resume from silently registering a replacement token.
-      }
-      return;
-    }
-    await _registrationPolicyStore.setExplicitlyDisabled(user.id, false);
-    final capability = await _tokenProvider.capability();
-    if (!capability.ready) throw StateError('Push provider is not ready');
-    await _requestAndRegisterCurrentToken(deliveryPreferences);
+      await _registrationPolicyStore.setExplicitlyDisabled(owner, false);
+      operation.check();
+      final capability = await _tokenProvider.capability();
+      operation.check();
+      if (!capability.ready) throw StateError('Push provider is not ready');
+      await _requestAndRegisterCurrentToken(deliveryPreferences, operation);
+    });
   }
 
   /// Reconciles a durable provider token after sign-in, token rotation,
@@ -151,22 +174,28 @@ class CommunityPushService {
   Future<void> refreshRegistrationIfEnabled({
     required NotificationDeliveryPreferences deliveryPreferences,
   }) async {
-    if (!isAvailable) return;
-    final user = _client.auth.currentUser;
-    if (user == null) return;
-    if (await _registrationPolicyStore.isExplicitlyDisabled(user.id)) return;
-    final capability = await _tokenProvider.capability();
-    if (!capability.ready || !capability.permissionGranted) return;
-    final token = await _tokenProvider.existingPermissionToken();
-    if (token == null || token.isEmpty) return;
-    await _registerToken(token, deliveryPreferences);
+    if (!_availability() || _client.auth.currentUser == null) return;
+    await _forOwner<void>((operation) async {
+      final disabled = await _registrationPolicyStore.isExplicitlyDisabled(
+        operation.ownerId!,
+      );
+      operation.check();
+      if (disabled) return;
+      final capability = await _tokenProvider.capability();
+      operation.check();
+      if (!capability.ready || !capability.permissionGranted) return;
+      final token = await _tokenProvider.existingPermissionToken();
+      operation.check();
+      if (token == null || token.isEmpty) return;
+      await _registerToken(token, deliveryPreferences, operation);
+    });
   }
 
   Future<CommunityPushDeliveryCategories> syncDeliveryPreferences(
     NotificationDeliveryPreferences deliveryPreferences, {
     required CommunityPushDeliveryCategories expectedState,
-  }) async {
-    final owner = _categoryOwner();
+  }) => _forOwner((operation) async {
+    final owner = operation.ownerId!;
     if (owner != expectedState.ownerId) {
       throw const AuthException('Notification owner changed');
     }
@@ -198,19 +227,20 @@ class CommunityPushService {
       throw StateError('Notification category save was not verified');
     }
     return receipt;
-  }
+  });
 
-  Future<CommunityPushDeliveryCategories> loadDeliveryCategories() async {
-    final owner = _categoryOwner();
-    final response = await _client.rpc(
-      'bil_get_my_push_delivery_categories_v1',
-    );
-    _verifyCategoryOwner(owner);
-    return CommunityPushDeliveryCategories.fromReceipt(
-      response,
-      expectedOwnerId: owner,
-    );
-  }
+  Future<CommunityPushDeliveryCategories> loadDeliveryCategories() =>
+      _forOwner((operation) async {
+        final owner = operation.ownerId!;
+        final response = await _client.rpc(
+          'bil_get_my_push_delivery_categories_v1',
+        );
+        _verifyCategoryOwner(owner);
+        return CommunityPushDeliveryCategories.fromReceipt(
+          response,
+          expectedOwnerId: owner,
+        );
+      });
 
   String _categoryOwner() {
     final owner = _client.auth.currentUser?.id;
@@ -224,36 +254,42 @@ class CommunityPushService {
     }
   }
 
-  Future<void> setSensitivePreviewAllowed(bool allowed) => _client.rpc(
-    'bil_set_sensitive_push_previews',
-    params: {'p_allowed': allowed},
+  Future<void> setSensitivePreviewAllowed(bool allowed) => _forOwner<void>(
+    (_) => _client.rpc(
+      'bil_set_sensitive_push_previews',
+      params: {'p_allowed': allowed},
+    ),
   );
 
   Future<CommunityPushPreferences> loadPreferences() async {
     final user = _client.auth.currentUser;
-    if (user == null || !isAvailable) {
+    if (user == null || !_availability()) {
       return const CommunityPushPreferences(enabled: false, timeZone: 'UTC');
     }
-    final capability = await _tokenProvider.capability();
-    if (!capability.ready) {
-      return const CommunityPushPreferences(
-        enabled: false,
-        timeZone: 'UTC',
-        providerReady: false,
+    return _forOwner((operation) async {
+      final capability = await _tokenProvider.capability();
+      operation.check();
+      if (!capability.ready) {
+        return const CommunityPushPreferences(
+          enabled: false,
+          timeZone: 'UTC',
+          providerReady: false,
+        );
+      }
+      final response = await _client.rpc('bil_get_push_preferences');
+      operation.check();
+      final categories = await loadDeliveryCategories();
+      _verifyCategoryOwner(user.id);
+      final rows = (response as List).cast<Map<String, dynamic>>();
+      final row = rows.isEmpty ? null : rows.first;
+      return CommunityPushPreferences(
+        enabled: row?['enabled'] as bool? ?? false,
+        timeZone: row?['timezone'] as String? ?? 'UTC',
+        sensitivePreviewAllowed:
+            row?['sensitive_preview_allowed'] as bool? ?? false,
+        deliveryCategories: categories,
       );
-    }
-    final response = await _client.rpc('bil_get_push_preferences');
-    final categories = await loadDeliveryCategories();
-    _verifyCategoryOwner(user.id);
-    final rows = (response as List).cast<Map<String, dynamic>>();
-    final row = rows.isEmpty ? null : rows.first;
-    return CommunityPushPreferences(
-      enabled: row?['enabled'] as bool? ?? false,
-      timeZone: row?['timezone'] as String? ?? 'UTC',
-      sensitivePreviewAllowed:
-          row?['sensitive_preview_allowed'] as bool? ?? false,
-      deliveryCategories: categories,
-    );
+    });
   }
 
   Map<String, bool> _categoryParams(
@@ -262,30 +298,36 @@ class CommunityPushService {
 
   Future<void> _requestAndRegisterCurrentToken(
     NotificationDeliveryPreferences deliveryPreferences,
+    CommunityOwnerOperation operation,
   ) async {
     final capability = await _tokenProvider.capability();
+    operation.check();
     if (!capability.ready) throw StateError('Push provider is not ready');
     final token = await _tokenProvider.requestToken();
+    operation.check();
     if (token == null || token.isEmpty) {
       throw StateError('Push permission or native configuration unavailable');
     }
-    await _registerToken(token, deliveryPreferences);
+    await _registerToken(token, deliveryPreferences, operation);
   }
 
   Future<void> _registerToken(
     String token,
     NotificationDeliveryPreferences deliveryPreferences,
+    CommunityOwnerOperation operation,
   ) async {
-    final local = await FlutterTimezone.getLocalTimezone();
+    final identifier = await _timeZoneIdentifier();
+    operation.check();
     await _client.rpc(
       'bil_register_push_token_v2',
       params: {
         'p_token': token,
         'p_platform': Platform.isIOS ? 'apns' : 'fcm',
-        'p_timezone': local.identifier,
+        'p_timezone': identifier,
         'p_sensitive_preview_allowed': false,
         ..._categoryParams(deliveryPreferences),
       },
     );
   }
 }
+

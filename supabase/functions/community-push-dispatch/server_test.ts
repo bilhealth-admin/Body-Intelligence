@@ -29,6 +29,8 @@ function fakeRuntime(options: {
   outboxError?: boolean;
   claimError?: boolean;
   resultError?: boolean;
+  event?: Record<string, unknown>;
+  sensitivePreviewAllowed?: boolean;
 } = {}) {
   const calls: Array<{ name: string; args?: Record<string, unknown> }> = [];
   const payloads: Array<Record<string, unknown>> = [];
@@ -50,7 +52,7 @@ function fakeRuntime(options: {
             order: () => ({
               limit: () =>
                 Promise.resolve({
-                  data: options.outboxError ? null : [event],
+                  data: options.outboxError ? null : [{ ...event, ...options.event }],
                   error: options.outboxError ? { message: "offline" } : null,
                 }),
             }),
@@ -63,7 +65,9 @@ function fakeRuntime(options: {
           (name === "bil_claim_push_deliveries" && options.claimError) ||
           (name === "bil_record_push_delivery_result" && options.resultError);
         return Promise.resolve({
-          data: name === "bil_claim_push_deliveries" ? [token] : null,
+          data: name === "bil_claim_push_deliveries"
+            ? [{ ...token, sensitive_preview_allowed: options.sensitivePreviewAllowed ?? false }]
+            : null,
           error: fail ? { message: "offline" } : null,
         });
       },
@@ -115,6 +119,7 @@ Deno.test("private push previews stay generic and every delivery is recorded onc
     failed: 0,
   });
   assertEquals(fake.payloads.length, 1);
+  assertEquals(fake.payloads[0].title, "BIL");
   assertEquals(fake.payloads[0].body, "You have a new private update.");
   assertEquals(fake.payloads[0].idempotency_key, token.delivery_key);
   assertEquals(fake.calls.map((c) => c.name), [
@@ -162,4 +167,62 @@ Deno.test("outbox, claim, and result failures cannot masquerade as delivery", as
     delivered: 0,
     failed: 1,
   });
+});
+
+
+Deno.test("disabled sensitive previews mask health and identity in both visible fields", async () => {
+  const fake = fakeRuntime({
+    event: {
+      title: "Private sender: glucose result 13.1",
+      body: "Confidential diagnosis and private coach reply",
+    },
+  });
+  assertEquals((await handler(request(), fake.dependencies)).status, 200);
+  assertEquals(fake.payloads[0].title, "BIL");
+  assertEquals(fake.payloads[0].body, "You have a new private update.");
+  const delivered = JSON.stringify(fake.payloads[0]);
+  assertEquals(delivered.includes("glucose"), false);
+  assertEquals(delivered.includes("Confidential"), false);
+  assertEquals(delivered.includes("Private sender"), false);
+});
+
+Deno.test("event locale never grants authority to expose or replace private copy", async () => {
+  for (const locale of ["ar", "ar-EG", "zh-Hant", "unknown", null]) {
+    const fake = fakeRuntime({
+      event: {
+        title: "Sensitive user title",
+        body: "Sensitive user body",
+        locale,
+        recipient_locale: locale,
+        private_preview_title: "Untrusted localized title",
+        private_preview_body: "Untrusted localized body",
+      },
+    });
+    await handler(request(), fake.dependencies);
+    assertEquals(fake.payloads[0].title, "BIL");
+    assertEquals(fake.payloads[0].body, "You have a new private update.");
+  }
+});
+
+Deno.test("explicit sensitive preview consent preserves the intended title and body", async () => {
+  const fake = fakeRuntime({
+    sensitivePreviewAllowed: true,
+    event: { title: "Chosen preview title", body: "Chosen preview body" },
+  });
+  await handler(request(), fake.dependencies);
+  assertEquals(fake.payloads[0].title, "Chosen preview title");
+  assertEquals(fake.payloads[0].body, "Chosen preview body");
+});
+
+Deno.test("known administrative copy preserves its existing visible notification", async () => {
+  const fake = fakeRuntime({
+    event: {
+      copy_key: "admin_notification_gift_v1",
+      title: "BIL account update",
+      body: "Your account gift is available in BIL.",
+    },
+  });
+  await handler(request(), fake.dependencies);
+  assertEquals(fake.payloads[0].title, "BIL account update");
+  assertEquals(fake.payloads[0].body, "Your account gift is available in BIL.");
 });
