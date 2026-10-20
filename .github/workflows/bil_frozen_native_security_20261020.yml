@@ -1,0 +1,159 @@
+name: BIL final5775 Java Security Extended and all Android33 native journeys
+'on':
+  workflow_dispatch: {}
+  push:
+    branches:
+    - audit/final-java-native-5775-20261020
+    paths:
+    - .github/workflows/bil_frozen_native_security_20261020.yml
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+  security-events: write
+jobs:
+  analyze:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: java-kotlin
+          runner: ubuntu-24.04
+          build-mode: manual
+          flutter-build: android
+    steps:
+    - name: Check out accepted source
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        ref: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+    - name: Check out the exact reviewed native controller separately
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.sha }}
+        path: frozen-native-control
+        persist-credentials: false
+    - name: Verify controller helpers without changing application source
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$(git rev-parse HEAD)" = "$BIL_SOURCE_SHA"
+        test "$(git rev-parse 'HEAD^{tree}')" = "$BIL_SOURCE_TREE"
+        test "$(git -C frozen-native-control rev-parse HEAD)" = "$GITHUB_SHA"
+        python3 -m unittest discover -s frozen-native-control/.github/scripts -p test_bil_ios_simulator_spawn_diagnostic.py -v
+        python3 -m unittest discover -s frozen-native-control/.github/scripts -p test_native_source_receipt.py -v
+        python3 -m unittest discover -s frozen-native-control/.github/scripts -p test_bil_cocoapods_derived_proof.py -v
+    - name: Record pristine immutable source before dependency tools
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 frozen-native-control/.github/scripts/native_source_receipt.py --phase checkout \
+          --language '${{ matrix.language }}' --source-head "$BIL_SOURCE_SHA" --source-tree "$BIL_SOURCE_TREE" \
+          --output artifacts/qa/frozen-native-source
+    - name: Install Flutter stable
+      if: matrix.flutter-build != false
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+      with:
+        flutter-version: 3.44.6
+        cache: true
+    - name: Resolve Flutter dependencies
+      if: matrix.flutter-build != false
+      run: flutter pub get
+    - name: Prepare pinned Android policy library repairs
+      if: matrix.flutter-build == 'android'
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 tool/release/prepare_android_policy_plugin_overrides.py
+        dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+    - name: Record actual source and native input blobs before compilation
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 frozen-native-control/.github/scripts/native_source_receipt.py --phase before \
+          --language '${{ matrix.language }}' --source-head "$BIL_SOURCE_SHA" --source-tree "$BIL_SOURCE_TREE" \
+          --output artifacts/qa/frozen-native-source
+    - name: Initialize CodeQL with Security Extended
+      uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        queries: security-extended
+    - name: Build Android plugin sources for CodeQL
+      if: matrix.flutter-build == 'android'
+      run: flutter build apk --debug --no-pub --build-number 33 --dart-define=BIL_ENVIRONMENT=testing --dart-define=BIL_USE_SUPABASE=false
+        --dart-define=SUPABASE_URL= --dart-define=SUPABASE_ANON_KEY= --dart-define=BIL_PAYMENTS_ENABLED=false --dart-define=BIL_ADS_ENABLED=false
+        --dart-define=BIL_COMMUNITY_ENABLED=false --dart-define=BIL_PUSH_ENABLED=false
+    - name: Preserve the isolated Android debug APK for static inspection
+      if: matrix.flutter-build == 'android'
+      shell: bash
+      run: |
+        set -euo pipefail
+        OUT=artifacts/qa/text18/android-api33
+        mkdir -p "$OUT"
+        cp build/app/outputs/flutter-apk/app-debug.apk "$OUT/offline-debug-build33.apk"
+        sha256sum "$OUT/offline-debug-build33.apk" > "$OUT/apk.sha256"
+    - name: Upload CodeQL results
+      uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d
+      with:
+        category: /language:${{ matrix.language }}
+    - name: Verify purchase and restore pipeline with isolated native SDK fakes
+      if: matrix.flutter-build == 'android'
+      run: flutter test --no-pub --reporter expanded --dart-define=BIL_PAYMENTS_ENABLED=true test/features/commerce/store_transaction_queue_test.dart
+        test/features/commerce/store_native_purchase_completion_test.dart test/features/commerce/app_purchase_confirmation_test.dart
+        test/features/commerce/app_subscription_confirmation_test.dart test/features/commerce/verified_store_purchase_startup_event_test.dart
+        test/features/intelligence_center/ai_boost_purchase_service_test.dart
+    - name: Enable and require KVM before Android native integration
+      if: matrix.flutter-build == 'android'
+      shell: bash
+      run: bash .github/scripts/bil_prepare_android_kvm.sh
+    - name: Run Android 33 native integration journeys offline
+      if: matrix.flutter-build == 'android'
+      uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+      with:
+        api-level: 33
+        arch: x86_64
+        target: google_apis
+        profile: pixel_6
+        disable-animations: true
+        emulator-boot-timeout: 1200
+        script: bash .github/scripts/bil_android33_native_integration.sh
+        cores: 2
+        ram-size: 2048M
+        emulator-build: '16428233'
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+    - name: Upload Android API 33 native integration evidence
+      if: always() && matrix.flutter-build == 'android'
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: bil-android33-native-integration-${{ env.BIL_SOURCE_SHA }}
+        path: artifacts/qa/text18/android-api33
+        if-no-files-found: warn
+        retention-days: 14
+    - name: Verify actual source and every native input after all journeys
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ ! -f artifacts/qa/frozen-native-source/native-source-before.json ]]; then
+          echo 'NATIVE_AFTER_PROOF_BLOCKED_BEFORE_PROOF_MISSING'
+          exit 1
+        fi
+        python3 frozen-native-control/.github/scripts/native_source_receipt.py --phase after \
+          --language '${{ matrix.language }}' --source-head "$BIL_SOURCE_SHA" --source-tree "$BIL_SOURCE_TREE" \
+          --output artifacts/qa/frozen-native-source
+      if: always()
+    - name: Preserve exact native source binding for this matrix job
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: bil-frozen-native-source-${{ matrix.language }}-5775d082-${{ github.run_id }}
+        path: artifacts/qa/frozen-native-source
+        if-no-files-found: error
+        retention-days: 14
+    env:
+      BIL_SOURCE_SHA: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+      BIL_SOURCE_TREE: 7ea15defb433ad134ee5066f538d8e790c45f809
+      BIL_NATIVE_TARGET: all
