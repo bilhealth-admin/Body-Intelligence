@@ -21,7 +21,6 @@ env:
   APP_SOURCE_TREE: 7ea15defb433ad134ee5066f538d8e790c45f809
   REVIEWED_HELPER_SHA: f0d82dd4869c1713ca535577a9af1966494b7525
   REVIEWED_HELPER_TREE: 59a280a3309188990acb4b7424fb8701f80e826b
-  READINESS_OUT: ${{ runner.temp }}/ephemeral-config-readiness
 jobs:
   reviewed-ephemeral-config:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/ops/ephemeral-config-readiness-5775-20261020') || (github.event_name == 'workflow_dispatch' && inputs.execute_reviewed_helper)
@@ -44,6 +43,8 @@ jobs:
         with:
           node-version: '24'
       - name: Verify immutable helper bytes and record separate controller and reviewed source
+        env:
+          READINESS_OUT: ${{ runner.temp }}/ephemeral-config-readiness
         shell: bash
         run: |
           set -euo pipefail
@@ -104,6 +105,7 @@ jobs:
           BIL_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.BIL_SUPABASE_SERVICE_ROLE_KEY }}
           BIL_SUPABASE_ANON_KEY: ${{ secrets.BIL_SUPABASE_ANON_KEY }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          READINESS_OUT: ${{ runner.temp }}/ephemeral-config-readiness
         run: python3 tool/release_certification/ephemeral_readiness/lifecycle.py --execute
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
