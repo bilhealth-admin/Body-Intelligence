@@ -83,7 +83,9 @@ Future<void> main() async {
     ..writeln(
       '// dart run tool/localization/generate_apple_ai_privacy_copy.dart',
     )
-    ..writeln('// Machine-translated except authored Arabic consent corrections; other translations are not native-reviewed.')
+    ..writeln(
+      '// Machine-translated except authored Arabic consent corrections; other translations are not native-reviewed.',
+    )
     ..writeln('abstract final class AppleAiPrivacyRuntimeCopy {')
     ..writeln('  static const supported = <String>{');
   for (final tag in <String>['en', ...targets.keys]) {
@@ -193,4 +195,3 @@ String _escape(String value) => value
     .replaceAll("'", r"\'")
     .replaceAll('\r', '')
     .replaceAll('\n', r'\n');
-

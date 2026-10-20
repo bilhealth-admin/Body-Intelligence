@@ -33,117 +33,138 @@ void main() {
       });
     }
 
-    test('master disable cannot disable a later account ABA=$roundTrip', () async {
-      final fixture = await _PushFixture.open();
-      fixture.pauseAt = 'policy-write';
-      final pending = fixture.service.setEnabled(
-        false,
-        deliveryPreferences: const NotificationDeliveryPreferences(),
-      );
-      final assertion = expectLater(pending, throwsA(isA<AuthException>()));
-      await fixture.entered.future;
-      await fixture.changeOwner(roundTrip);
-      fixture.release.complete();
-      await assertion;
-      expect(fixture.requests, isEmpty);
-      expect(fixture.tokens.deleteCalls, 0);
-      expect(fixture.policy.disabled[rewardsOwnerA], isFalse);
-    });
-
-    test('explicit enable cannot register for another visit ABA=$roundTrip', () async {
-      final fixture = await _PushFixture.open();
-      fixture.pauseAt = 'request-token';
-      final pending = fixture.service.setEnabled(
-        true,
-        deliveryPreferences: const NotificationDeliveryPreferences(),
-      );
-      final assertion = expectLater(pending, throwsA(isA<AuthException>()));
-      await fixture.entered.future;
-      await fixture.changeOwner(roundTrip);
-      fixture.release.complete();
-      await assertion;
-      expect(fixture.requests, isEmpty);
-      expect(fixture.tokens.requestCalls, 1);
-    });
-
-    for (final mutation in [false, true]) {
-      test('category receipt cannot acknowledge retired visit mutation=$mutation ABA=$roundTrip', () async {
+    test(
+      'master disable cannot disable a later account ABA=$roundTrip',
+      () async {
         final fixture = await _PushFixture.open();
-        fixture.pauseAt = 'rpc';
-        final pending = mutation
-            ? fixture.service.syncDeliveryPreferences(
-                const NotificationDeliveryPreferences(),
-                expectedState: CommunityPushDeliveryCategories.fromReceipt(
-                  _receipt(),
-                  expectedOwnerId: rewardsOwnerA,
-                ),
-              )
-            : fixture.service.loadDeliveryCategories();
+        fixture.pauseAt = 'policy-write';
+        final pending = fixture.service.setEnabled(
+          false,
+          deliveryPreferences: const NotificationDeliveryPreferences(),
+        );
         final assertion = expectLater(pending, throwsA(isA<AuthException>()));
         await fixture.entered.future;
         await fixture.changeOwner(roundTrip);
         fixture.release.complete();
         await assertion;
-        expect(fixture.requests.single.owner, rewardsOwnerA);
-      });
+        expect(fixture.requests, isEmpty);
+        expect(fixture.tokens.deleteCalls, 0);
+        expect(fixture.policy.disabled[rewardsOwnerA], isFalse);
+      },
+    );
+
+    test(
+      'explicit enable cannot register for another visit ABA=$roundTrip',
+      () async {
+        final fixture = await _PushFixture.open();
+        fixture.pauseAt = 'request-token';
+        final pending = fixture.service.setEnabled(
+          true,
+          deliveryPreferences: const NotificationDeliveryPreferences(),
+        );
+        final assertion = expectLater(pending, throwsA(isA<AuthException>()));
+        await fixture.entered.future;
+        await fixture.changeOwner(roundTrip);
+        fixture.release.complete();
+        await assertion;
+        expect(fixture.requests, isEmpty);
+        expect(fixture.tokens.requestCalls, 1);
+      },
+    );
+
+    for (final mutation in [false, true]) {
+      test(
+        'category receipt cannot acknowledge retired visit mutation=$mutation ABA=$roundTrip',
+        () async {
+          final fixture = await _PushFixture.open();
+          fixture.pauseAt = 'rpc';
+          final pending = mutation
+              ? fixture.service.syncDeliveryPreferences(
+                  const NotificationDeliveryPreferences(),
+                  expectedState: CommunityPushDeliveryCategories.fromReceipt(
+                    _receipt(),
+                    expectedOwnerId: rewardsOwnerA,
+                  ),
+                )
+              : fixture.service.loadDeliveryCategories();
+          final assertion = expectLater(pending, throwsA(isA<AuthException>()));
+          await fixture.entered.future;
+          await fixture.changeOwner(roundTrip);
+          fixture.release.complete();
+          await assertion;
+          expect(fixture.requests.single.owner, rewardsOwnerA);
+        },
+      );
     }
   }
 
-  test('same owner silently refreshes existing token without permission request', () async {
-    final fixture = await _PushFixture.open();
-    await fixture.service.refreshRegistrationIfEnabled(
-      deliveryPreferences: const NotificationDeliveryPreferences(),
-    );
-    expect(fixture.requests.single.method, 'bil_register_push_token_v2');
-    expect(fixture.requests.single.owner, rewardsOwnerA);
-    expect(fixture.requests.single.params, {
-      'p_token': 'synthetic-device-token',
-      'p_platform': 'fcm',
-      'p_timezone': 'Europe/London',
-      'p_sensitive_preview_allowed': false,
-      'p_message_enabled': true,
-      'p_friend_request_enabled': true,
-      'p_friend_accepted_enabled': true,
-    });
-    expect(fixture.tokens.requestCalls, 0);
-  });
+  test(
+    'same owner silently refreshes existing token without permission request',
+    () async {
+      final fixture = await _PushFixture.open();
+      await fixture.service.refreshRegistrationIfEnabled(
+        deliveryPreferences: const NotificationDeliveryPreferences(),
+      );
+      expect(fixture.requests.single.method, 'bil_register_push_token_v2');
+      expect(fixture.requests.single.owner, rewardsOwnerA);
+      expect(fixture.requests.single.params, {
+        'p_token': 'synthetic-device-token',
+        'p_platform': 'fcm',
+        'p_timezone': 'Europe/London',
+        'p_sensitive_preview_allowed': false,
+        'p_message_enabled': true,
+        'p_friend_request_enabled': true,
+        'p_friend_accepted_enabled': true,
+      });
+      expect(fixture.tokens.requestCalls, 0);
+    },
+  );
 
-  test('current owner explicit optout never reads or registers provider token', () async {
-    final fixture = await _PushFixture.open();
-    fixture.policy.disabled[rewardsOwnerA] = true;
-    await fixture.service.refreshRegistrationIfEnabled(
-      deliveryPreferences: const NotificationDeliveryPreferences(),
-    );
-    expect(fixture.requests, isEmpty);
-    expect(fixture.tokens.capabilityCalls, 0);
-    expect(fixture.tokens.requestCalls, 0);
-  });
+  test(
+    'current owner explicit optout never reads or registers provider token',
+    () async {
+      final fixture = await _PushFixture.open();
+      fixture.policy.disabled[rewardsOwnerA] = true;
+      await fixture.service.refreshRegistrationIfEnabled(
+        deliveryPreferences: const NotificationDeliveryPreferences(),
+      );
+      expect(fixture.requests, isEmpty);
+      expect(fixture.tokens.capabilityCalls, 0);
+      expect(fixture.tokens.requestCalls, 0);
+    },
+  );
 
-  test('same owner disable persists optout and disables only its token', () async {
-    final fixture = await _PushFixture.open();
-    await fixture.service.setEnabled(
-      false,
-      deliveryPreferences: const NotificationDeliveryPreferences(),
-    );
-    expect(fixture.requests.single.method, 'bil_disable_push_tokens');
-    expect(fixture.requests.single.owner, rewardsOwnerA);
-    expect(fixture.policy.disabled[rewardsOwnerA], isTrue);
-    expect(fixture.tokens.deleteCalls, 1);
-  });
-
-  test('server disable failure rolls back local intent without deleting token', () async {
-    final fixture = await _PushFixture.open();
-    fixture.failure = true;
-    await expectLater(
-      fixture.service.setEnabled(
+  test(
+    'same owner disable persists optout and disables only its token',
+    () async {
+      final fixture = await _PushFixture.open();
+      await fixture.service.setEnabled(
         false,
         deliveryPreferences: const NotificationDeliveryPreferences(),
-      ),
-      throwsA(isA<PostgrestException>()),
-    );
-    expect(fixture.policy.disabled[rewardsOwnerA], isFalse);
-    expect(fixture.tokens.deleteCalls, 0);
-  });
+      );
+      expect(fixture.requests.single.method, 'bil_disable_push_tokens');
+      expect(fixture.requests.single.owner, rewardsOwnerA);
+      expect(fixture.policy.disabled[rewardsOwnerA], isTrue);
+      expect(fixture.tokens.deleteCalls, 1);
+    },
+  );
+
+  test(
+    'server disable failure rolls back local intent without deleting token',
+    () async {
+      final fixture = await _PushFixture.open();
+      fixture.failure = true;
+      await expectLater(
+        fixture.service.setEnabled(
+          false,
+          deliveryPreferences: const NotificationDeliveryPreferences(),
+        ),
+        throwsA(isA<PostgrestException>()),
+      );
+      expect(fixture.policy.disabled[rewardsOwnerA], isFalse);
+      expect(fixture.tokens.deleteCalls, 0);
+    },
+  );
 }
 
 Map<String, Object?> _receipt() => {
@@ -173,7 +194,8 @@ class _PushFixture {
       return 'Europe/London';
     },
   );
-  final requests = <({String method, String owner, Map<String, dynamic> params})>[];
+  final requests =
+      <({String method, String owner, Map<String, dynamic> params})>[];
   final entered = Completer<void>();
   final release = Completer<void>();
   String? pauseAt;
@@ -195,9 +217,13 @@ class _PushFixture {
   }
 
   Future<void> changeOwner(bool roundTrip) async {
-    await client.auth.recoverSession(jsonEncode(RewardsRpcFixture.session(rewardsOwnerB)));
+    await client.auth.recoverSession(
+      jsonEncode(RewardsRpcFixture.session(rewardsOwnerB)),
+    );
     if (roundTrip) {
-      await client.auth.recoverSession(jsonEncode(RewardsRpcFixture.session(rewardsOwnerA)));
+      await client.auth.recoverSession(
+        jsonEncode(RewardsRpcFixture.session(rewardsOwnerA)),
+      );
     }
     await Future<void>.delayed(Duration.zero);
   }
@@ -211,7 +237,13 @@ class _PushFixture {
 
   Future<http.Response> respond(http.Request request) async {
     final token = request.headers['authorization']!.split(' ').last;
-    final claims = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(token.split('.')[1])))) as Map;
+    final claims =
+        jsonDecode(
+              utf8.decode(
+                base64Url.decode(base64Url.normalize(token.split('.')[1])),
+              ),
+            )
+            as Map;
     final decoded = jsonDecode(request.body);
     requests.add((
       method: request.url.pathSegments.last,

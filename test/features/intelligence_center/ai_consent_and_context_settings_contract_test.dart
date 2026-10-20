@@ -109,34 +109,47 @@ void main() {
     expect(germanContextTitle, isNot(contextTitle));
   });
 
-  test('Arabic AI disclosure declines data transfer while retaining local features', () {
-    // Check the public resolver used by the actual privacy surfaces, including
-    // regional Arabic tags. A translation must not say to refuse local features.
-    const disclosures = <String>[
-      'If you agree, BIL sends your question and only the context you selected—such as weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Raw microphone audio is not sent to BIL or Google Gemini. You can decline and keep using BIL’s local features, and withdraw consent later in AI Coach settings.',
-      'AI Coach is optional. With consent, selected personal context is sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. You may decline and keep local features.',
-      'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.',
-    ];
-    for (final locale in ['ar', 'ar-EG', 'ar_SA']) {
-      for (final disclosure in disclosures) {
-        final visible = RuntimeCopy.resolve(disclosure, locale);
-        expect(visible, isNotNull, reason: 'Every Arabic consent surface resolves.');
-        expect(visible, contains('Google Gemini'));
-        expect(visible, contains('تديرها Google'));
-        expect(
-          visible,
-          contains('يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية'),
-          reason: 'Refusal applies to data transmission; local features stay available.',
-        );
-        expect(visible, isNot(contains('رفض الميزات المحلية')));
-        expect(visible, isNot(contains('رفض ميزات BIL المحلية')));
+  test(
+    'Arabic AI disclosure declines data transfer while retaining local features',
+    () {
+      // Check the public resolver used by the actual privacy surfaces, including
+      // regional Arabic tags. A translation must not say to refuse local features.
+      const disclosures = <String>[
+        'If you agree, BIL sends your question and only the context you selected—such as weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Raw microphone audio is not sent to BIL or Google Gemini. You can decline and keep using BIL’s local features, and withdraw consent later in AI Coach settings.',
+        'AI Coach is optional. With consent, selected personal context is sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. You may decline and keep local features.',
+        'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.',
+      ];
+      for (final locale in ['ar', 'ar-EG', 'ar_SA']) {
+        for (final disclosure in disclosures) {
+          final visible = RuntimeCopy.resolve(disclosure, locale);
+          expect(
+            visible,
+            isNotNull,
+            reason: 'Every Arabic consent surface resolves.',
+          );
+          expect(visible, contains('Google Gemini'));
+          expect(visible, contains('تديرها Google'));
+          expect(
+            visible,
+            contains(
+              'يمكنك رفض إرسال البيانات ومواصلة استخدام ميزات BIL المحلية',
+            ),
+            reason:
+                'Refusal applies to data transmission; local features stay available.',
+          );
+          expect(visible, isNot(contains('رفض الميزات المحلية')));
+          expect(visible, isNot(contains('رفض ميزات BIL المحلية')));
+        }
+        for (final disclosure in [disclosures.first, disclosures.last]) {
+          final visible = RuntimeCopy.resolve(disclosure, locale)!;
+          expect(visible, contains('12 دورًا من المحادثة'));
+          expect(
+            visible,
+            contains('سحب هذه الموافقة لاحقًا من إعدادات AI Coach'),
+          );
+          expect(visible, contains('صوت الميكروفون الخام'));
+        }
       }
-      for (final disclosure in [disclosures.first, disclosures.last]) {
-        final visible = RuntimeCopy.resolve(disclosure, locale)!;
-        expect(visible, contains('12 دورًا من المحادثة'));
-        expect(visible, contains('سحب هذه الموافقة لاحقًا من إعدادات AI Coach'));
-        expect(visible, contains('صوت الميكروفون الخام'));
-      }
-    }
-  });
+    },
+  );
 }
