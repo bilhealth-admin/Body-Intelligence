@@ -3,7 +3,7 @@ name: BIL guarded association recovery 20261020
 on:
   push:
     branches: [ops/site-association-recovery-20261020]
-    paths: [.github/workflows/bil_site_association_recovery_20261020.yml]
+    paths: [.github/workflows/bil_site_association_recovery_20261020.yml, tool/release_ops/verify_official_site_inventory.mjs, tool/release_ops/site_recovery_20261020.py]
   workflow_dispatch:
     inputs:
       execute_recovery:
@@ -113,7 +113,7 @@ jobs:
           WRANGLER_SEND_METRICS: 'false'
         run: |
           set -euo pipefail
-          node "$RUNNER_TEMP/bil-site-toolchain/node_modules/wrangler/bin/wrangler.js" deploy --config wrangler.site.jsonc --no-bundle --keep-vars --dry-run --outdir ../recovery-evidence/wrangler-dry-run > ../recovery-evidence/wrangler-dry-run.log 2>&1
+          node "$RUNNER_TEMP/bil-site-toolchain/node_modules/wrangler/bin/wrangler.js" deploy --config "$GITHUB_WORKSPACE/recovery-evidence/deploy-project/wrangler.recovery.json" --no-bundle --keep-vars --dry-run --outdir "$GITHUB_WORKSPACE/recovery-evidence/wrangler-dry-run" > ../recovery-evidence/wrangler-dry-run.log 2>&1
           node ../controller/tool/release_ops/verify_official_site_inventory.mjs . ../recovery-evidence "$RUNNER_TEMP/bil-site-toolchain"
       - name: Upload immutable prechange backup before deployment is possible
         id: backup
@@ -142,5 +142,6 @@ jobs:
           path: recovery-evidence/
           if-no-files-found: error
           retention-days: 30
+
 
 

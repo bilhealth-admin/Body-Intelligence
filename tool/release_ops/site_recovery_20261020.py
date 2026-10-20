@@ -277,6 +277,29 @@ def config_behavior(root):
     return rows
 
 
+
+def deployment_project(root, output, create=False):
+    # Keep Wrangler's no-bundle discovery away from the release-tools directory:
+    # that directory contains unrelated SQL data modules.
+    original = json.loads((root / "wrangler.site.jsonc").read_text())
+    config = {**original, "main": "./worker/bilhealth_site_worker.mjs",
+              "assets": {**original["assets"], "directory": str(root / "public_site")}}
+    project = output / "deploy-project"
+    worker = project / "worker/bilhealth_site_worker.mjs"
+    config_path = project / "wrangler.recovery.json"
+    body = (root / "tool/release/bilhealth_site_worker.mjs").read_bytes()
+    if create:
+        worker.parent.mkdir(parents=True, exist_ok=True)
+        worker.write_bytes(body)
+        json_write(config_path, config)
+    require(worker.is_file() and worker.read_bytes() == body, "ISOLATED_ENTRYPOINT_SOURCE_MISMATCH")
+    require(config_path.is_file() and json.loads(config_path.read_text()) == config, "ISOLATED_DEPLOY_CONFIGURATION_CHANGED")
+    require(sorted(path.name for path in worker.parent.iterdir()) == ["bilhealth_site_worker.mjs"], "UNREVIEWED_ADDITIONAL_WORKER_MODULE")
+    return {"worker_sha256": sha(body), "effective_config_sha256": sha(config_path.read_bytes()),
+            "module_inventory": ["worker/bilhealth_site_worker.mjs"],
+            "path_only_configuration_changes": ["main", "assets.directory"]}
+
+
 def prepare(root, output):
     require(command(["git", "rev-parse", "HEAD"], root).decode().strip() == SOURCE, "CANDIDATE_SOURCE_MISMATCH")
     require(not command(["git", "status", "--porcelain=v1", "--untracked-files=no"], root).strip(), "CANDIDATE_TRACKED_FILES_DIRTY")
@@ -311,6 +334,7 @@ def prepare(root, output):
     report["remote_asset_configuration_status"] = "UNKNOWN_NOT_PROVEN_EQUIVALENT_WHEN_API_ASSETS_IS_NULL"
     report["apply_review_scope"] = "execute_recovery=true reasserts the visible frozen6bf asset/SPA configuration after known behavior matches; it does not certify unknown prior asset metadata equivalence"
     report["asset_manifest"] = asset_manifest(root)
+    report["deployment_project"] = deployment_project(root, output, create=True)
     json_write(output / "proposed-static-asset-manifest.json", report["asset_manifest"])
     report["public_comparison"] = compare_public(root, report["asset_manifest"], output)
     report["header_and_redirect_config_files"] = {name: sha((root / "public_site" / name).read_bytes()) for name in ("_headers", "_redirects")}
@@ -386,6 +410,7 @@ def deploy(root, output):
     official = json.loads((output / "official-wrangler-inventory.json").read_text())
     require(official.get("status") == "PASS" and official.get("source_sha") == SOURCE and official.get("wrangler_version") == "4.125.0" and official.get("deploy_helpers_version") == "0.8.0", "OFFICIAL_WRANGLER_UPLOAD_INVENTORY_NOT_VERIFIED")
     require(asset_manifest(root) == preflight["asset_manifest"], "ASSETS_CHANGED_AFTER_PREFLIGHT")
+    require(deployment_project(root, output) == preflight["deployment_project"], "ISOLATED_DEPLOY_PROJECT_CHANGED")
     require(command(["git", "rev-parse", "HEAD"], root).decode().strip() == SOURCE and not command(["git", "status", "--porcelain=v1", "--untracked-files=no"], root).strip(), "SOURCE_CHANGED_BEFORE_DEPLOY")
     backup = backup_bound()
     # All comparisons are repeated immediately before the only mutation.
@@ -400,7 +425,7 @@ def deploy(root, output):
     with log.open("wb") as handle:
         wrangler = Path(os.environ["RUNNER_TEMP"]) / "bil-site-toolchain/node_modules/wrangler/bin/wrangler.js"
         require(wrangler.is_file(), "PINNED_WRANGLER_BINARY_MISSING")
-        completed = subprocess.run(["node", str(wrangler), "deploy", "--config", "wrangler.site.jsonc", "--no-bundle", "--keep-vars"], cwd=root, stdout=handle, stderr=subprocess.STDOUT)
+        completed = subprocess.run(["node", str(wrangler), "deploy", "--config", str(output / "deploy-project/wrangler.recovery.json"), "--no-bundle", "--keep-vars"], cwd=output / "deploy-project", stdout=handle, stderr=subprocess.STDOUT)
     require(completed.returncode == 0, "WRANGLER_DEPLOY_FAILED_REVIEW_SNAPSHOT")
     postcheck(root, preflight["asset_manifest"], preflight["before"], output)
     print(json.dumps({"status": "SITE_ASSOCIATION_RECOVERY_POSTCHECK_PASS", "store_submission_approved": False}))
@@ -418,3 +443,4 @@ if __name__ == "__main__":
         json_write(args.output / "failure.json", {"mode": args.mode, "error_type": type(failure).__name__,
             "safe_guard_code": str(failure) if isinstance(failure, ValueError) and str(failure).isupper() else "UNEXPECTED_FAILURE_SEE_PARTIAL_EVIDENCE"})
         raise SystemExit(1)
+
