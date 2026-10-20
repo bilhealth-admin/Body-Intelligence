@@ -1,0 +1,153 @@
+name: BIL remaining static and deployed boundary evidence
+run-name: BIL remaining independent evidence for frozen 6bf23994
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/store-remaining-gates-20261020]
+    paths: [.github/workflows/bil_store_remaining_gates_20261020.yml]
+permissions:
+  contents: read
+env:
+  SOURCE_SHA: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+  SOURCE_BRANCH: integration/bil-qa-media-policy-20261011
+  FLUTTER_VERSION: 3.44.6
+jobs:
+  static-dependency-release-audits:
+    name: Existing full static, dependency, repository and release audit gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Run the existing unchanged static gate on the exact application source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf 'Controller=%s\nAppSource=%s\n' "$GITHUB_SHA" "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          GITHUB_SHA="$SOURCE_SHA" bash tool/release_certification/run_static_gate.sh 1
+      - name: Preserve every actual audit and failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-remaining-static-6bf23994-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-cert-static-1/
+          if-no-files-found: error
+          retention-days: 30
+
+  live-workout-stream:
+    name: Existing real public workout range and stream test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Require the real stream opt-in and preserve the existing assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/bil-live-workout"
+          flutter pub get --enforce-lockfile
+          flutter test --no-pub --dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true \
+            test/features/wellness/wellness_video_stream_live_test.dart \
+            2>&1 | tee "$RUNNER_TEMP/bil-live-workout/live-workout-range.log"
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-live-workout-6bf23994-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-live-workout/
+          if-no-files-found: error
+          retention-days: 30
+
+  public-release-files:
+    name: Real deployed association, advertising and workout manifest responses
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Collect and parse the existing release-gate public files
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-public-release-files"
+          mkdir -p "$OUT"
+          curl --fail --silent --show-error --location --max-time 45 https://www.bilhealth.com/.well-known/apple-app-site-association --output "$OUT/apple-app-site-association.json"
+          curl --fail --silent --show-error --location --max-time 45 https://www.bilhealth.com/.well-known/assetlinks.json --output "$OUT/assetlinks.json"
+          curl --fail --silent --show-error --location --max-time 45 https://www.bilhealth.com/app-ads.txt --output "$OUT/app-ads.txt"
+          curl --fail --silent --show-error --location --max-time 45 https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json --output "$OUT/workout-manifest.json"
+          node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$OUT/apple-app-site-association.json"
+          node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$OUT/assetlinks.json"
+          node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$OUT/workout-manifest.json"
+          test -s "$OUT/app-ads.txt"
+          printf 'PUBLIC_FILES_TRANSPORT_AND_PARSE=PASS\nSCOPE=Existing gate; identity/value reconciliation remains required\n' > "$OUT/status.txt"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-public-release-files-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-public-release-files/
+          if-no-files-found: error
+          retention-days: 30
+
+  deployed-admin-boundary:
+    name: Deployed independent admin auth and exact CORS boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 6bf23994712ffbdcb2d8179defec5852e5d08ae1
+          persist-credentials: false
+      - name: Run the existing public unauthenticated boundary checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/bil-admin-boundary"
+          node tool/release_certification/admin_web_boundary_smoke.mjs \
+            | tee "$RUNNER_TEMP/bil-admin-boundary/result.json"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-admin-boundary-6bf23994-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-admin-boundary/
+          if-no-files-found: error
+          retention-days: 30
+
+  dispatch-dedicated-healthkit:
+    name: Start the existing dedicated HealthKit permission-sheet audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Require branch identity then dispatch without signed release inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OBSERVED="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$SOURCE_BRANCH" --jq .object.sha)"
+          test "$OBSERVED" = "$SOURCE_SHA"
+          EXISTING="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/bil_healthkit_cloud_simulator.yml/runs?branch=$SOURCE_BRANCH&per_page=30" \
+            | jq -r --arg source "$SOURCE_SHA" '[.workflow_runs[] | select(.head_sha == $source and (.status != "completed" or .conclusion == "success"))] | first | .html_url // empty')"
+          if [[ -n "$EXISTING" ]]; then
+            printf 'Existing exact-source HealthKit evidence or active run: %s\nNo duplicate dispatch.\n' "$EXISTING" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh workflow run bil_healthkit_cloud_simulator.yml \
+            --repo "$GITHUB_REPOSITORY" --ref "$SOURCE_BRANCH"
+          echo 'HEALTHKIT_DISPATCH_ACCEPTED_NOT_TEST_PASS; no release signing or store upload requested.' >> "$GITHUB_STEP_SUMMARY"
