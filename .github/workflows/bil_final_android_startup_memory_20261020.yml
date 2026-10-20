@@ -49,7 +49,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: ReactiveCircus/android-emulator-runner
-          ref: 4c44018e59b437e86cdfc41da381398f93ed8808
+          ref: a421e43855164a8197daf9d8d40fe71c6996bb0d
           path: emulator-runner
           persist-credentials: false
       - name: Checkout immutable application5775

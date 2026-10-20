@@ -60,6 +60,14 @@ class PreInputControls(unittest.TestCase):
             with self.assertRaises(TimeoutError): guard.execute(Path("/sdk/adb"),5554,["shell"],12)
             run.assert_not_called()
 
+    def test_annotated_tag_object_cannot_substitute_for_resolved_pristine_commit(self):
+        self.assertEqual(patcher.UPSTREAM_COMMIT, "a421e43855164a8197daf9d8d40fe71c6996bb0d")
+        self.assertEqual(patcher.UPSTREAM_ACTION_TAG_OBJECT, "4c44018e59b437e86cdfc41da381398f93ed8808")
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(patcher, "git", return_value=patcher.UPSTREAM_ACTION_TAG_OBJECT):
+                with self.assertRaisesRegex(ValueError, "CHECKOUT_NOT_PRISTINE_PIN"):
+                    patcher.patch(Path(directory), Path(directory)/"receipt.json")
+
     def test_patch_is_exact_addition_and_rejects_any_other_upstream_bytes(self):
         original = (Path(__file__).parent/"android_pre_input_fixtures/emulator-manager.js").read_bytes()
         changed = patcher.patched_bytes(original)
