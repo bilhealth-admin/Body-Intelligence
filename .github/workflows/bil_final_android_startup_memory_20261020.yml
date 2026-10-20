@@ -1,0 +1,107 @@
+name: BIL frozen5da Android startup with controlled guest memory
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/final-android-startup-memory-20261020]
+    paths:
+      - .github/workflows/bil_final_android_startup_memory_20261020.yml
+      - tool/release_ops/android_startup_focus_controller.py
+      - tool/release_ops/test_android_startup_focus_controller.py
+      - tool/release_ops/android_startup_focus_fixtures/**
+      - tool/release_ops/run_android_startup_memory_controller.sh
+permissions:
+  contents: read
+concurrency:
+  group: bil-frozen5da-startup-memory-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  APP_SOURCE: 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996
+jobs:
+  startup-memory:
+    name: Frozen5da API${{ matrix.api }} guest4096MiB strict startup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [34, 35]
+    env:
+      BIL_FROZEN_APP_ROOT: ${{ github.workspace }}/app
+      BIL_ANDROID_EMULATOR_API: ${{ matrix.api }}
+      BIL_CONTROLLER_SOURCE: ${{ github.sha }}
+    steps:
+      - name: Checkout the controller separately
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+      - name: Checkout immutable application5da
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996
+          path: app
+          persist-credentials: false
+      - name: Verify source and negative classification controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C app rev-parse HEAD)" = "$APP_SOURCE"
+          python3 controller/tool/release_ops/test_android_startup_focus_controller.py
+          bash -n controller/tool/release_ops/run_android_startup_memory_controller.sh
+      - name: Install the same Flutter3.44.6
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve and apply only the frozen audited dependency repairs
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+          git diff --exit-code -- android lib pubspec.yaml pubspec.lock
+      - name: Build the unchanged offline-config debug artifact
+        working-directory: app
+        shell: bash
+        run: >-
+          flutter build apk --debug --no-pub --build-number 33
+          --dart-define=BIL_ENVIRONMENT=testing
+          --dart-define=BIL_USE_SUPABASE=false
+          --dart-define=SUPABASE_URL=
+          --dart-define=SUPABASE_ANON_KEY=
+          --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false
+          --dart-define=BIL_PAYMENTS_ENABLED=false
+          --dart-define=BIL_ADS_ENABLED=false
+          --dart-define=BIL_COMMUNITY_ENABLED=false
+          --dart-define=BIL_PUSH_ENABLED=false
+      - name: Enable the same KVM boundary
+        working-directory: app
+        shell: bash
+        run: bash .github/scripts/bil_prepare_android_kvm.sh
+      - name: One clean boot with controlled guest memory
+        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
+        with:
+          working-directory: app
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          cores: 2
+          ram-size: 4096M
+          emulator-build: '16428233'
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          emulator-boot-timeout: 900
+          pre-emulator-launch-script: bash "$GITHUB_WORKSPACE/controller/tool/release_ops/run_android_startup_memory_controller.sh" prelaunch
+          script: bash "$GITHUB_WORKSPACE/controller/tool/release_ops/run_android_startup_memory_controller.sh" run
+      - name: Upload every result including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen5da-api${{ matrix.api }}-memory4096-${{ github.run_id }}
+          path: app/artifacts/release/android_emulator_smoke/api-${{ matrix.api }}
+          if-no-files-found: warn
+          retention-days: 30
