@@ -7,14 +7,18 @@ import os
 from pathlib import Path
 import re
 import subprocess
+from bil_ios_simulator_spawn_diagnostic import sanitize
 
 INPUT_ROOTS = ("android", "ios", "lib", "integration_test", "test_driver", "test", ".github/scripts",
                "pubspec.yaml", "pubspec.lock", ".github/workflows/bil_codeql_security_extended.yml")
 CONTROLLER_PATH = ".github/workflows/bil_frozen_native_security_20261020.yml"
+PUBLIC_PATCH_PATHS = {"ios/Runner.xcodeproj/project.pbxproj", "ios/Podfile", "ios/Runner/Info.plist",
+                      "ios/Flutter/Debug.xcconfig", "ios/Flutter/Profile.xcconfig", "ios/Flutter/Release.xcconfig",
+                      "ios/Flutter/AppFrameworkInfo.plist", "ios/Runner/Runner.entitlements", "ios/Runner/RunnerDebug.entitlements"}
 
 
 def collect(args, *, run=subprocess.run):
-    if args.phase not in ("before", "after") or args.language not in ("java-kotlin", "swift"):
+    if args.phase not in ("checkout", "before", "after") or args.language not in ("java-kotlin", "swift"):
         raise ValueError("Only native before/after receipt phases are permitted")
     if not re.fullmatch(r"[0-9a-f]{40}", args.source_head) or not re.fullmatch(r"[0-9a-f]{40}", args.source_tree):
         raise ValueError("Frozen source HEAD and tree are required")
@@ -31,9 +35,44 @@ def collect(args, *, run=subprocess.run):
 
     if git("rev-parse", "HEAD").decode().strip() != args.source_head or git("rev-parse", "HEAD^{tree}").decode().strip() != args.source_tree:
         raise ValueError("Actual checked-out source HEAD/tree mismatch")
+    output = Path(args.output)
+    output.mkdir(parents=True, exist_ok=True)
     # Native repairs may create ignored build overlays. Tracked app, native,
     # dependency, driver and test bytes must still match the frozen commit.
-    git("diff", "--exit-code", "HEAD", "--", *INPUT_ROOTS)
+    diff = run(["git", "diff", "--exit-code", "HEAD", "--", *INPUT_ROOTS], capture_output=True, check=False)
+    if diff.returncode:
+        if diff.returncode != 1:
+            raise ValueError("SOURCE_DIFF_COMMAND_FAILED")
+        changed = []
+        for raw_path in git("diff", "--name-only", "-z", "HEAD", "--", *INPUT_ROOTS).split(b"\0"):
+            if not raw_path:
+                continue
+            name = raw_path.decode("utf-8")
+            path = Path(name)
+            if path.is_absolute() or ".." in path.parts or not any(name == root or name.startswith(root + "/") for root in INPUT_ROOTS):
+                raise ValueError("UNEXPECTED_TRACKED_DIFF_PATH")
+            original = git("show", "HEAD:" + name)
+            row = {"path": name, "committed_sha256": hashlib.sha256(original).hexdigest(),
+                   "working_sha256": hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() and not path.is_symlink() else None,
+                   "source_phase": args.phase}
+            if name in PUBLIC_PATCH_PATHS:
+                patch = git("diff", "--no-ext-diff", "--no-color", "--unified=3", "HEAD", "--", name)
+                if len(patch) <= 128 * 1024:
+                    member = "tracked-change-" + hashlib.sha256(name.encode()).hexdigest()[:12] + ".diff"
+                    (output / member).write_text(sanitize(patch))
+                    row["redacted_public_native_patch_member"] = member
+                else:
+                    row["patch_status"] = "TOO_LARGE_NOT_PUBLISHED"
+            changed.append(row)
+        failure = {"schema": "bil.qa.frozen-native-source-diff.v1", "phase": args.phase,
+                   "application_source_sha": args.source_head, "application_source_tree": args.source_tree,
+                   "controller_sha": control, "run_id": run_id, "workflow_path": CONTROLLER_PATH,
+                   "language": args.language, "tracked_native_inputs_clean": False,
+                   "status": "BLOCKED_UNREVIEWED_TRACKED_NATIVE_OR_TEST_CHANGES", "changed_tracked_inputs": changed,
+                   "claim": "Diagnostic metadata only; no changed input or generated project repair is accepted"}
+        (output / ("native-source-" + args.phase + "-dirty.json")).write_text(json.dumps(failure, indent=2) + "\n")
+        print(json.dumps({"status": failure["status"], "changed_paths": [row["path"] for row in changed]}))
+        raise ValueError("FROZEN_NATIVE_TRACKED_INPUTS_CHANGED")
     inputs = []
     for entry in git("ls-tree", "-r", "-z", "HEAD", "--", *INPUT_ROOTS).split(b"\0"):
         if not entry:
@@ -57,8 +96,6 @@ def collect(args, *, run=subprocess.run):
               "input_roots": list(INPUT_ROOTS), "inputs": inputs,
               "working_inputs_fingerprint": hashlib.sha256(json.dumps(inputs, sort_keys=True).encode()).hexdigest(),
               "claim": "Actual checkout and native/test input bytes only; GitHub job/step results determine test success"}
-    output = Path(args.output)
-    output.mkdir(parents=True, exist_ok=True)
     if args.phase == "after":
         before = json.loads((output / "native-source-before.json").read_text())
         for field in ("repository", "application_source_sha", "application_source_tree", "controller_sha", "run_id",

@@ -36,6 +36,12 @@ class NativeSourceReceiptTests(unittest.TestCase):
                 raw = (args.source_head + "\n").encode()
             elif argv[1:3] == ["rev-parse", "HEAD^{tree}"]:
                 raw = (("d"*40 if wrong_tree else args.source_tree) + "\n").encode()
+            elif argv[1] == "diff" and "--name-only" in argv:
+                raw = b"ios/Runner/AppDelegate.swift\0"
+            elif argv[1] == "diff" and "--no-ext-diff" in argv:
+                raw = b"diff --git a/ios/Runner.xcodeproj/project.pbxproj b/ios/Runner.xcodeproj/project.pbxproj\n-old\n+new\n"
+            elif argv[1] == "show":
+                raw = b"// actual fixture\n"
             elif argv[1] == "diff":
                 return subprocess.CompletedProcess(argv, int(dirty), b"", b"")
             elif argv[1] == "ls-tree":
@@ -77,6 +83,21 @@ class NativeSourceReceiptTests(unittest.TestCase):
             Path("lib/main.dart").symlink_to("../ios/Runner/AppDelegate.swift")
             with self.assertRaisesRegex(ValueError, "symlinked"):
                 collect(args, run=self.runner(args))
+
+    def test_initial_checkout_receipt_and_dirty_tooling_metadata_never_waive_change(self):
+        with self.fixture() as args:
+            args.phase = "checkout"
+            initial = collect(args, run=self.runner(args))
+            self.assertEqual(initial["phase"], "checkout")
+            args.phase = "before"
+            with self.assertRaisesRegex(ValueError, "TRACKED_INPUTS_CHANGED"):
+                collect(args, run=self.runner(args, dirty=True))
+            import json
+            dirty = json.loads((Path(args.output) / "native-source-before-dirty.json").read_text())
+            self.assertFalse(dirty["tracked_native_inputs_clean"])
+            self.assertEqual(dirty["changed_tracked_inputs"][0]["path"], "ios/Runner/AppDelegate.swift")
+            self.assertEqual(len(dirty["changed_tracked_inputs"][0]["working_sha256"]), 64)
+            self.assertFalse((Path(args.output) / "native-source-before.json").exists())
 
 
 if __name__ == "__main__":

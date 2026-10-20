@@ -3,7 +3,7 @@ name: BIL frozen exact source Java Swift and all native journeys
   workflow_dispatch: {}
   push:
     branches:
-    - audit/frozen-native-security-20261020
+    - audit/frozen-swift-diagnosis-20261020
     paths:
     - .github/workflows/bil_frozen_native_security_20261020.yml
 permissions:
@@ -20,10 +20,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - language: java-kotlin
-          runner: ubuntu-24.04
-          build-mode: manual
-          flutter-build: android
         - language: swift
           runner: macos-26-intel
           build-mode: manual
@@ -49,6 +45,13 @@ jobs:
         test "$(git -C frozen-native-control rev-parse HEAD)" = "$GITHUB_SHA"
         python3 -m unittest discover -s frozen-native-control/.github/scripts -p test_bil_ios_simulator_spawn_diagnostic.py -v
         python3 -m unittest discover -s frozen-native-control/.github/scripts -p test_native_source_receipt.py -v
+    - name: Record exact checked-out source before dependency tools
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 frozen-native-control/.github/scripts/native_source_receipt.py --phase checkout \
+          --language '${{ matrix.language }}' --source-head "$BIL_SOURCE_SHA" --source-tree "$BIL_SOURCE_TREE" \
+          --output artifacts/qa/frozen-native-source
     - name: Install Flutter stable
       if: matrix.flutter-build != false
       uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
