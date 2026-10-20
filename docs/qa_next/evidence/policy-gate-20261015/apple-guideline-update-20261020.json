@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "app_source_sha": "5da21a5660b26e59e9ead7b0927d4ed7cf2c3996",
+  "policy_read_date": "2026-10-20",
+  "scope": "Documentation-only limited policy delta; not application, runtime, creative asset, saved Console or store acceptance certification",
+  "official_urls": [
+    "https://developer.apple.com/app-store/review/guidelines/",
+    "https://developer.apple.com/app-store/asset-best-practices/"
+  ],
+  "changed_existing_ids": [
+    "A003",
+    "A016"
+  ],
+  "added_ids": [
+    "A100",
+    "A101"
+  ],
+  "all_four_statuses": "BLOCKED",
+  "all_four_risks": "P0",
+  "other_rows_unchanged": 136,
+  "root_schema_unchanged": true,
+  "historical_source_base_preserved": "769169f2dd00f7e3dbcbce763285d2b81c2e9d60",
+  "policy_inventory_sha256": "9f7cf8e0d1ca6500d35148f070bb08fe3b81ae6fa3fd1d4f1761d769120f31df",
+  "validation": {
+    "frozen_validator_accepts_inventory": true,
+    "frozen_existing_validator_unit_tests_passed": 9,
+    "delta_invariants": "PASS",
+    "release_decision": "BLOCKED"
+  },
+  "state_counts": {
+    "BLOCKED": 98,
+    "NOT APPLICABLE": 39,
+    "PASS": 2,
+    "FAIL": 1
+  },
+  "runtime_tests_run": false,
+  "signed_artifact_inspected": false,
+  "creative_assets_inspected": false,
+  "console_updated": false,
+  "source_test_files_inspected": [
+    "test/app/router/mobile_admin_removal_contract_test.dart",
+    "test/app/router/mobile_admin_route_behavior_test.dart",
+    "test/features/community/community_admin_moderation_visibility_contract_test.dart"
+  ],
+  "source_reassociation": {
+    "previous_app_source_sha": "6bf23994712ffbdcb2d8179defec5852e5d08ae1",
+    "compared_file_pairs": 15,
+    "unchanged_file_pairs": 13,
+    "source_comparison_sha256": "5ccba30f5c48fe408fcfbfebe5a3528d1d4c90d9b714f88911560f4a8e114ac1",
+    "baseline_inventory_semantically_matches_committed_candidate": true,
+    "comparison_url": "https://github.com/bilhealth-admin/Body-Intelligence/compare/6bf23994712ffbdcb2d8179defec5852e5d08ae1...5da21a5660b26e59e9ead7b0927d4ed7cf2c3996",
+    "focused_ads_run": {
+      "run_id": 39416387669,
+      "head_sha": "5da21a5660b26e59e9ead7b0927d4ed7cf2c3996",
+      "head_branch": "fix/ad-disclosure-20261020",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/39416387669",
+      "workflow_path": ".github/workflows/bil_ad_disclosure_20261020.yml",
+      "jobs": [
+        {
+          "id": 118606331239,
+          "name": "Exact SDK format, full analysis and all advertising regressions",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Format only reviewed Dart repairs and preserve exact branch lease",
+              "conclusion": "success"
+            },
+            {
+              "name": "Analyze all Flutter source without weakening any rule",
+              "conclusion": "success"
+            },
+            {
+              "name": "Exercise every advertising suite and real localized privacy page",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ],
+      "scope_limit": "Successful focused advertising run is not signed artifact, full final device, store acceptance or tracking reconciliation proof."
+    },
+    "privacy_rejection_and_A084_unchanged": true
+  }
+}

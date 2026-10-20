@@ -1,0 +1,18 @@
+{
+  "source_sha": "5da21a5660b26e59e9ead7b0927d4ed7cf2c3996",
+  "status": "LOCAL_PREPARATION_ONLY_NOT_SAVED_TO_APPLE",
+  "description_expected_live_sha256": "8fa0fa5901be167ee4169409817898ce4079ddc2a0d201946273315e6de03954",
+  "fields": {
+    "description": {
+      "characters": 3954,
+      "bytes_utf8": 3958,
+      "sha256": "9274270eca3eeef5e51a41a1363a55d9d74dc65282d75e39695d8fdd35638aa7"
+    },
+    "review_notes": {
+      "characters": 3936,
+      "bytes_utf8": 3938,
+      "sha256": "fea74a630eb397c489adaf948d8ffaaab73f9b66f6f342d750ac86a8d53187ab"
+    }
+  },
+  "reason": "Identify paid screenshot features and match actual credit-based AI access and free Apple Health permission paths."
+}

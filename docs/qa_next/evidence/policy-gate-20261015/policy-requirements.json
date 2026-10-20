@@ -55,25 +55,25 @@
     {
       "id": "A003",
       "platform": "Apple",
-      "clause": "1.2 وقائمته الكاملة",
+      "clause": "1.2 — User-Generated Content, including AI content creation",
       "official_urls": [
         "https://developer.apple.com/app-store/review/guidelines/"
       ],
-      "read_date": "2026-10-15",
+      "read_date": "2026-10-20",
       "applies": true,
-      "rationale": "منشورات وتعليقات وردود ورسائل؛ E1",
-      "implementation": "`lib/features/community/`، `ai_coach_feedback_service.dart`، `ai_coach_report_confirmation_sheet.dart`، `supabase/functions/ai-coach/` — moderation/reports/roles و SQL/API القائمة. Run38734170433 معزول، ولا يثبت زمن استجابة Production.",
-      "proof_test": "`lib/features/community/`، `ai_coach_feedback_service.dart`، `ai_coach_report_confirmation_sheet.dart`، `supabase/functions/ai-coach/` — moderation/reports/roles و SQL/API القائمة. Run38734170433 معزول، ولا يثبت زمن استجابة Production.; results are bound to the cited source/run, not a signed-store journey",
+      "rationale": "Community and AI creation require abuse safeguards, reporting with timely handling, user blocking and accessible contact details. Safeguards and remediation obligations apply to both. Exclude prohibited primary-use patterns and remediate identified violations.",
+      "implementation": "Source association 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996: lib/features/community/; lib/features/intelligence_center/services/ai_coach_safety_report_service.dart; lib/features/intelligence_center/presentation/ai_coach_report_confirmation_sheet.dart; lib/features/safety_moderation/domain/ai_coach_safety_report.dart; supabase/functions/ai-coach/.",
+      "proof_test": "test/features/community/community_post_moderation_test.dart; test/features/community/community_report_sheet_test.dart; test/parallel/bil05/community_post_moderation_receipt_test.dart; test/features/intelligence_center/ai_coach_safety_report_service_test.dart; test/features/safety_moderation/ai_coach_safety_report_test.dart. These are evidence locations, not a new test-pass claim; published handling and signed-user journeys remain unproved.",
       "status": "BLOCKED",
-      "evidence": "BIL_20261015_POLICY_GATE_APPENDIX_APPLE_AR.md evidence keys E1",
-      "minimum_action": "BLOCKED/P0 للخدمة الحية والمراجع",
+      "evidence": "Official guideline reread 2026-10-20. Historical E1 evidence remains source/run-specific. docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md associates this limited inventory refresh with app source 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996; no deployed moderation-response or signed-artifact acceptance is asserted.",
+      "minimum_action": "Keep BLOCKED/P0 until actual app reporting/blocking, deployed handling, contact access and remediation workflow are evidenced.",
       "needs_signed_device_console": true,
       "previous_rejection": "Not recorded for this clause",
       "risk": "P0",
       "source_checked": true,
       "release_certification": false,
       "status_scope": "policy_acceptance",
-      "source_evidence_refs": "BIL_20261015_POLICY_GATE_APPENDIX_APPLE_AR.md: E1",
+      "source_evidence_refs": "docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md; app-source:5da21a5660b26e59e9ead7b0927d4ed7cf2c3996; historical BIL_20261015_POLICY_GATE_APPENDIX_APPLE_AR.md:E1",
       "requirement_type": "mandatory_store_policy"
     },
     {
@@ -364,25 +364,25 @@
     {
       "id": "A016",
       "platform": "Apple",
-      "clause": "2.3.1(a),(b)",
+      "clause": "2.3.1(a),(b) — specific review notes, accessible changes and truthful marketing",
       "official_urls": [
         "https://developer.apple.com/app-store/review/guidelines/"
       ],
-      "read_date": "2026-10-15",
+      "read_date": "2026-10-20",
       "applies": true,
-      "rationale": "الإدارة و AI والمجتمع موثقة وليست مخفية؛ E1/E8",
-      "implementation": "`lib/features/community/`، `ai_coach_feedback_service.dart`، `ai_coach_report_confirmation_sheet.dart`، `supabase/functions/ai-coach/` — moderation/reports/roles و SQL/API القائمة. Run38734170433 معزول، ولا يثبت زمن استجابة Production.; تقاريرالمتاجر، `legal_document_page.dart`، `help_center_page.dart`، `/plans` الحالي و`BilDynamicStoreOffers`، `public_site/`، جردالوسائطوالتراخيص — legal/plans/privacy والصورالقائمة. Console والحقوقالخارجية لا تثبتهاالملفات وحدها.",
-      "proof_test": "`lib/features/community/`، `ai_coach_feedback_service.dart`، `ai_coach_report_confirmation_sheet.dart`، `supabase/functions/ai-coach/` — moderation/reports/roles و SQL/API القائمة. Run38734170433 معزول، ولا يثبت زمن استجابة Production.; تقاريرالمتاجر، `legal_document_page.dart`، `help_center_page.dart`، `/plans` الحالي و`BilDynamicStoreOffers`، `public_site/`، جردالوسائطوالتراخيص — legal/plans/privacy والصورالقائمة. Console والحقوقالخارجية لا تثبتهاالملفات وحدها.; results are bound to the cited source/run, not a signed-store journey",
+      "rationale": "Describe product changes specifically in review notes, make them reviewable and keep marketing truthful. Concealed or undocumented functionality is separately tracked under A101/2.5.19.",
+      "implementation": "Source association 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996: lib/app/router/app_router.dart; lib/app/router/app_community_routes.dart; lib/features/commerce/; docs/qa_next/BIL_20261016_APPLE_STORE_FINAL_CODE_ALIGNMENT_AR.md. The advertising disclosure now distinguishes app-recorded data from Google SDK technical/ad-interaction data and IP-derived approximate location (lib/features/ads/advertising_privacy_page.dart:453; lib/app/localization/runtime_copy_advertising_disclosure.dart:3). Actual saved Notes for Review and visible store text require fresh readback.",
+      "proof_test": "test/app/router/mobile_admin_route_behavior_test.dart; test/app/router/mobile_admin_removal_contract_test.dart; test/features/commerce/bil_store_copy_test.dart; test/release_metadata_test.dart; compare actual saved App Store Connect review notes and claims with reachable candidate features. Named tests are not claimed newly passed here.",
       "status": "BLOCKED",
-      "evidence": "BIL_20261015_POLICY_GATE_APPENDIX_APPLE_AR.md evidence keys E1,E8",
-      "minimum_action": "BLOCKED/P0 لمطابقة Notes والخدمات",
+      "evidence": "Official guideline reread 2026-10-20; former hidden-feature wording is now assessed under new A101. Historical E1/E8 notes remain dated evidence. docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md binds this requirement mapping to 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996 after exact source comparison with 6bf23994712ffbdcb2d8179defec5852e5d08ae1. Focused advertising run39416387669 succeeded on this source, but does not certify ATT reconciliation, live notes or the final binary.",
+      "minimum_action": "Keep BLOCKED/P0 until saved review notes, truthful claims, access instructions and final candidate behavior match.",
       "needs_signed_device_console": true,
       "previous_rejection": "Not recorded for this clause",
       "risk": "P0",
       "source_checked": true,
       "release_certification": false,
       "status_scope": "policy_acceptance",
-      "source_evidence_refs": "BIL_20261015_POLICY_GATE_APPENDIX_APPLE_AR.md: E1, E8",
+      "source_evidence_refs": "docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md; app-source:5da21a5660b26e59e9ead7b0927d4ed7cf2c3996; historical BIL_20261015_POLICY_GATE_APPENDIX_APPLE_AR.md:E1,E8",
       "requirement_type": "mandatory_store_policy"
     },
     {
@@ -3293,6 +3293,55 @@
       "release_certification": false,
       "officially_mandatory_tool": false,
       "mandatory_by_owner": true
+    },
+    {
+      "platform": "Apple",
+      "official_urls": [
+        "https://developer.apple.com/app-store/review/guidelines/",
+        "https://developer.apple.com/app-store/asset-best-practices/"
+      ],
+      "read_date": "2026-10-20",
+      "applies": true,
+      "status": "BLOCKED",
+      "needs_signed_device_console": true,
+      "previous_rejection": "No separate rejection recorded for this clause; the historical Apple privacy rejection remains unchanged in A084.",
+      "risk": "P0",
+      "source_checked": false,
+      "release_certification": false,
+      "status_scope": "policy_acceptance",
+      "requirement_type": "mandatory_store_policy",
+      "id": "A100",
+      "clause": "2.3.14 — Creative assets",
+      "rationale": "Creative assets need relevant, age-appropriate, accurate app or brand content; avoid misleading references, unverifiable claims and specific or discounted prices. Applicability remains conservative pending the current asset inventory.",
+      "implementation": "Potential surfaces: current App Store product-page header, search-result and featuring creative assets; public store metadata. No creative asset is asserted to exist from the repository alone. App-in-use screenshots and IAP review screenshots remain separately governed by their relevant requirements.",
+      "proof_test": "test/epic15_store_screenshot_golden_test.dart and test/features/commerce/apple_review_product_screenshot_test.dart are existing screenshot evidence locations, not proof of this separate creative format. Inventory and visually review every actual supplied creative asset and applicable localization against the final app/brand and Apple asset guidance.",
+      "evidence": "New policy row based on official reread 2026-10-20. docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md associates review with app source 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996. No actual creative-asset or Console acceptance is claimed; no new automated test result is asserted.",
+      "minimum_action": "Keep BLOCKED/P0 pending asset inventory and claim/price/content review. If no creative assets are supplied, record verified absence before marking this specific format not applicable.",
+      "source_evidence_refs": "docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md; app-source:5da21a5660b26e59e9ead7b0927d4ed7cf2c3996"
+    },
+    {
+      "platform": "Apple",
+      "official_urls": [
+        "https://developer.apple.com/app-store/review/guidelines/"
+      ],
+      "read_date": "2026-10-20",
+      "applies": true,
+      "status": "BLOCKED",
+      "needs_signed_device_console": true,
+      "previous_rejection": "No separate rejection recorded for this clause; the historical Apple privacy rejection remains unchanged in A084.",
+      "risk": "P0",
+      "source_checked": true,
+      "release_certification": false,
+      "status_scope": "policy_acceptance",
+      "requirement_type": "mandatory_store_policy",
+      "id": "A101",
+      "clause": "2.5.19 — Hidden, dormant or undocumented features",
+      "rationale": "User-facing functionality must be apparent to users and reviewers; concealment or undocumented product behavior is prohibited.",
+      "implementation": "Source association 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996: lib/app/router/ and shipping import graph from lib/main.dart; mobile operator presentation lives only under test/support/legacy_mobile_admin/. Review native entrypoints, deep links, feature configuration and remote flags against the documented product.",
+      "proof_test": "test/app/router/mobile_admin_removal_contract_test.dart checks shipping import closure; test/app/router/mobile_admin_route_behavior_test.dart rejects removed operator routes and preserves member routes; test/features/community/community_admin_moderation_visibility_contract_test.dart preserves report/block controls. These scoped tests do not prove all final-binary behavior.",
+      "evidence": "Official clause reread 2026-10-20. Source of the named removal/route tests was inspected at 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996; no test was rerun and no binary or remote-configuration audit was performed in this inventory edit. docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md.",
+      "minimum_action": "Keep BLOCKED/P0 until the final binary, routes, configurations and review notes disclose the same reachable product functionality; preserve user reporting and blocking.",
+      "source_evidence_refs": "docs/qa_next/BIL_20261020_APPLE_GUIDELINE_INVENTORY_UPDATE.md; app-source:5da21a5660b26e59e9ead7b0927d4ed7cf2c3996"
     }
   ]
 }
