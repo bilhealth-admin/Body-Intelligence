@@ -1,0 +1,126 @@
+name: BIL native Apple workout screenshots - frozen source
+
+on:
+  push:
+    branches: [audit/apple-workout-capture-20261020]
+    paths: [.github/workflows/bil_apple_workout_native_capture_20261020.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-apple-workout-capture-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: 3.44.6
+  APPLICATION_SOURCE: 5da21a5660b26e59e9ead7b0927d4ed7cf2c3996
+
+jobs:
+  capture:
+    name: Native ${{ matrix.device }} capture
+    runs-on: macos-26
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [iphone67, ipad129]
+    steps:
+      - name: Checkout exact controller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          persist-credentials: false
+      - name: Checkout frozen application
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ env.APPLICATION_SOURCE }}
+          path: app
+          persist-credentials: false
+      - name: Install exact Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Preserve tracked source and toolchain evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 control/tool/release_ops/verify_native_store_capture.py source-snapshot app evidence/source-before.json
+          flutter --version > evidence/flutter-version.txt
+          xcodebuild -version > evidence/xcode-version.txt
+          python3 control/tool/release_ops/verify_native_store_capture.py devices > evidence/device-plan.json
+      - name: Resolve original dependencies and preserve native test plugins
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          plutil -lint ios/Runner/Info.plist
+      - name: Inject temporary controller entrypoint and analyze
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e app/integration_test/store_workout_native_capture_test.dart
+          cp control/integration_test/store_workout_native_capture_test.dart app/integration_test/store_workout_native_capture_test.dart
+          cd app
+          flutter analyze --no-pub integration_test/store_workout_native_capture_test.dart
+      - name: Create exact native simulator
+        id: sim
+        shell: bash
+        env:
+          DEVICE_CLASS: ${{ matrix.device }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          plan=json.loads(Path('evidence/device-plan.json').read_text())
+          role='iphone' if os.environ['DEVICE_CLASS']=='iphone67' else 'ipad'
+          device=next(d for d in plan['devices'] if d['role']==role)
+          udid=subprocess.check_output(['xcrun','simctl','create','BIL-Store-'+os.environ['DEVICE_CLASS']+'-'+os.environ['GITHUB_RUN_ID'],device['identifier'],plan['runtime']['identifier']],text=True).strip()
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+              out.write('udid='+udid+'\n')
+          Path('evidence/selected-device.json').write_text(json.dumps({'udid':udid,'device':device,'runtime':plan['runtime']},indent=2)+'\n')
+          subprocess.run(['xcrun','simctl','boot',udid],check=True)
+          subprocess.run(['xcrun','simctl','bootstatus',udid,'-b'],check=True)
+          subprocess.run(['xcrun','simctl','ui',udid,'appearance','light'],check=True)
+          subprocess.run(['xcrun','simctl','spawn',udid,'defaults','write','NSGlobalDomain','AppleLanguages','-array','en'],check=True)
+          subprocess.run(['xcrun','simctl','spawn',udid,'defaults','write','NSGlobalDomain','AppleLocale','en_US'],check=True)
+          subprocess.run(['xcrun','simctl','status_bar',udid,'override','--time','09:41','--batteryState','charged','--batteryLevel','100','--wifiBars','3','--cellularBars','4'],check=True)
+          PY
+      - name: Capture actual full app workout route and acknowledge native PNG
+        shell: bash
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+          DEVICE_CLASS: ${{ matrix.device }}
+        run: |
+          set -euo pipefail
+          python3 control/tool/release_ops/run_native_store_capture.py --app app --output evidence --udid "$UDID" --device "$DEVICE_CLASS"
+      - name: Verify every original tracked file remains byte-identical
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 control/tool/release_ops/verify_native_store_capture.py source-verify app evidence/source-before.json > evidence/source-after-verification.json
+          git -C app diff --exit-code HEAD --
+      - name: Upload bounded capture evidence - visual review required
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-apple-workout-native-${{ matrix.device }}-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Delete disposable simulator
+        if: always() && steps.sim.outputs.udid != ''
+        shell: bash
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          xcrun simctl shutdown "$UDID" || true
+          xcrun simctl delete "$UDID" || true
