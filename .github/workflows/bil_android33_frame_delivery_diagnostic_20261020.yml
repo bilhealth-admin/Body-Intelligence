@@ -1,0 +1,82 @@
+name: DIAGNOSTIC ONLY frozen5775 Android33 raw frame delivery
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/android33-frame-delivery-diagnostic-20261020]
+    paths:
+      - .github/workflows/bil_android33_frame_delivery_diagnostic_20261020.yml
+      - tool/release_ops/native_frame_delivery_diagnostic/**
+permissions:
+  contents: read
+concurrency:
+  group: bil-one-frame-delivery-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  APP_SOURCE: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+  APP_TREE: 7ea15defb433ad134ee5066f538d8e790c45f809
+jobs:
+  one-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Check out the controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+          sparse-checkout: tool/release_ops/native_frame_delivery_diagnostic
+      - name: Check out immutable application5775
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 5775d082a1b4c7a29e4ed4d6e01693b31923dc31
+          path: app
+          persist-credentials: false
+      - name: Run offline provenance and negative controls; install untracked wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 controller/tool/release_ops/native_frame_delivery_diagnostic/test_controller.py
+          python3 controller/tool/release_ops/native_frame_delivery_diagnostic/controller.py prepare --app app --controller controller --output "$RUNNER_TEMP/native-frame-diagnostic"
+      - name: Install the same Flutter3.44.6
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies and test raw sampler without a device
+        working-directory: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart format --output=none integration_test/bil_native_frame_delivery_diagnostic.dart test/bil_native_frame_delivery_diagnostic_test.dart
+          git diff --exit-code -- lib android integration_test test tools/qa/flutter pubspec.yaml pubspec.lock
+          flutter test --no-pub --reporter expanded test/bil_native_frame_delivery_diagnostic_test.dart
+      - name: Enable original KVM boundary
+        working-directory: app
+        run: bash .github/scripts/bil_prepare_android_kvm.sh
+      - name: One clean API33 boot; all original feature cases and assertions
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          working-directory: app
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          cores: 2
+          emulator-build: '16428233'
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          emulator-boot-timeout: 1200
+          script: python3 "$GITHUB_WORKSPACE/controller/tool/release_ops/native_frame_delivery_diagnostic/controller.py" run --app "$GITHUB_WORKSPACE/app" --controller "$GITHUB_WORKSPACE/controller" --output "$RUNNER_TEMP/native-frame-diagnostic"
+      - name: Prepare bounded raw diagnostic evidence even after failure
+        if: always()
+        run: python3 controller/tool/release_ops/native_frame_delivery_diagnostic/controller.py bundle --app app --controller controller --output "$RUNNER_TEMP/native-frame-diagnostic"
+      - name: Upload only diagnostic evidence; wrapper success does not certify release
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: android33-frame-delivery-DIAGNOSTIC-ONLY-${{ github.run_id }}
+          path: ${{ runner.temp }}/native-frame-diagnostic/upload
+          if-no-files-found: warn
+          retention-days: 14
