@@ -923,7 +923,10 @@ function requestBody(requestId = "coach-test-request-0001") {
   });
 }
 
-function fakeClients(reservations: Array<Record<string, unknown>>) {
+function fakeClients(
+  reservations: Array<Record<string, unknown>>,
+  settlementResults: unknown[] = [],
+) {
   const settlements: Array<Record<string, unknown>> = [];
   return {
     settlements,
@@ -951,7 +954,9 @@ function fakeClients(reservations: Array<Record<string, unknown>>) {
           }
           settlements.push(params);
           return Promise.resolve({
-            data: { state: params.p_succeeded ? "succeeded" : "refunded" },
+            data: settlementResults.length > 0
+              ? settlementResults.shift()
+              : { state: params.p_succeeded ? "succeeded" : "refunded" },
             error: null,
           });
         },
@@ -959,6 +964,80 @@ function fakeClients(reservations: Array<Record<string, unknown>>) {
     }),
   };
 }
+
+function successfulSettlementProvider() {
+  return Promise.resolve({
+    attempts: 1,
+    data: {
+      candidates: [{
+        finishReason: "STOP",
+        content: {
+          parts: [{
+            text: JSON.stringify(
+              citationContractReply(["cdc_healthy_eating"]),
+            ),
+          }],
+        },
+      }],
+      usageMetadata: { promptTokenCount: 20, candidatesTokenCount: 10 },
+    },
+  });
+}
+
+for (
+  const [label, result] of [
+    ["expired reservation", {
+      duplicate: false,
+      state: "refunded",
+      reason: "reservation_expired",
+      bil_ai_tokens_actual: 0,
+    }],
+    ["unsettled reservation", { state: "reserved" }],
+    ["missing result", null],
+    ["missing state", {}],
+  ] as const
+) {
+  Deno.test(`settlement result rejects ${label} without returning an answer`, async () => {
+    const fake = fakeClients([{ duplicate: false, state: "reserved" }], [
+      result,
+    ]);
+    const diagnostics: Array<Record<string, unknown>> = [];
+    const response = await handler(requestBody(), {
+      clients: fake.create as never,
+      geminiCall: successfulSettlementProvider,
+      diagnosticLog: (event) => {
+        diagnostics.push(event as unknown as Record<string, unknown>);
+      },
+    });
+    assertEquals(response.status, 503);
+    assertEquals(await response.json(), { error: "settlement_failed" });
+    assertEquals(fake.settlements.length, 2);
+    assertEquals(fake.settlements.map((value) => value.p_succeeded), [
+      true,
+      false,
+    ]);
+    assertEquals(diagnostics.length, 1);
+    assertEquals(diagnostics[0].stage, "credit_settlement");
+    assertEquals(diagnostics[0].compensation_attempted, true);
+    assertEquals(diagnostics[0].compensation_succeeded, true);
+  });
+}
+
+Deno.test("settlement result preserves an idempotent succeeded response", async () => {
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }], [{
+    duplicate: true,
+    state: "succeeded",
+    bil_ai_tokens_actual: 2,
+  }]);
+  const response = await handler(requestBody(), {
+    clients: fake.create as never,
+    geminiCall: successfulSettlementProvider,
+  });
+  assertEquals(response.status, 200);
+  assertEquals((await response.json()).response_id, "coach-test-request-0001");
+  assertEquals(fake.settlements.length, 1);
+  assertEquals(fake.settlements[0].p_succeeded, true);
+});
 
 Deno.test("provider timeout refunds exactly one established reservation", async () => {
   const fake = fakeClients([{ duplicate: false, state: "reserved" }]);

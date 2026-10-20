@@ -173,7 +173,14 @@ void main() {
     expect(cloudTransport, contains("'p_device_id': deviceId"));
     expect(community, contains(".from('bil_messages').insert"));
     expect(community, contains("'body': text"));
-    expect(auth, contains("'phone': phone"));
+    // New signups send no phone number; retained legacy account data still
+    // requires the Phone Number disclosure checked above. The SDK request
+    // payload is exercised by registration_data_minimization_test.dart.
+    expect(auth, isNot(contains("'phone':")));
+    expect(
+      auth,
+      contains("if (fullName.trim().isNotEmpty) 'full_name': fullName.trim()"),
+    );
     expect(purchase, contains("'verification_data':"));
     expect(purchase, contains('serverVerificationData'));
     // The guarded transcript bridge carries only recognized text into ask().

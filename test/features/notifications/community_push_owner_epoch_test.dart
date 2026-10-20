@@ -15,6 +15,70 @@ import '../community/support/community_rewards_rpc_fixture.dart';
 // Real Supabase auth/RPC and the production transport fence, with no network,
 // provider, credentials or real-user notification tokens.
 void main() {
+  test('unavailable push refresh does not read policy or provider', () async {
+    final fixture = await _PushFixture.open();
+    fixture.available = false;
+    await fixture.service.refreshRegistrationIfEnabled(
+      deliveryPreferences: const NotificationDeliveryPreferences(),
+    );
+    expect(fixture.events, isEmpty);
+    expect(fixture.requests, isEmpty);
+    expect(fixture.tokens.requestCalls, 0);
+  });
+
+  test('signed-out push refresh does not read policy or provider', () async {
+    final fixture = await _PushFixture.open(signedIn: false);
+    expect(fixture.client.auth.currentUser, isNull);
+    await fixture.service.refreshRegistrationIfEnabled(
+      deliveryPreferences: const NotificationDeliveryPreferences(),
+    );
+    expect(fixture.events, isEmpty);
+    expect(fixture.requests, isEmpty);
+    expect(fixture.tokens.requestCalls, 0);
+  });
+
+  for (final scenario in [
+    (name: 'unconfigured provider', capability: _capability(configured: false)),
+    (
+      name: 'missing token registration',
+      capability: _capability(tokenRegistration: false),
+    ),
+    (
+      name: 'missing remote tap routing',
+      capability: _capability(remoteTapRouting: false),
+    ),
+    (
+      name: 'permission denied',
+      capability: _capability(permissionGranted: false),
+    ),
+  ]) {
+    test('refresh stops before token for ${scenario.name}', () async {
+      final fixture = await _PushFixture.open();
+      fixture.tokens.capabilityResult = scenario.capability;
+      await fixture.service.refreshRegistrationIfEnabled(
+        deliveryPreferences: const NotificationDeliveryPreferences(),
+      );
+      expect(fixture.events, ['policy-read', 'capability']);
+      expect(fixture.tokens.existingTokenCalls, 0);
+      expect(fixture.tokens.requestCalls, 0);
+      expect(fixture.requests, isEmpty);
+    });
+  }
+
+  for (final token in <String?>[null, '']) {
+    test('refresh stops before registration for token=$token', () async {
+      final fixture = await _PushFixture.open();
+      fixture.tokens.existingToken = token;
+      await fixture.service.refreshRegistrationIfEnabled(
+        deliveryPreferences: const NotificationDeliveryPreferences(),
+      );
+      expect(fixture.events, ['policy-read', 'capability', 'token']);
+      expect(fixture.tokens.existingTokenCalls, 1);
+      expect(fixture.tokens.requestCalls, 0);
+      expect(fixture.requests, isEmpty);
+    });
+  }
+
   for (final roundTrip in [false, true]) {
     for (final stage in ['policy-read', 'capability', 'token', 'timezone']) {
       test('refresh retires pending $stage at ABA=$roundTrip', () async {
@@ -105,6 +169,13 @@ void main() {
       await fixture.service.refreshRegistrationIfEnabled(
         deliveryPreferences: const NotificationDeliveryPreferences(),
       );
+      expect(fixture.events, [
+        'policy-read',
+        'capability',
+        'token',
+        'timezone',
+        'rpc',
+      ]);
       expect(fixture.requests.single.method, 'bil_register_push_token_v2');
       expect(fixture.requests.single.owner, rewardsOwnerA);
       expect(fixture.requests.single.params, {
@@ -128,8 +199,10 @@ void main() {
       await fixture.service.refreshRegistrationIfEnabled(
         deliveryPreferences: const NotificationDeliveryPreferences(),
       );
+      expect(fixture.events, ['policy-read']);
       expect(fixture.requests, isEmpty);
       expect(fixture.tokens.capabilityCalls, 0);
+      expect(fixture.tokens.existingTokenCalls, 0);
       expect(fixture.tokens.requestCalls, 0);
     },
   );
@@ -167,6 +240,19 @@ void main() {
   );
 }
 
+PushProviderCapability _capability({
+  bool configured = true,
+  bool tokenRegistration = true,
+  bool remoteTapRouting = true,
+  bool permissionGranted = true,
+}) => PushProviderCapability(
+  configured: configured,
+  tokenRegistration: tokenRegistration,
+  remoteTapRouting: remoteTapRouting,
+  permissionGranted: permissionGranted,
+  provider: 'synthetic',
+);
+
 Map<String, Object?> _receipt() => {
   'owner_id': rewardsOwnerA,
   'initialized': true,
@@ -188,20 +274,23 @@ class _PushFixture {
     client,
     tokenProvider: tokens,
     registrationPolicyStore: policy,
-    availability: () => true,
+    availability: () => available,
     timeZoneIdentifier: () async {
+      events.add('timezone');
       await pause('timezone');
       return 'Europe/London';
     },
   );
   final requests =
       <({String method, String owner, Map<String, dynamic> params})>[];
+  final events = <String>[];
   final entered = Completer<void>();
   final release = Completer<void>();
   String? pauseAt;
   bool failure = false;
+  bool available = true;
 
-  static Future<_PushFixture> open() async {
+  static Future<_PushFixture> open({bool signedIn = true}) async {
     final fixture = _PushFixture();
     fixture.client = SupabaseClient(
       'https://push-owner-fixture.invalid',
@@ -209,9 +298,11 @@ class _PushFixture {
       authOptions: const AuthClientOptions(autoRefreshToken: false),
       httpClient: CommunityOwnerHttpClient(MockClient(fixture.respond)),
     );
-    await fixture.client.auth.setInitialSession(
-      jsonEncode(RewardsRpcFixture.session(rewardsOwnerA)),
-    );
+    if (signedIn) {
+      await fixture.client.auth.setInitialSession(
+        jsonEncode(RewardsRpcFixture.session(rewardsOwnerA)),
+      );
+    }
     addTearDown(fixture.client.dispose);
     return fixture;
   }
@@ -236,6 +327,7 @@ class _PushFixture {
   }
 
   Future<http.Response> respond(http.Request request) async {
+    events.add('rpc');
     final token = request.headers['authorization']!.split(' ').last;
     final claims =
         jsonDecode(
@@ -267,6 +359,7 @@ class _Policy extends CommunityPushRegistrationPolicyStore {
 
   @override
   Future<bool> isExplicitlyDisabled(String userId) async {
+    fixture.events.add('policy-read');
     await fixture.pause('policy-read');
     return disabled[userId] ?? false;
   }
@@ -282,26 +375,26 @@ class _Tokens implements PushTokenProvider {
   _Tokens(this.fixture);
   final _PushFixture fixture;
   int capabilityCalls = 0;
+  int existingTokenCalls = 0;
   int requestCalls = 0;
   int deleteCalls = 0;
+  PushProviderCapability capabilityResult = _capability();
+  String? existingToken = 'synthetic-device-token';
 
   @override
   Future<PushProviderCapability> capability() async {
     capabilityCalls++;
+    fixture.events.add('capability');
     await fixture.pause('capability');
-    return const PushProviderCapability(
-      configured: true,
-      tokenRegistration: true,
-      remoteTapRouting: true,
-      permissionGranted: true,
-      provider: 'synthetic',
-    );
+    return capabilityResult;
   }
 
   @override
   Future<String?> existingPermissionToken() async {
+    existingTokenCalls++;
+    fixture.events.add('token');
     await fixture.pause('token');
-    return 'synthetic-device-token';
+    return existingToken;
   }
 
   @override

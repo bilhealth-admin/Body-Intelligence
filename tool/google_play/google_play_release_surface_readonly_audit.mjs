@@ -13,6 +13,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { googleOAuthTokenUri } from './google_oauth.mjs';
 
 const PACKAGE_NAME = 'com.bilhealth.bodyintelligencelog';
@@ -38,16 +39,47 @@ function base64Url(value) {
   return Buffer.from(value).toString('base64url');
 }
 
-function safeError(status, parsed) {
+function sanitizedMessage(value, secrets = []) {
+  if (typeof value !== 'string') return null;
+  let message = value;
+  for (const secret of secrets) {
+    if (typeof secret === 'string' && secret) message = message.split(secret).join('[REDACTED]');
+  }
+  message = message
+    .replace(/-----BEGIN[\s\S]*?-----END[^-]*-----/g, '[REDACTED]')
+    .replace(/\bBearer\s+\S+/gi, 'Bearer [REDACTED]')
+    .replace(/\b(access_token|refresh_token|id_token|assertion|private_key)["']?\s*[=:]\s*(?:"[^"\r\n]*"|'[^'\r\n]*'|[^&\s]+)/gi, '$1=[REDACTED]')
+    .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[REDACTED]')
+    .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+  if (!message) return null;
+  return message.length > 400 ? message.slice(0, 397) + '...' : message;
+}
+
+function safeError(httpStatus, parsed, secrets = []) {
+  const status = parsed?.error?.status;
   return {
-    status,
-    code: parsed?.error?.code ?? status,
-    statusText: parsed?.error?.status ?? null,
-    message: parsed?.error?.message ?? null,
+    code: Number.isSafeInteger(parsed?.error?.code) ? parsed.error.code : httpStatus,
+    status: typeof status === 'string' && /^[A-Z][A-Z0-9_]{0,79}$/.test(status) ? status : null,
+    message: sanitizedMessage(parsed?.error?.message, secrets),
   };
 }
 
-async function accessToken(credentials) {
+class AuditFailure extends Error {
+  constructor(stage, httpStatus = null, error = null) {
+    super(`${stage}_FAILED:${httpStatus ?? 'UNKNOWN'}:${error?.status ?? 'UNKNOWN'}`);
+    this.failure = { stage, httpStatus, error };
+  }
+}
+
+function failureDetail(error, stage) {
+  return error instanceof AuditFailure ? error.failure : {
+    stage, httpStatus: null,
+    error: { code: null, status: null, message: 'Audit operation failed without a safe Google diagnostic.' },
+  };
+}
+
+async function accessToken(credentials, fetchImpl = fetch) {
   const now = Math.floor(Date.now() / 1000);
   const tokenUri = googleOAuthTokenUri(credentials);
   const header = base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
@@ -62,7 +94,7 @@ async function accessToken(credentials) {
   const signature = crypto
     .sign('RSA-SHA256', Buffer.from(signingInput), credentials.private_key)
     .toString('base64url');
-  const response = await fetch(tokenUri, {
+  const response = await fetchImpl(tokenUri, {
     method: 'POST',
     redirect: 'error',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -73,18 +105,21 @@ async function accessToken(credentials) {
   });
   const parsed = await response.json().catch(() => null);
   if (!response.ok || !parsed?.access_token) {
-    throw new Error(`GOOGLE_OAUTH_FAILED:${response.status}`);
+    throw new AuditFailure('GOOGLE_OAUTH', response.status,
+      safeError(response.status, parsed, [credentials.private_key, credentials.client_email]));
   }
   return parsed.access_token;
 }
 
-class Client {
-  constructor(token) {
+export class Client {
+  constructor(token, fetchImpl = fetch, secrets = []) {
     this.token = token;
+    this.fetchImpl = fetchImpl;
+    this.secrets = [token, ...secrets];
   }
 
   async request(method, resource, body) {
-    const response = await fetch(`${API_ROOT}${resource}`, {
+    const response = await this.fetchImpl(`${API_ROOT}${resource}`, {
       method,
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -94,9 +129,14 @@ class Client {
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const text = await response.text();
-    const parsed = text ? JSON.parse(text) : null;
+    let parsed = null;
+    try { parsed = text ? JSON.parse(text) : null; } catch {
+      const diagnostic = { code: response.status, status: null, message: 'Google API returned a non-JSON response.' };
+      if (response.ok) throw new AuditFailure('GOOGLE_RESPONSE_JSON', response.status, diagnostic);
+      return { ok: false, status: response.status, error: diagnostic };
+    }
     if (!response.ok) {
-      return { ok: false, status: response.status, error: safeError(response.status, parsed) };
+      return { ok: false, status: response.status, error: safeError(response.status, parsed, this.secrets) };
     }
     return { ok: true, status: response.status, value: parsed };
   }
@@ -116,7 +156,7 @@ class Client {
 
 function requireOk(result, label) {
   if (!result.ok) {
-    throw new Error(`${label}_FAILED:${result.status}:${result.error?.statusText ?? 'UNKNOWN'}`);
+    throw new AuditFailure(label, result.status, result.error);
   }
   return result.value;
 }
@@ -141,95 +181,132 @@ function summarizeImages(result) {
   };
 }
 
-const credentialsPath = argument('--credentials');
-const outputPath = argument('--output');
-if (!credentialsPath || !outputPath) {
-  throw new Error('--credentials and --output are required');
-}
-const output = path.resolve(outputPath);
-if (path.parse(output).root.toUpperCase() !== 'G:\\') {
-  throw new Error(`Audit output must stay on G:, received ${output}`);
-}
-const credentials = JSON.parse(fs.readFileSync(path.resolve(credentialsPath), 'utf8'));
-if (credentials.type !== 'service_account' || !credentials.client_email ||
-    !credentials.private_key) {
-  throw new Error('Credential file is not a complete Google service account');
-}
-
-const client = new Client(await accessToken(credentials));
-const packagePath = `/applications/${encodeURIComponent(PACKAGE_NAME)}`;
-const insert = await client.post(`${packagePath}/edits`, {});
-const edit = requireOk(insert, 'EDIT_INSERT');
-const editId = edit.id;
-if (!editId) throw new Error('EDIT_ID_MISSING');
-const editPath = `${packagePath}/edits/${encodeURIComponent(editId)}`;
-let report;
-let deleteResult;
-
-try {
-  const [details, listings, tracks, bundles, apks] = await Promise.all([
-    client.get(`${editPath}/details`),
-    client.get(`${editPath}/listings`),
-    client.get(`${editPath}/tracks`),
-    client.get(`${editPath}/bundles`),
-    client.get(`${editPath}/apks`),
-  ]);
-  const locales = listings.ok
-    ? (listings.value?.listings ?? []).map((listing) => listing.language)
-    : [];
-  const images = [];
-  for (const locale of locales) {
-    for (const imageType of IMAGE_TYPES) {
-      const result = await client.get(
-        `${editPath}/listings/${encodeURIComponent(locale)}/${imageType}`,
-      );
-      images.push({ locale, imageType, result: summarizeImages(result) });
-    }
-  }
-  const countryAvailability = [];
-  if (tracks.ok) {
-    for (const track of tracks.value?.tracks ?? []) {
-      const result = await client.get(
-        `${editPath}/countryAvailability/${encodeURIComponent(track.track)}`,
-      );
-      countryAvailability.push({
-        track: track.track,
-        result: result.ok ? {
-          ok: true,
-          httpStatus: result.status,
-          syncWithProduction: result.value?.syncWithProduction ?? null,
-          countryCount: result.value?.countries?.length ?? 0,
-          countries: result.value?.countries ?? [],
-        } : cleanResult(result),
-      });
-    }
-  }
-  report = {
+export async function runReleaseSurfaceAudit({ clientFactory, output }) {
+  const packagePath = `/applications/${encodeURIComponent(PACKAGE_NAME)}`;
+  const report = {
     generatedAt: new Date().toISOString(),
     mode: 'transient-edit-read-only-no-commit',
     packageName: PACKAGE_NAME,
     mutationPerformed: false,
-    transientEdit: {
-      insertHttpStatus: insert.status,
-      expiryTimeSeconds: edit.expiryTimeSeconds ?? null,
-      committed: false,
-    },
-    details: cleanResult(details),
-    listings: cleanResult(listings),
-    tracks: cleanResult(tracks),
-    bundles: cleanResult(bundles),
-    apks: cleanResult(apks),
-    images,
-    countryAvailability,
+    transientEdit: { committed: false },
   };
-} finally {
-  deleteResult = await client.delete(editPath);
+  let client;
+  let editPath;
+  let stage = 'GOOGLE_OAUTH';
+
+  try {
+    client = await clientFactory();
+    stage = 'EDIT_INSERT';
+    const insert = await client.post(`${packagePath}/edits`, {});
+    report.transientEdit.insertHttpStatus = insert.status;
+    const edit = requireOk(insert, 'EDIT_INSERT');
+    const editId = edit.id;
+    if (!editId) throw new AuditFailure('EDIT_ID_MISSING');
+    editPath = `${packagePath}/edits/${encodeURIComponent(editId)}`;
+    report.transientEdit.expiryTimeSeconds = edit.expiryTimeSeconds ?? null;
+    stage = 'EDIT_READ';
+    const [details, listings, tracks, bundles, apks] = await Promise.all([
+      client.get(`${editPath}/details`),
+      client.get(`${editPath}/listings`),
+      client.get(`${editPath}/tracks`),
+      client.get(`${editPath}/bundles`),
+      client.get(`${editPath}/apks`),
+    ]);
+    // Retain every completed read before failing a required metadata read.
+    // Optional artifact reads (for example, no bundles yet) keep their own
+    // recorded status without making unavailable metadata look audited.
+    Object.assign(report, {
+      details: cleanResult(details),
+      listings: cleanResult(listings),
+      tracks: cleanResult(tracks),
+      bundles: cleanResult(bundles),
+      apks: cleanResult(apks),
+    });
+    requireOk(details, 'EDIT_READ_DETAILS');
+    requireOk(listings, 'EDIT_READ_LISTINGS');
+    requireOk(tracks, 'EDIT_READ_TRACKS');
+    const locales = listings.ok
+      ? (listings.value?.listings ?? []).map((listing) => listing.language)
+      : [];
+    const images = [];
+    for (const locale of locales) {
+      for (const imageType of IMAGE_TYPES) {
+        const result = await client.get(
+          `${editPath}/listings/${encodeURIComponent(locale)}/${imageType}`,
+        );
+        images.push({ locale, imageType, result: summarizeImages(result) });
+      }
+    }
+    const countryAvailability = [];
+    if (tracks.ok) {
+      for (const track of tracks.value?.tracks ?? []) {
+        const result = await client.get(
+          `${editPath}/countryAvailability/${encodeURIComponent(track.track)}`,
+        );
+        countryAvailability.push({
+          track: track.track,
+          result: result.ok ? {
+            ok: true,
+            httpStatus: result.status,
+            syncWithProduction: result.value?.syncWithProduction ?? null,
+            countryCount: result.value?.countries?.length ?? 0,
+            countries: result.value?.countries ?? [],
+          } : cleanResult(result),
+        });
+      }
+    }
+    Object.assign(report, {
+      images,
+      countryAvailability,
+    });
+  } catch (error) {
+    report.failure = failureDetail(error, stage);
+  } finally {
+    if (editPath) {
+      try {
+        const result = await client.delete(editPath);
+        report.transientEdit.deleted = result.ok;
+        report.transientEdit.deleteHttpStatus = result.status;
+        if (!result.ok) {
+          report.transientEdit.deleteError = result.error;
+          throw new AuditFailure('TRANSIENT_EDIT_DELETE', result.status, result.error);
+        }
+      } catch (error) {
+        report.transientEdit.deleted = false;
+        const cleanupFailure = failureDetail(error, 'TRANSIENT_EDIT_DELETE');
+        if (report.failure) report.cleanupFailure = cleanupFailure;
+        else report.failure = cleanupFailure;
+      }
+    }
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  }
+  if (report.failure) {
+    throw new AuditFailure(report.failure.stage, report.failure.httpStatus, report.failure.error);
+  }
+  return report;
 }
 
-report.transientEdit.deleted = deleteResult.ok;
-report.transientEdit.deleteHttpStatus = deleteResult.status;
-if (!deleteResult.ok) report.transientEdit.deleteError = deleteResult.error;
-fs.mkdirSync(path.dirname(output), { recursive: true });
-fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-if (!deleteResult.ok) throw new Error(`TRANSIENT_EDIT_DELETE_FAILED:${deleteResult.status}`);
-process.stdout.write(`Wrote ${output}\n`);
+async function runCli() {
+  const credentialsPath = argument('--credentials');
+  const outputPath = argument('--output');
+  if (!credentialsPath || !outputPath) throw new AuditFailure('ARGUMENTS_REQUIRED');
+  const output = path.resolve(outputPath);
+  if (path.parse(output).root.toUpperCase() !== 'G:\\') throw new AuditFailure('OUTPUT_DRIVE_INVALID');
+  await runReleaseSurfaceAudit({ output, clientFactory: async () => {
+    const credentials = JSON.parse(fs.readFileSync(path.resolve(credentialsPath), 'utf8'));
+    if (credentials.type !== 'service_account' || !credentials.client_email || !credentials.private_key) {
+      throw new AuditFailure('SERVICE_ACCOUNT_INVALID');
+    }
+    const token = await accessToken(credentials);
+    return new Client(token, fetch, [credentials.private_key, credentials.client_email]);
+  } });
+  process.stdout.write(`Wrote ${output}\n`);
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  runCli().catch((error) => {
+    process.stderr.write(`${JSON.stringify(failureDetail(error, 'GOOGLE_AUDIT'))}\n`);
+    process.exitCode = 1;
+  });
+}

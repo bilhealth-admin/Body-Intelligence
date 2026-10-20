@@ -254,6 +254,23 @@ jobs:
           set -euo pipefail
           dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
 
+      - name: Select exact CocoaPods in an isolated job gem home
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
+          python3 .github/scripts/install_isolated_cocoapods.py \
+            --output artifacts/release/rc_mobile_test/ios/cocoapods-installation.json
+
+      - name: Upload isolated CocoaPods installation receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: bil-cocoapods-rc-ios-${{ github.sha }}
+          path: artifacts/release/rc_mobile_test/ios/cocoapods-installation.json
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Build iOS simulator application
         shell: bash
         run: |

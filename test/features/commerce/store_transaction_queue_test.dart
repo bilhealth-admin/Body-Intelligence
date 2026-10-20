@@ -1078,8 +1078,10 @@ void main() {
           headers: {'content-type': 'application/json'},
         ),
       );
-      await drain();
+      await waitForStoreIdle();
       expect(verificationCalls, 1);
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'reconciliation_verification_failed');
 
       // Opening Plans creates a new service. The same member's unfinished
       // transaction stays fail-closed without consuming another rate-limit
@@ -1091,7 +1093,7 @@ void main() {
       native.finishPrices();
       await store.initialize();
       native.updates.add([replayed]);
-      await drain();
+      await waitForStoreIdle();
       expect(verificationCalls, 1);
       expect(store.state, VerifiedStoreState.failed);
       expect(store.messageCode, 'reconciliation_verification_failed');
@@ -1118,7 +1120,7 @@ void main() {
       native.finishPrices();
       await store.initialize();
       native.updates.add([replayed]);
-      await drain();
+      await waitForStoreIdle();
 
       expect(verificationCalls, 2);
     },

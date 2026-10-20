@@ -325,14 +325,17 @@ class SupabaseAuthService {
   Future<BilAuthOutcome> signUp({
     required String email,
     required String password,
-    required String fullName,
-    required String phone,
+    String fullName = '',
   }) async {
     final response = await client.auth.signUp(
       email: email,
       password: password,
       emailRedirectTo: emailRedirectUri,
-      data: <String, dynamic>{'full_name': fullName, 'phone': phone},
+      // Only a voluntarily supplied display name is added to a new account.
+      // Existing account metadata is never updated by this signup path.
+      data: <String, dynamic>{
+        if (fullName.trim().isNotEmpty) 'full_name': fullName.trim(),
+      },
     );
     return response.session == null
         ? BilAuthOutcome.confirmationRequired

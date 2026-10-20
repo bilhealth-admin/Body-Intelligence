@@ -54,7 +54,7 @@ for (const lang of ['en', 'ar']) {
     assert.match(sharing, /Google UMP/);
     assert.match(sharing, lang === 'en' ? /Ads are excluded for guests and paid users/ : /لا تظهر الإعلانات للضيف أو للمستخدم المدفوع/);
     assert.match(sharing, lang === 'en' ? /Health data is not sold/ : /لا تُباع البيانات الصحية/);
-    assert.match(privacy.updated, lang === 'en' ? /4 October 2026/ : /4 أكتوبر 2026/);
+    assert.match(privacy.updated, lang === 'en' ? /20 October 2026/ : /20 أكتوبر 2026/);
   });
 }
 
@@ -71,7 +71,7 @@ test('no-script privacy retains the current Android and iOS provider disclosure'
   const html = fs.readFileSync(new URL('../../public_site/index.html', import.meta.url), 'utf8');
   const fallback = html.match(/<noscript>([\s\S]*?)<\/noscript>/)?.[1];
   assert.ok(fallback, 'Actual no-script legal fallback must remain readable');
-  assert.match(fallback, /Last updated: 4 October 2026/);
+  assert.match(fallback, /Last updated: 20 October 2026/);
   assert.match(fallback, /Google Mobile Ads.*supported Android and iOS builds/);
   assert.doesNotMatch(fallback, /Google Mobile Ads.*supported Android builds/);
   assert.match(fallback, /Health data is not sold or used to personalize advertising/);

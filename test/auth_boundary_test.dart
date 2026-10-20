@@ -90,9 +90,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.byType(TextFormField), findsNWidgets(5));
-    expect(find.text('Full name'), findsOneWidget);
-    expect(find.text('Phone number'), findsOneWidget);
+    expect(find.byType(TextFormField), findsNWidgets(4));
+    expect(find.text('Display name (optional)'), findsOneWidget);
+    expect(find.text('Phone number'), findsNothing);
     expect(find.text('Email'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
     expect(find.text('Confirm password'), findsOneWidget);
@@ -101,6 +101,35 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('register-submit')), findsOneWidget);
+
+    await tester.enterText(
+      find.byType(TextFormField).at(1),
+      'member@example.invalid',
+    );
+    await tester.enterText(find.byType(TextFormField).at(2), 'Secure123!');
+    await tester.enterText(find.byType(TextFormField).at(3), 'Secure123!');
+    final form = tester.state<FormState>(find.byType(Form));
+    expect(
+      form.validate(),
+      isTrue,
+      reason: 'An account needs no display name.',
+    );
+    await tester.enterText(find.byType(TextFormField).at(0), 'Q');
+    expect(
+      form.validate(),
+      isTrue,
+      reason: 'A pseudonym can be one character.',
+    );
+    final fields = tester
+        .widgetList<TextFormField>(find.byType(TextFormField))
+        .toList();
+    expect(fields[1].validator!('invalid'), isNotNull);
+    expect(fields[2].validator!('weak'), isNotNull);
+    expect(fields[3].validator!('different'), isNotNull);
+    final submit = tester.widget<FilledButton>(
+      find.byKey(const Key('register-submit')),
+    );
+    expect(submit.onPressed, isNull, reason: 'Terms still require acceptance.');
   });
 
   testWidgets('store reviewer has dedicated password access without bypass', (

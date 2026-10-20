@@ -286,6 +286,23 @@ jobs:
           plutil -lint ios/Runner/Runner.entitlements
           plutil -lint ios/Runner/RunnerDebug.entitlements
 
+      - name: Select exact CocoaPods in an isolated job gem home
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
+          python3 .github/scripts/install_isolated_cocoapods.py \
+            --output BIL-ios-cocoapods-installation.json
+
+      - name: Upload isolated CocoaPods installation receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-ios-cocoapods-installation-${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
+          path: BIL-ios-cocoapods-installation.json
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Boot iOS Simulator for the system-crypto release gate
         id: crypto_simulator
         if: ${{ inputs.run_native_crypto_checks }}

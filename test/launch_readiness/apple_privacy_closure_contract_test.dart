@@ -83,6 +83,14 @@ void main() {
         declaration,
         contains('NSPrivacyCollectedDataTypePurposeAppFunctionality'),
       );
+      if (dataType == 'NSPrivacyCollectedDataTypeUserID' ||
+          dataType == 'NSPrivacyCollectedDataTypeProductInteraction') {
+        expect(
+          declaration,
+          contains('NSPrivacyCollectedDataTypePurposeAnalytics'),
+          reason: 'Creator view counts retain the authenticated viewer ID.',
+        );
+      }
       expect(
         declaration,
         matches(
@@ -322,7 +330,8 @@ void main() {
     ).readAsStringSync();
 
     for (final required in <String>[
-      'Other sign-in options do not require a phone number.',
+      'New account creation does not request a phone number.',
+      'Phone numbers supplied through an earlier registration flow may remain in existing account metadata',
       'public Community avatar',
       'Private messages are stored with access controls but are not end-to-end encrypted.',
       'treats this authenticated processing as linked to the account',
@@ -337,7 +346,8 @@ void main() {
     ]) {
       expect(publicPolicy, contains(required), reason: 'Missing: $required');
     }
-    expect(publicPolicy, contains('رقم الهاتف عندما يطلبه مسار التسجيل'));
+    expect(publicPolicy, contains('لا يطلب إنشاء الحساب الجديد رقم هاتف'));
+    expect(publicPolicy, contains('ضمن بيانات الحسابات الحالية'));
     expect(publicPolicy, contains('ليست مشفرة من طرف إلى طرف'));
     expect(publicPolicy, contains('لا يحمّل أداة تحليلات ويب من BIL'));
 

@@ -2,7 +2,6 @@ import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
-import 'package:country_picker/country_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,11 +24,9 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final formKey = GlobalKey<FormState>();
   final name = TextEditingController();
-  final phone = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
   final confirmation = TextEditingController();
-  Country selectedCountry = Country.parse('EG');
   bool obscurePassword = true;
   bool obscureConfirmation = true;
   bool accepted = false;
@@ -53,10 +50,6 @@ class _RegisterPageState extends State<RegisterPage> {
             email: email.text.trim().toLowerCase(),
             password: password.text,
             fullName: name.text.trim(),
-            phone: AuthInputValidation.normalizeNationalPhone(
-              phone.text,
-              selectedCountry.phoneCode,
-            ),
           );
       if (!mounted) return;
       if (outcome == BilAuthOutcome.confirmationRequired) {
@@ -83,7 +76,6 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void dispose() {
     name.dispose();
-    phone.dispose();
     email.dispose();
     password.dispose();
     confirmation.dispose();
@@ -131,11 +123,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 22),
                   _field(
                     name,
-                    tr('Full name', 'الاسم الكامل'),
+                    tr('Display name (optional)', 'الاسم المعروض (اختياري)'),
                     Icons.person_outline,
+                    validator: (_) => null,
                   ),
-                  const SizedBox(height: 12),
-                  _phoneField(),
                   const SizedBox(height: 12),
                   _field(
                     email,
@@ -237,126 +228,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ? null
             : tr('This field is required.', 'هذا الحقل مطلوب.'),
   );
-
-  void _normalizeVisiblePhone(String value) {
-    final normalized = AuthInputValidation.normalizeVisibleNationalPhone(
-      value,
-      selectedCountry.phoneCode,
-    );
-    if (normalized != value) {
-      final removedCharacterCount = value.length - normalized.length;
-      final currentOffset = phone.selection.extentOffset;
-      final normalizedOffset = (currentOffset - removedCharacterCount)
-          .clamp(0, normalized.length)
-          .toInt();
-      phone.value = TextEditingValue(
-        text: normalized,
-        selection: TextSelection.collapsed(offset: normalizedOffset),
-      );
-    }
-    setState(() {});
-  }
-
-  Widget _phoneField() => TextFormField(
-    controller: phone,
-    enabled: AppEnvironment.cloudConfigured && !loading,
-    keyboardType: TextInputType.phone,
-    textDirection: TextDirection.ltr,
-    textAlign: TextAlign.start,
-    style: Theme.of(context).textTheme.bodyLarge,
-    decoration:
-        _decoration(
-          tr('Phone number', 'رقم الهاتف'),
-          Icons.phone_outlined,
-        ).copyWith(
-          prefixIconConstraints: const BoxConstraints(minWidth: 116),
-          prefixIcon: InkWell(
-            onTap: loading ? null : _selectCountry,
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(start: 14, end: 10),
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      selectedCountry.flagEmoji,
-                      style: const TextStyle(fontSize: 22),
-                    ),
-                    const SizedBox(width: 7),
-                    Semantics(
-                      label: '+${selectedCountry.phoneCode}',
-                      child: ExcludeSemantics(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          textDirection: TextDirection.ltr,
-                          children: [
-                            const Text(
-                              '+',
-                              maxLines: 1,
-                              softWrap: false,
-                              textDirection: TextDirection.ltr,
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              selectedCountry.phoneCode,
-                              maxLines: 1,
-                              softWrap: false,
-                              textDirection: TextDirection.ltr,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 3),
-                    const BilGlassPressFeedback(
-                      child: Icon(Icons.arrow_drop_down_rounded, size: 20),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-    validator: (value) =>
-        AuthInputValidation.isValidNationalPhone(
-          value,
-          selectedCountry.phoneCode,
-        )
-        ? null
-        : tr(
-            'Enter a valid phone number for the selected country.',
-            'أدخل رقم هاتف صحيحًا للدولة المختارة.',
-          ),
-    onChanged: _normalizeVisiblePhone,
-  );
-
-  void _selectCountry() {
-    showCountryPicker(
-      context: context,
-      useSafeArea: true,
-      // The selected calling code remains visible beside the input. Hiding it
-      // in the RTL country list avoids the package's long-code line break
-      // where the plus sign was rendered alone on a second line.
-      showPhoneCode: false,
-      countryListTheme: CountryListThemeData(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        inputDecoration: InputDecoration(
-          labelText: tr('Search country', 'ابحث عن الدولة'),
-          prefixIcon: const Icon(Icons.search_rounded),
-          border: const OutlineInputBorder(),
-        ),
-      ),
-      onSelect: (country) {
-        selectedCountry = country;
-        _normalizeVisiblePhone(phone.text);
-      },
-    );
-  }
 
   Widget _passwordField(
     TextEditingController controller,

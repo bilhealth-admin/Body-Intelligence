@@ -44,10 +44,12 @@ for separately classified source, SDK, console and unresolved evidence.
 
 ## Optional cloud data
 
-- Supabase Auth handles account identifiers, email, a phone number where the
-  chosen registration path asks for one, authentication events, IP address and
-  user-agent/security metadata. A phone number is not required by every sign-in
-  option.
+- Supabase Auth handles account identifiers, email, an optional display name,
+  authentication events, IP address and user-agent/security metadata. New
+  account creation does not request or send a phone number. Phone numbers
+  supplied through an earlier registration flow may remain in existing account
+  metadata under the retention and account-deletion controls; keep the Phone
+  Number disclosure while that historical data is still managed.
 - The current selective cloud-sync policy uploads only profile/body settings,
   weight records and hydration records after the signed-in user enables sync.
   It does not make the entire local meal diary a general cloud replica.
@@ -131,7 +133,7 @@ or completeness assertion for App Store Connect.
 | Contact Info — Phone Number | Yes | App Functionality |
 | Health & Fitness — Health | Yes | App Functionality; Product Personalization |
 | Health & Fitness — Fitness | Yes | App Functionality; Product Personalization |
-| Identifiers — User ID | Yes | App Functionality |
+| Identifiers — User ID | Yes | App Functionality; Analytics |
 | Identifiers — Device ID | Yes | App Functionality |
 | Contacts — Community social graph | Yes | App Functionality; Product Personalization |
 | User Content — Other User Content | Yes | App Functionality; Product Personalization |
@@ -139,7 +141,7 @@ or completeness assertion for App Store Connect.
 | User Content — Emails or Text Messages | Yes | App Functionality |
 | User Content — Photos or Videos | Yes | App Functionality |
 | Purchases — Purchase History | Yes | App Functionality |
-| Usage Data — Product Interaction | Yes | App Functionality |
+| Usage Data — Product Interaction | Yes | App Functionality; Analytics |
 | Usage Data — Search History | Yes | App Functionality |
 | Diagnostics — Performance Data | Yes | App Functionality |
 | Diagnostics — Other Diagnostic Data | Yes | App Functionality |

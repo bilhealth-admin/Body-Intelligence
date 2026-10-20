@@ -195,6 +195,15 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Verify offline store audit evidence and safe diagnostics
+        shell: pwsh
+        run: |
+          node --test tool/google_play/google_play_release_surface_readonly_audit.test.mjs tool/google_play/google_oauth.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pwsh -NoProfile -File tool/release_certification/test_store_readonly_evidence.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tool/release_certification -p test_pass_1_barrier.py -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - id: audit
         shell: pwsh
         env:
@@ -361,11 +370,19 @@ jobs:
           VISUAL: ${{ needs.visual_pass_1.result }}
           LIVE: ${{ needs.live_pass_1.result }}
           STORE: ${{ needs.store_readonly.result }}
+          LIVE_EVIDENCE: ${{ needs.live_pass_1.outputs.gate_status }}
+          STORE_EVIDENCE: ${{ needs.store_readonly.outputs.gate_status }}
           PRE_FINAL: ${{ needs.pre_final_automated_gates.result }}
           CLOUD_LIVE: ${{ needs.pre_final_cloud_live.result }}
         run: |
           for VALUE in "$STATIC" "$FULL" "$VISUAL" "$LIVE" "$STORE" "$PRE_FINAL" "$CLOUD_LIVE"; do
             test "$VALUE" = success
+          done
+          for EVIDENCE in "$LIVE_EVIDENCE" "$STORE_EVIDENCE"; do
+            if [[ "$EVIDENCE" != PASS ]]; then
+              echo 'Actual live/store evidence is not PASS; the second pass is blocked.' >&2
+              exit 1
+            fi
           done
 
   static_pass_2:

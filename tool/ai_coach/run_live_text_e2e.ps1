@@ -4,6 +4,7 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot '..\release\http_failure_body.ps1')
 . (Join-Path $PSScriptRoot '..\release_certification\auth_admin_user_create.ps1')
 . (Join-Path $PSScriptRoot '..\release\supabase_query_result.ps1')
+. (Join-Path $PSScriptRoot 'live_text_e2e_diagnostics.ps1')
 $baseUrl = "https://$ProjectRef.supabase.co"
 $userId = $null
 $authToken = $null
@@ -13,6 +14,8 @@ $result = $null
 $sessionRevoked = $false
 $userDeleted = $false
 $cascadeClean = $false
+$probeFailed = $false
+$cleanup = $null
 
 function Invoke-DbQuery([string]$Sql) {
   $old = $ErrorActionPreference
@@ -150,6 +153,7 @@ try {
   $usage = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$userId' order by week_start desc limit 1") -RequiredColumns @('used','reserved') -NumericColumns @('used','reserved')
   $feedback = Get-BilSupabaseQueryRow -Result (Invoke-DbQuery "select feedback_id,helpful,runtime from public.bil_ai_coach_feedback where owner_id='$userId' and response_id='$requestId'") -RequiredColumns @('feedback_id','helpful','runtime')
   if ($event.state -ne 'succeeded' -or [decimal]$event.credit_actual -le 0 -or [decimal]$usage.used -le 0 -or [decimal]$usage.reserved -ne 0) {
+    Write-BilCoachSettlementDiagnostic -Event $event -Usage $usage
     throw 'AI token settlement did not reach the expected succeeded/used>0/reserved=0 state.'
   }
   if ($duplicateStatus -ne 409) { throw 'Duplicate request was not rejected with HTTP 409.' }
@@ -181,6 +185,10 @@ try {
     feedback_id = [string]$feedbackId
     duplicate_status = $duplicateStatus
   }
+}
+catch {
+  $probeFailed = $true
+  throw
 }
 finally {
   if (-not $userId -and $email -and $adminHeaders) {
@@ -224,6 +232,11 @@ finally {
       }
       catch { $cascadeClean = $false }
     }
+  }
+  if ($probeFailed -or -not $sessionRevoked -or -not $userDeleted -or -not $cascadeClean) {
+    Write-BilCoachCleanupDiagnostic -FixtureIdentified ([bool]$userId) `
+      -SessionRevoked $sessionRevoked -UserDeleted $userDeleted `
+      -CascadeClean $cascadeClean -Cleanup $cleanup
   }
   Remove-Variable serverKey, publishableKey, password, keysRaw, authToken -ErrorAction SilentlyContinue
 }

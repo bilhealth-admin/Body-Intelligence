@@ -13,22 +13,35 @@ capture_failure_evidence() {
   local exit_status=$?
   if (( exit_status != 0 )); then
     printf 'exit_status=%s\nstage=%s\n' "$exit_status" "$stage" \
-      > "$evidence/failure.txt"
-    adb devices -l >> "$evidence/failure.txt" 2>&1 || true
-    adb logcat -d -t 1500 \
+      > "$evidence/failure.txt" || true
+    timeout 15s adb devices -l >> "$evidence/failure.txt" 2>&1 || true
+    timeout 15s adb logcat -d -t 1500 \
       > "$evidence/failure-logcat.txt" 2>&1 || true
     if [[ ! -f "$evidence/startup.png" && ! -f "$evidence/failure-screen.png" ]]; then
-      adb exec-out screencap -p > "$evidence/failure-screen.png" 2>&1 || true
+      timeout 15s adb exec-out screencap -p \
+        > "$evidence/failure-screen.png" 2>&1 || true
     fi
-    adb shell dumpsys activity activities \
+    timeout 15s adb shell dumpsys activity activities \
       > "$evidence/failure-activity-state.txt" 2>&1 || true
-    adb shell dumpsys window windows \
+    timeout 15s adb shell dumpsys window \
       > "$evidence/failure-window-state.txt" 2>&1 || true
-    adb shell uiautomator dump /sdcard/bil-failure-window.xml \
+    # Focus can change from Launcher to its ANR dialog after the last poll.
+    # Preserve the failed attempt and identify the actual dialog owner.
+    timeout 15s python3 tool/release/verify_android_startup_frame.py \
+      --window-health-only --require-app-focus \
+      --window-state "$evidence/failure-window-state.txt" \
+      > "$evidence/failure-window-check.txt" \
+      2> "$evidence/failure-window-errors.txt" || true
+    timeout 15s adb shell dumpsys activity lastanr \
+      > "$evidence/failure-last-anr.txt" 2>&1 || true
+    timeout 15s adb logcat -b crash -d -t 1000 \
+      > "$evidence/failure-crash-logcat.txt" 2>&1 || true
+    timeout 15s adb shell uiautomator dump /sdcard/bil-failure-window.xml \
       > "$evidence/failure-uiautomator.txt" 2>&1 || true
-    adb pull /sdcard/bil-failure-window.xml "$evidence/failure-window.xml" \
+    timeout 15s adb pull /sdcard/bil-failure-window.xml "$evidence/failure-window.xml" \
       >/dev/null 2>&1 || true
   fi
+  return "$exit_status"
 }
 trap capture_failure_evidence EXIT
 
