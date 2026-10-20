@@ -1,0 +1,2492 @@
+{
+  "cocoapods_version": "1.16.2",
+  "generated_workspace": [
+    "group:Runner.xcodeproj",
+    "group:Pods/Pods.xcodeproj"
+  ],
+  "original_workspace": [
+    "group:Runner.xcodeproj"
+  ],
+  "reviewed_generated_pbx_normalized": {
+    "archiveVersion": "1",
+    "classes": {},
+    "objectVersion": "54",
+    "objects": {
+      "1498D2321E8E86230040F4C2": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.h",
+        "path": "GeneratedPluginRegistrant.h",
+        "sourceTree": "<group>"
+      },
+      "1498D2331E8E89220040F4C2": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.objc",
+        "path": "GeneratedPluginRegistrant.m",
+        "sourceTree": "<group>"
+      },
+      "1498D2341E8E89220040F4C2": {
+        "fileRef": "1498D2331E8E89220040F4C2",
+        "isa": "PBXBuildFile"
+      },
+      "249021D3217E4FDB00AE95B9": {
+        "buildSettings": {
+          "ALWAYS_SEARCH_USER_PATHS": "NO",
+          "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
+          "CLANG_ANALYZER_NONNULL": "YES",
+          "CLANG_CXX_LANGUAGE_STANDARD": "gnu++0x",
+          "CLANG_CXX_LIBRARY": "libc++",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CLANG_ENABLE_OBJC_ARC": "YES",
+          "CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING": "YES",
+          "CLANG_WARN_BOOL_CONVERSION": "YES",
+          "CLANG_WARN_COMMA": "YES",
+          "CLANG_WARN_CONSTANT_CONVERSION": "YES",
+          "CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS": "YES",
+          "CLANG_WARN_DIRECT_OBJC_ISA_USAGE": "YES_ERROR",
+          "CLANG_WARN_EMPTY_BODY": "YES",
+          "CLANG_WARN_ENUM_CONVERSION": "YES",
+          "CLANG_WARN_INFINITE_RECURSION": "YES",
+          "CLANG_WARN_INT_CONVERSION": "YES",
+          "CLANG_WARN_NON_LITERAL_NULL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF": "YES",
+          "CLANG_WARN_OBJC_LITERAL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_ROOT_CLASS": "YES_ERROR",
+          "CLANG_WARN_RANGE_LOOP_ANALYSIS": "YES",
+          "CLANG_WARN_STRICT_PROTOTYPES": "YES",
+          "CLANG_WARN_SUSPICIOUS_MOVE": "YES",
+          "CLANG_WARN_UNREACHABLE_CODE": "YES",
+          "CLANG_WARN__DUPLICATE_METHOD_MATCH": "YES",
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "iPhone Developer",
+          "COPY_PHASE_STRIP": "NO",
+          "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
+          "ENABLE_NS_ASSERTIONS": "NO",
+          "ENABLE_STRICT_OBJC_MSGSEND": "YES",
+          "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+          "GCC_C_LANGUAGE_STANDARD": "gnu99",
+          "GCC_NO_COMMON_BLOCKS": "YES",
+          "GCC_WARN_64_TO_32_BIT_CONVERSION": "YES",
+          "GCC_WARN_ABOUT_RETURN_TYPE": "YES_ERROR",
+          "GCC_WARN_UNDECLARED_SELECTOR": "YES",
+          "GCC_WARN_UNINITIALIZED_AUTOS": "YES_AGGRESSIVE",
+          "GCC_WARN_UNUSED_FUNCTION": "YES",
+          "GCC_WARN_UNUSED_VARIABLE": "YES",
+          "IPHONEOS_DEPLOYMENT_TARGET": "15.0",
+          "MTL_ENABLE_DEBUG_INFO": "NO",
+          "SDKROOT": "iphoneos",
+          "SUPPORTED_PLATFORMS": "iphoneos",
+          "TARGETED_DEVICE_FAMILY": "1,2",
+          "VALIDATE_PRODUCT": "YES"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Profile"
+      },
+      "249021D4217E4FDB00AE95B9": {
+        "baseConfigurationReference": "7AFA3C8E1D35360C0083082E",
+        "buildSettings": {
+          "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CODE_SIGN_ENTITLEMENTS": "Runner/Runner.entitlements",
+          "CURRENT_PROJECT_VERSION": "$(FLUTTER_BUILD_NUMBER)",
+          "DEVELOPMENT_TEAM": "43F9Y5Y96K",
+          "ENABLE_BITCODE": "NO",
+          "INFOPLIST_FILE": "Runner/Info.plist",
+          "LD_RUNPATH_SEARCH_PATHS": [
+            "$(inherited)",
+            "@executable_path/Frameworks"
+          ],
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_OBJC_BRIDGING_HEADER": "Runner/Runner-Bridging-Header.h",
+          "SWIFT_VERSION": "5.0",
+          "VERSIONING_SYSTEM": "apple-generic"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Profile"
+      },
+      "331C807B294A618700263BE5": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "RunnerTests.swift",
+        "sourceTree": "<group>"
+      },
+      "331C807D294A63A400263BE5": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "331C808B294A63AB00263BE5"
+        ],
+        "isa": "PBXSourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "331C807F294A63A400263BE5": {
+        "buildActionMask": "2147483647",
+        "files": [],
+        "isa": "PBXResourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "331C8080294A63A400263BE5": {
+        "buildConfigurationList": "331C8087294A63A400263BE5",
+        "buildPhases": [
+          "script:[CP] Check Pods Manifest.lock:[\"$(DERIVED_FILE_DIR)/Pods-RunnerTests-checkManifestLockResult.txt\"]",
+          "331C807D294A63A400263BE5",
+          "331C807F294A63A400263BE5",
+          "phase:RunnerTestsFrameworks"
+        ],
+        "buildRules": [],
+        "dependencies": [
+          "331C8086294A63A400263BE5"
+        ],
+        "isa": "PBXNativeTarget",
+        "name": "RunnerTests",
+        "productName": "RunnerTests",
+        "productReference": "331C8081294A63A400263BE5",
+        "productType": "com.apple.product-type.bundle.unit-test"
+      },
+      "331C8081294A63A400263BE5": {
+        "explicitFileType": "wrapper.cfbundle",
+        "includeInIndex": "0",
+        "isa": "PBXFileReference",
+        "path": "RunnerTests.xctest",
+        "sourceTree": "BUILT_PRODUCTS_DIR"
+      },
+      "331C8082294A63A400263BE5": {
+        "children": [
+          "331C807B294A618700263BE5"
+        ],
+        "isa": "PBXGroup",
+        "path": "RunnerTests",
+        "sourceTree": "<group>"
+      },
+      "331C8085294A63A400263BE5": {
+        "containerPortal": "97C146E61CF9000F007C117D",
+        "isa": "PBXContainerItemProxy",
+        "proxyType": "1",
+        "remoteGlobalIDString": "97C146ED1CF9000F007C117D",
+        "remoteInfo": "Runner"
+      },
+      "331C8086294A63A400263BE5": {
+        "isa": "PBXTargetDependency",
+        "target": "97C146ED1CF9000F007C117D",
+        "targetProxy": "331C8085294A63A400263BE5"
+      },
+      "331C8087294A63A400263BE5": {
+        "buildConfigurations": [
+          "331C8088294A63A400263BE5",
+          "331C8089294A63A400263BE5",
+          "331C808A294A63A400263BE5"
+        ],
+        "defaultConfigurationIsVisible": "0",
+        "defaultConfigurationName": "Release",
+        "isa": "XCConfigurationList"
+      },
+      "331C8088294A63A400263BE5": {
+        "baseConfigurationReference": "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig",
+        "buildSettings": {
+          "BUNDLE_LOADER": "$(TEST_HOST)",
+          "CODE_SIGN_STYLE": "Automatic",
+          "CURRENT_PROJECT_VERSION": "1",
+          "GENERATE_INFOPLIST_FILE": "YES",
+          "MARKETING_VERSION": "1.0",
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog.RunnerTests",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG",
+          "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
+          "SWIFT_VERSION": "5.0",
+          "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Debug"
+      },
+      "331C8089294A63A400263BE5": {
+        "baseConfigurationReference": "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig",
+        "buildSettings": {
+          "BUNDLE_LOADER": "$(TEST_HOST)",
+          "CODE_SIGN_STYLE": "Automatic",
+          "CURRENT_PROJECT_VERSION": "1",
+          "GENERATE_INFOPLIST_FILE": "YES",
+          "MARKETING_VERSION": "1.0",
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog.RunnerTests",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_VERSION": "5.0",
+          "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Release"
+      },
+      "331C808A294A63A400263BE5": {
+        "baseConfigurationReference": "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig",
+        "buildSettings": {
+          "BUNDLE_LOADER": "$(TEST_HOST)",
+          "CODE_SIGN_STYLE": "Automatic",
+          "CURRENT_PROJECT_VERSION": "1",
+          "GENERATE_INFOPLIST_FILE": "YES",
+          "MARKETING_VERSION": "1.0",
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog.RunnerTests",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_VERSION": "5.0",
+          "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Profile"
+      },
+      "331C808B294A63AB00263BE5": {
+        "fileRef": "331C807B294A618700263BE5",
+        "isa": "PBXBuildFile"
+      },
+      "3B06AD1E1E4923F5004D2608": {
+        "alwaysOutOfDate": "1",
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputPaths": [
+          "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+        ],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "Thin Binary",
+        "outputPaths": [],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin"
+      },
+      "3B3967151E833CAA004F5970": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.xml",
+        "name": "AppFrameworkInfo.plist",
+        "path": "Flutter/AppFrameworkInfo.plist",
+        "sourceTree": "<group>"
+      },
+      "3B3967161E833CAA004F5970": {
+        "fileRef": "3B3967151E833CAA004F5970",
+        "isa": "PBXBuildFile"
+      },
+      "74858FAD1ED2DC5600515810": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.h",
+        "path": "Runner-Bridging-Header.h",
+        "sourceTree": "<group>"
+      },
+      "74858FAE1ED2DC5600515810": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "AppDelegate.swift",
+        "sourceTree": "<group>"
+      },
+      "74858FAF1ED2DC5600515810": {
+        "fileRef": "74858FAE1ED2DC5600515810",
+        "isa": "PBXBuildFile"
+      },
+      "781AD8BC2B33823900A9FFBB": {
+        "isa": "XCLocalSwiftPackageReference",
+        "relativePath": "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage"
+      },
+      "7884E8672EC3CC0400C636F2": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "SceneDelegate.swift",
+        "sourceTree": "<group>"
+      },
+      "7884E8682EC3CC0700C636F2": {
+        "fileRef": "7884E8672EC3CC0400C636F2",
+        "isa": "PBXBuildFile"
+      },
+      "78A3181F2AECB46A00862997": {
+        "isa": "XCSwiftPackageProductDependency",
+        "productName": "FlutterGeneratedPluginSwiftPackage"
+      },
+      "78A318202AECB46A00862997": {
+        "isa": "PBXBuildFile",
+        "productRef": "78A3181F2AECB46A00862997"
+      },
+      "78E0A7A72DC9AD7400C4905E": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "wrapper",
+        "name": "FlutterGeneratedPluginSwiftPackage",
+        "path": "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage",
+        "sourceTree": "<group>"
+      },
+      "7AFA3C8E1D35360C0083082E": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Release.xcconfig",
+        "path": "Flutter/Release.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "9705A1C41CF9048500538489": {
+        "buildActionMask": "2147483647",
+        "dstPath": "",
+        "dstSubfolderSpec": "10",
+        "files": [],
+        "isa": "PBXCopyFilesBuildPhase",
+        "name": "Embed Frameworks",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "9740EEB11CF90186004384FC": {
+        "children": [
+          "78E0A7A72DC9AD7400C4905E",
+          "3B3967151E833CAA004F5970",
+          "9740EEB21CF90195004384FC",
+          "7AFA3C8E1D35360C0083082E",
+          "9740EEB31CF90195004384FC"
+        ],
+        "isa": "PBXGroup",
+        "name": "Flutter",
+        "sourceTree": "<group>"
+      },
+      "9740EEB21CF90195004384FC": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Debug.xcconfig",
+        "path": "Flutter/Debug.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "9740EEB31CF90195004384FC": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Generated.xcconfig",
+        "path": "Flutter/Generated.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "9740EEB61CF901F6004384FC": {
+        "alwaysOutOfDate": "1",
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputPaths": [],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "Run Script",
+        "outputPaths": [],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build"
+      },
+      "97C146E51CF9000F007C117D": {
+        "children": [
+          "9740EEB11CF90186004384FC",
+          "97C146F01CF9000F007C117D",
+          "97C146EF1CF9000F007C117D",
+          "331C8082294A63A400263BE5",
+          "group:Pods",
+          "group:Frameworks"
+        ],
+        "isa": "PBXGroup",
+        "sourceTree": "<group>"
+      },
+      "97C146E61CF9000F007C117D": {
+        "attributes": {
+          "BuildIndependentTargetsInParallel": "YES",
+          "LastUpgradeCheck": "1510",
+          "ORGANIZATIONNAME": "",
+          "TargetAttributes": {
+            "331C8080294A63A400263BE5": {
+              "CreatedOnToolsVersion": "14.0",
+              "TestTargetID": "97C146ED1CF9000F007C117D"
+            },
+            "97C146ED1CF9000F007C117D": {
+              "CreatedOnToolsVersion": "7.3.1",
+              "LastSwiftMigration": "1100",
+              "ProvisioningStyle": "Automatic",
+              "SystemCapabilities": {
+                "com.apple.HealthKit": {
+                  "enabled": "1"
+                },
+                "com.apple.InAppPurchase": {
+                  "enabled": "1"
+                },
+                "com.apple.Push": {
+                  "enabled": "1"
+                },
+                "com.apple.SignInWithApple": {
+                  "enabled": "1"
+                }
+              }
+            }
+          }
+        },
+        "buildConfigurationList": "97C146E91CF9000F007C117D",
+        "compatibilityVersion": "Xcode 9.3",
+        "developmentRegion": "en",
+        "hasScannedForEncodings": "0",
+        "isa": "PBXProject",
+        "knownRegions": [
+          "en",
+          "ar",
+          "fr",
+          "es",
+          "tr",
+          "de",
+          "it",
+          "pt-BR",
+          "pt-PT",
+          "ur",
+          "fa",
+          "hi",
+          "id",
+          "ms",
+          "ja",
+          "ko",
+          "zh-Hans",
+          "zh-Hant",
+          "ru",
+          "bn",
+          "vi",
+          "th",
+          "pl",
+          "nl",
+          "uk",
+          "Base"
+        ],
+        "mainGroup": "97C146E51CF9000F007C117D",
+        "packageReferences": [
+          "781AD8BC2B33823900A9FFBB"
+        ],
+        "productRefGroup": "97C146EF1CF9000F007C117D",
+        "projectDirPath": "",
+        "projectRoot": "",
+        "targets": [
+          "97C146ED1CF9000F007C117D",
+          "331C8080294A63A400263BE5"
+        ]
+      },
+      "97C146E91CF9000F007C117D": {
+        "buildConfigurations": [
+          "97C147031CF9000F007C117D",
+          "97C147041CF9000F007C117D",
+          "249021D3217E4FDB00AE95B9"
+        ],
+        "defaultConfigurationIsVisible": "0",
+        "defaultConfigurationName": "Release",
+        "isa": "XCConfigurationList"
+      },
+      "97C146EA1CF9000F007C117D": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "74858FAF1ED2DC5600515810",
+          "A1B2C3D41F00000100000002",
+          "A1B2C3D41F00000100000004",
+          "B11210120000000000000002",
+          "A1B2C3D41F00000100000006",
+          "A1B2C3D41F00000100000008",
+          "A1B2C3D41F0000010000000A",
+          "D40909000000000000000002",
+          "A1B2C3D41F0000010000000C",
+          "C1D2E3F41F00000100000002",
+          "D2E3F4A51F00000100000002",
+          "E3F4A5B61F00000100000002",
+          "1498D2341E8E89220040F4C2",
+          "7884E8682EC3CC0700C636F2"
+        ],
+        "isa": "PBXSourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "97C146EB1CF9000F007C117D": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "78A318202AECB46A00862997",
+          "build:Pods_Runner.framework"
+        ],
+        "isa": "PBXFrameworksBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "97C146EC1CF9000F007C117D": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "97C147011CF9000F007C117D",
+          "3B3967161E833CAA004F5970",
+          "97C146FE1CF9000F007C117D",
+          "97C146FC1CF9000F007C117D",
+          "B1A2C3D41F00000100000002",
+          "B1A2C3D41F00000100000004",
+          "C1D2E3F41F00000100000004",
+          "C1D2E3F41F00000100000006"
+        ],
+        "isa": "PBXResourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "97C146ED1CF9000F007C117D": {
+        "buildConfigurationList": "97C147051CF9000F007C117D",
+        "buildPhases": [
+          "script:[CP] Check Pods Manifest.lock:[\"$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt\"]",
+          "9740EEB61CF901F6004384FC",
+          "97C146EA1CF9000F007C117D",
+          "97C146EB1CF9000F007C117D",
+          "97C146EC1CF9000F007C117D",
+          "9705A1C41CF9048500538489",
+          "3B06AD1E1E4923F5004D2608",
+          "script:[CP] Embed Pods Frameworks:[]",
+          "script:[CP] Copy Pods Resources:[]"
+        ],
+        "buildRules": [],
+        "dependencies": [],
+        "isa": "PBXNativeTarget",
+        "name": "Runner",
+        "packageProductDependencies": [
+          "78A3181F2AECB46A00862997"
+        ],
+        "productName": "Runner",
+        "productReference": "97C146EE1CF9000F007C117D",
+        "productType": "com.apple.product-type.application"
+      },
+      "97C146EE1CF9000F007C117D": {
+        "explicitFileType": "wrapper.application",
+        "includeInIndex": "0",
+        "isa": "PBXFileReference",
+        "path": "Runner.app",
+        "sourceTree": "BUILT_PRODUCTS_DIR"
+      },
+      "97C146EF1CF9000F007C117D": {
+        "children": [
+          "97C146EE1CF9000F007C117D",
+          "331C8081294A63A400263BE5"
+        ],
+        "isa": "PBXGroup",
+        "name": "Products",
+        "sourceTree": "<group>"
+      },
+      "97C146F01CF9000F007C117D": {
+        "children": [
+          "97C146FA1CF9000F007C117D",
+          "97C146FD1CF9000F007C117D",
+          "97C146FF1CF9000F007C117D",
+          "97C147021CF9000F007C117D",
+          "B1A2C3D41F00000100000001",
+          "B1A2C3D41F00000100000003",
+          "1498D2321E8E86230040F4C2",
+          "1498D2331E8E89220040F4C2",
+          "74858FAE1ED2DC5600515810",
+          "A1B2C3D41F00000100000001",
+          "A1B2C3D41F00000100000003",
+          "B11210120000000000000001",
+          "A1B2C3D41F00000100000005",
+          "A1B2C3D41F00000100000007",
+          "A1B2C3D41F00000100000009",
+          "D40909000000000000000001",
+          "A1B2C3D41F0000010000000B",
+          "C1D2E3F41F00000100000001",
+          "C1D2E3F41F00000100000003",
+          "C1D2E3F41F00000100000005",
+          "D2E3F4A51F00000100000001",
+          "E3F4A5B61F00000100000001",
+          "7884E8672EC3CC0400C636F2",
+          "74858FAD1ED2DC5600515810"
+        ],
+        "isa": "PBXGroup",
+        "path": "Runner",
+        "sourceTree": "<group>"
+      },
+      "97C146FA1CF9000F007C117D": {
+        "children": [
+          "97C146FB1CF9000F007C117D"
+        ],
+        "isa": "PBXVariantGroup",
+        "name": "Main.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C146FB1CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "file.storyboard",
+        "name": "Base",
+        "path": "Base.lproj/Main.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C146FC1CF9000F007C117D": {
+        "fileRef": "97C146FA1CF9000F007C117D",
+        "isa": "PBXBuildFile"
+      },
+      "97C146FD1CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "folder.assetcatalog",
+        "path": "Assets.xcassets",
+        "sourceTree": "<group>"
+      },
+      "97C146FE1CF9000F007C117D": {
+        "fileRef": "97C146FD1CF9000F007C117D",
+        "isa": "PBXBuildFile"
+      },
+      "97C146FF1CF9000F007C117D": {
+        "children": [
+          "97C147001CF9000F007C117D"
+        ],
+        "isa": "PBXVariantGroup",
+        "name": "LaunchScreen.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C147001CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "file.storyboard",
+        "name": "Base",
+        "path": "Base.lproj/LaunchScreen.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C147011CF9000F007C117D": {
+        "fileRef": "97C146FF1CF9000F007C117D",
+        "isa": "PBXBuildFile"
+      },
+      "97C147021CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.xml",
+        "path": "Info.plist",
+        "sourceTree": "<group>"
+      },
+      "97C147031CF9000F007C117D": {
+        "buildSettings": {
+          "ALWAYS_SEARCH_USER_PATHS": "NO",
+          "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
+          "CLANG_ANALYZER_NONNULL": "YES",
+          "CLANG_CXX_LANGUAGE_STANDARD": "gnu++0x",
+          "CLANG_CXX_LIBRARY": "libc++",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CLANG_ENABLE_OBJC_ARC": "YES",
+          "CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING": "YES",
+          "CLANG_WARN_BOOL_CONVERSION": "YES",
+          "CLANG_WARN_COMMA": "YES",
+          "CLANG_WARN_CONSTANT_CONVERSION": "YES",
+          "CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS": "YES",
+          "CLANG_WARN_DIRECT_OBJC_ISA_USAGE": "YES_ERROR",
+          "CLANG_WARN_EMPTY_BODY": "YES",
+          "CLANG_WARN_ENUM_CONVERSION": "YES",
+          "CLANG_WARN_INFINITE_RECURSION": "YES",
+          "CLANG_WARN_INT_CONVERSION": "YES",
+          "CLANG_WARN_NON_LITERAL_NULL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF": "YES",
+          "CLANG_WARN_OBJC_LITERAL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_ROOT_CLASS": "YES_ERROR",
+          "CLANG_WARN_RANGE_LOOP_ANALYSIS": "YES",
+          "CLANG_WARN_STRICT_PROTOTYPES": "YES",
+          "CLANG_WARN_SUSPICIOUS_MOVE": "YES",
+          "CLANG_WARN_UNREACHABLE_CODE": "YES",
+          "CLANG_WARN__DUPLICATE_METHOD_MATCH": "YES",
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "iPhone Developer",
+          "COPY_PHASE_STRIP": "NO",
+          "DEBUG_INFORMATION_FORMAT": "dwarf",
+          "ENABLE_STRICT_OBJC_MSGSEND": "YES",
+          "ENABLE_TESTABILITY": "YES",
+          "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+          "GCC_C_LANGUAGE_STANDARD": "gnu99",
+          "GCC_DYNAMIC_NO_PIC": "NO",
+          "GCC_NO_COMMON_BLOCKS": "YES",
+          "GCC_OPTIMIZATION_LEVEL": "0",
+          "GCC_PREPROCESSOR_DEFINITIONS": [
+            "DEBUG=1",
+            "$(inherited)"
+          ],
+          "GCC_WARN_64_TO_32_BIT_CONVERSION": "YES",
+          "GCC_WARN_ABOUT_RETURN_TYPE": "YES_ERROR",
+          "GCC_WARN_UNDECLARED_SELECTOR": "YES",
+          "GCC_WARN_UNINITIALIZED_AUTOS": "YES_AGGRESSIVE",
+          "GCC_WARN_UNUSED_FUNCTION": "YES",
+          "GCC_WARN_UNUSED_VARIABLE": "YES",
+          "IPHONEOS_DEPLOYMENT_TARGET": "15.0",
+          "MTL_ENABLE_DEBUG_INFO": "YES",
+          "ONLY_ACTIVE_ARCH": "YES",
+          "SDKROOT": "iphoneos",
+          "TARGETED_DEVICE_FAMILY": "1,2"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Debug"
+      },
+      "97C147041CF9000F007C117D": {
+        "buildSettings": {
+          "ALWAYS_SEARCH_USER_PATHS": "NO",
+          "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
+          "CLANG_ANALYZER_NONNULL": "YES",
+          "CLANG_CXX_LANGUAGE_STANDARD": "gnu++0x",
+          "CLANG_CXX_LIBRARY": "libc++",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CLANG_ENABLE_OBJC_ARC": "YES",
+          "CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING": "YES",
+          "CLANG_WARN_BOOL_CONVERSION": "YES",
+          "CLANG_WARN_COMMA": "YES",
+          "CLANG_WARN_CONSTANT_CONVERSION": "YES",
+          "CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS": "YES",
+          "CLANG_WARN_DIRECT_OBJC_ISA_USAGE": "YES_ERROR",
+          "CLANG_WARN_EMPTY_BODY": "YES",
+          "CLANG_WARN_ENUM_CONVERSION": "YES",
+          "CLANG_WARN_INFINITE_RECURSION": "YES",
+          "CLANG_WARN_INT_CONVERSION": "YES",
+          "CLANG_WARN_NON_LITERAL_NULL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF": "YES",
+          "CLANG_WARN_OBJC_LITERAL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_ROOT_CLASS": "YES_ERROR",
+          "CLANG_WARN_RANGE_LOOP_ANALYSIS": "YES",
+          "CLANG_WARN_STRICT_PROTOTYPES": "YES",
+          "CLANG_WARN_SUSPICIOUS_MOVE": "YES",
+          "CLANG_WARN_UNREACHABLE_CODE": "YES",
+          "CLANG_WARN__DUPLICATE_METHOD_MATCH": "YES",
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "iPhone Developer",
+          "COPY_PHASE_STRIP": "NO",
+          "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
+          "ENABLE_NS_ASSERTIONS": "NO",
+          "ENABLE_STRICT_OBJC_MSGSEND": "YES",
+          "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+          "GCC_C_LANGUAGE_STANDARD": "gnu99",
+          "GCC_NO_COMMON_BLOCKS": "YES",
+          "GCC_WARN_64_TO_32_BIT_CONVERSION": "YES",
+          "GCC_WARN_ABOUT_RETURN_TYPE": "YES_ERROR",
+          "GCC_WARN_UNDECLARED_SELECTOR": "YES",
+          "GCC_WARN_UNINITIALIZED_AUTOS": "YES_AGGRESSIVE",
+          "GCC_WARN_UNUSED_FUNCTION": "YES",
+          "GCC_WARN_UNUSED_VARIABLE": "YES",
+          "IPHONEOS_DEPLOYMENT_TARGET": "15.0",
+          "MTL_ENABLE_DEBUG_INFO": "NO",
+          "SDKROOT": "iphoneos",
+          "SUPPORTED_PLATFORMS": "iphoneos",
+          "SWIFT_COMPILATION_MODE": "wholemodule",
+          "SWIFT_OPTIMIZATION_LEVEL": "-O",
+          "TARGETED_DEVICE_FAMILY": "1,2",
+          "VALIDATE_PRODUCT": "YES"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Release"
+      },
+      "97C147051CF9000F007C117D": {
+        "buildConfigurations": [
+          "97C147061CF9000F007C117D",
+          "97C147071CF9000F007C117D",
+          "249021D4217E4FDB00AE95B9"
+        ],
+        "defaultConfigurationIsVisible": "0",
+        "defaultConfigurationName": "Release",
+        "isa": "XCConfigurationList"
+      },
+      "97C147061CF9000F007C117D": {
+        "baseConfigurationReference": "9740EEB21CF90195004384FC",
+        "buildSettings": {
+          "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CODE_SIGN_ENTITLEMENTS": "Runner/RunnerDebug.entitlements",
+          "CURRENT_PROJECT_VERSION": "$(FLUTTER_BUILD_NUMBER)",
+          "DEVELOPMENT_TEAM": "43F9Y5Y96K",
+          "ENABLE_BITCODE": "NO",
+          "INFOPLIST_FILE": "Runner/Info.plist",
+          "LD_RUNPATH_SEARCH_PATHS": [
+            "$(inherited)",
+            "@executable_path/Frameworks"
+          ],
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_OBJC_BRIDGING_HEADER": "Runner/Runner-Bridging-Header.h",
+          "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
+          "SWIFT_VERSION": "5.0",
+          "VERSIONING_SYSTEM": "apple-generic"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Debug"
+      },
+      "97C147071CF9000F007C117D": {
+        "baseConfigurationReference": "7AFA3C8E1D35360C0083082E",
+        "buildSettings": {
+          "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CODE_SIGN_ENTITLEMENTS": "Runner/Runner.entitlements",
+          "CURRENT_PROJECT_VERSION": "$(FLUTTER_BUILD_NUMBER)",
+          "DEVELOPMENT_TEAM": "43F9Y5Y96K",
+          "ENABLE_BITCODE": "NO",
+          "INFOPLIST_FILE": "Runner/Info.plist",
+          "LD_RUNPATH_SEARCH_PATHS": [
+            "$(inherited)",
+            "@executable_path/Frameworks"
+          ],
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_OBJC_BRIDGING_HEADER": "Runner/Runner-Bridging-Header.h",
+          "SWIFT_VERSION": "5.0",
+          "VERSIONING_SYSTEM": "apple-generic"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Release"
+      },
+      "A1B2C3D41F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILGlobalHealthBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000002": {
+        "fileRef": "A1B2C3D41F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000003": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILFitnessBleBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000004": {
+        "fileRef": "A1B2C3D41F00000100000003",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000005": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILSpeechBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000006": {
+        "fileRef": "A1B2C3D41F00000100000005",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000007": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILTextToSpeechBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000008": {
+        "fileRef": "A1B2C3D41F00000100000007",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000009": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILSystemCryptoBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F0000010000000A": {
+        "fileRef": "A1B2C3D41F00000100000009",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F0000010000000B": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.objc",
+        "path": "BILObjCExceptionCatcher.m",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F0000010000000C": {
+        "fileRef": "A1B2C3D41F0000010000000B",
+        "isa": "PBXBuildFile"
+      },
+      "B11210120000000000000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILCommunityTranslationBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "B11210120000000000000002": {
+        "fileRef": "B11210120000000000000001",
+        "isa": "PBXBuildFile"
+      },
+      "B1A2C3D41F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xml",
+        "path": "PrivacyInfo.xcprivacy",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000002": {
+        "fileRef": "B1A2C3D41F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "B1A2C3D41F00000100000003": {
+        "children": [
+          "B1A2C3D41F00000100000005",
+          "B1A2C3D41F00000100000006",
+          "B1A2C3D41F00000100000007",
+          "B1A2C3D41F00000100000008",
+          "B1A2C3D41F00000100000009",
+          "B1A2C3D41F0000010000000A",
+          "B1A2C3D41F0000010000000B",
+          "B1A2C3D41F0000010000000C",
+          "B1A2C3D41F0000010000000D",
+          "B1A2C3D41F0000010000000E",
+          "B1A2C3D41F0000010000000F",
+          "B1A2C3D41F00000100000010",
+          "B1A2C3D41F00000100000011",
+          "B1A2C3D41F00000100000012",
+          "B1A2C3D41F00000100000013",
+          "B1A2C3D41F00000100000014",
+          "B1A2C3D41F00000100000015",
+          "B1A2C3D41F00000100000016",
+          "B1A2C3D41F00000100000017",
+          "B1A2C3D41F00000100000018",
+          "B1A2C3D41F00000100000019",
+          "B1A2C3D41F0000010000001A",
+          "B1A2C3D41F0000010000001B",
+          "B1A2C3D41F0000010000001C",
+          "B1A2C3D41F0000010000001D"
+        ],
+        "isa": "PBXVariantGroup",
+        "name": "InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000004": {
+        "fileRef": "B1A2C3D41F00000100000003",
+        "isa": "PBXBuildFile"
+      },
+      "B1A2C3D41F00000100000005": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "en",
+        "path": "en.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000006": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ar",
+        "path": "ar.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000007": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "fr",
+        "path": "fr.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000008": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "es",
+        "path": "es.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000009": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "tr",
+        "path": "tr.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000A": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "de",
+        "path": "de.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000B": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "it",
+        "path": "it.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000C": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "pt-BR",
+        "path": "pt-BR.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "pt-PT",
+        "path": "pt-PT.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000E": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ur",
+        "path": "ur.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000F": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "fa",
+        "path": "fa.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000010": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "hi",
+        "path": "hi.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000011": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "id",
+        "path": "id.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000012": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ms",
+        "path": "ms.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000013": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ja",
+        "path": "ja.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000014": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ko",
+        "path": "ko.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000015": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "zh-Hans",
+        "path": "zh-Hans.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000016": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "zh-Hant",
+        "path": "zh-Hant.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000017": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ru",
+        "path": "ru.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000018": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "bn",
+        "path": "bn.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000019": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "vi",
+        "path": "vi.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001A": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "th",
+        "path": "th.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001B": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "pl",
+        "path": "pl.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001C": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "nl",
+        "path": "nl.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "uk",
+        "path": "uk.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILMicSoundBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000002": {
+        "fileRef": "C1D2E3F41F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "C1D2E3F41F00000100000003": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "audio.wav",
+        "path": "bil_mic_open_vibration.wav",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000004": {
+        "fileRef": "C1D2E3F41F00000100000003",
+        "isa": "PBXBuildFile"
+      },
+      "C1D2E3F41F00000100000005": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "audio.wav",
+        "path": "bil_mic_end_vibration.wav",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000006": {
+        "fileRef": "C1D2E3F41F00000100000005",
+        "isa": "PBXBuildFile"
+      },
+      "D2E3F4A51F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILAppleSignInLifecycleBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "D2E3F4A51F00000100000002": {
+        "fileRef": "D2E3F4A51F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "D40909000000000000000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILSettingsSymbolsBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "D40909000000000000000002": {
+        "fileRef": "D40909000000000000000001",
+        "isa": "PBXBuildFile"
+      },
+      "E3F4A5B61F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILAppAttestBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "E3F4A5B61F00000100000002": {
+        "fileRef": "E3F4A5B61F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "build:Pods_Runner.framework": {
+        "fileRef": "file:Pods_Runner.framework",
+        "isa": "PBXBuildFile"
+      },
+      "build:Pods_RunnerTests.framework": {
+        "fileRef": "file:Pods_RunnerTests.framework",
+        "isa": "PBXBuildFile"
+      },
+      "file:Pods_Runner.framework": {
+        "explicitFileType": "wrapper.framework",
+        "includeInIndex": "0",
+        "isa": "PBXFileReference",
+        "path": "Pods_Runner.framework",
+        "sourceTree": "BUILT_PRODUCTS_DIR"
+      },
+      "file:Pods_RunnerTests.framework": {
+        "explicitFileType": "wrapper.framework",
+        "includeInIndex": "0",
+        "isa": "PBXFileReference",
+        "path": "Pods_RunnerTests.framework",
+        "sourceTree": "BUILT_PRODUCTS_DIR"
+      },
+      "file:Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig": {
+        "includeInIndex": "1",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Pods-Runner.debug.xcconfig",
+        "path": "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "file:Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig": {
+        "includeInIndex": "1",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Pods-Runner.profile.xcconfig",
+        "path": "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "file:Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig": {
+        "includeInIndex": "1",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Pods-Runner.release.xcconfig",
+        "path": "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig": {
+        "includeInIndex": "1",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Pods-RunnerTests.debug.xcconfig",
+        "path": "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig": {
+        "includeInIndex": "1",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Pods-RunnerTests.profile.xcconfig",
+        "path": "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig": {
+        "includeInIndex": "1",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Pods-RunnerTests.release.xcconfig",
+        "path": "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "group:Frameworks": {
+        "children": [
+          "file:Pods_Runner.framework",
+          "file:Pods_RunnerTests.framework"
+        ],
+        "isa": "PBXGroup",
+        "name": "Frameworks",
+        "sourceTree": "<group>"
+      },
+      "group:Pods": {
+        "children": [
+          "file:Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig",
+          "file:Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig",
+          "file:Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig",
+          "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig",
+          "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig",
+          "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"
+        ],
+        "isa": "PBXGroup",
+        "name": "Pods",
+        "path": "Pods",
+        "sourceTree": "<group>"
+      },
+      "phase:RunnerTestsFrameworks": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "build:Pods_RunnerTests.framework"
+        ],
+        "isa": "PBXFrameworksBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "script:[CP] Check Pods Manifest.lock:[\"$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt\"]": {
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputFileListPaths": [],
+        "inputPaths": [
+          "${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+          "${PODS_ROOT}/Manifest.lock"
+        ],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "[CP] Check Pods Manifest.lock",
+        "outputFileListPaths": [],
+        "outputPaths": [
+          "$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt"
+        ],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n",
+        "showEnvVarsInLog": "0"
+      },
+      "script:[CP] Check Pods Manifest.lock:[\"$(DERIVED_FILE_DIR)/Pods-RunnerTests-checkManifestLockResult.txt\"]": {
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputFileListPaths": [],
+        "inputPaths": [
+          "${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+          "${PODS_ROOT}/Manifest.lock"
+        ],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "[CP] Check Pods Manifest.lock",
+        "outputFileListPaths": [],
+        "outputPaths": [
+          "$(DERIVED_FILE_DIR)/Pods-RunnerTests-checkManifestLockResult.txt"
+        ],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n",
+        "showEnvVarsInLog": "0"
+      },
+      "script:[CP] Copy Pods Resources:[]": {
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputFileListPaths": [
+          "${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist"
+        ],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "[CP] Copy Pods Resources",
+        "outputFileListPaths": [
+          "${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist"
+        ],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n",
+        "showEnvVarsInLog": "0"
+      },
+      "script:[CP] Embed Pods Frameworks:[]": {
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputFileListPaths": [
+          "${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist"
+        ],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "[CP] Embed Pods Frameworks",
+        "outputFileListPaths": [
+          "${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist"
+        ],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n",
+        "showEnvVarsInLog": "0"
+      }
+    },
+    "rootObject": "97C146E61CF9000F007C117D"
+  },
+  "reviewed_generated_roles": [
+    "build:Pods_Runner.framework",
+    "build:Pods_RunnerTests.framework",
+    "file:Pods_Runner.framework",
+    "file:Pods_RunnerTests.framework",
+    "file:Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig",
+    "file:Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig",
+    "file:Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig",
+    "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig",
+    "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig",
+    "file:Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig",
+    "group:Frameworks",
+    "group:Pods",
+    "phase:RunnerTestsFrameworks",
+    "script:[CP] Check Pods Manifest.lock:[\"$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt\"]",
+    "script:[CP] Check Pods Manifest.lock:[\"$(DERIVED_FILE_DIR)/Pods-RunnerTests-checkManifestLockResult.txt\"]",
+    "script:[CP] Copy Pods Resources:[]",
+    "script:[CP] Embed Pods Frameworks:[]"
+  ],
+  "reviewed_observed_generated_sha256": {
+    "ios/Flutter/Debug.xcconfig": "39fe59bc2f1c1cdf832b1748dced312b1ee34ca1fb540f68d71ff79ff1f4c0bd",
+    "ios/Flutter/Release.xcconfig": "fb21c2fba79494221360a145682c30c532f7ba1e5b320d85d3db10d4db97e0f5",
+    "ios/Runner.xcodeproj/project.pbxproj": "72474eefa617406aeb97e6b6a80f31cd7f2844eeb90f99baf70ad781c073e39d",
+    "ios/Runner.xcworkspace/contents.xcworkspacedata": "465e6de5660384eb6832e8078920ba6cd5305c445cb29a24a86a2fda4aa6b67e"
+  },
+  "reviewed_original_pbx": {
+    "archiveVersion": "1",
+    "classes": {},
+    "objectVersion": "54",
+    "objects": {
+      "1498D2321E8E86230040F4C2": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.h",
+        "path": "GeneratedPluginRegistrant.h",
+        "sourceTree": "<group>"
+      },
+      "1498D2331E8E89220040F4C2": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.objc",
+        "path": "GeneratedPluginRegistrant.m",
+        "sourceTree": "<group>"
+      },
+      "1498D2341E8E89220040F4C2": {
+        "fileRef": "1498D2331E8E89220040F4C2",
+        "isa": "PBXBuildFile"
+      },
+      "249021D3217E4FDB00AE95B9": {
+        "buildSettings": {
+          "ALWAYS_SEARCH_USER_PATHS": "NO",
+          "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
+          "CLANG_ANALYZER_NONNULL": "YES",
+          "CLANG_CXX_LANGUAGE_STANDARD": "gnu++0x",
+          "CLANG_CXX_LIBRARY": "libc++",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CLANG_ENABLE_OBJC_ARC": "YES",
+          "CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING": "YES",
+          "CLANG_WARN_BOOL_CONVERSION": "YES",
+          "CLANG_WARN_COMMA": "YES",
+          "CLANG_WARN_CONSTANT_CONVERSION": "YES",
+          "CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS": "YES",
+          "CLANG_WARN_DIRECT_OBJC_ISA_USAGE": "YES_ERROR",
+          "CLANG_WARN_EMPTY_BODY": "YES",
+          "CLANG_WARN_ENUM_CONVERSION": "YES",
+          "CLANG_WARN_INFINITE_RECURSION": "YES",
+          "CLANG_WARN_INT_CONVERSION": "YES",
+          "CLANG_WARN_NON_LITERAL_NULL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF": "YES",
+          "CLANG_WARN_OBJC_LITERAL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_ROOT_CLASS": "YES_ERROR",
+          "CLANG_WARN_RANGE_LOOP_ANALYSIS": "YES",
+          "CLANG_WARN_STRICT_PROTOTYPES": "YES",
+          "CLANG_WARN_SUSPICIOUS_MOVE": "YES",
+          "CLANG_WARN_UNREACHABLE_CODE": "YES",
+          "CLANG_WARN__DUPLICATE_METHOD_MATCH": "YES",
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "iPhone Developer",
+          "COPY_PHASE_STRIP": "NO",
+          "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
+          "ENABLE_NS_ASSERTIONS": "NO",
+          "ENABLE_STRICT_OBJC_MSGSEND": "YES",
+          "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+          "GCC_C_LANGUAGE_STANDARD": "gnu99",
+          "GCC_NO_COMMON_BLOCKS": "YES",
+          "GCC_WARN_64_TO_32_BIT_CONVERSION": "YES",
+          "GCC_WARN_ABOUT_RETURN_TYPE": "YES_ERROR",
+          "GCC_WARN_UNDECLARED_SELECTOR": "YES",
+          "GCC_WARN_UNINITIALIZED_AUTOS": "YES_AGGRESSIVE",
+          "GCC_WARN_UNUSED_FUNCTION": "YES",
+          "GCC_WARN_UNUSED_VARIABLE": "YES",
+          "IPHONEOS_DEPLOYMENT_TARGET": "15.0",
+          "MTL_ENABLE_DEBUG_INFO": "NO",
+          "SDKROOT": "iphoneos",
+          "SUPPORTED_PLATFORMS": "iphoneos",
+          "TARGETED_DEVICE_FAMILY": "1,2",
+          "VALIDATE_PRODUCT": "YES"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Profile"
+      },
+      "249021D4217E4FDB00AE95B9": {
+        "baseConfigurationReference": "7AFA3C8E1D35360C0083082E",
+        "buildSettings": {
+          "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CODE_SIGN_ENTITLEMENTS": "Runner/Runner.entitlements",
+          "CURRENT_PROJECT_VERSION": "$(FLUTTER_BUILD_NUMBER)",
+          "DEVELOPMENT_TEAM": "43F9Y5Y96K",
+          "ENABLE_BITCODE": "NO",
+          "INFOPLIST_FILE": "Runner/Info.plist",
+          "LD_RUNPATH_SEARCH_PATHS": [
+            "$(inherited)",
+            "@executable_path/Frameworks"
+          ],
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_OBJC_BRIDGING_HEADER": "Runner/Runner-Bridging-Header.h",
+          "SWIFT_VERSION": "5.0",
+          "VERSIONING_SYSTEM": "apple-generic"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Profile"
+      },
+      "331C807B294A618700263BE5": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "RunnerTests.swift",
+        "sourceTree": "<group>"
+      },
+      "331C807D294A63A400263BE5": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "331C808B294A63AB00263BE5"
+        ],
+        "isa": "PBXSourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "331C807F294A63A400263BE5": {
+        "buildActionMask": "2147483647",
+        "files": [],
+        "isa": "PBXResourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "331C8080294A63A400263BE5": {
+        "buildConfigurationList": "331C8087294A63A400263BE5",
+        "buildPhases": [
+          "331C807D294A63A400263BE5",
+          "331C807F294A63A400263BE5"
+        ],
+        "buildRules": [],
+        "dependencies": [
+          "331C8086294A63A400263BE5"
+        ],
+        "isa": "PBXNativeTarget",
+        "name": "RunnerTests",
+        "productName": "RunnerTests",
+        "productReference": "331C8081294A63A400263BE5",
+        "productType": "com.apple.product-type.bundle.unit-test"
+      },
+      "331C8081294A63A400263BE5": {
+        "explicitFileType": "wrapper.cfbundle",
+        "includeInIndex": "0",
+        "isa": "PBXFileReference",
+        "path": "RunnerTests.xctest",
+        "sourceTree": "BUILT_PRODUCTS_DIR"
+      },
+      "331C8082294A63A400263BE5": {
+        "children": [
+          "331C807B294A618700263BE5"
+        ],
+        "isa": "PBXGroup",
+        "path": "RunnerTests",
+        "sourceTree": "<group>"
+      },
+      "331C8085294A63A400263BE5": {
+        "containerPortal": "97C146E61CF9000F007C117D",
+        "isa": "PBXContainerItemProxy",
+        "proxyType": "1",
+        "remoteGlobalIDString": "97C146ED1CF9000F007C117D",
+        "remoteInfo": "Runner"
+      },
+      "331C8086294A63A400263BE5": {
+        "isa": "PBXTargetDependency",
+        "target": "97C146ED1CF9000F007C117D",
+        "targetProxy": "331C8085294A63A400263BE5"
+      },
+      "331C8087294A63A400263BE5": {
+        "buildConfigurations": [
+          "331C8088294A63A400263BE5",
+          "331C8089294A63A400263BE5",
+          "331C808A294A63A400263BE5"
+        ],
+        "defaultConfigurationIsVisible": "0",
+        "defaultConfigurationName": "Release",
+        "isa": "XCConfigurationList"
+      },
+      "331C8088294A63A400263BE5": {
+        "buildSettings": {
+          "BUNDLE_LOADER": "$(TEST_HOST)",
+          "CODE_SIGN_STYLE": "Automatic",
+          "CURRENT_PROJECT_VERSION": "1",
+          "GENERATE_INFOPLIST_FILE": "YES",
+          "MARKETING_VERSION": "1.0",
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog.RunnerTests",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG",
+          "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
+          "SWIFT_VERSION": "5.0",
+          "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Debug"
+      },
+      "331C8089294A63A400263BE5": {
+        "buildSettings": {
+          "BUNDLE_LOADER": "$(TEST_HOST)",
+          "CODE_SIGN_STYLE": "Automatic",
+          "CURRENT_PROJECT_VERSION": "1",
+          "GENERATE_INFOPLIST_FILE": "YES",
+          "MARKETING_VERSION": "1.0",
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog.RunnerTests",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_VERSION": "5.0",
+          "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Release"
+      },
+      "331C808A294A63A400263BE5": {
+        "buildSettings": {
+          "BUNDLE_LOADER": "$(TEST_HOST)",
+          "CODE_SIGN_STYLE": "Automatic",
+          "CURRENT_PROJECT_VERSION": "1",
+          "GENERATE_INFOPLIST_FILE": "YES",
+          "MARKETING_VERSION": "1.0",
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog.RunnerTests",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_VERSION": "5.0",
+          "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Profile"
+      },
+      "331C808B294A63AB00263BE5": {
+        "fileRef": "331C807B294A618700263BE5",
+        "isa": "PBXBuildFile"
+      },
+      "3B06AD1E1E4923F5004D2608": {
+        "alwaysOutOfDate": "1",
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputPaths": [
+          "${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+        ],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "Thin Binary",
+        "outputPaths": [],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin"
+      },
+      "3B3967151E833CAA004F5970": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.xml",
+        "name": "AppFrameworkInfo.plist",
+        "path": "Flutter/AppFrameworkInfo.plist",
+        "sourceTree": "<group>"
+      },
+      "3B3967161E833CAA004F5970": {
+        "fileRef": "3B3967151E833CAA004F5970",
+        "isa": "PBXBuildFile"
+      },
+      "74858FAD1ED2DC5600515810": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.h",
+        "path": "Runner-Bridging-Header.h",
+        "sourceTree": "<group>"
+      },
+      "74858FAE1ED2DC5600515810": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "AppDelegate.swift",
+        "sourceTree": "<group>"
+      },
+      "74858FAF1ED2DC5600515810": {
+        "fileRef": "74858FAE1ED2DC5600515810",
+        "isa": "PBXBuildFile"
+      },
+      "781AD8BC2B33823900A9FFBB": {
+        "isa": "XCLocalSwiftPackageReference",
+        "relativePath": "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage"
+      },
+      "7884E8672EC3CC0400C636F2": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "SceneDelegate.swift",
+        "sourceTree": "<group>"
+      },
+      "7884E8682EC3CC0700C636F2": {
+        "fileRef": "7884E8672EC3CC0400C636F2",
+        "isa": "PBXBuildFile"
+      },
+      "78A3181F2AECB46A00862997": {
+        "isa": "XCSwiftPackageProductDependency",
+        "productName": "FlutterGeneratedPluginSwiftPackage"
+      },
+      "78A318202AECB46A00862997": {
+        "isa": "PBXBuildFile",
+        "productRef": "78A3181F2AECB46A00862997"
+      },
+      "78E0A7A72DC9AD7400C4905E": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "wrapper",
+        "name": "FlutterGeneratedPluginSwiftPackage",
+        "path": "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage",
+        "sourceTree": "<group>"
+      },
+      "7AFA3C8E1D35360C0083082E": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Release.xcconfig",
+        "path": "Flutter/Release.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "9705A1C41CF9048500538489": {
+        "buildActionMask": "2147483647",
+        "dstPath": "",
+        "dstSubfolderSpec": "10",
+        "files": [],
+        "isa": "PBXCopyFilesBuildPhase",
+        "name": "Embed Frameworks",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "9740EEB11CF90186004384FC": {
+        "children": [
+          "78E0A7A72DC9AD7400C4905E",
+          "3B3967151E833CAA004F5970",
+          "9740EEB21CF90195004384FC",
+          "7AFA3C8E1D35360C0083082E",
+          "9740EEB31CF90195004384FC"
+        ],
+        "isa": "PBXGroup",
+        "name": "Flutter",
+        "sourceTree": "<group>"
+      },
+      "9740EEB21CF90195004384FC": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Debug.xcconfig",
+        "path": "Flutter/Debug.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "9740EEB31CF90195004384FC": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xcconfig",
+        "name": "Generated.xcconfig",
+        "path": "Flutter/Generated.xcconfig",
+        "sourceTree": "<group>"
+      },
+      "9740EEB61CF901F6004384FC": {
+        "alwaysOutOfDate": "1",
+        "buildActionMask": "2147483647",
+        "files": [],
+        "inputPaths": [],
+        "isa": "PBXShellScriptBuildPhase",
+        "name": "Run Script",
+        "outputPaths": [],
+        "runOnlyForDeploymentPostprocessing": "0",
+        "shellPath": "/bin/sh",
+        "shellScript": "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build"
+      },
+      "97C146E51CF9000F007C117D": {
+        "children": [
+          "9740EEB11CF90186004384FC",
+          "97C146F01CF9000F007C117D",
+          "97C146EF1CF9000F007C117D",
+          "331C8082294A63A400263BE5"
+        ],
+        "isa": "PBXGroup",
+        "sourceTree": "<group>"
+      },
+      "97C146E61CF9000F007C117D": {
+        "attributes": {
+          "BuildIndependentTargetsInParallel": "YES",
+          "LastUpgradeCheck": "1510",
+          "ORGANIZATIONNAME": "",
+          "TargetAttributes": {
+            "331C8080294A63A400263BE5": {
+              "CreatedOnToolsVersion": "14.0",
+              "TestTargetID": "97C146ED1CF9000F007C117D"
+            },
+            "97C146ED1CF9000F007C117D": {
+              "CreatedOnToolsVersion": "7.3.1",
+              "LastSwiftMigration": "1100",
+              "ProvisioningStyle": "Automatic",
+              "SystemCapabilities": {
+                "com.apple.HealthKit": {
+                  "enabled": "1"
+                },
+                "com.apple.InAppPurchase": {
+                  "enabled": "1"
+                },
+                "com.apple.Push": {
+                  "enabled": "1"
+                },
+                "com.apple.SignInWithApple": {
+                  "enabled": "1"
+                }
+              }
+            }
+          }
+        },
+        "buildConfigurationList": "97C146E91CF9000F007C117D",
+        "compatibilityVersion": "Xcode 9.3",
+        "developmentRegion": "en",
+        "hasScannedForEncodings": "0",
+        "isa": "PBXProject",
+        "knownRegions": [
+          "en",
+          "ar",
+          "fr",
+          "es",
+          "tr",
+          "de",
+          "it",
+          "pt-BR",
+          "pt-PT",
+          "ur",
+          "fa",
+          "hi",
+          "id",
+          "ms",
+          "ja",
+          "ko",
+          "zh-Hans",
+          "zh-Hant",
+          "ru",
+          "bn",
+          "vi",
+          "th",
+          "pl",
+          "nl",
+          "uk",
+          "Base"
+        ],
+        "mainGroup": "97C146E51CF9000F007C117D",
+        "packageReferences": [
+          "781AD8BC2B33823900A9FFBB"
+        ],
+        "productRefGroup": "97C146EF1CF9000F007C117D",
+        "projectDirPath": "",
+        "projectRoot": "",
+        "targets": [
+          "97C146ED1CF9000F007C117D",
+          "331C8080294A63A400263BE5"
+        ]
+      },
+      "97C146E91CF9000F007C117D": {
+        "buildConfigurations": [
+          "97C147031CF9000F007C117D",
+          "97C147041CF9000F007C117D",
+          "249021D3217E4FDB00AE95B9"
+        ],
+        "defaultConfigurationIsVisible": "0",
+        "defaultConfigurationName": "Release",
+        "isa": "XCConfigurationList"
+      },
+      "97C146EA1CF9000F007C117D": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "74858FAF1ED2DC5600515810",
+          "A1B2C3D41F00000100000002",
+          "A1B2C3D41F00000100000004",
+          "B11210120000000000000002",
+          "A1B2C3D41F00000100000006",
+          "A1B2C3D41F00000100000008",
+          "A1B2C3D41F0000010000000A",
+          "D40909000000000000000002",
+          "A1B2C3D41F0000010000000C",
+          "C1D2E3F41F00000100000002",
+          "D2E3F4A51F00000100000002",
+          "E3F4A5B61F00000100000002",
+          "1498D2341E8E89220040F4C2",
+          "7884E8682EC3CC0700C636F2"
+        ],
+        "isa": "PBXSourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "97C146EB1CF9000F007C117D": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "78A318202AECB46A00862997"
+        ],
+        "isa": "PBXFrameworksBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "97C146EC1CF9000F007C117D": {
+        "buildActionMask": "2147483647",
+        "files": [
+          "97C147011CF9000F007C117D",
+          "3B3967161E833CAA004F5970",
+          "97C146FE1CF9000F007C117D",
+          "97C146FC1CF9000F007C117D",
+          "B1A2C3D41F00000100000002",
+          "B1A2C3D41F00000100000004",
+          "C1D2E3F41F00000100000004",
+          "C1D2E3F41F00000100000006"
+        ],
+        "isa": "PBXResourcesBuildPhase",
+        "runOnlyForDeploymentPostprocessing": "0"
+      },
+      "97C146ED1CF9000F007C117D": {
+        "buildConfigurationList": "97C147051CF9000F007C117D",
+        "buildPhases": [
+          "9740EEB61CF901F6004384FC",
+          "97C146EA1CF9000F007C117D",
+          "97C146EB1CF9000F007C117D",
+          "97C146EC1CF9000F007C117D",
+          "9705A1C41CF9048500538489",
+          "3B06AD1E1E4923F5004D2608"
+        ],
+        "buildRules": [],
+        "dependencies": [],
+        "isa": "PBXNativeTarget",
+        "name": "Runner",
+        "packageProductDependencies": [
+          "78A3181F2AECB46A00862997"
+        ],
+        "productName": "Runner",
+        "productReference": "97C146EE1CF9000F007C117D",
+        "productType": "com.apple.product-type.application"
+      },
+      "97C146EE1CF9000F007C117D": {
+        "explicitFileType": "wrapper.application",
+        "includeInIndex": "0",
+        "isa": "PBXFileReference",
+        "path": "Runner.app",
+        "sourceTree": "BUILT_PRODUCTS_DIR"
+      },
+      "97C146EF1CF9000F007C117D": {
+        "children": [
+          "97C146EE1CF9000F007C117D",
+          "331C8081294A63A400263BE5"
+        ],
+        "isa": "PBXGroup",
+        "name": "Products",
+        "sourceTree": "<group>"
+      },
+      "97C146F01CF9000F007C117D": {
+        "children": [
+          "97C146FA1CF9000F007C117D",
+          "97C146FD1CF9000F007C117D",
+          "97C146FF1CF9000F007C117D",
+          "97C147021CF9000F007C117D",
+          "B1A2C3D41F00000100000001",
+          "B1A2C3D41F00000100000003",
+          "1498D2321E8E86230040F4C2",
+          "1498D2331E8E89220040F4C2",
+          "74858FAE1ED2DC5600515810",
+          "A1B2C3D41F00000100000001",
+          "A1B2C3D41F00000100000003",
+          "B11210120000000000000001",
+          "A1B2C3D41F00000100000005",
+          "A1B2C3D41F00000100000007",
+          "A1B2C3D41F00000100000009",
+          "D40909000000000000000001",
+          "A1B2C3D41F0000010000000B",
+          "C1D2E3F41F00000100000001",
+          "C1D2E3F41F00000100000003",
+          "C1D2E3F41F00000100000005",
+          "D2E3F4A51F00000100000001",
+          "E3F4A5B61F00000100000001",
+          "7884E8672EC3CC0400C636F2",
+          "74858FAD1ED2DC5600515810"
+        ],
+        "isa": "PBXGroup",
+        "path": "Runner",
+        "sourceTree": "<group>"
+      },
+      "97C146FA1CF9000F007C117D": {
+        "children": [
+          "97C146FB1CF9000F007C117D"
+        ],
+        "isa": "PBXVariantGroup",
+        "name": "Main.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C146FB1CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "file.storyboard",
+        "name": "Base",
+        "path": "Base.lproj/Main.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C146FC1CF9000F007C117D": {
+        "fileRef": "97C146FA1CF9000F007C117D",
+        "isa": "PBXBuildFile"
+      },
+      "97C146FD1CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "folder.assetcatalog",
+        "path": "Assets.xcassets",
+        "sourceTree": "<group>"
+      },
+      "97C146FE1CF9000F007C117D": {
+        "fileRef": "97C146FD1CF9000F007C117D",
+        "isa": "PBXBuildFile"
+      },
+      "97C146FF1CF9000F007C117D": {
+        "children": [
+          "97C147001CF9000F007C117D"
+        ],
+        "isa": "PBXVariantGroup",
+        "name": "LaunchScreen.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C147001CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "file.storyboard",
+        "name": "Base",
+        "path": "Base.lproj/LaunchScreen.storyboard",
+        "sourceTree": "<group>"
+      },
+      "97C147011CF9000F007C117D": {
+        "fileRef": "97C146FF1CF9000F007C117D",
+        "isa": "PBXBuildFile"
+      },
+      "97C147021CF9000F007C117D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.xml",
+        "path": "Info.plist",
+        "sourceTree": "<group>"
+      },
+      "97C147031CF9000F007C117D": {
+        "buildSettings": {
+          "ALWAYS_SEARCH_USER_PATHS": "NO",
+          "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
+          "CLANG_ANALYZER_NONNULL": "YES",
+          "CLANG_CXX_LANGUAGE_STANDARD": "gnu++0x",
+          "CLANG_CXX_LIBRARY": "libc++",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CLANG_ENABLE_OBJC_ARC": "YES",
+          "CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING": "YES",
+          "CLANG_WARN_BOOL_CONVERSION": "YES",
+          "CLANG_WARN_COMMA": "YES",
+          "CLANG_WARN_CONSTANT_CONVERSION": "YES",
+          "CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS": "YES",
+          "CLANG_WARN_DIRECT_OBJC_ISA_USAGE": "YES_ERROR",
+          "CLANG_WARN_EMPTY_BODY": "YES",
+          "CLANG_WARN_ENUM_CONVERSION": "YES",
+          "CLANG_WARN_INFINITE_RECURSION": "YES",
+          "CLANG_WARN_INT_CONVERSION": "YES",
+          "CLANG_WARN_NON_LITERAL_NULL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF": "YES",
+          "CLANG_WARN_OBJC_LITERAL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_ROOT_CLASS": "YES_ERROR",
+          "CLANG_WARN_RANGE_LOOP_ANALYSIS": "YES",
+          "CLANG_WARN_STRICT_PROTOTYPES": "YES",
+          "CLANG_WARN_SUSPICIOUS_MOVE": "YES",
+          "CLANG_WARN_UNREACHABLE_CODE": "YES",
+          "CLANG_WARN__DUPLICATE_METHOD_MATCH": "YES",
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "iPhone Developer",
+          "COPY_PHASE_STRIP": "NO",
+          "DEBUG_INFORMATION_FORMAT": "dwarf",
+          "ENABLE_STRICT_OBJC_MSGSEND": "YES",
+          "ENABLE_TESTABILITY": "YES",
+          "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+          "GCC_C_LANGUAGE_STANDARD": "gnu99",
+          "GCC_DYNAMIC_NO_PIC": "NO",
+          "GCC_NO_COMMON_BLOCKS": "YES",
+          "GCC_OPTIMIZATION_LEVEL": "0",
+          "GCC_PREPROCESSOR_DEFINITIONS": [
+            "DEBUG=1",
+            "$(inherited)"
+          ],
+          "GCC_WARN_64_TO_32_BIT_CONVERSION": "YES",
+          "GCC_WARN_ABOUT_RETURN_TYPE": "YES_ERROR",
+          "GCC_WARN_UNDECLARED_SELECTOR": "YES",
+          "GCC_WARN_UNINITIALIZED_AUTOS": "YES_AGGRESSIVE",
+          "GCC_WARN_UNUSED_FUNCTION": "YES",
+          "GCC_WARN_UNUSED_VARIABLE": "YES",
+          "IPHONEOS_DEPLOYMENT_TARGET": "15.0",
+          "MTL_ENABLE_DEBUG_INFO": "YES",
+          "ONLY_ACTIVE_ARCH": "YES",
+          "SDKROOT": "iphoneos",
+          "TARGETED_DEVICE_FAMILY": "1,2"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Debug"
+      },
+      "97C147041CF9000F007C117D": {
+        "buildSettings": {
+          "ALWAYS_SEARCH_USER_PATHS": "NO",
+          "ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS": "YES",
+          "CLANG_ANALYZER_NONNULL": "YES",
+          "CLANG_CXX_LANGUAGE_STANDARD": "gnu++0x",
+          "CLANG_CXX_LIBRARY": "libc++",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CLANG_ENABLE_OBJC_ARC": "YES",
+          "CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING": "YES",
+          "CLANG_WARN_BOOL_CONVERSION": "YES",
+          "CLANG_WARN_COMMA": "YES",
+          "CLANG_WARN_CONSTANT_CONVERSION": "YES",
+          "CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS": "YES",
+          "CLANG_WARN_DIRECT_OBJC_ISA_USAGE": "YES_ERROR",
+          "CLANG_WARN_EMPTY_BODY": "YES",
+          "CLANG_WARN_ENUM_CONVERSION": "YES",
+          "CLANG_WARN_INFINITE_RECURSION": "YES",
+          "CLANG_WARN_INT_CONVERSION": "YES",
+          "CLANG_WARN_NON_LITERAL_NULL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF": "YES",
+          "CLANG_WARN_OBJC_LITERAL_CONVERSION": "YES",
+          "CLANG_WARN_OBJC_ROOT_CLASS": "YES_ERROR",
+          "CLANG_WARN_RANGE_LOOP_ANALYSIS": "YES",
+          "CLANG_WARN_STRICT_PROTOTYPES": "YES",
+          "CLANG_WARN_SUSPICIOUS_MOVE": "YES",
+          "CLANG_WARN_UNREACHABLE_CODE": "YES",
+          "CLANG_WARN__DUPLICATE_METHOD_MATCH": "YES",
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "iPhone Developer",
+          "COPY_PHASE_STRIP": "NO",
+          "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
+          "ENABLE_NS_ASSERTIONS": "NO",
+          "ENABLE_STRICT_OBJC_MSGSEND": "YES",
+          "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+          "GCC_C_LANGUAGE_STANDARD": "gnu99",
+          "GCC_NO_COMMON_BLOCKS": "YES",
+          "GCC_WARN_64_TO_32_BIT_CONVERSION": "YES",
+          "GCC_WARN_ABOUT_RETURN_TYPE": "YES_ERROR",
+          "GCC_WARN_UNDECLARED_SELECTOR": "YES",
+          "GCC_WARN_UNINITIALIZED_AUTOS": "YES_AGGRESSIVE",
+          "GCC_WARN_UNUSED_FUNCTION": "YES",
+          "GCC_WARN_UNUSED_VARIABLE": "YES",
+          "IPHONEOS_DEPLOYMENT_TARGET": "15.0",
+          "MTL_ENABLE_DEBUG_INFO": "NO",
+          "SDKROOT": "iphoneos",
+          "SUPPORTED_PLATFORMS": "iphoneos",
+          "SWIFT_COMPILATION_MODE": "wholemodule",
+          "SWIFT_OPTIMIZATION_LEVEL": "-O",
+          "TARGETED_DEVICE_FAMILY": "1,2",
+          "VALIDATE_PRODUCT": "YES"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Release"
+      },
+      "97C147051CF9000F007C117D": {
+        "buildConfigurations": [
+          "97C147061CF9000F007C117D",
+          "97C147071CF9000F007C117D",
+          "249021D4217E4FDB00AE95B9"
+        ],
+        "defaultConfigurationIsVisible": "0",
+        "defaultConfigurationName": "Release",
+        "isa": "XCConfigurationList"
+      },
+      "97C147061CF9000F007C117D": {
+        "baseConfigurationReference": "9740EEB21CF90195004384FC",
+        "buildSettings": {
+          "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CODE_SIGN_ENTITLEMENTS": "Runner/RunnerDebug.entitlements",
+          "CURRENT_PROJECT_VERSION": "$(FLUTTER_BUILD_NUMBER)",
+          "DEVELOPMENT_TEAM": "43F9Y5Y96K",
+          "ENABLE_BITCODE": "NO",
+          "INFOPLIST_FILE": "Runner/Info.plist",
+          "LD_RUNPATH_SEARCH_PATHS": [
+            "$(inherited)",
+            "@executable_path/Frameworks"
+          ],
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_OBJC_BRIDGING_HEADER": "Runner/Runner-Bridging-Header.h",
+          "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
+          "SWIFT_VERSION": "5.0",
+          "VERSIONING_SYSTEM": "apple-generic"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Debug"
+      },
+      "97C147071CF9000F007C117D": {
+        "baseConfigurationReference": "7AFA3C8E1D35360C0083082E",
+        "buildSettings": {
+          "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+          "CLANG_ENABLE_MODULES": "YES",
+          "CODE_SIGN_ENTITLEMENTS": "Runner/Runner.entitlements",
+          "CURRENT_PROJECT_VERSION": "$(FLUTTER_BUILD_NUMBER)",
+          "DEVELOPMENT_TEAM": "43F9Y5Y96K",
+          "ENABLE_BITCODE": "NO",
+          "INFOPLIST_FILE": "Runner/Info.plist",
+          "LD_RUNPATH_SEARCH_PATHS": [
+            "$(inherited)",
+            "@executable_path/Frameworks"
+          ],
+          "PRODUCT_BUNDLE_IDENTIFIER": "com.bilhealth.bodyintelligencelog",
+          "PRODUCT_NAME": "$(TARGET_NAME)",
+          "SWIFT_OBJC_BRIDGING_HEADER": "Runner/Runner-Bridging-Header.h",
+          "SWIFT_VERSION": "5.0",
+          "VERSIONING_SYSTEM": "apple-generic"
+        },
+        "isa": "XCBuildConfiguration",
+        "name": "Release"
+      },
+      "A1B2C3D41F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILGlobalHealthBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000002": {
+        "fileRef": "A1B2C3D41F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000003": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILFitnessBleBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000004": {
+        "fileRef": "A1B2C3D41F00000100000003",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000005": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILSpeechBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000006": {
+        "fileRef": "A1B2C3D41F00000100000005",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000007": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILTextToSpeechBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F00000100000008": {
+        "fileRef": "A1B2C3D41F00000100000007",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F00000100000009": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILSystemCryptoBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F0000010000000A": {
+        "fileRef": "A1B2C3D41F00000100000009",
+        "isa": "PBXBuildFile"
+      },
+      "A1B2C3D41F0000010000000B": {
+        "fileEncoding": "4",
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.c.objc",
+        "path": "BILObjCExceptionCatcher.m",
+        "sourceTree": "<group>"
+      },
+      "A1B2C3D41F0000010000000C": {
+        "fileRef": "A1B2C3D41F0000010000000B",
+        "isa": "PBXBuildFile"
+      },
+      "B11210120000000000000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILCommunityTranslationBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "B11210120000000000000002": {
+        "fileRef": "B11210120000000000000001",
+        "isa": "PBXBuildFile"
+      },
+      "B1A2C3D41F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.xml",
+        "path": "PrivacyInfo.xcprivacy",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000002": {
+        "fileRef": "B1A2C3D41F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "B1A2C3D41F00000100000003": {
+        "children": [
+          "B1A2C3D41F00000100000005",
+          "B1A2C3D41F00000100000006",
+          "B1A2C3D41F00000100000007",
+          "B1A2C3D41F00000100000008",
+          "B1A2C3D41F00000100000009",
+          "B1A2C3D41F0000010000000A",
+          "B1A2C3D41F0000010000000B",
+          "B1A2C3D41F0000010000000C",
+          "B1A2C3D41F0000010000000D",
+          "B1A2C3D41F0000010000000E",
+          "B1A2C3D41F0000010000000F",
+          "B1A2C3D41F00000100000010",
+          "B1A2C3D41F00000100000011",
+          "B1A2C3D41F00000100000012",
+          "B1A2C3D41F00000100000013",
+          "B1A2C3D41F00000100000014",
+          "B1A2C3D41F00000100000015",
+          "B1A2C3D41F00000100000016",
+          "B1A2C3D41F00000100000017",
+          "B1A2C3D41F00000100000018",
+          "B1A2C3D41F00000100000019",
+          "B1A2C3D41F0000010000001A",
+          "B1A2C3D41F0000010000001B",
+          "B1A2C3D41F0000010000001C",
+          "B1A2C3D41F0000010000001D"
+        ],
+        "isa": "PBXVariantGroup",
+        "name": "InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000004": {
+        "fileRef": "B1A2C3D41F00000100000003",
+        "isa": "PBXBuildFile"
+      },
+      "B1A2C3D41F00000100000005": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "en",
+        "path": "en.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000006": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ar",
+        "path": "ar.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000007": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "fr",
+        "path": "fr.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000008": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "es",
+        "path": "es.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000009": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "tr",
+        "path": "tr.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000A": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "de",
+        "path": "de.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000B": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "it",
+        "path": "it.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000C": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "pt-BR",
+        "path": "pt-BR.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "pt-PT",
+        "path": "pt-PT.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000E": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ur",
+        "path": "ur.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000000F": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "fa",
+        "path": "fa.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000010": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "hi",
+        "path": "hi.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000011": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "id",
+        "path": "id.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000012": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ms",
+        "path": "ms.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000013": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ja",
+        "path": "ja.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000014": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ko",
+        "path": "ko.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000015": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "zh-Hans",
+        "path": "zh-Hans.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000016": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "zh-Hant",
+        "path": "zh-Hant.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000017": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "ru",
+        "path": "ru.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000018": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "bn",
+        "path": "bn.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F00000100000019": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "vi",
+        "path": "vi.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001A": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "th",
+        "path": "th.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001B": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "pl",
+        "path": "pl.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001C": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "nl",
+        "path": "nl.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "B1A2C3D41F0000010000001D": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "text.plist.strings",
+        "name": "uk",
+        "path": "uk.lproj/InfoPlist.strings",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILMicSoundBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000002": {
+        "fileRef": "C1D2E3F41F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "C1D2E3F41F00000100000003": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "audio.wav",
+        "path": "bil_mic_open_vibration.wav",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000004": {
+        "fileRef": "C1D2E3F41F00000100000003",
+        "isa": "PBXBuildFile"
+      },
+      "C1D2E3F41F00000100000005": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "audio.wav",
+        "path": "bil_mic_end_vibration.wav",
+        "sourceTree": "<group>"
+      },
+      "C1D2E3F41F00000100000006": {
+        "fileRef": "C1D2E3F41F00000100000005",
+        "isa": "PBXBuildFile"
+      },
+      "D2E3F4A51F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILAppleSignInLifecycleBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "D2E3F4A51F00000100000002": {
+        "fileRef": "D2E3F4A51F00000100000001",
+        "isa": "PBXBuildFile"
+      },
+      "D40909000000000000000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILSettingsSymbolsBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "D40909000000000000000002": {
+        "fileRef": "D40909000000000000000001",
+        "isa": "PBXBuildFile"
+      },
+      "E3F4A5B61F00000100000001": {
+        "isa": "PBXFileReference",
+        "lastKnownFileType": "sourcecode.swift",
+        "path": "BILAppAttestBridge.swift",
+        "sourceTree": "<group>"
+      },
+      "E3F4A5B61F00000100000002": {
+        "fileRef": "E3F4A5B61F00000100000001",
+        "isa": "PBXBuildFile"
+      }
+    },
+    "rootObject": "97C146E61CF9000F007C117D"
+  },
+  "reviewed_original_sha256": {
+    "ios/Flutter/Debug.xcconfig": "07db486627a6febe2336361bd45c315f4f228209e0265148107511c3c9aee0f4",
+    "ios/Flutter/Release.xcconfig": "90f41a5993655805ea5d297713cfcebf34066eeb05039a3c7d5f54d478dd82f5",
+    "ios/Runner.xcodeproj/project.pbxproj": "12818a6d54b3016d28edfb23e0523a7277cccd66fd776bfff497f55acc077e30",
+    "ios/Runner.xcworkspace/contents.xcworkspacedata": "706a4c812f2a1e220e6785c27580020d58048e2ae4d30d1280f3c43344ce6b38"
+  },
+  "schema": "bil.qa.reviewed-cocoapods-derived.v1"
+}
