@@ -11,6 +11,23 @@ jobs:
     env:
       BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
     steps:
+      - name: Initialize controlled live-service evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          source = os.environ['GITHUB_SHA']
+          if not re.fullmatch('[0-9a-f]{40}', source):
+              raise SystemExit('Invalid live-service source SHA')
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bil-cert-live-1'
+          output.mkdir(parents=True, exist_ok=True)
+          (output / 'live-service-receipt.json').write_text(json.dumps({
+              'schema': 'bil.qa.live-service-outcome.v1', 'source_sha': source,
+              'status': 'STARTED', 'stage': 'workflow_setup',
+              'actual_live_backend_pass': False,
+          }, indent=2) + '\n', encoding='utf-8')
+          PY
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.sha }}
@@ -29,12 +46,65 @@ jobs:
           npm ci --prefix supabase/tests --ignore-scripts
           node supabase/tests/vision_cache_reservation_test.mjs
       - name: Actual deployed service roundtrips with disposable fixtures and cleanup
+        id: roundtrips
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           set -euo pipefail
-          bash tool/release_certification/run_live_gate.sh 1
-          grep -Fx 'LIVE_BACKEND_CORE=PASS' "$RUNNER_TEMP/bil-cert-live-1/status.txt"
+          OUT="$RUNNER_TEMP/bil-cert-live-1"
+          mkdir -p "$OUT"
+          preserve_exit() {
+            local code=$?
+            trap - EXIT
+            printf '%s\n' "$code" > "$OUT/roundtrip-exit-code.txt" || true
+            exit "$code"
+          }
+          trap preserve_exit EXIT
+          printf '%s\n' 'live_gate_command' > "$OUT/roundtrip-stage.txt"
+          bash tool/release_certification/run_live_gate.sh 1 2>&1 | tee "$OUT/live-gate.log"
+          printf '%s\n' 'require_actual_live_pass' > "$OUT/roundtrip-stage.txt"
+          grep -Fx 'LIVE_BACKEND_CORE=PASS' "$OUT/status.txt"
+      - name: Preserve actual live-service outcome
+        if: always()
+        shell: bash
+        env:
+          PRIOR_JOB_STATUS: ${{ job.status }}
+          ROUNDTRIP_OUTCOME: ${{ steps.roundtrips.outcome }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bil-cert-live-1'
+          output.mkdir(parents=True, exist_ok=True)
+          source = os.environ['GITHUB_SHA']
+          if not re.fullmatch('[0-9a-f]{40}', source):
+              raise SystemExit('Invalid live-service source SHA')
+          def read(name):
+              path = output / name
+              return path.read_text(encoding='utf-8').strip() if path.is_file() else ''
+          raw_code = read('roundtrip-exit-code.txt')
+          code = int(raw_code) if re.fullmatch('[0-9]{1,3}', raw_code) else None
+          stage = read('roundtrip-stage.txt')
+          if stage not in ('live_gate_command', 'require_actual_live_pass'):
+              stage = 'workflow_setup'
+          status = read('status.txt')
+          backend = {'LIVE_BACKEND_CORE=PASS': 'PASS', 'LIVE_BACKEND_CORE=FAIL': 'FAIL',
+                     'LIVE_BACKEND_CORE=NOT RUN': 'NOT_RUN'}.get(status, 'ABSENT_OR_INVALID')
+          prior = os.environ.get('PRIOR_JOB_STATUS', '')
+          outcome = os.environ.get('ROUNDTRIP_OUTCOME', '')
+          log_present = (output / 'live-gate.log').is_file()
+          passed = (prior == 'success' and outcome == 'success' and code == 0 and backend == 'PASS'
+                    and stage == 'require_actual_live_pass' and log_present)
+          report = {'schema': 'bil.qa.live-service-outcome.v1', 'source_sha': source,
+                    'status': 'PASS' if passed else 'FAIL', 'stage': stage,
+                    'roundtrip_exit_code': code, 'live_backend_core': backend,
+                    'roundtrip_log_present': log_present,
+                    'actual_live_backend_pass': passed}
+          (output / 'live-service-receipt.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(report))
+          if prior == 'success' and not passed:
+              raise SystemExit('Live-service outcome is not an actual completed PASS')
+          PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

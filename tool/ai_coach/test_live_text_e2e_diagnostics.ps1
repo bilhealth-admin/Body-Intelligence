@@ -1,4 +1,8 @@
-param([string]$Scenario = '')
+param(
+  [string]$Scenario = '',
+  [ValidateSet('ConciseView', 'NormalView', 'CategoryView')]
+  [string]$MockErrorView = 'ConciseView'
+)
 
 $ErrorActionPreference = 'Stop'
 $probePath = Join-Path $PSScriptRoot 'run_live_text_e2e.ps1'
@@ -11,6 +15,7 @@ foreach ($path in @($probePath, (Join-Path $PSScriptRoot 'live_text_e2e_diagnost
 }
 
 if ($Scenario) {
+  $ErrorView = $MockErrorView
   # Both external entry points are mocked before the real probe is loaded.
   # Unknown requests fail locally; no network/native CLI fallback is allowed.
   $global:BilCoachMockScenario = $Scenario
@@ -81,6 +86,9 @@ if ($Scenario) {
     if ($Uri.EndsWith('/rpc/bil_set_ai_closed_test_access') -or $Uri.EndsWith('/rpc/bil_record_consent')) { return $true }
     if ($Uri.EndsWith('/rpc/bil_record_ai_coach_feedback')) { return 'DO_NOT_LOG_FEEDBACK' }
     if ($Uri.EndsWith('/functions/v1/ai-coach')) {
+      if ($global:BilCoachMockScenario -eq 'unexpected-probe-failure') {
+        throw 'DO_NOT_LOG_UNEXPECTED_ERROR'
+      }
       $global:BilCoachMockCoachCalls++
       if ($global:BilCoachMockCoachCalls -gt 1) {
         $exception = [System.Exception]::new('Duplicate request')
@@ -100,17 +108,34 @@ if ($Scenario) {
     if ($Uri.EndsWith('/auth/v1/admin/users/DO_NOT_LOG_OWNER') -and $Method -eq 'Delete') { return $true }
     throw 'Unexpected mocked HTTP request; refusing network fallback.'
   }
-  & $probePath
+  try {
+    & $probePath
+  }
+  catch {
+    # Inspect the actual ErrorRecord, not PowerShell's host-dependent ANSI,
+    # wrapping or ErrorView presentation. Never emit the source error/data.
+    $failureCode = switch -Exact -CaseSensitive ($_.Exception.Message) {
+      'AI token settlement did not reach the expected succeeded/used>0/reserved=0 state.' { 'AI_SETTLEMENT_FAILED' }
+      'AI Coach E2E succeeded, but ephemeral-user cleanup verification failed.' { 'AI_CLEANUP_FAILED' }
+      'SUPABASE_QUERY_EXPECTED_ONE_ROW' { 'QUERY_EXPECTED_ONE_ROW' }
+      default { 'UNEXPECTED_PROBE_FAILURE' }
+    }
+    [Console]::Error.WriteLine('BIL_AI_COACH_MOCK_FAILURE=' + ([ordered]@{
+        schema = 'bil.qa.ai-coach-mock-failure.v1'
+        code = $failureCode
+      } | ConvertTo-Json -Compress))
+    exit 1
+  }
   exit 0
 }
 
-function Invoke-MockedProbe([string]$Case) {
+function Invoke-MockedProbe([string]$Case, [string]$View = 'ConciseView') {
   $start = [Diagnostics.ProcessStartInfo]::new()
   $start.FileName = (Get-Process -Id $PID).Path
   $start.UseShellExecute = $false
   $start.RedirectStandardOutput = $true
   $start.RedirectStandardError = $true
-  foreach ($argument in @('-NoProfile', '-File', $PSCommandPath, '-Scenario', $Case)) {
+  foreach ($argument in @('-NoProfile', '-File', $PSCommandPath, '-Scenario', $Case, '-MockErrorView', $View)) {
     $start.ArgumentList.Add($argument)
   }
   $process = [Diagnostics.Process]::Start($start)
@@ -123,6 +148,19 @@ function Invoke-MockedProbe([string]$Case) {
   $result = [pscustomobject]@{ code = $process.ExitCode; stdout = $stdout.Result; stderr = $stderr.Result }
   $process.Dispose()
   return $result
+}
+
+function Assert-MockedFailure($Failure, [string]$ExpectedCode, [string]$Case) {
+  if ($Failure.code -eq 0 -or $Failure.stdout.Trim() -ne '') {
+    throw "Original failure/nonzero exit or empty stdout was lost: $Case"
+  }
+  $records = @($Failure.stderr -split '\r?\n' |
+    Where-Object { $_.StartsWith('BIL_AI_COACH_MOCK_FAILURE=') } |
+    ForEach-Object { $_.Substring('BIL_AI_COACH_MOCK_FAILURE='.Length) | ConvertFrom-Json })
+  if ($records.Count -ne 1 -or $records[0].schema -cne 'bil.qa.ai-coach-mock-failure.v1' -or
+    $records[0].code -cne $ExpectedCode) {
+    throw "Original failure identity was lost or replaced: $Case"
+  }
 }
 
 $passed = 0
@@ -148,10 +186,7 @@ $failedPredicates = @{
 }
 foreach ($case in $failedPredicates.Keys) {
   $failure = Invoke-MockedProbe $case
-  if ($failure.code -eq 0 -or $failure.stdout.Trim() -ne '' -or
-    -not $failure.stderr.Contains('AI token settlement did not reach the expected succeeded/used>0/reserved=0 state.')) {
-    throw "Original settlement failure/nonzero exit was lost: $case"
-  }
+  Assert-MockedFailure $failure 'AI_SETTLEMENT_FAILED' $case
   if (($failure.stdout + $failure.stderr).Contains('DO_NOT_LOG_') -or $failure.stderr.Contains('coachlive')) {
     throw "Sensitive source data appeared in diagnostics: $case"
   }
@@ -175,10 +210,7 @@ foreach ($case in $failedPredicates.Keys) {
 # A missing SQL row is rejected by the strict query contract before the
 # settlement predicates can run. Keep that real failure and cleanup evidence.
 $failure = Invoke-MockedProbe 'missing-event'
-if ($failure.code -eq 0 -or $failure.stdout.Trim() -ne '' -or
-  -not $failure.stderr.Contains('SUPABASE_QUERY_EXPECTED_ONE_ROW')) {
-  throw 'Strict missing-event failure/nonzero exit was lost.'
-}
+Assert-MockedFailure $failure 'QUERY_EXPECTED_ONE_ROW' 'missing-event'
 if (($failure.stdout + $failure.stderr).Contains('DO_NOT_LOG_') -or $failure.stderr.Contains('coachlive')) {
   throw 'Sensitive source data appeared in the missing-event failure.'
 }
@@ -195,10 +227,7 @@ $passed++
 foreach ($case in @('cleanup-residue', 'cleanup-revoke-failure', 'cleanup-query-failure',
   'cleanup-empty-rows', 'cleanup-missing-count', 'cleanup-string-count')) {
   $failure = Invoke-MockedProbe $case
-  if ($failure.code -eq 0 -or $failure.stdout.Trim() -ne '' -or
-    -not $failure.stderr.Contains('AI Coach E2E succeeded, but ephemeral-user cleanup verification failed.')) {
-    throw "Cleanup failure/nonzero exit was lost: $case"
-  }
+  Assert-MockedFailure $failure 'AI_CLEANUP_FAILED' $case
   $line = @($failure.stderr -split '\r?\n' | Where-Object { $_.StartsWith('BIL_AI_COACH_DIAGNOSTIC=') })
   if ($line.Count -ne 1) { throw "Missing cleanup-failure evidence: $case" }
   $cleanup = $line[0].Substring('BIL_AI_COACH_DIAGNOSTIC='.Length) | ConvertFrom-Json
@@ -211,4 +240,32 @@ foreach ($case in @('cleanup-residue', 'cleanup-revoke-failure', 'cleanup-query-
   Write-Output "AI_COACH_OFFLINE_CASE_PASS=$case"
   $passed++
 }
+
+foreach ($view in @('NormalView', 'CategoryView')) {
+  $failure = Invoke-MockedProbe 'unsafe-state' $view
+  Assert-MockedFailure $failure 'AI_SETTLEMENT_FAILED' "unsafe-state/$view"
+  $settlement = @($failure.stderr -split '\r?\n' |
+    Where-Object { $_.StartsWith('BIL_AI_COACH_DIAGNOSTIC=') } |
+    ForEach-Object { $_.Substring('BIL_AI_COACH_DIAGNOSTIC='.Length) | ConvertFrom-Json } |
+    Where-Object kind -EQ 'settlement')
+  if ($settlement.Count -ne 1 -or $settlement[0].state -cne 'unexpected' -or
+    $settlement[0].predicates.state_succeeded -ne $false -or
+    ($failure.stdout + $failure.stderr).Contains('DO_NOT_LOG_')) {
+    throw "Unsafe-state semantic/privacy failure under ErrorView $view"
+  }
+  Write-Output "AI_COACH_OFFLINE_CASE_PASS=unsafe-state/$view"
+  $passed++
+}
+
+$failure = Invoke-MockedProbe 'unexpected-probe-failure'
+Assert-MockedFailure $failure 'UNEXPECTED_PROBE_FAILURE' 'unexpected-probe-failure'
+if (($failure.stdout + $failure.stderr).Contains('DO_NOT_LOG_')) {
+  throw 'Unknown source error leaked from the mocked failure boundary.'
+}
+$rejected = $false
+try { Assert-MockedFailure $failure 'AI_SETTLEMENT_FAILED' 'unexpected-probe-failure' }
+catch { $rejected = $true }
+if (-not $rejected) { throw 'An unrelated failure was accepted as a settlement rejection.' }
+Write-Output 'AI_COACH_OFFLINE_CASE_PASS=unexpected-probe-failure'
+$passed++
 Write-Output "AI_COACH_OFFLINE_DIAGNOSTIC_TESTS_PASS=$passed;LIVE_REQUESTS=0"

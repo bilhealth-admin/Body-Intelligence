@@ -35,6 +35,7 @@ collect_app_files() {
 IPHONE_UDID=''
 IPAD_UDID=''
 ACTIVE_DEVICE=''
+BOOTED_DEVICE=''
 cleanup() {
   local original_status=$? label device
   trap - EXIT
@@ -43,7 +44,7 @@ cleanup() {
     device="${pair#*:}"
     label="${pair%%:*}"
     [ -n "$device" ] || continue
-    if [ "$original_status" -ne 0 ]; then
+    if [ "$original_status" -ne 0 ] && [ "$device" = "$BOOTED_DEVICE" ]; then
       if [ "$device" = "$ACTIVE_DEVICE" ]; then
         # These are fresh synthetic QA simulators. Capture launch/signature
         # diagnostics before deletion so a SpringBoard denial is actionable.
@@ -57,7 +58,7 @@ cleanup() {
         xcrun simctl io "$device" screenshot "$OUT/$label-failure.png"
       collect_app_files "$label" "$device"
     fi
-    if [ "$device" = "$ACTIVE_DEVICE" ]; then
+    if [ "$device" = "$BOOTED_DEVICE" ]; then
       stage "$label-shutdown" 30 "$OUT/$label-shutdown.log" xcrun simctl shutdown "$device"
     fi
     stage "$label-delete" 30 "$OUT/$label-delete.log" xcrun simctl delete "$device"
@@ -122,6 +123,23 @@ case "${BIL_NATIVE_TARGET:-all}" in
   feature-splashes) KINDS=(feature-splashes) ;;
   *) echo 'Unsupported native entrypoint scope' >&2; exit 2 ;;
 esac
+# Warm the Swift package graph in the fresh native job before Flutter's fixed
+# settings-query deadline. This is preparation, never native-test evidence.
+python3 .github/scripts/bil_ios_native_preflight.py \
+  --workspace "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/$OUT"
+# Exercise the existing native XCTest target, separately from Flutter drivers.
+# Its in-memory App Attest key-store tests are not hardware-attestation proof.
+ACTIVE_DEVICE="$IPHONE_UDID"
+stage runner-tests-boot 120 "$OUT/runner-tests-boot.log" xcrun simctl boot "$IPHONE_UDID"
+BOOTED_DEVICE="$IPHONE_UDID"
+stage runner-tests-bootstatus 180 "$OUT/runner-tests-bootstatus.log" \
+  xcrun simctl bootstatus "$IPHONE_UDID" -b
+python3 .github/scripts/bil_ios_runner_tests.py \
+  --workspace "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/$OUT/runner-tests" \
+  --device "$IPHONE_UDID" "${DEFINES[@]}"
+stage runner-tests-shutdown 30 "$OUT/runner-tests-shutdown.log" xcrun simctl shutdown "$IPHONE_UDID"
+ACTIVE_DEVICE=''
+BOOTED_DEVICE=''
 for KIND in "${KINDS[@]}"; do
   case "$KIND" in
     system-crypto)
@@ -229,6 +247,7 @@ BIL_PRIVACY_PY
     LABEL="${PAIR%%:*}"
     ACTIVE_DEVICE="$DEVICE"
     stage "$LABEL-$KIND-boot" 120 "$OUT/$LABEL-$KIND-boot.log" xcrun simctl boot "$DEVICE"
+    BOOTED_DEVICE="$DEVICE"
     stage "$LABEL-$KIND-bootstatus" 180 "$OUT/$LABEL-$KIND-bootstatus.log" \
       xcrun simctl bootstatus "$DEVICE" -b
     stage "$LABEL-$KIND-appearance" 120 "$OUT/$LABEL-$KIND-appearance.log" \
@@ -247,5 +266,6 @@ BIL_PRIVACY_PY
     stage "$LABEL-$KIND-shutdown" 30 "$OUT/$LABEL-$KIND-shutdown.log" \
       xcrun simctl shutdown "$DEVICE"
     ACTIVE_DEVICE=''
+    BOOTED_DEVICE=''
   done
 done

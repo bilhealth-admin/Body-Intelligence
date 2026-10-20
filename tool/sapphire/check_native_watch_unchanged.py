@@ -1,6 +1,6 @@
 """Keep the native Watch/current-value boundary frozen while allowing reviewed guide UI.
-The three guide/arrow files are pinned to their reviewed 4ddb56c8 Git blobs;
-this is not a blanket exclusion or a new baseline for health or native code.
+The three guide/arrow files and one reviewed privacy declaration are pinned to
+exact Git blobs; this is not a blanket exclusion or a new native/health baseline.
 """
 from pathlib import Path
 import subprocess
@@ -11,6 +11,11 @@ REVIEWED_GUIDANCE = {
     'lib/features/dashboard/widgets/dashboard_carousel.dart': 'd07e741ea5dd313ec0f759bf0e69ecb80f6c49ef',
     'lib/features/dashboard/widgets/first_food_days_guide.dart': '595aa236b78fcc8a0dafab5c7a0a344c8d394dcf',
     'lib/features/dashboard/widgets/first_use_context_coachmark.dart': '5e82f15a39b27b5ae746d8f563a24dd21cc77e7d',
+}
+# 1484cbee adds truthful Analytics purposes for UserID/ProductInteraction only.
+# Preserve the original native boundary and reject any later declaration change.
+REVIEWED_PRIVACY_DECLARATIONS = {
+    'ios/Runner/PrivacyInfo.xcprivacy': 'efc6431400a6e8e3f36dcb4d587a36084928aae6',
 }
 SIGNAL_PAGE = 'lib/features/connected_health/connected_health_signal_detail_page.dart'
 # Preserve every original path and original reviewed exclusion from the workflow.
@@ -46,13 +51,24 @@ def measured_card(text):
     return text[text.index('class _MeasuredSignalCard'):text.index('class _SignalHistoryCard')]
 
 
-def verify(repo, baseline=BASELINE, reviewed=None):
+def verify(repo, baseline=BASELINE, reviewed=None, reviewed_privacy=None):
     reviewed = REVIEWED_GUIDANCE if reviewed is None else reviewed
+    reviewed_privacy = REVIEWED_PRIVACY_DECLARATIONS if reviewed_privacy is None else reviewed_privacy
     for path, expected in reviewed.items():
         actual = git(repo, 'hash-object', '--path=' + path, '--', path).strip()
         if actual != expected:
             raise WatchBoundaryChanged('Reviewed guidance changed: ' + path)
-    protected = (*PROTECTED_PATHS, *(':(exclude)' + path for path in reviewed))
+    for path, expected in reviewed_privacy.items():
+        if not (repo / path).is_file():
+            raise WatchBoundaryChanged('Reviewed privacy declaration missing: ' + path)
+        actual = git(repo, 'hash-object', '--path=' + path, '--', path).strip()
+        if actual != expected:
+            raise WatchBoundaryChanged('Reviewed privacy declaration changed: ' + path)
+    protected = (
+        *PROTECTED_PATHS,
+        *(':(exclude)' + path for path in reviewed),
+        *(':(exclude)' + path for path in reviewed_privacy),
+    )
     changed = git(repo, 'diff', '--name-only', baseline, '--', *protected).splitlines()
     untracked = git(repo, 'ls-files', '--others', '--exclude-standard', '--', *protected).splitlines()
     if changed or untracked:
@@ -69,4 +85,4 @@ if __name__ == '__main__':
     except (WatchBoundaryChanged, subprocess.CalledProcessError, ValueError, OSError) as error:
         print('NATIVE_WATCH_GUARD=FAIL: ' + str(error), file=sys.stderr)
         raise SystemExit(1)
-    print('NATIVE_WATCH_GUARD=PASS; original native/health baseline retained; three reviewed guide blobs pinned')
+    print('NATIVE_WATCH_GUARD=PASS; original native/health baseline retained; three guide blobs and reviewed privacy declaration pinned')

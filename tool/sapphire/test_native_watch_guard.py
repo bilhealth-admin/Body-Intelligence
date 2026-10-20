@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from check_native_watch_unchanged import (
-    REVIEWED_GUIDANCE, SIGNAL_PAGE, WatchBoundaryChanged, verify,
+    REVIEWED_GUIDANCE, REVIEWED_PRIVACY_DECLARATIONS, SIGNAL_PAGE, WatchBoundaryChanged, verify,
 )
 
 
@@ -22,6 +22,8 @@ class NativeWatchGuardTest(unittest.TestCase):
         self.write('android/app/src/main/Watch.kt', 'val watch = 1\n')
         self.write('lib/features/dashboard/widgets/watch_card.dart', 'const live = 1;\n')
         self.write('lib/features/global_platform/health_data/health.dart', 'const value = 1;\n')
+        for path in REVIEWED_PRIVACY_DECLARATIONS:
+            self.write(path, '<plist>original privacy declaration</plist>\n')
         for path in REVIEWED_GUIDANCE:
             self.write(path, 'const oldGuide = 1;\n')
         self.git('add', '.')
@@ -31,6 +33,10 @@ class NativeWatchGuardTest(unittest.TestCase):
         for path in REVIEWED_GUIDANCE:
             self.write(path, 'const reviewedGuide = 2;\n')
             self.reviewed[path] = self.git('hash-object', '--path=' + path, '--', path).strip()
+        self.reviewed_privacy = {}
+        for path in REVIEWED_PRIVACY_DECLARATIONS:
+            self.write(path, '<plist>reviewed Analytics disclosure</plist>\n')
+            self.reviewed_privacy[path] = self.git('hash-object', '--path=' + path, '--', path).strip()
 
     def git(self, *args):
         return subprocess.check_output(['git', *args], cwd=self.repo, stderr=subprocess.PIPE).decode()
@@ -41,7 +47,7 @@ class NativeWatchGuardTest(unittest.TestCase):
         target.write_bytes(content.encode('utf-8'))
 
     def check(self):
-        verify(self.repo, self.baseline, self.reviewed)
+        verify(self.repo, self.baseline, self.reviewed, self.reviewed_privacy)
 
     def test_reviewed_guidance_passes_without_rebasing_native_boundary(self):
         self.check()
@@ -53,6 +59,30 @@ class NativeWatchGuardTest(unittest.TestCase):
                 with self.assertRaisesRegex(WatchBoundaryChanged, 'Reviewed guidance changed'):
                     self.check()
                 self.write(path, 'const reviewedGuide = 2;\n')
+
+    def test_reviewed_privacy_passes_without_rebasing_native_boundary(self):
+        self.check()
+        for path in self.reviewed_privacy:
+            self.assertEqual(self.git('show', self.baseline + ':' + path), '<plist>original privacy declaration</plist>\n')
+
+    def test_future_privacy_declaration_change_fails(self):
+        for path in self.reviewed_privacy:
+            with self.subTest(path=path):
+                self.write(path, '<plist>unreviewed privacy declaration</plist>\n')
+                with self.assertRaisesRegex(WatchBoundaryChanged, 'Reviewed privacy declaration changed'):
+                    self.check()
+
+    def test_missing_reviewed_privacy_declaration_fails(self):
+        for path in self.reviewed_privacy:
+            with self.subTest(path=path):
+                (self.repo / path).unlink()
+                with self.assertRaisesRegex(WatchBoundaryChanged, 'Reviewed privacy declaration missing'):
+                    self.check()
+
+    def test_untracked_other_privacy_declaration_fails(self):
+        self.write('ios/Runner/UnreviewedPrivacy.xcprivacy', '<plist>unreviewed new disclosure</plist>\n')
+        with self.assertRaisesRegex(WatchBoundaryChanged, 'Protected native/health/dashboard paths changed'):
+            self.check()
 
     def test_native_watch_change_fails(self):
         self.write('ios/Runner/Watch.swift', 'let watch = 2\n')

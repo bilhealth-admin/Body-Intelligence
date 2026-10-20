@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Offline regression checks for the startup workflow's boolean API selector.
+
+The selector parser accepts only the checked-in two-branch expression grammar,
+then decodes its real JSON payloads. It does not emulate arbitrary GitHub syntax
+or need Flutter, an emulator, network access, or third-party Python packages.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+WORKFLOW = ROOT / ".github/workflows/bil_android_isolated_emulator_smoke.yml"
+
+
+def selected_matrix(source: str, api36_only: bool | None) -> dict:
+    expression = re.search(
+        r"^      matrix: \$\{\{ fromJSON\(\s*"
+        r"inputs\.api36_only == true &&\s*'([^']+)'\s*"
+        r"\|\|\s*'([^']+)'\s*\) \}\}\s*$",
+        source,
+        re.MULTILINE,
+    )
+    if expression is None:
+        raise ValueError("Startup matrix requires review: unknown selector grammar")
+    return json.loads(expression.group(1 if api36_only is True else 2))
+
+
+class AndroidStartupWorkflowTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.source = WORKFLOW.read_text(encoding="utf-8")
+
+    def test_opt_in_is_a_typed_boolean_and_defaults_to_all_apis(self) -> None:
+        dispatch = re.search(
+            r"^  workflow_dispatch:\n(.*?)(?=^\S)",
+            self.source,
+            re.MULTILINE | re.DOTALL,
+        )
+        self.assertIsNotNone(dispatch)
+        self.assertRegex(dispatch.group(1), r"(?m)^      api36_only:\s*$")
+        self.assertRegex(dispatch.group(1), r"(?m)^        type: boolean\s*$")
+        self.assertRegex(dispatch.group(1), r"(?m)^        required: false\s*$")
+        self.assertRegex(dispatch.group(1), r"(?m)^        default: false\s*$")
+
+    def test_push_without_dispatch_input_keeps_all_six_apis(self) -> None:
+        rows = selected_matrix(self.source, None)["include"]
+        self.assertEqual([row["api-level"] for row in rows], [26, 29, 33, 34, 35, 36])
+
+    def test_explicit_false_keeps_the_same_default_matrix(self) -> None:
+        self.assertEqual(
+            selected_matrix(self.source, False), selected_matrix(self.source, None)
+        )
+
+    def test_true_selects_only_api36_without_include_augmentation(self) -> None:
+        matrix = selected_matrix(self.source, True)
+        self.assertEqual(set(matrix), {"include"})
+        self.assertEqual(
+            matrix["include"],
+            [{"api-level": 36, "profile": "pixel_6", "ram-size": "4096M"}],
+        )
+
+    def test_full_matrix_has_no_other_axes_or_duplicate_api_jobs(self) -> None:
+        matrix = selected_matrix(self.source, False)
+        self.assertEqual(set(matrix), {"include"})
+        apis = [row["api-level"] for row in matrix["include"]]
+        self.assertEqual(len(apis), len(set(apis)))
+
+    def test_full_matrix_preserves_profiles_and_explicit_newer_api_memory(self) -> None:
+        rows = {row["api-level"]: row for row in selected_matrix(self.source, False)["include"]}
+        self.assertEqual({api: row["profile"] for api, row in rows.items()}, {
+            26: "pixel_2", 29: "pixel_2", 33: "pixel_6",
+            34: "pixel_6", 35: "pixel_6", 36: "pixel_6",
+        })
+        for api in (34, 35, 36):
+            with self.subTest(api=api):
+                self.assertEqual(rows[api]["ram-size"], "4096M")
+        for api in (26, 29, 33):
+            with self.subTest(api=api):
+                self.assertNotIn("ram-size", rows[api])
+
+    def test_selector_cannot_change_startup_gates_or_existing_time_budgets(self) -> None:
+        for required in (
+            "  cancel-in-progress: false",
+            "    timeout-minutes: 90",
+            "      fail-fast: false",
+            "          cores: 2",
+            "          emulator-boot-timeout: 900",
+            "          ram-size: ${{ matrix.ram-size }}",
+            "          script: BIL_ANDROID_EMULATOR_API=${{ matrix.api-level }} bash tool/release/run_android_emulator_smoke.sh",
+        ):
+            with self.subTest(setting=required.strip()):
+                self.assertIn(required + "\n", self.source)
+
+    def test_unknown_selector_logic_requires_review_instead_of_guessing(self) -> None:
+        changed = self.source.replace("inputs.api36_only == true", "inputs.api36_only != false")
+        with self.assertRaisesRegex(ValueError, "unknown selector grammar"):
+            selected_matrix(changed, None)
+
+
+if __name__ == "__main__":
+    unittest.main()

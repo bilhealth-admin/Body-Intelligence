@@ -301,15 +301,13 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Run iOS 37 native integration journeys on iPhone and iPad
-        if: matrix.flutter-build == 'ios'
-        run: bash .github/scripts/bil_ios37_native_integration.sh
-
-      - name: Upload iOS 37 iPhone and iPad evidence
+      # Native journeys run in the separate fresh macOS job below. CodeQL's
+      # inherited process tracing must not be the native test environment.
+      - name: Upload iOS CodeQL build and preparation evidence
         if: always() && matrix.flutter-build == 'ios'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: bil-ios37-iphone-ipad-integration-${{ github.sha }}
+          name: bil-ios-codeql-build-${{ github.sha }}
           path: artifacts/qa/text18/ios37-simulators
           if-no-files-found: warn
           retention-days: 14
@@ -788,7 +786,13 @@ jobs:
           retention-days: 14
 
   ios-native-integration:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.ios_native_only == true }}
+    if: >-
+      ${{ inputs.source_audit_only != true && inputs.mobsf_only != true && inputs.android_native_only != true &&
+          ((github.event_name == 'workflow_dispatch' && inputs.ios_native_only == true) ||
+           (inputs.ios_native_only != true &&
+            !(github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') &&
+            (github.event_name != 'workflow_dispatch' || inputs.ios_only == true ||
+             (inputs.android_only != true && inputs.supabase_only != true)))) }}
     name: iPhone and iPad native tests from exact simulator bundles
     runs-on: macos-26
     timeout-minutes: 120
@@ -799,6 +803,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Verify native preparation commands and workflow scopes offline
+        run: python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:

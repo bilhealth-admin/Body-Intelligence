@@ -3,13 +3,36 @@ on:
   push:
     branches: [fix/community-sapphire-health-3033, fix/admob-clean-production-2026-10-02]
   workflow_dispatch:
+    inputs:
+      guard_only:
+        description: 'Only reviewed native/Watch boundary guard; not full Sapphire evidence'
+        type: boolean
+        default: false
+run-name: Sapphire - ${{ inputs.guard_only && 'native guard ONLY' || 'full QA' }} - ${{ github.sha }}
 permissions:
   contents: read
 concurrency:
   group: sapphire-history-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  native-watch-guard-only:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.guard_only }}
+    name: Native Watch guard only (not full QA)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the actual protected native and reviewed declaration boundary
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tool/sapphire -p 'test_native_watch_guard.py' -v
+          python3 tool/sapphire/check_native_watch_unchanged.py
   prepare:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.guard_only }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -107,7 +130,7 @@ jobs:
           retention-days: 14
   community-reference-preparation:
     needs: [prepare, analyze-and-focused]
-    if: needs.prepare.outputs.references_ready != 'true'
+    if: (github.event_name != 'workflow_dispatch' || !inputs.guard_only) && needs.prepare.outputs.references_ready != 'true'
     runs-on: windows-2022
     timeout-minutes: 25
     env:
@@ -138,7 +161,7 @@ jobs:
           retention-days: 14
   full-tests:
     needs: [prepare, analyze-and-focused]
-    if: needs.prepare.outputs.references_ready == 'true'
+    if: (github.event_name != 'workflow_dispatch' || !inputs.guard_only) && needs.prepare.outputs.references_ready == 'true'
     runs-on: windows-2022
     timeout-minutes: 40
     strategy:
@@ -171,6 +194,7 @@ jobs:
           retention-days: 14
   visual-and-cloud-contracts:
     needs: [prepare, analyze-and-focused]
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.guard_only }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
